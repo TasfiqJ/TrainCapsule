@@ -73,6 +73,7 @@ class PipelineBlocked(RuntimeError):
 
 MAX_STAGE_TURNS = 200
 TURN_ESCALATION_FACTOR = 2
+MAX_REVIEW_TURN_MULTIPLIER = 4
 TURN_CEILING_MARKERS = (
     "reached maximum number of turns",
     "error_max_turns",
@@ -167,6 +168,35 @@ def retry_stage_update(
     if escalated is not None:
         update["max_turns"] = escalated
     return update
+
+
+def review_turn_retry_update(
+    stage: Stage,
+    result: StageResult,
+    role_config: RoleConfig,
+) -> dict[str, object] | None:
+    """Give a truncated independent review enough room without bypassing its verdict.
+
+    Review roles must not be routed to a mutating repair merely because the reviewer
+    used every turn before emitting its structured report. Retry the same independent
+    role with a larger ceiling first. The increase is bounded to four times the role's
+    declared budget (and the global schema ceiling), so a wedged reviewer still reaches
+    the normal truthful repair/failure path.
+    """
+
+    if not stage_hit_turn_ceiling(result):
+        return None
+    base_turns = role_config.max_turns
+    current_turns = stage.max_turns or base_turns
+    review_ceiling = min(base_turns * MAX_REVIEW_TURN_MULTIPLIER, MAX_STAGE_TURNS)
+    if current_turns >= review_ceiling:
+        return None
+    return {
+        "max_turns": min(
+            current_turns * TURN_ESCALATION_FACTOR,
+            review_ceiling,
+        )
+    }
 
 
 def _role_requires_changes(role: RoleName) -> bool:
@@ -949,6 +979,35 @@ async def run_pipeline(
             findings = _findings_from_result(result)
             console.print(f"[red]Stage failed:[/red] {findings}")
 
+            review_roles = {
+                RoleName.ADVERSARY,
+                RoleName.AUDIT,
+                RoleName.SECURITY,
+                RoleName.PERFORMANCE,
+                RoleName.VALUE_VALIDATOR,
+                RoleName.VALUE_ADVERSARY,
+                RoleName.RELEASE,
+            }
+            if stage.role in review_roles:
+                review_update = review_turn_retry_update(
+                    stage,
+                    result,
+                    role_configs[stage.role],
+                )
+                if review_update is not None:
+                    console.print(
+                        f"[yellow]Review turn ceiling hit:[/yellow] retrying "
+                        f"{stage.role.value} independently with "
+                        f"{review_update['max_turns']} turns "
+                        f"(was {stage.max_turns or role_configs[stage.role].max_turns})"
+                    )
+                    task.pipeline[checkpoint.stage_index] = stage.model_copy(
+                        update=review_update
+                    )
+                    checkpoint.previous_findings = findings
+                    checkpoint_store.save(checkpoint)
+                    continue
+
             is_configured_mutator = (
                 task.repair.enabled
                 and task.repair.mutating_role is not None
@@ -995,15 +1054,6 @@ async def run_pipeline(
                     )
                 )
 
-            review_roles = {
-                RoleName.ADVERSARY,
-                RoleName.AUDIT,
-                RoleName.SECURITY,
-                RoleName.PERFORMANCE,
-                RoleName.VALUE_VALIDATOR,
-                RoleName.VALUE_ADVERSARY,
-                RoleName.RELEASE,
-            }
             if (
                 stage.role in review_roles
                 and task.repair.enabled

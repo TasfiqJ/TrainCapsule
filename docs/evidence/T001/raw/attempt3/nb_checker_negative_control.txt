@@ -1,0 +1,11 @@
+# negative control: one recorded digest in a TMPDIR COPY of final_bundle.sha256 zeroed;
+# the protected bundle and the repository copy are not modified.
+NB1: FAIL - 19 of 20 OK; ['00_EXECUTIVE_BUILD_DECISION.md: FAILED']
+NB2: PASS - manifest files map = 20, self-excluded
+NB3: PASS - declared=9 entries, equal=True
+NB4: PASS - 3 of 3 pairs byte-identical
+NB5: UNKNOWN - read_order=10, authority_order=9, extra_in_readme=['TRAINCAPSULE_FINAL_MASTER_PLAN.md'], missing_from_readme=[], matches_recorded_discrepancy=True
+pass_set=['NB2', 'NB3', 'NB4']
+NB5 is UNKNOWN and is excluded from the pass set; see SOURCE_PRECEDENCE.md section 7.
+RESULT: FAIL ['NB1']
+exit= 1

@@ -1,0 +1,4 @@
+COMMAND: bash scripts/gates/contract_gate.sh T001
+UTC: 2026-08-10T17:34:27Z
+PASS T001: deterministic packet has no specification stage
+EXIT_CODE: 0

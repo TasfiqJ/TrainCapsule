@@ -1,0 +1,2 @@
+PASS T001: deterministic packet has no specification stage
+exit=0

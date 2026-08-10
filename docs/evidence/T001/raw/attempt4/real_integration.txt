@@ -1,0 +1,4 @@
+COMMAND: bash scripts/gates/real_integration.sh T001
+UTC: 2026-08-10T17:34:44Z
+PASS T001: declared outputs and static integration evidence are present
+EXIT_CODE: 0

@@ -1,0 +1,6 @@
+[EC1] base_sha points at a commit that is not an ancestor of HEAD: DETECTED
+[EC3] a declared output path is replaced with a nonexistent file: DETECTED
+[EC4] a gate claims PASS while recording a nonzero exit code: DETECTED
+[EC4] a truth_state uses a value outside the closed vocabulary: DETECTED
+[EC5] an UNKNOWN behaviour is aggregated into the pass summary: DETECTED
+RESULT: PASS - 5 of 5 targeted mutations were detected

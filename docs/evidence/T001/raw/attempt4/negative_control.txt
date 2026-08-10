@@ -1,0 +1,25 @@
+COMMAND: python3 docs/evidence/T001/negative_control.py
+UTC: 2026-08-10T17:37:35Z
+baseline (unmutated mirror): exit_code=0
+  baseline NB1: PASS - 20 of 20 OK
+  baseline NB2: PASS - manifest files map = 20, self-excluded
+  baseline NB3: PASS - declared=9 entries, equal=True
+  baseline NB4: PASS - 3 of 3 pairs byte-identical
+  baseline NB5: UNKNOWN - read_order=10, authority_order=9, extra_in_readme=['TRAINCAPSULE_FINAL_MASTER_PLAN.md'], missing_from_readme=[], matches_recorded_discrepancy=True
+NB1: zeroed the recorded digest of 00_EXECUTIVE_BUILD_DECISION.md in the mirrored final_bundle.sha256
+  exit_code=1 changed=['NB1', 'NB2'] targeted_detected=True
+  NB1 now: FAIL - 19 of 20 OK; ['00_EXECUTIVE_BUILD_DECISION.md: FAILED']
+NB2: appended one newline to the mirrored .factory/source-locks/FINAL_MANIFEST.json copy
+  exit_code=1 changed=['NB2'] targeted_detected=True
+  NB2 now: FAIL - manifest files map = 20, self-excluded; ['.factory/source-locks/FINAL_MANIFEST.json: FAILED']
+NB3: swapped the first two entries of authority_order in the mirrored FINAL_MANIFEST.json
+  exit_code=1 changed=['NB2', 'NB3'] targeted_detected=True
+  NB3 now: FAIL - declared=9 entries, equal=False
+NB4: appended one newline to the mirrored 08_ACQUISITION_THESIS(1).md duplicate
+  exit_code=1 changed=['NB1', 'NB4'] targeted_detected=True
+  NB4 now: FAIL - 2 of 3 pairs byte-identical; ['08_ACQUISITION_THESIS(1).md: DIVERGED from 08_ACQUISITION_THESIS.md']
+NB5: renamed the recorded NB5 divergence entry in the mirrored README.md read order
+  exit_code=1 changed=['NB1', 'NB5'] targeted_detected=True
+  NB5 now: FAIL - read_order=10, authority_order=9, extra_in_readme=['SOME_OTHER_DOCUMENT.md'], missing_from_readme=[], matches_recorded_discrepancy=False
+RESULT: PASS - all 5 single-input mutations were detected and forced exit_code 1
+EXIT_CODE: 0

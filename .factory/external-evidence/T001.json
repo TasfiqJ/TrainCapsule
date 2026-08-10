@@ -1,0 +1,345 @@
+{
+  "task_id": "T001",
+  "title": "Commit final source-of-truth bundle and precedence rules",
+  "role": "research",
+  "recorded_utc": "2026-08-10T17:47:50Z",
+  "base_sha": "eb7085455698428040aba2b3bec996557d09eeb4",
+  "base_sha_history_note": "base_sha is the commit at which every reading in this ledger was taken. Readings were re-measured at eb7085455698428040aba2b3bec996557d09eeb4 in attempt 7, after EC1 was found FAIL at HEAD in an adversary review because the previously recorded base_sha (c9473be6778dff44237046ac16d09726f91e12f2) was discovered to lie on a history line abandoned by two later 'recover:' commits and was neither HEAD nor an ancestor of HEAD. attempt7 re-verified every gate and normative behavior directly at HEAD (no ancestor relationship assumed) and set base_sha to that exact commit. Earlier measurement commits are listed in supersedes_base_sha_history. Because the commit that records this ledger necessarily advances HEAD past base_sha, invariant EC2 of verify_evidence_currency.py machine-checks that every path changed between base_sha and HEAD is evidence-only, so no normative artifact moved after the readings were taken.",
+  "attribution": {
+    "producer": "autonomous factory research stage, Claude Opus 5",
+    "environment": "linux WSL2, sandboxed, network denied",
+    "external_network_used": false,
+    "human_or_customer_input": "none",
+    "note": "All evidence below is deterministic local measurement over repository bytes, re-measured at base_sha. No customer, upstream, benchmark, hardware, or production evidence is claimed."
+  },
+  "outputs": [
+    "SOURCE_PRECEDENCE.md",
+    "docs/evidence/T001/final_bundle.sha256",
+    "docs/evidence/T001/manifest_copies.sha256",
+    "docs/evidence/T001/verification.md",
+    ".factory/external-evidence/T001.json"
+  ],
+  "normative_behaviors": [
+    {
+      "id": "NB1",
+      "statement": "The final source-of-truth bundle is committed to the repository and every manifest-locked file matches its recorded SHA-256.",
+      "check": "(cd docs/source-of-truth/final-2026-08-09 && sha256sum -c \"$PWD/../../evidence/T001/final_bundle.sha256\")",
+      "observed": "20 of 20 files OK, exit_code=0; git ls-files reports 21 tracked files in the bundle directory (20 manifest-locked files plus FINAL_MANIFEST.json), 0 untracked, git status --short on that directory reports 0 lines. Re-measured at base_sha.",
+      "truth_state": "PASS"
+    },
+    {
+      "id": "NB2",
+      "statement": "The manifest excludes itself and the docs copy is byte-identical to the source-lock copy.",
+      "check": "sha256sum -c docs/evidence/T001/manifest_copies.sha256",
+      "observed": "docs/source-of-truth/final-2026-08-09/FINAL_MANIFEST.json and .factory/source-locks/FINAL_MANIFEST.json both = 51872ae1eacce06869a5924143b896364372b2b95997dcd3b4e3af080c9e6bdc; parsed JSON compared equal; manifest files map contains 20 entries and omits FINAL_MANIFEST.json (manifest_excludes_itself: true); 4 of 4 entries OK, exit_code=0. Re-measured at base_sha after SOURCE_PRECEDENCE.md was edited and its digest re-recorded.",
+      "truth_state": "PASS"
+    },
+    {
+      "id": "NB3",
+      "statement": "SOURCE_PRECEDENCE.md section 1 authority order equals FINAL_MANIFEST.authority_order.",
+      "check": "compare SOURCE_PRECEDENCE.md numbered list 1-9 against authority_order in both manifest copies",
+      "observed": "identical nine entries in identical order: 00_EXECUTIVE_BUILD_DECISION.md, 03_PRODUCT_STRATEGY_AND_REQUIREMENTS.md, 04_TECHNICAL_ARCHITECTURE.md, 05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC.md, 12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md, 14_CLAUDE_CODE_MASTER_BUILD_PROMPT.md, 08_ACQUISITION_THESIS.md, 09_CAREER_AND_HIRING_THESIS.md, 13_SOURCE_REGISTER.md",
+      "truth_state": "PASS"
+    },
+    {
+      "id": "NB4",
+      "statement": "The three '(1)'-suffixed bundle files are byte-identical duplicates of their unsuffixed counterparts and therefore introduce no normative contradiction.",
+      "check": "sha256 of each pair",
+      "observed": "08_ACQUISITION_THESIS(1).md == 08_ACQUISITION_THESIS.md (d9eb52ab5993...); 09_CAREER_AND_HIRING_THESIS(1).md == 09_CAREER_AND_HIRING_THESIS.md (f132056a4845...); 12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT(1).md == 12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md (4833aeef102e...)",
+      "truth_state": "PASS"
+    },
+    {
+      "id": "NB5",
+      "statement": "README.md read order and FINAL_MANIFEST.authority_order agree on which documents hold authority.",
+      "check": "compare README.md 'Read order' list against authority_order",
+      "observed": "README.md lists ten entries and adds TRAINCAPSULE_FINAL_MASTER_PLAN.md at position 10; authority_order lists nine and omits it. SUPERSESSION_AND_MIGRATION.md requires 'source authority matches the final read order' without disambiguating. Not resolvable from the bundle alone.",
+      "truth_state": "UNKNOWN",
+      "handling": "Recorded as an open discrepancy in SOURCE_PRECEDENCE.md section 7. Not converted to PASS. Requires an independently reviewed ADR. Until then TRAINCAPSULE_FINAL_MASTER_PLAN.md is treated as non-authoritative and normative instructions unique to it must not be acted on."
+    }
+  ],
+  "source_map": {
+    "authority_documents_verified_present_and_hash_locked": 9,
+    "non_authority_bundle_files": 11,
+    "classification_basis": [
+      "docs/source-of-truth/final-2026-08-09/FINAL_MANIFEST.json (authority_order, files, manifest_excludes_itself)",
+      "docs/source-of-truth/final-2026-08-09/README.md (Read order; Supersession; Integrity)",
+      "docs/source-of-truth/final-2026-08-09/SUPERSESSION_AND_MIGRATION.md (Replace; Preserve only as historical input; Migration verification)",
+      "docs/source-of-truth/final-2026-08-09/13_SOURCE_REGISTER.md (Research rules)"
+    ],
+    "external_claim_rule": "13_SOURCE_REGISTER.md Research rules govern third-party and market claims; such claims remain EXTERNAL_VALIDATION_REQUIRED."
+  },
+  "machine_gates": [
+    {
+      "name": "contract",
+      "command": "bash scripts/gates/contract_gate.sh T001",
+      "exit_code": 0,
+      "stdout": "PASS T001: deterministic packet has no specification stage",
+      "truth_state": "PASS",
+      "stdout_capture": "docs/evidence/T001/raw/contract.txt",
+      "remeasured_at_commit": "c9473be6778dff44237046ac16d09726f91e12f2",
+      "stdout_capture_current": "docs/evidence/T001/raw/attempt6/contract.txt"
+    },
+    {
+      "name": "secret-scan",
+      "command": "bash scripts/gates/secret_scan.sh",
+      "exit_code": 0,
+      "stdout": "PASS: no high-confidence credential pattern found",
+      "truth_state": "PASS",
+      "stdout_capture": "docs/evidence/T001/raw/secret_scan.txt",
+      "remeasured_at_commit": "c9473be6778dff44237046ac16d09726f91e12f2",
+      "stdout_capture_current": "docs/evidence/T001/raw/attempt6/secret_scan.txt"
+    },
+    {
+      "name": "fast-quality",
+      "command": "bash scripts/gates/fast_quality.sh",
+      "exit_code": 0,
+      "stdout": "All checks passed!\n0 errors, 0 warnings, 0 informations\n........................................................................ [ 41%]\n........................................................................ [ 82%]\n...............................                                          [100%]",
+      "truth_state": "PASS",
+      "stdout_capture": "docs/evidence/T001/raw/fast_quality.txt",
+      "derived_not_printed": "The gate prints progress dots and never prints a 'N tests passed' string. Counting dots at this commit gives 72+72+31 = 175, which is a derived figure, not gate output. The figure 161 recorded in an earlier revision corresponded to commit 5fa07116 and is superseded; the string '161 tests passed' was never emitted by the gate and was an inference.",
+      "remeasured_at_commit": "c9473be6778dff44237046ac16d09726f91e12f2",
+      "stdout_capture_current": "docs/evidence/T001/raw/attempt6/fast_quality.txt"
+    },
+    {
+      "name": "real-integration",
+      "command": "bash scripts/gates/real_integration.sh T001",
+      "exit_code": 0,
+      "stdout": "PASS T001: declared outputs and static integration evidence are present",
+      "truth_state": "PASS",
+      "stdout_capture": "docs/evidence/T001/raw/real_integration.txt",
+      "root_cause": "scripts/gates/gate_common.py:61 normalizes declared outputs with pattern.lstrip('./'). str.lstrip strips a character set, not a prefix, so '.factory/external-evidence/T001.json' becomes 'factory/external-evidence/T001.json', which does not exist under ROOT. The declared output does exist and is well-formed JSON. Measured directly: match_files('.factory/external-evidence/T001.json') == [] while (ROOT/'.factory/external-evidence/T001.json').exists() == True. Every dot-prefixed declared output is affected.",
+      "prior_reading": {
+        "base_sha": "5fa0711660cce164e5d6fec320e62695ef0b24cc",
+        "exit_code": 1,
+        "stdout": "declared outputs are missing: .factory/external-evidence/T001.json",
+        "truth_state": "INFRASTRUCTURE_ERROR",
+        "root_cause": "scripts/gates/gate_common.py normalized declared outputs with pattern.lstrip('./'). str.lstrip strips a character set, not a prefix, so '.factory/external-evidence/T001.json' became 'factory/external-evidence/T001.json', which does not exist under ROOT. Every dot-prefixed declared output was affected.",
+        "resolution": "Fixed outside this task under separate authorization in commit e25777e ('fix(factory): recover tasks after controller repair'), which uses removeprefix('./'). e25777e is an ancestor of base_sha. scripts/gates/** remains in this stage's forbidden_paths and was not modified by this task; 'git status --short scripts/' is empty at base_sha.",
+        "remediation_not_taken": "No duplicate or substitute file was ever created at 'factory/external-evidence/T001.json' to satisfy the defective matcher, and the INFRASTRUCTURE_ERROR reading was never converted to PASS while the defect stood."
+      },
+      "remeasured_at_commit": "c9473be6778dff44237046ac16d09726f91e12f2",
+      "stdout_capture_current": "docs/evidence/T001/raw/attempt6/real_integration.txt"
+    }
+  ],
+  "raw_evidence_paths": [
+    "docs/evidence/T001/verification.md",
+    "docs/evidence/T001/final_bundle.sha256",
+    "docs/evidence/T001/manifest_copies.sha256",
+    "docs/evidence/T001/raw/contract.txt",
+    "docs/evidence/T001/raw/secret_scan.txt",
+    "docs/evidence/T001/raw/fast_quality.txt",
+    "docs/evidence/T001/raw/real_integration.txt",
+    "docs/evidence/T001/raw/nb1_bundle_verify.txt",
+    "docs/evidence/T001/raw/nb2_manifest_copies.txt",
+    "docs/evidence/T001/raw/nb3_nb4_consistency.txt",
+    "docs/source-of-truth/final-2026-08-09/FINAL_MANIFEST.json",
+    ".factory/source-locks/FINAL_MANIFEST.json",
+    "docs/evidence/T001/raw/attempt6/contract.txt",
+    "docs/evidence/T001/raw/attempt6/evidence_currency.txt",
+    "docs/evidence/T001/raw/attempt6/evidence_currency_negative_control.txt",
+    "docs/evidence/T001/raw/attempt6/fast_quality.txt",
+    "docs/evidence/T001/raw/attempt6/head.txt",
+    "docs/evidence/T001/raw/attempt6/nb_checker.txt",
+    "docs/evidence/T001/raw/attempt6/negative_control.txt",
+    "docs/evidence/T001/raw/attempt6/real_integration.txt",
+    "docs/evidence/T001/raw/attempt6/secret_scan.txt",
+    "docs/evidence/T001/verify_evidence_currency.py",
+    "docs/evidence/T001/raw/attempt6/manifest_copies.txt",
+    "docs/evidence/T001/raw/attempt7/contract.txt",
+    "docs/evidence/T001/raw/attempt7/secret_scan.txt",
+    "docs/evidence/T001/raw/attempt7/fast_quality.txt",
+    "docs/evidence/T001/raw/attempt7/real_integration.txt",
+    "docs/evidence/T001/raw/attempt7/head.txt",
+    "docs/evidence/T001/raw/attempt7/nb_checker.txt",
+    "docs/evidence/T001/raw/attempt7/evidence_currency.txt",
+    "docs/evidence/T001/raw/attempt7/evidence_currency_negative_control.txt"
+  ],
+  "value_assessment": {
+    "mode": "foundational",
+    "primary_metric": "foundational capability present",
+    "status": "pass",
+    "evidence_class": "foundational_dependency",
+    "justification": "Every later roadmap task resolves conflicts against a fixed authority order. Without a committed, hash-locked bundle and written precedence rules, no downstream Close, Qualify, or Exchange claim can be attributed to a stable source. This is a dependency claim, not a demand claim. Verified at base_sha rather than asserted: the bundle is committed and hash-locked, the precedence rules are written, and the four required gates exit 0.",
+    "commercially_validated": false,
+    "commercial_truth_state": "EXTERNAL_VALIDATION_REQUIRED",
+    "prohibited_proxies_avoided": true
+  },
+  "limitations": [
+    "Evidence is byte-level integrity and internal consistency of repository documents only. It does not establish that the documented product behavior is implemented, correct, or useful.",
+    "NB5 is UNKNOWN and is not counted as a pass.",
+    "sha256sum -c verifies content against digests recorded in this repository at this commit; it is not an independent third-party notarization or signature, and re-recording the SOURCE_PRECEDENCE.md digest after editing that file detects later drift only.",
+    "No customer, upstream maintainer, benchmark, accelerator hardware, or production evidence exists for this task, and none is claimed.",
+    "The contract gate passed by the 'no specification stage' branch; specs/tasks/T001.md does not exist and is a forbidden path for this stage, so frozen-specification content was not verified.",
+    "The real-integration gate checks presence of declared outputs and static integration evidence. Its PASS means the declared files exist and are resolvable by the gate; it does not evaluate their content.",
+    "Gate results were captured in this sandbox (linux WSL2, network denied). No remote CI run is attested here.",
+    "The evidence-ledger oracle checks that readings are current and internally consistent; it does not re-derive the readings themselves.",
+    "verify_evidence_currency.py evaluates 5 invariants and 5 mutation cases, which is not an exhaustive set of ledger corruption classes.",
+    "remote_ci_required is set in the task packet but network access is denied in this sandbox; no remote CI run is included and its absence is recorded as outstanding, not as a pass."
+  ],
+  "corrections_this_session": [
+    "real-integration re-measured at base_sha 035a3c56: exit_code 0, truth_state PASS. The prior INFRASTRUCTURE_ERROR reading and its root cause are retained under machine_gates[real-integration].prior_reading rather than deleted; the defect was fixed in ancestor commit e25777e outside this task.",
+    "fast-quality re-run at base_sha: stdout recorded verbatim; progress-dot percentages changed from 44/89/100 to 41/82/100 and the derived dot count from 161 to 175. Both counts are labelled derived; neither is gate output.",
+    "SOURCE_PRECEDENCE.md section 8 updated to state that check 3 now passes and to attribute the fix to e25777e; its digest in docs/evidence/T001/manifest_copies.sha256 was re-recorded from aa5aa9a7a7a8... to a3ce6dda9573... and sha256sum -c re-verified 4 of 4 OK.",
+    "docs/evidence/T001/verification.md base commit, section 2 and section 3 updated to the re-measured results; the NB3 raw-output token was corrected from NB3_EQUAL to the actually printed NB3_equal.",
+    "All seven raw captures under docs/evidence/T001/raw/ were regenerated from this session's runs."
+  ],
+  "overall_truth_state": {
+    "normative_behaviors": "NB1-NB4 PASS (re-measured at base_sha 035a3c56); NB5 UNKNOWN and not counted as a pass",
+    "machine_gates": "contract PASS, secret-scan PASS, fast-quality PASS, real-integration PASS (all exit_code 0 at base_sha)",
+    "task_verdict": "PASS on the four required machine gates and on NB1-NB4. NB5 remains UNKNOWN and open; commercial validation remains EXTERNAL_VALIDATION_REQUIRED."
+  },
+  "supersedes_base_sha": "5fa0711660cce164e5d6fec320e62695ef0b24cc",
+  "reverification_session_attempt2": {
+    "at_commit": "ce00cd14af7b13c07301bb6b807b6ff09605c233",
+    "note": "This commit is the one that wrote the corrections_this_session block above; it is re-verified here, in a fresh session, by independently re-running every required gate and re-checking every hash-based normative behavior directly at this commit rather than trusting the recorded text.",
+    "commands_and_results": [
+      "bash scripts/gates/contract_gate.sh T001 -> exit_code 0, stdout 'PASS T001: deterministic packet has no specification stage'",
+      "bash scripts/gates/secret_scan.sh -> exit_code 0, stdout 'PASS: no high-confidence credential pattern found'",
+      "bash scripts/gates/real_integration.sh T001 -> exit_code 0, stdout 'PASS T001: declared outputs and static integration evidence are present'",
+      "bash scripts/gates/fast_quality.sh -> exit_code 0, stdout ends 'All checks passed! / 0 errors, 0 warnings, 0 informations' with progress dots at 41/82/100 percent, identical to the recorded capture",
+      "(cd docs/source-of-truth/final-2026-08-09 && sha256sum -c .../final_bundle.sha256) -> 20 of 20 OK",
+      "sha256sum -c docs/evidence/T001/manifest_copies.sha256 -> 4 of 4 OK",
+      "git status --short docs/source-of-truth/final-2026-08-09 -> 0 lines (bundle directory clean)",
+      "git diff --stat 035a3c56 ce00cd1 -- .claude .factory/source-locks bootstrap/private-gates config docs/source-of-truth/final-2026-08-09 factory/feature_ledger.yaml factory/product_definition_of_done.yaml factory/task_catalog.yaml scripts specs/tasks/T001.md tcfactory prompts schemas factory/queue factory/state -> empty (no forbidden path touched by this task's commit)",
+      "git diff --name-only 035a3c56 ce00cd1 -> all 9 changed files fall under this stage's allowed_paths (SOURCE_PRECEDENCE.md, docs/evidence/**, .factory/external-evidence/T001.json)"
+    ],
+    "conclusion": "All four required machine gates and NB1-NB4 reproduce identical PASS results at ce00cd1. NB5 is still UNKNOWN and is still not converted to PASS. No new content changes were required this session; this block documents independent re-verification only.",
+    "no_new_file_changes_this_session": true
+  },
+  "attempt_history_note": "Between reverification_session_attempt2 (ce00cd1) and this session, prior research-role attempts added docs/evidence/T001/negative_control.py and raw captures under docs/evidence/T001/raw/attempt3/ and docs/evidence/T001/raw/attempt4/, but this JSON file was not updated in those attempts and its base_sha field remained frozen at 035a3c56, contradicting the actual repository state. That is the defect this session fixes: attempt3 and attempt4 raw evidence is indexed below and base_sha now reflects HEAD.",
+  "reverification_session_attempt5": {
+    "at_commit": "8e3a2cdc7e61cd8dd57ec32a3ea08e9c94b3f9ea",
+    "note": "Fresh session. Independently re-ran every required gate and both python checkers directly at HEAD, and indexed the previously-uncommitted-to-JSON attempt3/attempt4 raw captures that already existed on disk from earlier research attempts.",
+    "commands_and_results": [
+      "bash scripts/gates/contract_gate.sh T001 -> exit_code 0, stdout 'PASS T001: deterministic packet has no specification stage'",
+      "bash scripts/gates/secret_scan.sh -> exit_code 0, stdout 'PASS: no high-confidence credential pattern found'",
+      "bash scripts/gates/fast_quality.sh -> exit_code 0, stdout ends 'All checks passed! / 0 errors, 0 warnings, 0 informations' (progress dots 35/71/100 percent, same 3-block shape as prior captures; dot counts vary between runs solely with pytest collection ordering/output width and are not gate pass/fail signal)",
+      "bash scripts/gates/real_integration.sh T001 -> exit_code 0, stdout 'PASS T001: declared outputs and static integration evidence are present'",
+      "python3 docs/evidence/T001/verify_precedence.py -> exit_code 0, NB1 PASS, NB2 PASS, NB3 PASS, NB4 PASS, NB5 UNKNOWN (identical shape to prior sessions: read_order=10, authority_order=9, extra_in_readme=['TRAINCAPSULE_FINAL_MASTER_PLAN.md'], matches_recorded_discrepancy=True), pass_set=[NB1,NB2,NB3,NB4]",
+      "python3 docs/evidence/T001/negative_control.py -> exit_code 0, RESULT: PASS - all 5 single-input mutations (NB1 corruption, NB2 whitespace drift, NB3 order swap, NB4 duplicate divergence, NB5 discrepancy-label rename) each independently forced exit_code 1 on the mutated copy; no collateral suppression"
+    ],
+    "raw_capture_paths_this_session": [
+      "docs/evidence/T001/raw/attempt5/contract.txt",
+      "docs/evidence/T001/raw/attempt5/secret_scan.txt",
+      "docs/evidence/T001/raw/attempt5/fast_quality.txt",
+      "docs/evidence/T001/raw/attempt5/real_integration.txt",
+      "docs/evidence/T001/raw/attempt5/nb_checker.txt",
+      "docs/evidence/T001/raw/attempt5/negative_control.txt"
+    ],
+    "prior_uncommitted_raw_captures_now_indexed": [
+      "docs/evidence/T001/raw/attempt3/contract.txt",
+      "docs/evidence/T001/raw/attempt3/fast_quality.txt",
+      "docs/evidence/T001/raw/attempt3/nb_checker.txt",
+      "docs/evidence/T001/raw/attempt3/nb_checker_negative_control.txt",
+      "docs/evidence/T001/raw/attempt3/real_integration.txt",
+      "docs/evidence/T001/raw/attempt3/secret_scan.txt",
+      "docs/evidence/T001/raw/attempt4/contract.txt",
+      "docs/evidence/T001/raw/attempt4/fast_quality.txt",
+      "docs/evidence/T001/raw/attempt4/nb_checker.txt",
+      "docs/evidence/T001/raw/attempt4/nb_checker_negative_control.txt",
+      "docs/evidence/T001/raw/attempt4/negative_control.txt",
+      "docs/evidence/T001/raw/attempt4/real_integration.txt",
+      "docs/evidence/T001/raw/attempt4/secret_scan.txt"
+    ],
+    "protected_path_check": "git diff --name-only main HEAD (this branch vs base_branch) touches only: .factory/external-evidence/T001.json, SOURCE_PRECEDENCE.md, docs/evidence/T001/** (final_bundle.sha256, manifest_copies.sha256, negative_control.py, raw/**, verification.md, verify_precedence.py). All of these fall under this stage's allowed_paths. No file under .claude, .factory/source-locks, bootstrap/private-gates, config, docs/source-of-truth/final-2026-08-09, factory/feature_ledger.yaml, factory/product_definition_of_done.yaml, factory/task_catalog.yaml, scripts, specs/tasks/T001.md, tcfactory, prompts, schemas, factory/queue, or factory/state is touched by this branch relative to main.",
+    "conclusion": "All four required machine gates and NB1-NB4 reproduce identical PASS results at 8e3a2cd, matching every prior session back to ce00cd1 and 035a3c56. NB5 remains UNKNOWN by design and is not converted to PASS. The negative control still detects all 5 targeted single-field corruptions with no collateral suppression. base_sha staleness from the prior handoff is resolved: this field and this block now reflect HEAD."
+  },
+  "overall_truth_state_current": {
+    "as_of_commit": "eb7085455698428040aba2b3bec996557d09eeb4",
+    "normative_behaviors": "NB1-NB4 PASS; NB5 UNKNOWN and excluded from the pass set (open discrepancy, requires an independently reviewed ADR, tracked in SOURCE_PRECEDENCE.md section 7)",
+    "machine_gates": "contract PASS, secret-scan PASS, fast-quality PASS, real-integration PASS (all exit_code 0)",
+    "negative_control_precedence": "PASS - 5 of 5 targeted single-field mutations detected, no collateral suppression",
+    "evidence_ledger_oracle": "PASS - EC1-EC5 hold; negative control detected 5 of 5 targeted mutations",
+    "commercial_or_external_validation": "EXTERNAL_VALIDATION_REQUIRED, unchanged; no customer, upstream, benchmark, hardware, or production evidence exists or is claimed",
+    "remote_ci": "NOT_RUN in this session. The packet sets remote_ci_required, but network is denied in this sandbox. All readings here are local and self-recorded; independent confirmation is still outstanding and is not counted as a pass.",
+    "task_verdict": "PASS on the four required machine gates, on NB1-NB4, and on evidence-ledger invariants EC1-EC5, all re-measured at this commit. NB5 stays UNKNOWN and open by design. Remote CI confirmation and commercial validation remain outstanding and are not counted as passes."
+  },
+  "supersedes_base_sha_history": [
+    "8e3a2cdc7e61cd8dd57ec32a3ea08e9c94b3f9ea",
+    "c9473be6778dff44237046ac16d09726f91e12f2"
+  ],
+  "reverification_session_attempt7": {
+    "at_commit": "eb7085455698428040aba2b3bec996557d09eeb4",
+    "trigger": "Adversary review of a prior session found EC1 FAIL: the ledger's recorded base_sha (c9473be6778dff44237046ac16d09726f91e12f2) was not HEAD and not an ancestor of HEAD. 'git rev-list --count c9473be..HEAD' = 9 and 'HEAD..c9473be' = 3, confirming the two histories had diverged (two controller 'recover:' commits, df7b5c7 and 12ed99c..f538d00's line, moved HEAD onto a branch that never contains c9473be). The adversary also found SOURCE_PRECEDENCE.md differed by +25/-2 lines between the two commits, so the recorded PASS text no longer described the promoted tree.",
+    "fix": "No content change to SOURCE_PRECEDENCE.md or the source-of-truth bundle was needed: NB1-NB4 already reproduce PASS at current HEAD with the bundle and SOURCE_PRECEDENCE.md exactly as committed. Only this ledger's base_sha was stale. base_sha is now set to eb7085455698428040aba2b3bec996557d09eeb4 (current HEAD at measurement time), and every required gate plus both python checkers were re-run directly against that commit rather than trusting the earlier c9473be-era text.",
+    "commands_and_results": [
+      "git rev-parse HEAD -> eb7085455698428040aba2b3bec996557d09eeb4",
+      "bash scripts/gates/contract_gate.sh T001 -> exit_code 0, stdout 'PASS T001: deterministic packet has no specification stage'",
+      "bash scripts/gates/secret_scan.sh -> exit_code 0, stdout 'PASS: no high-confidence credential pattern found'",
+      "bash scripts/gates/fast_quality.sh -> exit_code 0, stdout ends 'All checks passed! / 0 errors, 0 warnings, 0 informations' (a first invocation returned exit_code 2 from a sandbox-only 'Read-only file system' error creating a uv cache tmp file under $HOME/.cache/uv, not a code or test failure; re-run with UV_CACHE_DIR pointed at the sandbox-writable $TMPDIR succeeded with identical pass output, no gate script or test file was modified)",
+      "bash scripts/gates/real_integration.sh T001 -> exit_code 0, stdout 'PASS T001: declared outputs and static integration evidence are present'",
+      "python3 docs/evidence/T001/verify_precedence.py -> exit_code 0, NB1 PASS, NB2 PASS, NB3 PASS, NB4 PASS, NB5 UNKNOWN (identical shape to every prior session), pass_set=[NB1,NB2,NB3,NB4]",
+      "python3 docs/evidence/T001/verify_evidence_currency.py -> exit_code 0, EC1 PASS (base_sha=HEAD), EC2 PASS (0 paths changed since base_sha), EC3 PASS (35 declared paths, none missing), EC4 PASS, EC5 PASS",
+      "python3 docs/evidence/T001/verify_evidence_currency.py --self-test -> exit_code 0, RESULT: PASS - 5 of 5 targeted mutations were detected (EC1, EC3, EC4 x2, EC5), no collateral suppression"
+    ],
+    "raw_capture_paths_this_session": [
+      "docs/evidence/T001/raw/attempt7/contract.txt",
+      "docs/evidence/T001/raw/attempt7/secret_scan.txt",
+      "docs/evidence/T001/raw/attempt7/fast_quality.txt",
+      "docs/evidence/T001/raw/attempt7/real_integration.txt",
+      "docs/evidence/T001/raw/attempt7/nb_checker.txt",
+      "docs/evidence/T001/raw/attempt7/evidence_currency.txt",
+      "docs/evidence/T001/raw/attempt7/evidence_currency_negative_control.txt",
+      "docs/evidence/T001/raw/attempt7/head.txt"
+    ],
+    "protected_path_check": "git diff --name-only main HEAD confirms this branch touches only SOURCE_PRECEDENCE.md, .factory/external-evidence/T001.json, and docs/evidence/T001/** relative to main, all within this stage's allowed_paths. This session changed only .factory/external-evidence/T001.json (evidence-only per EC2) and added new files under docs/evidence/T001/raw/attempt7/ (also evidence-only). No source-of-truth, gate, schema, or forbidden path was touched.",
+    "not_converted_to_pass": "NB5 stays UNKNOWN. Commercial/upstream validation stays EXTERNAL_VALIDATION_REQUIRED. The prior real-integration INFRASTRUCTURE_ERROR reading and its resolution remain recorded under machine_gates[real-integration].prior_reading, unchanged. remote_ci_required remains NOT_RUN; this sandbox denies network access.",
+    "conclusion": "EC1 and EC2, the two invariants found FAIL by the adversary, now PASS because base_sha equals HEAD and no normative artifact changed after the readings were taken. All four required gates and NB1-NB4 reproduce PASS at eb7085455698, matching every prior session's shape back to 8e3a2cd, ce00cd1, and 035a3c56. This resolves the adversary's finding without altering SOURCE_PRECEDENCE.md, the source-of-truth bundle, any gate script, or any truth-state vocabulary."
+  },
+  "evidence_ledger_oracle": {
+    "purpose": "Machine-checkable oracle for the ledger itself. It closes the exact defect that caused the previous non-pass verdict: a stale base_sha whose PASS readings no longer described the committed tree.",
+    "checker": "docs/evidence/T001/verify_evidence_currency.py",
+    "invariants": {
+      "EC1": "ledger base_sha resolves and is HEAD or an ancestor of HEAD",
+      "EC2": "every path changed between base_sha and HEAD is evidence-only",
+      "EC3": "every declared output and raw evidence path exists on disk",
+      "EC4": "truth-state vocabulary is closed and no gate claims PASS with a nonzero exit code",
+      "EC5": "no non-pass truth state is aggregated into a pass claim"
+    },
+    "observed": "EC1-EC5 PASS at commit eb7085455698428040aba2b3bec996557d09eeb4",
+    "truth_state": "PASS",
+    "stdout_capture": "docs/evidence/T001/raw/attempt7/evidence_currency.txt",
+    "negative_control": {
+      "command": "python3 docs/evidence/T001/verify_evidence_currency.py --self-test",
+      "observed": "5 of 5 targeted single-field mutations detected, each firing its target invariant",
+      "truth_state": "PASS",
+      "stdout_capture": "docs/evidence/T001/raw/attempt6/evidence_currency_negative_control.txt"
+    }
+  },
+  "status_conversion_audit": {
+    "claim": "No uncertainty or error state in this ledger was converted to PASS. Every non-pass state that was ever recorded is still carried explicitly.",
+    "records": [
+      {
+        "item": "NB5",
+        "state": "UNKNOWN",
+        "converted": false,
+        "detail": "README.md read order lists TRAINCAPSULE_FINAL_MASTER_PLAN.md at position 10 while FINAL_MANIFEST.authority_order omits it. Not resolvable from the bundle alone. Excluded from pass_set by verify_precedence.py and machine-checked by EC5. Resolution requires an independently reviewed ADR; it is not resolvable by this task."
+      },
+      {
+        "item": "real-integration prior reading",
+        "state": "INFRASTRUCTURE_ERROR",
+        "converted": false,
+        "detail": "The earlier exit_code 1 was caused by scripts/gates/gate_common.py match_files using str.lstrip('./'), which corrupted dot-prefixed declared outputs. That defect was fixed outside this task under separate authority in commit e25777e (verified an ancestor of base_sha; gate_common.py now uses removeprefix('./')). The current PASS is an independent re-measurement of a repaired gate, not a reinterpretation of the old reading. No substitute or duplicate file was created to satisfy the defective matcher, and the INFRASTRUCTURE_ERROR reading was never relabelled while the defect stood."
+      },
+      {
+        "item": "commercial and upstream validation",
+        "state": "EXTERNAL_VALIDATION_REQUIRED",
+        "converted": false,
+        "detail": "No customer, upstream, benchmark, hardware, or production evidence exists or is claimed. The value contract mode is foundational; commercial demand is not inferred."
+      }
+    ]
+  },
+  "this_session_changes": {
+    "session": "attempt6",
+    "measurement_commit": "c9473be6778dff44237046ac16d09726f91e12f2",
+    "changed": [
+      "docs/evidence/T001/verify_evidence_currency.py (new deterministic oracle for the evidence ledger, invariants EC1-EC5, with --self-test negative control)",
+      "SOURCE_PRECEDENCE.md section 8 (documents check 5, replaces a stale hard-coded commit reference with a pointer to base_sha, and states the scope limit explicitly)",
+      "docs/evidence/T001/manifest_copies.sha256 (SOURCE_PRECEDENCE.md digest updated to 246da7246f11f8511c47b414da84847c51d7100efdfeea0436d74a27ea2550f4 to match the edited file; sha256sum -c exits 0)",
+      ".factory/external-evidence/T001.json (this ledger, re-measured)",
+      "docs/evidence/T001/raw/attempt6/* (verbatim stdout for all nine checks)"
+    ],
+    "not_changed": "No protected, forbidden, or source-of-truth path was touched. No threshold was lowered and no non-pass state was relabelled.",
+    "resolves_prior_finding": "The prior non-pass verdict was caused by a stale base_sha in this ledger. That failure mode now has a machine oracle (EC1, EC2) with a negative control, instead of relying on a human noticing drift."
+  }
+}

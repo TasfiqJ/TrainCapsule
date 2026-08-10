@@ -1,0 +1,2 @@
+PASS T001: declared outputs and static integration evidence are present
+exit=0

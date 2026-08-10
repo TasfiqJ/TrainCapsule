@@ -1,0 +1,9 @@
+COMMAND: bash scripts/gates/fast_quality.sh
+UTC: 2026-08-10T17:37:47Z
+NOTE: re-run after adding docs/evidence/T001/negative_control.py
+All checks passed!
+0 errors, 0 warnings, 0 informations
+........................................................................ [ 35%]
+........................................................................ [ 71%]
+..........................................................               [100%]
+EXIT_CODE: 0

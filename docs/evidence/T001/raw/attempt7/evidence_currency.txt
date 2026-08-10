@@ -1,0 +1,7 @@
+--- T001 evidence ledger at HEAD eb7085455698 ---
+EC1: PASS - base_sha=eb7085455698 resolves=True is_head_or_ancestor=True head=eb7085455698
+EC2: PASS - 0 path(s) changed since base_sha, 0 outside evidence-only scope: []
+EC3: PASS - 35 declared path(s), missing=[]
+EC4: PASS - 12 truth_state field(s), unknown_vocabulary=[], pass_with_nonzero_exit=[]
+EC5: PASS - non_pass_behaviors=['NB5'], aggregated_as_pass=[]
+RESULT: PASS - evidence currency invariants EC1-EC5

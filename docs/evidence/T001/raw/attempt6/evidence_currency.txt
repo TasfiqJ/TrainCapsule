@@ -1,0 +1,10 @@
+# commit c9473be6778dff44237046ac16d09726f91e12f2 (candidate working tree)
+# cmd: python3 docs/evidence/T001/verify_evidence_currency.py
+--- T001 evidence ledger at HEAD c9473be6778d ---
+EC1: PASS - base_sha=c9473be6778d resolves=True is_head_or_ancestor=True head=c9473be6778d
+EC2: PASS - 0 path(s) changed since base_sha, 0 outside evidence-only scope: []
+EC3: PASS - 28 declared path(s), missing=[]
+EC4: PASS - 12 truth_state field(s), unknown_vocabulary=[], pass_with_nonzero_exit=[]
+EC5: PASS - non_pass_behaviors=['NB5'], aggregated_as_pass=[]
+RESULT: PASS - evidence currency invariants EC1-EC5
+# exit_code=0

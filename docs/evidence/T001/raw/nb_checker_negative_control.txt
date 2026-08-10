@@ -1,0 +1,5 @@
+mutate NB1 digest -> ('NB1', 'FAIL')
+mutate NB2 digest -> ('NB2', 'FAIL')
+mutate NB3 authority_order -> ('NB3', 'FAIL')
+mutate NB4 pair -> ('NB4', 'FAIL')
+mutate NB5 recorded divergence -> ('NB5', 'FAIL') returned False

@@ -1,0 +1,5 @@
+docs/source-of-truth/final-2026-08-09/FINAL_MANIFEST.json: OK
+.factory/source-locks/FINAL_MANIFEST.json: OK
+SOURCE_PRECEDENCE.md: OK
+docs/evidence/T001/final_bundle.sha256: OK
+nb2_exit=0

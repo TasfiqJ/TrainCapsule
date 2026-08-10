@@ -1,0 +1,4 @@
+# commit c9473be6778dff44237046ac16d09726f91e12f2 (candidate working tree)
+# cmd: bash scripts/gates/contract_gate.sh T001
+PASS T001: deterministic packet has no specification stage
+# exit_code=0

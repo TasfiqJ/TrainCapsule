@@ -1,0 +1,11 @@
+COMMAND: python3 docs/evidence/T001/verify_precedence.py
+UTC: 2026-08-10T17:34:49Z
+NB1: PASS - 20 of 20 OK
+NB2: PASS - manifest files map = 20, self-excluded
+NB3: PASS - declared=9 entries, equal=True
+NB4: PASS - 3 of 3 pairs byte-identical
+NB5: UNKNOWN - read_order=10, authority_order=9, extra_in_readme=['TRAINCAPSULE_FINAL_MASTER_PLAN.md'], missing_from_readme=[], matches_recorded_discrepancy=True
+pass_set=['NB1', 'NB2', 'NB3', 'NB4']
+NB5 is UNKNOWN and is excluded from the pass set; see SOURCE_PRECEDENCE.md section 7.
+RESULT: NB1-NB4 PASS, NB5 UNKNOWN and unchanged
+EXIT_CODE: 0

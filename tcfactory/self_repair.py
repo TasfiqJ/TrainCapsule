@@ -221,7 +221,9 @@ async def attempt_factory_self_repair(
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     task_id = f"FACTORY_REPAIR_{stamp}_{attempt}"
     packet = build_self_repair_task(reason=reason, attempt=attempt, task_id=task_id)
-    packet_path = repo_root / "factory" / "recovery" / "self-repair" / f"{task_id}.yaml"
+    # Runtime repair packets must not dirty main before the clean-main pipeline gate.
+    # factory/state is durable across restarts and intentionally ignored by Git.
+    packet_path = repo_root / "factory" / "state" / "self-repair" / f"{task_id}.yaml"
     write_task_packet(packet_path, packet)
     outcome_path = packet_path.with_suffix(".result.json")
     try:

@@ -17,7 +17,7 @@ from rich.console import Console
 from rich.table import Table
 
 from .auth import assert_max_oauth_only, subscription_credentials_path
-from .autopilot import load_state, run_autopilot
+from .autopilot import load_state, run_autopilot, save_state
 from .claude_features import (
     assert_minimum_version,
     installed_claude_version,
@@ -738,6 +738,13 @@ def autonomy_resume(
     _control_file(repo_root, factory, "pause").unlink(missing_ok=True)
     _control_file(repo_root, factory, "stop").unlink(missing_ok=True)
     (repo_root / autonomy.hard_stuck_path).unlink(missing_ok=True)
+    state = load_state(repo_root, factory)
+    state.repair_attempts = 0
+    state.repair_status = None
+    state.blocker_reason = None
+    state.required_action = None
+    state.blocked_tasks = []
+    save_state(repo_root, factory, state)
     console.print("[green]Autopilot controls cleared; service may resume.[/green]")
 
 

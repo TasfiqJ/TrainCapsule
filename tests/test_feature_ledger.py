@@ -1,6 +1,11 @@
 from __future__ import annotations
 
+from pathlib import Path
+
+from tcfactory.autopilot import sync_ledger_from_queue
 from tcfactory.feature_ledger import FeatureItem, FeatureLedger
+from tcfactory.models import FactoryConfig
+from tcfactory.queue import queue_dirs
 
 
 def _ledger() -> FeatureLedger:
@@ -70,4 +75,18 @@ def test_terminal_block_does_not_reenter_the_ready_queue() -> None:
     ledger.refresh_readiness()
 
     assert blocked.status == "blocked"
+    assert ledger.next_ready() is None
+
+
+def test_queue_block_routes_to_autonomous_respecification(tmp_path: Path) -> None:
+    ledger = _ledger()
+    item = ledger.item("T002")
+    item.packet_path = "tasks/T002.yaml"
+    item.status = "packet_approved"
+    config = FactoryConfig()
+    blocked = queue_dirs(tmp_path, config)["blocked"] / "T002.yaml"
+    blocked.write_text("task_id: T002\n", encoding="utf-8")
+
+    assert sync_ledger_from_queue(tmp_path, config, ledger)
+    assert item.status == "respec_required"
     assert ledger.next_ready() is None

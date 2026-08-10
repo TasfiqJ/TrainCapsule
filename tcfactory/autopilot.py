@@ -234,7 +234,9 @@ def sync_ledger_from_queue(
         elif item.task_id in queue["failed"]:
             item.status = "respec_required"
         elif item.task_id in queue["blocked"]:
-            item.status = "blocked"
+            # A queue-level PipelineBlocked result still receives bounded autonomous
+            # re-specification. Only a ledger item marked terminal_blocked is final.
+            item.status = "respec_required"
         elif item.task_id in queue["pending"]:
             item.status = "queued"
         elif item.packet_path and item.status not in {"passed", "external_wait", "deferred"}:
@@ -328,7 +330,10 @@ async def _respec_failed_item(
 ) -> bool:
     if not autonomy.auto_respec_failed_tasks:
         return False
-    failed_error_path = queue_dirs(repo_root, factory)["failed"] / f"{item.task_id}.error.txt"
+    dirs = queue_dirs(repo_root, factory)
+    failed_error_path = dirs["failed"] / f"{item.task_id}.error.txt"
+    if not failed_error_path.is_file():
+        failed_error_path = dirs["blocked"] / f"{item.task_id}.error.txt"
     failed_error = (
         failed_error_path.read_text(encoding="utf-8", errors="replace")
         if failed_error_path.is_file()
@@ -377,9 +382,10 @@ async def _respec_failed_item(
             f"Revision {item.revisions} requested after bounded pipeline failure; preserve the "
             "original outcome and strengthen specification/gates."
         )
-    failed_path = queue_dirs(repo_root, factory)["failed"] / f"{item.task_id}.yaml"
-    failed_path.unlink(missing_ok=True)
-    failed_path.with_suffix(".error.txt").unlink(missing_ok=True)
+    for queue_state in ("failed", "blocked"):
+        failed_path = dirs[queue_state] / f"{item.task_id}.yaml"
+        failed_path.unlink(missing_ok=True)
+        failed_path.with_suffix(".error.txt").unlink(missing_ok=True)
     save_feature_ledger(factory.resolve(repo_root, factory.feature_ledger_path), ledger)
     commit_all(repo_root, f"retry {item.task_id.lower()}")
     await create_and_promote_task_packet(

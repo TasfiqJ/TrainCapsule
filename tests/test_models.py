@@ -27,6 +27,10 @@ def test_demo_task_loads() -> None:
     assert {stage.role: stage.task_budget_tokens for stage in task.pipeline} == (
         expected_calibration_budgets
     )
+    for stage in task.pipeline:
+        if stage.machine_gates:
+            assert stage.tools is not None
+            assert "Bash" in stage.tools
 
 
 def test_t001_has_no_builder() -> None:

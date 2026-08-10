@@ -130,7 +130,8 @@
       "tools": [
         "Read",
         "Grep",
-        "Glob"
+        "Glob",
+        "Bash"
       ],
       "allowed_paths": [],
       "forbidden_paths": [
@@ -149,7 +150,8 @@
       "tools": [
         "Read",
         "Grep",
-        "Glob"
+        "Glob",
+        "Bash"
       ],
       "allowed_paths": [],
       "forbidden_paths": [
@@ -168,7 +170,8 @@
       "tools": [
         "Read",
         "Grep",
-        "Glob"
+        "Glob",
+        "Bash"
       ],
       "allowed_paths": [],
       "forbidden_paths": [

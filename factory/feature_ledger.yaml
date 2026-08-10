@@ -112,7 +112,7 @@ tasks:
   phase: P0
   depends_on:
   - T001
-  status: ready
+  status: queued
   terminal_blocked: false
   packet_path: null
   trust_core: false
@@ -134,6 +134,8 @@ tasks:
   - Task packet approved through catalog planning.
   - Revision 1 requested after bounded pipeline failure; preserve the original outcome
     and strengthen specification/gates.
+  - Verified controller repair merged; retrying the same task without consuming a
+    specification revision and preserving its last valid candidate.
   revisions: 1
   value_revisions: 0
   infrastructure_recoveries: 0
@@ -3480,4 +3482,4 @@ tasks:
   revisions: 0
   value_revisions: 0
   infrastructure_recoveries: 0
-updated_at: '2026-08-10T23:26:32.116990+00:00'
+updated_at: '2026-08-10T23:53:09.083777+00:00'

@@ -25,6 +25,7 @@ from .models import (
     RiskTier,
     RoleName,
     SecurityPolicy,
+    Stage,
     TaskPacket,
 )
 from .pipeline import run_pipeline
@@ -57,6 +58,19 @@ _PROTECTED_FACTORY_PATHS = {
     "Install-TrainCapsuleAutonomousBuilder.ps1",
     "bootstrap/private-gates/**",
 }
+
+
+def add_protected_path_baseline(packet: TaskPacket) -> TaskPacket:
+    """Inject controller-owned protected paths into every writable product stage."""
+    pipeline: list[Stage] = []
+    baseline = sorted(_PROTECTED_FACTORY_PATHS)
+    for stage in packet.pipeline:
+        if stage.read_only is True:
+            pipeline.append(stage)
+            continue
+        forbidden = list(dict.fromkeys([*stage.forbidden_paths, *baseline]))
+        pipeline.append(stage.model_copy(update={"forbidden_paths": forbidden}))
+    return packet.model_copy(update={"pipeline": pipeline})
 
 
 def planning_task_for(
@@ -252,6 +266,7 @@ async def create_and_promote_task_packet(
             risk_profiles=profiles,
         )
         packet = packet.model_copy(update={"auto_merge": autonomy_config.auto_merge})
+        packet = add_protected_path_baseline(packet)
         validate_product_task_packet(packet, item)
         write_task_packet(destination, packet)
         planning_mode = "catalog"
@@ -269,6 +284,7 @@ async def create_and_promote_task_packet(
         proposal = repo_root / "factory" / "proposals" / f"{item.task_id}.yaml"
         packet = load_task(proposal)
         packet = apply_risk_profile(packet, item, profiles)
+        packet = add_protected_path_baseline(packet)
         validate_product_task_packet(packet, item)
         packet = packet.model_copy(update={"auto_merge": autonomy_config.auto_merge})
         write_task_packet(destination, packet)

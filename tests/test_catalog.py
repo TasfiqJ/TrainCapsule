@@ -5,6 +5,7 @@ from pathlib import Path
 from tcfactory.catalog import load_task_catalog, task_packet_from_catalog
 from tcfactory.feature_ledger import load_feature_ledger
 from tcfactory.models import RiskTier, RoleName
+from tcfactory.planner import add_protected_path_baseline, validate_product_task_packet
 from tcfactory.risk import load_risk_profiles
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -86,6 +87,27 @@ def test_catalog_first_attempt_is_deterministic_and_revisions_use_model_respec()
     ledger, catalog, _profiles = _inputs()
     assert "T031" in catalog.tasks
     assert ledger.item("T031").revisions == 0
+
+
+def test_catalog_packet_gets_controller_owned_protected_path_baseline() -> None:
+    ledger, catalog, profiles = _inputs()
+    item = ledger.item("T001")
+    packet = task_packet_from_catalog(
+        repo_root=ROOT,
+        item=item,
+        catalog=catalog,
+        risk_profiles=profiles,
+    )
+
+    protected = add_protected_path_baseline(packet)
+    validate_product_task_packet(protected, item)
+
+    research = next(stage for stage in protected.pipeline if stage.role == RoleName.RESEARCH)
+    assert "factory/state/**" in research.forbidden_paths
+    assert "scripts/gates/**" in research.forbidden_paths
+    assert "docs/TrainCapsule_Matrix_Definitive_Master_Plan_v1.0.md" in (
+        research.forbidden_paths
+    )
     # The controller condition is intentionally simple and auditable: catalog on revision 0,
     # fresh model planning only after evidence-backed re-specification or a missing entry.
     assert ledger.item("T031").revisions == 0

@@ -27,6 +27,14 @@ def test_demo_task_loads() -> None:
     assert {stage.role: stage.task_budget_tokens for stage in task.pipeline} == (
         expected_calibration_budgets
     )
+    expected_calibration_turns = {
+        RoleName.SPECIFICATION: 10,
+        RoleName.BUILDER: 24,
+        RoleName.ADVERSARY: 12,
+        RoleName.AUDIT: 10,
+        RoleName.RELEASE: 10,
+    }
+    assert {stage.role: stage.max_turns for stage in task.pipeline} == expected_calibration_turns
     for stage in task.pipeline:
         if stage.machine_gates:
             assert stage.tools is not None

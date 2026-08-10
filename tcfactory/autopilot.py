@@ -6,6 +6,7 @@ import os
 import subprocess
 from collections.abc import Generator
 from contextlib import contextmanager
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import TextIO
@@ -351,16 +352,45 @@ def _write_completion(repo_root: Path, config: FactoryConfig, ledger: FeatureLed
     return path
 
 
-async def _respec_failed_item(
+@dataclass(frozen=True)
+class RespecOutcome:
+    """Result of one bounded automatic re-specification attempt.
+
+    ``block_reason`` and ``evidence_path`` carry the *current* terminal-block cause so the
+    self-repair role never has to infer it from ledger note ordering. Ledger notes are
+    de-duplicated, so ``notes[-1]`` can be an unrelated older entry.
+    """
+
+    changed: bool
+    block_reason: str | None = None
+    evidence_path: str | None = None
+
+
+def respec_block_reason(item: FeatureItem, outcome: RespecOutcome) -> str:
+    """Compose the durable, non-stale blocker handed to autonomous self-repair."""
+
+    return (
+        f"Task {item.task_id} exhausted automatic re-specification. "
+        f"Blocking reason: {outcome.block_reason or 'unrecorded'}. "
+        "Durable failure evidence artifact: "
+        f"{outcome.evidence_path or 'no queue error artifact recorded'} "
+        f"(revisions {item.revisions}, value revisions {item.value_revisions})."
+    )
+
+
+async def respec_failed_item(
     *,
     repo_root: Path,
     factory: FactoryConfig,
     autonomy: AutonomyConfig,
     ledger: FeatureLedger,
     item: FeatureItem,
-) -> bool:
+) -> RespecOutcome:
     if not autonomy.auto_respec_failed_tasks:
-        return False
+        return RespecOutcome(
+            changed=False,
+            block_reason="Automatic re-specification is disabled by autonomy configuration.",
+        )
     dirs = queue_dirs(repo_root, factory)
     failed_error_path = dirs["failed"] / f"{item.task_id}.error.txt"
     if not failed_error_path.is_file():
@@ -370,8 +400,33 @@ async def _respec_failed_item(
         if failed_error_path.is_file()
         else ""
     )
+    evidence_path: str | None = None
+    if failed_error_path.is_file():
+        try:
+            evidence_path = str(failed_error_path.resolve().relative_to(repo_root.resolve()))
+        except ValueError:
+            evidence_path = str(failed_error_path)
     task_path = repo_root / (item.packet_path or f"tasks/{item.task_id}.yaml")
-    if is_infrastructure_failure(failed_error) and task_path.is_file():
+    value_failure = any(
+        marker in failed_error.lower()
+        for marker in (
+            "material-value gate",
+            "value evidence gate",
+            "predeclared materiality threshold",
+        )
+    )
+    ceiling = (
+        autonomy.value_redesign_limit if value_failure else autonomy.max_respecifications_per_task
+    )
+    current = item.value_revisions if value_failure else item.revisions
+    infrastructure_failure = is_infrastructure_failure(failed_error) and task_path.is_file()
+    # The recovery budget is consecutive and applies at every revision level, not only at the
+    # re-specification ceiling. Without that, a task below the ceiling never increments the
+    # counter and can be requeued forever on infrastructure-classified failures.
+    infrastructure_exhausted = infrastructure_failure and item.infrastructure_recoveries >= (
+        autonomy.max_consecutive_infrastructure_recoveries
+    )
+    if infrastructure_failure and not infrastructure_exhausted:
         checkpoint_store = CheckpointStore(
             factory.resolve(repo_root, factory.pipeline_state_dir)
         )
@@ -388,6 +443,7 @@ async def _respec_failed_item(
             stale_path.with_suffix(".pause.json").unlink(missing_ok=True)
         item.status = "queued"
         item.terminal_blocked = False
+        item.infrastructure_recoveries += 1
         reason = "Infrastructure-only failure recovered without consuming a specification revision."
         if reason not in item.notes:
             item.notes.append(reason)
@@ -399,34 +455,38 @@ async def _respec_failed_item(
         )
         save_feature_ledger(factory.resolve(repo_root, factory.feature_ledger_path), ledger)
         commit_all(repo_root, f"recover infrastructure {item.task_id.lower()}")
-        return True
-    value_failure = any(
-        marker in failed_error.lower()
-        for marker in (
-            "material-value gate",
-            "value evidence gate",
-            "predeclared materiality threshold",
-        )
-    )
-    ceiling = (
-        autonomy.value_redesign_limit if value_failure else autonomy.max_respecifications_per_task
-    )
-    current = item.value_revisions if value_failure else item.revisions
+        return RespecOutcome(changed=True)
     if current >= ceiling:
         item.status = "blocked"
         item.terminal_blocked = True
-        reason = (
-            "Material-value redesign ceiling reached; the feature remains technically possible "
-            "but has not demonstrated a commercially material result."
-            if value_failure
-            else "Automatic re-specification ceiling reached."
-        )
+        if infrastructure_exhausted:
+            reason = (
+                "Infrastructure-recovery ceiling reached while the re-specification ceiling was "
+                "already exhausted; repeated infrastructure-only failures are preventing forward "
+                "progress and require operator intervention rather than another automatic "
+                "recovery."
+            )
+        elif value_failure:
+            reason = (
+                "Material-value redesign ceiling reached; the feature remains technically "
+                "possible but has not demonstrated a commercially material result."
+            )
+        else:
+            reason = "Automatic re-specification ceiling reached."
         if reason not in item.notes:
             item.notes.append(reason)
-        return False
+        return RespecOutcome(changed=False, block_reason=reason, evidence_path=evidence_path)
     if task_path.exists():
         archive_failed_packet(repo_root, task_path, revision=item.revisions + 1)
     item.revisions += 1
+    if infrastructure_exhausted:
+        item.notes.append(
+            f"Revision {item.revisions}: consecutive infrastructure recoveries reached "
+            f"{autonomy.max_consecutive_infrastructure_recoveries} without a completed run, so "
+            "the failure is treated as a specification defect (for example an under-sized turn "
+            "or budget bound) and consumes a revision."
+        )
+    item.infrastructure_recoveries = 0
     if value_failure:
         item.value_revisions += 1
     item.packet_path = None
@@ -456,7 +516,7 @@ async def _respec_failed_item(
         ledger=ledger,
         item=item,
     )
-    return True
+    return RespecOutcome(changed=True)
 
 
 async def _run_autopilot_inner(
@@ -692,7 +752,7 @@ async def _run_autopilot_inner(
             state.current_action = "automatic re-specification"
             save_state(repo_root, factory, state)
             try:
-                changed = await _respec_failed_item(
+                respec_outcome = await respec_failed_item(
                     repo_root=repo_root,
                     factory=factory,
                     autonomy=autonomy,
@@ -712,7 +772,7 @@ async def _run_autopilot_inner(
                 await asyncio.sleep(delay)
                 state.status = "running"
                 continue
-            if not changed:
+            if not respec_outcome.changed:
                 save_feature_ledger(ledger_path, ledger)
                 commit_all(repo_root, f"block {failed_item.task_id.lower()}")
                 await _repair_or_hard_stuck(
@@ -720,10 +780,7 @@ async def _run_autopilot_inner(
                     factory=factory,
                     autonomy=autonomy,
                     state=state,
-                    reason=(
-                        f"Task {failed_item.task_id} exhausted automatic re-specification. "
-                        f"Latest evidence: {failed_item.notes[-1] if failed_item.notes else 'none'}"
-                    ),
+                    reason=respec_block_reason(failed_item, respec_outcome),
                     blocker_id=failed_item.task_id,
                 )
                 return

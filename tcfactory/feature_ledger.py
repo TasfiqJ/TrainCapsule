@@ -53,6 +53,7 @@ class FeatureItem(BaseModel):
     notes: list[str] = Field(default_factory=list)
     revisions: int = 0
     value_revisions: int = 0
+    infrastructure_recoveries: int = 0
 
 
 class FeatureLedger(BaseModel):

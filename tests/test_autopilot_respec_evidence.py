@@ -1,0 +1,285 @@
+"""Regression tests for the blocker evidence handed to autonomous self-repair.
+
+Durable evidence for the defect: ``factory/feature_ledger.yaml`` recorded 20 identical
+"Automatic re-specification ceiling reached." notes for T001 and the controller produced 21
+``block t001`` commits, yet the reason passed to self-repair was built from ``notes[-1]``.
+Because the ceiling note is de-duplicated before it is appended, ``notes[-1]`` stayed on an
+older, unrelated note ("Infrastructure-only failure recovered without consuming a
+specification revision."), which contradicts the actual durable failure record
+``factory/queue/failed/T001.error.txt``.
+"""
+
+from __future__ import annotations
+
+import asyncio
+from pathlib import Path
+
+import pytest
+
+from tcfactory.autopilot import (
+    RespecOutcome,
+    respec_block_reason,
+    respec_failed_item,
+)
+from tcfactory.config import load_factory_config
+from tcfactory.feature_ledger import FeatureItem, FeatureLedger
+from tcfactory.models import AutonomyConfig
+from tcfactory.queue import queue_dirs
+
+CEILING_NOTE = "Automatic re-specification ceiling reached."
+STALE_NOTE = "Infrastructure-only failure recovered without consuming a specification revision."
+DURABLE_ERROR = (
+    "PipelineFailure: Mutating stage research failed after 3 bounded failures. "
+    "Re-specification is required."
+)
+
+
+def _repo(tmp_path: Path) -> Path:
+    source_root = Path(__file__).resolve().parents[1]
+    (tmp_path / "config").mkdir()
+    (tmp_path / "config/factory.yaml").write_text(
+        (source_root / "config/factory.yaml").read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    return tmp_path
+
+
+def _item(**overrides: object) -> FeatureItem:
+    fields: dict[str, object] = {
+        "task_id": "T001",
+        "outcome": "Commit final source-of-truth bundle and precedence rules",
+        "lead_role": "Spec",
+        "phase": "P0",
+        "status": "respec_required",
+        "packet_path": "tasks/T001.yaml",
+        "revisions": 3,
+        "notes": [CEILING_NOTE, STALE_NOTE],
+    }
+    fields.update(overrides)
+    return FeatureItem(**fields)  # type: ignore[arg-type]
+
+
+def _ledger(item: FeatureItem) -> FeatureLedger:
+    return FeatureLedger(source_of_truth="test", tasks=[item])
+
+
+def _run_respec(repo: Path, item: FeatureItem, error_text: str) -> RespecOutcome:
+    config = load_factory_config(repo / "config/factory.yaml")
+    dirs = queue_dirs(repo, config)
+    (dirs["failed"] / "T001.error.txt").write_text(error_text, encoding="utf-8")
+    return asyncio.run(
+        respec_failed_item(
+            repo_root=repo,
+            factory=config,
+            autonomy=AutonomyConfig(),
+            ledger=_ledger(item),
+            item=item,
+        )
+    )
+
+
+def test_ceiling_block_reports_current_cause_and_durable_artifact(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    item = _item()
+
+    outcome = _run_respec(repo, item, DURABLE_ERROR)
+
+    assert outcome.changed is False
+    assert outcome.block_reason == CEILING_NOTE
+    assert outcome.evidence_path == "factory/queue/failed/T001.error.txt"
+    assert item.status == "blocked"
+    assert item.terminal_blocked is True
+    # The de-duplicated ceiling note must not be appended a second time.
+    assert item.notes.count(CEILING_NOTE) == 1
+
+
+def test_repair_reason_never_reuses_a_stale_trailing_note(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    item = _item()
+
+    outcome = _run_respec(repo, item, DURABLE_ERROR)
+    reason = respec_block_reason(item, outcome)
+
+    assert item.notes[-1] == STALE_NOTE, "fixture must reproduce the stale trailing note"
+    assert STALE_NOTE not in reason
+    assert CEILING_NOTE in reason
+    assert "factory/queue/failed/T001.error.txt" in reason
+    assert "exhausted automatic re-specification" in reason
+    assert "revisions 3" in reason
+
+
+def test_value_redesign_ceiling_reports_its_own_cause(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    item = _item(revisions=0, value_revisions=AutonomyConfig().value_redesign_limit, notes=[])
+
+    outcome = _run_respec(
+        repo, item, "PipelineFailure: material-value gate rejected the predeclared threshold."
+    )
+    reason = respec_block_reason(item, outcome)
+
+    assert outcome.changed is False
+    assert outcome.block_reason is not None
+    assert "Material-value redesign ceiling reached" in outcome.block_reason
+    assert "Material-value redesign ceiling reached" in reason
+    assert outcome.evidence_path == "factory/queue/failed/T001.error.txt"
+
+
+def _noop_commit_all(*args: object, **kwargs: object) -> None:
+    return None
+
+
+def _noop_save_feature_ledger(*args: object, **kwargs: object) -> None:
+    return None
+
+
+async def _stub_create_and_promote_task_packet(**kwargs: object) -> None:
+    """Stand in for packet regeneration, which shells out to Git and Claude. Only the observable
+    effect this test depends on is reproduced: the item points at an on-disk packet again."""
+    item = kwargs["item"]
+    item.packet_path = "tasks/T001.yaml"  # type: ignore[union-attr]
+
+
+def test_infrastructure_failure_still_recovers_without_blocking(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _repo(tmp_path)
+    (repo / "tasks").mkdir()
+    source_root = Path(__file__).resolve().parents[1]
+    (repo / "tasks/T001.yaml").write_text(
+        (source_root / "tasks/DEMO-001.yaml").read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    item = _item(packet_path="tasks/T001.yaml", notes=[])
+    monkeypatch.setattr("tcfactory.autopilot.commit_all", _noop_commit_all)
+    monkeypatch.setattr("tcfactory.autopilot.save_feature_ledger", _noop_save_feature_ledger)
+
+    outcome = _run_respec(
+        repo, item, "ClaudeRunError: reached maximum number of turns during the research stage."
+    )
+
+    assert outcome.changed is True
+    assert outcome.block_reason is None
+    assert item.status == "queued"
+    assert item.terminal_blocked is False
+
+
+def test_repeated_infrastructure_recovery_at_ceiling_eventually_blocks(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Reproduces the durable failure: infrastructure recovery does not consume a revision,
+    so a task already at the re-specification ceiling could be requeued and immediately
+    re-blocked forever, burning an unbounded number of self-repair cycles on T001. Recovery
+    must still work while budget remains, but must not be able to loop without limit once the
+    ceiling is exhausted.
+    """
+    repo = _repo(tmp_path)
+    (repo / "tasks").mkdir()
+    source_root = Path(__file__).resolve().parents[1]
+    (repo / "tasks/T001.yaml").write_text(
+        (source_root / "tasks/DEMO-001.yaml").read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    item = _item(packet_path="tasks/T001.yaml", notes=[])
+    monkeypatch.setattr("tcfactory.autopilot.commit_all", _noop_commit_all)
+    monkeypatch.setattr("tcfactory.autopilot.save_feature_ledger", _noop_save_feature_ledger)
+    infra_error = "ClaudeRunError: reached maximum number of turns during the research stage."
+    limit = AutonomyConfig().max_consecutive_infrastructure_recoveries
+
+    outcomes = [_run_respec(repo, item, infra_error) for _ in range(limit)]
+    for outcome in outcomes:
+        assert outcome.changed is True
+        assert item.status == "queued"
+        assert item.terminal_blocked is False
+    assert item.revisions == 3, "infrastructure recovery must never consume a revision"
+
+    final_outcome = _run_respec(repo, item, infra_error)
+
+    assert final_outcome.changed is False
+    assert item.status == "blocked"
+    assert item.terminal_blocked is True
+    assert final_outcome.block_reason is not None
+    assert "operator intervention" in final_outcome.block_reason
+    assert item.revisions == 3, "the terminal block must still not fabricate a spec revision"
+
+
+def test_infrastructure_recovery_below_the_ceiling_is_also_bounded(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Counterexample for the first repair attempt: the recovery counter was only incremented
+    once the re-specification ceiling was already exhausted, so a task starting at revisions=0
+    never incremented it, never reached the ceiling, and could be requeued forever on
+    infrastructure-classified failures (for example an under-sized ``max_turns``). Every
+    infrastructure recovery must consume recovery budget, and exhausting that budget below the
+    ceiling must escalate to a bounded re-specification instead of looping.
+    """
+    repo = _repo(tmp_path)
+    (repo / "tasks").mkdir()
+    source_root = Path(__file__).resolve().parents[1]
+    (repo / "tasks/T001.yaml").write_text(
+        (source_root / "tasks/DEMO-001.yaml").read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    item = _item(packet_path="tasks/T001.yaml", revisions=0, notes=[])
+    monkeypatch.setattr("tcfactory.autopilot.commit_all", _noop_commit_all)
+    monkeypatch.setattr("tcfactory.autopilot.save_feature_ledger", _noop_save_feature_ledger)
+    monkeypatch.setattr(
+        "tcfactory.autopilot.create_and_promote_task_packet",
+        _stub_create_and_promote_task_packet,
+    )
+    infra_error = "ClaudeRunError: reached maximum number of turns during the research stage."
+    autonomy = AutonomyConfig()
+    limit = autonomy.max_consecutive_infrastructure_recoveries
+    ceiling = autonomy.max_respecifications_per_task
+
+    # Recovery budget is consumed even at revisions=0.
+    for _ in range(limit):
+        outcome = _run_respec(repo, item, infra_error)
+        assert outcome.changed is True
+        assert item.status == "queued"
+    assert item.infrastructure_recoveries == limit
+    assert item.revisions == 0, "recovery must not consume a revision while budget remains"
+
+    # Exhausting the budget below the ceiling escalates to a re-specification, not another loop.
+    escalation = _run_respec(repo, item, infra_error)
+    assert escalation.changed is True
+    assert escalation.block_reason is None
+    assert item.status == "ready"
+    assert item.revisions == 1
+    assert item.infrastructure_recoveries == 0
+    assert any("consumes a revision" in note for note in item.notes)
+
+    # The whole loop terminates: it can never exceed (ceiling + 1) * (limit + 1) calls.
+    max_calls = (ceiling + 1) * (limit + 1)
+    calls = limit + 1
+    final: RespecOutcome | None = None
+    while calls < max_calls + 5:
+        final = _run_respec(repo, item, infra_error)
+        calls += 1
+        if not final.changed:
+            break
+    assert final is not None
+    assert final.changed is False, "unbounded infrastructure recovery: the loop never terminated"
+    assert calls <= max_calls
+    assert item.status == "blocked"
+    assert item.terminal_blocked is True
+    assert final.block_reason is not None
+    assert "operator intervention" in final.block_reason
+    assert item.revisions == ceiling
+
+
+def test_missing_error_artifact_is_reported_truthfully(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    config = load_factory_config(repo / "config/factory.yaml")
+    queue_dirs(repo, config)
+    item = _item()
+
+    outcome = asyncio.run(
+        respec_failed_item(
+            repo_root=repo,
+            factory=config,
+            autonomy=AutonomyConfig(),
+            ledger=_ledger(item),
+            item=item,
+        )
+    )
+    reason = respec_block_reason(item, outcome)
+
+    assert outcome.changed is False
+    assert outcome.evidence_path is None
+    assert "no queue error artifact recorded" in reason

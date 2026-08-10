@@ -430,6 +430,7 @@ class AutonomyConfig(BaseModel):
     max_self_repair_attempts: int = Field(default=3, ge=0, le=5)
     allow_paid_usage: Literal[False] = False
     max_respecifications_per_task: int = Field(default=3, ge=0, le=10)
+    max_consecutive_infrastructure_recoveries: int = Field(default=2, ge=0, le=10)
     idle_poll_seconds: int = Field(default=60, ge=5, le=3600)
     quota_reset_buffer_seconds: int = Field(default=0, ge=0, le=3600)
     unknown_limit_retry_seconds: int = Field(default=3600, ge=60, le=86_400)

@@ -41,6 +41,14 @@ def test_demo_task_loads() -> None:
             assert "Bash" in stage.tools
 
 
+def test_demo_task_requires_independent_literal_checksum_oracles() -> None:
+    task = load_task(Path("tasks/DEMO-001.yaml"))
+    criteria = " ".join(task.acceptance_criteria)
+
+    assert "literal published SHA-256 known-answer values" in criteria
+    assert "must not compute expected values with hashlib" in criteria
+
+
 def test_t001_has_no_builder() -> None:
     task = load_task(Path("tasks/T001.yaml"))
     assert RoleName.BUILDER not in {stage.role for stage in task.pipeline}

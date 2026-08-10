@@ -16,6 +16,7 @@
   "acceptance_criteria": [
     "A small checksum function accepts bytes and returns lowercase SHA-256 hex.",
     "Tests cover empty bytes, ASCII bytes, and deterministic repeatability.",
+    "Digest correctness tests use literal published SHA-256 known-answer values for empty bytes and b'abc'; they must not compute expected values with hashlib or the implementation under test.",
     "No controller, protected source, hidden gate, or release configuration changes."
   ],
   "outputs": [

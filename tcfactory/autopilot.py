@@ -71,9 +71,7 @@ def is_infrastructure_failure(error: str) -> bool:
         "service capacity",
         "infrastructure_error",
     )
-    return any(
-        marker in normalized for marker in infrastructure_markers + TURN_CEILING_MARKERS
-    )
+    return any(marker in normalized for marker in infrastructure_markers + TURN_CEILING_MARKERS)
 
 
 @contextmanager
@@ -137,6 +135,41 @@ def save_state(repo_root: Path, config: FactoryConfig, state: AutonomyState) -> 
     )
 
 
+async def _wait_until(
+    *,
+    repo_root: Path,
+    factory: FactoryConfig,
+    autonomy: AutonomyConfig,
+    state: AutonomyState,
+    wake_at: datetime,
+    poll_seconds: float = 30.0,
+) -> str:
+    """Wait visibly and allow dashboard retry/pause/stop controls to interrupt the wait."""
+    while True:
+        disk_state = load_state(repo_root, factory)
+        if (
+            state.next_wake_at is not None
+            and disk_state.status == "restarting"
+            and disk_state.next_wake_at is None
+        ):
+            state.status = "restarting"
+            state.current_action = "retry requested; restarting now"
+            state.last_event = "timed wait interrupted by an explicit retry request"
+            state.next_wake_at = None
+            save_state(repo_root, factory, state)
+            return "retry"
+        if (repo_root / autonomy.stop_file).exists():
+            return "stop"
+        if (repo_root / autonomy.pause_file).exists():
+            return "pause"
+        remaining = (wake_at - _now()).total_seconds()
+        if remaining <= 0:
+            return "elapsed"
+        state.next_wake_at = wake_at
+        save_state(repo_root, factory, state)
+        await asyncio.sleep(min(max(1.0, poll_seconds), remaining))
+
+
 def _notify(autonomy: AutonomyConfig, message: str) -> None:
     if not autonomy.notification_command:
         return
@@ -164,15 +197,12 @@ async def _repair_or_hard_stuck(
     """Exhaust bounded, gated self-repair before publishing a durable hard stop."""
     last_artifact: str | None = state.last_repair_artifact
     while (
-        autonomy.auto_repair_factory
-        and state.repair_attempts < autonomy.max_self_repair_attempts
+        autonomy.auto_repair_factory and state.repair_attempts < autonomy.max_self_repair_attempts
     ):
         state.repair_attempts += 1
         state.status = "repairing"
         state.next_wake_at = None
-        state.repair_status = (
-            f"attempt {state.repair_attempts}/{autonomy.max_self_repair_attempts}"
-        )
+        state.repair_status = f"attempt {state.repair_attempts}/{autonomy.max_self_repair_attempts}"
         state.active_task_id = blocker_id
         state.current_action = "autonomous factory self-repair"
         state.blocker_reason = reason
@@ -203,9 +233,7 @@ async def _repair_or_hard_stuck(
         except AuthenticationPause as exc:
             state.status = "waiting_auth"
             state.repair_status = "waiting for Claude Max OAuth"
-            state.next_wake_at = _now() + timedelta(
-                seconds=factory.authentication_retry_seconds
-            )
+            state.next_wake_at = _now() + timedelta(seconds=factory.authentication_retry_seconds)
             state.last_event = exc.message
             save_state(repo_root, factory, state)
             return False
@@ -385,9 +413,7 @@ def visible_blocked_task_ids(ledger: FeatureLedger) -> list[str]:
     ]
 
 
-def terminal_blocker_reason(
-    repo_root: Path, factory: FactoryConfig, item: FeatureItem
-) -> str:
+def terminal_blocker_reason(repo_root: Path, factory: FactoryConfig, item: FeatureItem) -> str:
     """Report the current queue artifact instead of a potentially stale ledger note."""
 
     dirs = queue_dirs(repo_root, factory)
@@ -408,12 +434,8 @@ def _verified_repair_intent(
     repo_root: Path, state: AutonomyState, ledger: FeatureLedger
 ) -> tuple[FeatureItem | None, str | None]:
     marker_path = repo_root / _VERIFIED_REPAIR_RETRY
-    marker = (
-        cast(dict[str, object], read_json(marker_path, {})) if marker_path.is_file() else {}
-    )
-    consumed = cast(
-        dict[str, object], read_json(repo_root / _VERIFIED_REPAIR_CONSUMED, {})
-    )
+    marker = cast(dict[str, object], read_json(marker_path, {})) if marker_path.is_file() else {}
+    consumed = cast(dict[str, object], read_json(repo_root / _VERIFIED_REPAIR_CONSUMED, {}))
     artifact_path = str(marker.get("artifact_path") or "") or None
     blocker_id = str(marker.get("blocker_id") or "") or state.active_task_id
     has_signal = marker_path.is_file() or (
@@ -453,9 +475,7 @@ def _verified_repair_intent(
     if not has_signal:
         return None, None
 
-    item = next(
-        (candidate for candidate in ledger.tasks if candidate.task_id == blocker_id), None
-    )
+    item = next((candidate for candidate in ledger.tasks if candidate.task_id == blocker_id), None)
     if item is None:
         item = terminal_root_blocker(ledger)
     return item, artifact_path
@@ -672,9 +692,7 @@ async def respec_failed_item(
         autonomy.max_consecutive_infrastructure_recoveries
     )
     if infrastructure_failure and not infrastructure_exhausted:
-        checkpoint_store = CheckpointStore(
-            factory.resolve(repo_root, factory.pipeline_state_dir)
-        )
+        checkpoint_store = CheckpointStore(factory.resolve(repo_root, factory.pipeline_state_dir))
         checkpoint = checkpoint_store.load(item.task_id)
         if checkpoint is not None:
             checkpoint_store.archive(
@@ -804,7 +822,13 @@ async def _run_autopilot_inner(
             save_state(repo_root, factory, state)
             if once:
                 return
-            await asyncio.sleep(max(1.0, (retry_at - _now()).total_seconds()))
+            await _wait_until(
+                repo_root=repo_root,
+                factory=factory,
+                autonomy=autonomy,
+                state=state,
+                wake_at=retry_at,
+            )
         clear_hard_stuck(repo_root, autonomy)
         state.repair_attempts = 0
         state.repair_status = None
@@ -866,7 +890,13 @@ async def _run_autopilot_inner(
             _notify(autonomy, state.last_event)
             if once:
                 return
-            await asyncio.sleep(max(1.0, (state.next_wake_at - _now()).total_seconds()))
+            await _wait_until(
+                repo_root=repo_root,
+                factory=factory,
+                autonomy=autonomy,
+                state=state,
+                wake_at=state.next_wake_at,
+            )
             continue
 
         github_state_path = factory.resolve(repo_root, factory.github_state_path)
@@ -889,19 +919,14 @@ async def _run_autopilot_inner(
                 state.consecutive_failures += 1
                 state.status = "waiting_github"
                 state.current_action = "resume pending origin/main sync and required CI"
-                state.next_wake_at = _now() + timedelta(
-                    seconds=autonomy.hard_stuck_retry_seconds
-                )
+                state.next_wake_at = _now() + timedelta(seconds=autonomy.hard_stuck_retry_seconds)
                 state.last_event = (
                     "Durable GitHub state is pending; no Claude task will start before "
                     f"retry at {state.next_wake_at.isoformat()}: "
                     f"{pending_github_result.get('error')}"
                 )
                 save_state(repo_root, factory, state)
-                if (
-                    state.consecutive_failures
-                    >= autonomy.max_consecutive_factory_failures
-                ):
+                if state.consecutive_failures >= autonomy.max_consecutive_factory_failures:
                     await _repair_or_hard_stuck(
                         repo_root=repo_root,
                         factory=factory,
@@ -913,8 +938,12 @@ async def _run_autopilot_inner(
                     return
                 if once:
                     return
-                await asyncio.sleep(
-                    max(1.0, (state.next_wake_at - _now()).total_seconds())
+                await _wait_until(
+                    repo_root=repo_root,
+                    factory=factory,
+                    autonomy=autonomy,
+                    state=state,
+                    wake_at=state.next_wake_at,
                 )
                 continue
             state.consecutive_failures = 0
@@ -991,7 +1020,13 @@ async def _run_autopilot_inner(
                 save_state(repo_root, factory, state)
                 if once:
                     return
-                await asyncio.sleep(max(1.0, (state.next_wake_at - _now()).total_seconds()))
+                await _wait_until(
+                    repo_root=repo_root,
+                    factory=factory,
+                    autonomy=autonomy,
+                    state=state,
+                    wake_at=state.next_wake_at,
+                )
                 state.status = "running"
                 continue
             except AuthenticationPause as exc:
@@ -1007,7 +1042,13 @@ async def _run_autopilot_inner(
                 _notify(autonomy, state.last_event)
                 if once:
                     return
-                await asyncio.sleep(max(1.0, (state.next_wake_at - _now()).total_seconds()))
+                await _wait_until(
+                    repo_root=repo_root,
+                    factory=factory,
+                    autonomy=autonomy,
+                    state=state,
+                    wake_at=state.next_wake_at,
+                )
                 state.status = "running"
                 continue
             except CompletionBlocked as exc:
@@ -1104,8 +1145,13 @@ async def _run_autopilot_inner(
                 save_state(repo_root, factory, state)
                 if once:
                     return
-                delay = max(1.0, (state.next_wake_at - _now()).total_seconds())
-                await asyncio.sleep(delay)
+                await _wait_until(
+                    repo_root=repo_root,
+                    factory=factory,
+                    autonomy=autonomy,
+                    state=state,
+                    wake_at=state.next_wake_at,
+                )
                 state.status = "running"
                 continue
             if not respec_outcome.changed:
@@ -1154,19 +1200,14 @@ async def _run_autopilot_inner(
                 state.consecutive_failures += 1
                 state.status = "waiting_github"
                 state.current_action = "retry origin/main synchronization and required CI"
-                state.next_wake_at = _now() + timedelta(
-                    seconds=autonomy.hard_stuck_retry_seconds
-                )
+                state.next_wake_at = _now() + timedelta(seconds=autonomy.hard_stuck_retry_seconds)
                 state.last_event = (
                     "origin/main synchronization or required CI failed; no new task will "
                     f"start before retry at {state.next_wake_at.isoformat()}: "
                     f"{github_result.get('error')}"
                 )
                 save_state(repo_root, factory, state)
-                if (
-                    state.consecutive_failures
-                    >= autonomy.max_consecutive_factory_failures
-                ):
+                if state.consecutive_failures >= autonomy.max_consecutive_factory_failures:
                     await _repair_or_hard_stuck(
                         repo_root=repo_root,
                         factory=factory,
@@ -1178,8 +1219,12 @@ async def _run_autopilot_inner(
                     return
                 if once:
                     return
-                await asyncio.sleep(
-                    max(1.0, (state.next_wake_at - _now()).total_seconds())
+                await _wait_until(
+                    repo_root=repo_root,
+                    factory=factory,
+                    autonomy=autonomy,
+                    state=state,
+                    wake_at=state.next_wake_at,
                 )
                 github_result = _sync_github_best_effort(
                     repo_root=repo_root,
@@ -1233,8 +1278,13 @@ async def _run_autopilot_inner(
                 save_state(repo_root, factory, state)
                 if once:
                     return
-                delay = max(1.0, (state.next_wake_at - _now()).total_seconds())
-                await asyncio.sleep(delay)
+                await _wait_until(
+                    repo_root=repo_root,
+                    factory=factory,
+                    autonomy=autonomy,
+                    state=state,
+                    wake_at=state.next_wake_at,
+                )
                 state.status = "running"
             except Exception as exc:  # noqa: BLE001
                 state.consecutive_failures += 1
@@ -1278,7 +1328,13 @@ async def _run_autopilot_inner(
             save_state(repo_root, factory, state)
             if once:
                 return
-            await asyncio.sleep(max(1.0, (wake - _now()).total_seconds()))
+            await _wait_until(
+                repo_root=repo_root,
+                factory=factory,
+                autonomy=autonomy,
+                state=state,
+                wake_at=wake,
+            )
             state.status = "running"
             continue
 

@@ -42,6 +42,11 @@ MIN_CLAUDE_TASK_BUDGET_TOKENS = 20_000
 REPORT_CONTINUATION_MAX_TURNS = 4
 
 
+def subprocess_env_scrub_value(*, read_only: bool) -> str:
+    """Keep reviewers hardened without disabling configured writes for mutating roles."""
+    return "1" if read_only else "0"
+
+
 def report_continuation_overrides() -> dict[str, Any]:
     """Bound report finalization by turns/tokens without a cache-sensitive dollar meter."""
     return {
@@ -184,11 +189,7 @@ async def run_agent_stage(
     # pipeline execution routes one model at a time so each downgrade is attributable;
     # direct callers may still supply one valid SDK fallback.
     fallback_model = next(
-        (
-            candidate
-            for candidate in dict.fromkeys(fallback_models)
-            if candidate != model
-        ),
+        (candidate for candidate in dict.fromkeys(fallback_models) if candidate != model),
         None,
     )
     effort = stage.effort or role_config.effort
@@ -271,7 +272,10 @@ async def run_agent_stage(
             "API_TIMEOUT_MS": "300000",
             "CLAUDE_CODE_MAX_RETRIES": "4",
             "CLAUDE_ASYNC_AGENT_STALL_TIMEOUT_MS": "180000",
-            "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "1",
+            # The environment has already been stripped of credentials and paid API routes.
+            # SDK subprocess hardening stays on for reviewers, but mutating roles must retain
+            # the exact write authority granted by their tools, sandbox, and path hooks.
+            "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": subprocess_env_scrub_value(read_only=read_only),
         }
     )
 

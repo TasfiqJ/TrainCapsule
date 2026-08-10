@@ -59,13 +59,20 @@
     }
   ],
   "private_gate": {
-    "required": false,
-    "suite": null,
+    "required": true,
+    "suite": "factory-calibration",
     "timeout_seconds": 1800
   },
   "pipeline": [
     {
       "role": "specification",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Write",
+        "Edit"
+      ],
       "allowed_paths": [
         "specs/tasks/DEMO-001.md"
       ],
@@ -86,6 +93,13 @@
     },
     {
       "role": "builder",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob",
+        "Write",
+        "Edit"
+      ],
       "allowed_paths": [
         "demo/**",
         "tests/demo/**"
@@ -110,6 +124,11 @@
     },
     {
       "role": "adversary",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
       "allowed_paths": [],
       "forbidden_paths": [
         "**"
@@ -123,6 +142,11 @@
     },
     {
       "role": "audit",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
       "allowed_paths": [],
       "forbidden_paths": [
         "**"
@@ -136,6 +160,11 @@
     },
     {
       "role": "release",
+      "tools": [
+        "Read",
+        "Grep",
+        "Glob"
+      ],
       "allowed_paths": [],
       "forbidden_paths": [
         "**"

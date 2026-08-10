@@ -44,7 +44,7 @@ tasks:
   lead_role: Spec
   phase: P0
   depends_on: []
-  status: packet_approved
+  status: queued
   terminal_blocked: false
   packet_path: tasks/T001.yaml
   trust_core: false
@@ -89,6 +89,7 @@ tasks:
   depends_on:
   - T001
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -115,6 +116,7 @@ tasks:
   depends_on:
   - T002
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -141,6 +143,7 @@ tasks:
   depends_on:
   - T003
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -167,6 +170,7 @@ tasks:
   depends_on:
   - T004
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -192,6 +196,7 @@ tasks:
   depends_on:
   - T005
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -217,6 +222,7 @@ tasks:
   depends_on:
   - T006
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -242,6 +248,7 @@ tasks:
   depends_on:
   - T007
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -268,6 +275,7 @@ tasks:
   depends_on:
   - T008
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -294,6 +302,7 @@ tasks:
   depends_on:
   - T009
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -320,6 +329,7 @@ tasks:
   depends_on:
   - T010
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -346,6 +356,7 @@ tasks:
   depends_on:
   - T011
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -372,6 +383,7 @@ tasks:
   depends_on:
   - T012
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -397,6 +409,7 @@ tasks:
   depends_on:
   - T013
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -422,6 +435,7 @@ tasks:
   depends_on:
   - T014
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -447,6 +461,7 @@ tasks:
   depends_on:
   - T015
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -472,6 +487,7 @@ tasks:
   depends_on:
   - T016
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -498,6 +514,7 @@ tasks:
   depends_on:
   - T017
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -524,6 +541,7 @@ tasks:
   depends_on:
   - T018
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -550,6 +568,7 @@ tasks:
   depends_on:
   - T019
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -576,6 +595,7 @@ tasks:
   depends_on:
   - T020
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -602,6 +622,7 @@ tasks:
   depends_on:
   - T021
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -627,6 +648,7 @@ tasks:
   depends_on:
   - T022
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -653,6 +675,7 @@ tasks:
   depends_on:
   - T023
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -679,6 +702,7 @@ tasks:
   depends_on:
   - T024
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -705,6 +729,7 @@ tasks:
   depends_on:
   - T025
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -731,6 +756,7 @@ tasks:
   depends_on:
   - T026
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -757,6 +783,7 @@ tasks:
   depends_on:
   - T027
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -783,6 +810,7 @@ tasks:
   depends_on:
   - T028
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -809,6 +837,7 @@ tasks:
   depends_on:
   - T029
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -835,6 +864,7 @@ tasks:
   depends_on:
   - T030
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -861,6 +891,7 @@ tasks:
   depends_on:
   - T031
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -887,6 +918,7 @@ tasks:
   depends_on:
   - T032
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -913,6 +945,7 @@ tasks:
   depends_on:
   - T033
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -939,6 +972,7 @@ tasks:
   depends_on:
   - T034
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -964,6 +998,7 @@ tasks:
   depends_on:
   - T035
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -989,6 +1024,7 @@ tasks:
   depends_on:
   - T036
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1014,6 +1050,7 @@ tasks:
   depends_on:
   - T037
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1039,6 +1076,7 @@ tasks:
   depends_on:
   - T038
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1064,6 +1102,7 @@ tasks:
   depends_on:
   - T039
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1089,6 +1128,7 @@ tasks:
   depends_on:
   - T040
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1114,6 +1154,7 @@ tasks:
   depends_on:
   - T041
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1139,6 +1180,7 @@ tasks:
   depends_on:
   - T042
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1164,6 +1206,7 @@ tasks:
   depends_on:
   - T043
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1189,6 +1232,7 @@ tasks:
   depends_on:
   - T044
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1214,6 +1258,7 @@ tasks:
   depends_on:
   - T045
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1239,6 +1284,7 @@ tasks:
   depends_on:
   - T046
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1265,6 +1311,7 @@ tasks:
   depends_on:
   - T047
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1291,6 +1338,7 @@ tasks:
   depends_on:
   - T048
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1317,6 +1365,7 @@ tasks:
   depends_on:
   - T049
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1343,6 +1392,7 @@ tasks:
   depends_on:
   - T050
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1369,6 +1419,7 @@ tasks:
   depends_on:
   - T051
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -1395,6 +1446,7 @@ tasks:
   depends_on:
   - T052
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -1421,6 +1473,7 @@ tasks:
   depends_on:
   - T053
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1447,6 +1500,7 @@ tasks:
   depends_on:
   - T054
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -1473,6 +1527,7 @@ tasks:
   depends_on:
   - T055
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1498,6 +1553,7 @@ tasks:
   depends_on:
   - T056
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1523,6 +1579,7 @@ tasks:
   depends_on:
   - T057
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1548,6 +1605,7 @@ tasks:
   depends_on:
   - T058
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1573,6 +1631,7 @@ tasks:
   depends_on:
   - T059
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1598,6 +1657,7 @@ tasks:
   depends_on:
   - T060
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1623,6 +1683,7 @@ tasks:
   depends_on:
   - T061
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1648,6 +1709,7 @@ tasks:
   depends_on:
   - T062
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1673,6 +1735,7 @@ tasks:
   depends_on:
   - T063
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1698,6 +1761,7 @@ tasks:
   depends_on:
   - T064
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1723,6 +1787,7 @@ tasks:
   depends_on:
   - T065
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1748,6 +1813,7 @@ tasks:
   depends_on:
   - T066
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1773,6 +1839,7 @@ tasks:
   depends_on:
   - T067
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1798,6 +1865,7 @@ tasks:
   depends_on:
   - T068
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -1823,6 +1891,7 @@ tasks:
   depends_on:
   - T069
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1848,6 +1917,7 @@ tasks:
   depends_on:
   - T070
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1873,6 +1943,7 @@ tasks:
   depends_on:
   - T071
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1898,6 +1969,7 @@ tasks:
   depends_on:
   - T072
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1923,6 +1995,7 @@ tasks:
   depends_on:
   - T073
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1948,6 +2021,7 @@ tasks:
   depends_on:
   - T074
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -1973,6 +2047,7 @@ tasks:
   depends_on:
   - T075
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -1998,6 +2073,7 @@ tasks:
   depends_on:
   - T076
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2023,6 +2099,7 @@ tasks:
   depends_on:
   - T077
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2048,6 +2125,7 @@ tasks:
   depends_on:
   - T078
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2073,6 +2151,7 @@ tasks:
   depends_on:
   - T079
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2098,6 +2177,7 @@ tasks:
   depends_on:
   - T080
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2123,6 +2203,7 @@ tasks:
   depends_on:
   - T081
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2148,6 +2229,7 @@ tasks:
   depends_on:
   - T082
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2173,6 +2255,7 @@ tasks:
   depends_on:
   - T083
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2198,6 +2281,7 @@ tasks:
   depends_on:
   - T084
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2223,6 +2307,7 @@ tasks:
   depends_on:
   - T085
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2248,6 +2333,7 @@ tasks:
   depends_on:
   - T086
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2273,6 +2359,7 @@ tasks:
   depends_on:
   - T087
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2298,6 +2385,7 @@ tasks:
   depends_on:
   - T088
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2323,6 +2411,7 @@ tasks:
   depends_on:
   - T089
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2348,6 +2437,7 @@ tasks:
   depends_on:
   - T090
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2373,6 +2463,7 @@ tasks:
   depends_on:
   - T091
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2398,6 +2489,7 @@ tasks:
   depends_on:
   - T092
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2423,6 +2515,7 @@ tasks:
   depends_on:
   - T093
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2448,6 +2541,7 @@ tasks:
   depends_on:
   - T094
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2473,6 +2567,7 @@ tasks:
   depends_on:
   - T095
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2498,6 +2593,7 @@ tasks:
   depends_on:
   - T096
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2523,6 +2619,7 @@ tasks:
   depends_on:
   - T097
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2548,6 +2645,7 @@ tasks:
   depends_on:
   - T098
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2573,6 +2671,7 @@ tasks:
   depends_on:
   - T099
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -2598,6 +2697,7 @@ tasks:
   depends_on:
   - T100
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2623,6 +2723,7 @@ tasks:
   depends_on:
   - T101
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -2648,6 +2749,7 @@ tasks:
   depends_on:
   - T102
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2673,6 +2775,7 @@ tasks:
   depends_on:
   - T103
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2699,6 +2802,7 @@ tasks:
   depends_on:
   - T104
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2724,6 +2828,7 @@ tasks:
   depends_on:
   - T105
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2749,6 +2854,7 @@ tasks:
   depends_on:
   - T106
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2774,6 +2880,7 @@ tasks:
   depends_on:
   - T107
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -2799,6 +2906,7 @@ tasks:
   depends_on:
   - T108
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2824,6 +2932,7 @@ tasks:
   depends_on:
   - T109
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -2850,6 +2959,7 @@ tasks:
   depends_on:
   - T110
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2876,6 +2986,7 @@ tasks:
   depends_on:
   - T111
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2902,6 +3013,7 @@ tasks:
   depends_on:
   - T112
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -2928,6 +3040,7 @@ tasks:
   depends_on:
   - T113
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -2954,6 +3067,7 @@ tasks:
   depends_on:
   - T114
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -2980,6 +3094,7 @@ tasks:
   depends_on:
   - T115
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -3006,6 +3121,7 @@ tasks:
   depends_on:
   - T116
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -3032,6 +3148,7 @@ tasks:
   depends_on:
   - T117
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -3058,6 +3175,7 @@ tasks:
   depends_on:
   - T118
   status: external_wait
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -3084,6 +3202,7 @@ tasks:
   depends_on:
   - T118
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -3110,6 +3229,7 @@ tasks:
   depends_on:
   - T120
   status: external_wait
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -3136,6 +3256,7 @@ tasks:
   depends_on:
   - T120
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: true
   risk_tier: trust_core
@@ -3162,6 +3283,7 @@ tasks:
   depends_on:
   - T122
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: integration
@@ -3188,6 +3310,7 @@ tasks:
   depends_on:
   - T123
   status: blocked
+  terminal_blocked: false
   packet_path: null
   trust_core: false
   risk_tier: standard
@@ -3207,4 +3330,4 @@ tasks:
   notes: []
   revisions: 0
   value_revisions: 0
-updated_at: '2026-08-10T09:34:29.873126+00:00'
+updated_at: '2026-08-10T09:42:57.950409+00:00'

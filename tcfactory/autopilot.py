@@ -9,7 +9,7 @@ from contextlib import contextmanager
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import TextIO
+from typing import TextIO, cast
 
 from rich.console import Console
 
@@ -35,6 +35,9 @@ from .self_repair import attempt_factory_self_repair, clear_hard_stuck, write_ha
 from .util import read_json, utc_stamp, write_json
 
 console = Console()
+
+_VERIFIED_REPAIR_RETRY = Path("factory/state/VERIFIED_REPAIR_RETRY.json")
+_VERIFIED_REPAIR_CONSUMED = Path("factory/state/VERIFIED_REPAIR_RETRY_CONSUMED.json")
 
 
 class AutopilotError(RuntimeError):
@@ -195,6 +198,15 @@ async def _repair_or_hard_stuck(
         save_state(repo_root, factory, state)
         if outcome.applied:
             clear_hard_stuck(repo_root, autonomy)
+            write_json(
+                repo_root / _VERIFIED_REPAIR_RETRY,
+                {
+                    "artifact_path": outcome.artifact_path,
+                    "blocker_id": blocker_id,
+                    "repair_task_id": outcome.task_id,
+                    "verified_at": _now().isoformat(),
+                },
+            )
             state.status = "restarting"
             state.repair_status = "verified repair merged"
             state.consecutive_failures = 0
@@ -356,6 +368,63 @@ def visible_blocked_task_ids(ledger: FeatureLedger) -> list[str]:
     ]
 
 
+def terminal_blocker_reason(
+    repo_root: Path, factory: FactoryConfig, item: FeatureItem
+) -> str:
+    """Report the current queue artifact instead of a potentially stale ledger note."""
+
+    dirs = queue_dirs(repo_root, factory)
+    error_path = dirs["failed"] / f"{item.task_id}.error.txt"
+    if not error_path.is_file():
+        error_path = dirs["blocked"] / f"{item.task_id}.error.txt"
+    if error_path.is_file():
+        try:
+            relative = error_path.resolve().relative_to(repo_root.resolve())
+        except ValueError:
+            relative = error_path
+        error = error_path.read_text(encoding="utf-8", errors="replace").strip()
+        return f"Durable queue artifact {relative}: {error or 'empty error artifact'}"
+    return "Terminal automatable blocker has no durable queue error artifact."
+
+
+def _verified_repair_intent(
+    repo_root: Path, state: AutonomyState, ledger: FeatureLedger
+) -> tuple[FeatureItem | None, str | None]:
+    marker_path = repo_root / _VERIFIED_REPAIR_RETRY
+    marker = (
+        cast(dict[str, object], read_json(marker_path, {})) if marker_path.is_file() else {}
+    )
+    consumed = cast(
+        dict[str, object], read_json(repo_root / _VERIFIED_REPAIR_CONSUMED, {})
+    )
+    artifact_path = str(marker.get("artifact_path") or "") or None
+    blocker_id = str(marker.get("blocker_id") or "") or state.active_task_id
+    has_signal = marker_path.is_file() or (
+        state.repair_status == "verified repair merged"
+        and not bool(consumed.get("repair_status_consumed"))
+    )
+
+    # Migration fallback for verified repairs produced before the durable retry marker existed.
+    if not has_signal:
+        result_paths = sorted((repo_root / "factory/state/self-repair").glob("*.result.json"))
+        if result_paths:
+            latest = result_paths[-1]
+            result = read_json(latest, {})
+            latest_artifact = str(latest)
+            if bool(result.get("applied")) and consumed.get("artifact_path") != latest_artifact:
+                artifact_path = latest_artifact
+                has_signal = True
+    if not has_signal:
+        return None, None
+
+    item = next(
+        (candidate for candidate in ledger.tasks if candidate.task_id == blocker_id), None
+    )
+    if item is None:
+        item = terminal_root_blocker(ledger)
+    return item, artifact_path
+
+
 def _write_completion(repo_root: Path, config: FactoryConfig, ledger: FeatureLedger) -> Path:
     path = repo_root / "factory" / "state" / "PRODUCT_BUILD_COMPLETE.json"
     audit_roots = sorted(config.resolve(repo_root, config.completion_dir).glob("*"))
@@ -422,26 +491,8 @@ def recover_task_after_verified_repair(
     specification revision.
     """
 
-    if state.repair_status != "verified repair merged":
-        return False
-    item: FeatureItem | None = None
-    if state.active_task_id:
-        item = next(
-            (candidate for candidate in ledger.tasks if candidate.task_id == state.active_task_id),
-            None,
-        )
-    if item is None:
-        item = next(
-            (
-                candidate
-                for candidate in ledger.tasks
-                if candidate.terminal_blocked and candidate.automatable
-            ),
-            None,
-        )
+    item, repair_artifact = _verified_repair_intent(repo_root, state, ledger)
     if item is None or item.status == "passed":
-        state.repair_status = None
-        state.repair_attempts = 0
         return False
 
     dirs = queue_dirs(repo_root, factory)
@@ -514,6 +565,16 @@ def recover_task_after_verified_repair(
     state.blocked_tasks = []
     state.next_wake_at = None
     state.last_event = f"Recovered and requeued {item.task_id} after verified controller repair"
+    write_json(
+        repo_root / _VERIFIED_REPAIR_CONSUMED,
+        {
+            "artifact_path": repair_artifact,
+            "recovered_at": _now().isoformat(),
+            "repair_status_consumed": True,
+            "task_id": item.task_id,
+        },
+    )
+    (repo_root / _VERIFIED_REPAIR_RETRY).unlink(missing_ok=True)
     return True
 
 
@@ -1102,11 +1163,7 @@ async def _run_autopilot_inner(
         if terminal is not None:
             state.active_task_id = terminal.task_id
             state.current_action = "autonomous repair of terminal root blocker"
-            state.blocker_reason = (
-                terminal.notes[-1]
-                if terminal.notes
-                else "Automatable root task is terminally blocked without recorded evidence."
-            )
+            state.blocker_reason = terminal_blocker_reason(repo_root, factory, terminal)
             save_state(repo_root, factory, state)
             await _repair_or_hard_stuck(
                 repo_root=repo_root,

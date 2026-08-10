@@ -22,6 +22,7 @@ from tcfactory.autopilot import (
     recover_task_after_verified_repair,
     respec_block_reason,
     respec_failed_item,
+    terminal_blocker_reason,
 )
 from tcfactory.checkpoints import CheckpointStore, new_checkpoint
 from tcfactory.config import load_factory_config
@@ -320,11 +321,12 @@ def test_verified_repair_reopens_root_task_and_preserves_candidate_checkpoint(
     failed.write_text((repo / "tasks/T001.yaml").read_text(encoding="utf-8"), encoding="utf-8")
     failed.with_suffix(".error.txt").write_text("controller defect\n", encoding="utf-8")
     state = AutonomyState(
-        status="restarting",
-        active_task_id="T001",
-        repair_status="verified repair merged",
+        status="stopped",
         updated_at=datetime.now(UTC),
     )
+    repair_result = repo / "factory/state/self-repair/FACTORY_REPAIR_20260810T000000Z_1.result.json"
+    repair_result.parent.mkdir(parents=True)
+    repair_result.write_text('{"applied": true}\n', encoding="utf-8")
     monkeypatch.setattr("tcfactory.autopilot.commit_all", _fixed_recovery_commit)
     monkeypatch.setattr(
         "tcfactory.autopilot.transplant_candidate_onto", _fixed_candidate_transplant
@@ -353,3 +355,19 @@ def test_verified_repair_reopens_root_task_and_preserves_candidate_checkpoint(
     assert state.status == "running"
     assert state.repair_status is None
     assert state.active_task_id == "T001"
+    consumed = repo / "factory/state/VERIFIED_REPAIR_RETRY_CONSUMED.json"
+    assert str(repair_result) in consumed.read_text(encoding="utf-8")
+
+
+def test_terminal_blocker_reason_uses_current_queue_error_not_stale_note(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    config = load_factory_config(repo / "config/factory.yaml")
+    item = _item(status="blocked", terminal_blocked=True)
+    error = queue_dirs(repo, config)["failed"] / "T001.error.txt"
+    error.write_text(DURABLE_ERROR + "\n", encoding="utf-8")
+
+    reason = terminal_blocker_reason(repo, config, item)
+
+    assert DURABLE_ERROR in reason
+    assert "factory/queue/failed/T001.error.txt" in reason
+    assert STALE_NOTE not in reason

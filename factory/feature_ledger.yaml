@@ -44,7 +44,7 @@ tasks:
   lead_role: Spec
   phase: P0
   depends_on: []
-  status: blocked
+  status: respec_required
   terminal_blocked: true
   packet_path: tasks/T001.yaml
   trust_core: false
@@ -3338,4 +3338,4 @@ tasks:
   notes: []
   revisions: 0
   value_revisions: 0
-updated_at: '2026-08-10T11:53:24.348865+00:00'
+updated_at: '2026-08-10T12:08:24.519984+00:00'

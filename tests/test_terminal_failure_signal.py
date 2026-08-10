@@ -47,7 +47,10 @@ def _result(**overrides: object) -> StageResult:
 
 def test_stage_error_is_preferred_then_terminal_reason_then_unknown() -> None:
     assert terminal_failure_signal(_result(error="boom", terminal_reason="max_turns")) == "boom"
-    assert terminal_failure_signal(_result(terminal_reason="max_turns")) == "max_turns"
+    assert (
+        terminal_failure_signal(_result(terminal_reason="max_turns"))
+        == "terminal_reason=max_turns"
+    )
     assert terminal_failure_signal(_result()) == "unknown"
 
 
@@ -77,6 +80,24 @@ def test_wrapper_text_alone_is_not_an_infrastructure_failure() -> None:
     """
 
     assert is_infrastructure_failure(f"PipelineFailure: {T001_WRAPPER_TEXT}") is False
+
+
+def test_turn_ceiling_with_no_populated_error_survives_the_terminal_wrapper() -> None:
+    """Regression for the counterexample: terminal_reason-only turn ceilings must
+    still classify as infrastructure after passing through the terminal wrapper.
+
+    A stage that hits its turn ceiling before populating ``StageResult.error`` (only
+    ``terminal_reason="max_turns"`` is set) previously produced the bare signal
+    "max_turns", which does not match any ``TURN_CEILING_MARKERS`` entry. That
+    misclassified a genuine turn ceiling as a truthful product rejection, consuming a
+    re-specification revision instead of the free infrastructure requeue -- the exact
+    mechanism that exhausts ``autonomy.max_respecifications_per_task``.
+    """
+
+    result = _result(terminal_reason="max_turns")
+    assert result.error is None
+    message = terminal_failure_message(T001_WRAPPER_TEXT, result)
+    assert is_infrastructure_failure(message) is True
 
 
 def test_unattributable_terminal_failure_is_not_recovered_for_free() -> None:

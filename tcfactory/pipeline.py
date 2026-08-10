@@ -108,9 +108,19 @@ def terminal_failure_signal(result: StageResult) -> str:
     ``unknown`` is returned when the stage carried neither signal. It is deliberately
     not classifiable as infrastructure: an unattributable failure must stay a truthful
     failure rather than earn a free requeue.
+
+    A bare ``terminal_reason`` (e.g. ``"max_turns"``) is embedded in the canonical
+    ``terminal_reason=<value>`` form, matching the marker ``is_infrastructure_failure``
+    matches on. Returning the bare reason made a genuine turn ceiling with no populated
+    ``.error`` unclassifiable as infrastructure, consuming a re-specification revision
+    identically to a truthful product rejection.
     """
 
-    return result.error or result.terminal_reason or "unknown"
+    if result.error:
+        return result.error
+    if result.terminal_reason:
+        return f"terminal_reason={result.terminal_reason}"
+    return "unknown"
 
 
 def terminal_failure_message(summary: str, result: StageResult) -> str:

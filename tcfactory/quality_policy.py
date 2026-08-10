@@ -30,6 +30,14 @@ _FORBIDDEN_FILENAMES = {
     ".credentials.json",
 }
 _TEST_PATH_RE = re.compile(r"(^|/)(tests?|specs?)(/|$)|(^|/)__tests__(/|$)")
+# `specs/tasks/<TASK_ID>.md` is a controller-owned planning document that the
+# planning pipeline itself mandates as a writable planner output (see
+# `tcfactory.risk.planning_pipeline`). It is a specification narrative, not an
+# executable test, so test-change authority and the private-gate requirement for
+# test edits must not be applied to it; otherwise re-planning an existing task
+# is structurally impossible. Every other check (secrets, status laundering,
+# size, forbidden filenames) still applies to it unchanged.
+_PLANNING_SPEC_RE = re.compile(r"^specs/tasks/[^/]+\.md$")
 _SKIP_RE = re.compile(
     r"(?i)(pytest\.skip|pytest\.mark\.(?:skip|xfail)|unittest\.skip|@skip|\bxskip\b)"
 )
@@ -348,7 +356,11 @@ def scan_candidate(
     violations: list[str] = []
     warnings: list[str] = []
 
-    test_changes = [path for path in changed if _TEST_PATH_RE.search(path)]
+    test_changes = [
+        path
+        for path in changed
+        if _TEST_PATH_RE.search(path) and not _PLANNING_SPEC_RE.match(path)
+    ]
     existing_test_changes = [
         path
         for path in test_changes

@@ -81,6 +81,13 @@ TURN_CEILING_MARKERS = (
     "error_max_turns",
     "terminal_reason=max_turns",
 )
+MAX_REVIEW_INFRA_RETRIES = 2
+STRUCTURED_OUTPUT_FAULT_MARKERS = (
+    # Both forms are emitted verbatim by claude_runner: the canonical
+    # ``terminal_reason=<value>`` text and the SDK result subtype.
+    "terminal_reason=structured_output_retry_exhausted",
+    "subtype=error_max_structured_output_retries",
+)
 
 
 def stage_hit_turn_ceiling(result: StageResult) -> bool:
@@ -95,6 +102,22 @@ def stage_hit_turn_ceiling(result: StageResult) -> bool:
         return True
     error = (result.error or "").lower()
     return any(marker in error for marker in TURN_CEILING_MARKERS)
+
+
+def stage_hit_structured_output_fault(result: StageResult) -> bool:
+    """A structured-output retry exhaustion is a tooling fault, not a review verdict.
+
+    The Claude Agent SDK gives up after repeated attempts to coerce a response into a
+    schema-valid ``AgentReport`` and returns no report at all. The review role never
+    evaluated the candidate, so there are no reviewer findings for a mutating repair
+    cycle to resolve; routing this straight into ``repair.max_cycles`` burns a bounded
+    repair cycle on an SDK hiccup instead of retrying the same read-only review.
+    """
+
+    if (result.terminal_reason or "").strip().lower() == "structured_output_retry_exhausted":
+        return True
+    error = (result.error or "").lower()
+    return any(marker in error for marker in STRUCTURED_OUTPUT_FAULT_MARKERS)
 
 
 def terminal_failure_signal(result: StageResult) -> str:
@@ -199,6 +222,34 @@ def review_turn_retry_update(
             review_ceiling,
         )
     }
+
+
+def review_infra_retry_update(
+    result: StageResult,
+    failure_count: int,
+) -> dict[str, object] | None:
+    """Retry an independent review whose report was lost to an SDK serialization fault.
+
+    ``review_turn_retry_update`` only rescues a reviewer that ran out of turns. When the
+    SDK instead exhausts its structured-output attempts there is no report at all, so the
+    reviewer expressed no finding -- yet the review branch falls through to a mutating
+    repair cycle. That spends a bounded ``repair.max_cycles`` slot, and seeds the repair
+    with SDK error text as if it were review feedback, on a candidate no reviewer judged.
+    Re-run the identical read-only review instead, at most ``MAX_REVIEW_INFRA_RETRIES``
+    times per stage, so a persistently wedged reviewer still reaches the normal truthful
+    repair/failure path and no verdict is ever assumed on its behalf.
+
+    Returns an empty mapping when the stage must be retried unchanged: the fault is in
+    report serialization, not in the review budget or the model, and the turn ceiling is
+    already handled by ``review_turn_retry_update`` ahead of this check. ``None`` means
+    "not a structured-output fault, or the bounded retries are spent".
+    """
+
+    if not stage_hit_structured_output_fault(result):
+        return None
+    if failure_count > MAX_REVIEW_INFRA_RETRIES:
+        return None
+    return {}
 
 
 def preserve_mutating_candidate(
@@ -1084,6 +1135,35 @@ async def run_pipeline(
                         update=review_update
                     )
                     checkpoint.previous_findings = findings
+                    checkpoint_store.save(checkpoint)
+                    continue
+                infra_update = review_infra_retry_update(
+                    result,
+                    checkpoint.stage_failures[key],
+                )
+                if infra_update is not None:
+                    console.print(
+                        f"[yellow]Review report lost to a structured-output fault:"
+                        f"[/yellow] re-running {stage.role.value} independently "
+                        f"(attempt {checkpoint.stage_failures[key]} of "
+                        f"{MAX_REVIEW_INFRA_RETRIES})"
+                    )
+                    append_event(
+                        config.resolve(repo_root, config.event_log_path),
+                        event="review_infrastructure_retry",
+                        component="pipeline",
+                        task_id=task.task_id,
+                        run_id=run_id,
+                        role=stage.role.value,
+                        detail=terminal_failure_signal(result)[:200],
+                    )
+                    if infra_update:
+                        task.pipeline[checkpoint.stage_index] = stage.model_copy(
+                            update=infra_update
+                        )
+                    # previous_findings is deliberately left as-is: the SDK never
+                    # produced a report, so there is no reviewer finding to carry and
+                    # injecting the transport error would fake review feedback.
                     checkpoint_store.save(checkpoint)
                     continue
 

@@ -33,7 +33,7 @@ from .models import (
     QueuePauseMetadata,
 )
 from .observability import append_event, write_heartbeat
-from .pipeline import TURN_CEILING_MARKERS
+from .pipeline import STRUCTURED_OUTPUT_FAULT_MARKERS, TURN_CEILING_MARKERS
 from .planner import archive_failed_packet, create_and_promote_task_packet
 from .queue import enqueue_task, process_one, promote_due_paused, queue_dirs, reconcile_running
 from .quota import AuthenticationPause, QuotaLimitPause
@@ -71,7 +71,15 @@ def is_infrastructure_failure(error: str) -> bool:
         "service capacity",
         "infrastructure_error",
     )
-    return any(marker in normalized for marker in infrastructure_markers + TURN_CEILING_MARKERS)
+    # A structured-output retry exhaustion is transport, not product evidence: the stage
+    # produced no report, so the failure carries no truthful rejection to spend a
+    # specification revision on.
+    return any(
+        marker in normalized
+        for marker in infrastructure_markers
+        + TURN_CEILING_MARKERS
+        + STRUCTURED_OUTPUT_FAULT_MARKERS
+    )
 
 
 @contextmanager

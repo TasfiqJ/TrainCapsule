@@ -100,6 +100,19 @@ pipeline:
   - scripts/**
   - specs/tasks/T001.md
   - tcfactory/**
+  - Control-TrainCapsuleBuilder.ps1
+  - Install-TrainCapsuleAutonomousBuilder.ps1
+  - config/context.yaml
+  - config/github.yaml
+  - config/risk_profiles.yaml
+  - docs/CONTEXT_INDEX.yaml
+  - docs/MASTER_PLAN_INDEX.md
+  - docs/TrainCapsule_Matrix_Definitive_Master_Plan_v1.0.md
+  - factory/queue/**
+  - factory/state/**
+  - prompts/**
+  - schemas/**
+  - scripts/gates/**
   allowed_domains: []
   acceptance_criteria:
   - 'Complete the exact protected-roadmap outcome: Commit final source-of-truth bundle

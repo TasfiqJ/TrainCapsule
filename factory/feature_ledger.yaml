@@ -1,3319 +1,3193 @@
-{
-  "version": 2,
-  "source_of_truth": "docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md#12.9-prioritized-task-ledger",
-  "rules": {
-    "unfinished_items_may_not_be_deleted": true,
-    "status_values": [
-      "blocked",
-      "ready",
-      "packet_proposed",
-      "packet_approved",
-      "queued",
-      "running",
-      "paused",
-      "external_wait",
-      "passed",
-      "failed",
-      "respec_required",
-      "deferred"
-    ],
-    "auto_enqueue_requires": [
-      "packet_approved",
-      "all_dependencies_passed",
-      "private_gate_configured_when_required"
-    ],
-    "lights_out_auto_merge_requires": [
-      "CALIBRATION_PASSED marker",
-      "external private gate configured",
-      "fresh role-separated live demonstration",
-      "deterministic sabotage and negative controls",
-      "private GitHub remote and remote CI at the same SHA"
-    ],
-    "lights_out_completion": "All automatable local roadmap tasks pass; external-validation tasks remain external_wait until attributable evidence exists.",
-    "risk_tiers": [
-      "mechanical",
-      "standard",
-      "integration",
-      "trust_core"
-    ],
-    "risk_may_only_increase": true,
-    "commit_policy": "One bounded verified commit per passing task; never force push.",
-    "model_policy": "Sonnet for routine bounded work; Opus only for truth-critical research, adversarial, security, or recovery work.",
-    "task_packet_policy": "Use the protected roadmap and controller catalog; re-specify only after evidence-backed ambiguity or failure."
-  },
-  "tasks": [
-    {
-      "task_id": "T001",
-      "outcome": "Commit final source-of-truth bundle and precedence rules",
-      "lead_role": "Spec",
-      "phase": "P0",
-      "depends_on": [],
-      "status": "ready",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "executive_decision",
-        "product_strategy",
-        "source_register"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T002",
-      "outcome": "Recheck product name, package, domain, and trademark surface",
-      "lead_role": "Research",
-      "phase": "P0",
-      "depends_on": [
-        "T001"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "executive_decision",
-        "product_strategy",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T003",
-      "outcome": "Pin current primary sources and create claim registry",
-      "lead_role": "Research",
-      "phase": "P0",
-      "depends_on": [
-        "T002"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "executive_decision",
-        "product_strategy",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T004",
-      "outcome": "Configure protected normative paths and changed-file gate",
-      "lead_role": "Security",
-      "phase": "P0",
-      "depends_on": [
-        "T003"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "executive_decision",
-        "product_strategy",
-        "source_register"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T005",
-      "outcome": "Create role-separated worktree factory and durable task ledger",
-      "lead_role": "Factory",
-      "phase": "P0",
-      "depends_on": [
-        "T004"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "factory",
-        "security"
-      ],
-      "commit_type": "ci"
-    },
-    {
-      "task_id": "T006",
-      "outcome": "Create quota checkpoint, pause, resume, and single-instance controls",
-      "lead_role": "Factory",
-      "phase": "P0",
-      "depends_on": [
-        "T005"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "factory",
-        "security"
-      ],
-      "commit_type": "ci"
-    },
-    {
-      "task_id": "T007",
-      "outcome": "Bootstrap hidden gates outside builder-visible repository",
-      "lead_role": "Adversary",
-      "phase": "P0",
-      "depends_on": [
-        "T006"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "factory",
-        "security"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T008",
-      "outcome": "Create public distributed-workload incident corpus schema",
-      "lead_role": "Research",
-      "phase": "P0",
-      "depends_on": [
-        "T007"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T009",
-      "outcome": "Create native/bundled/agent capability matrix",
-      "lead_role": "Research",
-      "phase": "P0",
-      "depends_on": [
-        "T008"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T010",
-      "outcome": "Create wedge scoring model and Wedge Discovery Ledger",
-      "lead_role": "Product",
-      "phase": "P0",
-      "depends_on": [
-        "T009"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T011",
-      "outcome": "Create monthly WEDGE_DECISION.md workflow",
-      "lead_role": "Product",
-      "phase": "P0",
-      "depends_on": [
-        "T010"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T012",
-      "outcome": "Create immutable attempted-case and value-record schemas",
-      "lead_role": "Value",
-      "phase": "P0",
-      "depends_on": [
-        "T011"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "executive_decision",
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T013",
-      "outcome": "Define WorkloadManifest, WorkloadLock, and ChangeLock schemas",
-      "lead_role": "Spec",
-      "phase": "P1",
-      "depends_on": [
-        "T012"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T014",
-      "outcome": "Implement canonical serialization and digests",
-      "lead_role": "Builder",
-      "phase": "P1",
-      "depends_on": [
-        "T013"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T015",
-      "outcome": "Implement workload/change lock diff and trust downgrade rules",
-      "lead_role": "Builder",
-      "phase": "P1",
-      "depends_on": [
-        "T014"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T016",
-      "outcome": "Implement EnvironmentAvailabilityRecord",
-      "lead_role": "Builder",
-      "phase": "P1",
-      "depends_on": [
-        "T015"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T017",
-      "outcome": "Define EvidenceArtifact and provenance contracts",
-      "lead_role": "Spec",
-      "phase": "P1",
-      "depends_on": [
-        "T016"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "security"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T018",
-      "outcome": "Implement atomic content-addressed object store",
-      "lead_role": "Builder",
-      "phase": "P1",
-      "depends_on": [
-        "T017"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "security"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T019",
-      "outcome": "Implement SQLite metadata and migrations",
-      "lead_role": "Builder",
-      "phase": "P1",
-      "depends_on": [
-        "T018"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "security"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T020",
-      "outcome": "Implement retention, deletion, legal hold, and revocation graph",
-      "lead_role": "Security",
-      "phase": "P1",
-      "depends_on": [
-        "T019"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "security"
-      ],
-      "commit_type": "fix"
-    },
-    {
-      "task_id": "T021",
-      "outcome": "Implement secret/data classification scan",
-      "lead_role": "Security",
-      "phase": "P1",
-      "depends_on": [
-        "T020"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "security"
-      ],
-      "commit_type": "fix"
-    },
-    {
-      "task_id": "T022",
-      "outcome": "Implement initial CLI: doctor, lock, inspect",
-      "lead_role": "Builder",
-      "phase": "P1",
-      "depends_on": [
-        "T021"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "product_strategy"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T023",
-      "outcome": "Verify clean setup and deterministic digest fixtures",
-      "lead_role": "Release",
-      "phase": "P1",
-      "depends_on": [
-        "T022"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "executive_decision",
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "ci"
-    },
-    {
-      "task_id": "T024",
-      "outcome": "Define adapter capability/loss/authority contract",
-      "lead_role": "Spec",
-      "phase": "P2",
-      "depends_on": [
-        "T023"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T025",
-      "outcome": "Implement current stable PyTorch Flight Recorder importer",
-      "lead_role": "Builder",
-      "phase": "P2",
-      "depends_on": [
-        "T024"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T026",
-      "outcome": "Implement c10d/NCCL lifecycle normalization",
-      "lead_role": "Builder",
-      "phase": "P2",
-      "depends_on": [
-        "T025"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T027",
-      "outcome": "Implement Slurm process/job/node importer",
-      "lead_role": "Builder",
-      "phase": "P2",
-      "depends_on": [
-        "T026"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T028",
-      "outcome": "Implement DCGM/NVML/XID/ECC importer",
-      "lead_role": "Builder",
-      "phase": "P2",
-      "depends_on": [
-        "T027"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T029",
-      "outcome": "Implement checkpoint/RNG/sampler reference importer",
-      "lead_role": "Builder",
-      "phase": "P2",
-      "depends_on": [
-        "T028"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T030",
-      "outcome": "Implement capture completeness states",
-      "lead_role": "Builder",
-      "phase": "P2",
-      "depends_on": [
-        "T029"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T031",
-      "outcome": "Fuzz malformed and oversized evidence inputs",
-      "lead_role": "Security",
-      "phase": "P2",
-      "depends_on": [
-        "T030"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T032",
-      "outcome": "Run real native trace import end to end",
-      "lead_role": "Integration",
-      "phase": "P2",
-      "depends_on": [
-        "T031"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T033",
-      "outcome": "Implement native baseline timing and effort ledger",
-      "lead_role": "Benchmark",
-      "phase": "P2",
-      "depends_on": [
-        "T032"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "executive_decision",
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T034",
-      "outcome": "Add Flight Recorder and cloud recovery capabilities to absorption register",
-      "lead_role": "Research",
-      "phase": "P2",
-      "depends_on": [
-        "T033"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T035",
-      "outcome": "Define actor/resource/phase/state-channel IncidentIR",
-      "lead_role": "Spec",
-      "phase": "P3",
-      "depends_on": [
-        "T034"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T036",
-      "outcome": "Implement per-actor ordered trace",
-      "lead_role": "Builder",
-      "phase": "P3",
-      "depends_on": [
-        "T035"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T037",
-      "outcome": "Implement process-group/collective alignment",
-      "lead_role": "Builder",
-      "phase": "P3",
-      "depends_on": [
-        "T036"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T038",
-      "outcome": "Implement time-interval uncertainty and partial order",
-      "lead_role": "Builder",
-      "phase": "P3",
-      "depends_on": [
-        "T037"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T039",
-      "outcome": "Implement evidence-gap propagation",
-      "lead_role": "Builder",
-      "phase": "P3",
-      "depends_on": [
-        "T038"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T040",
-      "outcome": "Release PRE_COLLECTIVE_LIFECYCLE_CONTRACT_V1",
-      "lead_role": "Spec",
-      "phase": "P3",
-      "depends_on": [
-        "T039"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "roadmap"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T041",
-      "outcome": "Create skipped/reordered/incompatible collective faults",
-      "lead_role": "Adversary",
-      "phase": "P3",
-      "depends_on": [
-        "T040"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "trust_spec",
-        "roadmap"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T042",
-      "outcome": "Create data-branch, dataloader, checkpoint-wait, process-exit faults",
-      "lead_role": "Adversary",
-      "phase": "P3",
-      "depends_on": [
-        "T041"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "trust_spec",
-        "roadmap"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T043",
-      "outcome": "Create clean controls and delayed-but-healthy controls",
-      "lead_role": "Adversary",
-      "phase": "P3",
-      "depends_on": [
-        "T042"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "trust_spec",
-        "roadmap"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T044",
-      "outcome": "Implement last consistent/first observed inconsistent boundary",
-      "lead_role": "Builder",
-      "phase": "P3",
-      "depends_on": [
-        "T043"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T045",
-      "outcome": "Implement Symptom, ObservedDivergence, and Hypothesis records",
-      "lead_role": "Builder",
-      "phase": "P3",
-      "depends_on": [
-        "T044"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T046",
-      "outcome": "Test timestamp-only alignment and hidden missing evidence",
-      "lead_role": "Adversary",
-      "phase": "P3",
-      "depends_on": [
-        "T045"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T047",
-      "outcome": "Run hidden first-boundary suite with zero clean-control blame",
-      "lead_role": "Release",
-      "phase": "P3",
-      "depends_on": [
-        "T046"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "executive_decision",
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "ci"
-    },
-    {
-      "task_id": "T048",
-      "outcome": "Define C0-C3 capture levels and recorder failure policy",
-      "lead_role": "Spec",
-      "phase": "P4",
-      "depends_on": [
-        "T047"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T049",
-      "outcome": "Implement semantic step/microbatch/phase markers",
-      "lead_role": "Builder",
-      "phase": "P4",
-      "depends_on": [
-        "T048"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T050",
-      "outcome": "Implement optional bounded local ring buffer",
-      "lead_role": "Builder",
-      "phase": "P4",
-      "depends_on": [
-        "T049"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T051",
-      "outcome": "Implement out-of-band freeze independent of failed process group",
-      "lead_role": "Builder",
-      "phase": "P4",
-      "depends_on": [
-        "T050"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T052",
-      "outcome": "Benchmark capture-on/off median and tail distributions",
-      "lead_role": "Performance",
-      "phase": "P4",
-      "depends_on": [
-        "T051"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T053",
-      "outcome": "Measure CPU, memory, storage, network, GPU, and output effects",
-      "lead_role": "Performance",
-      "phase": "P4",
-      "depends_on": [
-        "T052"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T054",
-      "outcome": "Create instrumentation-induced and instrumentation-hidden faults",
-      "lead_role": "Adversary",
-      "phase": "P4",
-      "depends_on": [
-        "T053"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T055",
-      "outcome": "Issue perturbation policy verdict; disable unsafe levels",
-      "lead_role": "Release",
-      "phase": "P4",
-      "depends_on": [
-        "T054"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "ci"
-    },
-    {
-      "task_id": "T056",
-      "outcome": "Define controlled ExperimentPlan and permitted-inference contract",
-      "lead_role": "Spec",
-      "phase": "P5",
-      "depends_on": [
-        "T055"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T057",
-      "outcome": "Implement hypothesis ledger and experiment result lineage",
-      "lead_role": "Builder",
-      "phase": "P5",
-      "depends_on": [
-        "T056"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T058",
-      "outcome": "Implement cost/safety/privacy/decision-value budget",
-      "lead_role": "Builder",
-      "phase": "P5",
-      "depends_on": [
-        "T057"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T059",
-      "outcome": "Implement closure-value qualification terminal states",
-      "lead_role": "Builder",
-      "phase": "P5",
-      "depends_on": [
-        "T058"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T060",
-      "outcome": "Define faithfulness and applicability schemas",
-      "lead_role": "Spec",
-      "phase": "P5",
-      "depends_on": [
-        "T059"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T061",
-      "outcome": "Implement rank/actor-set reduction",
-      "lead_role": "Builder",
-      "phase": "P5",
-      "depends_on": [
-        "T060"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T062",
-      "outcome": "Implement step/event-window reduction",
-      "lead_role": "Builder",
-      "phase": "P5",
-      "depends_on": [
-        "T061"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T063",
-      "outcome": "Implement process-group legality validator",
-      "lead_role": "Builder",
-      "phase": "P5",
-      "depends_on": [
-        "T062"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T064",
-      "outcome": "Implement data/control-trigger preservation hooks",
-      "lead_role": "Builder",
-      "phase": "P5",
-      "depends_on": [
-        "T063"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T065",
-      "outcome": "Implement model/operator/tensor reduction interfaces",
-      "lead_role": "Builder",
-      "phase": "P5",
-      "depends_on": [
-        "T064"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T066",
-      "outcome": "Implement environment/version simplification",
-      "lead_role": "Builder",
-      "phase": "P5",
-      "depends_on": [
-        "T065"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T067",
-      "outcome": "Implement multi-objective candidate cost and search budget",
-      "lead_role": "Builder",
-      "phase": "P5",
-      "depends_on": [
-        "T066"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T068",
-      "outcome": "Create trigger-removal, boundary-change, and tier-drop hidden faults",
-      "lead_role": "Adversary",
-      "phase": "P5",
-      "depends_on": [
-        "T067"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T069",
-      "outcome": "Verify Minimum Faithful Experiment on controlled flagship case",
-      "lead_role": "Release",
-      "phase": "P5",
-      "depends_on": [
-        "T068"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "ci"
-    },
-    {
-      "task_id": "T070",
-      "outcome": "Define runner, privacy-zone, retry, and semantic-state contracts",
-      "lead_role": "Spec",
-      "phase": "P6",
-      "depends_on": [
-        "T069"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "security"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T071",
-      "outcome": "Implement local non-root OCI runner",
-      "lead_role": "Builder",
-      "phase": "P6",
-      "depends_on": [
-        "T070"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "security"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T072",
-      "outcome": "Implement source/substitute environment locks",
-      "lead_role": "Builder",
-      "phase": "P6",
-      "depends_on": [
-        "T071"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "security"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T073",
-      "outcome": "Implement structural local multi-process execution",
-      "lead_role": "Builder",
-      "phase": "P6",
-      "depends_on": [
-        "T072"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "security"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T074",
-      "outcome": "Implement federated request/result protocol",
-      "lead_role": "Builder",
-      "phase": "P6",
-      "depends_on": [
-        "T073"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "security"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T075",
-      "outcome": "Implement environment mismatch and unavailable states",
-      "lead_role": "Builder",
-      "phase": "P6",
-      "depends_on": [
-        "T074"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "security"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T076",
-      "outcome": "Implement network, mount, capability, resource, and timeout sandbox",
-      "lead_role": "Security",
-      "phase": "P6",
-      "depends_on": [
-        "T075"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "security"
-      ],
-      "commit_type": "fix"
-    },
-    {
-      "task_id": "T077",
-      "outcome": "Implement archive traversal/symlink/device/decompression protections",
-      "lead_role": "Security",
-      "phase": "P6",
-      "depends_on": [
-        "T076"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "security"
-      ],
-      "commit_type": "fix"
-    },
-    {
-      "task_id": "T078",
-      "outcome": "Implement SBOM, dependency, license, vulnerability, and secret gates",
-      "lead_role": "Security",
-      "phase": "P6",
-      "depends_on": [
-        "T077"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "security"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T079",
-      "outcome": "Implement signing and provenance attestation",
-      "lead_role": "Security",
-      "phase": "P6",
-      "depends_on": [
-        "T078"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "security"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T080",
-      "outcome": "Define tcap/OCI artifact and federated result schema",
-      "lead_role": "Spec",
-      "phase": "P6",
-      "depends_on": [
-        "T079"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "security"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T081",
-      "outcome": "Implement offline verifier and trusted launch templates",
-      "lead_role": "Builder",
-      "phase": "P6",
-      "depends_on": [
-        "T080"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "security"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T082",
-      "outcome": "Replay sanitized/public controlled artifact from clean environment",
-      "lead_role": "Release",
-      "phase": "P6",
-      "depends_on": [
-        "T081"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "security"
-      ],
-      "commit_type": "ci"
-    },
-    {
-      "task_id": "T083",
-      "outcome": "Define Recovery Assurance property groups and states",
-      "lead_role": "Spec",
-      "phase": "P7",
-      "depends_on": [
-        "T082"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T084",
-      "outcome": "Implement checkpoint integrity and completeness checks",
-      "lead_role": "Builder",
-      "phase": "P7",
-      "depends_on": [
-        "T083"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T085",
-      "outcome": "Implement optimizer/scheduler/RNG/sampler/data-cursor checks",
-      "lead_role": "Builder",
-      "phase": "P7",
-      "depends_on": [
-        "T084"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T086",
-      "outcome": "Implement shard ownership and process-group checks",
-      "lead_role": "Builder",
-      "phase": "P7",
-      "depends_on": [
-        "T085"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T087",
-      "outcome": "Implement numerical and performance sentinels",
-      "lead_role": "Builder",
-      "phase": "P7",
-      "depends_on": [
-        "T086"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T088",
-      "outcome": "Implement canary, rollback, and observation-window records",
-      "lead_role": "Builder",
-      "phase": "P7",
-      "depends_on": [
-        "T087"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T089",
-      "outcome": "Create false-green restart, stale sampler, and throughput regression faults",
-      "lead_role": "Adversary",
-      "phase": "P7",
-      "depends_on": [
-        "T088"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "trust_spec",
-        "architecture"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T090",
-      "outcome": "Define WorkloadIncidentContract and classification",
-      "lead_role": "Spec",
-      "phase": "P7",
-      "depends_on": [
-        "T089"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T091",
-      "outcome": "Implement contract registry, applicability, drift, expiry, revocation",
-      "lead_role": "Builder",
-      "phase": "P7",
-      "depends_on": [
-        "T090"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T092",
-      "outcome": "Implement QualificationRun against ChangeLock",
-      "lead_role": "Builder",
-      "phase": "P7",
-      "depends_on": [
-        "T091"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T093",
-      "outcome": "Block stale/out-of-envelope contract passes",
-      "lead_role": "Adversary",
-      "phase": "P7",
-      "depends_on": [
-        "T092"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T094",
-      "outcome": "Run controlled change qualification end to end",
-      "lead_role": "Release",
-      "phase": "P7",
-      "depends_on": [
-        "T093"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "ci"
-    },
-    {
-      "task_id": "T095",
-      "outcome": "Release CHECKPOINT_RESUME_STATE_CONSISTENCY_V1",
-      "lead_role": "Spec",
-      "phase": "P8",
-      "depends_on": [
-        "T094"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "roadmap"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T096",
-      "outcome": "Create checkpoint shard, optimizer, RNG, sampler, and cursor faults",
-      "lead_role": "Adversary",
-      "phase": "P8",
-      "depends_on": [
-        "T095"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "trust_spec",
-        "roadmap"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T097",
-      "outcome": "Implement pack-specific evidence and experiments",
-      "lead_role": "Builder",
-      "phase": "P8",
-      "depends_on": [
-        "T096"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "trust_spec",
-        "roadmap"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T098",
-      "outcome": "Run recovery and qualification hidden suite",
-      "lead_role": "Release",
-      "phase": "P8",
-      "depends_on": [
-        "T097"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "trust_spec",
-        "roadmap"
-      ],
-      "commit_type": "ci"
-    },
-    {
-      "task_id": "T099",
-      "outcome": "Define OperatorAlignmentBackend interface",
-      "lead_role": "Spec",
-      "phase": "P8",
-      "depends_on": [
-        "T098"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "source_register"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T100",
-      "outcome": "Benchmark OpGuard capability and integration boundary",
-      "lead_role": "Research",
-      "phase": "P8",
-      "depends_on": [
-        "T099"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "source_register"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T101",
-      "outcome": "Define ScaleEmulationBackend interface",
-      "lead_role": "Spec",
-      "phase": "P8",
-      "depends_on": [
-        "T100"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "source_register"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T102",
-      "outcome": "Benchmark PrismLLM capability and integration boundary",
-      "lead_role": "Research",
-      "phase": "P8",
-      "depends_on": [
-        "T101"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "source_register"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T103",
-      "outcome": "Implement backend stubs/conformance fixtures, not duplicate algorithms",
-      "lead_role": "Builder",
-      "phase": "P8",
-      "depends_on": [
-        "T102"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "source_register"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T104",
-      "outcome": "Run KEEP/INTEGRATE/UPSTREAM/NARROW/REPLACE decision",
-      "lead_role": "Product",
-      "phase": "P8",
-      "depends_on": [
-        "T103"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "trust_spec",
-        "source_register"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T105",
-      "outcome": "Complete CLI Close/Qualify/Exchange workflow",
-      "lead_role": "Builder",
-      "phase": "P9",
-      "depends_on": [
-        "T104"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "product_strategy"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T106",
-      "outcome": "Implement thin local evidence/contract viewer",
-      "lead_role": "Builder",
-      "phase": "P9",
-      "depends_on": [
-        "T105"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "product_strategy"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T107",
-      "outcome": "Write operator, deployment, security, and incident-pack guides",
-      "lead_role": "Docs",
-      "phase": "P9",
-      "depends_on": [
-        "T106"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "architecture",
-        "product_strategy"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T108",
-      "outcome": "Run independent clean-machine installation",
-      "lead_role": "Release",
-      "phase": "P9",
-      "depends_on": [
-        "T107"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "product_strategy"
-      ],
-      "commit_type": "ci"
-    },
-    {
-      "task_id": "T109",
-      "outcome": "Run second-engineer workflow without hidden founder edits",
-      "lead_role": "Release",
-      "phase": "P9",
-      "depends_on": [
-        "T108"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "architecture",
-        "product_strategy"
-      ],
-      "commit_type": "ci"
-    },
-    {
-      "task_id": "T110",
-      "outcome": "Compare complete native/bundled/agent workflow against TrainCapsule",
-      "lead_role": "Benchmark",
-      "phase": "P9",
-      "depends_on": [
-        "T109"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "executive_decision",
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T111",
-      "outcome": "Generate positive, negative, unknown, and no-gain case ledger",
-      "lead_role": "Value",
-      "phase": "P9",
-      "depends_on": [
-        "T110"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "executive_decision",
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T112",
-      "outcome": "Run competitor equivalence and contract-value-decay gates",
-      "lead_role": "Adversary",
-      "phase": "P9",
-      "depends_on": [
-        "T111"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "executive_decision",
-        "trust_spec",
-        "product_strategy"
-      ],
-      "commit_type": "test"
-    },
-    {
-      "task_id": "T113",
-      "outcome": "Generate founder technical briefs and oral-defense checklist",
-      "lead_role": "Docs",
-      "phase": "P9",
-      "depends_on": [
-        "T112"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "career",
-        "source_register"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T114",
-      "outcome": "Prepare public controlled demo and technical report",
-      "lead_role": "Release",
-      "phase": "P9",
-      "depends_on": [
-        "T113"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "product_strategy",
-        "career",
-        "source_register"
-      ],
-      "commit_type": "ci"
-    },
-    {
-      "task_id": "T115",
-      "outcome": "Create named-account map and qualification rubric",
-      "lead_role": "Product",
-      "phase": "P10",
-      "depends_on": [
-        "T114"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "acquisition",
-        "career"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T116",
-      "outcome": "Create paid feasibility/incident assessment offer",
-      "lead_role": "Product",
-      "phase": "P10",
-      "depends_on": [
-        "T115"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "acquisition",
-        "career"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T117",
-      "outcome": "Create local-data, DPA, IP, retention, and support templates",
-      "lead_role": "Security",
-      "phase": "P10",
-      "depends_on": [
-        "T116"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "product_strategy",
-        "acquisition",
-        "career"
-      ],
-      "commit_type": "fix"
-    },
-    {
-      "task_id": "T118",
-      "outcome": "Begin targeted outreach after credible alpha",
-      "lead_role": "Founder",
-      "phase": "P10",
-      "depends_on": [
-        "T117"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "acquisition",
-        "career"
-      ],
-      "commit_type": "docs"
-    },
-    {
-      "task_id": "T119",
-      "outcome": "Run first external or highest-fidelity independent case",
-      "lead_role": "External",
-      "phase": "P10",
-      "depends_on": [
-        "T118"
-      ],
-      "status": "external_wait",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": false,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": false,
-      "completion_kind": "external_validation",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "acquisition",
-        "career"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T120",
-      "outcome": "Measure complete baseline and total delivery economics",
-      "lead_role": "Value",
-      "phase": "P10",
-      "depends_on": [
-        "T118"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "acquisition",
-        "career"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T121",
-      "outcome": "Request second incident or paid qualification",
-      "lead_role": "External",
-      "phase": "P10",
-      "depends_on": [
-        "T120"
-      ],
-      "status": "external_wait",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": false,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": false,
-      "completion_kind": "external_validation",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "acquisition",
-        "career"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T122",
-      "outcome": "Measure trust-core changes, manual hours, margin, and reuse",
-      "lead_role": "Value",
-      "phase": "P10",
-      "depends_on": [
-        "T120"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": true,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "trust_core",
-      "remote_ci_required": true,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "acquisition",
-        "career"
-      ],
-      "commit_type": "feat"
-    },
-    {
-      "task_id": "T123",
-      "outcome": "Issue COMPANY/PRODUCTIZED_SERVICE/REDESIGN/OPEN_SOURCE/STOP decision",
-      "lead_role": "Release",
-      "phase": "P10",
-      "depends_on": [
-        "T122"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "integration",
-      "remote_ci_required": true,
-      "allow_test_changes": true,
-      "context_keys": [
-        "product_strategy",
-        "acquisition",
-        "career"
-      ],
-      "commit_type": "ci"
-    },
-    {
-      "task_id": "T124",
-      "outcome": "Submit one meaningful upstream artifact",
-      "lead_role": "Founder",
-      "phase": "P10",
-      "depends_on": [
-        "T123"
-      ],
-      "status": "blocked",
-      "packet_path": null,
-      "trust_core": false,
-      "auto_enqueue_allowed": true,
-      "evidence": [],
-      "last_run_id": null,
-      "notes": [],
-      "automatable": true,
-      "completion_kind": "build",
-      "risk_tier": "standard",
-      "remote_ci_required": false,
-      "allow_test_changes": false,
-      "context_keys": [
-        "product_strategy",
-        "career",
-        "source_register"
-      ],
-      "commit_type": "docs"
-    }
-  ]
-}
+version: 2
+source_of_truth: docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md#12.9-prioritized-task-ledger
+rules:
+  unfinished_items_may_not_be_deleted: true
+  status_values:
+  - blocked
+  - ready
+  - packet_proposed
+  - packet_approved
+  - queued
+  - running
+  - paused
+  - external_wait
+  - passed
+  - failed
+  - respec_required
+  - deferred
+  auto_enqueue_requires:
+  - packet_approved
+  - all_dependencies_passed
+  - private_gate_configured_when_required
+  lights_out_auto_merge_requires:
+  - CALIBRATION_PASSED marker
+  - external private gate configured
+  - fresh role-separated live demonstration
+  - deterministic sabotage and negative controls
+  - private GitHub remote and remote CI at the same SHA
+  lights_out_completion: All automatable local roadmap tasks pass; external-validation
+    tasks remain external_wait until attributable evidence exists.
+  risk_tiers:
+  - mechanical
+  - standard
+  - integration
+  - trust_core
+  risk_may_only_increase: true
+  commit_policy: One bounded verified commit per passing task; never force push.
+  model_policy: Sonnet for routine bounded work; Opus only for truth-critical research,
+    adversarial, security, or recovery work.
+  task_packet_policy: Use the protected roadmap and controller catalog; re-specify
+    only after evidence-backed ambiguity or failure.
+tasks:
+- task_id: T001
+  outcome: Commit final source-of-truth bundle and precedence rules
+  lead_role: Spec
+  phase: P0
+  depends_on: []
+  status: packet_approved
+  packet_path: tasks/T001.yaml
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - executive_decision
+  - product_strategy
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes:
+  - Task packet approved through catalog planning.
+  revisions: 0
+  value_revisions: 0
+- task_id: T002
+  outcome: Recheck product name, package, domain, and trademark surface
+  lead_role: Research
+  phase: P0
+  depends_on:
+  - T001
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - executive_decision
+  - product_strategy
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T003
+  outcome: Pin current primary sources and create claim registry
+  lead_role: Research
+  phase: P0
+  depends_on:
+  - T002
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - executive_decision
+  - product_strategy
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T004
+  outcome: Configure protected normative paths and changed-file gate
+  lead_role: Security
+  phase: P0
+  depends_on:
+  - T003
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - executive_decision
+  - product_strategy
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T005
+  outcome: Create role-separated worktree factory and durable task ledger
+  lead_role: Factory
+  phase: P0
+  depends_on:
+  - T004
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - factory
+  - security
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: ci
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T006
+  outcome: Create quota checkpoint, pause, resume, and single-instance controls
+  lead_role: Factory
+  phase: P0
+  depends_on:
+  - T005
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - factory
+  - security
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: ci
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T007
+  outcome: Bootstrap hidden gates outside builder-visible repository
+  lead_role: Adversary
+  phase: P0
+  depends_on:
+  - T006
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - factory
+  - security
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T008
+  outcome: Create public distributed-workload incident corpus schema
+  lead_role: Research
+  phase: P0
+  depends_on:
+  - T007
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - product_strategy
+  - trust_spec
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T009
+  outcome: Create native/bundled/agent capability matrix
+  lead_role: Research
+  phase: P0
+  depends_on:
+  - T008
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - product_strategy
+  - trust_spec
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T010
+  outcome: Create wedge scoring model and Wedge Discovery Ledger
+  lead_role: Product
+  phase: P0
+  depends_on:
+  - T009
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - product_strategy
+  - trust_spec
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T011
+  outcome: Create monthly WEDGE_DECISION.md workflow
+  lead_role: Product
+  phase: P0
+  depends_on:
+  - T010
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - product_strategy
+  - trust_spec
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T012
+  outcome: Create immutable attempted-case and value-record schemas
+  lead_role: Value
+  phase: P0
+  depends_on:
+  - T011
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - executive_decision
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T013
+  outcome: Define WorkloadManifest, WorkloadLock, and ChangeLock schemas
+  lead_role: Spec
+  phase: P1
+  depends_on:
+  - T012
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - trust_spec
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T014
+  outcome: Implement canonical serialization and digests
+  lead_role: Builder
+  phase: P1
+  depends_on:
+  - T013
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T015
+  outcome: Implement workload/change lock diff and trust downgrade rules
+  lead_role: Builder
+  phase: P1
+  depends_on:
+  - T014
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T016
+  outcome: Implement EnvironmentAvailabilityRecord
+  lead_role: Builder
+  phase: P1
+  depends_on:
+  - T015
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T017
+  outcome: Define EvidenceArtifact and provenance contracts
+  lead_role: Spec
+  phase: P1
+  depends_on:
+  - T016
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - trust_spec
+  - security
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T018
+  outcome: Implement atomic content-addressed object store
+  lead_role: Builder
+  phase: P1
+  depends_on:
+  - T017
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  - security
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T019
+  outcome: Implement SQLite metadata and migrations
+  lead_role: Builder
+  phase: P1
+  depends_on:
+  - T018
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  - security
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T020
+  outcome: Implement retention, deletion, legal hold, and revocation graph
+  lead_role: Security
+  phase: P1
+  depends_on:
+  - T019
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - trust_spec
+  - security
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: fix
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T021
+  outcome: Implement secret/data classification scan
+  lead_role: Security
+  phase: P1
+  depends_on:
+  - T020
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - trust_spec
+  - security
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: fix
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T022
+  outcome: 'Implement initial CLI: doctor, lock, inspect'
+  lead_role: Builder
+  phase: P1
+  depends_on:
+  - T021
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - product_strategy
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T023
+  outcome: Verify clean setup and deterministic digest fixtures
+  lead_role: Release
+  phase: P1
+  depends_on:
+  - T022
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - executive_decision
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: ci
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T024
+  outcome: Define adapter capability/loss/authority contract
+  lead_role: Spec
+  phase: P2
+  depends_on:
+  - T023
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T025
+  outcome: Implement current stable PyTorch Flight Recorder importer
+  lead_role: Builder
+  phase: P2
+  depends_on:
+  - T024
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T026
+  outcome: Implement c10d/NCCL lifecycle normalization
+  lead_role: Builder
+  phase: P2
+  depends_on:
+  - T025
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T027
+  outcome: Implement Slurm process/job/node importer
+  lead_role: Builder
+  phase: P2
+  depends_on:
+  - T026
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T028
+  outcome: Implement DCGM/NVML/XID/ECC importer
+  lead_role: Builder
+  phase: P2
+  depends_on:
+  - T027
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T029
+  outcome: Implement checkpoint/RNG/sampler reference importer
+  lead_role: Builder
+  phase: P2
+  depends_on:
+  - T028
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T030
+  outcome: Implement capture completeness states
+  lead_role: Builder
+  phase: P2
+  depends_on:
+  - T029
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T031
+  outcome: Fuzz malformed and oversized evidence inputs
+  lead_role: Security
+  phase: P2
+  depends_on:
+  - T030
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T032
+  outcome: Run real native trace import end to end
+  lead_role: Integration
+  phase: P2
+  depends_on:
+  - T031
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T033
+  outcome: Implement native baseline timing and effort ledger
+  lead_role: Benchmark
+  phase: P2
+  depends_on:
+  - T032
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - executive_decision
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T034
+  outcome: Add Flight Recorder and cloud recovery capabilities to absorption register
+  lead_role: Research
+  phase: P2
+  depends_on:
+  - T033
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - product_strategy
+  - trust_spec
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T035
+  outcome: Define actor/resource/phase/state-channel IncidentIR
+  lead_role: Spec
+  phase: P3
+  depends_on:
+  - T034
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T036
+  outcome: Implement per-actor ordered trace
+  lead_role: Builder
+  phase: P3
+  depends_on:
+  - T035
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T037
+  outcome: Implement process-group/collective alignment
+  lead_role: Builder
+  phase: P3
+  depends_on:
+  - T036
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T038
+  outcome: Implement time-interval uncertainty and partial order
+  lead_role: Builder
+  phase: P3
+  depends_on:
+  - T037
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T039
+  outcome: Implement evidence-gap propagation
+  lead_role: Builder
+  phase: P3
+  depends_on:
+  - T038
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - trust_spec
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T040
+  outcome: Release PRE_COLLECTIVE_LIFECYCLE_CONTRACT_V1
+  lead_role: Spec
+  phase: P3
+  depends_on:
+  - T039
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - roadmap
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T041
+  outcome: Create skipped/reordered/incompatible collective faults
+  lead_role: Adversary
+  phase: P3
+  depends_on:
+  - T040
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - roadmap
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T042
+  outcome: Create data-branch, dataloader, checkpoint-wait, process-exit faults
+  lead_role: Adversary
+  phase: P3
+  depends_on:
+  - T041
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - roadmap
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T043
+  outcome: Create clean controls and delayed-but-healthy controls
+  lead_role: Adversary
+  phase: P3
+  depends_on:
+  - T042
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - roadmap
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T044
+  outcome: Implement last consistent/first observed inconsistent boundary
+  lead_role: Builder
+  phase: P3
+  depends_on:
+  - T043
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T045
+  outcome: Implement Symptom, ObservedDivergence, and Hypothesis records
+  lead_role: Builder
+  phase: P3
+  depends_on:
+  - T044
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T046
+  outcome: Test timestamp-only alignment and hidden missing evidence
+  lead_role: Adversary
+  phase: P3
+  depends_on:
+  - T045
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T047
+  outcome: Run hidden first-boundary suite with zero clean-control blame
+  lead_role: Release
+  phase: P3
+  depends_on:
+  - T046
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - executive_decision
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: ci
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T048
+  outcome: Define C0-C3 capture levels and recorder failure policy
+  lead_role: Spec
+  phase: P4
+  depends_on:
+  - T047
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T049
+  outcome: Implement semantic step/microbatch/phase markers
+  lead_role: Builder
+  phase: P4
+  depends_on:
+  - T048
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T050
+  outcome: Implement optional bounded local ring buffer
+  lead_role: Builder
+  phase: P4
+  depends_on:
+  - T049
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T051
+  outcome: Implement out-of-band freeze independent of failed process group
+  lead_role: Builder
+  phase: P4
+  depends_on:
+  - T050
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T052
+  outcome: Benchmark capture-on/off median and tail distributions
+  lead_role: Performance
+  phase: P4
+  depends_on:
+  - T051
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T053
+  outcome: Measure CPU, memory, storage, network, GPU, and output effects
+  lead_role: Performance
+  phase: P4
+  depends_on:
+  - T052
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T054
+  outcome: Create instrumentation-induced and instrumentation-hidden faults
+  lead_role: Adversary
+  phase: P4
+  depends_on:
+  - T053
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T055
+  outcome: Issue perturbation policy verdict; disable unsafe levels
+  lead_role: Release
+  phase: P4
+  depends_on:
+  - T054
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - architecture
+  - trust_spec
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: ci
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T056
+  outcome: Define controlled ExperimentPlan and permitted-inference contract
+  lead_role: Spec
+  phase: P5
+  depends_on:
+  - T055
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T057
+  outcome: Implement hypothesis ledger and experiment result lineage
+  lead_role: Builder
+  phase: P5
+  depends_on:
+  - T056
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - product_strategy
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T058
+  outcome: Implement cost/safety/privacy/decision-value budget
+  lead_role: Builder
+  phase: P5
+  depends_on:
+  - T057
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - product_strategy
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T059
+  outcome: Implement closure-value qualification terminal states
+  lead_role: Builder
+  phase: P5
+  depends_on:
+  - T058
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T060
+  outcome: Define faithfulness and applicability schemas
+  lead_role: Spec
+  phase: P5
+  depends_on:
+  - T059
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T061
+  outcome: Implement rank/actor-set reduction
+  lead_role: Builder
+  phase: P5
+  depends_on:
+  - T060
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T062
+  outcome: Implement step/event-window reduction
+  lead_role: Builder
+  phase: P5
+  depends_on:
+  - T061
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T063
+  outcome: Implement process-group legality validator
+  lead_role: Builder
+  phase: P5
+  depends_on:
+  - T062
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T064
+  outcome: Implement data/control-trigger preservation hooks
+  lead_role: Builder
+  phase: P5
+  depends_on:
+  - T063
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T065
+  outcome: Implement model/operator/tensor reduction interfaces
+  lead_role: Builder
+  phase: P5
+  depends_on:
+  - T064
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T066
+  outcome: Implement environment/version simplification
+  lead_role: Builder
+  phase: P5
+  depends_on:
+  - T065
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T067
+  outcome: Implement multi-objective candidate cost and search budget
+  lead_role: Builder
+  phase: P5
+  depends_on:
+  - T066
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T068
+  outcome: Create trigger-removal, boundary-change, and tier-drop hidden faults
+  lead_role: Adversary
+  phase: P5
+  depends_on:
+  - T067
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T069
+  outcome: Verify Minimum Faithful Experiment on controlled flagship case
+  lead_role: Release
+  phase: P5
+  depends_on:
+  - T068
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: ci
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T070
+  outcome: Define runner, privacy-zone, retry, and semantic-state contracts
+  lead_role: Spec
+  phase: P6
+  depends_on:
+  - T069
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - security
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T071
+  outcome: Implement local non-root OCI runner
+  lead_role: Builder
+  phase: P6
+  depends_on:
+  - T070
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - security
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T072
+  outcome: Implement source/substitute environment locks
+  lead_role: Builder
+  phase: P6
+  depends_on:
+  - T071
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - security
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T073
+  outcome: Implement structural local multi-process execution
+  lead_role: Builder
+  phase: P6
+  depends_on:
+  - T072
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - security
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T074
+  outcome: Implement federated request/result protocol
+  lead_role: Builder
+  phase: P6
+  depends_on:
+  - T073
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - security
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T075
+  outcome: Implement environment mismatch and unavailable states
+  lead_role: Builder
+  phase: P6
+  depends_on:
+  - T074
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - security
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T076
+  outcome: Implement network, mount, capability, resource, and timeout sandbox
+  lead_role: Security
+  phase: P6
+  depends_on:
+  - T075
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - security
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: fix
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T077
+  outcome: Implement archive traversal/symlink/device/decompression protections
+  lead_role: Security
+  phase: P6
+  depends_on:
+  - T076
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - security
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: fix
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T078
+  outcome: Implement SBOM, dependency, license, vulnerability, and secret gates
+  lead_role: Security
+  phase: P6
+  depends_on:
+  - T077
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - security
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T079
+  outcome: Implement signing and provenance attestation
+  lead_role: Security
+  phase: P6
+  depends_on:
+  - T078
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - security
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T080
+  outcome: Define tcap/OCI artifact and federated result schema
+  lead_role: Spec
+  phase: P6
+  depends_on:
+  - T079
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - security
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T081
+  outcome: Implement offline verifier and trusted launch templates
+  lead_role: Builder
+  phase: P6
+  depends_on:
+  - T080
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - security
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T082
+  outcome: Replay sanitized/public controlled artifact from clean environment
+  lead_role: Release
+  phase: P6
+  depends_on:
+  - T081
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - security
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: ci
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T083
+  outcome: Define Recovery Assurance property groups and states
+  lead_role: Spec
+  phase: P7
+  depends_on:
+  - T082
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T084
+  outcome: Implement checkpoint integrity and completeness checks
+  lead_role: Builder
+  phase: P7
+  depends_on:
+  - T083
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T085
+  outcome: Implement optimizer/scheduler/RNG/sampler/data-cursor checks
+  lead_role: Builder
+  phase: P7
+  depends_on:
+  - T084
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T086
+  outcome: Implement shard ownership and process-group checks
+  lead_role: Builder
+  phase: P7
+  depends_on:
+  - T085
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T087
+  outcome: Implement numerical and performance sentinels
+  lead_role: Builder
+  phase: P7
+  depends_on:
+  - T086
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T088
+  outcome: Implement canary, rollback, and observation-window records
+  lead_role: Builder
+  phase: P7
+  depends_on:
+  - T087
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T089
+  outcome: Create false-green restart, stale sampler, and throughput regression faults
+  lead_role: Adversary
+  phase: P7
+  depends_on:
+  - T088
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - architecture
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T090
+  outcome: Define WorkloadIncidentContract and classification
+  lead_role: Spec
+  phase: P7
+  depends_on:
+  - T089
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T091
+  outcome: Implement contract registry, applicability, drift, expiry, revocation
+  lead_role: Builder
+  phase: P7
+  depends_on:
+  - T090
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T092
+  outcome: Implement QualificationRun against ChangeLock
+  lead_role: Builder
+  phase: P7
+  depends_on:
+  - T091
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T093
+  outcome: Block stale/out-of-envelope contract passes
+  lead_role: Adversary
+  phase: P7
+  depends_on:
+  - T092
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T094
+  outcome: Run controlled change qualification end to end
+  lead_role: Release
+  phase: P7
+  depends_on:
+  - T093
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: ci
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T095
+  outcome: Release CHECKPOINT_RESUME_STATE_CONSISTENCY_V1
+  lead_role: Spec
+  phase: P8
+  depends_on:
+  - T094
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - trust_spec
+  - roadmap
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T096
+  outcome: Create checkpoint shard, optimizer, RNG, sampler, and cursor faults
+  lead_role: Adversary
+  phase: P8
+  depends_on:
+  - T095
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - roadmap
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T097
+  outcome: Implement pack-specific evidence and experiments
+  lead_role: Builder
+  phase: P8
+  depends_on:
+  - T096
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - roadmap
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T098
+  outcome: Run recovery and qualification hidden suite
+  lead_role: Release
+  phase: P8
+  depends_on:
+  - T097
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - trust_spec
+  - roadmap
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: ci
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T099
+  outcome: Define OperatorAlignmentBackend interface
+  lead_role: Spec
+  phase: P8
+  depends_on:
+  - T098
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T100
+  outcome: Benchmark OpGuard capability and integration boundary
+  lead_role: Research
+  phase: P8
+  depends_on:
+  - T099
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - architecture
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T101
+  outcome: Define ScaleEmulationBackend interface
+  lead_role: Spec
+  phase: P8
+  depends_on:
+  - T100
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T102
+  outcome: Benchmark PrismLLM capability and integration boundary
+  lead_role: Research
+  phase: P8
+  depends_on:
+  - T101
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - architecture
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T103
+  outcome: Implement backend stubs/conformance fixtures, not duplicate algorithms
+  lead_role: Builder
+  phase: P8
+  depends_on:
+  - T102
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T104
+  outcome: Run KEEP/INTEGRATE/UPSTREAM/NARROW/REPLACE decision
+  lead_role: Product
+  phase: P8
+  depends_on:
+  - T103
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - product_strategy
+  - trust_spec
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T105
+  outcome: Complete CLI Close/Qualify/Exchange workflow
+  lead_role: Builder
+  phase: P9
+  depends_on:
+  - T104
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - product_strategy
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T106
+  outcome: Implement thin local evidence/contract viewer
+  lead_role: Builder
+  phase: P9
+  depends_on:
+  - T105
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T107
+  outcome: Write operator, deployment, security, and incident-pack guides
+  lead_role: Docs
+  phase: P9
+  depends_on:
+  - T106
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - architecture
+  - product_strategy
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T108
+  outcome: Run independent clean-machine installation
+  lead_role: Release
+  phase: P9
+  depends_on:
+  - T107
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - architecture
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: ci
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T109
+  outcome: Run second-engineer workflow without hidden founder edits
+  lead_role: Release
+  phase: P9
+  depends_on:
+  - T108
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - architecture
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: ci
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T110
+  outcome: Compare complete native/bundled/agent workflow against TrainCapsule
+  lead_role: Benchmark
+  phase: P9
+  depends_on:
+  - T109
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - executive_decision
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T111
+  outcome: Generate positive, negative, unknown, and no-gain case ledger
+  lead_role: Value
+  phase: P9
+  depends_on:
+  - T110
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - executive_decision
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T112
+  outcome: Run competitor equivalence and contract-value-decay gates
+  lead_role: Adversary
+  phase: P9
+  depends_on:
+  - T111
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - executive_decision
+  - trust_spec
+  - product_strategy
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: test
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T113
+  outcome: Generate founder technical briefs and oral-defense checklist
+  lead_role: Docs
+  phase: P9
+  depends_on:
+  - T112
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - product_strategy
+  - career
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T114
+  outcome: Prepare public controlled demo and technical report
+  lead_role: Release
+  phase: P9
+  depends_on:
+  - T113
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - product_strategy
+  - career
+  - source_register
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: ci
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T115
+  outcome: Create named-account map and qualification rubric
+  lead_role: Product
+  phase: P10
+  depends_on:
+  - T114
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - product_strategy
+  - acquisition
+  - career
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T116
+  outcome: Create paid feasibility/incident assessment offer
+  lead_role: Product
+  phase: P10
+  depends_on:
+  - T115
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - product_strategy
+  - acquisition
+  - career
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T117
+  outcome: Create local-data, DPA, IP, retention, and support templates
+  lead_role: Security
+  phase: P10
+  depends_on:
+  - T116
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - product_strategy
+  - acquisition
+  - career
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: fix
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T118
+  outcome: Begin targeted outreach after credible alpha
+  lead_role: Founder
+  phase: P10
+  depends_on:
+  - T117
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - product_strategy
+  - acquisition
+  - career
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T119
+  outcome: Run first external or highest-fidelity independent case
+  lead_role: External
+  phase: P10
+  depends_on:
+  - T118
+  status: external_wait
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - product_strategy
+  - acquisition
+  - career
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: false
+  automatable: false
+  completion_kind: external_validation
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T120
+  outcome: Measure complete baseline and total delivery economics
+  lead_role: Value
+  phase: P10
+  depends_on:
+  - T118
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - product_strategy
+  - acquisition
+  - career
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T121
+  outcome: Request second incident or paid qualification
+  lead_role: External
+  phase: P10
+  depends_on:
+  - T120
+  status: external_wait
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - product_strategy
+  - acquisition
+  - career
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: false
+  automatable: false
+  completion_kind: external_validation
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T122
+  outcome: Measure trust-core changes, manual hours, margin, and reuse
+  lead_role: Value
+  phase: P10
+  depends_on:
+  - T120
+  status: blocked
+  packet_path: null
+  trust_core: true
+  risk_tier: trust_core
+  context_keys:
+  - product_strategy
+  - acquisition
+  - career
+  remote_ci_required: true
+  allow_test_changes: false
+  commit_type: feat
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T123
+  outcome: Issue COMPANY/PRODUCTIZED_SERVICE/REDESIGN/OPEN_SOURCE/STOP decision
+  lead_role: Release
+  phase: P10
+  depends_on:
+  - T122
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: integration
+  context_keys:
+  - product_strategy
+  - acquisition
+  - career
+  remote_ci_required: true
+  allow_test_changes: true
+  commit_type: ci
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+- task_id: T124
+  outcome: Submit one meaningful upstream artifact
+  lead_role: Founder
+  phase: P10
+  depends_on:
+  - T123
+  status: blocked
+  packet_path: null
+  trust_core: false
+  risk_tier: standard
+  context_keys:
+  - product_strategy
+  - career
+  - source_register
+  remote_ci_required: false
+  allow_test_changes: false
+  commit_type: docs
+  auto_enqueue_allowed: true
+  automatable: true
+  completion_kind: build
+  evidence_required: []
+  evidence: []
+  last_run_id: null
+  notes: []
+  revisions: 0
+  value_revisions: 0
+updated_at: '2026-08-10T08:58:31.883679+00:00'

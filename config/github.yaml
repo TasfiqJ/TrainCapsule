@@ -1,9 +1,9 @@
 version: 3
-enabled: false
+enabled: true
 remote: origin
 branch: main
 visibility: private
-repository: null
+repository: TasfiqJ/TrainCapsule
 push_after_verified_tasks: 2
 push_interval_seconds: 900
 push_before_quota_pause: true

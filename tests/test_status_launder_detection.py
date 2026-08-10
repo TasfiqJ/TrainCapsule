@@ -49,6 +49,12 @@ LAUNDERING_LINES = [
     'STATUS_ALIASES = {"SKIPPED": "SUCCESS"}',
 ]
 
+MULTILINE_LAUNDERING_BODIES = [
+    'if state == "UNKNOWN":\n    state = "PASS"\n',
+    'case "SKIPPED":\n    return "SUCCESS"\n',
+    'if result == "INVALID_ORACLE":\n    emit_status("PASSED")\n',
+]
+
 
 def _repo(path: Path) -> str:
     run_command(["git", "init", "-b", "main"], cwd=path)
@@ -123,6 +129,46 @@ def test_status_conversion_in_uncommitted_new_file_still_fails(
     """
     with pytest.raises(QualityPolicyError, match="uncertainty/error status into PASS"):
         _scan(tmp_path, "tcfactory/summary.py", line + "\n", commit=False)
+
+
+@pytest.mark.parametrize("body", MULTILINE_LAUNDERING_BODIES)
+def test_multiline_status_conversion_still_fails_closed(tmp_path: Path, body: str) -> None:
+    with pytest.raises(QualityPolicyError, match="across lines"):
+        _scan(tmp_path, "tcfactory/summary.py", body)
+
+
+@pytest.mark.parametrize("body", MULTILINE_LAUNDERING_BODIES)
+def test_multiline_status_conversion_in_untracked_file_still_fails(
+    tmp_path: Path, body: str
+) -> None:
+    with pytest.raises(QualityPolicyError, match="across lines"):
+        _scan(tmp_path, "tcfactory/summary.py", body, commit=False)
+
+
+def test_added_pass_action_under_existing_unknown_guard_still_fails(tmp_path: Path) -> None:
+    _repo(tmp_path)
+    target = tmp_path / "tcfactory" / "summary.py"
+    target.parent.mkdir(parents=True, exist_ok=True)
+    target.write_text('if state == "UNKNOWN":\n    state = state\n')
+    commit_all(tmp_path, "guard baseline")
+    base = current_sha(tmp_path)
+    target.write_text('if state == "UNKNOWN":\n    state = "PASS"\n')
+    with pytest.raises(QualityPolicyError, match="across lines"):
+        enforce_candidate_quality(
+            worktree=tmp_path,
+            base_sha=base,
+            task=_task(),
+            artifact_dir=tmp_path / "artifacts",
+        )
+
+
+def test_separate_multiline_status_counts_are_not_a_conversion(tmp_path: Path) -> None:
+    report = _scan(
+        tmp_path,
+        "docs/evidence/counts.txt",
+        "UNKNOWN count: 3\nPASS count: 5\n",
+    )
+    assert report["violations"] == []
 
 
 def test_violation_names_the_offending_file_and_line(tmp_path: Path) -> None:

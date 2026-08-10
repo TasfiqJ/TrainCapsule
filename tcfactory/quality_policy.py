@@ -78,6 +78,20 @@ _LAUNDER_TERNARY_RE = re.compile(
     rf"(?i)\b(?:{_PASS_STATUS})\b[\"']?\s+if\b.{{0,60}}?\b(?:{_UNCERTAIN_STATUS})\b"
 )
 _LAUNDER_RES = (_LAUNDER_DIRECTIONAL_RE, _LAUNDER_CALL_RE, _LAUNDER_TERNARY_RE)
+# A conversion can be split across lines, most commonly as an uncertainty
+# guard followed by an assignment/return of PASS. Per-line matching alone
+# misses this ordinary form. These two expressions are paired within a small
+# diff hunk window below, and at least one participating line must be added.
+_LAUNDER_GUARD_RE = re.compile(
+    rf"(?i)(?:\b(?:if|elif|when|case|switch|match)\b.{{0,100}}?"
+    rf"\b(?:{_UNCERTAIN_STATUS})\b[^\w\n]{{0,8}}|"
+    rf"\b(?:{_UNCERTAIN_STATUS})\b[\"']?\s*:)\s*$"
+)
+_PASS_ACTION_RE = re.compile(
+    rf"(?i)(?:\b(?:return|yield)\b|(?:->|=>|:=|(?<![=!<>])=(?!=))|"
+    rf"\b(?:set|emit|report|record|write|store)\w*\s*\().{{0,48}}?"
+    rf"\b(?:{_PASS_STATUS})\b"
+)
 # A line that reports, forbids, or excludes laundering is not itself
 # laundering. The rescue below only ever applies to text that cannot execute
 # (prose files, string literals, comments); live code is never rescued.
@@ -174,7 +188,7 @@ def _is_inert(text: str, match: re.Match[str], *, include_comment: bool = True) 
 
 def _diff(worktree: Path, base_sha: str) -> str:
     return run_command(
-        ["git", "diff", "--no-ext-diff", "--unified=1", base_sha],
+        ["git", "diff", "--no-ext-diff", "--unified=3", base_sha],
         cwd=worktree,
         check=False,
     ).stdout
@@ -226,6 +240,104 @@ def _first_launder_match(text: str) -> re.Match[str] | None:
         if match is not None:
             return match
     return None
+
+
+def _diff_line_windows(
+    worktree: Path, diff: str
+) -> list[tuple[str, list[tuple[int, str, bool]]]]:
+    """Return per-hunk new-file lines as (line number, text, is_added).
+
+    Context lines let the detector see an added PASS assignment under an
+    existing UNKNOWN guard. Untracked files are represented as one all-added
+    window because they do not appear in ``git diff``.
+    """
+    windows: list[tuple[str, list[tuple[int, str, bool]]]] = []
+    current_path = "<unknown file>"
+    current_lines: list[tuple[int, str, bool]] | None = None
+    new_line = 0
+    for raw_line in diff.splitlines():
+        if raw_line.startswith("+++ "):
+            target = raw_line[4:].strip()
+            current_path = target[2:] if target.startswith("b/") else target
+            continue
+        if raw_line.startswith("@@ "):
+            match = re.search(r"\+(\d+)(?:,\d+)?", raw_line)
+            if match is None:
+                current_lines = None
+                continue
+            new_line = int(match.group(1))
+            current_lines = []
+            windows.append((current_path, current_lines))
+            continue
+        if current_lines is None or not raw_line:
+            continue
+        prefix = raw_line[0]
+        if prefix == "-" or raw_line.startswith("\\ No newline"):
+            continue
+        if prefix in {" ", "+"}:
+            current_lines.append((new_line, raw_line[1:], prefix == "+"))
+            new_line += 1
+
+    for path_value in _untracked_files(worktree):
+        path = worktree / path_value
+        if not path.is_file() or path.stat().st_size > 2 * 1024 * 1024:
+            continue
+        try:
+            text = path.read_text(encoding="utf-8")
+        except (OSError, UnicodeDecodeError):
+            continue
+        windows.append(
+            (path_value, [(number, line, True) for number, line in enumerate(text.splitlines(), 1)])
+        )
+    return windows
+
+
+def _multiline_launder_findings(
+    worktree: Path, diff: str
+) -> tuple[list[str], list[str]]:
+    violations: list[str] = []
+    warnings: list[str] = []
+    for path_value, lines in _diff_line_windows(worktree, diff):
+        for index, (guard_number, guard_text, guard_added) in enumerate(lines):
+            guard_match = _LAUNDER_GUARD_RE.search(guard_text)
+            if guard_match is None:
+                continue
+            for action_number, action_text, action_added in lines[index + 1 : index + 5]:
+                if action_number - guard_number > 3:
+                    break
+                action_match = _PASS_ACTION_RE.search(action_text)
+                if action_match is None or not (guard_added or action_added):
+                    continue
+                guard_inert = _is_inert(guard_text, guard_match)
+                action_inert = _is_inert(action_text, action_match)
+                snippet = (
+                    f"line {guard_number}: {guard_text.strip()} / "
+                    f"line {action_number}: {action_text.strip()}"
+                )
+                live_code = _is_code_file(path_value) and not (guard_inert and action_inert)
+                combined = f"{guard_text}\n{action_text}"
+                if live_code:
+                    violations.append(
+                        "Candidate appears to convert an uncertainty/error status into PASS "
+                        f"across lines in {path_value}: {snippet[:240]}"
+                    )
+                elif _LAUNDER_NEGATION_RE.search(combined):
+                    warnings.append(
+                        "Multi-line status-conversion phrasing is negated/excluded; reviewer "
+                        f"must confirm it describes prevention in {path_value}: {snippet[:240]}"
+                    )
+                elif _is_fixture_context(path_value) and guard_inert and action_inert:
+                    warnings.append(
+                        "Inert multi-line status-laundering pattern; reviewer must confirm it "
+                        f"is fixture data in {path_value}: {snippet[:240]}"
+                    )
+                else:
+                    violations.append(
+                        "Candidate appears to convert an uncertainty/error status into PASS "
+                        f"across lines in {path_value}: {snippet[:240]}"
+                    )
+                break
+    return violations, warnings
 
 
 def scan_candidate(
@@ -365,6 +477,10 @@ def scan_candidate(
                 "Uncertainty and pass statuses appear together; reviewer must confirm no "
                 f"status conversion in {path_value}: {text.strip()[:160]}"
             )
+
+    multiline_violations, multiline_warnings = _multiline_launder_findings(worktree, diff)
+    violations.extend(multiline_violations)
+    warnings.extend(multiline_warnings)
 
     removed_assertions = [line for line in removed_lines.splitlines() if "assert" in line.lower()]
     if removed_assertions and not task.allow_test_changes:

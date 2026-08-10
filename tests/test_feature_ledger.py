@@ -2,7 +2,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tcfactory.autopilot import sync_ledger_from_queue
+from tcfactory.autopilot import is_infrastructure_failure, sync_ledger_from_queue
 from tcfactory.feature_ledger import FeatureItem, FeatureLedger
 from tcfactory.models import FactoryConfig
 from tcfactory.queue import queue_dirs
@@ -105,3 +105,9 @@ def test_terminal_blocked_queue_entry_stays_terminal(tmp_path: Path) -> None:
     assert not sync_ledger_from_queue(tmp_path, config, ledger)
     assert item.status == "blocked"
     assert ledger.next_ready() is None
+
+
+def test_stale_main_and_turn_limits_are_infrastructure_failures() -> None:
+    assert is_infrastructure_failure("Cannot resume T001: main moved from abc to def")
+    assert is_infrastructure_failure("Reached maximum number of turns (18)")
+    assert not is_infrastructure_failure("material-value gate rejected the result")

@@ -13,6 +13,7 @@ from typing import TextIO
 from rich.console import Console
 
 from .auth import assert_max_oauth_only
+from .checkpoints import CheckpointStore
 from .completion import CompletionBlocked, audit_and_expand_or_complete
 from .config import load_autonomy_config, load_factory_config
 from .feature_ledger import FeatureItem, FeatureLedger, load_feature_ledger, save_feature_ledger
@@ -31,6 +32,20 @@ console = Console()
 
 class AutopilotError(RuntimeError):
     pass
+
+
+def is_infrastructure_failure(error: str) -> bool:
+    normalized = error.lower()
+    return any(
+        marker in normalized
+        for marker in (
+            "cannot resume",
+            "main moved from",
+            "reached maximum number of turns",
+            "service capacity",
+            "infrastructure_error",
+        )
+    )
 
 
 @contextmanager
@@ -344,6 +359,36 @@ async def _respec_failed_item(
         if failed_error_path.is_file()
         else ""
     )
+    task_path = repo_root / (item.packet_path or f"tasks/{item.task_id}.yaml")
+    if is_infrastructure_failure(failed_error) and task_path.is_file():
+        checkpoint_store = CheckpointStore(
+            factory.resolve(repo_root, factory.pipeline_state_dir)
+        )
+        checkpoint = checkpoint_store.load(item.task_id)
+        if checkpoint is not None:
+            checkpoint_store.archive(
+                checkpoint,
+                suffix=f"infrastructure-{_now().strftime('%Y%m%dT%H%M%SZ')}",
+            )
+        for queue_state in ("failed", "blocked", "paused", "running"):
+            stale_path = dirs[queue_state] / f"{item.task_id}.yaml"
+            stale_path.unlink(missing_ok=True)
+            stale_path.with_suffix(".error.txt").unlink(missing_ok=True)
+            stale_path.with_suffix(".pause.json").unlink(missing_ok=True)
+        item.status = "queued"
+        item.terminal_blocked = False
+        reason = "Infrastructure-only failure recovered without consuming a specification revision."
+        if reason not in item.notes:
+            item.notes.append(reason)
+        enqueue_task(
+            repo_root=repo_root,
+            config=factory,
+            source=task_path,
+            replace=True,
+        )
+        save_feature_ledger(factory.resolve(repo_root, factory.feature_ledger_path), ledger)
+        commit_all(repo_root, f"recover infrastructure {item.task_id.lower()}")
+        return True
     value_failure = any(
         marker in failed_error.lower()
         for marker in (
@@ -368,7 +413,6 @@ async def _respec_failed_item(
         if reason not in item.notes:
             item.notes.append(reason)
         return False
-    task_path = repo_root / (item.packet_path or f"tasks/{item.task_id}.yaml")
     if task_path.exists():
         archive_failed_packet(repo_root, task_path, revision=item.revisions + 1)
     item.revisions += 1

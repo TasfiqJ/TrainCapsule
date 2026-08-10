@@ -17,6 +17,16 @@ def test_demo_task_loads() -> None:
     builder = next(stage for stage in task.pipeline if stage.role == RoleName.BUILDER)
     assert builder.tools is not None
     assert "Bash" in builder.tools
+    expected_calibration_budgets = {
+        RoleName.SPECIFICATION: 60_000,
+        RoleName.BUILDER: 90_000,
+        RoleName.ADVERSARY: 50_000,
+        RoleName.AUDIT: 50_000,
+        RoleName.RELEASE: 50_000,
+    }
+    assert {stage.role: stage.task_budget_tokens for stage in task.pipeline} == (
+        expected_calibration_budgets
+    )
 
 
 def test_t001_has_no_builder() -> None:

@@ -89,6 +89,7 @@
         "factory/product_definition_of_done.yaml"
       ],
       "machine_gates": [],
+      "task_budget_tokens": 60000,
       "require_changes": true
     },
     {
@@ -121,6 +122,7 @@
       "machine_gates": [
         "demo-tests"
       ],
+      "task_budget_tokens": 90000,
       "require_changes": true
     },
     {
@@ -138,6 +140,7 @@
         "demo-tests",
         "no-protected-change"
       ],
+      "task_budget_tokens": 50000,
       "read_only": true,
       "require_changes": false
     },
@@ -156,6 +159,7 @@
         "demo-tests",
         "no-protected-change"
       ],
+      "task_budget_tokens": 50000,
       "read_only": true,
       "require_changes": false
     },
@@ -174,6 +178,7 @@
         "demo-tests",
         "no-protected-change"
       ],
+      "task_budget_tokens": 50000,
       "read_only": true,
       "require_changes": false
     }

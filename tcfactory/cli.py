@@ -744,6 +744,10 @@ def autonomy_resume(
     state.blocker_reason = None
     state.required_action = None
     state.blocked_tasks = []
+    state.last_repair_artifact = None
+    state.next_wake_at = None
+    state.status = "restarting"
+    state.current_action = "retry requested"
     save_state(repo_root, factory, state)
     console.print("[green]Autopilot controls cleared; service may resume.[/green]")
 

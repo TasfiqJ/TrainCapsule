@@ -35,7 +35,18 @@ if ($LASTEXITCODE -ne 0) {
 
 $LinuxCommand = "cd $RepoQuoted && exec ./scripts/windows_task_entrypoint.sh"
 $Arguments = "-d `"$Distribution`" -- bash -lc `"$LinuxCommand`""
-$Action = New-ScheduledTaskAction -Execute $Wsl -Argument $Arguments
+$EscapedArguments = $Arguments.Replace("'", "''")
+$LauncherSource = @"
+`$Wsl = Join-Path `$env:SystemRoot 'System32\wsl.exe'
+`$WslArguments = '$EscapedArguments'
+Start-Process -FilePath `$Wsl -ArgumentList `$WslArguments -WindowStyle Hidden
+"@
+$EncodedLauncher = [Convert]::ToBase64String(
+    [Text.Encoding]::Unicode.GetBytes($LauncherSource)
+)
+$PowerShell = Join-Path $PSHOME "powershell.exe"
+$PowerShellArguments = "-NoProfile -NonInteractive -WindowStyle Hidden -EncodedCommand $EncodedLauncher"
+$Action = New-ScheduledTaskAction -Execute $PowerShell -Argument $PowerShellArguments
 
 $WindowsIdentity = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 if ([string]::IsNullOrWhiteSpace($WindowsIdentity)) {

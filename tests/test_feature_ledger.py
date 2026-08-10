@@ -90,3 +90,18 @@ def test_queue_block_routes_to_autonomous_respecification(tmp_path: Path) -> Non
     assert sync_ledger_from_queue(tmp_path, config, ledger)
     assert item.status == "respec_required"
     assert ledger.next_ready() is None
+
+
+def test_terminal_blocked_queue_entry_stays_terminal(tmp_path: Path) -> None:
+    ledger = _ledger()
+    item = ledger.item("T002")
+    item.packet_path = "tasks/T002.yaml"
+    item.status = "blocked"
+    item.terminal_blocked = True
+    config = FactoryConfig()
+    blocked = queue_dirs(tmp_path, config)["blocked"] / "T002.yaml"
+    blocked.write_text("task_id: T002\n", encoding="utf-8")
+
+    assert not sync_ledger_from_queue(tmp_path, config, ledger)
+    assert item.status == "blocked"
+    assert ledger.next_ready() is None

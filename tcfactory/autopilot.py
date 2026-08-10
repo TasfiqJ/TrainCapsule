@@ -126,6 +126,7 @@ async def _repair_or_hard_stuck(
     ):
         state.repair_attempts += 1
         state.status = "repairing"
+        state.next_wake_at = None
         state.repair_status = (
             f"attempt {state.repair_attempts}/{autonomy.max_self_repair_attempts}"
         )
@@ -216,6 +217,10 @@ def sync_ledger_from_queue(
     changed = False
     for item in ledger.tasks:
         old = item.status
+        if item.terminal_blocked:
+            # Runtime queue residue cannot resurrect a task after its bounded
+            # re-specification policy has deliberately made it terminal.
+            continue
         if item.task_id in queue["done"]:
             item.status = "passed"
             summaries = sorted(
@@ -360,7 +365,8 @@ async def _respec_failed_item(
             if value_failure
             else "Automatic re-specification ceiling reached."
         )
-        item.notes.append(reason)
+        if reason not in item.notes:
+            item.notes.append(reason)
         return False
     task_path = repo_root / (item.packet_path or f"tasks/{item.task_id}.yaml")
     if task_path.exists():

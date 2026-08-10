@@ -16,6 +16,9 @@ def test_windows_task_runs_foreground_autopilot() -> None:
     assert "-Trigger $Triggers" in script
     assert 'printf "%s" "$HOME"' in script
     assert "~/projects/traincapsule" not in script
+    assert "EncodedCommand" in script
+    assert "Start-Process" in script
+    assert "-WindowStyle Hidden" in script
     assert "tcfactory autopilot" in entry
     assert "load_factory_env.sh" in entry
     assert "CLAUDE_CODE_OAUTH_TOKEN" not in entry

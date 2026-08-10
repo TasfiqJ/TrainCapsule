@@ -26,7 +26,7 @@ def test_self_repair_can_change_loop_but_not_billing_or_gates() -> None:
         "no-paid-usage",
         "secret-scan",
         "fast-quality",
-        "protected-controls",
+        "self-repair-scope",
     }
     assert task.auto_merge is True
     assert task.github_push is False

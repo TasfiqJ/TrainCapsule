@@ -73,7 +73,7 @@ def build_self_repair_task(*, reason: str, attempt: int, task_id: str) -> TaskPa
             command="bash scripts/gates/fast_quality.sh",
             timeout_seconds=1800,
         ),
-        Gate(name="protected-controls", command="bash scripts/gates/no_protected_changes.sh"),
+        Gate(name="self-repair-scope", command="bash scripts/gates/self_repair_scope.sh"),
     ]
     common_criteria = [
         "Reproduce or deterministically explain the supplied factory/controller failure.",

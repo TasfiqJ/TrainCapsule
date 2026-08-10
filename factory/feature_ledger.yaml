@@ -44,7 +44,7 @@ tasks:
   lead_role: Spec
   phase: P0
   depends_on: []
-  status: packet_approved
+  status: queued
   packet_path: tasks/T001.yaml
   trust_core: false
   risk_tier: integration
@@ -70,7 +70,8 @@ tasks:
   - Revision 2 requested after bounded pipeline failure; preserve the original outcome
     and strengthen specification/gates.
   - Reused the approved packet after adding bounded same-session structured-report
-    finalization; the completed work phase no longer needs to restart for a missing report.
+    finalization; the completed work phase no longer needs to restart for a missing
+    report.
   revisions: 2
   value_revisions: 0
 - task_id: T002
@@ -3198,4 +3199,4 @@ tasks:
   notes: []
   revisions: 0
   value_revisions: 0
-updated_at: '2026-08-10T09:15:58.902399+00:00'
+updated_at: '2026-08-10T09:20:20.121239+00:00'

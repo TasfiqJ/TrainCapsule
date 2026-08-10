@@ -14,19 +14,25 @@ from typing import TextIO
 from rich.console import Console
 
 from .auth import assert_max_oauth_only
-from .checkpoints import CheckpointStore
+from .checkpoints import CheckpointStore, new_checkpoint
 from .completion import CompletionBlocked, audit_and_expand_or_complete
 from .config import load_autonomy_config, load_factory_config
 from .feature_ledger import FeatureItem, FeatureLedger, load_feature_ledger, save_feature_ledger
 from .github_sync import GitHubDivergenceError, GitHubSyncError, sync_github
-from .gitops import commit_all
-from .models import AutonomyConfig, AutonomyState, FactoryConfig, QueuePauseMetadata
+from .gitops import GitError, commit_all, current_sha, transplant_candidate_onto
+from .models import (
+    AutonomyConfig,
+    AutonomyState,
+    FactoryConfig,
+    PipelineState,
+    QueuePauseMetadata,
+)
 from .observability import append_event, write_heartbeat
 from .planner import archive_failed_packet, create_and_promote_task_packet
 from .queue import enqueue_task, process_one, promote_due_paused, queue_dirs, reconcile_running
 from .quota import AuthenticationPause, QuotaLimitPause
 from .self_repair import attempt_factory_self_repair, clear_hard_stuck, write_hard_stuck
-from .util import read_json, write_json
+from .util import read_json, utc_stamp, write_json
 
 console = Console()
 
@@ -327,6 +333,29 @@ def _completion_reached(ledger: FeatureLedger, autonomy: AutonomyConfig) -> bool
     return ledger.build_complete()
 
 
+def terminal_root_blocker(ledger: FeatureLedger) -> FeatureItem | None:
+    """Return the first automatable terminal cause, not every blocked descendant."""
+
+    return next(
+        (
+            item
+            for item in ledger.tasks
+            if item.terminal_blocked and item.automatable and item.status != "passed"
+        ),
+        None,
+    )
+
+
+def visible_blocked_task_ids(ledger: FeatureLedger) -> list[str]:
+    """Expose causal blockers in the UI while hiding dependency-only fallout."""
+
+    return [
+        item.task_id
+        for item in ledger.tasks
+        if item.status == "external_wait" or item.terminal_blocked
+    ]
+
+
 def _write_completion(repo_root: Path, config: FactoryConfig, ledger: FeatureLedger) -> Path:
     path = repo_root / "factory" / "state" / "PRODUCT_BUILD_COMPLETE.json"
     audit_roots = sorted(config.resolve(repo_root, config.completion_dir).glob("*"))
@@ -376,6 +405,116 @@ def respec_block_reason(item: FeatureItem, outcome: RespecOutcome) -> str:
         f"{outcome.evidence_path or 'no queue error artifact recorded'} "
         f"(revisions {item.revisions}, value revisions {item.value_revisions})."
     )
+
+
+def recover_task_after_verified_repair(
+    *,
+    repo_root: Path,
+    factory: FactoryConfig,
+    state: AutonomyState,
+    ledger: FeatureLedger,
+) -> bool:
+    """Atomically reopen the root task after a verified controller repair.
+
+    The repair pipeline advances ``main``. Any partial product candidate therefore has to be
+    transplanted onto that new revision before it can be resumed. The old checkpoint is archived,
+    the candidate delta is preserved, and the same task is requeued without spending another
+    specification revision.
+    """
+
+    if state.repair_status != "verified repair merged":
+        return False
+    item: FeatureItem | None = None
+    if state.active_task_id:
+        item = next(
+            (candidate for candidate in ledger.tasks if candidate.task_id == state.active_task_id),
+            None,
+        )
+    if item is None:
+        item = next(
+            (
+                candidate
+                for candidate in ledger.tasks
+                if candidate.terminal_blocked and candidate.automatable
+            ),
+            None,
+        )
+    if item is None or item.status == "passed":
+        state.repair_status = None
+        state.repair_attempts = 0
+        return False
+
+    dirs = queue_dirs(repo_root, factory)
+    task_path = repo_root / (item.packet_path or f"tasks/{item.task_id}.yaml")
+    item.terminal_blocked = False
+    item.infrastructure_recoveries = 0
+    item.status = "queued" if task_path.is_file() else "ready"
+    note = (
+        "Verified controller repair merged; retrying the same task without consuming a "
+        "specification revision and preserving its last valid candidate."
+    )
+    if note not in item.notes:
+        item.notes.append(note)
+    save_feature_ledger(factory.resolve(repo_root, factory.feature_ledger_path), ledger)
+    new_base_sha = commit_all(
+        repo_root, f"recover: resume {item.task_id.lower()} after verified controller repair"
+    ) or current_sha(repo_root)
+
+    checkpoint_store = CheckpointStore(factory.resolve(repo_root, factory.pipeline_state_dir))
+    previous = checkpoint_store.load(item.task_id)
+    candidate_sha = new_base_sha
+    previous_findings: list[str] = []
+    stage_index = 0
+    if previous is not None:
+        previous_findings = (previous.previous_findings or [])[-20:]
+        stage_index = previous.stage_index
+        if previous.candidate_sha != previous.starting_sha:
+            candidate_sha = transplant_candidate_onto(
+                repo_root,
+                factory.resolve(repo_root, factory.worktree_dir),
+                task_id=item.task_id,
+                run_id=utc_stamp(),
+                original_base_sha=previous.starting_sha,
+                candidate_sha=previous.candidate_sha,
+                new_base_sha=new_base_sha,
+            )
+        checkpoint_store.archive(
+            previous,
+            suffix=f"controller-repair-{_now().strftime('%Y%m%dT%H%M%SZ')}",
+        )
+    recovered = new_checkpoint(
+        task_id=item.task_id,
+        run_id=utc_stamp(),
+        starting_sha=new_base_sha,
+    )
+    recovered.candidate_sha = candidate_sha
+    recovered.stage_index = stage_index
+    recovered.state = PipelineState.RUNNING
+    recovered.previous_findings = [
+        *previous_findings,
+        "A verified controller repair was merged. The prior candidate was preserved on top of "
+        "the repaired main revision; inspect it first and finish the unchanged task gates.",
+    ]
+    checkpoint_store.save(recovered)
+
+    for queue_state in ("failed", "blocked", "paused", "running"):
+        stale = dirs[queue_state] / f"{item.task_id}.yaml"
+        stale.unlink(missing_ok=True)
+        stale.with_suffix(".error.txt").unlink(missing_ok=True)
+        stale.with_suffix(".pause.json").unlink(missing_ok=True)
+    if task_path.is_file():
+        enqueue_task(repo_root=repo_root, config=factory, source=task_path, replace=True)
+    state.active_task_id = item.task_id
+    state.status = "running"
+    state.current_action = "resume task after verified controller repair"
+    state.repair_attempts = 0
+    state.repair_status = None
+    state.blocker_reason = None
+    state.required_action = None
+    state.blocked_tasks = []
+    state.next_wake_at = None
+    state.last_event = f"Recovered and requeued {item.task_id} after verified controller repair"
+    return True
 
 
 async def respec_failed_item(
@@ -630,6 +769,43 @@ async def _run_autopilot_inner(
         if sync_ledger_from_queue(repo_root, factory, ledger):
             save_feature_ledger(ledger_path, ledger)
             commit_all(repo_root, "update roadmap")
+        try:
+            recovered_after_repair = recover_task_after_verified_repair(
+                repo_root=repo_root,
+                factory=factory,
+                state=state,
+                ledger=ledger,
+            )
+        except GitError as exc:
+            state.last_event = f"candidate recovery after controller repair failed: {exc}"
+            save_state(repo_root, factory, state)
+            await _repair_or_hard_stuck(
+                repo_root=repo_root,
+                factory=factory,
+                autonomy=autonomy,
+                state=state,
+                reason=state.last_event,
+                blocker_id=state.active_task_id or "FACTORY_RECOVERY",
+            )
+            return
+        if recovered_after_repair:
+            save_state(repo_root, factory, state)
+            try:
+                _sync_github_best_effort(
+                    repo_root=repo_root,
+                    factory=factory,
+                    reason="verified controller repair and recovered task",
+                    force=True,
+                )
+            except GitHubDivergenceError as exc:
+                state.status = "blocked"
+                state.last_event = f"GitHub divergence after controller repair: {exc}"
+                state.blocked_tasks = ["GITHUB_SYNC"]
+                save_state(repo_root, factory, state)
+                return
+            if once:
+                return
+            continue
 
         if _completion_reached(ledger, autonomy):
             state.status = "auditing"
@@ -922,9 +1098,30 @@ async def _run_autopilot_inner(
             _notify(autonomy, state.last_event)
             return
 
-        blocked = [
-            item.task_id for item in ledger.tasks if item.status in {"blocked", "external_wait"}
-        ]
+        terminal = terminal_root_blocker(ledger)
+        if terminal is not None:
+            state.active_task_id = terminal.task_id
+            state.current_action = "autonomous repair of terminal root blocker"
+            state.blocker_reason = (
+                terminal.notes[-1]
+                if terminal.notes
+                else "Automatable root task is terminally blocked without recorded evidence."
+            )
+            save_state(repo_root, factory, state)
+            await _repair_or_hard_stuck(
+                repo_root=repo_root,
+                factory=factory,
+                autonomy=autonomy,
+                state=state,
+                reason=(
+                    f"Task {terminal.task_id} is the terminal root blocker preventing roadmap "
+                    f"progress. Durable blocker: {state.blocker_reason}"
+                ),
+                blocker_id=terminal.task_id,
+            )
+            return
+
+        blocked = visible_blocked_task_ids(ledger)
         state.status = "blocked" if blocked else "idle"
         state.blocked_tasks = blocked
         state.active_task_id = None
@@ -937,9 +1134,7 @@ async def _run_autopilot_inner(
         save_state(repo_root, factory, state)
         if once:
             return
-        await asyncio.sleep(
-            autonomy.external_blocker_sleep_seconds if blocked else autonomy.idle_poll_seconds
-        )
+        await asyncio.sleep(autonomy.idle_poll_seconds)
 
 
 async def run_autopilot(

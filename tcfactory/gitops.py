@@ -140,6 +140,72 @@ def cleanup_worktree(repo_root: Path, worktree: Worktree, *, delete_branch: bool
         run_command(["git", "branch", "-D", worktree.branch], cwd=repo_root, check=False)
 
 
+def transplant_candidate_onto(
+    repo_root: Path,
+    worktree_root: Path,
+    *,
+    task_id: str,
+    run_id: str,
+    original_base_sha: str,
+    candidate_sha: str,
+    new_base_sha: str,
+) -> str:
+    """Replay only a task candidate's delta onto a repaired controller revision.
+
+    Reusing the old candidate tree would erase the controller repair, while starting over would
+    discard valid product work. Applying the exact old-base-to-candidate delta onto repaired main
+    preserves both and fails closed when the changes genuinely conflict.
+    """
+
+    if candidate_sha == original_base_sha:
+        return new_base_sha
+    patch = run_command(
+        [
+            "git",
+            "diff",
+            "--binary",
+            "--full-index",
+            original_base_sha,
+            candidate_sha,
+            "--",
+        ],
+        cwd=repo_root,
+    ).stdout
+    if not patch.strip():
+        return new_base_sha
+    worktree = create_worktree(
+        repo_root,
+        worktree_root,
+        task_id=task_id,
+        run_id=run_id,
+        role="controller-recovery",
+        attempt=1,
+        base_sha=new_base_sha,
+    )
+    try:
+        applied = run_command(
+            ["git", "apply", "--3way", "--index", "-"],
+            cwd=worktree.path,
+            check=False,
+            input_text=patch,
+        )
+        if applied.returncode != 0:
+            detail = (applied.stderr or applied.stdout).strip()
+            raise GitError(
+                "Could not transplant the preserved candidate onto repaired main without a "
+                f"conflict: {detail or 'git apply failed'}"
+            )
+        recovered_sha = commit_all(
+            worktree.path,
+            f"recover: preserve {task_id.lower()} candidate after controller repair",
+        )
+        if not recovered_sha:
+            raise GitError("Candidate transplant produced no recoverable commit")
+        return recovered_sha
+    finally:
+        cleanup_worktree(repo_root, worktree, delete_branch=False)
+
+
 def _clean_words(value: str) -> str:
     text = re.sub(r"[`*_#:\[\](){}]", " ", value)
     text = re.sub(

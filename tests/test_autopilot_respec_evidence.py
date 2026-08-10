@@ -12,18 +12,21 @@ specification revision."), which contradicts the actual durable failure record
 from __future__ import annotations
 
 import asyncio
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 
 from tcfactory.autopilot import (
     RespecOutcome,
+    recover_task_after_verified_repair,
     respec_block_reason,
     respec_failed_item,
 )
+from tcfactory.checkpoints import CheckpointStore, new_checkpoint
 from tcfactory.config import load_factory_config
-from tcfactory.feature_ledger import FeatureItem, FeatureLedger
-from tcfactory.models import AutonomyConfig
+from tcfactory.feature_ledger import FeatureItem, FeatureLedger, save_feature_ledger
+from tcfactory.models import AutonomyConfig, AutonomyState, PipelineState
 from tcfactory.queue import queue_dirs
 
 CEILING_NOTE = "Automatic re-specification ceiling reached."
@@ -129,6 +132,14 @@ def _noop_commit_all(*args: object, **kwargs: object) -> None:
 
 def _noop_save_feature_ledger(*args: object, **kwargs: object) -> None:
     return None
+
+
+def _fixed_recovery_commit(*args: object, **kwargs: object) -> str:
+    return "new-main"
+
+
+def _fixed_candidate_transplant(*args: object, **kwargs: object) -> str:
+    return "rebased-candidate"
 
 
 async def _stub_create_and_promote_task_packet(**kwargs: object) -> None:
@@ -283,3 +294,62 @@ def test_missing_error_artifact_is_reported_truthfully(tmp_path: Path) -> None:
     assert outcome.changed is False
     assert outcome.evidence_path is None
     assert "no queue error artifact recorded" in reason
+
+
+def test_verified_repair_reopens_root_task_and_preserves_candidate_checkpoint(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _repo(tmp_path)
+    source_root = Path(__file__).resolve().parents[1]
+    (repo / "tasks").mkdir()
+    (repo / "tasks/T001.yaml").write_text(
+        (source_root / "tasks/T001.yaml").read_text(encoding="utf-8"), encoding="utf-8"
+    )
+    item = _item(status="blocked", terminal_blocked=True, infrastructure_recoveries=2)
+    ledger = _ledger(item)
+    (repo / "factory").mkdir(exist_ok=True)
+    save_feature_ledger(repo / "factory/feature_ledger.yaml", ledger)
+    config = load_factory_config(repo / "config/factory.yaml")
+    store = CheckpointStore(config.resolve(repo, config.pipeline_state_dir))
+    checkpoint = new_checkpoint(task_id="T001", run_id="old-run", starting_sha="old-main")
+    checkpoint.candidate_sha = "old-candidate"
+    checkpoint.state = PipelineState.FAILED
+    checkpoint.previous_findings = ["preserve this finding"]
+    store.save(checkpoint)
+    failed = queue_dirs(repo, config)["failed"] / "T001.yaml"
+    failed.write_text((repo / "tasks/T001.yaml").read_text(encoding="utf-8"), encoding="utf-8")
+    failed.with_suffix(".error.txt").write_text("controller defect\n", encoding="utf-8")
+    state = AutonomyState(
+        status="restarting",
+        active_task_id="T001",
+        repair_status="verified repair merged",
+        updated_at=datetime.now(UTC),
+    )
+    monkeypatch.setattr("tcfactory.autopilot.commit_all", _fixed_recovery_commit)
+    monkeypatch.setattr(
+        "tcfactory.autopilot.transplant_candidate_onto", _fixed_candidate_transplant
+    )
+
+    assert recover_task_after_verified_repair(
+        repo_root=repo,
+        factory=config,
+        state=state,
+        ledger=ledger,
+    )
+
+    recovered = store.load("T001")
+    assert recovered is not None
+    assert recovered.starting_sha == "new-main"
+    assert recovered.candidate_sha == "rebased-candidate"
+    assert recovered.state == PipelineState.RUNNING
+    assert recovered.previous_findings is not None
+    assert "preserve this finding" in recovered.previous_findings
+    assert list((store.root / "archive").glob("T001-controller-repair-*.json"))
+    assert (queue_dirs(repo, config)["pending"] / "T001.yaml").is_file()
+    assert not failed.exists()
+    assert item.status == "queued"
+    assert item.terminal_blocked is False
+    assert item.infrastructure_recoveries == 0
+    assert state.status == "running"
+    assert state.repair_status is None
+    assert state.active_task_id == "T001"

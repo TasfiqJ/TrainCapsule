@@ -13,6 +13,15 @@ if [[ -z "$UV" ]]; then
   exit 21
 fi
 
+# Scheduled Task may launch again while the long-lived controller is healthy. Avoid invoking a
+# duplicate Python process (and its noisy traceback) when the kernel lock already proves that the
+# existing controller owns the loop.
+if ! flock -n "$ROOT/factory/state/autopilot.lock" -c true; then
+  printf 'Another healthy controller owns the single-instance lock; duplicate launcher exiting.\n' \
+    >>"$LOG_DIR/autopilot.log"
+  exit 0
+fi
+
 # The foreground wsl.exe process keeps WSL alive. Restarting after a bounded controller exit
 # immediately loads a verified self-repair instead of waiting for the next scheduled heartbeat.
 while true; do

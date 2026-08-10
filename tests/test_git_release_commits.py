@@ -2,12 +2,16 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import pytest
+
 from tcfactory.gitops import (
+    GitError,
     changed_files,
     commit_all,
     current_sha,
     squash_candidate,
     task_commit_message,
+    transplant_candidate_onto,
 )
 from tcfactory.models import CommitType, RoleName, SecurityPolicy, Stage, TaskPacket
 from tcfactory.util import run_command
@@ -90,3 +94,54 @@ def test_squash_candidate_creates_one_direct_child_with_same_tree(tmp_path: Path
         ["git", "show", "-s", "--format=%an <%ae>", release], cwd=tmp_path
     ).stdout.strip()
     assert author == "Test User <test@example.com>"
+
+
+def test_transplant_candidate_preserves_product_work_and_repaired_main(tmp_path: Path) -> None:
+    base = _init_repo(tmp_path)
+    (tmp_path / "product.txt").write_text("candidate\n", encoding="utf-8")
+    candidate = commit_all(tmp_path, "partial product candidate")
+    assert candidate
+    run_command(["git", "reset", "--hard", base], cwd=tmp_path)
+    (tmp_path / "controller.txt").write_text("repair\n", encoding="utf-8")
+    repaired_main = commit_all(tmp_path, "repair controller")
+    assert repaired_main
+
+    recovered = transplant_candidate_onto(
+        tmp_path,
+        tmp_path / "worktrees",
+        task_id="T001",
+        run_id="20260810T000000Z",
+        original_base_sha=base,
+        candidate_sha=candidate,
+        new_base_sha=repaired_main,
+    )
+
+    assert current_sha(tmp_path, f"{recovered}^") == repaired_main
+    assert run_command(["git", "show", f"{recovered}:product.txt"], cwd=tmp_path).stdout == (
+        "candidate\n"
+    )
+    assert run_command(["git", "show", f"{recovered}:controller.txt"], cwd=tmp_path).stdout == (
+        "repair\n"
+    )
+
+
+def test_transplant_candidate_fails_closed_on_real_conflict(tmp_path: Path) -> None:
+    base = _init_repo(tmp_path)
+    (tmp_path / "a.txt").write_text("candidate\n", encoding="utf-8")
+    candidate = commit_all(tmp_path, "partial product candidate")
+    assert candidate
+    run_command(["git", "reset", "--hard", base], cwd=tmp_path)
+    (tmp_path / "a.txt").write_text("controller repair\n", encoding="utf-8")
+    repaired_main = commit_all(tmp_path, "repair controller")
+    assert repaired_main
+
+    with pytest.raises(GitError, match="without a conflict"):
+        transplant_candidate_onto(
+            tmp_path,
+            tmp_path / "worktrees",
+            task_id="T001",
+            run_id="20260810T000001Z",
+            original_base_sha=base,
+            candidate_sha=candidate,
+            new_base_sha=repaired_main,
+        )

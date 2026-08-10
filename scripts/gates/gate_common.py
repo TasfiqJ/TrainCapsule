@@ -58,7 +58,10 @@ def tracked_and_untracked_files() -> list[Path]:
 
 
 def match_files(pattern: str) -> list[Path]:
-    normalized = pattern.replace("\\", "/").lstrip("./")
+    # Remove only an explicit current-directory prefix. ``str.lstrip("./")`` removes every
+    # leading dot and slash character and therefore corrupts authoritative hidden paths such as
+    # ``.factory/external-evidence/T001.json`` into ``factory/...``.
+    normalized = pattern.replace("\\", "/").removeprefix("./")
     if "*" not in normalized and "?" not in normalized and "[" not in normalized:
         path = ROOT / normalized
         return [path] if path.exists() else []

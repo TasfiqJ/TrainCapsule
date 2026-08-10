@@ -2,7 +2,12 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tcfactory.autopilot import is_infrastructure_failure, sync_ledger_from_queue
+from tcfactory.autopilot import (
+    is_infrastructure_failure,
+    sync_ledger_from_queue,
+    terminal_root_blocker,
+    visible_blocked_task_ids,
+)
 from tcfactory.feature_ledger import FeatureItem, FeatureLedger
 from tcfactory.models import FactoryConfig
 from tcfactory.queue import queue_dirs
@@ -105,6 +110,18 @@ def test_terminal_blocked_queue_entry_stays_terminal(tmp_path: Path) -> None:
     assert not sync_ledger_from_queue(tmp_path, config, ledger)
     assert item.status == "blocked"
     assert ledger.next_ready() is None
+
+
+def test_only_terminal_root_cause_is_reported_and_repaired() -> None:
+    ledger = _ledger()
+    root = ledger.item("T001")
+    root.status = "blocked"
+    root.terminal_blocked = True
+    dependent = ledger.item("T002")
+    dependent.status = "blocked"
+
+    assert terminal_root_blocker(ledger) is root
+    assert visible_blocked_task_ids(ledger) == ["T001", "T003"]
 
 
 def test_stale_main_and_turn_limits_are_infrastructure_failures() -> None:

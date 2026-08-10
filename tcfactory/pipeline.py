@@ -125,6 +125,31 @@ def _findings_from_result(result: StageResult) -> list[str]:
     return findings
 
 
+def apply_scout_verdict(
+    primary: StageResult,
+    scout: StageResult,
+    *,
+    blocking_on_concrete_failure: bool,
+    blocking_on_non_pass: bool,
+) -> None:
+    if primary.verdict != Verdict.PASS or scout.verdict == Verdict.PASS:
+        return
+    findings = _findings_from_result(scout)
+    if blocking_on_concrete_failure and scout.verdict == Verdict.FAIL:
+        primary.verdict = Verdict.FAIL
+        primary.error = (
+            "Integration scout found a concrete blocking contradiction: "
+            + " | ".join(findings[:4])
+        )
+    elif blocking_on_non_pass:
+        primary.verdict = scout.verdict
+        primary.error = (
+            f"Integration scout returned {scout.verdict.value}; independent peer evidence "
+            "is required: "
+            + " | ".join(findings[:4])
+        )
+
+
 def _clear_active(checkpoint: PipelineCheckpoint) -> None:
     checkpoint.active_role = None
     checkpoint.active_attempt = None
@@ -370,17 +395,14 @@ async def _execute_stage(
                         "artifact_dir": scout_result.artifact_dir,
                     }
                 )
-                if (
-                    features.integration_scout.blocking_on_concrete_failure
-                    and scout_result.verdict == Verdict.FAIL
-                    and result.verdict == Verdict.PASS
-                ):
-                    result.verdict = Verdict.FAIL
-                    peer_findings = _findings_from_result(scout_result)
-                    result.error = (
-                        "Integration scout found a concrete blocking contradiction: "
-                        + " | ".join(peer_findings[:4])
-                    )
+                apply_scout_verdict(
+                    result,
+                    scout_result,
+                    blocking_on_concrete_failure=(
+                        features.integration_scout.blocking_on_concrete_failure
+                    ),
+                    blocking_on_non_pass=features.integration_scout.blocking_on_non_pass,
+                )
             except (TimeoutError, QuotaLimitPause, AuthenticationPause) as exc:
                 result.peer_sessions.append(
                     {
@@ -390,6 +412,15 @@ async def _execute_stage(
                         "error": f"{type(exc).__name__}: {exc}",
                     }
                 )
+                if (
+                    features.integration_scout.blocking_on_non_pass
+                    and result.verdict == Verdict.PASS
+                ):
+                    result.verdict = Verdict.UNKNOWN
+                    result.error = (
+                        "Integration scout was unavailable; independent peer evidence is "
+                        f"required: {type(exc).__name__}: {exc}"
+                    )
             except Exception as exc:  # noqa: BLE001
                 result.peer_sessions.append(
                     {
@@ -399,6 +430,15 @@ async def _execute_stage(
                         "error": f"{type(exc).__name__}: {exc}",
                     }
                 )
+                if (
+                    features.integration_scout.blocking_on_non_pass
+                    and result.verdict == Verdict.PASS
+                ):
+                    result.verdict = Verdict.UNKNOWN
+                    result.error = (
+                        "Integration scout errored; independent peer evidence is required: "
+                        f"{type(exc).__name__}: {exc}"
+                    )
     except QuotaLimitPause as exc:
         if scout_future is not None and not scout_future.done():
             scout_future.cancel()

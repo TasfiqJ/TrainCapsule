@@ -28,6 +28,7 @@ integration_scout:
   timeout_seconds: 900
   startup_delay_seconds: 0.75
   blocking_on_concrete_failure: true
+  blocking_on_non_pass: true
 goal:
   enabled: true
   minimum_cli_version: 2.1.224

@@ -43,9 +43,10 @@ def test_claude_native_feature_policy_is_token_bounded() -> None:
     # The official Workflow tool is not assumed in the Python Agent SDK.
     assert features.dynamic_workflows.enabled is False
     scout = roles[RoleName.INTEGRATION_SCOUT]
-    assert scout.max_turns >= 8
+    assert scout.max_turns >= 12
     assert scout.task_budget_tokens is not None
-    assert scout.task_budget_tokens >= 40_000
+    assert scout.task_budget_tokens >= 120_000
+    assert features.integration_scout.blocking_on_non_pass is True
 
 
 def test_trust_builder_gets_peer_channel_advisor_goal_but_no_workflow() -> None:

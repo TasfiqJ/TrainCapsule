@@ -53,6 +53,7 @@ class ScoutConfig(BaseModel):
     timeout_seconds: int = Field(default=900, ge=60, le=3600)
     startup_delay_seconds: float = Field(default=0.75, ge=0, le=10)
     blocking_on_concrete_failure: bool = True
+    blocking_on_non_pass: bool = True
 
 
 class GoalConfig(BaseModel):

@@ -44,8 +44,8 @@ tasks:
   lead_role: Spec
   phase: P0
   depends_on: []
-  status: ready
-  packet_path: null
+  status: packet_approved
+  packet_path: tasks/T001.yaml
   trust_core: false
   risk_tier: integration
   context_keys:
@@ -74,6 +74,8 @@ tasks:
     report.
   - Revision 3 requested after bounded pipeline failure; preserve the original outcome
     and strengthen specification/gates.
+  - Reused the approved packet after replacing the cache-sensitive continuation meter
+    with tool-free four-turn and 20k-token report limits.
   revisions: 3
   value_revisions: 0
 - task_id: T002

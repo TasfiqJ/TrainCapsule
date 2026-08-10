@@ -2,7 +2,13 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from tcfactory.gitops import commit_all, current_sha, squash_candidate, task_commit_message
+from tcfactory.gitops import (
+    changed_files,
+    commit_all,
+    current_sha,
+    squash_candidate,
+    task_commit_message,
+)
 from tcfactory.models import CommitType, RoleName, SecurityPolicy, Stage, TaskPacket
 from tcfactory.util import run_command
 
@@ -41,6 +47,20 @@ def test_commit_all_uses_operator_identity(tmp_path: Path) -> None:
         ["git", "show", "-s", "--format=%an <%ae>", sha], cwd=tmp_path
     ).stdout.strip()
     assert author == "Test User <test@example.com>"
+
+
+def test_changed_files_expands_directories_and_filters_only_empty_sentinels(
+    tmp_path: Path,
+) -> None:
+    base = _init_repo(tmp_path)
+    spec = tmp_path / "specs" / "tasks" / "DEMO-001.md"
+    spec.parent.mkdir(parents=True)
+    spec.write_text("specification\n", encoding="utf-8")
+    (tmp_path / ".npmrc").write_text("", encoding="utf-8")
+    (tmp_path / "package-lock.json").write_text("real change\n", encoding="utf-8")
+
+    assert changed_files(tmp_path, base) == ["package-lock.json", "specs/tasks/DEMO-001.md"]
+    assert not (tmp_path / ".npmrc").exists()
 
 
 def test_squash_candidate_creates_one_direct_child_with_same_tree(tmp_path: Path) -> None:

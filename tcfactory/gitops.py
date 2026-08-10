@@ -20,6 +20,21 @@ class GitError(RuntimeError):
     pass
 
 
+_CLAUDE_SANDBOX_SENTINELS = frozenset(
+    {
+        ".gitmodules",
+        ".npmrc",
+        ".yarnrc",
+        ".yarnrc.yml",
+        "bunfig.toml",
+        "package-lock.json",
+        "package.json",
+        "pnpm-lock.yaml",
+        "yarn.lock",
+    }
+)
+
+
 def ensure_git_repo(repo_root: Path) -> None:
     try:
         run_command(["git", "rev-parse", "--is-inside-work-tree"], cwd=repo_root)
@@ -76,12 +91,31 @@ def changed_files(worktree: Path, base_sha: str) -> list[str]:
     committed = run_command(
         ["git", "diff", "--name-only", f"{base_sha}...HEAD"], cwd=worktree
     ).stdout.splitlines()
-    uncommitted = run_command(["git", "status", "--porcelain"], cwd=worktree).stdout.splitlines()
+    uncommitted = run_command(
+        ["git", "status", "--porcelain", "--untracked-files=all"], cwd=worktree
+    ).stdout.splitlines()
     paths = set(committed)
     for line in uncommitted:
         if len(line) >= 4:
             paths.add(line[3:].strip())
-    return sorted(path for path in paths if path)
+
+    def is_empty_untracked_sandbox_sentinel(path: str) -> bool:
+        if path not in _CLAUDE_SANDBOX_SENTINELS:
+            return False
+        candidate = worktree / path
+        if not candidate.is_file() or candidate.stat().st_size != 0:
+            return False
+        tracked = run_command(
+            ["git", "cat-file", "-e", f"{base_sha}:{path}"],
+            cwd=worktree,
+            check=False,
+        )
+        if tracked.returncode == 0:
+            return False
+        candidate.unlink()
+        return True
+
+    return sorted(path for path in paths if path and not is_empty_untracked_sandbox_sentinel(path))
 
 
 def commit_all(worktree: Path, message: str) -> str | None:

@@ -44,8 +44,8 @@ tasks:
   lead_role: Spec
   phase: P0
   depends_on: []
-  status: ready
-  packet_path: null
+  status: packet_approved
+  packet_path: tasks/T001.yaml
   trust_core: false
   risk_tier: integration
   context_keys:
@@ -69,6 +69,8 @@ tasks:
     two infrastructure-only maximum-turn failures.
   - Revision 2 requested after bounded pipeline failure; preserve the original outcome
     and strengthen specification/gates.
+  - Reused the approved packet after adding bounded same-session structured-report
+    finalization; the completed work phase no longer needs to restart for a missing report.
   revisions: 2
   value_revisions: 0
 - task_id: T002

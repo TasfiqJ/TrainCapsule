@@ -38,6 +38,15 @@ from .quota import (
 )
 from .util import write_json
 
+MIN_CLAUDE_TASK_BUDGET_TOKENS = 20_000
+
+
+def provider_compatible_task_budget(configured: int | None) -> int | None:
+    """Honor the configured ceiling unless Claude requires a higher minimum."""
+    if configured is None:
+        return None
+    return max(configured, MIN_CLAUDE_TASK_BUDGET_TOKENS)
+
 
 def _message_to_json(message: object) -> dict[str, Any]:
     if is_dataclass(message) and not isinstance(message, type):
@@ -138,7 +147,9 @@ async def run_agent_stage(
     effort = stage.effort or role_config.effort
     max_turns = stage.max_turns or role_config.max_turns
     max_budget = stage.max_budget_usd or role_config.max_budget_usd
-    task_budget = stage.task_budget_tokens or role_config.task_budget_tokens
+    task_budget = provider_compatible_task_budget(
+        stage.task_budget_tokens or role_config.task_budget_tokens
+    )
     read_only = role_config.read_only if stage.read_only is None else stage.read_only
     tools = list(stage.tools if stage.tools is not None else role_config.tools)
     for tool in feature_plan.tools:

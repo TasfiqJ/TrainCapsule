@@ -22,9 +22,7 @@ def _prepare_subscription_login(tmp_path: Path, monkeypatch: pytest.MonkeyPatch)
     # Production shells may already have the durable lights-out OAuth route loaded.
     # Clear it so subscription-login tests exercise only the state they arrange.
     monkeypatch.delenv("CLAUDE_CODE_OAUTH_TOKEN", raising=False)
-    monkeypatch.setenv(
-        "TCF_CLAUDE_OAUTH_TOKEN_FILE", str(tmp_path / "missing-claude-oauth-token")
-    )
+    monkeypatch.setenv("TCF_CLAUDE_OAUTH_TOKEN_FILE", str(tmp_path / "missing-claude-oauth-token"))
     monkeypatch.delenv("TCF_USAGE_CREDITS_DISABLED_ACK", raising=False)
     config_dir = tmp_path / ".claude"
     config_dir.mkdir()

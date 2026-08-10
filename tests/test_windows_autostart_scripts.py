@@ -23,9 +23,7 @@ def test_windows_task_runs_foreground_autopilot() -> None:
 
 def test_private_github_runner_has_limited_recovery_task() -> None:
     root = Path(__file__).resolve().parents[1]
-    script = (root / "scripts" / "register_windows_github_runner.ps1").read_text(
-        encoding="utf-8"
-    )
+    script = (root / "scripts" / "register_windows_github_runner.ps1").read_text(encoding="utf-8")
     assert "run-traincapsule-runner-foreground.sh" in script
     assert "RunLevel Limited" in script
     assert "MultipleInstances IgnoreNew" in script

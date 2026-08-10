@@ -40,7 +40,19 @@ from .util import write_json
 
 MIN_CLAUDE_TASK_BUDGET_TOKENS = 20_000
 REPORT_CONTINUATION_MAX_TURNS = 4
-REPORT_CONTINUATION_MAX_BUDGET_USD = 0.5
+
+
+def report_continuation_overrides() -> dict[str, Any]:
+    """Bound report finalization by turns/tokens without a cache-sensitive dollar meter."""
+    return {
+        "max_turns": REPORT_CONTINUATION_MAX_TURNS,
+        "max_budget_usd": None,
+        "task_budget": {"total": MIN_CLAUDE_TASK_BUDGET_TOKENS},
+        "effort": "low",
+        "tools": [],
+        "allowed_tools": [],
+        "skills": [],
+    }
 
 
 def needs_report_continuation(result: object | None) -> bool:
@@ -421,9 +433,7 @@ async def run_agent_stage(
         continuation_options = replace(
             options,
             resume=continuation_session_id,
-            max_turns=REPORT_CONTINUATION_MAX_TURNS,
-            max_budget_usd=REPORT_CONTINUATION_MAX_BUDGET_USD,
-            task_budget={"total": MIN_CLAUDE_TASK_BUDGET_TOKENS},
+            **report_continuation_overrides(),
         )
         continuation_prompt = (
             "The bounded work phase ended before you returned the required structured "

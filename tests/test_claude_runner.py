@@ -3,6 +3,7 @@ from types import SimpleNamespace
 from tcfactory.claude_runner import (
     needs_report_continuation,
     provider_compatible_task_budget,
+    report_continuation_overrides,
     select_result_message,
 )
 
@@ -58,3 +59,15 @@ def test_report_continuation_requires_a_resumable_session() -> None:
 
     assert needs_report_continuation(None) is False
     assert needs_report_continuation(missing_session) is False
+
+
+def test_report_continuation_uses_small_tool_free_limits() -> None:
+    overrides = report_continuation_overrides()
+
+    assert overrides["max_turns"] == 4
+    assert overrides["task_budget"] == {"total": 20_000}
+    assert overrides["max_budget_usd"] is None
+    assert overrides["effort"] == "low"
+    assert overrides["tools"] == []
+    assert overrides["allowed_tools"] == []
+    assert overrides["skills"] == []

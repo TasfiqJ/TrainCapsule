@@ -1,0 +1,9 @@
+{
+  "id": "T006",
+  "epic": "E21",
+  "priority": "P0",
+  "role": "Factory",
+  "title": "Create quota checkpoint, pause, resume, and single-instance controls",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

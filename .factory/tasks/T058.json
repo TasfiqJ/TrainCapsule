@@ -1,0 +1,9 @@
+{
+  "id": "T058",
+  "epic": "E09",
+  "priority": "P5",
+  "role": "Builder",
+  "title": "Implement cost/safety/privacy/decision-value budget",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

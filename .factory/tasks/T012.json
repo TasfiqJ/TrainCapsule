@@ -1,0 +1,9 @@
+{
+  "id": "T012",
+  "epic": "E19",
+  "priority": "P0",
+  "role": "Value",
+  "title": "Create immutable attempted-case and value-record schemas",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "T065",
+  "epic": "E10",
+  "priority": "P5",
+  "role": "Builder",
+  "title": "Implement model/operator/tensor reduction interfaces",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

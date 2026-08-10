@@ -1,0 +1,27 @@
+version: 3
+enabled: false
+remote: origin
+branch: main
+visibility: private
+repository: null
+push_after_verified_tasks: 2
+push_interval_seconds: 900
+push_before_quota_pause: true
+push_at_completion: true
+immediate_risk_tiers:
+- integration
+- trust_core
+retry_attempts: 5
+retry_backoff_seconds: 30
+verify_remote_sha: true
+remote_ci:
+  enabled: true
+  workflow_name: AI factory quality
+  required_risk_tiers:
+  - integration
+  - trust_core
+  timeout_seconds: 1800
+  poll_seconds: 20
+  fail_closed: true
+wait_for_main_ci_after_push: true
+commit_subject_max_chars: 50

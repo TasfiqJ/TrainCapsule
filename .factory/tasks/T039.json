@@ -1,0 +1,9 @@
+{
+  "id": "T039",
+  "epic": "E06",
+  "priority": "P3",
+  "role": "Builder",
+  "title": "Implement evidence-gap propagation",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "T081",
+  "epic": "E14",
+  "priority": "P6",
+  "role": "Builder",
+  "title": "Implement offline verifier and trusted launch templates",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

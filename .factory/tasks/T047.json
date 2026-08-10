@@ -1,0 +1,9 @@
+{
+  "id": "T047",
+  "epic": "E19",
+  "priority": "P3",
+  "role": "Release",
+  "title": "Run hidden first-boundary suite with zero clean-control blame",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

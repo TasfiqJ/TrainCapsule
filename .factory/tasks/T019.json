@@ -1,0 +1,9 @@
+{
+  "id": "T019",
+  "epic": "E04",
+  "priority": "P1",
+  "role": "Builder",
+  "title": "Implement SQLite metadata and migrations",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "T070",
+  "epic": "E11",
+  "priority": "P6",
+  "role": "Spec",
+  "title": "Define runner, privacy-zone, retry, and semantic-state contracts",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

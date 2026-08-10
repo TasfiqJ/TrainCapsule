@@ -1,0 +1,9 @@
+{
+  "id": "T054",
+  "epic": "E05",
+  "priority": "P4",
+  "role": "Adversary",
+  "title": "Create instrumentation-induced and instrumentation-hidden faults",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "T005",
+  "epic": "E21",
+  "priority": "P0",
+  "role": "Factory",
+  "title": "Create role-separated worktree factory and durable task ledger",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "T107",
+  "epic": "E16",
+  "priority": "P9",
+  "role": "Docs",
+  "title": "Write operator, deployment, security, and incident-pack guides",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

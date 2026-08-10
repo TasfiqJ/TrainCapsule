@@ -1,0 +1,9 @@
+{
+  "id": "T105",
+  "epic": "E16",
+  "priority": "P9",
+  "role": "Builder",
+  "title": "Complete CLI Close/Qualify/Exchange workflow",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

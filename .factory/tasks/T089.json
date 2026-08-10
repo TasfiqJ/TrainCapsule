@@ -1,0 +1,9 @@
+{
+  "id": "T089",
+  "epic": "E12",
+  "priority": "P7",
+  "role": "Adversary",
+  "title": "Create false-green restart, stale sampler, and throughput regression faults",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

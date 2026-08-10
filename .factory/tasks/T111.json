@@ -1,0 +1,9 @@
+{
+  "id": "T111",
+  "epic": "E19",
+  "priority": "P9",
+  "role": "Value",
+  "title": "Generate positive, negative, unknown, and no-gain case ledger",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

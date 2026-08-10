@@ -1,0 +1,9 @@
+{
+  "id": "T068",
+  "epic": "E10",
+  "priority": "P5",
+  "role": "Adversary",
+  "title": "Create trigger-removal, boundary-change, and tier-drop hidden faults",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

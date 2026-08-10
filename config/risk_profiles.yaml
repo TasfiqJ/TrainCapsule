@@ -1,0 +1,311 @@
+version: 5
+principles:
+- Use the controller-owned task catalog before asking a model to plan.
+- Run deterministic gates before any model reviewer.
+- Sonnet writes almost all production code and tests.
+- Haiku handles only mechanical, non-authoritative review or fallback planning.
+- Opus is reserved for truth-critical specification, primary-source research, adversarial
+  analysis, and security.
+- Every role starts in a fresh session and receives paths, hashes, and bounded handoff
+  data rather than prior transcripts.
+- The controller may raise risk; no model may lower it.
+- Review depth follows the cost of a false green, not repository size.
+- Fable, model teams, and open-ended subagents are disabled in the default loop.
+profiles:
+  mechanical:
+    context_chars: 35000
+    task_budget_usd: 5
+    repair_cycles: 1
+    roles:
+      planner:
+        model: haiku
+        effort: low
+        max_turns: 5
+        max_budget_usd: 0.4
+        task_budget_tokens: 8000
+      specification:
+        model: haiku
+        effort: low
+        max_turns: 5
+        max_budget_usd: 0.4
+        task_budget_tokens: 8000
+      research:
+        model: haiku
+        effort: low
+        max_turns: 5
+        max_budget_usd: 0.4
+        task_budget_tokens: 8000
+      builder:
+        model: sonnet
+        effort: medium
+        max_turns: 10
+        max_budget_usd: 2.0
+        task_budget_tokens: 24000
+      adversary:
+        model: haiku
+        effort: low
+        max_turns: 4
+        max_budget_usd: 0.3
+        task_budget_tokens: 6000
+      audit:
+        model: haiku
+        effort: low
+        max_turns: 4
+        max_budget_usd: 0.3
+        task_budget_tokens: 6000
+      security:
+        model: opus
+        effort: medium
+        max_turns: 6
+        max_budget_usd: 1.4
+        task_budget_tokens: 14000
+      performance:
+        model: haiku
+        effort: low
+        max_turns: 4
+        max_budget_usd: 0.3
+        task_budget_tokens: 6000
+      release:
+        model: haiku
+        effort: low
+        max_turns: 4
+        max_budget_usd: 0.3
+        task_budget_tokens: 6000
+      value_validator:
+        model: haiku
+        effort: low
+        max_turns: 4
+        max_budget_usd: 0.3
+        task_budget_tokens: 6000
+      value_adversary:
+        model: haiku
+        effort: low
+        max_turns: 4
+        max_budget_usd: 0.3
+        task_budget_tokens: 6000
+    reviewers:
+    - release
+  standard:
+    context_chars: 70000
+    task_budget_usd: 12
+    repair_cycles: 1
+    roles:
+      planner:
+        model: sonnet
+        effort: medium
+        max_turns: 7
+        max_budget_usd: 1.4
+        task_budget_tokens: 18000
+      specification:
+        model: sonnet
+        effort: high
+        max_turns: 8
+        max_budget_usd: 1.8
+        task_budget_tokens: 22000
+      research:
+        model: sonnet
+        effort: high
+        max_turns: 9
+        max_budget_usd: 2.0
+        task_budget_tokens: 26000
+      builder:
+        model: sonnet
+        effort: high
+        max_turns: 18
+        max_budget_usd: 4.5
+        task_budget_tokens: 55000
+      adversary:
+        model: sonnet
+        effort: high
+        max_turns: 7
+        max_budget_usd: 1.5
+        task_budget_tokens: 18000
+      audit:
+        model: sonnet
+        effort: medium
+        max_turns: 6
+        max_budget_usd: 1.1
+        task_budget_tokens: 14000
+      security:
+        model: opus
+        effort: high
+        max_turns: 9
+        max_budget_usd: 2.8
+        task_budget_tokens: 28000
+      performance:
+        model: sonnet
+        effort: medium
+        max_turns: 6
+        max_budget_usd: 1.1
+        task_budget_tokens: 14000
+      release:
+        model: sonnet
+        effort: medium
+        max_turns: 5
+        max_budget_usd: 0.9
+        task_budget_tokens: 12000
+      value_validator:
+        model: sonnet
+        effort: medium
+        max_turns: 5
+        max_budget_usd: 0.9
+        task_budget_tokens: 12000
+      value_adversary:
+        model: sonnet
+        effort: high
+        max_turns: 6
+        max_budget_usd: 1.2
+        task_budget_tokens: 16000
+    reviewers:
+    - adversary
+    - release
+  integration:
+    context_chars: 110000
+    task_budget_usd: 24
+    repair_cycles: 2
+    roles:
+      planner:
+        model: sonnet
+        effort: high
+        max_turns: 9
+        max_budget_usd: 2.2
+        task_budget_tokens: 28000
+      specification:
+        model: opus
+        effort: high
+        max_turns: 10
+        max_budget_usd: 3.2
+        task_budget_tokens: 34000
+      research:
+        model: opus
+        effort: high
+        max_turns: 11
+        max_budget_usd: 3.8
+        task_budget_tokens: 40000
+      builder:
+        model: sonnet
+        effort: high
+        max_turns: 22
+        max_budget_usd: 5.5
+        task_budget_tokens: 72000
+      adversary:
+        model: opus
+        effort: high
+        max_turns: 10
+        max_budget_usd: 3.2
+        task_budget_tokens: 32000
+      audit:
+        model: sonnet
+        effort: high
+        max_turns: 8
+        max_budget_usd: 1.9
+        task_budget_tokens: 22000
+      security:
+        model: opus
+        effort: high
+        max_turns: 10
+        max_budget_usd: 3.2
+        task_budget_tokens: 32000
+      performance:
+        model: sonnet
+        effort: high
+        max_turns: 8
+        max_budget_usd: 1.9
+        task_budget_tokens: 22000
+      release:
+        model: sonnet
+        effort: high
+        max_turns: 6
+        max_budget_usd: 1.4
+        task_budget_tokens: 16000
+      value_validator:
+        model: sonnet
+        effort: high
+        max_turns: 7
+        max_budget_usd: 1.6
+        task_budget_tokens: 20000
+      value_adversary:
+        model: opus
+        effort: high
+        max_turns: 8
+        max_budget_usd: 2.8
+        task_budget_tokens: 28000
+    reviewers:
+    - adversary
+    - audit
+    - release
+  trust_core:
+    context_chars: 150000
+    task_budget_usd: 34
+    repair_cycles: 2
+    roles:
+      planner:
+        model: sonnet
+        effort: high
+        max_turns: 9
+        max_budget_usd: 2.2
+        task_budget_tokens: 26000
+      specification:
+        model: opus
+        effort: xhigh
+        max_turns: 13
+        max_budget_usd: 5.0
+        task_budget_tokens: 48000
+      research:
+        model: opus
+        effort: high
+        max_turns: 13
+        max_budget_usd: 4.5
+        task_budget_tokens: 48000
+      builder:
+        model: sonnet
+        effort: high
+        max_turns: 26
+        max_budget_usd: 6.5
+        task_budget_tokens: 90000
+      adversary:
+        model: opus
+        effort: xhigh
+        max_turns: 13
+        max_budget_usd: 5.0
+        task_budget_tokens: 44000
+      audit:
+        model: sonnet
+        effort: high
+        max_turns: 10
+        max_budget_usd: 2.5
+        task_budget_tokens: 28000
+      security:
+        model: opus
+        effort: high
+        max_turns: 12
+        max_budget_usd: 4.2
+        task_budget_tokens: 38000
+      performance:
+        model: sonnet
+        effort: high
+        max_turns: 9
+        max_budget_usd: 2.2
+        task_budget_tokens: 26000
+      release:
+        model: sonnet
+        effort: high
+        max_turns: 7
+        max_budget_usd: 1.7
+        task_budget_tokens: 18000
+      value_validator:
+        model: sonnet
+        effort: high
+        max_turns: 8
+        max_budget_usd: 1.9
+        task_budget_tokens: 24000
+      value_adversary:
+        model: opus
+        effort: xhigh
+        max_turns: 10
+        max_budget_usd: 3.8
+        task_budget_tokens: 36000
+    reviewers:
+    - adversary
+    - audit
+    - release

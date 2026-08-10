@@ -1,0 +1,9 @@
+{
+  "id": "T073",
+  "epic": "E11",
+  "priority": "P6",
+  "role": "Builder",
+  "title": "Implement structural local multi-process execution",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "T046",
+  "epic": "E08",
+  "priority": "P3",
+  "role": "Adversary",
+  "title": "Test timestamp-only alignment and hidden missing evidence",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

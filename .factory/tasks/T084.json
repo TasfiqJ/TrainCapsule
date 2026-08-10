@@ -1,0 +1,9 @@
+{
+  "id": "T084",
+  "epic": "E12",
+  "priority": "P7",
+  "role": "Builder",
+  "title": "Implement checkpoint integrity and completeness checks",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

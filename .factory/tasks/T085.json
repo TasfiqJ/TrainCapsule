@@ -1,0 +1,9 @@
+{
+  "id": "T085",
+  "epic": "E12",
+  "priority": "P7",
+  "role": "Builder",
+  "title": "Implement optimizer/scheduler/RNG/sampler/data-cursor checks",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

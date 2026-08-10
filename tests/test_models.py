@@ -1,0 +1,21 @@
+from pathlib import Path
+
+from tcfactory.config import load_task
+from tcfactory.models import RoleName
+
+
+def test_demo_task_loads() -> None:
+    task = load_task(Path("tasks/DEMO-001.yaml"))
+    assert task.task_id == "DEMO-001"
+    assert [stage.role for stage in task.pipeline] == [
+        RoleName.SPECIFICATION,
+        RoleName.BUILDER,
+        RoleName.ADVERSARY,
+        RoleName.AUDIT,
+        RoleName.RELEASE,
+    ]
+
+
+def test_t001_has_no_builder() -> None:
+    task = load_task(Path("tasks/T001.yaml"))
+    assert RoleName.BUILDER not in {stage.role for stage in task.pipeline}

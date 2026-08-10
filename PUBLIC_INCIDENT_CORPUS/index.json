@@ -1,0 +1,6 @@
+{
+  "schema_version": "1.0",
+  "corpus_status": "BOOTSTRAPPED_EMPTY",
+  "entries": [],
+  "admission_rule": "Attributable, redistributable, privacy-reviewed evidence with an explicit oracle."
+}

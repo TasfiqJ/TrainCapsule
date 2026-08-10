@@ -1,0 +1,9 @@
+{
+  "id": "T035",
+  "epic": "E06",
+  "priority": "P3",
+  "role": "Spec",
+  "title": "Define actor/resource/phase/state-channel IncidentIR",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

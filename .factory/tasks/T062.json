@@ -1,0 +1,9 @@
+{
+  "id": "T062",
+  "epic": "E10",
+  "priority": "P5",
+  "role": "Builder",
+  "title": "Implement step/event-window reduction",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

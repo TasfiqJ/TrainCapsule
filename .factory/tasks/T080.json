@@ -1,0 +1,9 @@
+{
+  "id": "T080",
+  "epic": "E14",
+  "priority": "P6",
+  "role": "Spec",
+  "title": "Define tcap/OCI artifact and federated result schema",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

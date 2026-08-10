@@ -1,0 +1,9 @@
+{
+  "id": "T076",
+  "epic": "E15",
+  "priority": "P6",
+  "role": "Security",
+  "title": "Implement network, mount, capability, resource, and timeout sandbox",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

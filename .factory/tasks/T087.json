@@ -1,0 +1,9 @@
+{
+  "id": "T087",
+  "epic": "E12",
+  "priority": "P7",
+  "role": "Builder",
+  "title": "Implement numerical and performance sentinels",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

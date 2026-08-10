@@ -1,0 +1,9 @@
+{
+  "id": "T044",
+  "epic": "E08",
+  "priority": "P3",
+  "role": "Builder",
+  "title": "Implement last consistent/first observed inconsistent boundary",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

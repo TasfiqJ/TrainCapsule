@@ -1,0 +1,9 @@
+{
+  "id": "T079",
+  "epic": "E15",
+  "priority": "P6",
+  "role": "Security",
+  "title": "Implement signing and provenance attestation",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "T013",
+  "epic": "E03",
+  "priority": "P1",
+  "role": "Spec",
+  "title": "Define WorkloadManifest, WorkloadLock, and ChangeLock schemas",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

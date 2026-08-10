@@ -1,0 +1,9 @@
+{
+  "id": "T095",
+  "epic": "E17",
+  "priority": "P8",
+  "role": "Spec",
+  "title": "Release CHECKPOINT_RESUME_STATE_CONSISTENCY_V1",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

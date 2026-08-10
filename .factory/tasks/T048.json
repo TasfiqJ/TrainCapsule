@@ -1,0 +1,9 @@
+{
+  "id": "T048",
+  "epic": "E05",
+  "priority": "P4",
+  "role": "Spec",
+  "title": "Define C0-C3 capture levels and recorder failure policy",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

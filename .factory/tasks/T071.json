@@ -1,0 +1,9 @@
+{
+  "id": "T071",
+  "epic": "E11",
+  "priority": "P6",
+  "role": "Builder",
+  "title": "Implement local non-root OCI runner",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "T057",
+  "epic": "E09",
+  "priority": "P5",
+  "role": "Builder",
+  "title": "Implement hypothesis ledger and experiment result lineage",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

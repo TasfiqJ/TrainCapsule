@@ -1,0 +1,9 @@
+{
+  "id": "T078",
+  "epic": "E15",
+  "priority": "P6",
+  "role": "Security",
+  "title": "Implement SBOM, dependency, license, vulnerability, and secret gates",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

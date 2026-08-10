@@ -1,0 +1,9 @@
+{
+  "id": "T025",
+  "epic": "E05",
+  "priority": "P2",
+  "role": "Builder",
+  "title": "Implement current stable PyTorch Flight Recorder importer",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

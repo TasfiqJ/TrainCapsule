@@ -1,0 +1,9 @@
+{
+  "id": "T023",
+  "epic": "E19",
+  "priority": "P1",
+  "role": "Release",
+  "title": "Verify clean setup and deterministic digest fixtures",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

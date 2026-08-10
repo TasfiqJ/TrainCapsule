@@ -1,0 +1,465 @@
+{
+  "$defs": {
+    "Gate": {
+      "additionalProperties": false,
+      "properties": {
+        "command": {
+          "title": "Command",
+          "type": "string"
+        },
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "required": {
+          "default": true,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "stages": {
+          "items": {
+            "$ref": "#/$defs/RoleName"
+          },
+          "title": "Stages",
+          "type": "array"
+        },
+        "timeout_seconds": {
+          "default": 900,
+          "maximum": 7200,
+          "minimum": 1,
+          "title": "Timeout Seconds",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "name",
+        "command"
+      ],
+      "title": "Gate",
+      "type": "object"
+    },
+    "PrivateGate": {
+      "additionalProperties": false,
+      "description": "Reference to a gate whose implementation lives outside the agent-visible repository.",
+      "properties": {
+        "required": {
+          "default": false,
+          "title": "Required",
+          "type": "boolean"
+        },
+        "suite": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Suite"
+        },
+        "timeout_seconds": {
+          "default": 1800,
+          "maximum": 14400,
+          "minimum": 1,
+          "title": "Timeout Seconds",
+          "type": "integer"
+        }
+      },
+      "title": "PrivateGate",
+      "type": "object"
+    },
+    "RepairPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "builder_models": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Builder Models",
+          "type": "array"
+        },
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "max_cycles": {
+          "default": 2,
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Max Cycles",
+          "type": "integer"
+        },
+        "restart_review_from": {
+          "$ref": "#/$defs/RoleName",
+          "default": "adversary"
+        }
+      },
+      "title": "RepairPolicy",
+      "type": "object"
+    },
+    "RoleName": {
+      "enum": [
+        "specification",
+        "builder",
+        "adversary",
+        "audit",
+        "security",
+        "performance",
+        "release",
+        "research"
+      ],
+      "title": "RoleName",
+      "type": "string"
+    },
+    "SecurityPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "allow_unsandboxed_commands": {
+          "default": false,
+          "title": "Allow Unsandboxed Commands",
+          "type": "boolean"
+        },
+        "fail_if_sandbox_unavailable": {
+          "default": true,
+          "title": "Fail If Sandbox Unavailable",
+          "type": "boolean"
+        },
+        "network_default": {
+          "default": "deny",
+          "enum": [
+            "deny",
+            "allowlist"
+          ],
+          "title": "Network Default",
+          "type": "string"
+        },
+        "secrets": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Secrets",
+          "type": "array"
+        }
+      },
+      "title": "SecurityPolicy",
+      "type": "object"
+    },
+    "Stage": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptance_criteria": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Acceptance Criteria",
+          "type": "array"
+        },
+        "allowed_domains": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Domains",
+          "type": "array"
+        },
+        "allowed_paths": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowed Paths",
+          "type": "array"
+        },
+        "disallowed_tools": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Disallowed Tools"
+        },
+        "effort": {
+          "anyOf": [
+            {
+              "enum": [
+                "low",
+                "medium",
+                "high",
+                "xhigh",
+                "max"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Effort"
+        },
+        "forbidden_paths": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Forbidden Paths",
+          "type": "array"
+        },
+        "machine_gates": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Machine Gates",
+          "type": "array"
+        },
+        "max_budget_usd": {
+          "anyOf": [
+            {
+              "exclusiveMinimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Budget Usd"
+        },
+        "max_turns": {
+          "anyOf": [
+            {
+              "maximum": 200,
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Max Turns"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "permission_mode": {
+          "anyOf": [
+            {
+              "enum": [
+                "default",
+                "acceptEdits",
+                "plan",
+                "auto",
+                "dontAsk",
+                "bypassPermissions"
+              ],
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Permission Mode"
+        },
+        "read_only": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Read Only"
+        },
+        "require_changes": {
+          "anyOf": [
+            {
+              "type": "boolean"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Require Changes"
+        },
+        "role": {
+          "$ref": "#/$defs/RoleName"
+        },
+        "task_budget_tokens": {
+          "anyOf": [
+            {
+              "minimum": 1000,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Task Budget Tokens"
+        },
+        "tools": {
+          "anyOf": [
+            {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tools"
+        }
+      },
+      "required": [
+        "role"
+      ],
+      "title": "Stage",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "acceptance_criteria": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Acceptance Criteria",
+      "type": "array"
+    },
+    "auto_merge": {
+      "default": false,
+      "title": "Auto Merge",
+      "type": "boolean"
+    },
+    "base_branch": {
+      "default": "main",
+      "title": "Base Branch",
+      "type": "string"
+    },
+    "depends_on": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Depends On",
+      "type": "array"
+    },
+    "gates": {
+      "items": {
+        "$ref": "#/$defs/Gate"
+      },
+      "title": "Gates",
+      "type": "array"
+    },
+    "goal": {
+      "title": "Goal",
+      "type": "string"
+    },
+    "inputs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Inputs",
+      "type": "array"
+    },
+    "non_goals": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Non Goals",
+      "type": "array"
+    },
+    "outputs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Outputs",
+      "type": "array"
+    },
+    "phase": {
+      "title": "Phase",
+      "type": "string"
+    },
+    "pipeline": {
+      "items": {
+        "$ref": "#/$defs/Stage"
+      },
+      "title": "Pipeline",
+      "type": "array"
+    },
+    "private_gate": {
+      "$ref": "#/$defs/PrivateGate"
+    },
+    "repair": {
+      "$ref": "#/$defs/RepairPolicy"
+    },
+    "security": {
+      "$ref": "#/$defs/SecurityPolicy"
+    },
+    "source_of_truth": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Source Of Truth",
+      "type": "array"
+    },
+    "stop_conditions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Stop Conditions",
+      "type": "array"
+    },
+    "task_budget_usd": {
+      "default": 60.0,
+      "exclusiveMinimum": 0,
+      "title": "Task Budget Usd",
+      "type": "number"
+    },
+    "task_id": {
+      "pattern": "^[A-Z][A-Z0-9_-]{1,63}$",
+      "title": "Task Id",
+      "type": "string"
+    },
+    "title": {
+      "title": "Title",
+      "type": "string"
+    }
+  },
+  "required": [
+    "task_id",
+    "title",
+    "phase",
+    "goal",
+    "source_of_truth",
+    "acceptance_criteria",
+    "outputs",
+    "stop_conditions",
+    "pipeline"
+  ],
+  "title": "TaskPacket",
+  "type": "object"
+}

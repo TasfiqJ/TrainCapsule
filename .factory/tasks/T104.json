@@ -1,0 +1,9 @@
+{
+  "id": "T104",
+  "epic": "E02",
+  "priority": "P8",
+  "role": "Product",
+  "title": "Run KEEP/INTEGRATE/UPSTREAM/NARROW/REPLACE decision",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

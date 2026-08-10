@@ -1,0 +1,9 @@
+{
+  "id": "T052",
+  "epic": "E05",
+  "priority": "P4",
+  "role": "Performance",
+  "title": "Benchmark capture-on/off median and tail distributions",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "T106",
+  "epic": "E16",
+  "priority": "P9",
+  "role": "Builder",
+  "title": "Implement thin local evidence/contract viewer",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

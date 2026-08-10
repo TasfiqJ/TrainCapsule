@@ -1,0 +1,9 @@
+{
+  "id": "T088",
+  "epic": "E12",
+  "priority": "P7",
+  "role": "Builder",
+  "title": "Implement canary, rollback, and observation-window records",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

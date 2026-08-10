@@ -1,0 +1,9 @@
+{
+  "id": "T110",
+  "epic": "E19",
+  "priority": "P9",
+  "role": "Benchmark",
+  "title": "Compare complete native/bundled/agent workflow against TrainCapsule",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

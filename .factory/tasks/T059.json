@@ -1,0 +1,9 @@
+{
+  "id": "T059",
+  "epic": "E09",
+  "priority": "P5",
+  "role": "Builder",
+  "title": "Implement closure-value qualification terminal states",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

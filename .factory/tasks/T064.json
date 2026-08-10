@@ -1,0 +1,9 @@
+{
+  "id": "T064",
+  "epic": "E10",
+  "priority": "P5",
+  "role": "Builder",
+  "title": "Implement data/control-trigger preservation hooks",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

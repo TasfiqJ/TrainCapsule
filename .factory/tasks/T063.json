@@ -1,0 +1,9 @@
+{
+  "id": "T063",
+  "epic": "E10",
+  "priority": "P5",
+  "role": "Builder",
+  "title": "Implement process-group legality validator",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

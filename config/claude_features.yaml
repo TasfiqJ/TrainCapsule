@@ -1,0 +1,91 @@
+version: 2
+cross_session_messaging:
+  enabled: true
+  minimum_cli_version: 2.1.224
+  risk_tiers:
+  - trust_core
+  roles:
+  - builder
+  - integration_scout
+  max_messages_per_session: 3
+  max_message_chars: 1000
+  same_machine_only: true
+  isolate_peer_machines: true
+  require_durable_handoff: true
+advisor:
+  enabled: true
+  model: opus
+  risk_tiers:
+  - trust_core
+  roles:
+  - builder
+  - recovery
+integration_scout:
+  enabled: true
+  risk_tiers:
+  - trust_core
+  role: integration_scout
+  timeout_seconds: 900
+  startup_delay_seconds: 0.75
+  blocking_on_concrete_failure: true
+goal:
+  enabled: true
+  minimum_cli_version: 2.1.224
+  risk_tiers:
+  - integration
+  - trust_core
+  roles:
+  - builder
+  max_condition_chars: 1800
+  max_turn_clause: 20
+  note: Goal mode is a bounded persistence aid; deterministic controller gates remain release authority.
+dynamic_workflows:
+  enabled: false
+  minimum_cli_version: 2.1.202
+  size_guideline: small
+  roles:
+  - research
+  risk_tiers:
+  - integration
+  - trust_core
+  task_allowlist:
+  - T001
+  - T002
+  - T003
+  max_agents_guideline: 4
+  non_authoritative: true
+  reason: Programmatic Workflow tool use is disabled until the Python Agent SDK explicitly documents support;
+    saved workflows remain optional/manual.
+agent_teams:
+  enabled: false
+  reason: Agent teams multiply context and token use; controller-owned fresh sessions are the default.
+memory:
+  auto_memory_enabled: false
+  durable_handoffs_only: true
+role_skills:
+  planner:
+  - plan-bounded-task
+  specification:
+  - specify-contract
+  builder:
+  - implement-task
+  integration_scout:
+  - integration-proof
+  adversary:
+  - adversarial-review
+  audit:
+  - integration-proof
+  security:
+  - security-proof
+  performance:
+  - performance-proof
+  release:
+  - release-proof
+  research:
+  - source-audit
+  recovery:
+  - recover-task
+  value_validator:
+  - value-audit
+  value_adversary:
+  - value-audit

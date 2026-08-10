@@ -1,0 +1,9 @@
+{
+  "id": "T101",
+  "epic": "E18",
+  "priority": "P8",
+  "role": "Spec",
+  "title": "Define ScaleEmulationBackend interface",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

@@ -1,0 +1,172 @@
+{
+  "task_id": "DEMO-001",
+  "title": "Prove the TrainCapsule factory on a harmless checksum utility",
+  "phase": "Factory calibration",
+  "goal": "Add a tiny deterministic checksum utility and tests so specification, builder, adversary, audit, and release roles are proven before product work.",
+  "source_of_truth": [
+    "docs/source-of-truth/final-2026-08-09/14_CLAUDE_CODE_MASTER_BUILD_PROMPT.md",
+    "CLAUDE.md"
+  ],
+  "inputs": [],
+  "non_goals": [
+    "TrainCapsule product logic",
+    "network access",
+    "dependency additions"
+  ],
+  "acceptance_criteria": [
+    "A small checksum function accepts bytes and returns lowercase SHA-256 hex.",
+    "Tests cover empty bytes, ASCII bytes, and deterministic repeatability.",
+    "No controller, protected source, hidden gate, or release configuration changes."
+  ],
+  "outputs": [
+    "specs/tasks/DEMO-001.md",
+    "demo/checksum.py",
+    "tests/demo/test_checksum.py"
+  ],
+  "stop_conditions": [
+    "The task requires changing factory orchestration to pass.",
+    "The exact checksum semantics are ambiguous."
+  ],
+  "security": {
+    "network_default": "deny",
+    "allow_unsandboxed_commands": false,
+    "fail_if_sandbox_unavailable": true,
+    "secrets": []
+  },
+  "gates": [
+    {
+      "name": "demo-tests",
+      "command": "python -m pytest tests/demo/test_checksum.py",
+      "timeout_seconds": 120,
+      "stages": [
+        "builder",
+        "adversary",
+        "audit",
+        "release"
+      ],
+      "required": true
+    },
+    {
+      "name": "no-protected-change",
+      "command": "bash scripts/gates/no_protected_changes.sh",
+      "timeout_seconds": 30,
+      "stages": [
+        "adversary",
+        "audit",
+        "release"
+      ],
+      "required": true
+    }
+  ],
+  "private_gate": {
+    "required": false,
+    "suite": null,
+    "timeout_seconds": 1800
+  },
+  "pipeline": [
+    {
+      "role": "specification",
+      "allowed_paths": [
+        "specs/tasks/DEMO-001.md"
+      ],
+      "forbidden_paths": [
+        "docs/source-of-truth/final-2026-08-09/**",
+        ".factory/source-locks/**",
+        ".claude/**",
+        "config/**",
+        "tcfactory/**",
+        "scripts/**",
+        "bootstrap/private-gates/**",
+        "factory/task_catalog.yaml",
+        "factory/feature_ledger.yaml",
+        "factory/product_definition_of_done.yaml"
+      ],
+      "machine_gates": [],
+      "require_changes": true
+    },
+    {
+      "role": "builder",
+      "allowed_paths": [
+        "demo/**",
+        "tests/demo/**"
+      ],
+      "forbidden_paths": [
+        "docs/source-of-truth/final-2026-08-09/**",
+        ".factory/source-locks/**",
+        ".claude/**",
+        "config/**",
+        "tcfactory/**",
+        "scripts/**",
+        "bootstrap/private-gates/**",
+        "factory/task_catalog.yaml",
+        "factory/feature_ledger.yaml",
+        "factory/product_definition_of_done.yaml",
+        "specs/**"
+      ],
+      "machine_gates": [
+        "demo-tests"
+      ],
+      "require_changes": true
+    },
+    {
+      "role": "adversary",
+      "allowed_paths": [],
+      "forbidden_paths": [
+        "**"
+      ],
+      "machine_gates": [
+        "demo-tests",
+        "no-protected-change"
+      ],
+      "read_only": true,
+      "require_changes": false
+    },
+    {
+      "role": "audit",
+      "allowed_paths": [],
+      "forbidden_paths": [
+        "**"
+      ],
+      "machine_gates": [
+        "demo-tests",
+        "no-protected-change"
+      ],
+      "read_only": true,
+      "require_changes": false
+    },
+    {
+      "role": "release",
+      "allowed_paths": [],
+      "forbidden_paths": [
+        "**"
+      ],
+      "machine_gates": [
+        "demo-tests",
+        "no-protected-change"
+      ],
+      "read_only": true,
+      "require_changes": false
+    }
+  ],
+  "repair": {
+    "enabled": true,
+    "max_cycles": 2,
+    "builder_models": [
+      "sonnet",
+      "opus"
+    ],
+    "restart_review_from": "adversary"
+  },
+  "task_budget_usd": 8.0,
+  "auto_merge": false,
+  "base_branch": "main",
+  "risk_tier": "trust_core",
+  "context_keys": [
+    "factory"
+  ],
+  "remote_ci_required": false,
+  "github_push": false,
+  "commit_type": "test",
+  "commit_subject": "test: calibrate autonomous loop",
+  "allow_test_changes": true
+}

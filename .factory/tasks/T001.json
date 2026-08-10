@@ -1,0 +1,9 @@
+{
+  "id": "T001",
+  "epic": "E01",
+  "priority": "P0",
+  "role": "Spec",
+  "title": "Commit final source-of-truth bundle and precedence rules",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

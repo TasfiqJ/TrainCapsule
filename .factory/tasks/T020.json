@@ -1,0 +1,9 @@
+{
+  "id": "T020",
+  "epic": "E04",
+  "priority": "P1",
+  "role": "Security",
+  "title": "Implement retention, deletion, legal hold, and revocation graph",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

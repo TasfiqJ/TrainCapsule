@@ -1,0 +1,9 @@
+{
+  "id": "T015",
+  "epic": "E03",
+  "priority": "P1",
+  "role": "Builder",
+  "title": "Implement workload/change lock diff and trust downgrade rules",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

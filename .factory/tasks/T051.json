@@ -1,0 +1,9 @@
+{
+  "id": "T051",
+  "epic": "E05",
+  "priority": "P4",
+  "role": "Builder",
+  "title": "Implement out-of-band freeze independent of failed process group",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

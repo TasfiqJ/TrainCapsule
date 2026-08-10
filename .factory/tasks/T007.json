@@ -1,0 +1,9 @@
+{
+  "id": "T007",
+  "epic": "E21",
+  "priority": "P0",
+  "role": "Adversary",
+  "title": "Bootstrap hidden gates outside builder-visible repository",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

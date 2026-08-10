@@ -1,0 +1,9 @@
+{
+  "id": "T099",
+  "epic": "E18",
+  "priority": "P8",
+  "role": "Spec",
+  "title": "Define OperatorAlignmentBackend interface",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

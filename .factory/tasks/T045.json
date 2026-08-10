@@ -1,0 +1,9 @@
+{
+  "id": "T045",
+  "epic": "E08",
+  "priority": "P3",
+  "role": "Builder",
+  "title": "Implement Symptom, ObservedDivergence, and Hypothesis records",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

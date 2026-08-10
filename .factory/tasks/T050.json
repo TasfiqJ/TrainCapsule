@@ -1,0 +1,9 @@
+{
+  "id": "T050",
+  "epic": "E05",
+  "priority": "P4",
+  "role": "Builder",
+  "title": "Implement optional bounded local ring buffer",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

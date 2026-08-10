@@ -1,0 +1,9 @@
+{
+  "id": "T018",
+  "epic": "E04",
+  "priority": "P1",
+  "role": "Builder",
+  "title": "Implement atomic content-addressed object store",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

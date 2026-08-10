@@ -1,0 +1,9 @@
+{
+  "id": "T017",
+  "epic": "E04",
+  "priority": "P1",
+  "role": "Spec",
+  "title": "Define EvidenceArtifact and provenance contracts",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

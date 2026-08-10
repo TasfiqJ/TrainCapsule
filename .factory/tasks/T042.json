@@ -1,0 +1,9 @@
+{
+  "id": "T042",
+  "epic": "E07",
+  "priority": "P3",
+  "role": "Adversary",
+  "title": "Create data-branch, dataloader, checkpoint-wait, process-exit faults",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

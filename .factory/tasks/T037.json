@@ -1,0 +1,9 @@
+{
+  "id": "T037",
+  "epic": "E06",
+  "priority": "P3",
+  "role": "Builder",
+  "title": "Implement process-group/collective alignment",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

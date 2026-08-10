@@ -1,0 +1,9 @@
+{
+  "id": "T075",
+  "epic": "E11",
+  "priority": "P6",
+  "role": "Builder",
+  "title": "Implement environment mismatch and unavailable states",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

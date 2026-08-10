@@ -1,0 +1,9 @@
+{
+  "id": "T053",
+  "epic": "E05",
+  "priority": "P4",
+  "role": "Performance",
+  "title": "Measure CPU, memory, storage, network, GPU, and output effects",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

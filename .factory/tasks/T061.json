@@ -1,0 +1,9 @@
+{
+  "id": "T061",
+  "epic": "E10",
+  "priority": "P5",
+  "role": "Builder",
+  "title": "Implement rank/actor-set reduction",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

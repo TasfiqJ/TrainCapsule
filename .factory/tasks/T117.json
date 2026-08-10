@@ -1,0 +1,9 @@
+{
+  "id": "T117",
+  "epic": "E20",
+  "priority": "P10",
+  "role": "Security",
+  "title": "Create local-data, DPA, IP, retention, and support templates",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

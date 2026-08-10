@@ -1,0 +1,9 @@
+{
+  "id": "T082",
+  "epic": "E14",
+  "priority": "P6",
+  "role": "Release",
+  "title": "Replay sanitized/public controlled artifact from clean environment",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

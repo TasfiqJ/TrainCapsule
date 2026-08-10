@@ -1,0 +1,9 @@
+{
+  "id": "T086",
+  "epic": "E12",
+  "priority": "P7",
+  "role": "Builder",
+  "title": "Implement shard ownership and process-group checks",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

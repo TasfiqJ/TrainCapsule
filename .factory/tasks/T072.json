@@ -1,0 +1,9 @@
+{
+  "id": "T072",
+  "epic": "E11",
+  "priority": "P6",
+  "role": "Builder",
+  "title": "Implement source/substitute environment locks",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

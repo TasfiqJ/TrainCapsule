@@ -1,0 +1,9 @@
+{
+  "id": "T022",
+  "epic": "E16",
+  "priority": "P1",
+  "role": "Builder",
+  "title": "Implement initial CLI: doctor, lock, inspect",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

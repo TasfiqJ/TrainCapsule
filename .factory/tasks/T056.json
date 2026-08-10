@@ -1,0 +1,9 @@
+{
+  "id": "T056",
+  "epic": "E09",
+  "priority": "P5",
+  "role": "Spec",
+  "title": "Define controlled ExperimentPlan and permitted-inference contract",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

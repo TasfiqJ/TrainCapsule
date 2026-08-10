@@ -1,0 +1,79 @@
+{
+  "$defs": {
+    "Verdict": {
+      "enum": [
+        "pass",
+        "fail",
+        "blocked",
+        "unknown"
+      ],
+      "title": "Verdict",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "changed_files": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Changed Files",
+      "type": "array"
+    },
+    "commands_run": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Commands Run",
+      "type": "array"
+    },
+    "evidence": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidence",
+      "type": "array"
+    },
+    "findings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    },
+    "next_actions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Next Actions",
+      "type": "array"
+    },
+    "summary": {
+      "title": "Summary",
+      "type": "string"
+    },
+    "tests_run": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Tests Run",
+      "type": "array"
+    },
+    "verdict": {
+      "$ref": "#/$defs/Verdict"
+    }
+  },
+  "required": [
+    "verdict",
+    "summary"
+  ],
+  "title": "AgentReport",
+  "type": "object"
+}

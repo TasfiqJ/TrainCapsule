@@ -1,0 +1,849 @@
+{
+  "version": 2,
+  "defaults": {
+    "target_user": "AI training, platform, reliability, framework, cloud, or accelerator engineering team",
+    "job_to_be_done": "Close an accelerated-workload failure, qualify a change, and exchange attributable evidence without false certainty.",
+    "pain": "Distributed workload failures and recovery uncertainty waste specialist time and expensive accelerator capacity.",
+    "customer_outcome": "A faster, reproducible, independently inspectable failure or change decision with explicit limits.",
+    "causal_mechanism": "Each task supplies a necessary capability in the Close, Qualify, or Exchange workflow.",
+    "primary_metric": "foundational capability present",
+    "metric_direction": "binary",
+    "threshold_rationale": "Required dependency for the protected roadmap; commercial demand is never inferred from implementation.",
+    "falsification_criteria": [
+      "The capability is not required by a protected workflow or duplicates native tooling without additional decision value.",
+      "The result depends on fabricated, unattributed, or model-only evidence."
+    ],
+    "revenue_linkage": "Supports incident closure, change qualification, private evidence exchange, or recurring reliability operations.",
+    "prohibited_proxies": [
+      "lines of code",
+      "raw test count without boundary coverage",
+      "GitHub stars without recurring use",
+      "model-written praise",
+      "synthetic customer quotes",
+      "unverified willingness-to-pay claims",
+      "fabricated benchmark results",
+      "post-hoc threshold lowering"
+    ],
+    "required_evidence_classes": [
+      "foundational_dependency"
+    ]
+  },
+  "tasks": {
+    "T001": {
+      "mode": "foundational",
+      "parent_milestone": "T012"
+    },
+    "T002": {
+      "mode": "foundational",
+      "parent_milestone": "T012"
+    },
+    "T003": {
+      "mode": "foundational",
+      "parent_milestone": "T012"
+    },
+    "T004": {
+      "mode": "foundational",
+      "parent_milestone": "T012"
+    },
+    "T005": {
+      "mode": "foundational",
+      "parent_milestone": "T012"
+    },
+    "T006": {
+      "mode": "foundational",
+      "parent_milestone": "T012"
+    },
+    "T007": {
+      "mode": "foundational",
+      "parent_milestone": "T012"
+    },
+    "T008": {
+      "mode": "foundational",
+      "parent_milestone": "T012"
+    },
+    "T009": {
+      "mode": "foundational",
+      "parent_milestone": "T012"
+    },
+    "T010": {
+      "mode": "foundational",
+      "parent_milestone": "T012"
+    },
+    "T011": {
+      "mode": "foundational",
+      "parent_milestone": "T012"
+    },
+    "T012": {
+      "mode": "measured",
+      "parent_milestone": "T012",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T012.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T013": {
+      "mode": "foundational",
+      "parent_milestone": "T023"
+    },
+    "T014": {
+      "mode": "foundational",
+      "parent_milestone": "T023"
+    },
+    "T015": {
+      "mode": "foundational",
+      "parent_milestone": "T023"
+    },
+    "T016": {
+      "mode": "foundational",
+      "parent_milestone": "T023"
+    },
+    "T017": {
+      "mode": "foundational",
+      "parent_milestone": "T023"
+    },
+    "T018": {
+      "mode": "foundational",
+      "parent_milestone": "T023"
+    },
+    "T019": {
+      "mode": "foundational",
+      "parent_milestone": "T023"
+    },
+    "T020": {
+      "mode": "foundational",
+      "parent_milestone": "T023"
+    },
+    "T021": {
+      "mode": "foundational",
+      "parent_milestone": "T023"
+    },
+    "T022": {
+      "mode": "foundational",
+      "parent_milestone": "T023"
+    },
+    "T023": {
+      "mode": "measured",
+      "parent_milestone": "T023",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T023.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T024": {
+      "mode": "foundational",
+      "parent_milestone": "T034"
+    },
+    "T025": {
+      "mode": "foundational",
+      "parent_milestone": "T034"
+    },
+    "T026": {
+      "mode": "foundational",
+      "parent_milestone": "T034"
+    },
+    "T027": {
+      "mode": "foundational",
+      "parent_milestone": "T034"
+    },
+    "T028": {
+      "mode": "foundational",
+      "parent_milestone": "T034"
+    },
+    "T029": {
+      "mode": "foundational",
+      "parent_milestone": "T034"
+    },
+    "T030": {
+      "mode": "foundational",
+      "parent_milestone": "T034"
+    },
+    "T031": {
+      "mode": "foundational",
+      "parent_milestone": "T034"
+    },
+    "T032": {
+      "mode": "foundational",
+      "parent_milestone": "T034"
+    },
+    "T033": {
+      "mode": "foundational",
+      "parent_milestone": "T034"
+    },
+    "T034": {
+      "mode": "foundational",
+      "parent_milestone": "T034"
+    },
+    "T035": {
+      "mode": "foundational",
+      "parent_milestone": "T047"
+    },
+    "T036": {
+      "mode": "foundational",
+      "parent_milestone": "T047"
+    },
+    "T037": {
+      "mode": "foundational",
+      "parent_milestone": "T047"
+    },
+    "T038": {
+      "mode": "foundational",
+      "parent_milestone": "T047"
+    },
+    "T039": {
+      "mode": "foundational",
+      "parent_milestone": "T047"
+    },
+    "T040": {
+      "mode": "foundational",
+      "parent_milestone": "T047"
+    },
+    "T041": {
+      "mode": "foundational",
+      "parent_milestone": "T047"
+    },
+    "T042": {
+      "mode": "foundational",
+      "parent_milestone": "T047"
+    },
+    "T043": {
+      "mode": "foundational",
+      "parent_milestone": "T047"
+    },
+    "T044": {
+      "mode": "foundational",
+      "parent_milestone": "T047"
+    },
+    "T045": {
+      "mode": "foundational",
+      "parent_milestone": "T047"
+    },
+    "T046": {
+      "mode": "foundational",
+      "parent_milestone": "T047"
+    },
+    "T047": {
+      "mode": "measured",
+      "parent_milestone": "T047",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T047.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T048": {
+      "mode": "foundational",
+      "parent_milestone": "T055"
+    },
+    "T049": {
+      "mode": "foundational",
+      "parent_milestone": "T055"
+    },
+    "T050": {
+      "mode": "foundational",
+      "parent_milestone": "T055"
+    },
+    "T051": {
+      "mode": "foundational",
+      "parent_milestone": "T055"
+    },
+    "T052": {
+      "mode": "foundational",
+      "parent_milestone": "T055"
+    },
+    "T053": {
+      "mode": "foundational",
+      "parent_milestone": "T055"
+    },
+    "T054": {
+      "mode": "foundational",
+      "parent_milestone": "T055"
+    },
+    "T055": {
+      "mode": "measured",
+      "parent_milestone": "T055",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T055.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T056": {
+      "mode": "foundational",
+      "parent_milestone": "T069"
+    },
+    "T057": {
+      "mode": "foundational",
+      "parent_milestone": "T069"
+    },
+    "T058": {
+      "mode": "foundational",
+      "parent_milestone": "T069"
+    },
+    "T059": {
+      "mode": "foundational",
+      "parent_milestone": "T069"
+    },
+    "T060": {
+      "mode": "foundational",
+      "parent_milestone": "T069"
+    },
+    "T061": {
+      "mode": "foundational",
+      "parent_milestone": "T069"
+    },
+    "T062": {
+      "mode": "foundational",
+      "parent_milestone": "T069"
+    },
+    "T063": {
+      "mode": "foundational",
+      "parent_milestone": "T069"
+    },
+    "T064": {
+      "mode": "foundational",
+      "parent_milestone": "T069"
+    },
+    "T065": {
+      "mode": "foundational",
+      "parent_milestone": "T069"
+    },
+    "T066": {
+      "mode": "foundational",
+      "parent_milestone": "T069"
+    },
+    "T067": {
+      "mode": "foundational",
+      "parent_milestone": "T069"
+    },
+    "T068": {
+      "mode": "foundational",
+      "parent_milestone": "T069"
+    },
+    "T069": {
+      "mode": "measured",
+      "parent_milestone": "T069",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T069.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T070": {
+      "mode": "foundational",
+      "parent_milestone": "T082"
+    },
+    "T071": {
+      "mode": "foundational",
+      "parent_milestone": "T082"
+    },
+    "T072": {
+      "mode": "foundational",
+      "parent_milestone": "T082"
+    },
+    "T073": {
+      "mode": "foundational",
+      "parent_milestone": "T082"
+    },
+    "T074": {
+      "mode": "foundational",
+      "parent_milestone": "T082"
+    },
+    "T075": {
+      "mode": "foundational",
+      "parent_milestone": "T082"
+    },
+    "T076": {
+      "mode": "foundational",
+      "parent_milestone": "T082"
+    },
+    "T077": {
+      "mode": "foundational",
+      "parent_milestone": "T082"
+    },
+    "T078": {
+      "mode": "foundational",
+      "parent_milestone": "T082"
+    },
+    "T079": {
+      "mode": "foundational",
+      "parent_milestone": "T082"
+    },
+    "T080": {
+      "mode": "foundational",
+      "parent_milestone": "T082"
+    },
+    "T081": {
+      "mode": "foundational",
+      "parent_milestone": "T082"
+    },
+    "T082": {
+      "mode": "measured",
+      "parent_milestone": "T082",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T082.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T083": {
+      "mode": "foundational",
+      "parent_milestone": "T094"
+    },
+    "T084": {
+      "mode": "foundational",
+      "parent_milestone": "T094"
+    },
+    "T085": {
+      "mode": "foundational",
+      "parent_milestone": "T094"
+    },
+    "T086": {
+      "mode": "foundational",
+      "parent_milestone": "T094"
+    },
+    "T087": {
+      "mode": "foundational",
+      "parent_milestone": "T094"
+    },
+    "T088": {
+      "mode": "foundational",
+      "parent_milestone": "T094"
+    },
+    "T089": {
+      "mode": "foundational",
+      "parent_milestone": "T094"
+    },
+    "T090": {
+      "mode": "foundational",
+      "parent_milestone": "T094"
+    },
+    "T091": {
+      "mode": "foundational",
+      "parent_milestone": "T094"
+    },
+    "T092": {
+      "mode": "foundational",
+      "parent_milestone": "T094"
+    },
+    "T093": {
+      "mode": "foundational",
+      "parent_milestone": "T094"
+    },
+    "T094": {
+      "mode": "measured",
+      "parent_milestone": "T094",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T094.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T095": {
+      "mode": "foundational",
+      "parent_milestone": "T104"
+    },
+    "T096": {
+      "mode": "foundational",
+      "parent_milestone": "T104"
+    },
+    "T097": {
+      "mode": "foundational",
+      "parent_milestone": "T104"
+    },
+    "T098": {
+      "mode": "measured",
+      "parent_milestone": "T098",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T098.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T099": {
+      "mode": "foundational",
+      "parent_milestone": "T104"
+    },
+    "T100": {
+      "mode": "foundational",
+      "parent_milestone": "T104"
+    },
+    "T101": {
+      "mode": "foundational",
+      "parent_milestone": "T104"
+    },
+    "T102": {
+      "mode": "foundational",
+      "parent_milestone": "T104"
+    },
+    "T103": {
+      "mode": "foundational",
+      "parent_milestone": "T104"
+    },
+    "T104": {
+      "mode": "foundational",
+      "parent_milestone": "T104"
+    },
+    "T105": {
+      "mode": "foundational",
+      "parent_milestone": "T114"
+    },
+    "T106": {
+      "mode": "foundational",
+      "parent_milestone": "T114"
+    },
+    "T107": {
+      "mode": "foundational",
+      "parent_milestone": "T114"
+    },
+    "T108": {
+      "mode": "measured",
+      "parent_milestone": "T108",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T108.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T109": {
+      "mode": "measured",
+      "parent_milestone": "T109",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T109.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T110": {
+      "mode": "foundational",
+      "parent_milestone": "T114"
+    },
+    "T111": {
+      "mode": "measured",
+      "parent_milestone": "T111",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T111.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T112": {
+      "mode": "foundational",
+      "parent_milestone": "T114"
+    },
+    "T113": {
+      "mode": "foundational",
+      "parent_milestone": "T114"
+    },
+    "T114": {
+      "mode": "measured",
+      "parent_milestone": "T114",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T114.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T115": {
+      "mode": "foundational",
+      "parent_milestone": "T124"
+    },
+    "T116": {
+      "mode": "foundational",
+      "parent_milestone": "T124"
+    },
+    "T117": {
+      "mode": "foundational",
+      "parent_milestone": "T124"
+    },
+    "T118": {
+      "mode": "foundational",
+      "parent_milestone": "T124"
+    },
+    "T119": {
+      "mode": "external",
+      "parent_milestone": "T119",
+      "primary_metric": "independently_attributable_external_behavior",
+      "metric_direction": "external",
+      "evidence_path": ".factory/external-evidence/T119.json",
+      "threshold_rationale": "Only real external behavior can satisfy this task; the factory must wait rather than fabricate evidence.",
+      "falsification_criteria": [
+        "Evidence is self-authored, synthetic, unattributed, or cannot be independently verified."
+      ],
+      "required_evidence_classes": [
+        "external_usage"
+      ]
+    },
+    "T120": {
+      "mode": "measured",
+      "parent_milestone": "T120",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T120.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T121": {
+      "mode": "external",
+      "parent_milestone": "T121",
+      "primary_metric": "independently_attributable_external_behavior",
+      "metric_direction": "external",
+      "evidence_path": ".factory/external-evidence/T121.json",
+      "threshold_rationale": "Only real external behavior can satisfy this task; the factory must wait rather than fabricate evidence.",
+      "falsification_criteria": [
+        "Evidence is self-authored, synthetic, unattributed, or cannot be independently verified."
+      ],
+      "required_evidence_classes": [
+        "external_usage"
+      ]
+    },
+    "T122": {
+      "mode": "measured",
+      "parent_milestone": "T122",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T122.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T123": {
+      "mode": "measured",
+      "parent_milestone": "T123",
+      "primary_metric": "all_predeclared_task_conditions_pass",
+      "metric_direction": "binary",
+      "minimum_material_improvement": 1.0,
+      "measurement_unit": "all conditions pass",
+      "evidence_path": ".factory/external-evidence/T123.json",
+      "required_conditions": [
+        "protected_source_requirements_satisfied",
+        "deterministic_machine_evidence_present",
+        "independent_adversarial_review_passed",
+        "no_unknown_or_external_fact_treated_as_pass",
+        "no_post_hoc_threshold_lowering"
+      ],
+      "threshold_rationale": "Release or value work is material only when every predeclared condition passes with attributable evidence.",
+      "falsification_criteria": [
+        "Any required condition is false, unknown, skipped, unattributed, or supported only by model assertion."
+      ],
+      "required_evidence_classes": [
+        "deterministic_measurement",
+        "controlled_experiment"
+      ]
+    },
+    "T124": {
+      "mode": "foundational",
+      "parent_milestone": "T124"
+    }
+  }
+}

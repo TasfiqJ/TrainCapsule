@@ -1,0 +1,9 @@
+{
+  "id": "T008",
+  "epic": "E02",
+  "priority": "P0",
+  "role": "Research",
+  "title": "Create public distributed-workload incident corpus schema",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

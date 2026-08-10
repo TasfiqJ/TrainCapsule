@@ -1,0 +1,9 @@
+{
+  "id": "T004",
+  "epic": "E01",
+  "priority": "P0",
+  "role": "Security",
+  "title": "Configure protected normative paths and changed-file gate",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

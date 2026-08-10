@@ -1,0 +1,9 @@
+{
+  "id": "T041",
+  "epic": "E07",
+  "priority": "P3",
+  "role": "Adversary",
+  "title": "Create skipped/reordered/incompatible collective faults",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

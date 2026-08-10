@@ -1,0 +1,9 @@
+{
+  "id": "T034",
+  "epic": "E02",
+  "priority": "P2",
+  "role": "Research",
+  "title": "Add Flight Recorder and cloud recovery capabilities to absorption register",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

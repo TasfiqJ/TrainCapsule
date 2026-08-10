@@ -1,0 +1,1126 @@
+{
+  "schema_version": "1.0",
+  "product": "TrainCapsule",
+  "source": "12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md",
+  "source_sha256": "4833aeef102e9d94050e2b5b2cf82cf0c630d0a4699390946056dea82f387754",
+  "task_count": 124,
+  "activation_status": "BLOCKED_PENDING_FACTORY_CALIBRATION",
+  "tasks": [
+    {
+      "id": "T001",
+      "epic": "E01",
+      "priority": "P0",
+      "role": "Spec",
+      "title": "Commit final source-of-truth bundle and precedence rules",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T002",
+      "epic": "E01",
+      "priority": "P0",
+      "role": "Research",
+      "title": "Recheck product name, package, domain, and trademark surface",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T003",
+      "epic": "E01",
+      "priority": "P0",
+      "role": "Research",
+      "title": "Pin current primary sources and create claim registry",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T004",
+      "epic": "E01",
+      "priority": "P0",
+      "role": "Security",
+      "title": "Configure protected normative paths and changed-file gate",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T005",
+      "epic": "E21",
+      "priority": "P0",
+      "role": "Factory",
+      "title": "Create role-separated worktree factory and durable task ledger",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T006",
+      "epic": "E21",
+      "priority": "P0",
+      "role": "Factory",
+      "title": "Create quota checkpoint, pause, resume, and single-instance controls",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T007",
+      "epic": "E21",
+      "priority": "P0",
+      "role": "Adversary",
+      "title": "Bootstrap hidden gates outside builder-visible repository",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T008",
+      "epic": "E02",
+      "priority": "P0",
+      "role": "Research",
+      "title": "Create public distributed-workload incident corpus schema",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T009",
+      "epic": "E02",
+      "priority": "P0",
+      "role": "Research",
+      "title": "Create native/bundled/agent capability matrix",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T010",
+      "epic": "E02",
+      "priority": "P0",
+      "role": "Product",
+      "title": "Create wedge scoring model and Wedge Discovery Ledger",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T011",
+      "epic": "E02",
+      "priority": "P0",
+      "role": "Product",
+      "title": "Create monthly WEDGE_DECISION.md workflow",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T012",
+      "epic": "E19",
+      "priority": "P0",
+      "role": "Value",
+      "title": "Create immutable attempted-case and value-record schemas",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T013",
+      "epic": "E03",
+      "priority": "P1",
+      "role": "Spec",
+      "title": "Define WorkloadManifest, WorkloadLock, and ChangeLock schemas",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T014",
+      "epic": "E03",
+      "priority": "P1",
+      "role": "Builder",
+      "title": "Implement canonical serialization and digests",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T015",
+      "epic": "E03",
+      "priority": "P1",
+      "role": "Builder",
+      "title": "Implement workload/change lock diff and trust downgrade rules",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T016",
+      "epic": "E03",
+      "priority": "P1",
+      "role": "Builder",
+      "title": "Implement EnvironmentAvailabilityRecord",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T017",
+      "epic": "E04",
+      "priority": "P1",
+      "role": "Spec",
+      "title": "Define EvidenceArtifact and provenance contracts",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T018",
+      "epic": "E04",
+      "priority": "P1",
+      "role": "Builder",
+      "title": "Implement atomic content-addressed object store",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T019",
+      "epic": "E04",
+      "priority": "P1",
+      "role": "Builder",
+      "title": "Implement SQLite metadata and migrations",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T020",
+      "epic": "E04",
+      "priority": "P1",
+      "role": "Security",
+      "title": "Implement retention, deletion, legal hold, and revocation graph",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T021",
+      "epic": "E04",
+      "priority": "P1",
+      "role": "Security",
+      "title": "Implement secret/data classification scan",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T022",
+      "epic": "E16",
+      "priority": "P1",
+      "role": "Builder",
+      "title": "Implement initial CLI: doctor, lock, inspect",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T023",
+      "epic": "E19",
+      "priority": "P1",
+      "role": "Release",
+      "title": "Verify clean setup and deterministic digest fixtures",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T024",
+      "epic": "E05",
+      "priority": "P2",
+      "role": "Spec",
+      "title": "Define adapter capability/loss/authority contract",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T025",
+      "epic": "E05",
+      "priority": "P2",
+      "role": "Builder",
+      "title": "Implement current stable PyTorch Flight Recorder importer",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T026",
+      "epic": "E05",
+      "priority": "P2",
+      "role": "Builder",
+      "title": "Implement c10d/NCCL lifecycle normalization",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T027",
+      "epic": "E05",
+      "priority": "P2",
+      "role": "Builder",
+      "title": "Implement Slurm process/job/node importer",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T028",
+      "epic": "E05",
+      "priority": "P2",
+      "role": "Builder",
+      "title": "Implement DCGM/NVML/XID/ECC importer",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T029",
+      "epic": "E05",
+      "priority": "P2",
+      "role": "Builder",
+      "title": "Implement checkpoint/RNG/sampler reference importer",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T030",
+      "epic": "E05",
+      "priority": "P2",
+      "role": "Builder",
+      "title": "Implement capture completeness states",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T031",
+      "epic": "E05",
+      "priority": "P2",
+      "role": "Security",
+      "title": "Fuzz malformed and oversized evidence inputs",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T032",
+      "epic": "E05",
+      "priority": "P2",
+      "role": "Integration",
+      "title": "Run real native trace import end to end",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T033",
+      "epic": "E19",
+      "priority": "P2",
+      "role": "Benchmark",
+      "title": "Implement native baseline timing and effort ledger",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T034",
+      "epic": "E02",
+      "priority": "P2",
+      "role": "Research",
+      "title": "Add Flight Recorder and cloud recovery capabilities to absorption register",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T035",
+      "epic": "E06",
+      "priority": "P3",
+      "role": "Spec",
+      "title": "Define actor/resource/phase/state-channel IncidentIR",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T036",
+      "epic": "E06",
+      "priority": "P3",
+      "role": "Builder",
+      "title": "Implement per-actor ordered trace",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T037",
+      "epic": "E06",
+      "priority": "P3",
+      "role": "Builder",
+      "title": "Implement process-group/collective alignment",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T038",
+      "epic": "E06",
+      "priority": "P3",
+      "role": "Builder",
+      "title": "Implement time-interval uncertainty and partial order",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T039",
+      "epic": "E06",
+      "priority": "P3",
+      "role": "Builder",
+      "title": "Implement evidence-gap propagation",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T040",
+      "epic": "E07",
+      "priority": "P3",
+      "role": "Spec",
+      "title": "Release PRE_COLLECTIVE_LIFECYCLE_CONTRACT_V1",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T041",
+      "epic": "E07",
+      "priority": "P3",
+      "role": "Adversary",
+      "title": "Create skipped/reordered/incompatible collective faults",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T042",
+      "epic": "E07",
+      "priority": "P3",
+      "role": "Adversary",
+      "title": "Create data-branch, dataloader, checkpoint-wait, process-exit faults",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T043",
+      "epic": "E07",
+      "priority": "P3",
+      "role": "Adversary",
+      "title": "Create clean controls and delayed-but-healthy controls",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T044",
+      "epic": "E08",
+      "priority": "P3",
+      "role": "Builder",
+      "title": "Implement last consistent/first observed inconsistent boundary",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T045",
+      "epic": "E08",
+      "priority": "P3",
+      "role": "Builder",
+      "title": "Implement Symptom, ObservedDivergence, and Hypothesis records",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T046",
+      "epic": "E08",
+      "priority": "P3",
+      "role": "Adversary",
+      "title": "Test timestamp-only alignment and hidden missing evidence",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T047",
+      "epic": "E19",
+      "priority": "P3",
+      "role": "Release",
+      "title": "Run hidden first-boundary suite with zero clean-control blame",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T048",
+      "epic": "E05",
+      "priority": "P4",
+      "role": "Spec",
+      "title": "Define C0-C3 capture levels and recorder failure policy",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T049",
+      "epic": "E05",
+      "priority": "P4",
+      "role": "Builder",
+      "title": "Implement semantic step/microbatch/phase markers",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T050",
+      "epic": "E05",
+      "priority": "P4",
+      "role": "Builder",
+      "title": "Implement optional bounded local ring buffer",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T051",
+      "epic": "E05",
+      "priority": "P4",
+      "role": "Builder",
+      "title": "Implement out-of-band freeze independent of failed process group",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T052",
+      "epic": "E05",
+      "priority": "P4",
+      "role": "Performance",
+      "title": "Benchmark capture-on/off median and tail distributions",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T053",
+      "epic": "E05",
+      "priority": "P4",
+      "role": "Performance",
+      "title": "Measure CPU, memory, storage, network, GPU, and output effects",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T054",
+      "epic": "E05",
+      "priority": "P4",
+      "role": "Adversary",
+      "title": "Create instrumentation-induced and instrumentation-hidden faults",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T055",
+      "epic": "E05",
+      "priority": "P4",
+      "role": "Release",
+      "title": "Issue perturbation policy verdict; disable unsafe levels",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T056",
+      "epic": "E09",
+      "priority": "P5",
+      "role": "Spec",
+      "title": "Define controlled ExperimentPlan and permitted-inference contract",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T057",
+      "epic": "E09",
+      "priority": "P5",
+      "role": "Builder",
+      "title": "Implement hypothesis ledger and experiment result lineage",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T058",
+      "epic": "E09",
+      "priority": "P5",
+      "role": "Builder",
+      "title": "Implement cost/safety/privacy/decision-value budget",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T059",
+      "epic": "E09",
+      "priority": "P5",
+      "role": "Builder",
+      "title": "Implement closure-value qualification terminal states",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T060",
+      "epic": "E10",
+      "priority": "P5",
+      "role": "Spec",
+      "title": "Define faithfulness and applicability schemas",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T061",
+      "epic": "E10",
+      "priority": "P5",
+      "role": "Builder",
+      "title": "Implement rank/actor-set reduction",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T062",
+      "epic": "E10",
+      "priority": "P5",
+      "role": "Builder",
+      "title": "Implement step/event-window reduction",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T063",
+      "epic": "E10",
+      "priority": "P5",
+      "role": "Builder",
+      "title": "Implement process-group legality validator",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T064",
+      "epic": "E10",
+      "priority": "P5",
+      "role": "Builder",
+      "title": "Implement data/control-trigger preservation hooks",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T065",
+      "epic": "E10",
+      "priority": "P5",
+      "role": "Builder",
+      "title": "Implement model/operator/tensor reduction interfaces",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T066",
+      "epic": "E10",
+      "priority": "P5",
+      "role": "Builder",
+      "title": "Implement environment/version simplification",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T067",
+      "epic": "E10",
+      "priority": "P5",
+      "role": "Builder",
+      "title": "Implement multi-objective candidate cost and search budget",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T068",
+      "epic": "E10",
+      "priority": "P5",
+      "role": "Adversary",
+      "title": "Create trigger-removal, boundary-change, and tier-drop hidden faults",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T069",
+      "epic": "E10",
+      "priority": "P5",
+      "role": "Release",
+      "title": "Verify Minimum Faithful Experiment on controlled flagship case",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T070",
+      "epic": "E11",
+      "priority": "P6",
+      "role": "Spec",
+      "title": "Define runner, privacy-zone, retry, and semantic-state contracts",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T071",
+      "epic": "E11",
+      "priority": "P6",
+      "role": "Builder",
+      "title": "Implement local non-root OCI runner",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T072",
+      "epic": "E11",
+      "priority": "P6",
+      "role": "Builder",
+      "title": "Implement source/substitute environment locks",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T073",
+      "epic": "E11",
+      "priority": "P6",
+      "role": "Builder",
+      "title": "Implement structural local multi-process execution",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T074",
+      "epic": "E11",
+      "priority": "P6",
+      "role": "Builder",
+      "title": "Implement federated request/result protocol",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T075",
+      "epic": "E11",
+      "priority": "P6",
+      "role": "Builder",
+      "title": "Implement environment mismatch and unavailable states",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T076",
+      "epic": "E15",
+      "priority": "P6",
+      "role": "Security",
+      "title": "Implement network, mount, capability, resource, and timeout sandbox",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T077",
+      "epic": "E15",
+      "priority": "P6",
+      "role": "Security",
+      "title": "Implement archive traversal/symlink/device/decompression protections",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T078",
+      "epic": "E15",
+      "priority": "P6",
+      "role": "Security",
+      "title": "Implement SBOM, dependency, license, vulnerability, and secret gates",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T079",
+      "epic": "E15",
+      "priority": "P6",
+      "role": "Security",
+      "title": "Implement signing and provenance attestation",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T080",
+      "epic": "E14",
+      "priority": "P6",
+      "role": "Spec",
+      "title": "Define tcap/OCI artifact and federated result schema",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T081",
+      "epic": "E14",
+      "priority": "P6",
+      "role": "Builder",
+      "title": "Implement offline verifier and trusted launch templates",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T082",
+      "epic": "E14",
+      "priority": "P6",
+      "role": "Release",
+      "title": "Replay sanitized/public controlled artifact from clean environment",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T083",
+      "epic": "E12",
+      "priority": "P7",
+      "role": "Spec",
+      "title": "Define Recovery Assurance property groups and states",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T084",
+      "epic": "E12",
+      "priority": "P7",
+      "role": "Builder",
+      "title": "Implement checkpoint integrity and completeness checks",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T085",
+      "epic": "E12",
+      "priority": "P7",
+      "role": "Builder",
+      "title": "Implement optimizer/scheduler/RNG/sampler/data-cursor checks",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T086",
+      "epic": "E12",
+      "priority": "P7",
+      "role": "Builder",
+      "title": "Implement shard ownership and process-group checks",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T087",
+      "epic": "E12",
+      "priority": "P7",
+      "role": "Builder",
+      "title": "Implement numerical and performance sentinels",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T088",
+      "epic": "E12",
+      "priority": "P7",
+      "role": "Builder",
+      "title": "Implement canary, rollback, and observation-window records",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T089",
+      "epic": "E12",
+      "priority": "P7",
+      "role": "Adversary",
+      "title": "Create false-green restart, stale sampler, and throughput regression faults",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T090",
+      "epic": "E13",
+      "priority": "P7",
+      "role": "Spec",
+      "title": "Define WorkloadIncidentContract and classification",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T091",
+      "epic": "E13",
+      "priority": "P7",
+      "role": "Builder",
+      "title": "Implement contract registry, applicability, drift, expiry, revocation",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T092",
+      "epic": "E13",
+      "priority": "P7",
+      "role": "Builder",
+      "title": "Implement QualificationRun against ChangeLock",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T093",
+      "epic": "E13",
+      "priority": "P7",
+      "role": "Adversary",
+      "title": "Block stale/out-of-envelope contract passes",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T094",
+      "epic": "E13",
+      "priority": "P7",
+      "role": "Release",
+      "title": "Run controlled change qualification end to end",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T095",
+      "epic": "E17",
+      "priority": "P8",
+      "role": "Spec",
+      "title": "Release CHECKPOINT_RESUME_STATE_CONSISTENCY_V1",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T096",
+      "epic": "E17",
+      "priority": "P8",
+      "role": "Adversary",
+      "title": "Create checkpoint shard, optimizer, RNG, sampler, and cursor faults",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T097",
+      "epic": "E17",
+      "priority": "P8",
+      "role": "Builder",
+      "title": "Implement pack-specific evidence and experiments",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T098",
+      "epic": "E17",
+      "priority": "P8",
+      "role": "Release",
+      "title": "Run recovery and qualification hidden suite",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T099",
+      "epic": "E18",
+      "priority": "P8",
+      "role": "Spec",
+      "title": "Define OperatorAlignmentBackend interface",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T100",
+      "epic": "E18",
+      "priority": "P8",
+      "role": "Research",
+      "title": "Benchmark OpGuard capability and integration boundary",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T101",
+      "epic": "E18",
+      "priority": "P8",
+      "role": "Spec",
+      "title": "Define ScaleEmulationBackend interface",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T102",
+      "epic": "E18",
+      "priority": "P8",
+      "role": "Research",
+      "title": "Benchmark PrismLLM capability and integration boundary",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T103",
+      "epic": "E18",
+      "priority": "P8",
+      "role": "Builder",
+      "title": "Implement backend stubs/conformance fixtures, not duplicate algorithms",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T104",
+      "epic": "E02",
+      "priority": "P8",
+      "role": "Product",
+      "title": "Run KEEP/INTEGRATE/UPSTREAM/NARROW/REPLACE decision",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T105",
+      "epic": "E16",
+      "priority": "P9",
+      "role": "Builder",
+      "title": "Complete CLI Close/Qualify/Exchange workflow",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T106",
+      "epic": "E16",
+      "priority": "P9",
+      "role": "Builder",
+      "title": "Implement thin local evidence/contract viewer",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T107",
+      "epic": "E16",
+      "priority": "P9",
+      "role": "Docs",
+      "title": "Write operator, deployment, security, and incident-pack guides",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T108",
+      "epic": "E16",
+      "priority": "P9",
+      "role": "Release",
+      "title": "Run independent clean-machine installation",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T109",
+      "epic": "E16",
+      "priority": "P9",
+      "role": "Release",
+      "title": "Run second-engineer workflow without hidden founder edits",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T110",
+      "epic": "E19",
+      "priority": "P9",
+      "role": "Benchmark",
+      "title": "Compare complete native/bundled/agent workflow against TrainCapsule",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T111",
+      "epic": "E19",
+      "priority": "P9",
+      "role": "Value",
+      "title": "Generate positive, negative, unknown, and no-gain case ledger",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T112",
+      "epic": "E19",
+      "priority": "P9",
+      "role": "Adversary",
+      "title": "Run competitor equivalence and contract-value-decay gates",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T113",
+      "epic": "E22",
+      "priority": "P9",
+      "role": "Docs",
+      "title": "Generate founder technical briefs and oral-defense checklist",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T114",
+      "epic": "E22",
+      "priority": "P9",
+      "role": "Release",
+      "title": "Prepare public controlled demo and technical report",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T115",
+      "epic": "E20",
+      "priority": "P10",
+      "role": "Product",
+      "title": "Create named-account map and qualification rubric",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T116",
+      "epic": "E20",
+      "priority": "P10",
+      "role": "Product",
+      "title": "Create paid feasibility/incident assessment offer",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T117",
+      "epic": "E20",
+      "priority": "P10",
+      "role": "Security",
+      "title": "Create local-data, DPA, IP, retention, and support templates",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T118",
+      "epic": "E20",
+      "priority": "P10",
+      "role": "Founder",
+      "title": "Begin targeted outreach after credible alpha",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T119",
+      "epic": "E20",
+      "priority": "P10",
+      "role": "External",
+      "title": "Run first external or highest-fidelity independent case",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T120",
+      "epic": "E20",
+      "priority": "P10",
+      "role": "Value",
+      "title": "Measure complete baseline and total delivery economics",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T121",
+      "epic": "E20",
+      "priority": "P10",
+      "role": "External",
+      "title": "Request second incident or paid qualification",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T122",
+      "epic": "E20",
+      "priority": "P10",
+      "role": "Value",
+      "title": "Measure trust-core changes, manual hours, margin, and reuse",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T123",
+      "epic": "E20",
+      "priority": "P10",
+      "role": "Release",
+      "title": "Issue COMPANY/PRODUCTIZED_SERVICE/REDESIGN/OPEN_SOURCE/STOP decision",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    },
+    {
+      "id": "T124",
+      "epic": "E22",
+      "priority": "P10",
+      "role": "Founder",
+      "title": "Submit one meaningful upstream artifact",
+      "status": "planned",
+      "truth_state": "NOT_STARTED"
+    }
+  ]
+}

@@ -1,0 +1,93 @@
+{
+  "version": 2,
+  "milestone": "automatable local TrainCapsule P0-P9 product",
+  "scope_statement": "Complete the automatable local product required by the final TrainCapsule source: Close, Qualify, and Exchange loops; both initial contract packs; explicit truth and assurance states; containment; reproducible evidence; local CLI/API/viewer; recovery; and independently auditable gates. External adoption, customer incidents, payment, funding, and acquisition are never fabricated completion criteria.",
+  "required_paths": [
+    "README.md",
+    "SECURITY.md",
+    "SOURCE_PRECEDENCE.md",
+    "CLAIM_REGISTRY.md",
+    "docs/source-of-truth/final-2026-08-09/FINAL_MANIFEST.json",
+    "PUBLIC_INCIDENT_CORPUS/index.json",
+    "packages/domain",
+    "packages/identity",
+    "packages/evidence",
+    "packages/incident_ir",
+    "packages/trust",
+    "packages/planner",
+    "packages/reducer",
+    "packages/runner",
+    "packages/recovery",
+    "packages/contracts",
+    "packages/qualify",
+    "packages/exchange",
+    "packages/cli",
+    "packages/api",
+    "backends",
+    "incident-packs/pre_collective_lifecycle_v1",
+    "incident-packs/checkpoint_resume_state_v1",
+    "apps/local-viewer",
+    "tests/unit",
+    "tests/property",
+    "tests/mutation",
+    "tests/fault-injection",
+    "tests/replay",
+    "tests/qualification",
+    "tests/security",
+    "tests/e2e",
+    "containers",
+    "policies"
+  ],
+  "required_globs": [
+    "schemas/**/*",
+    "incident-packs/pre_collective_lifecycle_v1/**/*",
+    "incident-packs/checkpoint_resume_state_v1/**/*",
+    "tests/replay/**/*",
+    "tests/qualification/**/*",
+    "tests/security/**/*",
+    ".factory/gate-results/**/*"
+  ],
+  "required_commands": [
+    {
+      "name": "source manifest",
+      "command": "python scripts/gates/validate_source_manifest.py",
+      "timeout_seconds": 120
+    },
+    {
+      "name": "Python test suite",
+      "command": "uv run pytest",
+      "timeout_seconds": 3600
+    },
+    {
+      "name": "Python lint",
+      "command": "uv run ruff check .",
+      "timeout_seconds": 1800
+    },
+    {
+      "name": "Python strict type check",
+      "command": "uv run pyright",
+      "timeout_seconds": 1800
+    },
+    {
+      "name": "secret scan",
+      "command": "bash scripts/gates/secret_scan.sh",
+      "timeout_seconds": 300
+    }
+  ],
+  "capability_evidence_required": [
+    "Close loop captures, reduces, replays, localizes, and verifies a failure or recovery with explicit faithfulness limits.",
+    "Qualify loop evaluates a controlled change against an applicable, unexpired contract and blocks false-green results.",
+    "Exchange loop emits policy-controlled, attributable, integrity-protected evidence without leaking restricted data.",
+    "PRE_COLLECTIVE_LIFECYCLE_CONTRACT_V1 passes declared controls and catches declared hidden faults.",
+    "CHECKPOINT_RESUME_STATE_CONSISTENCY_V1 passes declared controls and catches declared hidden faults.",
+    "Every result distinguishes PASS, FAIL, UNKNOWN, INVALID_ORACLE, INFRASTRUCTURE_ERROR, and EXTERNAL_VALIDATION_REQUIRED.",
+    "Private gates, protected expectations, release authority, OAuth material, and customer evidence remain outside builder-visible paths.",
+    "Pause, resume, quota wait, single-instance lock, crash recovery, and Windows-login recovery are proven."
+  ],
+  "completion_exclusions": [
+    "Real customer incident access, adoption, renewal, payment, funding, or acquisition interest.",
+    "Universal GPU, framework, scheduler, or cloud coverage claims.",
+    "Provider-caused attribution without independently sufficient evidence.",
+    "Any external fact represented by self-authored or synthetic evidence."
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "id": "T021",
+  "epic": "E04",
+  "priority": "P1",
+  "role": "Security",
+  "title": "Implement secret/data classification scan",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "T033",
+  "epic": "E19",
+  "priority": "P2",
+  "role": "Benchmark",
+  "title": "Implement native baseline timing and effort ledger",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

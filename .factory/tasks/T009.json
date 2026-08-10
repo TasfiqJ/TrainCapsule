@@ -1,0 +1,9 @@
+{
+  "id": "T009",
+  "epic": "E02",
+  "priority": "P0",
+  "role": "Research",
+  "title": "Create native/bundled/agent capability matrix",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

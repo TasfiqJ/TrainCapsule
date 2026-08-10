@@ -1,0 +1,9 @@
+{
+  "id": "T096",
+  "epic": "E17",
+  "priority": "P8",
+  "role": "Adversary",
+  "title": "Create checkpoint shard, optimizer, RNG, sampler, and cursor faults",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

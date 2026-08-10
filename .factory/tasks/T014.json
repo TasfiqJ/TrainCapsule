@@ -1,0 +1,9 @@
+{
+  "id": "T014",
+  "epic": "E03",
+  "priority": "P1",
+  "role": "Builder",
+  "title": "Implement canonical serialization and digests",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

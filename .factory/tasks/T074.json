@@ -1,0 +1,9 @@
+{
+  "id": "T074",
+  "epic": "E11",
+  "priority": "P6",
+  "role": "Builder",
+  "title": "Implement federated request/result protocol",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

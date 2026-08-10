@@ -1,0 +1,48 @@
+[project]
+name = "traincapsule-ai-factory"
+version = "1.0.0"
+description = "Claude subscription-only, value-gated, risk-tiered, quota-resumable TrainCapsule product factory"
+requires-python = ">=3.12,<3.13"
+dependencies = [
+  "claude-agent-sdk==0.2.134",
+  "pydantic>=2.8",
+  "PyYAML>=6.0",
+  "typer>=0.12",
+  "rich>=13.7",
+  "python-dateutil>=2.9",
+]
+
+[project.optional-dependencies]
+dev = [
+  "pytest>=8.3",
+  "ruff>=0.9",
+  "pyright>=1.1.390",
+  "types-PyYAML>=6.0",
+]
+
+[project.scripts]
+tcfactory = "tcfactory.cli:app"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["tcfactory"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py312"
+extend-exclude = ["docs/source-of-truth/final-2026-08-09"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM"]
+
+[tool.pyright]
+pythonVersion = "3.12"
+typeCheckingMode = "strict"
+exclude = [".venv", "factory/worktrees", "factory/artifacts"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-q"

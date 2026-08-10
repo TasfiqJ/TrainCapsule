@@ -1,0 +1,9 @@
+{
+  "id": "T031",
+  "epic": "E05",
+  "priority": "P2",
+  "role": "Security",
+  "title": "Fuzz malformed and oversized evidence inputs",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

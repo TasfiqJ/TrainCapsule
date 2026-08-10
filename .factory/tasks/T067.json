@@ -1,0 +1,9 @@
+{
+  "id": "T067",
+  "epic": "E10",
+  "priority": "P5",
+  "role": "Builder",
+  "title": "Implement multi-objective candidate cost and search budget",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

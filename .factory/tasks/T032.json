@@ -1,0 +1,9 @@
+{
+  "id": "T032",
+  "epic": "E05",
+  "priority": "P2",
+  "role": "Integration",
+  "title": "Run real native trace import end to end",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

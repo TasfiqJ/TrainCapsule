@@ -1,0 +1,9 @@
+{
+  "id": "T123",
+  "epic": "E20",
+  "priority": "P10",
+  "role": "Release",
+  "title": "Issue COMPANY/PRODUCTIZED_SERVICE/REDESIGN/OPEN_SOURCE/STOP decision",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

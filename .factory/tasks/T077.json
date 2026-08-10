@@ -1,0 +1,9 @@
+{
+  "id": "T077",
+  "epic": "E15",
+  "priority": "P6",
+  "role": "Security",
+  "title": "Implement archive traversal/symlink/device/decompression protections",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

@@ -1,0 +1,9 @@
+{
+  "id": "T049",
+  "epic": "E05",
+  "priority": "P4",
+  "role": "Builder",
+  "title": "Implement semantic step/microbatch/phase markers",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

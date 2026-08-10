@@ -1,0 +1,9 @@
+{
+  "id": "T016",
+  "epic": "E03",
+  "priority": "P1",
+  "role": "Builder",
+  "title": "Implement EnvironmentAvailabilityRecord",
+  "status": "planned",
+  "truth_state": "NOT_STARTED"
+}

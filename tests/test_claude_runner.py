@@ -17,3 +17,10 @@ def test_late_plain_peer_result_does_not_replace_structured_result() -> None:
     assert select_result_message(None, structured) is structured
     assert select_result_message(structured, late_plain) is structured
     assert select_result_message(late_plain, structured) is structured
+
+
+def test_later_structured_peer_result_replaces_provisional_verdict() -> None:
+    provisional = SimpleNamespace(structured_output={"verdict": "fail"})
+    final = SimpleNamespace(structured_output={"verdict": "pass"})
+
+    assert select_result_message(provisional, final) is final

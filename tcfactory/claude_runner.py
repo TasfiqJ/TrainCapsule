@@ -49,12 +49,10 @@ def provider_compatible_task_budget(configured: int | None) -> int | None:
 
 
 def select_result_message[T](current: T | None, candidate: T) -> T:
-    """Preserve a valid structured result when late peer messages emit extra results."""
+    """Use the latest structured result without letting plain peer chatter replace it."""
     if current is None:
         return candidate
-    if getattr(current, "structured_output", None) is None and getattr(
-        candidate, "structured_output", None
-    ) is not None:
+    if getattr(candidate, "structured_output", None) is not None:
         return candidate
     return current
 

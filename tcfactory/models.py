@@ -399,8 +399,8 @@ class FactoryConfig(BaseModel):
     completion_audit_model: str = "opus"
     completion_audit_max_turns: int = Field(default=24, ge=1, le=100)
     completion_audit_budget_usd: float = Field(default=8.0, gt=0)
-    quota_fallback_wait_seconds: int = Field(default=19_800, ge=60, le=604_800)
-    transient_retry_seconds: int = Field(default=900, ge=30, le=86_400)
+    quota_fallback_wait_seconds: int = Field(default=3600, ge=60, le=604_800)
+    transient_retry_seconds: int = Field(default=3600, ge=30, le=86_400)
     authentication_retry_seconds: int = Field(default=3600, ge=60, le=86_400)
     crash_resume_delay_seconds: int = Field(default=120, ge=0, le=86_400)
     autopilot_lock_path: str = "factory/state/autopilot.lock"
@@ -425,8 +425,8 @@ class AutonomyConfig(BaseModel):
     auto_respec_failed_tasks: bool = True
     max_respecifications_per_task: int = Field(default=3, ge=0, le=10)
     idle_poll_seconds: int = Field(default=60, ge=5, le=3600)
-    quota_reset_buffer_seconds: int = Field(default=180, ge=0, le=3600)
-    unknown_limit_retry_seconds: int = Field(default=1800, ge=60, le=86_400)
+    quota_reset_buffer_seconds: int = Field(default=0, ge=0, le=3600)
+    unknown_limit_retry_seconds: int = Field(default=3600, ge=60, le=86_400)
     max_consecutive_factory_failures: int = Field(default=5, ge=1, le=100)
     completion_target: Literal["product_build", "all_automatable"] = "product_build"
     stop_file: str = "factory/state/STOP"

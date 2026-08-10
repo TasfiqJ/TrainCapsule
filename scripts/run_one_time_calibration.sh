@@ -5,7 +5,8 @@ ENV_FILE="${TCF_ENV_FILE:-$HOME/.config/traincapsule/lights-out.env}"
 PRIVATE_ROOT="$HOME/.local/share/traincapsule-factory/private-gates"
 EVIDENCE_DIR="$ROOT/factory/state/calibration"
 CHECKPOINT="$ROOT/factory/state/pipelines/DEMO-001.json"
-RESET_BUFFER_SECONDS=180
+RESET_BUFFER_SECONDS=0
+LIMIT_PROBE_SECONDS=3600
 
 [[ -f "$ENV_FILE" ]] || {
   echo "Missing $ENV_FILE. Run scripts/configure_max5_token.sh." >&2
@@ -134,7 +135,7 @@ PY_FIND
 }
 
 quota_wait_seconds() {
-  uv run python - "$CHECKPOINT" "$RESET_BUFFER_SECONDS" <<'PY_QUOTA'
+  uv run python - "$CHECKPOINT" "$RESET_BUFFER_SECONDS" "$LIMIT_PROBE_SECONDS" <<'PY_QUOTA'
 import json
 import sys
 from datetime import UTC, datetime
@@ -142,6 +143,7 @@ from pathlib import Path
 
 path = Path(sys.argv[1])
 buffer_seconds = int(sys.argv[2])
+probe_seconds = int(sys.argv[3])
 if not path.is_file():
     raise SystemExit(2)
 try:
@@ -155,7 +157,7 @@ if not raw:
     raise SystemExit(5)
 resume_at = datetime.fromisoformat(raw.replace("Z", "+00:00")).astimezone(UTC)
 now = datetime.now(UTC)
-seconds = max(60, int((resume_at - now).total_seconds()) + buffer_seconds)
+seconds = max(60, min(probe_seconds, int((resume_at - now).total_seconds()) + buffer_seconds))
 print(seconds)
 print(str(data["pause"].get("kind") or "unknown"), file=sys.stderr)
 print(raw, file=sys.stderr)
@@ -187,7 +189,7 @@ run_live_demo_with_quota_resume() {
       echo "Could not calculate a safe quota-resume delay." | tee -a "$stderr_log" >&2
       return 1
     fi
-    printf 'Claude Max limit detected. Sleeping %s seconds, then resuming the same checkpoint with a fresh session.\n' \
+    printf 'Claude rejected work for a usage limit. Probing again in %s seconds with a fresh session.\n' \
       "$wait_seconds" | tee -a "$stdout_log"
     sleep "$wait_seconds"
     # Reload a renewed token without restarting the setup when the operator replaced it.

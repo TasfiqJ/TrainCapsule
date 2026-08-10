@@ -63,8 +63,8 @@ def main() -> None:
     )
     assert five_hour is not None
     assert five_hour.kind == PauseKind.FIVE_HOUR
-    assert five_hour.resume_at == now + timedelta(hours=2, minutes=15)
-    record_pass("five_hour_reset", "parsed exact two-hour fifteen-minute resume time")
+    assert five_hour.resume_at == now + timedelta(hours=1)
+    record_pass("five_hour_reset", "scheduled an hourly availability probe")
 
     classify(
         "weekly_limit",

@@ -8,8 +8,8 @@ auto_recover_interrupted: true
 auto_respec_failed_tasks: true
 max_respecifications_per_task: 3
 idle_poll_seconds: 60
-quota_reset_buffer_seconds: 180
-unknown_limit_retry_seconds: 1800
+quota_reset_buffer_seconds: 0
+unknown_limit_retry_seconds: 3600
 max_consecutive_factory_failures: 5
 completion_target: product_build
 stop_file: factory/state/STOP

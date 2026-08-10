@@ -6,9 +6,6 @@ from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import cast
-from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
-
-from dateutil import parser as date_parser
 
 from .models import PauseKind, QuotaPauseRecord, StageResult
 
@@ -16,23 +13,25 @@ _LIMIT_MARKERS: tuple[tuple[PauseKind, re.Pattern[str]], ...] = (
     (
         PauseKind.FIVE_HOUR,
         re.compile(
-            r"(?i)(?:(?:5[- ]hour|five[- ]hour|session).*?(?:limit|cap)|"
-            r"(?:limit|cap).*?(?:5[- ]hour|five[- ]hour|session)).*?"
-            r"(?:reached|exceeded|hit|resets?|available)"
+            r"(?i)(?=[^\n]{0,300}(?:5[- ]hour|five[- ]hour|session))"
+            r"(?=[^\n]{0,300}(?:limit|cap))"
+            r"(?=[^\n]{0,300}(?:reached|exceeded|hit))[^\n]{1,300}"
         ),
     ),
     (
         PauseKind.WEEKLY,
         re.compile(
-            r"(?i)(?:weekly|week).*?(?:limit|cap).*?"
-            r"(?:reached|exceeded|hit|resets?|available)"
+            r"(?i)(?=[^\n]{0,300}(?:weekly|week))"
+            r"(?=[^\n]{0,300}(?:limit|cap))"
+            r"(?=[^\n]{0,300}(?:reached|exceeded|hit))[^\n]{1,300}"
         ),
     ),
     (
         PauseKind.MODEL_LIMIT,
         re.compile(
-            r"(?i)(?:opus|sonnet|fable|model).*?(?:limit|cap).*?"
-            r"(?:reached|exceeded|hit|resets?|available)"
+            r"(?i)(?=[^\n]{0,300}(?:opus|sonnet|fable|model))"
+            r"(?=[^\n]{0,300}(?:limit|cap))"
+            r"(?=[^\n]{0,300}(?:reached|exceeded|hit))[^\n]{1,300}"
         ),
     ),
     (
@@ -41,7 +40,10 @@ _LIMIT_MARKERS: tuple[tuple[PauseKind, re.Pattern[str]], ...] = (
     ),
     (
         PauseKind.TRANSIENT_RATE_LIMIT,
-        re.compile(r"(?i)(?:rate[_ -]?limit|too many requests|status(?: code)? 429|\b429\b)"),
+        re.compile(
+            r"(?i)(?:(?:rate[_ -]?limit).*?(?:reached|exceeded|hit)|"
+            r"too many requests|status(?: code)? 429|\b429\b)"
+        ),
     ),
     (
         PauseKind.AUTHENTICATION,
@@ -59,24 +61,6 @@ _LIMIT_MARKERS: tuple[tuple[PauseKind, re.Pattern[str]], ...] = (
         ),
     ),
 )
-
-_RESET_PATTERNS: tuple[re.Pattern[str], ...] = (
-    re.compile(
-        r"(?i)resets?(?:\s+again)?(?:\s+at|\s+on|\s+in)?\s+"
-        r"(?P<value>[^\n.;]+)"
-    ),
-    re.compile(r"(?i)available(?:\s+again)?(?:\s+at|\s+on|\s+in)\s+(?P<value>[^\n.;]+)"),
-    re.compile(r"(?i)retry(?:\s+after|\s+at|\s+in)\s+(?P<value>[^\n.;]+)"),
-)
-
-
-_IANA_ZONE_PATTERN = re.compile(r"\((?P<zone>[A-Za-z_+-]+/[A-Za-z0-9_+./-]+)\)")
-
-_DURATION_PATTERN = re.compile(
-    r"(?i)(?:(?P<hours>\d+(?:\.\d+)?)\s*(?:hours?|hrs?|h))?\s*"
-    r"(?:(?P<minutes>\d+(?:\.\d+)?)\s*(?:minutes?|mins?|m))?"
-)
-
 
 @dataclass(frozen=True)
 class FailureDisposition:
@@ -122,9 +106,9 @@ def _safe_read(path: Path) -> str:
 def stage_failure_texts(result: StageResult, artifact_dir: Path) -> list[tuple[str, str]]:
     """Collect system-level failure evidence, not arbitrary model-authored prose.
 
-    RateLimitEvent is authoritative when present. This text fallback exists for older CLI/SDK
-    failure paths and intentionally excludes report findings to avoid treating a code example
-    containing words such as "limit reached" as a real quota event.
+    RateLimitEvent is handled authoritatively by the runners before this fallback is called.
+    Never scan the transcript here: it contains allowed RateLimitEvent metadata and arbitrary
+    model-authored prose, neither of which proves that Claude rejected the request.
     """
     texts: list[tuple[str, str]] = []
     if result.error:
@@ -134,64 +118,7 @@ def stage_failure_texts(result: StageResult, artifact_dir: Path) -> list[tuple[s
     stderr_path = artifact_dir / "claude-stderr.log"
     if stderr_path.exists():
         texts.append(("claude-stderr.log", _safe_read(stderr_path)[-100_000:]))
-    transcript_path = artifact_dir / "transcript.jsonl"
-    if transcript_path.exists():
-        transcript = _safe_read(transcript_path)[-100_000:]
-        if "RateLimitEvent" in transcript or '"error"' in transcript:
-            texts.append(("transcript.jsonl", transcript))
     return texts
-
-
-def _parse_duration(value: str, *, now: datetime) -> datetime | None:
-    match = _DURATION_PATTERN.fullmatch(value.strip())
-    if not match:
-        return None
-    hours = float(match.group("hours") or 0)
-    minutes = float(match.group("minutes") or 0)
-    if hours <= 0 and minutes <= 0:
-        return None
-    return now + timedelta(hours=hours, minutes=minutes)
-
-
-def _parse_reset_value(value: str, *, now: datetime) -> datetime | None:
-    cleaned = value.strip().strip("`'\"")
-    if not cleaned:
-        return None
-    duration = _parse_duration(cleaned, now=now)
-    if duration:
-        return duration
-    zone = None
-    zone_match = _IANA_ZONE_PATTERN.search(cleaned)
-    if zone_match:
-        try:
-            zone = ZoneInfo(zone_match.group("zone"))
-        except ZoneInfoNotFoundError:
-            zone = None
-        cleaned = _IANA_ZONE_PATTERN.sub("", cleaned).strip()
-    try:
-        default = now.astimezone(zone).replace(tzinfo=None) if zone else now.replace(tzinfo=None)
-        parsed = date_parser.parse(cleaned, fuzzy=True, default=default)
-    except (ValueError, OverflowError):
-        return None
-    if parsed.tzinfo is None:
-        parsed = parsed.replace(tzinfo=zone or now.tzinfo or UTC)
-    parsed = parsed.astimezone(UTC)
-    # A time-only expression may parse to earlier today. Move it to tomorrow.
-    if parsed <= now - timedelta(minutes=2):
-        parsed += timedelta(days=1)
-    # Reject implausibly distant values caused by fuzzy parsing.
-    if parsed > now + timedelta(days=8):
-        return None
-    return parsed
-
-
-def _extract_reset_at(text: str, *, now: datetime) -> datetime | None:
-    for pattern in _RESET_PATTERNS:
-        for match in pattern.finditer(text):
-            parsed = _parse_reset_value(match.group("value"), now=now)
-            if parsed:
-                return parsed
-    return None
 
 
 def _default_resume_at(
@@ -201,12 +128,15 @@ def _default_resume_at(
     quota_fallback_wait_seconds: int,
     transient_retry_seconds: int,
 ) -> datetime:
-    if kind == PauseKind.FIVE_HOUR:
-        return now + timedelta(seconds=max(quota_fallback_wait_seconds, 5 * 3600 + 300))
-    if kind in {PauseKind.WEEKLY, PauseKind.MODEL_LIMIT}:
-        # The next retry reclassifies the message. A 24-hour probe interval avoids tight loops
-        # if an exact weekly reset timestamp was absent from the SDK output.
-        return now + timedelta(hours=24)
+    if kind in {
+        PauseKind.FIVE_HOUR,
+        PauseKind.WEEKLY,
+        PauseKind.MODEL_LIMIT,
+        PauseKind.UNKNOWN_LIMIT,
+    }:
+        # Do not guess when a subscription window resets. Probe once per configured interval;
+        # a real rejection will create another durable pause, while an allowed request resumes.
+        return now + timedelta(seconds=quota_fallback_wait_seconds)
     if kind == PauseKind.SERVICE_CAPACITY:
         return now + timedelta(minutes=10)
     if kind == PauseKind.TRANSIENT_RATE_LIMIT:
@@ -218,8 +148,8 @@ def disposition_from_rate_limit_info(
     info: object,
     *,
     now: datetime | None = None,
-    quota_fallback_wait_seconds: int = 19_800,
-    transient_retry_seconds: int = 900,
+    quota_fallback_wait_seconds: int = 3_600,
+    transient_retry_seconds: int = 3_600,
 ) -> FailureDisposition | None:
     """Convert an Agent SDK RateLimitInfo object/dict into a durable pause.
 
@@ -262,20 +192,12 @@ def disposition_from_rate_limit_info(
     }
     kind = kind_by_type.get(rate_type, PauseKind.UNKNOWN_LIMIT)
     current = now or datetime.now(UTC)
-    raw_reset = field("resets_at")
-    reset_at: datetime | None = None
-    if isinstance(raw_reset, (int, float)) and raw_reset > 0:
-        try:
-            reset_at = datetime.fromtimestamp(float(raw_reset), tz=UTC)
-        except (OverflowError, OSError, ValueError):
-            reset_at = None
-    if reset_at is None or reset_at <= current:
-        reset_at = _default_resume_at(
-            kind,
-            now=current,
-            quota_fallback_wait_seconds=quota_fallback_wait_seconds,
-            transient_retry_seconds=transient_retry_seconds,
-        )
+    resume_at = _default_resume_at(
+        kind,
+        now=current,
+        quota_fallback_wait_seconds=quota_fallback_wait_seconds,
+        transient_retry_seconds=transient_retry_seconds,
+    )
     utilization = field("utilization")
     message = f"Agent SDK rate limit rejected: type={rate_type or 'unknown'}"
     if utilization is not None:
@@ -284,7 +206,7 @@ def disposition_from_rate_limit_info(
         kind=kind,
         message=message,
         source="RateLimitEvent",
-        resume_at=reset_at,
+        resume_at=resume_at,
     )
 
 
@@ -292,8 +214,8 @@ def classify_failure_texts(
     texts: Iterable[tuple[str, str]],
     *,
     now: datetime | None = None,
-    quota_fallback_wait_seconds: int = 19_800,
-    transient_retry_seconds: int = 900,
+    quota_fallback_wait_seconds: int = 3_600,
+    transient_retry_seconds: int = 3_600,
 ) -> FailureDisposition | None:
     current = now or datetime.now(UTC)
     for source, text in texts:
@@ -311,7 +233,7 @@ def classify_failure_texts(
                     source=source,
                     resume_at=current,
                 )
-            reset_at = _extract_reset_at(text, now=current) or _default_resume_at(
+            resume_at = _default_resume_at(
                 kind,
                 now=current,
                 quota_fallback_wait_seconds=quota_fallback_wait_seconds,
@@ -321,7 +243,7 @@ def classify_failure_texts(
                 kind=kind,
                 message=message,
                 source=source,
-                resume_at=reset_at,
+                resume_at=resume_at,
             )
     return None
 

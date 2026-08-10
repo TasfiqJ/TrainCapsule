@@ -20,8 +20,8 @@ pipeline_state_dir: factory/state/pipelines
 feature_ledger_path: factory/feature_ledger.yaml
 autonomy_config_path: config/autonomy.yaml
 autonomy_state_path: factory/state/autonomy.json
-quota_fallback_wait_seconds: 19800
-transient_retry_seconds: 900
+quota_fallback_wait_seconds: 3600
+transient_retry_seconds: 3600
 authentication_retry_seconds: 3600
 crash_resume_delay_seconds: 120
 autopilot_lock_path: factory/state/autopilot.lock

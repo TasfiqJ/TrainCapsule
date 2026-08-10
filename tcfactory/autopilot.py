@@ -28,6 +28,7 @@ from .models import (
     QueuePauseMetadata,
 )
 from .observability import append_event, write_heartbeat
+from .pipeline import TURN_CEILING_MARKERS
 from .planner import archive_failed_packet, create_and_promote_task_packet
 from .queue import enqueue_task, process_one, promote_due_paused, queue_dirs, reconcile_running
 from .quota import AuthenticationPause, QuotaLimitPause
@@ -45,17 +46,28 @@ class AutopilotError(RuntimeError):
 
 
 def is_infrastructure_failure(error: str) -> bool:
+    """Classify by the stage's own genuine signal, never by a wrapper's literal text.
+
+    A wrapper message such as "no repair path remains" describes the pipeline's own
+    control-flow decision for any role, not evidence that the stage hit an
+    infrastructure fault. Matching that wrapper text directly would misclassify every
+    truthful, non-infrastructure stage rejection that happens to lack a repair path as
+    an infrastructure failure eligible for a free (non-revision-consuming) requeue.
+    Only match on markers that pipeline.py's ``_terminal_failure_signal`` embeds from
+    the actual stage result (its ``error``/``terminal_reason``), so genuine turn
+    ceilings and infrastructure faults are still recognized after passing through a
+    generic terminal ``PipelineFailure`` wrapper.
+    """
+
     normalized = error.lower()
+    infrastructure_markers = (
+        "cannot resume",
+        "main moved from",
+        "service capacity",
+        "infrastructure_error",
+    )
     return any(
-        marker in normalized
-        for marker in (
-            "cannot resume",
-            "main moved from",
-            "reached maximum number of turns",
-            "stage research failed and no repair path remains",
-            "service capacity",
-            "infrastructure_error",
-        )
+        marker in normalized for marker in infrastructure_markers + TURN_CEILING_MARKERS
     )
 
 

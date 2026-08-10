@@ -127,5 +127,11 @@ def test_only_terminal_root_cause_is_reported_and_repaired() -> None:
 def test_stale_main_and_turn_limits_are_infrastructure_failures() -> None:
     assert is_infrastructure_failure("Cannot resume T001: main moved from abc to def")
     assert is_infrastructure_failure("Reached maximum number of turns (18)")
-    assert is_infrastructure_failure("Stage research failed and no repair path remains")
     assert not is_infrastructure_failure("material-value gate rejected the result")
+    # "no repair path remains" is the pipeline's own control-flow wrapper, emitted for
+    # any role that has no assigned repair stage. It is not evidence of an
+    # infrastructure fault, and matching it granted every truthful stage rejection a
+    # requeue that does not consume a re-specification revision. A genuine turn ceiling
+    # is still recovered because pipeline.terminal_failure_message now embeds the
+    # stage's own error in that wrapper; see tests/test_terminal_failure_signal.py.
+    assert not is_infrastructure_failure("Stage research failed and no repair path remains")

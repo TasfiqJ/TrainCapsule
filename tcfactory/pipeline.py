@@ -73,7 +73,7 @@ class PipelineBlocked(RuntimeError):
 
 MAX_STAGE_TURNS = 200
 TURN_ESCALATION_FACTOR = 2
-_TURN_CEILING_MARKERS = (
+TURN_CEILING_MARKERS = (
     "reached maximum number of turns",
     "error_max_turns",
     "terminal_reason=max_turns",
@@ -91,7 +91,37 @@ def stage_hit_turn_ceiling(result: StageResult) -> bool:
     if (result.terminal_reason or "").strip().lower() == "max_turns":
         return True
     error = (result.error or "").lower()
-    return any(marker in error for marker in _TURN_CEILING_MARKERS)
+    return any(marker in error for marker in TURN_CEILING_MARKERS)
+
+
+def terminal_failure_signal(result: StageResult) -> str:
+    """The durable, classifiable text for a terminal stage failure.
+
+    Terminal ``PipelineFailure`` messages are generic wrappers (e.g. "no repair path
+    remains") that describe the pipeline's own control-flow decision, not the stage's
+    actual error. Wrapping that generic text loses the one signal a recovery
+    classifier needs: whether the stage itself hit a turn ceiling, an infrastructure
+    fault, or a genuine product rejection. Embedding the raw ``result.error``/
+    ``terminal_reason`` keeps that signal in the durable failure artifact instead of
+    forcing classifiers to hardcode the wrapper text of one past incident.
+
+    ``unknown`` is returned when the stage carried neither signal. It is deliberately
+    not classifiable as infrastructure: an unattributable failure must stay a truthful
+    failure rather than earn a free requeue.
+    """
+
+    return result.error or result.terminal_reason or "unknown"
+
+
+def terminal_failure_message(summary: str, result: StageResult) -> str:
+    """Build a terminal failure message that preserves the stage's own signal.
+
+    Every terminal ``PipelineFailure`` goes through here so the durable ``.error.txt``
+    artifact and the recovery classifier always see the same text. Tests exercise this
+    function directly instead of re-declaring the format string.
+    """
+
+    return f"{summary} Last stage error: {terminal_failure_signal(result)}"
 
 
 def escalated_turn_budget(current: int) -> int | None:
@@ -947,9 +977,12 @@ async def run_pipeline(
                     checkpoint_store.save(checkpoint)
                     continue
                 raise PipelineFailure(
-                    f"Mutating stage {stage.role.value} failed after "
-                    f"{failure_count} bounded failures. "
-                    "Re-specification is required."
+                    terminal_failure_message(
+                        f"Mutating stage {stage.role.value} failed after "
+                        f"{failure_count} bounded failures. "
+                        "Re-specification is required.",
+                        result,
+                    )
                 )
 
             review_roles = {
@@ -969,6 +1002,10 @@ async def run_pipeline(
                 mutating = _find_mutating_stage(task)
                 repair_findings = list(findings)
                 repaired = False
+                # Stays None if no repair cycle ran, so the terminal message falls back
+                # to the original failing stage's signal instead of raising NameError
+                # and replacing a truthful PipelineFailure with a controller crash.
+                repair_result: StageResult | None = None
                 while checkpoint.repair_cycles < task.repair.max_cycles:
                     checkpoint.repair_cycles += 1
                     models = task.repair.builder_models
@@ -1026,12 +1063,20 @@ async def run_pipeline(
                     checkpoint_store.save(checkpoint)
                 if not repaired:
                     raise PipelineFailure(
-                        "Every bounded Sonnet/Opus repair cycle failed; "
-                        "automatic re-specification is required."
+                        terminal_failure_message(
+                            "Every bounded Sonnet/Opus repair cycle failed; "
+                            "automatic re-specification is required.",
+                            repair_result or result,
+                        )
                     )
                 continue
 
-            raise PipelineFailure(f"Stage {stage.role.value} failed and no repair path remains.")
+            raise PipelineFailure(
+                terminal_failure_message(
+                    f"Stage {stage.role.value} failed and no repair path remains.",
+                    result,
+                )
+            )
 
         value_gate_summary = _run_value_release_gate(
             repo_root=repo_root,

@@ -1,8 +1,14 @@
 """Regression: a turn ceiling must not burn the whole bounded retry budget.
 
-Durable evidence: factory/state/pipelines/T001.json recorded three research attempts,
-each ending with ``Reached maximum number of turns (18)`` against an unchanged 18-turn
-stage budget, which exhausted re-specification and failed the task.
+Provenance limitation: this module previously cited ``factory/state/pipelines/T001.json``
+as verbatim durable evidence. That file does not exist in this worktree, and the only
+on-disk T001 failure artifact
+(``factory/recovery/task-packets/T001-infrastructure-max-turns.error.txt``) records only
+the generic wrapper ``Stage research failed and no repair path remains.`` -- the stage's
+own error was discarded before it was persisted. The constant below is therefore a
+representative SDK turn-ceiling string, not a transcription of an attributed T001
+attempt, and these tests are boundary tests of the classifier rather than evidence about
+what actually failed in T001.
 """
 
 from __future__ import annotations
@@ -15,7 +21,7 @@ from tcfactory.pipeline import (
     stage_hit_turn_ceiling,
 )
 
-# Verbatim from factory/state/pipelines/T001.json results[2].error.
+# Representative SDK turn-ceiling error text; see the module docstring's provenance note.
 T001_TURN_CEILING_ERROR = (
     "Exception: Claude Code returned an error result: "
     "Reached maximum number of turns (18)"
@@ -45,7 +51,7 @@ def _role_config(max_turns: int = 25) -> RoleConfig:
     )
 
 
-def test_recorded_t001_error_is_recognized_as_a_turn_ceiling() -> None:
+def test_sdk_turn_ceiling_error_text_is_recognized() -> None:
     # The report-continuation path rescues a structured report, so terminal_reason
     # reads "completed" while the durable error still records the ceiling.
     result = _result(error=T001_TURN_CEILING_ERROR, terminal_reason="completed")

@@ -44,8 +44,8 @@ tasks:
   lead_role: Spec
   phase: P0
   depends_on: []
-  status: respec_required
-  packet_path: tasks/T001.yaml
+  status: ready
+  packet_path: null
   trust_core: false
   risk_tier: integration
   context_keys:
@@ -67,7 +67,9 @@ tasks:
     and strengthen specification/gates.
   - Reused the approved packet with the integration research allowance refreshed after
     two infrastructure-only maximum-turn failures.
-  revisions: 1
+  - Revision 2 requested after bounded pipeline failure; preserve the original outcome
+    and strengthen specification/gates.
+  revisions: 2
   value_revisions: 0
 - task_id: T002
   outcome: Recheck product name, package, domain, and trademark surface
@@ -3194,4 +3196,4 @@ tasks:
   notes: []
   revisions: 0
   value_revisions: 0
-updated_at: '2026-08-10T09:15:58.821736+00:00'
+updated_at: '2026-08-10T09:15:58.902399+00:00'

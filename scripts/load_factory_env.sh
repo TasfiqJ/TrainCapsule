@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 # This file is intentionally safe to source into an interactive shell.
+export PATH="$HOME/.local/bin:$HOME/.local/share/node-v24/bin:$PATH"
 ENV_FILE="${TCF_ENV_FILE:-$HOME/.config/traincapsule/lights-out.env}"
 if [[ ! -f "$ENV_FILE" ]]; then
   echo "Missing factory environment file: $ENV_FILE" >&2

@@ -218,6 +218,7 @@ def test_lights_out_requires_usage_credit_acknowledgement(
     monkeypatch.setenv("TCF_CLAUDE_OAUTH_TOKEN_FILE", str(token_file))
     monkeypatch.setenv("CLAUDE_CODE_OAUTH_TOKEN", "not-a-real-token")
     monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(tmp_path / ".claude"))
+    monkeypatch.delenv("TCF_USAGE_CREDITS_DISABLED_ACK", raising=False)
     with pytest.raises(RuntimeError, match="usage credits"):
         auth.assert_max_oauth_only(require_long_lived_token=True)
 

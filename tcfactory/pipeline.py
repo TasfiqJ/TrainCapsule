@@ -71,6 +71,64 @@ class PipelineBlocked(RuntimeError):
     pass
 
 
+MAX_STAGE_TURNS = 200
+TURN_ESCALATION_FACTOR = 2
+_TURN_CEILING_MARKERS = (
+    "reached maximum number of turns",
+    "error_max_turns",
+    "terminal_reason=max_turns",
+)
+
+
+def stage_hit_turn_ceiling(result: StageResult) -> bool:
+    """A turn ceiling truncates the work phase; it is not a truthful product rejection.
+
+    The report-continuation path can still rescue a structured report from a truncated
+    session, so ``terminal_reason`` may read ``completed`` while the durable error text
+    still records the ceiling. Both signals are checked.
+    """
+
+    if (result.terminal_reason or "").strip().lower() == "max_turns":
+        return True
+    error = (result.error or "").lower()
+    return any(marker in error for marker in _TURN_CEILING_MARKERS)
+
+
+def escalated_turn_budget(current: int) -> int | None:
+    """Bounded one-step turn increase so a retry is not truncated identically.
+
+    Token and dollar budgets still bound the retry; only the turn ceiling moves.
+    Returns ``None`` when the stage already sits at the schema ceiling.
+    """
+
+    if current >= MAX_STAGE_TURNS:
+        return None
+    return min(current * TURN_ESCALATION_FACTOR, MAX_STAGE_TURNS)
+
+
+def retry_stage_update(
+    stage: Stage,
+    result: StageResult,
+    role_config: RoleConfig,
+    model: str,
+) -> dict[str, object]:
+    """Rotate the retry model, and raise the turn ceiling only when it caused truncation.
+
+    Without the turn increase a stage that exhausted its turns is retried with the exact
+    same resource ceiling, so it truncates again and burns the whole bounded retry budget
+    on one deterministic infrastructure limit. A truthful product rejection keeps its
+    original turn budget.
+    """
+
+    update: dict[str, object] = {"model": model}
+    if not stage_hit_turn_ceiling(result):
+        return update
+    escalated = escalated_turn_budget(stage.max_turns or role_config.max_turns)
+    if escalated is not None:
+        update["max_turns"] = escalated
+    return update
+
+
 def _role_requires_changes(role: RoleName) -> bool:
     return role in {
         RoleName.PLANNER,
@@ -871,9 +929,19 @@ async def run_pipeline(
                     retry_models = task.repair.builder_models
                     retry_index = failure_count
                 if retry_index < len(retry_models):
-                    replacement = stage.model_copy(
-                        update={"model": retry_models[retry_index]}
+                    update = retry_stage_update(
+                        stage,
+                        result,
+                        role_configs[stage.role],
+                        retry_models[retry_index],
                     )
+                    if "max_turns" in update:
+                        console.print(
+                            f"[yellow]Turn ceiling hit:[/yellow] retrying "
+                            f"{stage.role.value} with {update['max_turns']} turns "
+                            f"(was {stage.max_turns or role_configs[stage.role].max_turns})"
+                        )
+                    replacement = stage.model_copy(update=update)
                     task.pipeline[checkpoint.stage_index] = replacement
                     checkpoint.previous_findings = findings
                     checkpoint_store.save(checkpoint)

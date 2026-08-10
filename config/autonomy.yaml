@@ -1,5 +1,5 @@
 version: 1
-enabled: false
+enabled: true
 auto_plan: true
 auto_enqueue: true
 auto_merge: true

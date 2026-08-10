@@ -42,6 +42,7 @@ def test_legacy_monthly_budget_alias_still_works(
 ) -> None:
     config_path = tmp_path / "factory.yaml"
     _write_config(config_path)
+    monkeypatch.delenv("TCF_MONTHLY_ESTIMATED_USD_CAP", raising=False)
     monkeypatch.setenv("TCF_MONTHLY_BUDGET_USD", "98.76")
     config = load_factory_config(config_path)
     assert config.monthly_budget_usd == 98.76

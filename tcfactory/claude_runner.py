@@ -180,11 +180,17 @@ async def run_agent_stage(
 
     model = stage.model or role_config.model
     fallback_models = stage.fallback_models or role_config.fallback_models
-    fallback_model = ",".join(
-        candidate
-        for candidate in dict.fromkeys(fallback_models)
-        if candidate != model
-    ) or None
+    # The SDK accepts one model alias, not a comma-separated fallback chain.  Normal
+    # pipeline execution routes one model at a time so each downgrade is attributable;
+    # direct callers may still supply one valid SDK fallback.
+    fallback_model = next(
+        (
+            candidate
+            for candidate in dict.fromkeys(fallback_models)
+            if candidate != model
+        ),
+        None,
+    )
     effort = stage.effort or role_config.effort
     max_turns = stage.max_turns or role_config.max_turns
     max_budget = stage.max_budget_usd or role_config.max_budget_usd
@@ -206,6 +212,34 @@ async def run_agent_stage(
             tool for tool in disallowed_tools if tool not in {"ListAgents", "SendMessage"}
         ]
     permission_mode = stage.permission_mode or role_config.permission_mode
+
+    append_event(
+        config.resolve(repo_root, config.event_log_path),
+        event="agent_stage_routed",
+        component="claude_runner",
+        task_id=task.task_id,
+        run_id=run_id,
+        role=stage.role.value,
+        detail=f"{feature_plan.session_name} using {model}",
+        data={
+            "model": model,
+            "fallback_model": fallback_model,
+            "effort": effort,
+            "max_turns": max_turns,
+            "task_budget_tokens": task_budget,
+            "read_only": read_only,
+            "risk_tier": task.risk_tier.value,
+        },
+    )
+    write_heartbeat(
+        config.resolve(repo_root, config.heartbeat_path),
+        component="claude_runner",
+        status="running",
+        task_id=task.task_id,
+        run_id=run_id,
+        role=stage.role.value,
+        detail=f"{feature_plan.session_name} using {model}",
+    )
 
     allowed_paths = stage.allowed_paths
     forbidden_paths = stage.forbidden_paths
@@ -563,7 +597,15 @@ async def run_agent_stage(
         run_id=run_id,
         role=stage.role.value,
         detail=stage_result.verdict.value,
-        data={"session_name": feature_plan.session_name, "session_id": session_id},
+        data={
+            "session_name": feature_plan.session_name,
+            "session_id": session_id,
+            "model": model,
+            "models_used": sorted(model_usage),
+            "num_turns": num_turns,
+            "cost_usd": round(total_cost, 6),
+            "terminal_reason": terminal_reason,
+        },
     )
     write_heartbeat(
         config.resolve(repo_root, config.heartbeat_path),

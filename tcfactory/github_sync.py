@@ -5,7 +5,7 @@ import shutil
 import time
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -33,8 +33,8 @@ class GitHubConfig(BaseModel):
 
     version: int = 1
     enabled: bool = False
-    remote: str = "origin"
-    branch: str = "main"
+    remote: Literal["origin"] = "origin"
+    branch: Literal["main"] = "main"
     visibility: str = "private"
     repository: str | None = None
     push_after_verified_tasks: int = Field(default=3, ge=1, le=50)
@@ -216,11 +216,16 @@ def _pre_push_checks(repo_root: Path) -> None:
         raise GitHubSyncError(fsck.stderr.strip() or "git fsck failed")
 
 
-def _push_with_retry(repo_root: Path, config: GitHubConfig, refspec: str) -> None:
+def push_main_with_retry(repo_root: Path, config: GitHubConfig, refspec: str) -> None:
+    expected_refspec = "refs/heads/main:refs/heads/main"
+    if config.remote != "origin" or config.branch != "main" or refspec != expected_refspec:
+        raise GitHubSyncError(
+            "Factory pushes are restricted to origin refs/heads/main:refs/heads/main"
+        )
     last_error = ""
     for attempt in range(1, config.retry_attempts + 1):
         result = run_command(
-            ["git", "push", "--porcelain", config.remote, refspec],
+            ["git", "push", "--porcelain", "origin", expected_refspec],
             cwd=repo_root,
             check=False,
         )
@@ -346,7 +351,11 @@ def sync_github(
         _pre_push_checks(repo_root)
         _ensure_no_divergence(repo_root, config, local_sha)
         if _remote_sha(repo_root, config) != local_sha:
-            _push_with_retry(repo_root, config, f"{config.branch}:{config.branch}")
+            push_main_with_retry(
+                repo_root,
+                config,
+                "refs/heads/main:refs/heads/main",
+            )
         if config.verify_remote_sha:
             observed = _remote_sha(repo_root, config)
             if observed != local_sha:
@@ -385,10 +394,11 @@ def run_remote_ci(
     run_id: str,
     artifact_dir: Path,
 ) -> dict[str, object]:
-    """Run GitHub Actions against the exact pre-promotion candidate commit.
+    """Run GitHub Actions for a candidate already promoted locally to ``main``.
 
-    A unique temporary branch is pushed. Main remains unchanged until the workflow passes.
-    The temporary branch is deleted after the result is recorded.
+    TrainCapsule uses a single-branch remote policy.  Pre-promotion candidates are
+    verified by local and private gates; remote CI starts only after the exact release
+    commit becomes local ``main`` and is pushed to ``origin/main``.
     """
 
     config_path = factory.resolve(repo_root, factory.github_config_path)
@@ -400,17 +410,26 @@ def run_remote_ci(
         )
     _gh_ready(repo_root, config)
     _pre_push_checks(repo_root)
-    branch = f"factory-ci/{task.task_id.lower()}-{run_id.lower()}"[:120]
+    local_main_sha = current_sha(repo_root, "main")
+    if candidate_sha != local_main_sha:
+        raise GitHubSyncError(
+            "Remote CI may only push the current local main commit; "
+            f"candidate={candidate_sha}, main={local_main_sha}"
+        )
+    _ensure_no_divergence(repo_root, config, candidate_sha)
     artifact_dir.mkdir(parents=True, exist_ok=True)
-    refspec = f"{candidate_sha}:refs/heads/{branch}"
-    _push_with_retry(repo_root, config, refspec)
+    push_main_with_retry(
+        repo_root,
+        config,
+        "refs/heads/main:refs/heads/main",
+    )
     try:
         result = wait_for_remote_ci(repo_root, config, candidate_sha)
         payload: dict[str, object] = {
             "required": True,
             "status": "pass",
             "candidate_sha": candidate_sha,
-            "temporary_branch": branch,
+            "branch": "main",
             "workflow": config.remote_ci.workflow_name,
             "result": result,
         }
@@ -421,16 +440,10 @@ def run_remote_ci(
             "required": True,
             "status": "fail",
             "candidate_sha": candidate_sha,
-            "temporary_branch": branch,
+            "branch": "main",
             "workflow": config.remote_ci.workflow_name,
             "error": f"{type(exc).__name__}: {exc}",
             "runs": _workflow_runs(repo_root, candidate_sha),
         }
         write_json(artifact_dir / "remote-ci.json", payload)
         raise GitHubSyncError(str(exc)) from exc
-    finally:
-        run_command(
-            ["git", "push", config.remote, "--delete", branch],
-            cwd=repo_root,
-            check=False,
-        )

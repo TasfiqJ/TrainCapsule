@@ -2,10 +2,16 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
+
+import pytest
 
 from tcfactory.github_sync import (
     GitHubConfig,
+    GitHubSyncError,
     GitHubSyncState,
+    push_main_with_retry,
     record_verified_task,
     should_push,
 )
@@ -60,3 +66,45 @@ def test_record_verified_task_persists_risk(tmp_path: Path) -> None:
     assert state.tasks_since_push == 1
     assert state.last_task_risk == RiskTier.INTEGRATION
     assert state.pending
+
+
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("branch", "feature"), ("remote", "upstream")],
+)
+def test_github_config_rejects_any_non_main_push_target(field: str, value: str) -> None:
+    with pytest.raises(ValueError):
+        GitHubConfig.model_validate({field: value})
+
+
+def test_push_helper_rejects_non_main_refspec_before_running_git(tmp_path: Path) -> None:
+    with pytest.raises(GitHubSyncError, match="restricted to origin"):
+        push_main_with_retry(tmp_path, GitHubConfig(), "feature:feature")
+
+
+def test_push_helper_executes_only_the_full_main_refspec(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    commands: list[list[str]] = []
+
+    def fake_run(command: list[str], **_: Any) -> SimpleNamespace:
+        commands.append(command)
+        return SimpleNamespace(returncode=0, stdout="", stderr="")
+
+    monkeypatch.setattr("tcfactory.github_sync.run_command", fake_run)
+
+    push_main_with_retry(
+        tmp_path,
+        GitHubConfig(),
+        "refs/heads/main:refs/heads/main",
+    )
+
+    assert commands == [
+        [
+            "git",
+            "push",
+            "--porcelain",
+            "origin",
+            "refs/heads/main:refs/heads/main",
+        ]
+    ]

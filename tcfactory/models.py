@@ -584,6 +584,7 @@ class AutonomyState(BaseModel):
         "paused",
         "auditing",
         "waiting_auth",
+        "waiting_github",
         "repairing",
         "restarting",
         "hard_stuck",

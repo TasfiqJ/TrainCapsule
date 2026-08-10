@@ -12,12 +12,17 @@ def stage_model_chain(stage: Stage, role_config: RoleConfig) -> list[str]:
 
 
 def routed_stage(stage: Stage, chain: list[str], index: int) -> Stage:
-    """Select one model and expose only its remaining availability fallbacks."""
+    """Select exactly one model; the controller owns ordered fallback routing."""
 
     return stage.model_copy(
         update={
             "model": chain[index],
-            "fallback_models": chain[index + 1 :],
+            # ClaudeAgentOptions accepts only one fallback model.  Supplying the
+            # remainder as a comma-separated alias hides which model actually ran
+            # and can retry a model twice.  The pipeline advances ``chain`` only
+            # after a machine-attributed model-limit event, so keep the SDK route
+            # single-model and observable.
+            "fallback_models": [],
         }
     )
 

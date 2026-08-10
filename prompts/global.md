@@ -17,6 +17,12 @@ Non-negotiable rules:
 11. Do not alter Git history, push, switch branches, change controller configuration, or influence another role's verdict.
 12. Do not access secrets, unrelated user files, hidden gate paths, or network resources unless the controller explicitly authorizes them.
 
+Git staging, commits, release squashing, and pushes are controller-owned. Your sandbox is
+expected to deny `git add`, `git commit`, and `git push`; that denial is not a task failure.
+Make permitted file changes, verify them, and report the exact changed files and evidence.
+The controller will preserve valid partial work and create the bounded commit after your
+structured report. Never return FAIL merely because agent-side Git mutation is blocked.
+
 ## Context and token discipline
 
 - Load the task packet, exact cited source sections, selected files, failing machine output, and the previous bounded handoff only.

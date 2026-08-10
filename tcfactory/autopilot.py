@@ -18,7 +18,12 @@ from .checkpoints import CheckpointStore, new_checkpoint
 from .completion import CompletionBlocked, audit_and_expand_or_complete
 from .config import load_autonomy_config, load_factory_config
 from .feature_ledger import FeatureItem, FeatureLedger, load_feature_ledger, save_feature_ledger
-from .github_sync import GitHubDivergenceError, GitHubSyncError, sync_github
+from .github_sync import (
+    GitHubDivergenceError,
+    GitHubSyncError,
+    load_github_state,
+    sync_github,
+)
 from .gitops import GitError, commit_all, current_sha, transplant_candidate_onto
 from .models import (
     AutonomyConfig,
@@ -863,6 +868,60 @@ async def _run_autopilot_inner(
                 return
             await asyncio.sleep(max(1.0, (state.next_wake_at - _now()).total_seconds()))
             continue
+
+        github_state_path = factory.resolve(repo_root, factory.github_state_path)
+        if load_github_state(github_state_path).pending:
+            try:
+                pending_github_result = _sync_github_best_effort(
+                    repo_root=repo_root,
+                    factory=factory,
+                    reason="resume pending origin/main sync before new work",
+                    force=True,
+                )
+            except GitHubDivergenceError as exc:
+                state.status = "blocked"
+                state.last_event = f"GitHub divergence while resuming pending sync: {exc}"
+                state.blocked_tasks = ["GITHUB_SYNC"]
+                save_state(repo_root, factory, state)
+                _notify(autonomy, state.last_event)
+                return
+            if pending_github_result.get("error"):
+                state.consecutive_failures += 1
+                state.status = "waiting_github"
+                state.current_action = "resume pending origin/main sync and required CI"
+                state.next_wake_at = _now() + timedelta(
+                    seconds=autonomy.hard_stuck_retry_seconds
+                )
+                state.last_event = (
+                    "Durable GitHub state is pending; no Claude task will start before "
+                    f"retry at {state.next_wake_at.isoformat()}: "
+                    f"{pending_github_result.get('error')}"
+                )
+                save_state(repo_root, factory, state)
+                if (
+                    state.consecutive_failures
+                    >= autonomy.max_consecutive_factory_failures
+                ):
+                    await _repair_or_hard_stuck(
+                        repo_root=repo_root,
+                        factory=factory,
+                        autonomy=autonomy,
+                        state=state,
+                        reason=state.last_event,
+                        blocker_id="GITHUB_SYNC",
+                    )
+                    return
+                if once:
+                    return
+                await asyncio.sleep(
+                    max(1.0, (state.next_wake_at - _now()).total_seconds())
+                )
+                continue
+            state.consecutive_failures = 0
+            state.next_wake_at = None
+            state.current_action = None
+            state.last_event = "pending origin/main synchronization and required CI completed"
+            save_state(repo_root, factory, state)
         if autonomy.auto_resume_quota:
             promote_due_paused(repo_root, factory)
         ledger_path = factory.resolve(repo_root, factory.feature_ledger_path)
@@ -1091,6 +1150,45 @@ async def _run_autopilot_inner(
                 save_state(repo_root, factory, state)
                 _notify(autonomy, state.last_event)
                 return
+            while github_result.get("status") == "deferred" and github_result.get("error"):
+                state.consecutive_failures += 1
+                state.status = "waiting_github"
+                state.current_action = "retry origin/main synchronization and required CI"
+                state.next_wake_at = _now() + timedelta(
+                    seconds=autonomy.hard_stuck_retry_seconds
+                )
+                state.last_event = (
+                    "origin/main synchronization or required CI failed; no new task will "
+                    f"start before retry at {state.next_wake_at.isoformat()}: "
+                    f"{github_result.get('error')}"
+                )
+                save_state(repo_root, factory, state)
+                if (
+                    state.consecutive_failures
+                    >= autonomy.max_consecutive_factory_failures
+                ):
+                    await _repair_or_hard_stuck(
+                        repo_root=repo_root,
+                        factory=factory,
+                        autonomy=autonomy,
+                        state=state,
+                        reason=state.last_event,
+                        blocker_id="GITHUB_SYNC",
+                    )
+                    return
+                if once:
+                    return
+                await asyncio.sleep(
+                    max(1.0, (state.next_wake_at - _now()).total_seconds())
+                )
+                github_result = _sync_github_best_effort(
+                    repo_root=repo_root,
+                    factory=factory,
+                    reason="retry verified task origin/main sync",
+                    force=True,
+                )
+            state.consecutive_failures = 0
+            state.next_wake_at = None
             state.last_event = (
                 "queue task processed; GitHub synchronization "
                 f"{github_result.get('status', 'unknown')}"

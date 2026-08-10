@@ -23,7 +23,7 @@ from .gates import (
     select_gates,
     validate_changed_paths,
 )
-from .github_sync import GithubSyncError, record_verified_task, run_remote_ci
+from .github_sync import record_verified_task
 from .gitops import (
     Worktree,
     changed_files,
@@ -199,6 +199,25 @@ def review_turn_retry_update(
             review_ceiling,
         )
     }
+
+
+def preserve_mutating_candidate(
+    checkpoint: PipelineCheckpoint,
+    current_sha: str,
+    attempted_sha: str,
+) -> str:
+    """Carry valid in-scope partial work into the next bounded repair attempt.
+
+    ``_execute_stage`` commits path-policy-valid partial edits even when a mutating
+    agent truthfully returns FAIL.  Losing that commit here makes the next repair
+    restart from the older defect and leaves the durable checkpoint pointing
+    backwards.  Final gates and independent reviewers still control promotion.
+    """
+
+    if attempted_sha != current_sha:
+        checkpoint.candidate_sha = attempted_sha
+        return attempted_sha
+    return current_sha
 
 
 def _role_requires_changes(role: RoleName) -> bool:
@@ -1075,9 +1094,9 @@ async def run_pipeline(
             )
             if stage.role == RoleName.BUILDER or is_configured_mutator:
                 failure_count = checkpoint.stage_failures[key]
-                if next_sha != candidate_sha:
-                    candidate_sha = next_sha
-                    checkpoint.candidate_sha = candidate_sha
+                candidate_sha = preserve_mutating_candidate(
+                    checkpoint, candidate_sha, next_sha
+                )
                 if is_configured_mutator and stage.role != RoleName.BUILDER:
                     retry_models = (
                         task.repair.mutating_retry_models
@@ -1168,9 +1187,29 @@ async def run_pipeline(
                     )
                     all_results.append(repair_result)
                     checkpoint.results.append(checkpoint_result_payload(repair_result))
+                    previous_candidate_sha = candidate_sha
+                    candidate_sha = preserve_mutating_candidate(
+                        checkpoint, candidate_sha, repair_sha
+                    )
+                    if candidate_sha != previous_candidate_sha:
+                        append_event(
+                            config.resolve(repo_root, config.event_log_path),
+                            event="repair_progress_preserved",
+                            component="pipeline",
+                            task_id=task.task_id,
+                            run_id=run_id,
+                            role=repair_stage.role.value,
+                            detail=(
+                                f"repair cycle {checkpoint.repair_cycles}: "
+                                f"{previous_candidate_sha[:12]} -> {candidate_sha[:12]}"
+                            ),
+                            data={
+                                "cycle": checkpoint.repair_cycles,
+                                "model": model,
+                                "verdict": repair_result.verdict.value,
+                            },
+                        )
                     if repair_result.verdict == Verdict.PASS:
-                        candidate_sha = repair_sha
-                        checkpoint.candidate_sha = candidate_sha
                         checkpoint.previous_findings = None
                         checkpoint.stage_index = _find_stage_index(
                             task, task.repair.restart_review_from
@@ -1239,22 +1278,11 @@ async def run_pipeline(
             "release_sha": release_sha,
         }
         if task.remote_ci_required and release_sha != starting_sha:
-            try:
-                remote_ci_summary = run_remote_ci(
-                    repo_root=repo_root,
-                    factory=config,
-                    task=task,
-                    candidate_sha=release_sha,
-                    run_id=run_id,
-                    artifact_dir=(
-                        config.resolve(repo_root, config.artifact_dir)
-                        / task.task_id
-                        / run_id
-                        / "remote-ci"
-                    ),
-                )
-            except GithubSyncError as exc:
-                raise PipelineBlocked(f"Required GitHub remote CI did not pass: {exc}") from exc
+            # The remote is deliberately single-branch.  Local deterministic and
+            # private gates approve the release commit here; the autopilot's required
+            # origin/main synchronization then pushes this exact SHA and waits for CI
+            # before it starts another task.
+            remote_ci_summary["status"] = "pending-main-push"
         elif task.remote_ci_required:
             remote_ci_summary["status"] = "no-change"
         checkpoint.remote_ci = remote_ci_summary

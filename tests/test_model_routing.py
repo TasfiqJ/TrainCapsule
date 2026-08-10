@@ -25,7 +25,7 @@ def test_fable_route_is_ordered_and_deduplicated() -> None:
     chain = stage_model_chain(stage, _role())
     assert chain == ["fable", "opus", "sonnet"]
     assert routed_stage(stage, chain, 1).model == "opus"
-    assert routed_stage(stage, chain, 1).fallback_models == ["sonnet"]
+    assert routed_stage(stage, chain, 1).fallback_models == []
 
 
 def test_only_model_specific_limit_can_downgrade() -> None:

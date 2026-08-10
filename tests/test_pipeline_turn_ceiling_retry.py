@@ -13,11 +13,13 @@ what actually failed in T001.
 
 from __future__ import annotations
 
+from tcfactory.checkpoints import new_checkpoint
 from tcfactory.models import RoleConfig, RoleName, Stage, StageResult, Verdict
 from tcfactory.pipeline import (
     MAX_REVIEW_TURN_MULTIPLIER,
     MAX_STAGE_TURNS,
     escalated_turn_budget,
+    preserve_mutating_candidate,
     retry_stage_update,
     review_turn_retry_update,
     stage_hit_turn_ceiling,
@@ -163,3 +165,30 @@ def test_truthful_review_rejection_still_routes_to_normal_repair() -> None:
     )
 
     assert review_turn_retry_update(stage, result, _role_config(max_turns=10)) is None
+
+
+def test_failed_mutating_repair_preserves_its_partial_candidate() -> None:
+    original = "a" * 40
+    partial = "b" * 40
+    checkpoint = new_checkpoint(
+        task_id="T001",
+        run_id="20260810T173311Z",
+        starting_sha=original,
+    )
+
+    selected = preserve_mutating_candidate(checkpoint, original, partial)
+
+    assert selected == partial
+    assert checkpoint.candidate_sha == partial
+
+
+def test_repair_without_a_new_commit_keeps_the_current_candidate() -> None:
+    current = "c" * 40
+    checkpoint = new_checkpoint(
+        task_id="T001",
+        run_id="20260810T173311Z",
+        starting_sha=current,
+    )
+
+    assert preserve_mutating_candidate(checkpoint, current, current) == current
+    assert checkpoint.candidate_sha == current

@@ -74,6 +74,8 @@ def test_retry_after_turn_ceiling_raises_the_stage_turn_budget() -> None:
     assert update["model"] == "sonnet"
     assert update["max_turns"] == 36
     replacement = stage.model_copy(update=update)
+    assert replacement.max_turns is not None
+    assert stage.max_turns is not None
     assert replacement.max_turns > stage.max_turns
 
 

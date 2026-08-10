@@ -16,7 +16,8 @@ build/
 *.token
 credentials*
 secrets*
-.claude/
+.claude/settings.local.json
+.claude/*.local.json
 .factory/sessions/*
 !.factory/sessions/.gitkeep
 .factory/costs/*

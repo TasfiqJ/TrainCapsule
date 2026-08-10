@@ -1,0 +1,248 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "disableAllHooks": false,
+  "permissions": {
+    "deny": [
+      "Bash(git push*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean*)",
+      "Bash(sudo*)",
+      "Bash(chmod*)",
+      "Bash(chown*)",
+      "Bash(docker*)",
+      "Bash(podman*)",
+      "Bash(powershell*)",
+      "Bash(powershell.exe*)",
+      "Bash(cmd.exe*)",
+      "Bash(wsl.exe*)",
+      "Bash(git add*)",
+      "Bash(git branch*)",
+      "Bash(git checkout*)",
+      "Bash(git cherry-pick*)",
+      "Bash(git commit*)",
+      "Bash(git merge*)",
+      "Bash(git rebase*)",
+      "Bash(git switch*)",
+      "Bash(git tag*)",
+      "Bash(git worktree*)",
+      "Bash(gh auth*)",
+      "Bash(gh repo create*)"
+    ]
+  },
+  "sandbox": {
+    "enabled": true,
+    "autoAllowBashIfSandboxed": true,
+    "allowUnsandboxedCommands": false,
+    "filesystem": {
+      "denyRead": [
+        "~/.config/traincapsule",
+        "~/.local/share/traincapsule-factory/private-gates",
+        "~/.claude/.credentials.json",
+        "/mnt/c",
+        "/proc/*/environ",
+        "/proc/self/environ",
+        "/proc/thread-self/environ",
+        "~/.config/gh",
+        "~/.git-credentials",
+        "~/.ssh",
+        "~/.netrc",
+        "~/.aws",
+        "~/.azure",
+        "~/.config/gcloud",
+        "~/.kube",
+        "~/.docker"
+      ],
+      "denyWrite": [
+        "~/.config/traincapsule",
+        "~/.local/share/traincapsule-factory/private-gates",
+        "~/.claude",
+        "/mnt/c",
+        "~/.config/gh",
+        "~/.git-credentials",
+        "~/.ssh",
+        "~/.netrc",
+        "~/.aws",
+        "~/.azure",
+        "~/.config/gcloud",
+        "~/.kube",
+        "~/.docker"
+      ]
+    },
+    "credentials": {
+      "files": [
+        {
+          "path": "~/.config/traincapsule/claude-oauth-token",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.claude/.credentials.json",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.local/share/traincapsule-factory/private-gates",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.config/gh",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.git-credentials",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.ssh",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.netrc",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.aws",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.azure",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.config/gcloud",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.kube",
+          "mode": "deny"
+        },
+        {
+          "path": "~/.docker",
+          "mode": "deny"
+        }
+      ],
+      "envVars": [
+        {
+          "name": "CLAUDE_CODE_OAUTH_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "TCF_CLAUDE_OAUTH_TOKEN_FILE",
+          "mode": "deny"
+        },
+        {
+          "name": "TCF_PRIVATE_GATE_RUNNER",
+          "mode": "deny"
+        },
+        {
+          "name": "GH_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "GITHUB_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "AWS_ACCESS_KEY_ID",
+          "mode": "deny"
+        },
+        {
+          "name": "AWS_SECRET_ACCESS_KEY",
+          "mode": "deny"
+        },
+        {
+          "name": "AWS_SESSION_TOKEN",
+          "mode": "deny"
+        },
+        {
+          "name": "AZURE_CLIENT_SECRET",
+          "mode": "deny"
+        },
+        {
+          "name": "GOOGLE_APPLICATION_CREDENTIALS",
+          "mode": "deny"
+        },
+        {
+          "name": "DOCKER_AUTH_CONFIG",
+          "mode": "deny"
+        }
+      ]
+    },
+    "failIfUnavailable": true
+  },
+  "hooks": {
+    "PreToolUse": [
+      {
+        "matcher": "Read|Grep|Glob|Write|Edit|Bash|WebFetch|WebSearch",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/path_guard.py\""
+          }
+        ]
+      },
+      {
+        "matcher": "ListAgents|SendMessage",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/messaging_guard.py\""
+          }
+        ]
+      }
+    ],
+    "ConfigChange": [
+      {
+        "matcher": "project_settings|local_settings|skills",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/block_config_changes.py\""
+          }
+        ]
+      }
+    ],
+    "SessionStart": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session_audit.py\""
+          }
+        ]
+      }
+    ],
+    "SessionEnd": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/session_audit.py\""
+          }
+        ]
+      }
+    ],
+    "StopFailure": [
+      {
+        "matcher": "*",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "python3 \"${CLAUDE_PROJECT_DIR}/.claude/hooks/stop_failure_checkpoint.py\""
+          }
+        ]
+      }
+    ]
+  },
+  "forceLoginMethod": "claudeai",
+  "disableAutoMode": "disable",
+  "disableBypassPermissionsMode": "disable",
+  "attribution": {
+    "commit": "",
+    "pr": "",
+    "sessionUrl": false
+  },
+  "isolatePeerMachines": true,
+  "workflowSizeGuideline": "small",
+  "autoMemoryEnabled": false
+}

@@ -19,6 +19,9 @@ def test_windows_task_runs_foreground_autopilot() -> None:
     assert "tcfactory autopilot" in entry
     assert "load_factory_env.sh" in entry
     assert "CLAUDE_CODE_OAUTH_TOKEN" not in entry
+    assert "HARD_STUCK.json" in entry
+    assert 'flock -n "$ROOT/factory/state/autopilot.lock"' in entry
+    assert "duplicate launcher exiting" in entry
 
 
 def test_private_github_runner_has_limited_recovery_task() -> None:

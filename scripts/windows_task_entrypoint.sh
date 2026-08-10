@@ -25,6 +25,11 @@ while true; do
   if [[ -f "$ROOT/factory/state/STOP" || -f "$ROOT/factory/state/HARD_STUCK.json" ]]; then
     exit "$controller_exit"
   fi
+  if ! flock -n "$ROOT/factory/state/autopilot.lock" -c true; then
+    printf 'Another healthy controller owns the single-instance lock; duplicate launcher exiting.\n' \
+      >>"$LOG_DIR/autopilot.log"
+    exit 0
+  fi
   printf 'Controller exited (%s); restarting in 15 seconds.\n' "$controller_exit" \
     >>"$LOG_DIR/autopilot.log"
   sleep 15

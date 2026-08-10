@@ -110,4 +110,5 @@ def test_terminal_blocked_queue_entry_stays_terminal(tmp_path: Path) -> None:
 def test_stale_main_and_turn_limits_are_infrastructure_failures() -> None:
     assert is_infrastructure_failure("Cannot resume T001: main moved from abc to def")
     assert is_infrastructure_failure("Reached maximum number of turns (18)")
+    assert is_infrastructure_failure("Stage research failed and no repair path remains")
     assert not is_infrastructure_failure("material-value gate rejected the result")

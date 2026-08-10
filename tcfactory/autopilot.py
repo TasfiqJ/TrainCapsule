@@ -42,6 +42,7 @@ def is_infrastructure_failure(error: str) -> bool:
             "cannot resume",
             "main moved from",
             "reached maximum number of turns",
+            "stage research failed and no repair path remains",
             "service capacity",
             "infrastructure_error",
         )

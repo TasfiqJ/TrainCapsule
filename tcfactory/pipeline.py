@@ -39,6 +39,7 @@ from .gitops import (
 )
 from .handoffs import write_handoff
 from .ledger import Ledger
+from .model_routing import may_downgrade_for_limit, routed_stage, stage_model_chain
 from .models import (
     FactoryConfig,
     GateResult,
@@ -54,6 +55,7 @@ from .models import (
     ValueStatus,
     Verdict,
 )
+from .observability import append_event
 from .provenance import append_provenance
 from .quality_policy import QualityPolicyError, enforce_candidate_quality
 from .quota import AuthenticationPause, QuotaLimitPause
@@ -488,24 +490,82 @@ async def _execute_stage(
         await asyncio.sleep(features.integration_scout.startup_delay_seconds)
 
     try:
-        result = await run_agent_stage(
-            repo_root=repo_root,
-            worktree=worktree.path,
-            config=config,
-            task=task,
-            stage=stage,
-            role_config=role_config,
-            global_prompt_path=config.global_prompt,
-            run_id=run_id,
-            attempt=attempt,
-            artifact_dir=artifact_dir,
-            previous_findings=previous_findings,
-            base_sha=base_sha,
-            handoff_path=checkpoint.handoff_path,
-            session_name_override=primary_name,
-            peer_names=[scout_name] if scout_name else None,
-            peer_messaging_override=True if scout_name else None,
-        )
+        model_chain = stage_model_chain(stage, role_config)
+        routed_failures: list[dict[str, object]] = []
+        routed_cost = 0.0
+        routed_findings = list(previous_findings or [])
+        result: StageResult | None = None
+        for route_index, selected_model in enumerate(model_chain):
+            selected_stage = routed_stage(stage, model_chain, route_index)
+            selected_artifact_dir = (
+                artifact_dir
+                if route_index == 0
+                else artifact_dir / f"model-fallback-{route_index}-{selected_model}"
+            )
+            try:
+                result = await run_agent_stage(
+                    repo_root=repo_root,
+                    worktree=worktree.path,
+                    config=config,
+                    task=task,
+                    stage=selected_stage,
+                    role_config=role_config,
+                    global_prompt_path=config.global_prompt,
+                    run_id=run_id,
+                    attempt=attempt,
+                    artifact_dir=selected_artifact_dir,
+                    previous_findings=routed_findings or None,
+                    base_sha=base_sha,
+                    handoff_path=checkpoint.handoff_path,
+                    session_name_override=primary_name,
+                    peer_names=[scout_name] if scout_name else None,
+                    peer_messaging_override=True if scout_name else None,
+                )
+                break
+            except QuotaLimitPause as exc:
+                if not may_downgrade_for_limit(exc.record.kind, model_chain, route_index):
+                    raise
+                next_model = model_chain[route_index + 1]
+                partial_cost = (
+                    exc.stage_result.total_cost_usd if exc.stage_result is not None else 0.0
+                )
+                routed_cost += partial_cost
+                routed_failure: dict[str, object] = {
+                    "model": selected_model,
+                    "next_model": next_model,
+                    "pause_kind": exc.record.kind.value,
+                    "message": exc.record.message,
+                    "partial_work_preserved": bool(changed_files(worktree.path, base_sha)),
+                    "cost_usd": partial_cost,
+                }
+                routed_failures.append(routed_failure)
+                write_json(
+                    artifact_dir / f"model-fallback-{route_index + 1}.json",
+                    routed_failure,
+                )
+                append_event(
+                    config.resolve(repo_root, config.event_log_path),
+                    event="agent_model_fallback",
+                    component="pipeline",
+                    task_id=task.task_id,
+                    run_id=run_id,
+                    role=stage.role.value,
+                    detail=f"{selected_model} -> {next_model}",
+                    data={"reason": exc.record.kind.value},
+                )
+                routed_findings.append(
+                    f"The {selected_model} subscription allowance became unavailable. "
+                    f"Continue the same bounded task with {next_model}; inspect and verify any "
+                    "permitted partial work already present in the worktree."
+                )
+        if result is None:
+            raise PipelineFailure("Model routing exhausted without a stage result")
+        if routed_failures:
+            result.total_cost_usd += routed_cost
+            result.peer_sessions.extend(
+                {"role": stage.role.value, "verdict": "model_fallback", **item}
+                for item in routed_failures
+            )
         if scout_future is not None:
             try:
                 scout_result = await asyncio.wait_for(

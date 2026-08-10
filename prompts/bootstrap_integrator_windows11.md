@@ -93,8 +93,8 @@ You may not:
 - Confirm `claude auth status` reports Claude.ai/OAuth authentication.
 - Treat `TCF_MONTHLY_ESTIMATED_USD_CAP` as an API-equivalent usage guard, not a billing authorization.
 - Preserve serial execution so Max 5x usage is bounded.
-- Confirm the official Claude Code aliases `haiku`, `sonnet`, and `opus` resolve and no non-Claude or Fable model is configured.
-- Do not add automatic Fable use.
+- Confirm the official Claude Code aliases `haiku`, `sonnet`, `opus`, and `fable` resolve and no non-Claude model is configured.
+- Permit Fable only through the controller-owned trust-core route with ordered Opus and Sonnet fallbacks; never make it the default model.
 
 ## Deliverable
 

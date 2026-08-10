@@ -1,4 +1,4 @@
-version: 5
+version: 6
 principles:
 - Use the controller-owned task catalog before asking a model to plan.
 - Run deterministic gates before any model reviewer.
@@ -10,7 +10,11 @@ principles:
   data rather than prior transcripts.
 - The controller may raise risk; no model may lower it.
 - Review depth follows the cost of a false green, not repository size.
-- Fable, model teams, and open-ended subagents are disabled in the default loop.
+- Fable is reserved for trust-core implementation that benefits from a long autonomous
+  session; it falls back to Opus and then Sonnet when its included Max allowance is unavailable.
+- Model selection never substitutes for evidence; deterministic gates, independent review,
+  private gates, remote CI, and the predeclared customer-value contract decide quality.
+- Model teams and open-ended subagents are disabled in the default loop.
 profiles:
   mechanical:
     context_chars: 35000
@@ -258,11 +262,12 @@ profiles:
         max_budget_usd: 4.5
         task_budget_tokens: 48000
       builder:
-        model: sonnet
+        model: fable
+        fallback_models: [opus, sonnet]
         effort: high
-        max_turns: 26
+        max_turns: 20
         max_budget_usd: 6.5
-        task_budget_tokens: 90000
+        task_budget_tokens: 72000
       adversary:
         model: opus
         effort: xhigh

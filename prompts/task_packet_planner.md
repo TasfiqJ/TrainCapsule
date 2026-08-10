@@ -30,7 +30,7 @@ The proposal must:
 - split overbroad work rather than creating a large task;
 - mark missing authority as BLOCKED rather than inventing semantics.
 
-Use Sonnet as the default builder, Opus for specification/profile/oracle/adversarial work, and no automatic Fable escalation.
+Use Haiku for mechanical work, Sonnet for normal implementation, and Opus for complex specification/profile/oracle/adversarial work. Only the controller may select Fable, and only for trust-core implementation with Opus then Sonnet fallbacks.
 
 Produce:
 

@@ -179,6 +179,12 @@ async def run_agent_stage(
     )
 
     model = stage.model or role_config.model
+    fallback_models = stage.fallback_models or role_config.fallback_models
+    fallback_model = ",".join(
+        candidate
+        for candidate in dict.fromkeys(fallback_models)
+        if candidate != model
+    ) or None
     effort = stage.effort or role_config.effort
     max_turns = stage.max_turns or role_config.max_turns
     max_budget = stage.max_budget_usd or role_config.max_budget_usd
@@ -333,6 +339,8 @@ async def run_agent_stage(
         artifact_dir / "claude-native-feature-plan.json",
         {
             "session_name": feature_plan.session_name,
+            "model": model,
+            "fallback_models": fallback_models,
             "advisor_model": feature_plan.advisor_model,
             "peer_messaging": feature_plan.peer_messaging,
             "peer_names": list(feature_plan.peer_names),
@@ -369,6 +377,7 @@ async def run_agent_stage(
         disallowed_tools=disallowed_tools,
         permission_mode=permission_mode,
         model=model,
+        fallback_model=fallback_model,
         effort=effort,
         max_turns=max_turns,
         max_budget_usd=max_budget,

@@ -21,6 +21,8 @@ def _numeric_total(value: object) -> int:
 
 def _family(model: object) -> str:
     value = str(model or "unknown").lower()
+    if "fable" in value:
+        return "fable"
     if "opus" in value:
         return "opus"
     if "sonnet" in value:
@@ -62,9 +64,16 @@ def usage_health(path: Path) -> dict[str, Any]:
         )
         return value / denominator if denominator else 0.0
 
-    shares = {family: share(family) for family in ("haiku", "sonnet", "opus", "other")}
+    shares = {
+        family: share(family)
+        for family in ("haiku", "sonnet", "opus", "fable", "other")
+    }
     status = "healthy"
-    if runs and shares["opus"] > 0.35:
+    if runs and shares["fable"] > 0.25:
+        status = "fable-heavy"
+    elif runs and shares["opus"] + shares["fable"] > 0.45:
+        status = "premium-model-heavy"
+    elif runs and shares["opus"] > 0.35:
         status = "opus-heavy"
     elif runs and shares["sonnet"] < 0.55:
         status = "sonnet-underused"
@@ -76,7 +85,8 @@ def usage_health(path: Path) -> dict[str, Any]:
         "shares": shares,
         "target": (
             "Sonnet should perform most production work; Haiku only mechanical work; "
-            "Opus should remain concentrated on integration/trust/security stages."
+            "Opus should remain concentrated on integration/trust/security stages; "
+            "Fable should remain below 25% and appear only on trust-core implementation."
         ),
         "by_family": dict(by_family),
         "stage_count": len(runs),

@@ -193,3 +193,28 @@ def test_rejected_overage_with_credits_disabled_does_not_claim_paid_overage() ->
     )
     assert disposition is not None
     assert disposition.kind == PauseKind.UNKNOWN_LIMIT
+
+
+def test_fable_weekly_allowance_text_is_model_specific() -> None:
+    result = classify_failure_texts(
+        [("stderr", "You've hit your Fable 5 usage limit; it resets Monday at 12:00 UTC")],
+        now=datetime(2026, 8, 9, 20, 0, tzinfo=UTC),
+    )
+    assert result is not None
+    assert result.kind == PauseKind.MODEL_LIMIT
+
+
+def test_machine_fable_limit_maps_to_model_pause() -> None:
+    from tcfactory.quota import disposition_from_rate_limit_info
+
+    now = datetime(2026, 8, 9, 20, 0, tzinfo=UTC)
+    disposition = disposition_from_rate_limit_info(
+        {
+            "status": "rejected",
+            "rate_limit_type": "seven_day_fable",
+            "resets_at": (now + timedelta(days=2)).timestamp(),
+        },
+        now=now,
+    )
+    assert disposition is not None
+    assert disposition.kind == PauseKind.MODEL_LIMIT

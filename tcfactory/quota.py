@@ -188,9 +188,17 @@ def disposition_from_rate_limit_info(
         "seven_day": PauseKind.WEEKLY,
         "seven_day_opus": PauseKind.MODEL_LIMIT,
         "seven_day_sonnet": PauseKind.MODEL_LIMIT,
+        "seven_day_fable": PauseKind.MODEL_LIMIT,
         "overage": PauseKind.UNKNOWN_LIMIT,
     }
-    kind = kind_by_type.get(rate_type, PauseKind.UNKNOWN_LIMIT)
+    kind = kind_by_type.get(rate_type)
+    if kind is None and (
+        rate_type.startswith("seven_day_")
+        or any(model in rate_type for model in ("fable", "opus", "sonnet"))
+    ):
+        kind = PauseKind.MODEL_LIMIT
+    if kind is None:
+        kind = PauseKind.UNKNOWN_LIMIT
     current = now or datetime.now(UTC)
     resume_at = _default_resume_at(
         kind,

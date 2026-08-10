@@ -149,6 +149,7 @@ class Stage(BaseModel):
 
     role: RoleName
     model: str | None = None
+    fallback_models: list[str] = Field(default_factory=list, max_length=3)
     effort: EffortLevel | None = None
     max_turns: int | None = Field(default=None, ge=1, le=200)
     max_budget_usd: float | None = Field(default=None, gt=0)
@@ -343,6 +344,7 @@ class RoleConfig(BaseModel):
 
     prompt_file: str
     model: str
+    fallback_models: list[str] = Field(default_factory=list, max_length=3)
     effort: EffortLevel = "high"
     max_turns: int = Field(default=25, ge=1, le=200)
     max_budget_usd: float = Field(default=12.0, gt=0)

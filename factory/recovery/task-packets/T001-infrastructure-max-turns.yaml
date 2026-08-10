@@ -1,0 +1,293 @@
+task_id: T001
+title: Commit final source-of-truth bundle and precedence rules
+phase: P0
+goal: 'Complete the bounded roadmap outcome: Commit final source-of-truth bundle and
+  precedence rules.'
+source_of_truth:
+- docs/source-of-truth/final-2026-08-09/00_EXECUTIVE_BUILD_DECISION.md
+- docs/source-of-truth/final-2026-08-09/03_PRODUCT_STRATEGY_AND_REQUIREMENTS.md
+- docs/source-of-truth/final-2026-08-09/04_TECHNICAL_ARCHITECTURE.md
+- docs/source-of-truth/final-2026-08-09/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC.md
+- docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md
+- docs/source-of-truth/final-2026-08-09/14_CLAUDE_CODE_MASTER_BUILD_PROMPT.md
+- docs/source-of-truth/final-2026-08-09/13_SOURCE_REGISTER.md
+depends_on: []
+inputs:
+- 'Roadmap item: T001'
+- 'Lead role: specification'
+- 'Risk tier: integration'
+- 'Master-plan section: 12.9 Prioritized task ledger — T001'
+- 'Master-plan section: Epic E01'
+non_goals:
+- Changing protected source-of-truth documents or controller-owned gate policy.
+- Expanding beyond the bounded roadmap outcome.
+- Lowering a truth, value, security, or qualification threshold.
+acceptance_criteria:
+- 'Complete the exact protected-roadmap outcome: Commit final source-of-truth bundle
+  and precedence rules'
+- Add deterministic tests or machine-checkable evidence for every implemented normative
+  behavior.
+- Write attributable raw evidence and truth states to .factory/external-evidence/T001.json.
+- Do not treat UNKNOWN, SKIPPED, INFRASTRUCTURE_ERROR, INVALID_ORACLE, or EXTERNAL_VALIDATION_REQUIRED
+  as pass.
+- Do not invent customer, upstream, benchmark, hardware, or production evidence.
+- Preserve the task's explicit causal link to its predeclared sellable milestone without
+  inventing demand.
+- Never lower a value threshold after observing the result unless a separately reviewed
+  ADR cites new external evidence.
+outputs:
+- SOURCE_PRECEDENCE.md
+- .factory/external-evidence/T001.json
+stop_conditions:
+- Protected sources conflict or do not support the intended behavior.
+- Required evidence, oracle independence, containment, or attribution cannot be established.
+- The work requires a credential, hidden gate, release authority, or unsandboxed access.
+security:
+  network_default: deny
+  allow_unsandboxed_commands: false
+  fail_if_sandbox_unavailable: true
+  secrets: []
+gates:
+- name: contract
+  command: bash scripts/gates/contract_gate.sh T001
+  timeout_seconds: 120
+  stages: []
+  required: true
+- name: secret-scan
+  command: bash scripts/gates/secret_scan.sh
+  timeout_seconds: 300
+  stages: []
+  required: true
+- name: fast-quality
+  command: bash scripts/gates/fast_quality.sh
+  timeout_seconds: 1800
+  stages: []
+  required: true
+- name: real-integration
+  command: bash scripts/gates/real_integration.sh T001
+  timeout_seconds: 3600
+  stages: []
+  required: true
+private_gate:
+  required: true
+  suite: traincapsule-integration-t001
+  timeout_seconds: 3600
+pipeline:
+- role: research
+  model: opus
+  effort: high
+  max_turns: 11
+  max_budget_usd: 3.8
+  task_budget_tokens: 40000
+  tools: null
+  disallowed_tools: null
+  permission_mode: null
+  allowed_paths:
+  - docs/product/**
+  - docs/evidence/**
+  - SOURCE_PRECEDENCE.md
+  - CLAIM_REGISTRY.md
+  - .factory/external-evidence/T001.json
+  forbidden_paths:
+  - .claude/**
+  - .factory/source-locks/**
+  - bootstrap/private-gates/**
+  - config/**
+  - docs/source-of-truth/final-2026-08-09/**
+  - factory/feature_ledger.yaml
+  - factory/product_definition_of_done.yaml
+  - factory/task_catalog.yaml
+  - scripts/**
+  - specs/tasks/T001.md
+  - tcfactory/**
+  - Control-TrainCapsuleBuilder.ps1
+  - Install-TrainCapsuleAutonomousBuilder.ps1
+  - config/context.yaml
+  - config/github.yaml
+  - config/risk_profiles.yaml
+  - docs/CONTEXT_INDEX.yaml
+  - docs/MASTER_PLAN_INDEX.md
+  - docs/TrainCapsule_Matrix_Definitive_Master_Plan_v1.0.md
+  - factory/queue/**
+  - factory/state/**
+  - prompts/**
+  - schemas/**
+  - scripts/gates/**
+  allowed_domains: []
+  acceptance_criteria:
+  - 'Complete the exact protected-roadmap outcome: Commit final source-of-truth bundle
+    and precedence rules'
+  - Add deterministic tests or machine-checkable evidence for every implemented normative
+    behavior.
+  - Write attributable raw evidence and truth states to .factory/external-evidence/T001.json.
+  - Do not treat UNKNOWN, SKIPPED, INFRASTRUCTURE_ERROR, INVALID_ORACLE, or EXTERNAL_VALIDATION_REQUIRED
+    as pass.
+  - Do not invent customer, upstream, benchmark, hardware, or production evidence.
+  context_keys: []
+  max_context_chars: 110000
+  machine_gates:
+  - contract
+  - secret-scan
+  - fast-quality
+  - real-integration
+  read_only: false
+  require_changes: true
+  advisor_model: null
+  peer_messaging: false
+  session_name: null
+  goal_condition: null
+  workflow_name: null
+- role: adversary
+  model: opus
+  effort: high
+  max_turns: 10
+  max_budget_usd: 3.2
+  task_budget_tokens: 32000
+  tools: null
+  disallowed_tools: null
+  permission_mode: null
+  allowed_paths: []
+  forbidden_paths:
+  - '**'
+  allowed_domains: []
+  acceptance_criteria: []
+  context_keys:
+  - executive_decision
+  - product_strategy
+  - source_register
+  max_context_chars: 110000
+  machine_gates:
+  - contract
+  - secret-scan
+  - fast-quality
+  - real-integration
+  read_only: true
+  require_changes: false
+  advisor_model: null
+  peer_messaging: false
+  session_name: null
+  goal_condition: null
+  workflow_name: null
+- role: audit
+  model: sonnet
+  effort: high
+  max_turns: 8
+  max_budget_usd: 1.9
+  task_budget_tokens: 22000
+  tools: null
+  disallowed_tools: null
+  permission_mode: null
+  allowed_paths: []
+  forbidden_paths:
+  - '**'
+  allowed_domains: []
+  acceptance_criteria: []
+  context_keys:
+  - executive_decision
+  - product_strategy
+  - source_register
+  max_context_chars: 110000
+  machine_gates:
+  - contract
+  - secret-scan
+  - fast-quality
+  - real-integration
+  read_only: true
+  require_changes: false
+  advisor_model: null
+  peer_messaging: false
+  session_name: null
+  goal_condition: null
+  workflow_name: null
+- role: release
+  model: sonnet
+  effort: high
+  max_turns: 6
+  max_budget_usd: 1.4
+  task_budget_tokens: 16000
+  tools: null
+  disallowed_tools: null
+  permission_mode: null
+  allowed_paths: []
+  forbidden_paths:
+  - '**'
+  allowed_domains: []
+  acceptance_criteria: []
+  context_keys:
+  - executive_decision
+  - product_strategy
+  - source_register
+  max_context_chars: 110000
+  machine_gates:
+  - contract
+  - secret-scan
+  - fast-quality
+  - real-integration
+  read_only: true
+  require_changes: false
+  advisor_model: null
+  peer_messaging: false
+  session_name: null
+  goal_condition: null
+  workflow_name: null
+risk_tier: integration
+context_keys:
+- executive_decision
+- product_strategy
+- source_register
+allow_test_changes: false
+remote_ci_required: true
+github_push: true
+commit_type: docs
+commit_subject: 'docs: Commit final source-of-truth bundle and precedence rules'
+repair:
+  enabled: true
+  max_cycles: 2
+  builder_models:
+  - sonnet
+  - opus
+  restart_review_from: adversary
+  mutating_role: research
+value_contract:
+  required: true
+  mode: foundational
+  target_user: AI training, platform, reliability, framework, cloud, or accelerator
+    engineering team
+  job_to_be_done: Close an accelerated-workload failure, qualify a change, and exchange
+    attributable evidence without false certainty.
+  pain: Distributed workload failures and recovery uncertainty waste specialist time
+    and expensive accelerator capacity.
+  customer_outcome: A faster, reproducible, independently inspectable failure or change
+    decision with explicit limits.
+  causal_mechanism: Each task supplies a necessary capability in the Close, Qualify,
+    or Exchange workflow.
+  primary_metric: foundational capability present
+  metric_direction: binary
+  minimum_material_improvement: null
+  measurement_unit: null
+  baseline_value: null
+  evidence_path: null
+  parent_milestone: T012
+  threshold_rationale: Required dependency for the protected roadmap; commercial demand
+    is never inferred from implementation.
+  required_conditions: []
+  falsification_criteria:
+  - The capability is not required by a protected workflow or duplicates native tooling
+    without additional decision value.
+  - The result depends on fabricated, unattributed, or model-only evidence.
+  revenue_linkage: Supports incident closure, change qualification, private evidence
+    exchange, or recurring reliability operations.
+  prohibited_proxies:
+  - lines of code
+  - raw test count without boundary coverage
+  - GitHub stars without recurring use
+  - model-written praise
+  - synthetic customer quotes
+  - unverified willingness-to-pay claims
+  - fabricated benchmark results
+  - post-hoc threshold lowering
+  required_evidence_classes:
+  - foundational_dependency
+task_budget_usd: 24.0
+auto_merge: true
+base_branch: main

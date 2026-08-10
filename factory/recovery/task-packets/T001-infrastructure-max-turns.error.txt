@@ -1,0 +1,1 @@
+PipelineFailure: Stage research failed and no repair path remains.

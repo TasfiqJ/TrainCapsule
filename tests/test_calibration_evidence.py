@@ -146,6 +146,13 @@ def test_valid_calibration_evidence_passes(tmp_path: Path) -> None:
     assert result["version"] == 3
 
 
+def test_calibration_script_uses_pinned_python_for_evidence() -> None:
+    script = Path("scripts/run_one_time_calibration.sh").read_text(encoding="utf-8")
+
+    assert 'uv run python - "$SUMMARY" "$EVIDENCE_DIR"' in script
+    assert 'python3 - "$SUMMARY" "$EVIDENCE_DIR"' not in script
+
+
 def test_tampered_calibration_log_fails(tmp_path: Path) -> None:
     _make_valid_evidence(tmp_path)
     path = tmp_path / "factory/state/calibration/unit_tests.stdout.log"

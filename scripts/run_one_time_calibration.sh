@@ -209,7 +209,7 @@ else
   : > "$EVIDENCE_DIR/live_demo.stderr.log"
 fi
 
-python3 - "$SUMMARY" "$EVIDENCE_DIR" <<'PY_EVIDENCE'
+uv run python - "$SUMMARY" "$EVIDENCE_DIR" <<'PY_EVIDENCE'
 import hashlib
 import json
 import subprocess

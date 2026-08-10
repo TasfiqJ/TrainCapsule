@@ -734,8 +734,10 @@ def autonomy_resume(
 ) -> None:
     repo_root = _resolve_repo(repo)
     factory = load_factory_config(repo_root / config_path)
+    autonomy = load_autonomy_config(factory.resolve(repo_root, factory.autonomy_config_path))
     _control_file(repo_root, factory, "pause").unlink(missing_ok=True)
     _control_file(repo_root, factory, "stop").unlink(missing_ok=True)
+    (repo_root / autonomy.hard_stuck_path).unlink(missing_ok=True)
     console.print("[green]Autopilot controls cleared; service may resume.[/green]")
 
 

@@ -360,6 +360,7 @@ class FactoryConfig(BaseModel):
 
     version: int = 2
     auth_mode: Literal["max_oauth_only", "unrestricted"] = "max_oauth_only"
+    allow_paid_usage: Literal[False] = False
     repo_root: str = "."
     task_dir: str = "tasks"
     artifact_dir: str = "factory/artifacts"
@@ -423,6 +424,9 @@ class AutonomyConfig(BaseModel):
     auto_resume_quota: bool = True
     auto_recover_interrupted: bool = True
     auto_respec_failed_tasks: bool = True
+    auto_repair_factory: bool = True
+    max_self_repair_attempts: int = Field(default=3, ge=0, le=5)
+    allow_paid_usage: Literal[False] = False
     max_respecifications_per_task: int = Field(default=3, ge=0, le=10)
     idle_poll_seconds: int = Field(default=60, ge=5, le=3600)
     quota_reset_buffer_seconds: int = Field(default=0, ge=0, le=3600)
@@ -431,6 +435,7 @@ class AutonomyConfig(BaseModel):
     completion_target: Literal["product_build", "all_automatable"] = "product_build"
     stop_file: str = "factory/state/STOP"
     pause_file: str = "factory/state/PAUSE"
+    hard_stuck_path: str = "factory/state/HARD_STUCK.json"
     calibration_marker: str = "factory/state/CALIBRATION_PASSED"
     require_calibration: bool = True
     notification_command: str | None = None
@@ -573,6 +578,9 @@ class AutonomyState(BaseModel):
         "paused",
         "auditing",
         "waiting_auth",
+        "repairing",
+        "restarting",
+        "hard_stuck",
         "complete",
         "blocked",
         "stopped",
@@ -580,6 +588,11 @@ class AutonomyState(BaseModel):
     active_task_id: str | None = None
     current_action: str | None = None
     consecutive_failures: int = 0
+    repair_attempts: int = 0
+    repair_status: str | None = None
+    blocker_reason: str | None = None
+    required_action: str | None = None
+    last_repair_artifact: str | None = None
     completed_tasks: list[str] = Field(default_factory=list)
     blocked_tasks: list[str] = Field(default_factory=list)
     last_event: str | None = None

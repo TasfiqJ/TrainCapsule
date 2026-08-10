@@ -1,5 +1,6 @@
 version: 9
 auth_mode: max_oauth_only
+allow_paid_usage: false
 repo_root: .
 task_dir: tasks
 artifact_dir: factory/artifacts

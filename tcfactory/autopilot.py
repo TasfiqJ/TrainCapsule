@@ -23,6 +23,7 @@ from .observability import append_event, write_heartbeat
 from .planner import archive_failed_packet, create_and_promote_task_packet
 from .queue import enqueue_task, process_one, promote_due_paused, queue_dirs, reconcile_running
 from .quota import AuthenticationPause, QuotaLimitPause
+from .self_repair import attempt_factory_self_repair, clear_hard_stuck, write_hard_stuck
 from .util import read_json, write_json
 
 console = Console()
@@ -106,6 +107,97 @@ def _notify(autonomy: AutonomyConfig, message: str) -> None:
         timeout=30,
         env=env,
     )
+
+
+async def _repair_or_hard_stuck(
+    *,
+    repo_root: Path,
+    factory: FactoryConfig,
+    autonomy: AutonomyConfig,
+    state: AutonomyState,
+    reason: str,
+    blocker_id: str,
+) -> bool:
+    """Exhaust bounded, gated self-repair before publishing a durable hard stop."""
+    last_artifact: str | None = state.last_repair_artifact
+    while (
+        autonomy.auto_repair_factory
+        and state.repair_attempts < autonomy.max_self_repair_attempts
+    ):
+        state.repair_attempts += 1
+        state.status = "repairing"
+        state.repair_status = (
+            f"attempt {state.repair_attempts}/{autonomy.max_self_repair_attempts}"
+        )
+        state.active_task_id = blocker_id
+        state.current_action = "autonomous factory self-repair"
+        state.blocker_reason = reason
+        state.required_action = None
+        state.last_event = f"Factory self-repair {state.repair_status}: {reason}"
+        save_state(repo_root, factory, state)
+        try:
+            outcome = await attempt_factory_self_repair(
+                repo_root=repo_root,
+                factory=factory,
+                autonomy=autonomy,
+                reason=reason,
+                attempt=state.repair_attempts,
+            )
+        except QuotaLimitPause as exc:
+            state.status = "paused"
+            state.repair_status = "waiting for included Claude allowance"
+            state.next_wake_at = exc.record.resume_at
+            state.last_event = str(exc)
+            save_state(repo_root, factory, state)
+            return False
+        except AuthenticationPause as exc:
+            state.status = "waiting_auth"
+            state.repair_status = "waiting for Claude Max OAuth"
+            state.next_wake_at = _now() + timedelta(
+                seconds=factory.authentication_retry_seconds
+            )
+            state.last_event = exc.message
+            save_state(repo_root, factory, state)
+            return False
+        last_artifact = outcome.artifact_path or last_artifact
+        state.last_repair_artifact = last_artifact
+        state.last_event = outcome.detail
+        save_state(repo_root, factory, state)
+        if outcome.applied:
+            clear_hard_stuck(repo_root, autonomy)
+            state.status = "restarting"
+            state.repair_status = "verified repair merged"
+            state.consecutive_failures = 0
+            state.blocker_reason = None
+            state.required_action = None
+            state.last_event = (
+                f"Verified autonomous repair {outcome.task_id} merged; restarting controller"
+            )
+            save_state(repo_root, factory, state)
+            return True
+
+    required_action = (
+        "Autonomous repair exhausted every safe, gated attempt. Review the named blocker and "
+        "last repair artifact in this dashboard; paid usage and gate weakening remain forbidden."
+    )
+    hard_stuck_path = write_hard_stuck(
+        repo_root=repo_root,
+        autonomy=autonomy,
+        reason=reason,
+        required_action=required_action,
+        attempts=state.repair_attempts,
+        artifact_path=last_artifact,
+    )
+    state.status = "hard_stuck"
+    state.repair_status = "exhausted"
+    state.blocked_tasks = sorted(set([*state.blocked_tasks, blocker_id]))
+    state.blocker_reason = reason
+    state.required_action = required_action
+    state.current_action = "hard stuck — safely paused"
+    state.last_event = f"Hard stuck record written: {hard_stuck_path}"
+    save_state(repo_root, factory, state)
+    _notify(autonomy, f"TrainCapsule factory is hard stuck: {reason}")
+    return False
 
 
 def _queue_task_ids(repo_root: Path, config: FactoryConfig) -> dict[str, set[str]]:
@@ -532,6 +624,18 @@ async def _run_autopilot_inner(
             if not changed:
                 save_feature_ledger(ledger_path, ledger)
                 commit_all(repo_root, f"block {failed_item.task_id.lower()}")
+                await _repair_or_hard_stuck(
+                    repo_root=repo_root,
+                    factory=factory,
+                    autonomy=autonomy,
+                    state=state,
+                    reason=(
+                        f"Task {failed_item.task_id} exhausted automatic re-specification. "
+                        f"Latest evidence: {failed_item.notes[-1] if failed_item.notes else 'none'}"
+                    ),
+                    blocker_id=failed_item.task_id,
+                )
+                return
             if once:
                 return
             continue
@@ -544,6 +648,10 @@ async def _run_autopilot_inner(
         if processed:
             state.status = "running"
             state.consecutive_failures = 0
+            state.repair_attempts = 0
+            state.repair_status = None
+            state.blocker_reason = None
+            state.required_action = None
             try:
                 github_result = _sync_github_best_effort(
                     repo_root=repo_root,
@@ -610,9 +718,14 @@ async def _run_autopilot_inner(
                 state.last_event = f"planning/enqueue failure: {type(exc).__name__}: {exc}"
                 save_state(repo_root, factory, state)
                 if state.consecutive_failures >= autonomy.max_consecutive_factory_failures:
-                    state.status = "blocked"
-                    save_state(repo_root, factory, state)
-                    _notify(autonomy, state.last_event)
+                    await _repair_or_hard_stuck(
+                        repo_root=repo_root,
+                        factory=factory,
+                        autonomy=autonomy,
+                        state=state,
+                        reason=state.last_event,
+                        blocker_id=next_item.task_id,
+                    )
                     return
                 await asyncio.sleep(autonomy.idle_poll_seconds)
             if once:
@@ -693,9 +806,26 @@ async def run_autopilot(
     resolved = repo_root.resolve()
     factory = load_factory_config(resolved / factory_config_path)
     with exclusive_autopilot_lock(resolved, factory):
-        await _run_autopilot_inner(
-            repo_root=resolved,
-            factory_config_path=factory_config_path,
-            autonomy_config_path=autonomy_config_path,
-            once=once,
-        )
+        try:
+            await _run_autopilot_inner(
+                repo_root=resolved,
+                factory_config_path=factory_config_path,
+                autonomy_config_path=autonomy_config_path,
+                once=once,
+            )
+        except (QuotaLimitPause, AuthenticationPause):
+            raise
+        except Exception as exc:  # noqa: BLE001
+            autonomy_path = autonomy_config_path or Path(factory.autonomy_config_path)
+            autonomy = load_autonomy_config(
+                autonomy_path if autonomy_path.is_absolute() else resolved / autonomy_path
+            )
+            state = load_state(resolved, factory)
+            await _repair_or_hard_stuck(
+                repo_root=resolved,
+                factory=factory,
+                autonomy=autonomy,
+                state=state,
+                reason=f"Unhandled controller failure: {type(exc).__name__}: {exc}",
+                blocker_id=state.active_task_id or "FACTORY_CONTROLLER",
+            )

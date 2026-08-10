@@ -13,7 +13,19 @@ if [[ -z "$UV" ]]; then
   exit 21
 fi
 
-# The foreground wsl.exe process keeps WSL alive. The controller owns the single-instance
-# lock, durable checkpoints, quota sleeps, fresh Claude sessions, and crash recovery.
-exec "$UV" run tcfactory autopilot --repo "$ROOT" \
-  >>"$LOG_DIR/autopilot.log" 2>&1
+# The foreground wsl.exe process keeps WSL alive. Restarting after a bounded controller exit
+# immediately loads a verified self-repair instead of waiting for the next scheduled heartbeat.
+while true; do
+  if "$UV" run tcfactory autopilot --repo "$ROOT" \
+    >>"$LOG_DIR/autopilot.log" 2>&1; then
+    controller_exit=0
+  else
+    controller_exit=$?
+  fi
+  if [[ -f "$ROOT/factory/state/STOP" || -f "$ROOT/factory/state/HARD_STUCK.json" ]]; then
+    exit "$controller_exit"
+  fi
+  printf 'Controller exited (%s); restarting in 15 seconds.\n' "$controller_exit" \
+    >>"$LOG_DIR/autopilot.log"
+  sleep 15
+done

@@ -6,6 +6,9 @@ auto_merge: true
 auto_resume_quota: true
 auto_recover_interrupted: true
 auto_respec_failed_tasks: true
+auto_repair_factory: true
+max_self_repair_attempts: 3
+allow_paid_usage: false
 max_respecifications_per_task: 3
 idle_poll_seconds: 60
 quota_reset_buffer_seconds: 0
@@ -14,6 +17,7 @@ max_consecutive_factory_failures: 5
 completion_target: product_build
 stop_file: factory/state/STOP
 pause_file: factory/state/PAUSE
+hard_stuck_path: factory/state/HARD_STUCK.json
 calibration_marker: factory/state/CALIBRATION_PASSED
 require_calibration: true
 notification_command: null

@@ -10,6 +10,7 @@ def test_windows_task_runs_foreground_autopilot() -> None:
     assert "windows_task_entrypoint.sh" in script
     assert "/bin/true" not in script
     assert "MultipleInstances IgnoreNew" in script
+    assert "-Force" not in script
     assert "RepetitionInterval (New-TimeSpan -Minutes 15)" in script
     assert "$Triggers = @($LogonTrigger, $RecoveryTrigger)" in script
     assert "-Trigger $Triggers" in script
@@ -18,6 +19,18 @@ def test_windows_task_runs_foreground_autopilot() -> None:
     assert "tcfactory autopilot" in entry
     assert "load_factory_env.sh" in entry
     assert "CLAUDE_CODE_OAUTH_TOKEN" not in entry
+
+
+def test_private_github_runner_has_limited_recovery_task() -> None:
+    root = Path(__file__).resolve().parents[1]
+    script = (root / "scripts" / "register_windows_github_runner.ps1").read_text(
+        encoding="utf-8"
+    )
+    assert "run-traincapsule-runner-foreground.sh" in script
+    assert "RunLevel Limited" in script
+    assert "MultipleInstances IgnoreNew" in script
+    assert "RepetitionInterval (New-TimeSpan -Minutes 15)" in script
+    assert "-Force" not in script
 
 
 def test_max_token_configuration_uses_protected_reloadable_file() -> None:

@@ -68,14 +68,25 @@ $Settings = New-ScheduledTaskSettingsSet `
     -ExecutionTimeLimit ([TimeSpan]::Zero) `
     -MultipleInstances IgnoreNew
 
-Register-ScheduledTask `
-    -TaskName $TaskName `
-    -Action $Action `
-    -Trigger $Triggers `
-    -Principal $Principal `
-    -Settings $Settings `
-    -Description "Runs the TrainCapsule autonomous Claude Max product factory in a foreground WSL process after logon, with a 15-minute recovery trigger." `
-    -Force | Out-Null
+$Description = "Runs the TrainCapsule autonomous Claude Max product factory in a foreground WSL process after logon, with a 15-minute recovery trigger."
+$ExistingTask = Get-ScheduledTask -TaskName $TaskName -ErrorAction SilentlyContinue
+if ($null -eq $ExistingTask) {
+    Register-ScheduledTask `
+        -TaskName $TaskName `
+        -Action $Action `
+        -Trigger $Triggers `
+        -Principal $Principal `
+        -Settings $Settings `
+        -Description $Description | Out-Null
+}
+else {
+    Set-ScheduledTask `
+        -TaskName $TaskName `
+        -Action $Action `
+        -Trigger $Triggers `
+        -Principal $Principal `
+        -Settings $Settings | Out-Null
+}
 
 Write-Host "Registered Windows scheduled task: $TaskName"
 Write-Host "Distribution: $Distribution"

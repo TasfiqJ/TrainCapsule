@@ -170,6 +170,21 @@ async def _wait_until(
         await asyncio.sleep(min(max(1.0, poll_seconds), remaining))
 
 
+def _prepare_restart_state(state: AutonomyState) -> bool:
+    """Preserve a durable future wake instead of retrying immediately after restart."""
+    if state.next_wake_at is not None and state.next_wake_at > _now():
+        state.current_action = state.current_action or "preserving scheduled automatic retry"
+        state.last_event = (
+            f"controller restarted; preserving scheduled wait until "
+            f"{state.next_wake_at.isoformat()}"
+        )
+        return True
+    state.status = "running"
+    state.next_wake_at = None
+    state.last_event = "autopilot started"
+    return False
+
+
 def _notify(autonomy: AutonomyConfig, message: str) -> None:
     if not autonomy.notification_command:
         return
@@ -847,8 +862,7 @@ async def _run_autopilot_inner(
         state.last_event = f"existing product completion marker: {existing_completion}"
         save_state(repo_root, factory, state)
         return
-    state.status = "running"
-    state.last_event = "autopilot started"
+    _prepare_restart_state(state)
     save_state(repo_root, factory, state)
     append_event(
         factory.resolve(repo_root, factory.event_log_path),
@@ -874,6 +888,26 @@ async def _run_autopilot_inner(
                 return
             await asyncio.sleep(autonomy.idle_poll_seconds)
             continue
+
+        if state.next_wake_at is not None and state.next_wake_at > _now():
+            wake_at = state.next_wake_at
+            state.current_action = state.current_action or "waiting for scheduled automatic retry"
+            save_state(repo_root, factory, state)
+            if once:
+                return
+            wait_result = await _wait_until(
+                repo_root=repo_root,
+                factory=factory,
+                autonomy=autonomy,
+                state=state,
+                wake_at=wake_at,
+            )
+            if wait_result in {"pause", "stop"}:
+                continue
+            state.status = "restarting"
+            state.current_action = "scheduled retry is starting"
+            state.next_wake_at = None
+            save_state(repo_root, factory, state)
 
         try:
             assert_max_oauth_only(

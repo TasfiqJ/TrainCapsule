@@ -10,6 +10,26 @@ from tcfactory import autopilot
 from tcfactory.models import AutonomyConfig, AutonomyState, FactoryConfig
 
 
+def test_controller_restart_preserves_a_future_quota_wake() -> None:
+    now = datetime.now(UTC)
+    wake_at = now + timedelta(hours=1)
+    state = AutonomyState(
+        status="paused",
+        current_action="waiting for included Claude allowance",
+        next_wake_at=wake_at,
+        updated_at=now,
+    )
+
+    preserved = autopilot._prepare_restart_state(  # pyright: ignore[reportPrivateUsage]
+        state
+    )
+
+    assert preserved is True
+    assert state.status == "paused"
+    assert state.next_wake_at == wake_at
+    assert "preserving scheduled wait" in (state.last_event or "")
+
+
 def test_timed_wait_is_interrupted_by_dashboard_retry(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

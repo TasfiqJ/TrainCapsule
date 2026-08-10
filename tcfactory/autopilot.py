@@ -423,7 +423,26 @@ def _verified_repair_intent(
             latest = result_paths[-1]
             result = read_json(latest, {})
             latest_artifact = str(latest)
-            if bool(result.get("applied")) and consumed.get("artifact_path") != latest_artifact:
+            consumed_artifacts = {
+                str(consumed.get("artifact_path") or ""),
+                str(consumed.get("latest_self_repair_artifact") or ""),
+            }
+            predates_consumption = False
+            recovered_at = str(consumed.get("recovered_at") or "")
+            if recovered_at and bool(consumed.get("repair_status_consumed")):
+                try:
+                    consumed_at = datetime.fromisoformat(recovered_at.replace("Z", "+00:00"))
+                    modified_at = datetime.fromtimestamp(latest.stat().st_mtime, UTC)
+                    predates_consumption = modified_at <= consumed_at
+                except (OSError, ValueError):
+                    # The explicit artifact identities above remain authoritative when a
+                    # legacy timestamp cannot be parsed or inspected.
+                    predates_consumption = False
+            if (
+                bool(result.get("applied"))
+                and latest_artifact not in consumed_artifacts
+                and not predates_consumption
+            ):
                 artifact_path = latest_artifact
                 has_signal = True
     if not has_signal:
@@ -581,6 +600,15 @@ def recover_task_after_verified_repair(
         repo_root / _VERIFIED_REPAIR_CONSUMED,
         {
             "artifact_path": repair_artifact,
+            "latest_self_repair_artifact": (
+                str(latest_self_repair_results[-1])
+                if (
+                    latest_self_repair_results := sorted(
+                        (repo_root / "factory/state/self-repair").glob("*.result.json")
+                    )
+                )
+                else None
+            ),
             "recovered_at": _now().isoformat(),
             "repair_status_consumed": True,
             "task_id": item.task_id,

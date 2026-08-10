@@ -19,6 +19,7 @@ import pytest
 
 from tcfactory.autopilot import (
     RespecOutcome,
+    _verified_repair_intent,  # pyright: ignore[reportPrivateUsage]
     recover_task_after_verified_repair,
     respec_block_reason,
     respec_failed_item,
@@ -357,6 +358,40 @@ def test_verified_repair_reopens_root_task_and_preserves_candidate_checkpoint(
     assert state.active_task_id == "T001"
     consumed = repo / "factory/state/VERIFIED_REPAIR_RETRY_CONSUMED.json"
     assert str(repair_result) in consumed.read_text(encoding="utf-8")
+
+
+def test_consumed_marker_does_not_replay_an_older_migration_artifact(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    item = _item(status="queued", terminal_blocked=False)
+    ledger = _ledger(item)
+    state = AutonomyState(
+        status="running",
+        active_task_id="T001",
+        updated_at=datetime.now(UTC),
+    )
+    old_result = (
+        repo
+        / "factory/state/self-repair/FACTORY_REPAIR_20260810T000000Z_1.result.json"
+    )
+    old_result.parent.mkdir(parents=True)
+    old_result.write_text('{"applied": true}\n', encoding="utf-8")
+    consumed_at = datetime.now(UTC)
+    consumed = repo / "factory/state/VERIFIED_REPAIR_RETRY_CONSUMED.json"
+    consumed.write_text(
+        (
+            '{"artifact_path": "git:new-repair", '
+            f'"recovered_at": "{consumed_at.isoformat()}", '
+            '"repair_status_consumed": true, "task_id": "T001"}\n'
+        ),
+        encoding="utf-8",
+    )
+
+    recovered_item, artifact = _verified_repair_intent(repo, state, ledger)
+
+    assert recovered_item is None
+    assert artifact is None
 
 
 def test_terminal_blocker_reason_uses_current_queue_error_not_stale_note(tmp_path: Path) -> None:

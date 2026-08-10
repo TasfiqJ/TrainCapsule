@@ -27,4 +27,6 @@ factory/artifacts/
 factory/worktrees/
 factory/queue/
 factory/logs/
+factory/messages/
+factory/completion/
 schemas/*.generated.json

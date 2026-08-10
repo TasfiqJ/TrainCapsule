@@ -22,3 +22,9 @@ secrets*
 !.factory/sessions/.gitkeep
 .factory/costs/*
 !.factory/costs/.gitkeep
+factory/state/
+factory/artifacts/
+factory/worktrees/
+factory/queue/
+factory/logs/
+schemas/*.generated.json

@@ -14,6 +14,9 @@ def test_demo_task_loads() -> None:
         RoleName.AUDIT,
         RoleName.RELEASE,
     ]
+    builder = next(stage for stage in task.pipeline if stage.role == RoleName.BUILDER)
+    assert builder.tools is not None
+    assert "Bash" in builder.tools
 
 
 def test_t001_has_no_builder() -> None:

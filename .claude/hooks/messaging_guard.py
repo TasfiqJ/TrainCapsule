@@ -8,6 +8,8 @@ import sys
 from pathlib import Path
 from typing import NoReturn, cast
 
+PEER_REFERENCE = re.compile(r"^(?P<name>[A-Za-z0-9._-]+) \[(?P<ref>[0-9a-f]{6,12})\]$")
+
 
 def deny(reason: str) -> NoReturn:
     print(
@@ -40,6 +42,14 @@ def allowed_peers() -> set[str]:
     return set(cast(list[str], items))
 
 
+def allowed_recipient(recipient: str, allowed: set[str]) -> bool:
+    """Accept a discovered Claude peer reference only for an allowed base session name."""
+    if recipient in allowed:
+        return True
+    match = PEER_REFERENCE.fullmatch(recipient)
+    return bool(match and match.group("name") in allowed)
+
+
 def main() -> None:
     payload = object_dict(json.load(sys.stdin), "Hook payload")
     tool = str(payload.get("tool_name", ""))
@@ -60,7 +70,7 @@ def main() -> None:
         or ""
     )
     allowed = allowed_peers()
-    if not recipient or recipient not in allowed:
+    if not recipient or not allowed_recipient(recipient, allowed):
         deny(f"Message recipient {recipient!r} is outside this task's peer allowlist")
     max_chars = int(os.environ.get("TCF_MAX_MESSAGE_CHARS", "1200"))
     if len(message) > max_chars:

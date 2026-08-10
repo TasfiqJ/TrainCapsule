@@ -98,7 +98,8 @@
         "Grep",
         "Glob",
         "Write",
-        "Edit"
+        "Edit",
+        "Bash"
       ],
       "allowed_paths": [
         "demo/**",

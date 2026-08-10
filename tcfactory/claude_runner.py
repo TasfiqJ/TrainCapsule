@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, is_dataclass
+from dataclasses import asdict, is_dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
@@ -39,6 +39,20 @@ from .quota import (
 from .util import write_json
 
 MIN_CLAUDE_TASK_BUDGET_TOKENS = 20_000
+REPORT_CONTINUATION_MAX_TURNS = 4
+REPORT_CONTINUATION_MAX_BUDGET_USD = 0.5
+
+
+def needs_report_continuation(result: object | None) -> bool:
+    """Resume only a turn-limited session that never produced its required report."""
+    if result is None or getattr(result, "structured_output", None) is not None:
+        return False
+    if not getattr(result, "session_id", None):
+        return False
+    return (
+        getattr(result, "subtype", None) == "error_max_turns"
+        or getattr(result, "terminal_reason", None) == "max_turns"
+    )
 
 
 def provider_compatible_task_budget(configured: int | None) -> int | None:
@@ -390,6 +404,63 @@ async def run_agent_stage(
                 result_message = select_result_message(result_message, message)
     except Exception as exc:  # noqa: BLE001
         error = f"{type(exc).__name__}: {exc}"
+
+    if needs_report_continuation(result_message) and machine_limit is None:
+        assert result_message is not None
+        continuation_session_id = result_message.session_id
+        write_json(
+            artifact_dir / "report-continuation.json",
+            {
+                "reason": "max_turns_without_structured_output",
+                "session_id": continuation_session_id,
+                "initial_num_turns": int(result_message.num_turns or 0),
+                "initial_terminal_reason": result_message.terminal_reason,
+                "max_turns": REPORT_CONTINUATION_MAX_TURNS,
+            },
+        )
+        continuation_options = replace(
+            options,
+            resume=continuation_session_id,
+            max_turns=REPORT_CONTINUATION_MAX_TURNS,
+            max_budget_usd=REPORT_CONTINUATION_MAX_BUDGET_USD,
+            task_budget={"total": MIN_CLAUDE_TASK_BUDGET_TOKENS},
+        )
+        continuation_prompt = (
+            "The bounded work phase ended before you returned the required structured "
+            "AgentReport. Preserve the current worktree exactly. Do not perform more research, "
+            "implementation, tests, or tool calls. Immediately return the required structured "
+            "report for the work already completed. Be truthful: return fail or blocked with "
+            "exact gaps if the acceptance criteria and durable evidence are incomplete."
+        )
+        try:
+            async for message in query(
+                prompt=continuation_prompt,
+                options=continuation_options,
+            ):
+                with transcript_path.open("a", encoding="utf-8") as handle:
+                    handle.write(json.dumps(_message_to_json(message), default=str) + "\n")
+                write_heartbeat(
+                    config.resolve(repo_root, config.heartbeat_path),
+                    component="claude_runner",
+                    status="running",
+                    task_id=task.task_id,
+                    run_id=run_id,
+                    role=stage.role.value,
+                    detail="structured-report-continuation",
+                )
+                if type(message).__name__ == "RateLimitEvent":
+                    machine_limit = disposition_from_rate_limit_info(
+                        getattr(message, "rate_limit_info", None),
+                        quota_fallback_wait_seconds=config.quota_fallback_wait_seconds,
+                        transient_retry_seconds=config.transient_retry_seconds,
+                    )
+                    if machine_limit is not None:
+                        break
+                if isinstance(message, ResultMessage):
+                    result_message = select_result_message(result_message, message)
+        except Exception as exc:  # noqa: BLE001
+            continuation_error = f"Report continuation {type(exc).__name__}: {exc}"
+            error = f"{error}; {continuation_error}" if error else continuation_error
 
     if machine_limit is not None:
         peer_record.status = "failed"

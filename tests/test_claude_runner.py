@@ -1,6 +1,10 @@
 from types import SimpleNamespace
 
-from tcfactory.claude_runner import provider_compatible_task_budget, select_result_message
+from tcfactory.claude_runner import (
+    needs_report_continuation,
+    provider_compatible_task_budget,
+    select_result_message,
+)
 
 
 def test_provider_task_budget_uses_current_minimum() -> None:
@@ -24,3 +28,33 @@ def test_later_structured_peer_result_replaces_provisional_verdict() -> None:
     final = SimpleNamespace(structured_output={"verdict": "pass"})
 
     assert select_result_message(provisional, final) is final
+
+
+def test_max_turns_without_report_gets_bounded_same_session_continuation() -> None:
+    max_turns = SimpleNamespace(
+        structured_output=None,
+        session_id="session-123",
+        subtype="error_max_turns",
+        terminal_reason="max_turns",
+    )
+    completed = SimpleNamespace(
+        structured_output={"verdict": "pass"},
+        session_id="session-123",
+        subtype="success",
+        terminal_reason="end_turn",
+    )
+
+    assert needs_report_continuation(max_turns) is True
+    assert needs_report_continuation(completed) is False
+
+
+def test_report_continuation_requires_a_resumable_session() -> None:
+    missing_session = SimpleNamespace(
+        structured_output=None,
+        session_id=None,
+        subtype="error_max_turns",
+        terminal_reason="max_turns",
+    )
+
+    assert needs_report_continuation(None) is False
+    assert needs_report_continuation(missing_session) is False

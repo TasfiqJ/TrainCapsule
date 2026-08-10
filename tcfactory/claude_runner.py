@@ -48,6 +48,17 @@ def provider_compatible_task_budget(configured: int | None) -> int | None:
     return max(configured, MIN_CLAUDE_TASK_BUDGET_TOKENS)
 
 
+def select_result_message[T](current: T | None, candidate: T) -> T:
+    """Preserve a valid structured result when late peer messages emit extra results."""
+    if current is None:
+        return candidate
+    if getattr(current, "structured_output", None) is None and getattr(
+        candidate, "structured_output", None
+    ) is not None:
+        return candidate
+    return current
+
+
 def _message_to_json(message: object) -> dict[str, Any]:
     if is_dataclass(message) and not isinstance(message, type):
         data = asdict(message)
@@ -378,7 +389,7 @@ async def run_agent_stage(
                 if machine_limit is not None:
                     break
             if isinstance(message, ResultMessage):
-                result_message = message
+                result_message = select_result_message(result_message, message)
     except Exception as exc:  # noqa: BLE001
         error = f"{type(exc).__name__}: {exc}"
 

@@ -44,7 +44,7 @@ tasks:
   lead_role: Spec
   phase: P0
   depends_on: []
-  status: queued
+  status: passed
   terminal_blocked: false
   packet_path: tasks/T001.yaml
   trust_core: false
@@ -60,7 +60,8 @@ tasks:
   automatable: true
   completion_kind: build
   evidence_required: []
-  evidence: []
+  evidence:
+  - factory/artifacts/T001/20260810T225908Z/pipeline-summary.json
   last_run_id: null
   notes:
   - Task packet approved through catalog planning.
@@ -111,7 +112,7 @@ tasks:
   phase: P0
   depends_on:
   - T001
-  status: blocked
+  status: ready
   terminal_blocked: false
   packet_path: null
   trust_core: false
@@ -3476,4 +3477,4 @@ tasks:
   revisions: 0
   value_revisions: 0
   infrastructure_recoveries: 0
-updated_at: '2026-08-10T22:59:07.801100+00:00'
+updated_at: '2026-08-10T23:01:56.538624+00:00'

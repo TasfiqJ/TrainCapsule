@@ -44,7 +44,7 @@ tasks:
   lead_role: Spec
   phase: P0
   depends_on: []
-  status: respec_required
+  status: blocked
   terminal_blocked: true
   packet_path: tasks/T001.yaml
   trust_core: false
@@ -80,6 +80,7 @@ tasks:
   - Automatic re-specification ceiling reached.
   - Manual infrastructure recovery approved after pinning quality gates to the shared
     offline environment and fixing terminal-block readiness transitions.
+  - Automatic re-specification ceiling reached.
   - Automatic re-specification ceiling reached.
   - Automatic re-specification ceiling reached.
   - Automatic re-specification ceiling reached.
@@ -3347,4 +3348,4 @@ tasks:
   notes: []
   revisions: 0
   value_revisions: 0
-updated_at: '2026-08-10T14:23:24.391338+00:00'
+updated_at: '2026-08-10T14:23:24.475065+00:00'

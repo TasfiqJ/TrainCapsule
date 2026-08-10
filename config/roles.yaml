@@ -50,9 +50,9 @@ integration_scout:
   prompt_file: prompts/integration_scout.md
   model: sonnet
   effort: medium
-  max_turns: 12
+  max_turns: 20
   max_budget_usd: 0.8
-  task_budget_tokens: 120000
+  task_budget_tokens: 200000
   tools: [Read, Grep, Glob, Bash, ListAgents, SendMessage]
   disallowed_tools: [Write, Edit, WebFetch, WebSearch, Agent]
   permission_mode: dontAsk

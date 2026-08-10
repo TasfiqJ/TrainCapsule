@@ -52,3 +52,13 @@ def test_demo_task_requires_independent_literal_checksum_oracles() -> None:
 def test_t001_has_no_builder() -> None:
     task = load_task(Path("tasks/T001.yaml"))
     assert RoleName.BUILDER not in {stage.role for stage in task.pipeline}
+
+
+def test_t001_research_stage_has_recovery_allowance() -> None:
+    task = load_task(Path("tasks/T001.yaml"))
+    research = next(stage for stage in task.pipeline if stage.role == RoleName.RESEARCH)
+
+    assert research.max_turns is not None
+    assert research.task_budget_tokens is not None
+    assert research.max_turns >= 18
+    assert research.task_budget_tokens >= 100_000

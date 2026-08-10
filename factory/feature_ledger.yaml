@@ -44,8 +44,8 @@ tasks:
   lead_role: Spec
   phase: P0
   depends_on: []
-  status: ready
-  packet_path: null
+  status: packet_approved
+  packet_path: tasks/T001.yaml
   trust_core: false
   risk_tier: integration
   context_keys:
@@ -65,6 +65,8 @@ tasks:
   - Task packet approved through catalog planning.
   - Revision 1 requested after bounded pipeline failure; preserve the original outcome
     and strengthen specification/gates.
+  - Reused the approved packet with the integration research allowance refreshed after
+    two infrastructure-only maximum-turn failures.
   revisions: 1
   value_revisions: 0
 - task_id: T002

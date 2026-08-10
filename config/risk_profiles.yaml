@@ -179,9 +179,9 @@ profiles:
       research:
         model: opus
         effort: high
-        max_turns: 11
+        max_turns: 18
         max_budget_usd: 3.8
-        task_budget_tokens: 40000
+        task_budget_tokens: 100000
       builder:
         model: sonnet
         effort: high

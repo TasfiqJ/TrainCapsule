@@ -74,16 +74,20 @@ class FeatureLedger(BaseModel):
     def refresh_readiness(self) -> None:
         passed = self.passed_ids()
         for item in self.tasks:
-            if item.status in {"passed", "deferred", "external_wait", "running", "paused"}:
+            if item.status in {
+                "passed",
+                "deferred",
+                "external_wait",
+                "running",
+                "paused",
+                "failed",
+                "respec_required",
+            }:
                 continue
             if set(item.depends_on).issubset(passed):
-                if item.packet_path and item.status in {"blocked", "failed", "respec_required"}:
+                if item.packet_path and item.status == "blocked":
                     item.status = "packet_approved"
-                elif not item.packet_path and item.status in {
-                    "blocked",
-                    "failed",
-                    "respec_required",
-                }:
+                elif not item.packet_path and item.status == "blocked":
                     item.status = "ready"
             elif item.status == "ready":
                 item.status = "blocked"

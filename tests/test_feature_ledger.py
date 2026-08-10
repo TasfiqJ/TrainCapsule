@@ -47,3 +47,15 @@ def test_external_wait_does_not_block_product_build_completion() -> None:
     ledger = _ledger()
     ledger.item("T002").status = "passed"
     assert ledger.build_complete()
+
+
+def test_failed_task_remains_routed_to_respecification() -> None:
+    ledger = _ledger()
+    failed = ledger.item("T002")
+    failed.status = "respec_required"
+    failed.packet_path = "tasks/T002.yaml"
+
+    ledger.refresh_readiness()
+
+    assert failed.status == "respec_required"
+    assert ledger.next_ready() is None

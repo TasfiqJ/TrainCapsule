@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -euo pipefail
 required=(
-  docs/TrainCapsule_Matrix_Definitive_Master_Plan_v1.0.md
-  docs/FINAL_AUTONOMOUS_FACTORY_PLAN.md
-  docs/SOURCE_AUTHORITY.md
+  SOURCE_PRECEDENCE.md
+  docs/source-of-truth/final-2026-08-09/FINAL_MANIFEST.json
+  docs/source-of-truth/final-2026-08-09/TRAINCAPSULE_FINAL_MASTER_PLAN.md
   docs/CONTEXT_INDEX.yaml
   config/risk_profiles.yaml
   config/context.yaml
@@ -15,6 +15,7 @@ required=(
 for path in "${required[@]}"; do
   test -s "$path" || { echo "Missing authority file: $path" >&2; exit 1; }
 done
+python3 scripts/gates/validate_source_manifest.py
 python3 - <<'PY'
 from pathlib import Path
 from tcfactory.yamlutil import load_yaml

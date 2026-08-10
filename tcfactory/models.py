@@ -75,6 +75,7 @@ class RoleName(StrEnum):
     RELEASE = "release"
     RESEARCH = "research"
     RECOVERY = "recovery"
+    FACTORY_REPAIR = "factory_repair"
     COMPLETION_AUDIT = "completion_audit"
     COMPLETION_ADJUDICATOR = "completion_adjudicator"
     VALUE_VALIDATOR = "value_validator"
@@ -179,6 +180,7 @@ class RepairPolicy(BaseModel):
     enabled: bool = True
     max_cycles: int = Field(default=2, ge=0, le=5)
     builder_models: list[str] = Field(default_factory=lambda: ["sonnet", "opus"])
+    mutating_retry_models: list[str] = Field(default_factory=list)
     restart_review_from: RoleName = RoleName.ADVERSARY
     mutating_role: RoleName | None = None
 
@@ -436,6 +438,7 @@ class AutonomyConfig(BaseModel):
     stop_file: str = "factory/state/STOP"
     pause_file: str = "factory/state/PAUSE"
     hard_stuck_path: str = "factory/state/HARD_STUCK.json"
+    hard_stuck_retry_seconds: int = Field(default=3600, ge=300, le=86_400)
     calibration_marker: str = "factory/state/CALIBRATION_PASSED"
     require_calibration: bool = True
     notification_command: str | None = None

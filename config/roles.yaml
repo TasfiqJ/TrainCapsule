@@ -155,3 +155,15 @@ recovery:
   disallowed_tools: [WebFetch, WebSearch, Agent]
   permission_mode: acceptEdits
   read_only: false
+
+factory_repair:
+  prompt_file: prompts/factory_repair.md
+  model: opus
+  effort: high
+  max_turns: 28
+  max_budget_usd: 5.0
+  task_budget_tokens: 140000
+  tools: [Read, Grep, Glob, Write, Edit, Bash]
+  disallowed_tools: [WebFetch, WebSearch, Agent]
+  permission_mode: acceptEdits
+  read_only: false

@@ -40,10 +40,10 @@ def _safe_reason(reason: str) -> str:
 
 
 def build_self_repair_task(*, reason: str, attempt: int, task_id: str) -> TaskPacket:
-    model = "opus" if attempt >= 2 else "sonnet"
     allowed_paths = [
         "tcfactory/**",
         "tests/**",
+        "prompts/factory_repair.md",
         "scripts/worker_loop.sh",
         "scripts/windows_task_entrypoint.sh",
         "scripts/recover_factory.sh",
@@ -87,6 +87,8 @@ def build_self_repair_task(*, reason: str, attempt: int, task_id: str) -> TaskPa
         "weakening a gate.",
         "Return blocked rather than changing protected controls when no safe verified "
         "repair exists.",
+        "Inspect and salvage prior verified repair candidates before starting over.",
+        "Do not stop at diagnosis while a safe implementation and regression test remain.",
     ]
     return TaskPacket(
         task_id=task_id,
@@ -99,6 +101,7 @@ def build_self_repair_task(*, reason: str, attempt: int, task_id: str) -> TaskPa
         source_of_truth=[
             "tcfactory/autopilot.py",
             "tcfactory/pipeline.py",
+            "prompts/factory_repair.md",
             "scripts/windows_task_entrypoint.sh",
             "config/factory.yaml",
             "config/autonomy.yaml",
@@ -124,11 +127,11 @@ def build_self_repair_task(*, reason: str, attempt: int, task_id: str) -> TaskPa
         private_gate=PrivateGate(required=False),
         pipeline=[
             Stage(
-                role=RoleName.RECOVERY,
-                model=model,
+                role=RoleName.FACTORY_REPAIR,
+                model="opus",
                 effort="high",
-                max_turns=20,
-                task_budget_tokens=100_000,
+                max_turns=28,
+                task_budget_tokens=140_000,
                 tools=["Read", "Grep", "Glob", "Write", "Edit", "Bash"],
                 disallowed_tools=["WebFetch", "WebSearch", "Agent"],
                 permission_mode="acceptEdits",
@@ -141,10 +144,10 @@ def build_self_repair_task(*, reason: str, attempt: int, task_id: str) -> TaskPa
             ),
             Stage(
                 role=RoleName.ADVERSARY,
-                model=model,
+                model="opus",
                 effort="high",
-                max_turns=8,
-                task_budget_tokens=40_000,
+                max_turns=10,
+                task_budget_tokens=48_000,
                 tools=["Read", "Grep", "Glob", "Bash"],
                 disallowed_tools=["Write", "Edit", "WebFetch", "WebSearch", "Agent"],
                 permission_mode="dontAsk",
@@ -193,10 +196,11 @@ def build_self_repair_task(*, reason: str, attempt: int, task_id: str) -> TaskPa
         commit_subject="repair autonomous factory",
         repair=RepairPolicy(
             enabled=True,
-            max_cycles=2,
-            builder_models=["sonnet", "opus"],
+            max_cycles=4,
+            builder_models=["sonnet", "opus", "sonnet", "opus"],
+            mutating_retry_models=["sonnet", "opus", "sonnet"],
             restart_review_from=RoleName.ADVERSARY,
-            mutating_role=RoleName.RECOVERY,
+            mutating_role=RoleName.FACTORY_REPAIR,
         ),
         task_budget_usd=20.0,
         auto_merge=True,
@@ -269,6 +273,7 @@ def write_hard_stuck(
     required_action: str,
     attempts: int,
     artifact_path: str | None,
+    auto_retry_at: datetime | None = None,
 ) -> Path:
     path = repo_root / autonomy.hard_stuck_path
     write_json(
@@ -281,6 +286,7 @@ def write_hard_stuck(
             "self_repair_attempts": attempts,
             "last_repair_artifact": artifact_path,
             "paid_usage_allowed": False,
+            "auto_retry_at": auto_retry_at.isoformat() if auto_retry_at else None,
         },
     )
     return path

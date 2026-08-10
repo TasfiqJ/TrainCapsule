@@ -151,12 +151,18 @@ async def _repair_or_hard_stuck(
         state.required_action = None
         state.last_event = f"Factory self-repair {state.repair_status}: {reason}"
         save_state(repo_root, factory, state)
+        repair_reason = reason
+        if last_artifact:
+            repair_reason += (
+                " Previous repair evidence must be inspected and salvaged when valid: "
+                f"{last_artifact}"
+            )
         try:
             outcome = await attempt_factory_self_repair(
                 repo_root=repo_root,
                 factory=factory,
                 autonomy=autonomy,
-                reason=reason,
+                reason=repair_reason,
                 attempt=state.repair_attempts,
             )
         except QuotaLimitPause as exc:
@@ -192,9 +198,11 @@ async def _repair_or_hard_stuck(
             save_state(repo_root, factory, state)
             return True
 
+    retry_at = _now() + timedelta(seconds=autonomy.hard_stuck_retry_seconds)
     required_action = (
-        "Autonomous repair exhausted every safe, gated attempt. Review the named blocker and "
-        "last repair artifact in this dashboard; paid usage and gate weakening remain forbidden."
+        "Autonomous repair exhausted this safe, gated batch. The exact blocker and last repair "
+        f"artifact are shown here; an independent batch will retry automatically at {retry_at}. "
+        "Paid usage and gate weakening remain forbidden."
     )
     hard_stuck_path = write_hard_stuck(
         repo_root=repo_root,
@@ -203,6 +211,7 @@ async def _repair_or_hard_stuck(
         required_action=required_action,
         attempts=state.repair_attempts,
         artifact_path=last_artifact,
+        auto_retry_at=retry_at,
     )
     state.status = "hard_stuck"
     state.repair_status = "exhausted"
@@ -210,6 +219,7 @@ async def _repair_or_hard_stuck(
     state.blocker_reason = reason
     state.required_action = required_action
     state.current_action = "hard stuck — safely paused"
+    state.next_wake_at = retry_at
     state.last_event = f"Hard stuck record written: {hard_stuck_path}"
     save_state(repo_root, factory, state)
     _notify(autonomy, f"TrainCapsule factory is hard stuck: {reason}")
@@ -475,6 +485,30 @@ async def _run_autopilot_inner(
         raise AutopilotError("Lights-out v2 requires TCF_MAX_PARALLEL=1 for serial main promotion.")
 
     state = load_state(repo_root, factory)
+    hard_stuck_path = repo_root / autonomy.hard_stuck_path
+    if hard_stuck_path.is_file():
+        hard_stuck = read_json(hard_stuck_path, {})
+        retry_raw = hard_stuck.get("auto_retry_at")
+        retry_at = datetime.fromisoformat(retry_raw) if retry_raw else _now()
+        if retry_at > _now():
+            state.status = "hard_stuck"
+            state.current_action = "hard stuck — safely paused"
+            state.next_wake_at = retry_at
+            state.last_event = f"automatic independent repair retry scheduled at {retry_at}"
+            save_state(repo_root, factory, state)
+            if once:
+                return
+            await asyncio.sleep(max(1.0, (retry_at - _now()).total_seconds()))
+        clear_hard_stuck(repo_root, autonomy)
+        state.repair_attempts = 0
+        state.repair_status = None
+        state.blocker_reason = None
+        state.required_action = None
+        state.blocked_tasks = []
+        state.next_wake_at = None
+        state.status = "restarting"
+        state.current_action = "automatic independent repair retry"
+        save_state(repo_root, factory, state)
     existing_completion = repo_root / "factory" / "state" / "PRODUCT_BUILD_COMPLETE.json"
     if existing_completion.exists():
         state.status = "complete"

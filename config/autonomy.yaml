@@ -18,6 +18,7 @@ completion_target: product_build
 stop_file: factory/state/STOP
 pause_file: factory/state/PAUSE
 hard_stuck_path: factory/state/HARD_STUCK.json
+hard_stuck_retry_seconds: 3600
 calibration_marker: factory/state/CALIBRATION_PASSED
 require_calibration: true
 notification_command: null

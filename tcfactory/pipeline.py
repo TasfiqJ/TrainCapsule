@@ -518,6 +518,7 @@ async def _execute_stage(
     )
     changed = changed_files(worktree.path, base_sha)
     result.changed_files = changed
+    path_policy_valid = True
     try:
         validate_changed_paths(
             changed,
@@ -530,6 +531,7 @@ async def _execute_stage(
                 f"Stage {stage.role.value} declared PASS but produced no repository change."
             )
     except PathPolicyError as exc:
+        path_policy_valid = False
         result.verdict = Verdict.FAIL
         result.error = f"{result.error}; {exc}" if result.error else str(exc)
 
@@ -565,6 +567,16 @@ async def _execute_stage(
             result.commit_sha = commit
     elif result.verdict == Verdict.PASS:
         result.commit_sha = base_sha
+    elif not read_only and changed and path_policy_valid:
+        # Preserve in-scope partial work on the isolated candidate branch. A fresh
+        # Sonnet/Opus session can finish it; final gates still control promotion.
+        commit = commit_all(
+            worktree.path,
+            stage_commit_message(task, stage.role, checkpoint=True),
+        )
+        if commit:
+            next_sha = commit
+            result.commit_sha = commit
 
     handoff = write_handoff(
         artifact_dir=artifact_dir,
@@ -839,17 +851,36 @@ async def run_pipeline(
             findings = _findings_from_result(result)
             console.print(f"[red]Stage failed:[/red] {findings}")
 
-            if stage.role == RoleName.BUILDER:
+            is_configured_mutator = (
+                task.repair.enabled
+                and task.repair.mutating_role is not None
+                and stage.role == task.repair.mutating_role
+            )
+            if stage.role == RoleName.BUILDER or is_configured_mutator:
                 failure_count = checkpoint.stage_failures[key]
-                models = task.repair.builder_models
-                if failure_count < len(models):
-                    replacement = stage.model_copy(update={"model": models[failure_count]})
+                if next_sha != candidate_sha:
+                    candidate_sha = next_sha
+                    checkpoint.candidate_sha = candidate_sha
+                if is_configured_mutator and stage.role != RoleName.BUILDER:
+                    retry_models = (
+                        task.repair.mutating_retry_models
+                        or task.repair.builder_models
+                    )
+                    retry_index = failure_count - 1
+                else:
+                    retry_models = task.repair.builder_models
+                    retry_index = failure_count
+                if retry_index < len(retry_models):
+                    replacement = stage.model_copy(
+                        update={"model": retry_models[retry_index]}
+                    )
                     task.pipeline[checkpoint.stage_index] = replacement
                     checkpoint.previous_findings = findings
                     checkpoint_store.save(checkpoint)
                     continue
                 raise PipelineFailure(
-                    f"Builder failed after {failure_count} bounded failures. "
+                    f"Mutating stage {stage.role.value} failed after "
+                    f"{failure_count} bounded failures. "
                     "Re-specification is required."
                 )
 
@@ -867,51 +898,69 @@ async def run_pipeline(
                 and task.repair.enabled
                 and checkpoint.repair_cycles < task.repair.max_cycles
             ):
-                checkpoint.repair_cycles += 1
                 mutating = _find_mutating_stage(task)
-                models = task.repair.builder_models
-                model = models[min(checkpoint.repair_cycles - 1, len(models) - 1)]
-                repair_stage = mutating.model_copy(
-                    update={
-                        "model": model,
-                        "acceptance_criteria": mutating.acceptance_criteria
-                        + ["Resolve every previous reviewer finding without weakening evidence."],
-                    }
-                )
-                repair_key = repair_stage.role.value
-                checkpoint.stage_attempts[repair_key] = (
-                    checkpoint.stage_attempts.get(repair_key, 0) + 1
-                )
-                repair_attempt = checkpoint.stage_attempts[repair_key]
-                console.print(
-                    f"[yellow]Repair cycle {checkpoint.repair_cycles}/{task.repair.max_cycles}"
-                    f"[/yellow] with {repair_stage.role.value} model {model}"
-                )
-                repair_result, repair_sha, _repair_worktree = await _execute_stage(
-                    repo_root=repo_root,
-                    config=config,
-                    task=task,
-                    role_configs=role_configs,
-                    stage=repair_stage,
-                    base_sha=candidate_sha,
-                    run_id=run_id,
-                    attempt=repair_attempt,
-                    ledger=ledger,
-                    previous_findings=findings,
-                    checkpoint=checkpoint,
-                    checkpoint_store=checkpoint_store,
-                )
-                all_results.append(repair_result)
-                checkpoint.results.append(checkpoint_result_payload(repair_result))
-                if repair_result.verdict != Verdict.PASS:
-                    raise PipelineFailure(
-                        "Repair stage failed; automatic re-specification is required."
+                repair_findings = list(findings)
+                repaired = False
+                while checkpoint.repair_cycles < task.repair.max_cycles:
+                    checkpoint.repair_cycles += 1
+                    models = task.repair.builder_models
+                    model = models[
+                        min(checkpoint.repair_cycles - 1, len(models) - 1)
+                    ]
+                    repair_stage = mutating.model_copy(
+                        update={
+                            "model": model,
+                            "acceptance_criteria": mutating.acceptance_criteria
+                            + [
+                                "Resolve every previous reviewer finding without "
+                                "weakening evidence."
+                            ],
+                        }
                     )
-                candidate_sha = repair_sha
-                checkpoint.candidate_sha = candidate_sha
-                checkpoint.previous_findings = None
-                checkpoint.stage_index = _find_stage_index(task, task.repair.restart_review_from)
-                checkpoint_store.save(checkpoint)
+                    repair_key = repair_stage.role.value
+                    checkpoint.stage_attempts[repair_key] = (
+                        checkpoint.stage_attempts.get(repair_key, 0) + 1
+                    )
+                    repair_attempt = checkpoint.stage_attempts[repair_key]
+                    console.print(
+                        f"[yellow]Repair cycle "
+                        f"{checkpoint.repair_cycles}/{task.repair.max_cycles}"
+                        f"[/yellow] with {repair_stage.role.value} model {model}"
+                    )
+                    repair_result, repair_sha, _repair_worktree = await _execute_stage(
+                        repo_root=repo_root,
+                        config=config,
+                        task=task,
+                        role_configs=role_configs,
+                        stage=repair_stage,
+                        base_sha=candidate_sha,
+                        run_id=run_id,
+                        attempt=repair_attempt,
+                        ledger=ledger,
+                        previous_findings=repair_findings,
+                        checkpoint=checkpoint,
+                        checkpoint_store=checkpoint_store,
+                    )
+                    all_results.append(repair_result)
+                    checkpoint.results.append(checkpoint_result_payload(repair_result))
+                    if repair_result.verdict == Verdict.PASS:
+                        candidate_sha = repair_sha
+                        checkpoint.candidate_sha = candidate_sha
+                        checkpoint.previous_findings = None
+                        checkpoint.stage_index = _find_stage_index(
+                            task, task.repair.restart_review_from
+                        )
+                        checkpoint_store.save(checkpoint)
+                        repaired = True
+                        break
+                    repair_findings.extend(_findings_from_result(repair_result))
+                    checkpoint.previous_findings = repair_findings
+                    checkpoint_store.save(checkpoint)
+                if not repaired:
+                    raise PipelineFailure(
+                        "Every bounded Sonnet/Opus repair cycle failed; "
+                        "automatic re-specification is required."
+                    )
                 continue
 
             raise PipelineFailure(f"Stage {stage.role.value} failed and no repair path remains.")

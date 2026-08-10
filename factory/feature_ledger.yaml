@@ -45,6 +45,7 @@ tasks:
   phase: P0
   depends_on: []
   status: packet_approved
+  terminal_blocked: false
   packet_path: tasks/T001.yaml
   trust_core: false
   risk_tier: integration
@@ -76,6 +77,9 @@ tasks:
     and strengthen specification/gates.
   - Reused the approved packet after replacing the cache-sensitive continuation meter
     with tool-free four-turn and 20k-token report limits.
+  - Automatic re-specification ceiling reached.
+  - Manual infrastructure recovery approved after pinning quality gates to the shared
+    offline environment and fixing terminal-block readiness transitions.
   revisions: 3
   value_revisions: 0
 - task_id: T002
@@ -3203,4 +3207,4 @@ tasks:
   notes: []
   revisions: 0
   value_revisions: 0
-updated_at: '2026-08-10T09:25:30.252995+00:00'
+updated_at: '2026-08-10T09:34:29.873126+00:00'

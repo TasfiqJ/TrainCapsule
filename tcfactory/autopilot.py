@@ -256,6 +256,7 @@ async def _respec_failed_item(
     current = item.value_revisions if value_failure else item.revisions
     if current >= ceiling:
         item.status = "blocked"
+        item.terminal_blocked = True
         reason = (
             "Material-value redesign ceiling reached; the feature remains technically possible "
             "but has not demonstrated a commercially material result."
@@ -272,6 +273,7 @@ async def _respec_failed_item(
         item.value_revisions += 1
     item.packet_path = None
     item.status = "ready"
+    item.terminal_blocked = False
     if value_failure:
         item.notes.append(
             f"Value redesign {item.value_revisions}/{autonomy.value_redesign_limit}: preserve the "

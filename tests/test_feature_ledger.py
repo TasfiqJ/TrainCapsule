@@ -59,3 +59,15 @@ def test_failed_task_remains_routed_to_respecification() -> None:
 
     assert failed.status == "respec_required"
     assert ledger.next_ready() is None
+
+
+def test_terminal_block_does_not_reenter_the_ready_queue() -> None:
+    ledger = _ledger()
+    blocked = ledger.item("T002")
+    blocked.terminal_blocked = True
+    blocked.packet_path = "tasks/T002.yaml"
+
+    ledger.refresh_readiness()
+
+    assert blocked.status == "blocked"
+    assert ledger.next_ready() is None

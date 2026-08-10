@@ -36,6 +36,7 @@ class FeatureItem(BaseModel):
     phase: str
     depends_on: list[str] = Field(default_factory=list)
     status: LedgerStatus = "blocked"
+    terminal_blocked: bool = False
     packet_path: str | None = None
     trust_core: bool = False
     risk_tier: RiskTier = RiskTier.STANDARD
@@ -74,6 +75,8 @@ class FeatureLedger(BaseModel):
     def refresh_readiness(self) -> None:
         passed = self.passed_ids()
         for item in self.tasks:
+            if item.terminal_blocked:
+                continue
             if item.status in {
                 "passed",
                 "deferred",

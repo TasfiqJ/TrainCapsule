@@ -44,8 +44,8 @@ tasks:
   lead_role: Spec
   phase: P0
   depends_on: []
-  status: blocked
-  terminal_blocked: true
+  status: respec_required
+  terminal_blocked: false
   packet_path: tasks/T001.yaml
   trust_core: false
   risk_tier: integration

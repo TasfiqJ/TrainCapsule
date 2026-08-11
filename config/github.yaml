@@ -8,6 +8,7 @@ repository: TasfiqJ/TrainCapsule
 releaseMode: pull_request
 directMainPush: false
 releaseBranchPrefix: release/traincapsule
+releaseMetadataPath: factory/state/latest-release.json
 createDraftPullRequest: true
 autoMergeMechanical: false
 autoMergeStandard: false

@@ -27,6 +27,7 @@ from tcfactory.checkpoints import V3Checkpoint
 from tcfactory.completion import MilestoneCompletionDecision
 from tcfactory.context import V3ContextManifest
 from tcfactory.handoffs import V3Handoff
+from tcfactory.supervisor import MigrationCompleteMarker, SupervisorState
 from tcfactory.v3.approvals import HumanApprovalRecord
 from tcfactory.v3.base import json_schema_for
 from tcfactory.v3.candidate_manifest import CandidateManifest
@@ -71,11 +72,13 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "handoff.schema.json": V3Handoff,
     "legacy-migration.schema.json": LegacyMigrationMap,
     "milestones.schema.json": MilestoneRoadmap,
+    "migration-complete-marker.schema.json": MigrationCompleteMarker,
     "milestone-completion.schema.json": MilestoneCompletionDecision,
     "milestone-policy-config.schema.json": MilestonePolicyConfig,
     "retry-policy.schema.json": RetryPolicy,
     "release-candidate.schema.json": ReleaseCandidate,
     "scheduler.schema.json": SchedulerConfig,
+    "supervisor-state.schema.json": SupervisorState,
     "work-item-v3.schema.json": WorkItem,
     "work-items.schema.json": WorkItemCollection,
     "task-packet.schema.json": V3TaskPacket,

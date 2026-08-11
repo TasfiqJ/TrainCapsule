@@ -8,14 +8,17 @@ def test_windows_task_runs_foreground_autopilot() -> None:
     script = (root / "scripts" / "register_windows_autostart.ps1").read_text(encoding="utf-8")
     entry = (root / "scripts" / "windows_task_entrypoint.sh").read_text(encoding="utf-8")
     assert "windows_task_entrypoint.sh" in script
-    assert "/bin/true" not in script
     assert "MultipleInstances IgnoreNew" in script
     assert "-Force" not in script
     assert "RepetitionInterval (New-TimeSpan -Minutes 15)" in script
     assert "$Triggers = @($LogonTrigger, $RecoveryTrigger)" in script
     assert "-Trigger $Triggers" in script
-    assert 'printf "%s" "$HOME"' in script
-    assert "~/projects/traincapsule" not in script
+    assert "RestartCount 999" not in script
+    assert "$RepoPath = $env:TCF_REPO_PATH" in script
+    assert "$WslDistribution = $env:TCF_WSL_DISTRIBUTION" in script
+    assert '$FactoryRuntimePath = "scripts/windows_task_entrypoint.sh"' in script
+    assert "/home/jasim" not in script
+    assert "Ubuntu-22.04" not in script
     assert "EncodedCommand" in script
     assert "Start-Process" in script
     assert "-WindowStyle Hidden" in script
@@ -23,11 +26,13 @@ def test_windows_task_runs_foreground_autopilot() -> None:
     assert "load_factory_env.sh" in entry
     assert "CLAUDE_CODE_OAUTH_TOKEN" not in entry
     assert "HARD_STUCK.json" in entry
-    assert 'flock -n "$ROOT/factory/state/autopilot.lock"' in entry
-    assert "duplicate launcher exiting" in entry
-    assert entry.index('flock -n "$ROOT/factory/state/autopilot.lock"') < entry.index(
-        "while true"
-    )
+    assert 'flock -n 9' in entry
+    assert "single-instance lock" in entry
+    assert "while true" not in entry
+    assert "tcfactory.supervisor preflight" in entry
+    assert "tcfactory.supervisor record-exit" in entry
+    assert "source integrity" in entry
+    assert "migration marker" in entry
 
 
 def test_private_github_runner_has_limited_recovery_task() -> None:

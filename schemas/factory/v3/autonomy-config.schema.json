@@ -169,17 +169,27 @@
           "type": "integer"
         },
         "maxControllerRestarts": {
-          "maximum": 10,
-          "minimum": 1,
+          "const": 3,
           "title": "Maxcontrollerrestarts",
           "type": "integer"
         },
         "restartBackoffSeconds": {
-          "items": {
-            "type": "integer"
-          },
-          "maxItems": 5,
-          "minItems": 1,
+          "maxItems": 3,
+          "minItems": 3,
+          "prefixItems": [
+            {
+              "const": 15,
+              "type": "integer"
+            },
+            {
+              "const": 60,
+              "type": "integer"
+            },
+            {
+              "const": 300,
+              "type": "integer"
+            }
+          ],
           "title": "Restartbackoffseconds",
           "type": "array"
         },

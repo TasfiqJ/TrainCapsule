@@ -29,6 +29,10 @@ runtime:
   localStateRootEnvironmentVariable: TCF_RUNTIME_ROOT
   singleInstanceLock: true
   hardStuckFile: HARD_STUCK.json
+  stopFile: STOP
+  migrationCompleteMarker: MIGRATION_COMPLETE_V3.json
+  supervisorStateFile: supervisor-state.json
+  supervisorLockFile: supervisor.lock
   redactSecrets: true
   rawCustomerEvidenceInRepository: false
 release:

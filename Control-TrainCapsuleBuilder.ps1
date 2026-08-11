@@ -1,74 +1,78 @@
 [CmdletBinding()]
 param(
     [ValidateSet(
-        "Overview", "Start", "Pause", "Resume", "Stop", "Verify", "Recover", "Logs",
-        "Queue", "Costs", "Roadmap", "Value", "Peers", "Blocker", "Features", "GitHub", "Sync"
+        "Status", "Overview", "Start", "Pause", "Resume", "Recover", "Stop",
+        "ScheduleDryRun", "MilestoneStatus", "Verify", "Logs", "Queue", "GitHub"
     )]
-    [string]$Action = "Overview",
-    [ValidatePattern('^T\d{3}$')]
-    [string]$TaskId = "T001"
+    [string]$Action = "Status",
+    [string]$RepoPath = $env:TCF_REPO_PATH,
+    [string]$WslDistribution = $env:TCF_WSL_DISTRIBUTION,
+    [string]$FactoryRuntimePath = "scripts/factory_control.sh"
 )
 
-$distribution = "Ubuntu-22.04"
-$repository = "/home/jasim/projects/traincapsule"
-$scheduledTask = "TrainCapsule Factory Autopilot"
-$factoryShell = "cd '$repository' && source scripts/load_factory_env.sh &&"
+$ErrorActionPreference = "Stop"
+$Wsl = Join-Path $env:SystemRoot "System32\wsl.exe"
+if (-not (Test-Path $Wsl)) {
+    throw "wsl.exe was not found. Install WSL2 first."
+}
 
-switch ($Action) {
-    "Start" {
-        $task = Get-ScheduledTask -TaskName $scheduledTask -ErrorAction SilentlyContinue
-        if ($null -ne $task) {
-            Start-ScheduledTask -TaskName $scheduledTask
-        } else {
-            & wsl.exe -d $distribution -- bash -lc "cd '$repository' && bash scripts/windows_task_entrypoint.sh"
-        }
+# When launched from a \\wsl.localhost share, derive both values from the script location.
+# Otherwise require -RepoPath (or TCF_REPO_PATH); no user/distribution path is assumed.
+if ([string]::IsNullOrWhiteSpace($RepoPath) -and
+    $PSScriptRoot -match '^\\\\wsl(?:\.localhost)?\\([^\\]+)\\(.+)$') {
+    if ([string]::IsNullOrWhiteSpace($WslDistribution)) {
+        $WslDistribution = $Matches[1]
     }
-    "Pause" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory pause"
-    }
-    "Resume" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory resume"
-    }
-    "Stop" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory stop"
-    }
-    "Verify" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory verify"
-    }
-    "Recover" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory recover"
-    }
-    "Logs" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory logs"
-    }
-    "Queue" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory queue-status"
-    }
-    "Costs" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory costs"
-    }
-    "Roadmap" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory roadmap"
-    }
-    "Value" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory value-status --task-id '$TaskId'"
-    }
-    "Peers" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory peer-status"
-    }
-    "Blocker" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory explain-blocker"
-    }
-    "Features" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory features"
-    }
-    "GitHub" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory github-status"
-    }
-    "Sync" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory github-sync"
-    }
-    "Overview" {
-        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory status"
+    $RepoPath = "/" + $Matches[2].Replace("\", "/")
+}
+if ([string]::IsNullOrWhiteSpace($RepoPath)) {
+    throw "Specify -RepoPath or set TCF_REPO_PATH."
+}
+foreach ($Value in @($RepoPath, $WslDistribution, $FactoryRuntimePath)) {
+    if ($Value -match "[`r`n`0]") {
+        throw "Control parameters may not contain control characters."
     }
 }
+
+if ($FactoryRuntimePath.StartsWith("/")) {
+    $Runtime = $FactoryRuntimePath
+}
+else {
+    $Runtime = $RepoPath.TrimEnd("/") + "/" + $FactoryRuntimePath.TrimStart("/")
+}
+
+function Invoke-TrainCapsuleWsl {
+    param([string[]]$LinuxArguments)
+    $WslArguments = @()
+    if (-not [string]::IsNullOrWhiteSpace($WslDistribution)) {
+        $WslArguments += @("-d", $WslDistribution)
+    }
+    $WslArguments += "--"
+    $WslArguments += $LinuxArguments
+    & $Wsl @WslArguments
+    if ($LASTEXITCODE -ne 0) {
+        throw "TrainCapsule control action failed with exit code $LASTEXITCODE."
+    }
+}
+
+Invoke-TrainCapsuleWsl -LinuxArguments @("test", "-x", $Runtime)
+
+$ControlAction = switch ($Action) {
+    "Status" { "status" }
+    "Overview" { "status" }
+    "Start" { "start" }
+    "Pause" { "pause" }
+    "Resume" { "resume" }
+    "Recover" { "recover" }
+    "Stop" { "stop" }
+    "ScheduleDryRun" { "schedule-dry-run" }
+    "MilestoneStatus" { "milestone-status" }
+    "Verify" { "verify" }
+    "Logs" { "logs" }
+    "Queue" { "queue" }
+    "GitHub" { "github" }
+}
+
+# The runtime script owns environment loading and redaction. OAuth values are never requested,
+# interpolated, printed, or passed as command-line arguments by this Windows control surface.
+Invoke-TrainCapsuleWsl -LinuxArguments @("bash", $Runtime, $ControlAction)

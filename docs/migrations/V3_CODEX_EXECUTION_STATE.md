@@ -7,12 +7,12 @@
 - Bundle integrity: 30/30 declared files, 542907/542907 bytes, all SHA-256 values matched
 - Controller: stopped; Windows restart task disabled; lock released
 - Baseline tests: 394 tests, Ruff, Pyright, schemas, packet checks, and all existing gates passed
-- Active phase: Phase G — startup and controls
-- Completed phases: baseline, controller shutdown, rollback ref, runtime metadata snapshot, prescribed bundle reading, Phase A source authority and integrity, Phase B typed domain models and schemas, Phase C bounded configuration/roadmap/scheduling/recovery, Phase D planning/context/value/support boundaries, Phase E backend/checkpoint isolation, and Phase F pull-request release/hosted CI
-- Commits created by this migration: `e331e39` (source authority), `b77167b` (domain models), `bfaba0b` (factory policy), `2200104` (planning/support state), `5fbbca7` (backend-neutral execution), and the Phase F release-policy commit containing this record
-- Next exact action: replace infinite launcher restart behavior with a bounded supervisor, add portable start/stop/status installation controls, and verify durable stop/kill/recovery behavior without starting a paid model session
+- Active phase: Phase H — prompt migration
+- Completed phases: baseline, controller shutdown, rollback ref, runtime metadata snapshot, prescribed bundle reading, Phase A source authority and integrity, Phase B typed domain models and schemas, Phase C bounded configuration/roadmap/scheduling/recovery, Phase D planning/context/value/support boundaries, Phase E backend/checkpoint isolation, Phase F pull-request release/hosted CI, and Phase G bounded startup/portable controls/status
+- Commits created by this migration: `e331e39` (source authority), `b77167b` (domain models), `bfaba0b` (factory policy), `2200104` (planning/support state), `5fbbca7` (backend-neutral execution), `9ca063d` (PR release controls), and the Phase G startup/control commit containing this record
+- Next exact action: migrate normative prompts, add the five V3 specialist prompt contracts, and prove finite scope, native-first review, `UNKNOWN`, external-truth, human-stop, and bounded-finding behavior without invoking a model
 - Unresolved blockers: qualified human source-migration approval remains external; it does not block internal engineering
-- Introduced failures: none; the Phase F 467-test full suite, Ruff, strict Pyright, YAML uniqueness, V3 configuration validation, and generated-schema check pass
+- Introduced failures: none; the Phase G 471-test full suite, Ruff, strict Pyright, Bash/PowerShell parsing, V3 configuration validation, and 32 generated-schema checks pass
 
 ## Rollback
 

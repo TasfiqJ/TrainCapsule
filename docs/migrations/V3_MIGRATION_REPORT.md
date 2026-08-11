@@ -131,6 +131,32 @@ Migrate the V2 factory/bootstrap repository to the bounded V3 product and factor
 - V3 configuration validation: pass without mutation
 - No GitHub branch, PR, merge, workflow run, or push was created during Phase F testing
 
+## Phase G implementation
+
+- Replaced the infinite launcher loop with one persistent finite supervisor. Short-lived controller exits receive exactly three restart opportunities with 15-second, 60-second, and 300-second backoff; the next exit writes the shared V3 `HARD_STUCK` record and durable `STOP`, then exits nonzero.
+- Persisted the supervisor restart budget independently of a launcher process. The budget resets only after the configured 1,800-second healthy interval, so Windows recovery heartbeats and process restarts cannot renew the retry loop.
+- Added a fail-closed startup preflight for the complete V3 configuration set, V3 source integrity, single-supervisor ownership, backend-neutral credential state, a source-digest/SHA-bound migration-complete marker, absence of `STOP`/`HARD_STUCK`, an empty running queue, and absence of quarantined corrupt checkpoints.
+- Kept the migration-complete marker absent while later migration phases remain. The existing durable `STOP` and `PAUSE` cause the actual launcher to exit before credentials or a controller process are loaded.
+- Removed Task Scheduler's 999-restart policy. The recovery heartbeat may relaunch the bounded supervisor, but persistent retry state and `HARD_STUCK` prevent a second unbounded loop.
+- Rebuilt `Control-TrainCapsuleBuilder.ps1` and Windows task registration around `RepoPath`, `WslDistribution`, `FactoryRuntimePath`, and action parameters/environment configuration. No user, repository, or distribution is hardcoded; OAuth values are never requested or printed.
+- Added portable status, pause, resume, recover, stop, schedule-dry-run, milestone-status, verify, logs, queue, GitHub, and start routing through the same redacting runtime script.
+- Replaced the narrow status response with a truthful V3 operator snapshot: active milestone, current work item/lane, checkpoint retry budget, persistent restart budget, human/external blockers, candidate SHA, factory CI, product CI, and latest release PR.
+- Added schema-versioned migration-marker and supervisor-state models, bringing generated V3 schemas from 30 to 32.
+
+## Phase G verification
+
+- Focused supervisor, control, status, release-compatibility, and configuration checks: 33 passed
+- Complete Pytest suite: 471 passed
+- Exact restart sequence and hard-stuck/stop writes: pass without sleep or model use
+- Healthy-interval-only reset: pass at the configured 1,800 seconds
+- Current stopped-launcher exercise: pass; `STOP` and `PAUSE` preserved, marker absent, controller not started
+- PowerShell parser: both control and registration scripts pass
+- Bash parser: launcher, systemd entrypoint, factory control, and status scripts pass
+- Ruff: pass
+- Strict Pyright: 0 errors, 0 warnings
+- Generated V3 schemas: 32 exact matches
+- No model session, GitHub mutation, Windows task change, or paid usage occurred
+
 ## Pending
 
-Startup controls, prompt migration, legacy mappings, product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.
+Prompt migration, legacy mappings, product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.

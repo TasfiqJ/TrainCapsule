@@ -50,7 +50,11 @@ class RoadmapPolicy(V3Model):
 class RuntimePolicy(V3Model):
     local_state_root_environment_variable: str = Field(min_length=1)
     single_instance_lock: Literal[True]
-    hard_stuck_file: str = Field(min_length=1)
+    hard_stuck_file: Literal["HARD_STUCK.json"]
+    stop_file: Literal["STOP"]
+    migration_complete_marker: Literal["MIGRATION_COMPLETE_V3.json"]
+    supervisor_state_file: Literal["supervisor-state.json"]
+    supervisor_lock_file: Literal["supervisor.lock"]
     redact_secrets: Literal[True]
     raw_customer_evidence_in_repository: Literal[False]
 
@@ -96,16 +100,14 @@ class RecoveryAutonomy(V3Model):
     auto_recover_interrupted: bool
     max_infrastructure_recoveries_per_run: int = Field(ge=1, le=10)
     max_factory_self_repairs_per_incident: int = Field(ge=1, le=3)
-    max_controller_restarts: int = Field(ge=1, le=10)
-    restart_backoff_seconds: list[int] = Field(min_length=1, max_length=5)
+    max_controller_restarts: Literal[3]
+    restart_backoff_seconds: tuple[Literal[15], Literal[60], Literal[300]]
     require_healthy_seconds_to_reset_restart_budget: int = Field(ge=60)
 
     @model_validator(mode="after")
     def finite_backoff(self) -> RecoveryAutonomy:
-        if any(value <= 0 for value in self.restart_backoff_seconds):
-            raise ValueError("restart backoff values must be positive")
-        if self.restart_backoff_seconds != sorted(self.restart_backoff_seconds):
-            raise ValueError("restart backoff values must be nondecreasing")
+        if self.restart_backoff_seconds != (15, 60, 300):
+            raise ValueError("controller restart backoff must be exactly 15, 60, and 300 seconds")
         return self
 
 

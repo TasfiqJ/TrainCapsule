@@ -1,0 +1,41 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 3,
+      "default": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "status": {
+      "const": "COMPLETE",
+      "default": "COMPLETE",
+      "title": "Status",
+      "type": "string"
+    },
+    "completedSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Completedsha",
+      "type": "string"
+    },
+    "sourceManifestSha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Sourcemanifestsha256",
+      "type": "string"
+    },
+    "completedAt": {
+      "format": "date-time",
+      "title": "Completedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "completedSha",
+    "sourceManifestSha256",
+    "completedAt"
+  ],
+  "title": "MigrationCompleteMarker",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/migration-complete-marker.schema.json"
+}

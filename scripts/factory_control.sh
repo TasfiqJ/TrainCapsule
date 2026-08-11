@@ -17,7 +17,11 @@ case "$ACTION" in
       echo "Autopilot is already running with PID $(cat factory/state/autopilot.pid)."
       exit 0
     fi
-    nohup bash scripts/systemd_entrypoint.sh >> factory/logs/autopilot.log 2>&1 &
+    if [[ -f factory/state/STOP || -f factory/state/HARD_STUCK.json ]]; then
+      echo "Startup refused: use explicit recovery and resume before start." >&2
+      exit 2
+    fi
+    nohup bash scripts/windows_task_entrypoint.sh >> factory/logs/autopilot.log 2>&1 &
     echo $! > factory/state/autopilot.pid
     echo "Autopilot started with PID $!."
     ;;
@@ -48,6 +52,12 @@ case "$ACTION" in
   roadmap)
     uv run tcfactory roadmap "$@"
     ;;
+  schedule-dry-run|schedule)
+    uv run tcfactory v3-schedule --dry-run --explain "$@"
+    ;;
+  milestone-status|milestones)
+    uv run tcfactory milestones "$@"
+    ;;
   value)
     [[ $# -ge 1 ]] || { echo "usage: $0 value tasks/TASK.yaml" >&2; exit 2; }
     uv run tcfactory value-status "$@"
@@ -70,7 +80,7 @@ case "$ACTION" in
   *)
     cat >&2 <<'USAGE'
 usage: scripts/factory_control.sh <action> [args]
-actions: overview start pause resume stop verify recover logs queue costs roadmap value peers blocker features github sync
+actions: overview start pause resume stop verify recover logs queue costs roadmap schedule-dry-run milestone-status value peers blocker features github sync
 USAGE
     exit 2
     ;;

@@ -58,6 +58,9 @@ class GitHubConfig(V3Model):
     release_mode: Literal["pull_request"] = "pull_request"
     direct_main_push: Literal[False] = False
     release_branch_prefix: str = "release/traincapsule"
+    release_metadata_path: Literal["factory/state/latest-release.json"] = (
+        "factory/state/latest-release.json"
+    )
     create_draft_pull_request: Literal[True] = True
     auto_merge_mechanical: Literal[False] = False
     auto_merge_standard: Literal[False] = False
@@ -639,6 +642,10 @@ def prepare_release_pull_request(
         updated_at=datetime.now(UTC),
     )
     write_json(metadata_path, metadata.model_dump(mode="json", by_alias=True))
+    latest_path = Path(config.release_metadata_path)
+    if not latest_path.is_absolute():
+        latest_path = repo_root / latest_path
+    write_json(latest_path, metadata.model_dump(mode="json", by_alias=True))
     return metadata
 
 

@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 # pyright: reportPrivateUsage=false, reportUnknownLambdaType=false, reportUnknownArgumentType=false
-
 import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path

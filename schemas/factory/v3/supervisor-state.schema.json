@@ -1,0 +1,97 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 3,
+      "default": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "restartAttempts": {
+      "default": 0,
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Restartattempts",
+      "type": "integer"
+    },
+    "lastStartedAt": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Laststartedat"
+    },
+    "lastExitAt": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lastexitat"
+    },
+    "lastExitCode": {
+      "anyOf": [
+        {
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lastexitcode"
+    },
+    "lastRuntimeSeconds": {
+      "anyOf": [
+        {
+          "minimum": 0,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lastruntimeseconds"
+    },
+    "healthyResets": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Healthyresets",
+      "type": "integer"
+    },
+    "lastDecision": {
+      "anyOf": [
+        {
+          "enum": [
+            "START",
+            "RESTART",
+            "HARD_STUCK",
+            "STOPPED"
+          ],
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lastdecision"
+    }
+  },
+  "title": "SupervisorState",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/supervisor-state.schema.json"
+}

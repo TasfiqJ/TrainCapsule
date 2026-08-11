@@ -46,6 +46,7 @@ from .observability import heartbeat_health, tail_events
 from .peer_messaging import peer_status as read_peer_status
 from .pipeline import run_pipeline
 from .queue import enqueue_task, promote_due_paused, reconcile_running, worker_loop
+from .runtime_status import build_runtime_status
 from .usage import usage_health
 from .util import atomic_write_text, read_json, resolve_within, write_json
 from .v3.approvals import HumanApprovalRecord
@@ -703,34 +704,7 @@ def status(
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
 ) -> None:
     repo_root = _resolve_repo(repo)
-    roadmap = _v3_roadmap(repo_root)
-    active = [item for item in roadmap.work_items if item.milestone == roadmap.active_milestone]
-    priority = {"RUNNING": 0, "QUEUED": 1, "READY": 2, "WAITING_HUMAN": 3}
-    current = min(active, key=lambda item: (priority.get(item.status.value, 9), item.work_item_id))
-    blocker = (
-        current.status.value
-        if current.status.value.startswith(("WAITING_", "BLOCKED_", "REJECTED_"))
-        else None
-    )
-    console.print_json(
-        data={
-            "activeMilestone": roadmap.active_milestone,
-            "workItemId": current.work_item_id,
-            "lane": current.lane.value,
-            "status": current.status.value,
-            "maturity": current.maturity_target.model_dump(mode="json", by_alias=True),
-            "scopedBlocker": blocker,
-            "attemptsRemaining": {
-                "plan": current.retry_policy.max_plan_attempts,
-                "repair": current.retry_policy.max_candidate_repair_cycles,
-                "restart": current.retry_policy.max_candidate_restarts,
-            },
-            "approvalStatus": {
-                "required": current.human_approval_required,
-                "references": current.human_approval_refs,
-            },
-        }
-    )
+    console.print_json(data=build_runtime_status(repo_root))
 
 
 @app.command("autopilot")

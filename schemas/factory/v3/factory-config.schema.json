@@ -185,8 +185,28 @@
           "type": "boolean"
         },
         "hardStuckFile": {
-          "minLength": 1,
+          "const": "HARD_STUCK.json",
           "title": "Hardstuckfile",
+          "type": "string"
+        },
+        "stopFile": {
+          "const": "STOP",
+          "title": "Stopfile",
+          "type": "string"
+        },
+        "migrationCompleteMarker": {
+          "const": "MIGRATION_COMPLETE_V3.json",
+          "title": "Migrationcompletemarker",
+          "type": "string"
+        },
+        "supervisorStateFile": {
+          "const": "supervisor-state.json",
+          "title": "Supervisorstatefile",
+          "type": "string"
+        },
+        "supervisorLockFile": {
+          "const": "supervisor.lock",
+          "title": "Supervisorlockfile",
           "type": "string"
         },
         "redactSecrets": {
@@ -204,6 +224,10 @@
         "localStateRootEnvironmentVariable",
         "singleInstanceLock",
         "hardStuckFile",
+        "stopFile",
+        "migrationCompleteMarker",
+        "supervisorStateFile",
+        "supervisorLockFile",
         "redactSecrets",
         "rawCustomerEvidenceInRepository"
       ],

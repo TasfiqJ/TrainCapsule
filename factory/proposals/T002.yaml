@@ -1,93 +1,274 @@
 task_id: T002
 title: Recheck product name, package, domain, and trademark surface
 phase: P0
-depends_on:
-  - T001
-base_branch: main
-risk_tier: integration
-auto_merge: false
-github_push: false
-remote_ci_required: false
-allow_test_changes: false
-commit_type: spec
-commit_subject: "research t002 name and trademark surface"
 goal: >
   Produce an independently reviewable research record confirming whether the
-  product name "TrainCapsule", its package identifier, and candidate domains
-  are free of blocking trademark, package-registry, and domain-availability
-  conflicts, or documenting the exact conflicts found.
-non_goals:
-  - Renaming the product or changing any source-of-truth naming decision
-  - Registering a domain, package name, or trademark
-  - Making a legal determination; only surfacing evidence for human/legal review
+  product name "TrainCapsule", its package identifiers, and candidate domains
+  named in source-of-truth are free of blocking trademark, package-registry,
+  and domain-availability conflicts, or documenting the exact conflicts
+  found.
+source_of_truth:
+  - docs/source-of-truth/final-2026-08-09/00_EXECUTIVE_BUILD_DECISION.md
+  - docs/source-of-truth/final-2026-08-09/03_PRODUCT_STRATEGY_AND_REQUIREMENTS.md
+  - docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md
+  - docs/source-of-truth/final-2026-08-09/13_SOURCE_REGISTER.md
+  - factory/feature_ledger.yaml
+depends_on:
+  - T001
 inputs:
   - "Roadmap ID: T002"
   - "Required dependencies: T001"
   - "Lead role: Research"
   - "Phase: P0"
+non_goals:
+  - Renaming the product or changing any source-of-truth naming decision
+  - Registering a domain, package name, or trademark
+  - Making a legal determination; only surfacing evidence for human/legal review
+acceptance_criteria:
+  - "A research record exists at docs/research/T002_name_trademark_check.md."
+  - "The record quotes the exact product name and package identifiers under review verbatim from source-of-truth."
+  - "The record documents trademark search results for the product name in at least one primary trademark register, with source URLs and query dates."
+  - "The record documents package-name availability/collision status on every package registry the product actually intends to publish to per source-of-truth, with source URLs and query dates."
+  - "The record documents domain-availability status for each candidate domain named in source-of-truth, with source URLs and query dates."
+  - "Every finding is labeled CLEAR, CONFLICT, or UNKNOWN in a machine-parseable findings table; UNKNOWN is used whenever a check could not be completed and is never silently upgraded to CLEAR."
+  - "Any CONFLICT finding names the conflicting party/registrant, an evidence link, and a plain description of the collision."
+  - "The record contains exactly one canonical '**Overall verdict: clear|conflicts_found|unknown**' line computed only from the itemized findings and consistent with the individual labels."
+  - "Every source cited is within the task's allowed research domains; no other network source is used."
+  - "A version-1 evidence manifest at docs/evidence/T002/manifest.json and sanitized raw artifacts under docs/evidence/T002/raw/ record, for every query executed, the finding ID, evidence kind, query shape, source, UTC/offset retrieval timestamp, reproduction command, artifact path, and SHA-256; every declared hash reproduces byte-for-byte."
+  - "Every CLEAR finding has raw target evidence and a working same-endpoint, same-query-shape positive control; every UNKNOWN or CONFLICT finding preserves raw target or limitation evidence instead of being asserted without support."
+  - "No file outside the three declared outputs is created or modified by the research stage."
+  - "If any CLEAR finding exists, the adversary stage independently re-checks at least one of them and confirms or disputes it with its own evidence link; if every finding is UNKNOWN because a stop condition was genuinely invoked, the adversary stage instead verifies the stop condition was correctly invoked and that no finding was silently upgraded."
+  - "The audit stage verifies every finding cites a working evidence link, that every declared manifest hash still reproduces, and that no CONFLICT or UNKNOWN was silently converted to CLEAR."
+  - "The release stage only reads the record and machine gate output; it adds no new findings and changes no file."
 outputs:
   - docs/research/T002_name_trademark_check.md
   - docs/evidence/T002/manifest.json
   - docs/evidence/T002/raw/**
-acceptance_criteria:
-  - "A research record exists at docs/research/T002_name_trademark_check.md."
-  - "The record states the exact product name and package identifiers under review, quoted from source-of-truth."
-  - "The record documents trademark search results for the product name in at least one primary trademark register, with source URLs and query dates."
-  - "The record documents package-name availability/collision status on every package registry the product actually intends to publish to (per source-of-truth), with source URLs and query dates."
-  - "The record documents domain-availability status for each candidate domain named in source-of-truth, with source URLs and query dates."
-  - "Every finding is labeled CLEAR, CONFLICT, or UNKNOWN; UNKNOWN is used whenever a check could not be completed and is never silently upgraded to CLEAR."
-  - "Any CONFLICT finding includes the conflicting party/registrant, evidence link, and a plain description of the collision."
-  - "The record includes an explicit overall verdict field (clear / conflicts_found / unknown) computed only from the itemized findings above."
-  - "The record cites every source it used, and cites no source outside the allowed network domains."
-  - "A version-1 evidence manifest and sanitized raw artifacts preserve every target, control, limitation, timestamp, reproduction command, and SHA-256."
-  - "Every CLEAR target query has a working same-endpoint, same-query-shape positive control."
-  - "No file outside outputs is created or modified by the research stage."
-  - "The adversary stage independently re-checks at least one CLEAR finding and confirms or disputes it with its own evidence link."
-  - "The audit stage verifies every finding cites a working evidence link and that no CONFLICT or UNKNOWN was silently converted to CLEAR."
-  - "The release stage only reads the record and machine gate output; it does not add new findings."
-context_keys:
-  - executive_decision
-  - product_strategy
-  - source_register
-source_of_truth:
-  - docs/TrainCapsule_Matrix_Definitive_Master_Plan_v1.0.md
-  - docs/MASTER_PLAN_INDEX.md
-  - docs/PLANNER_LOOP.md
-  - factory/feature_ledger.yaml
 stop_conditions:
   - "Source-of-truth does not name any product name at all to check: stop the entire task, do not invent one."
   - "Source-of-truth names the product name but does not name a specific package identifier or candidate domain for a given registry/registrar: do not invent the missing identifier; mark only the affected package/domain findings UNKNOWN and still complete the checks source-of-truth does support (for example the trademark search on the named product name)."
   - "No network access is available to any primary trademark, package-registry, or domain-registrar source: mark the affected findings UNKNOWN, do not guess."
-gates:
-  - name: research-file-present
-    command: "uv run python scripts/gates/output_and_integration_gate.py T002 file-present"
-    required: true
-    timeout_seconds: 30
-    stages: [research, adversary, audit, release]
-  - name: research-verdict-labeled
-    command: "uv run python scripts/gates/output_and_integration_gate.py T002 verdict-labeled"
-    required: true
-    timeout_seconds: 30
-    stages: [research, adversary, audit, release]
-  - name: research-no-silent-upgrade
-    command: "uv run python scripts/gates/output_and_integration_gate.py T002 no-silent-upgrade"
-    required: true
-    timeout_seconds: 30
-    stages: [research, adversary, audit, release]
-  - name: research-evidence-reproducible
-    command: "uv run python scripts/gates/output_and_integration_gate.py T002 evidence-reproducible"
-    required: true
-    timeout_seconds: 30
-    stages: [research, adversary, audit, release]
 security:
+  network_default: allowlist
   allow_unsandboxed_commands: false
   fail_if_sandbox_unavailable: true
-  network_default: deny
   secrets: []
+gates:
+  - name: contract
+    command: bash scripts/gates/contract_gate.sh T002
+    timeout_seconds: 120
+    stages: []
+    required: true
+  - name: secret-scan
+    command: bash scripts/gates/secret_scan.sh
+    timeout_seconds: 300
+    stages: []
+    required: true
+  - name: fast-quality
+    command: bash scripts/gates/fast_quality.sh
+    timeout_seconds: 1800
+    stages: []
+    required: true
+  - name: real-integration
+    command: bash scripts/gates/real_integration.sh T002
+    timeout_seconds: 3600
+    stages: []
+    required: true
 private_gate:
-  required: false
-  suite: null
-  timeout_seconds: 1800
+  required: true
+  suite: traincapsule-integration-t002
+  timeout_seconds: 3600
+pipeline:
+  - role: research
+    model: opus
+    effort: high
+    max_turns: 40
+    max_budget_usd: null
+    task_budget_tokens: null
+    tools: null
+    disallowed_tools: null
+    permission_mode: null
+    allowed_paths:
+      - docs/research/T002_name_trademark_check.md
+      - docs/evidence/T002/**
+    forbidden_paths:
+      - ".claude/**"
+      - ".factory/source-locks/**"
+      - "bootstrap/private-gates/**"
+      - "config/**"
+      - "docs/source-of-truth/final-2026-08-09/**"
+      - "factory/feature_ledger.yaml"
+      - "factory/product_definition_of_done.yaml"
+      - "factory/task_catalog.yaml"
+      - "factory/proposals/**"
+      - "scripts/**"
+      - "specs/tasks/T002.md"
+      - "tcfactory/**"
+      - "Control-TrainCapsuleBuilder.ps1"
+      - "Install-TrainCapsuleAutonomousBuilder.ps1"
+      - "docs/CONTEXT_INDEX.yaml"
+      - "docs/MASTER_PLAN_INDEX.md"
+      - "docs/TrainCapsule_Matrix_Definitive_Master_Plan_v1.0.md"
+      - "factory/queue/**"
+      - "factory/state/**"
+      - "prompts/**"
+      - "schemas/**"
+    allowed_domains:
+      - uspto.gov
+      - euipo.europa.eu
+      - wipo.int
+      - ised-isde.canada.ca
+      - pypi.org
+      - npmjs.com
+      - crates.io
+      - icann.org
+      - whois.icann.org
+      - rdap.verisign.com
+    acceptance_criteria:
+      - "A research record exists at docs/research/T002_name_trademark_check.md."
+      - "The record quotes the exact product name and package identifiers under review verbatim from source-of-truth."
+      - "Every finding is labeled CLEAR, CONFLICT, or UNKNOWN and never silently upgraded."
+      - "A version-1 evidence manifest and sanitized raw artifacts preserve every query, source, timestamp, command, and SHA-256."
+    context_keys:
+      - executive_decision
+      - product_strategy
+      - source_register
+    max_context_chars: 130000
+    machine_gates:
+      - contract
+      - secret-scan
+      - fast-quality
+      - real-integration
+    read_only: false
+    require_changes: true
+    advisor_model: null
+    peer_messaging: false
+    session_name: null
+    goal_condition: null
+    workflow_name: null
+  - role: adversary
+    model: opus
+    effort: high
+    max_turns: 16
+    max_budget_usd: null
+    task_budget_tokens: null
+    tools: null
+    disallowed_tools: null
+    permission_mode: null
+    allowed_paths: []
+    forbidden_paths:
+      - "**"
+    allowed_domains:
+      - uspto.gov
+      - euipo.europa.eu
+      - wipo.int
+      - ised-isde.canada.ca
+      - pypi.org
+      - npmjs.com
+      - crates.io
+      - icann.org
+      - whois.icann.org
+      - rdap.verisign.com
+    acceptance_criteria: []
+    context_keys:
+      - executive_decision
+      - product_strategy
+      - source_register
+    max_context_chars: 110000
+    machine_gates:
+      - contract
+      - secret-scan
+      - fast-quality
+      - real-integration
+    read_only: true
+    require_changes: false
+    advisor_model: null
+    peer_messaging: false
+    session_name: null
+    goal_condition: null
+    workflow_name: null
+  - role: audit
+    model: sonnet
+    effort: high
+    max_turns: 10
+    max_budget_usd: null
+    task_budget_tokens: null
+    tools: null
+    disallowed_tools: null
+    permission_mode: null
+    allowed_paths: []
+    forbidden_paths:
+      - "**"
+    allowed_domains:
+      - uspto.gov
+      - euipo.europa.eu
+      - wipo.int
+      - ised-isde.canada.ca
+      - pypi.org
+      - npmjs.com
+      - crates.io
+      - icann.org
+      - whois.icann.org
+      - rdap.verisign.com
+    acceptance_criteria: []
+    context_keys:
+      - executive_decision
+      - product_strategy
+      - source_register
+    max_context_chars: 110000
+    machine_gates:
+      - contract
+      - secret-scan
+      - fast-quality
+      - real-integration
+    read_only: true
+    require_changes: false
+    advisor_model: null
+    peer_messaging: false
+    session_name: null
+    goal_condition: null
+    workflow_name: null
+  - role: release
+    model: sonnet
+    effort: high
+    max_turns: 6
+    max_budget_usd: null
+    task_budget_tokens: null
+    tools: null
+    disallowed_tools: null
+    permission_mode: null
+    allowed_paths: []
+    forbidden_paths:
+      - "**"
+    allowed_domains: []
+    acceptance_criteria: []
+    context_keys:
+      - executive_decision
+      - product_strategy
+      - source_register
+    max_context_chars: 110000
+    machine_gates:
+      - contract
+      - secret-scan
+      - fast-quality
+      - real-integration
+    read_only: true
+    require_changes: false
+    advisor_model: null
+    peer_messaging: false
+    session_name: null
+    goal_condition: null
+    workflow_name: null
+risk_tier: integration
+context_keys:
+  - executive_decision
+  - product_strategy
+  - source_register
+allow_test_changes: false
+remote_ci_required: true
+github_push: true
+commit_type: docs
+commit_subject: "docs: recheck product name, package, domain, and trademark surface"
 repair:
   enabled: true
   max_cycles: 2
@@ -95,148 +276,49 @@ repair:
     - sonnet
     - opus
   mutating_retry_models: []
+  restart_review_from: adversary
   mutating_role: research
-  restart_review_from: release
-task_budget_usd: 12.0
 value_contract:
-  job_to_be_done: "Confirm the product can lawfully and safely use its declared name, package identifiers, and domains before further build investment."
-  target_user: "AI platform or inference engineer"
-  pain: "Undiscovered naming or trademark conflicts create late, expensive rework or legal exposure."
-  causal_mechanism: "This task establishes a required foundational precondition (clear naming/branding surface) for the roadmap to proceed past P0."
-  customer_outcome: "A documented, independently checkable naming and trademark clearance record."
-  revenue_linkage: "Protects the ability to commercially ship under the chosen name/package/domain."
-  mode: not_required
   required: true
-  required_conditions: []
-  required_evidence_classes:
-    - foundational_dependency
-  primary_metric: "internal control"
+  mode: foundational
+  target_user: "AI training, platform, reliability, framework, cloud, or accelerator engineering team"
+  job_to_be_done: "Close an accelerated-workload failure, qualify a change, and exchange attributable evidence without false certainty."
+  pain: "Undiscovered naming or trademark conflicts create late, expensive rework or legal exposure to the protected roadmap."
+  causal_mechanism: "This task establishes a required foundational precondition (a clear naming/branding surface) so the roadmap can proceed past P0."
+  customer_outcome: "A documented, independently checkable naming and trademark clearance record."
+  primary_metric: "foundational capability present"
   metric_direction: binary
+  minimum_material_improvement: null
   measurement_unit: null
   baseline_value: null
-  minimum_material_improvement: null
-  threshold_rationale: "Required foundational dependency; naming/trademark conflicts block later phases regardless of magnitude."
   evidence_path: docs/research/T002_name_trademark_check.md
+  parent_milestone: T012
+  threshold_rationale: "Required dependency for the protected roadmap; commercial demand is never inferred from implementation."
+  required_conditions:
+    - target_user_outcome_demonstrated_end_to_end
+    - independently_reproducible_in_supported_environment
+    - no_documentation_only_or_mock_only_substitution
   falsification_criteria:
+    - "The capability is not required by a protected workflow or duplicates native tooling without additional decision value."
+    - "The result depends on fabricated, unattributed, or model-only evidence."
+    - "The component passes in isolation but the target user cannot complete the declared job end to end."
+    - "Installation, operation, failure diagnosis, recovery, or upgrade requires undocumented developer intervention."
     - "A CONFLICT or UNKNOWN finding exists but the overall verdict is recorded as clear."
+  revenue_linkage: "Protects the ability to commercially ship under the chosen name/package/domain; supports incident closure, change qualification, private evidence exchange, or recurring reliability operations."
   prohibited_proxies:
     - "lines of code"
-    - "number of generated tests without boundary coverage"
+    - "raw test count without boundary coverage"
+    - "GitHub stars without recurring use"
     - "model-written praise"
     - "synthetic customer quotes"
     - "unverified willingness-to-pay claims"
-  parent_milestone: null
-pipeline:
-  - role: research
-    model: opus
-    effort: high
-    allowed_paths:
-      - docs/research/T002_name_trademark_check.md
-      - docs/evidence/T002/**
-    forbidden_paths:
-      - ".claude/**"
-      - "config/**"
-      - "prompts/**"
-      - "tcfactory/**"
-      - "schemas/**"
-      - "factory/state/**"
-      - "factory/queue/**"
-      - "factory/proposals/**"
-      - "factory/feature_ledger.yaml"
-      - "factory/product_definition_of_done.yaml"
-      - "docs/source-of-truth/**"
-      - "specs/**"
-    context_keys:
-      - executive_decision
-      - product_strategy
-      - source_register
-    allowed_domains:
-      - uspto.gov
-      - euipo.europa.eu
-      - wipo.int
-      - pypi.org
-      - npmjs.com
-      - crates.io
-      - icann.org
-      - whois.icann.org
-    machine_gates:
-      - research-file-present
-      - research-verdict-labeled
-      - research-no-silent-upgrade
-      - research-evidence-reproducible
-    max_turns: 12
-    max_budget_usd: 4.0
-    task_budget_tokens: 90000
-    max_context_chars: 130000
-    require_changes: true
-    peer_messaging: false
-  - role: adversary
-    model: opus
-    effort: high
-    allowed_paths: []
-    forbidden_paths:
-      - "**"
-    read_only: true
-    allowed_domains:
-      - uspto.gov
-      - euipo.europa.eu
-      - wipo.int
-      - pypi.org
-      - npmjs.com
-      - crates.io
-      - icann.org
-      - whois.icann.org
-    machine_gates:
-      - research-file-present
-      - research-verdict-labeled
-      - research-no-silent-upgrade
-      - research-evidence-reproducible
-    max_turns: 8
-    max_budget_usd: 2.5
-    task_budget_tokens: 60000
-    max_context_chars: 110000
-    peer_messaging: false
-  - role: audit
-    model: sonnet
-    effort: high
-    allowed_paths: []
-    forbidden_paths:
-      - "**"
-    read_only: true
-    allowed_domains:
-      - uspto.gov
-      - euipo.europa.eu
-      - wipo.int
-      - pypi.org
-      - npmjs.com
-      - crates.io
-      - icann.org
-      - whois.icann.org
-    machine_gates:
-      - research-file-present
-      - research-verdict-labeled
-      - research-no-silent-upgrade
-      - research-evidence-reproducible
-    max_turns: 6
-    max_budget_usd: 1.5
-    task_budget_tokens: 50000
-    max_context_chars: 110000
-    peer_messaging: false
-  - role: release
-    model: sonnet
-    effort: high
-    allowed_paths: []
-    forbidden_paths:
-      - "**"
-    read_only: true
-    allowed_domains: []
-    machine_gates:
-      - research-file-present
-      - research-verdict-labeled
-      - research-no-silent-upgrade
-      - research-evidence-reproducible
-    max_turns: 6
-    max_budget_usd: 1.4
-    task_budget_tokens: 50000
-    max_context_chars: 110000
-    peer_messaging: false
+    - "fabricated benchmark results"
+    - "post-hoc threshold lowering"
+    - "component completion without a usable supported workflow"
+    - "documentation or screenshots without runtime behavior evidence"
+    - "synthetic activity represented as adoption, retention, or willingness to pay"
+  required_evidence_classes:
+    - foundational_dependency
+task_budget_usd: 24.0
+auto_merge: false
+base_branch: main

@@ -12,6 +12,7 @@ param(
 $distribution = "Ubuntu-22.04"
 $repository = "/home/jasim/projects/traincapsule"
 $scheduledTask = "TrainCapsule Factory Autopilot"
+$factoryShell = "cd '$repository' && source scripts/load_factory_env.sh &&"
 
 switch ($Action) {
     "Start" {
@@ -23,51 +24,51 @@ switch ($Action) {
         }
     }
     "Pause" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory pause"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory pause"
     }
     "Resume" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory resume"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory resume"
     }
     "Stop" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory stop"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory stop"
     }
     "Verify" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory verify"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory verify"
     }
     "Recover" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory recover"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory recover"
     }
     "Logs" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory logs"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory logs"
     }
     "Queue" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory queue-status"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory queue-status"
     }
     "Costs" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory costs"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory costs"
     }
     "Roadmap" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory roadmap"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory roadmap"
     }
     "Value" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory value-status --task-id '$TaskId'"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory value-status --task-id '$TaskId'"
     }
     "Peers" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory peer-status"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory peer-status"
     }
     "Blocker" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory explain-blocker"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory explain-blocker"
     }
     "Features" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory features"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory features"
     }
     "GitHub" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory github-status"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory github-status"
     }
     "Sync" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory github-sync"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory github-sync"
     }
     "Overview" {
-        & wsl.exe -d $distribution -- bash -lc "cd '$repository' && uv run tcfactory status"
+        & wsl.exe -d $distribution -- bash -lc "$factoryShell uv run tcfactory status"
     }
 }

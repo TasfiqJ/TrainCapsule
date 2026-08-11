@@ -27,5 +27,7 @@ def test_unified_control_scripts_exist_and_cover_qol_actions() -> None:
         assert action in bash.lower()
     for action in ("Overview", "Start", "Pause", "Resume", "Stop", "Verify", "Recover", "Logs"):
         assert action in powershell
+    assert "source scripts/load_factory_env.sh" in powershell
+    assert "cd '$repository' && uv run" not in powershell
     assert "--force" not in bash
     assert "push --force" not in bash

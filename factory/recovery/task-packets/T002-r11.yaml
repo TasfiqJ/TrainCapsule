@@ -1,0 +1,449 @@
+task_id: T002
+title: Recheck product name, package, domain, and trademark surface
+phase: P0
+goal: 'Produce an independently reviewable research bundle confirming whether the
+  product name "TrainCapsule" and the CLI/package identifiers named in source-of-truth
+  are free of blocking trademark, package-registry, and domain-availability conflicts,
+  or documenting the exact conflicts found. The bundle is a preregistered version-2
+  query plan, a written findings record, and a version-2 evidence manifest with sanitized
+  raw artifacts; every finding is CLEAR, CONFLICT, or UNKNOWN, and UNKNOWN is preserved
+  whenever source-of-truth does not name a specific registry or domain to check.
+
+  '
+source_of_truth:
+- docs/source-of-truth/final-2026-08-09/00_EXECUTIVE_BUILD_DECISION.md
+- docs/source-of-truth/final-2026-08-09/03_PRODUCT_STRATEGY_AND_REQUIREMENTS.md
+- docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md
+- docs/source-of-truth/final-2026-08-09/13_SOURCE_REGISTER.md
+- factory/feature_ledger.yaml
+depends_on:
+- T001
+inputs:
+- 'Roadmap ID: T002'
+- 'Required dependencies: T001'
+- 'Lead role: Research'
+- 'Phase: P0'
+non_goals:
+- Renaming the product or changing any source-of-truth naming decision
+- Registering a domain, package name, or trademark
+- Making a legal determination; only surfacing evidence for human/legal review
+- Representing a completed T002 record, regardless of its overall verdict, as satisfying
+  source-of-truth's mandate to "Complete legal, domain, package, and trademark clearance
+  before public release" while any trademark finding remains UNKNOWN or CONFLICT
+acceptance_criteria:
+- A research record exists at docs/research/T002_name_trademark_check.md.
+- The record quotes the exact product name ("TrainCapsule") and every CLI/package
+  identifier under review verbatim from source-of-truth; no identifier is invented.
+- The record documents an attempted search for the product name against every allowlisted
+  primary-trademark-register host, including any subdomain, legacy interface, or JSON/XHR
+  endpoint under that host that plausibly serves the register's own search function;
+  each attempt records its source URL, query date, and exact outcome — an authoritative
+  hit/no-hit, or the specific non-authoritative blocking mechanism (for example a
+  CAPTCHA interstitial, an authentication requirement, a query-insensitive response,
+  or a static-asset host) — and a trademark finding is UNKNOWN only when this per-route
+  outcome is documented for every attempted route, not by a generic assertion that
+  no route is reachable.
+- The record documents package-name availability/collision status on every package
+  registry, and domain-availability status for every candidate domain, that source-of-truth
+  actually names an intent to use; where source-of-truth does not name a specific
+  registry or domain, the corresponding finding is UNKNOWN with a documented reason
+  instead of an invented identifier.
+- Every finding is labeled CLEAR, CONFLICT, or UNKNOWN in a machine-parseable findings
+  table; UNKNOWN is used whenever a check could not be completed or a required identifier
+  is not named, and is never silently upgraded to CLEAR.
+- Any CONFLICT finding names the conflicting party/registrant, an evidence link, and
+  a plain description of the collision.
+- 'The record contains exactly one canonical ''**Overall verdict: clear|conflicts_found|unknown**''
+  line computed only from the itemized findings and consistent with the individual
+  labels.'
+- A preregistered version-2 query plan exists at docs/evidence/T002/query-plan.json
+  before its queries are executed, naming every expected finding's subject, claim
+  boundary, and falsification condition, and naming every query's adapter, endpoint,
+  request_shape, source_scheme, source_class, freshness_days, and required_controls;
+  every query whose finding would rest on an absence (no trademark hit, no registry
+  collision, no registration record) declares a negative_control, and every query
+  against an endpoint that can answer empty on failure declares an error_control,
+  so that an empty answer is distinguishable from a broken lookup.
+- A version-2 evidence manifest at docs/evidence/T002/manifest.json and sanitized
+  raw artifacts under docs/evidence/T002/raw/ record, for every executed query, its
+  binding to a preregistered query_id and finding_id, evidence kind, source, retrieval
+  timestamp, response status, reproduction command, artifact path, and SHA-256; the
+  manifest's query-plan digest matches the plan file byte-for-byte, and every declared
+  evidence hash reproduces byte-for-byte.
+- Every CLEAR finding has raw target evidence and a working same-endpoint, same-query-shape
+  positive control; every UNKNOWN or CONFLICT finding preserves raw target or limitation
+  evidence instead of being asserted without support.
+- Every CLEAR finding's positive control is recorded as authoritative and its captured
+  outcome actually discriminates (for example a known-registered positive-control
+  token returns a hit while the absent target returns a no-hit through the same route),
+  not merely present; the record states this rule explicitly (a finding may be labeled
+  CLEAR only when every one of its queries is authoritative) so a reviewer can check
+  it directly against the manifest, since the automated gate checks presence and hash
+  integrity but not discrimination.
+- Every source cited in the record, the query plan, and the manifest is within the
+  task's allowed research domains; no other network source is used.
+- No file outside the four declared outputs (the record, the query plan, the manifest,
+  and the raw evidence directory) is created or modified by the research stage.
+- If any CLEAR finding exists, the adversary stage independently re-checks at least
+  one of them using its own live query against its granted domain allowlist (not merely
+  rereading the manifest) and confirms or disputes both the finding and whether its
+  positive control actually discriminated; if every finding is UNKNOWN because a stop
+  condition was genuinely invoked, the adversary stage instead verifies the stop condition
+  was correctly and specifically invoked (naming the actual per-route blocking mechanism,
+  not a generic assertion) and that no finding was silently upgraded. The adversary
+  stage records any weakness it finds only via mutation testing of protected gate
+  code outside every T002 stage's writable paths as a distinct, non-blocking gate-defect
+  finding naming the exact out-of-scope path, separate from any blocking finding about
+  the actual delivered candidate.
+- The audit stage independently verifies every finding cites a working evidence link,
+  that every declared manifest/query-plan hash still reproduces, that every CLEAR
+  finding's positive control actually discriminates rather than merely being present,
+  that every declared response_status matches its raw artifact's actual content, and
+  that no CONFLICT or UNKNOWN was silently converted to CLEAR in the actual delivered
+  candidate. A weakness the audit stage finds only via mutation testing of protected
+  gate code outside every T002 stage's writable paths is recorded as a distinct, non-blocking
+  gate-defect finding, separate from any blocking finding about the delivered candidate.
+- The release stage only reads the record and machine gate output; it adds no new
+  findings and changes no file.
+- The controller-owned pipeline router (tcfactory/risk.py, apply_risk_profile, lines
+  365-380 at this revision's base commit) rebuilds every read-only reviewer stage
+  (adversary, audit, release) from a bare Stage(...) call that sets only role, read_only,
+  require_changes, forbidden_paths, machine_gates, and context_keys, so no allowed_domains
+  declared anywhere in this proposal for a reviewer stage is ever carried through
+  promotion; the promoted, executed adversary stage therefore never has network access
+  regardless of what this or any prior revision declares. The independent re-check
+  the adversary stage performs under the criterion above is satisfied entirely by
+  artifact reproduction against files already captured under docs/evidence/T002/raw/
+  and docs/evidence/T002/manifest.json — recomputing every declared SHA-256, re-deriving
+  from the raw target and control response bytes whether a CLEAR finding's positive
+  control actually discriminates, confirming a documented stop-condition blocking
+  mechanism is actually visible in its corresponding raw artifact, and confirming
+  every declared response_status matches its raw artifact's actual content — never
+  by trusting the research stage's own labels and never by a live network call the
+  adversary stage structurally cannot make. This artifact-reproduction check is a
+  second, independent computation over the same raw bytes, not a re-read of the research
+  stage's conclusion, and is the only form of independent verification a reviewer
+  stage can perform under the confirmed routing behavior; it governs over the live-query
+  wording above wherever the two would otherwise conflict, and no future revision
+  should re-litigate a reviewer-stage allowed_domains fix, since this criterion documents
+  why the routing behavior makes that fix structurally impossible from within this
+  task's writable paths.
+outputs:
+- docs/research/T002_name_trademark_check.md
+- docs/evidence/T002/query-plan.json
+- docs/evidence/T002/manifest.json
+- docs/evidence/T002/raw/**
+stop_conditions:
+- 'Source-of-truth does not name any product name at all to check: stop the entire
+  task, do not invent one.'
+- 'Source-of-truth names the product name or CLI token but does not name a specific
+  package identifier or candidate domain for a given registry/registrar: do not invent
+  the missing identifier; mark only the affected package/domain findings UNKNOWN with
+  a documented reason, and still complete the checks source-of-truth does support
+  (for example the trademark search on the named product name).'
+- 'No allowlisted route to a primary trademark, package-registry, or domain-registrar
+  source returns an authoritative, machine-parseable result without a credential this
+  task is not authorized to create — whether because the route is unreachable, or
+  because it is reachable but blocked by a CAPTCHA/bot-mitigation interstitial, an
+  authentication wall, a query-insensitive/static response, or a nonexistent endpoint:
+  mark the affected findings UNKNOWN, cite the exact per-route blocking mechanism
+  observed, and do not guess. This condition covers ''reachable but non-authoritative''
+  routes as well as fully unreachable ones; a finding may not invoke this condition
+  by asserting ''no network access'' when network access existed but no route was
+  authoritative.'
+- 'A weakness in shared gate code (for example tcfactory/research_policy.py or scripts/gates/**)
+  is discoverable only through mutation testing performed by a review stage against
+  a throwaway clone, and is not present in the actual delivered candidate: this is
+  a controller/gate defect outside every T002 stage''s writable paths, not a T002
+  candidate defect. Record it as a distinct, non-blocking finding naming the specific
+  out-of-scope path and recommending a separate controller-authorized task; do not
+  attempt to patch the protected file from any T002 stage, and do not let this class
+  of finding alone fail T002''s acceptance criteria.'
+security:
+  network_default: allowlist
+  allow_unsandboxed_commands: false
+  fail_if_sandbox_unavailable: true
+  secrets: []
+gates:
+- name: contract
+  command: bash scripts/gates/contract_gate.sh T002
+  timeout_seconds: 120
+  stages: []
+  required: true
+- name: secret-scan
+  command: bash scripts/gates/secret_scan.sh
+  timeout_seconds: 300
+  stages: []
+  required: true
+- name: fast-quality
+  command: bash scripts/gates/fast_quality.sh
+  timeout_seconds: 1800
+  stages: []
+  required: true
+- name: real-integration
+  command: bash scripts/gates/real_integration.sh T002
+  timeout_seconds: 3600
+  stages: []
+  required: true
+- name: research-evidence
+  command: bash scripts/gates/real_integration.sh T002 research-evidence
+  timeout_seconds: 120
+  stages: []
+  required: true
+private_gate:
+  required: true
+  suite: traincapsule-integration-t002
+  timeout_seconds: 3600
+pipeline:
+- role: research
+  model: opus
+  fallback_models: []
+  effort: high
+  max_turns: 18
+  max_budget_usd: 3.8
+  task_budget_tokens: 100000
+  tools: null
+  disallowed_tools: null
+  permission_mode: null
+  allowed_paths:
+  - docs/research/T002_name_trademark_check.md
+  - docs/evidence/T002/**
+  forbidden_paths:
+  - .claude/**
+  - .factory/source-locks/**
+  - bootstrap/private-gates/**
+  - config/**
+  - docs/source-of-truth/final-2026-08-09/**
+  - factory/feature_ledger.yaml
+  - factory/product_definition_of_done.yaml
+  - factory/task_catalog.yaml
+  - factory/proposals/**
+  - scripts/**
+  - specs/tasks/T002.md
+  - tcfactory/**
+  - Control-TrainCapsuleBuilder.ps1
+  - Install-TrainCapsuleAutonomousBuilder.ps1
+  - docs/CONTEXT_INDEX.yaml
+  - docs/MASTER_PLAN_INDEX.md
+  - docs/TrainCapsule_Matrix_Definitive_Master_Plan_v1.0.md
+  - factory/queue/**
+  - factory/state/**
+  - prompts/**
+  - schemas/**
+  - config/context.yaml
+  - config/github.yaml
+  - config/risk_profiles.yaml
+  - scripts/gates/**
+  allowed_domains:
+  - uspto.gov
+  - euipo.europa.eu
+  - wipo.int
+  - ised-isde.canada.ca
+  - pypi.org
+  - npmjs.com
+  - crates.io
+  - icann.org
+  - whois.icann.org
+  - rdap.verisign.com
+  acceptance_criteria:
+  - A research record exists at docs/research/T002_name_trademark_check.md.
+  - The record quotes the exact product name and CLI/package identifiers under review
+    verbatim from source-of-truth.
+  - Every finding is labeled CLEAR, CONFLICT, or UNKNOWN and never silently upgraded.
+  - A preregistered version-2 query plan and a version-2 evidence manifest with sanitized
+    raw artifacts preserve every planned and executed query, source, timestamp, command,
+    and SHA-256.
+  - Every CLEAR finding's positive control is authoritative (it actually discriminates),
+    and every attempted route's outcome — including reachable-but-non-authoritative
+    routes — is documented with its specific blocking mechanism.
+  context_keys:
+  - executive_decision
+  - product_strategy
+  - source_register
+  max_context_chars: 110000
+  machine_gates:
+  - contract
+  - secret-scan
+  - fast-quality
+  - real-integration
+  - research-evidence
+  read_only: false
+  require_changes: true
+  advisor_model: null
+  peer_messaging: false
+  session_name: null
+  goal_condition: null
+  workflow_name: null
+- role: adversary
+  model: opus
+  fallback_models: []
+  effort: high
+  max_turns: 10
+  max_budget_usd: 3.2
+  task_budget_tokens: 51500
+  tools: null
+  disallowed_tools: null
+  permission_mode: null
+  allowed_paths: []
+  forbidden_paths:
+  - '**'
+  allowed_domains: []
+  acceptance_criteria: []
+  context_keys:
+  - executive_decision
+  - product_strategy
+  - source_register
+  max_context_chars: 110000
+  machine_gates:
+  - contract
+  - secret-scan
+  - fast-quality
+  - real-integration
+  - research-evidence
+  read_only: true
+  require_changes: false
+  advisor_model: null
+  peer_messaging: false
+  session_name: null
+  goal_condition: null
+  workflow_name: null
+- role: audit
+  model: sonnet
+  fallback_models: []
+  effort: high
+  max_turns: 8
+  max_budget_usd: 1.9
+  task_budget_tokens: 51500
+  tools: null
+  disallowed_tools: null
+  permission_mode: null
+  allowed_paths: []
+  forbidden_paths:
+  - '**'
+  allowed_domains: []
+  acceptance_criteria: []
+  context_keys:
+  - executive_decision
+  - product_strategy
+  - source_register
+  max_context_chars: 110000
+  machine_gates:
+  - contract
+  - secret-scan
+  - fast-quality
+  - real-integration
+  - research-evidence
+  read_only: true
+  require_changes: false
+  advisor_model: null
+  peer_messaging: false
+  session_name: null
+  goal_condition: null
+  workflow_name: null
+- role: release
+  model: sonnet
+  fallback_models: []
+  effort: high
+  max_turns: 6
+  max_budget_usd: 1.4
+  task_budget_tokens: 51500
+  tools: null
+  disallowed_tools: null
+  permission_mode: null
+  allowed_paths: []
+  forbidden_paths:
+  - '**'
+  allowed_domains: []
+  acceptance_criteria: []
+  context_keys:
+  - executive_decision
+  - product_strategy
+  - source_register
+  max_context_chars: 110000
+  machine_gates:
+  - contract
+  - secret-scan
+  - fast-quality
+  - real-integration
+  - research-evidence
+  read_only: true
+  require_changes: false
+  advisor_model: null
+  peer_messaging: false
+  session_name: null
+  goal_condition: null
+  workflow_name: null
+risk_tier: integration
+context_keys:
+- executive_decision
+- product_strategy
+- source_register
+allow_test_changes: false
+remote_ci_required: true
+github_push: true
+commit_type: feat
+commit_subject: 'docs: recheck product name, package, domain, and trademark surface'
+repair:
+  enabled: true
+  max_cycles: 2
+  builder_models:
+  - sonnet
+  - opus
+  mutating_retry_models: []
+  restart_review_from: adversary
+  mutating_role: research
+value_contract:
+  required: true
+  mode: foundational
+  target_user: AI training, platform, reliability, framework, cloud, or accelerator
+    engineering team
+  job_to_be_done: Close an accelerated-workload failure, qualify a change, and exchange
+    attributable evidence without false certainty.
+  pain: Undiscovered naming or trademark conflicts create late, expensive rework or
+    legal exposure to the protected roadmap.
+  customer_outcome: A documented, independently checkable naming and trademark clearance
+    record.
+  causal_mechanism: This task establishes a required foundational precondition (a
+    clear naming/branding surface) so the roadmap can proceed past P0.
+  primary_metric: foundational capability present
+  metric_direction: binary
+  minimum_material_improvement: null
+  measurement_unit: null
+  baseline_value: null
+  evidence_path: docs/research/T002_name_trademark_check.md
+  parent_milestone: T012
+  threshold_rationale: Required dependency for the protected roadmap; commercial demand
+    is never inferred from implementation.
+  required_conditions:
+  - target_user_outcome_demonstrated_end_to_end
+  - independently_reproducible_in_supported_environment
+  - no_documentation_only_or_mock_only_substitution
+  falsification_criteria:
+  - The capability is not required by a protected workflow or duplicates native tooling
+    without additional decision value.
+  - The result depends on fabricated, unattributed, or model-only evidence.
+  - The component passes in isolation but the target user cannot complete the declared
+    job end to end.
+  - Installation, operation, failure diagnosis, recovery, or upgrade requires undocumented
+    developer intervention.
+  - A CONFLICT or UNKNOWN finding exists but the overall verdict is recorded as clear.
+  revenue_linkage: Protects the ability to commercially ship under the chosen name/package/domain;
+    supports incident closure, change qualification, private evidence exchange, or
+    recurring reliability operations.
+  prohibited_proxies:
+  - lines of code
+  - raw test count without boundary coverage
+  - GitHub stars without recurring use
+  - model-written praise
+  - synthetic customer quotes
+  - unverified willingness-to-pay claims
+  - fabricated benchmark results
+  - post-hoc threshold lowering
+  - component completion without a usable supported workflow
+  - documentation or screenshots without runtime behavior evidence
+  - synthetic activity represented as adoption, retention, or willingness to pay
+  required_evidence_classes:
+  - foundational_dependency
+task_budget_usd: 24.0
+auto_merge: true
+base_branch: main

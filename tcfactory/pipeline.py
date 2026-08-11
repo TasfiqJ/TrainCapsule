@@ -81,6 +81,23 @@ TURN_CEILING_MARKERS = (
     "error_max_turns",
     "terminal_reason=max_turns",
 )
+REVIEW_BUDGET_EXHAUSTION_MARKERS = (
+    "budget exhaustion",
+    "context exhaustion",
+    "context/budget exhaustion",
+    "insufficient budget",
+    "maximum number of turns",
+    "turn ceiling",
+)
+REVIEW_INCOMPLETE_MARKERS = (
+    "not executed",
+    "were not run",
+    "did not run",
+    "could not run",
+    "before they could run",
+    "review is incomplete",
+    "check is incomplete",
+)
 MAX_REVIEW_INFRA_RETRIES = 2
 STRUCTURED_OUTPUT_FAULT_MARKERS = (
     # Both forms are emitted verbatim by claude_runner: the canonical
@@ -102,6 +119,32 @@ def stage_hit_turn_ceiling(result: StageResult) -> bool:
         return True
     error = (result.error or "").lower()
     return any(marker in error for marker in TURN_CEILING_MARKERS)
+
+
+def review_report_hit_budget_ceiling(result: StageResult) -> bool:
+    """Recognize a truthful UNKNOWN caused by an incomplete bounded review.
+
+    Claude can sometimes use its final turn to serialize a valid UNKNOWN report after
+    exhausting the session before it runs the required checks.  The SDK then reports a
+    normal completion, so ``stage_hit_turn_ceiling`` cannot see the infrastructure
+    cause.  Require both an explicit resource-exhaustion statement and an explicit
+    incomplete-execution statement.  That keeps product/evidence UNKNOWN verdicts on
+    the normal fail-closed path.
+    """
+
+    if result.verdict != Verdict.UNKNOWN or result.report is None:
+        return False
+    report_text = "\n".join(
+        [
+            result.report.summary,
+            *result.report.findings,
+            *result.report.limitations,
+            *result.report.next_actions,
+        ]
+    ).lower()
+    return any(marker in report_text for marker in REVIEW_BUDGET_EXHAUSTION_MARKERS) and any(
+        marker in report_text for marker in REVIEW_INCOMPLETE_MARKERS
+    )
 
 
 def stage_hit_structured_output_fault(result: StageResult) -> bool:
@@ -209,7 +252,7 @@ def review_turn_retry_update(
     the normal truthful repair/failure path.
     """
 
-    if not stage_hit_turn_ceiling(result):
+    if not (stage_hit_turn_ceiling(result) or review_report_hit_budget_ceiling(result)):
         return None
     base_turns = role_config.max_turns
     current_turns = stage.max_turns or base_turns
@@ -337,16 +380,14 @@ def apply_scout_verdict(
     findings = _findings_from_result(scout)
     if blocking_on_concrete_failure and scout.verdict == Verdict.FAIL:
         primary.verdict = Verdict.FAIL
-        primary.error = (
-            "Integration scout found a concrete blocking contradiction: "
-            + " | ".join(findings[:4])
+        primary.error = "Integration scout found a concrete blocking contradiction: " + " | ".join(
+            findings[:4]
         )
     elif blocking_on_non_pass:
         primary.verdict = scout.verdict
         primary.error = (
             f"Integration scout returned {scout.verdict.value}; independent peer evidence "
-            "is required: "
-            + " | ".join(findings[:4])
+            "is required: " + " | ".join(findings[:4])
         )
 
 
@@ -1131,9 +1172,7 @@ async def run_pipeline(
                         f"{review_update['max_turns']} turns "
                         f"(was {stage.max_turns or role_configs[stage.role].max_turns})"
                     )
-                    task.pipeline[checkpoint.stage_index] = stage.model_copy(
-                        update=review_update
-                    )
+                    task.pipeline[checkpoint.stage_index] = stage.model_copy(update=review_update)
                     checkpoint.previous_findings = findings
                     checkpoint_store.save(checkpoint)
                     continue
@@ -1174,14 +1213,9 @@ async def run_pipeline(
             )
             if stage.role == RoleName.BUILDER or is_configured_mutator:
                 failure_count = checkpoint.stage_failures[key]
-                candidate_sha = preserve_mutating_candidate(
-                    checkpoint, candidate_sha, next_sha
-                )
+                candidate_sha = preserve_mutating_candidate(checkpoint, candidate_sha, next_sha)
                 if is_configured_mutator and stage.role != RoleName.BUILDER:
-                    retry_models = (
-                        task.repair.mutating_retry_models
-                        or task.repair.builder_models
-                    )
+                    retry_models = task.repair.mutating_retry_models or task.repair.builder_models
                     retry_index = failure_count - 1
                 else:
                     retry_models = task.repair.builder_models
@@ -1228,9 +1262,7 @@ async def run_pipeline(
                 while checkpoint.repair_cycles < task.repair.max_cycles:
                     checkpoint.repair_cycles += 1
                     models = task.repair.builder_models
-                    model = models[
-                        min(checkpoint.repair_cycles - 1, len(models) - 1)
-                    ]
+                    model = models[min(checkpoint.repair_cycles - 1, len(models) - 1)]
                     repair_stage = mutating.model_copy(
                         update={
                             "model": model,

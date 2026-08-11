@@ -14,21 +14,21 @@ what actually failed in T001.
 from __future__ import annotations
 
 from tcfactory.checkpoints import new_checkpoint
-from tcfactory.models import RoleConfig, RoleName, Stage, StageResult, Verdict
+from tcfactory.models import AgentReport, RoleConfig, RoleName, Stage, StageResult, Verdict
 from tcfactory.pipeline import (
     MAX_REVIEW_TURN_MULTIPLIER,
     MAX_STAGE_TURNS,
     escalated_turn_budget,
     preserve_mutating_candidate,
     retry_stage_update,
+    review_report_hit_budget_ceiling,
     review_turn_retry_update,
     stage_hit_turn_ceiling,
 )
 
 # Representative SDK turn-ceiling error text; see the module docstring's provenance note.
 T001_TURN_CEILING_ERROR = (
-    "Exception: Claude Code returned an error result: "
-    "Reached maximum number of turns (18)"
+    "Exception: Claude Code returned an error result: Reached maximum number of turns (18)"
 )
 
 
@@ -135,6 +135,57 @@ def test_truncated_review_is_retried_as_the_same_independent_role() -> None:
     assert replacement.model == "opus"
 
 
+def test_unknown_review_truncated_before_gates_retries_same_role() -> None:
+    """A valid UNKNOWN envelope can still prove the review itself ran out of room."""
+    stage = Stage(role=RoleName.RELEASE, model="sonnet", max_turns=6)
+    result = _result(
+        role=RoleName.RELEASE,
+        verdict=Verdict.UNKNOWN,
+        terminal_reason="completed",
+        report=AgentReport(
+            verdict=Verdict.UNKNOWN,
+            summary="Release verification did not finish.",
+            findings=["Required release gates were not executed due to context/budget exhaustion."],
+            limitations=["This release check is incomplete."],
+        ),
+    )
+
+    assert review_report_hit_budget_ceiling(result)
+    assert review_turn_retry_update(stage, result, _role_config(max_turns=6)) == {"max_turns": 12}
+
+
+def test_external_evidence_unknown_is_not_reclassified_as_budget_exhaustion() -> None:
+    """Missing real-world evidence stays fail-closed and must never earn a free retry."""
+    stage = Stage(role=RoleName.RELEASE, model="sonnet", max_turns=6)
+    result = _result(
+        role=RoleName.RELEASE,
+        verdict=Verdict.UNKNOWN,
+        report=AgentReport(
+            verdict=Verdict.UNKNOWN,
+            summary="Independent trademark evidence has not been supplied.",
+            limitations=["External attributable evidence is required."],
+        ),
+    )
+
+    assert not review_report_hit_budget_ceiling(result)
+    assert review_turn_retry_update(stage, result, _role_config(max_turns=6)) is None
+
+
+def test_product_rejection_that_mentions_budget_is_not_reclassified() -> None:
+    """Both resource exhaustion and incomplete execution must be explicit."""
+    result = _result(
+        role=RoleName.RELEASE,
+        verdict=Verdict.UNKNOWN,
+        report=AgentReport(
+            verdict=Verdict.UNKNOWN,
+            summary="The product budget evidence is incomplete.",
+            findings=["The customer budget cannot be independently attributed."],
+        ),
+    )
+
+    assert not review_report_hit_budget_ceiling(result)
+
+
 def test_review_retry_is_bounded_to_four_times_its_declared_budget() -> None:
     result = _result(
         role=RoleName.ADVERSARY,
@@ -147,14 +198,17 @@ def test_review_retry_is_bounded_to_four_times_its_declared_budget() -> None:
         result,
         role_config,
     ) == {"max_turns": 40}
-    assert review_turn_retry_update(
-        Stage(
-            role=RoleName.ADVERSARY,
-            max_turns=10 * MAX_REVIEW_TURN_MULTIPLIER,
-        ),
-        result,
-        role_config,
-    ) is None
+    assert (
+        review_turn_retry_update(
+            Stage(
+                role=RoleName.ADVERSARY,
+                max_turns=10 * MAX_REVIEW_TURN_MULTIPLIER,
+            ),
+            result,
+            role_config,
+        )
+        is None
+    )
 
 
 def test_truthful_review_rejection_still_routes_to_normal_repair() -> None:

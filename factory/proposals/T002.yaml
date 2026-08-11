@@ -1,0 +1,219 @@
+task_id: T002
+title: Recheck product name, package, domain, and trademark surface
+phase: P0
+depends_on:
+  - T001
+base_branch: main
+risk_tier: integration
+auto_merge: false
+github_push: false
+remote_ci_required: false
+allow_test_changes: false
+commit_type: spec
+commit_subject: "research t002 name and trademark surface"
+goal: >
+  Produce an independently reviewable research record confirming whether the
+  product name "TrainCapsule", its package identifier, and candidate domains
+  are free of blocking trademark, package-registry, and domain-availability
+  conflicts, or documenting the exact conflicts found.
+non_goals:
+  - Renaming the product or changing any source-of-truth naming decision
+  - Registering a domain, package name, or trademark
+  - Making a legal determination; only surfacing evidence for human/legal review
+inputs:
+  - "Roadmap ID: T002"
+  - "Required dependencies: T001"
+  - "Lead role: Research"
+  - "Phase: P0"
+outputs:
+  - docs/research/T002_name_trademark_check.md
+acceptance_criteria:
+  - "A research record exists at docs/research/T002_name_trademark_check.md."
+  - "The record states the exact product name and package identifiers under review, quoted from source-of-truth."
+  - "The record documents trademark search results for the product name in at least one primary trademark register, with source URLs and query dates."
+  - "The record documents package-name availability/collision status on every package registry the product actually intends to publish to (per source-of-truth), with source URLs and query dates."
+  - "The record documents domain-availability status for each candidate domain named in source-of-truth, with source URLs and query dates."
+  - "Every finding is labeled CLEAR, CONFLICT, or UNKNOWN; UNKNOWN is used whenever a check could not be completed and is never silently upgraded to CLEAR."
+  - "Any CONFLICT finding includes the conflicting party/registrant, evidence link, and a plain description of the collision."
+  - "The record includes an explicit overall verdict field (clear / conflicts_found / unknown) computed only from the itemized findings above."
+  - "The record cites every source it used, and cites no source outside the allowed network domains."
+  - "No file outside outputs is created or modified by the research stage."
+  - "The adversary stage independently re-checks at least one CLEAR finding and confirms or disputes it with its own evidence link."
+  - "The audit stage verifies every finding cites a working evidence link and that no CONFLICT or UNKNOWN was silently converted to CLEAR."
+  - "The release stage only reads the record and machine gate output; it does not add new findings."
+context_keys:
+  - executive_decision
+  - product_strategy
+  - source_register
+source_of_truth:
+  - docs/TrainCapsule_Matrix_Definitive_Master_Plan_v1.0.md
+  - docs/MASTER_PLAN_INDEX.md
+  - docs/PLANNER_LOOP.md
+  - factory/feature_ledger.yaml
+stop_conditions:
+  - "Source-of-truth does not name a definitive product name, package identifier, or candidate domain list to check."
+  - "No network access is available to any primary trademark, package-registry, or domain-registrar source, making the check unverifiable."
+gates:
+  - name: research-file-present
+    command: "test -f docs/research/T002_name_trademark_check.md"
+    required: true
+    timeout_seconds: 10
+    stages: [research, adversary, audit, release]
+  - name: research-verdict-labeled
+    command: "grep -Eq 'Overall verdict:\\s*(clear|conflicts_found|unknown)' docs/research/T002_name_trademark_check.md"
+    required: true
+    timeout_seconds: 10
+    stages: [research, adversary, audit, release]
+  - name: research-no-silent-upgrade
+    command: "! grep -Eiq 'UNKNOWN[^\\n]*(upgraded|converted|treated as)[^\\n]*CLEAR' docs/research/T002_name_trademark_check.md"
+    required: true
+    timeout_seconds: 10
+    stages: [research, adversary, audit, release]
+security:
+  allow_unsandboxed_commands: false
+  fail_if_sandbox_unavailable: true
+  network_default: deny
+  secrets: []
+private_gate:
+  required: false
+  suite: null
+  timeout_seconds: 1800
+repair:
+  enabled: true
+  max_cycles: 2
+  builder_models:
+    - sonnet
+    - opus
+  mutating_retry_models: []
+  mutating_role: research
+  restart_review_from: release
+task_budget_usd: 12.0
+value_contract:
+  job_to_be_done: "Confirm the product can lawfully and safely use its declared name, package identifiers, and domains before further build investment."
+  target_user: "AI platform or inference engineer"
+  pain: "Undiscovered naming or trademark conflicts create late, expensive rework or legal exposure."
+  causal_mechanism: "This task establishes a required foundational precondition (clear naming/branding surface) for the roadmap to proceed past P0."
+  customer_outcome: "A documented, independently checkable naming and trademark clearance record."
+  revenue_linkage: "Protects the ability to commercially ship under the chosen name/package/domain."
+  mode: not_required
+  required: true
+  required_conditions: []
+  required_evidence_classes:
+    - foundational_dependency
+  primary_metric: "internal control"
+  metric_direction: binary
+  measurement_unit: null
+  baseline_value: null
+  minimum_material_improvement: null
+  threshold_rationale: "Required foundational dependency; naming/trademark conflicts block later phases regardless of magnitude."
+  evidence_path: docs/research/T002_name_trademark_check.md
+  falsification_criteria:
+    - "A CONFLICT or UNKNOWN finding exists but the overall verdict is recorded as clear."
+  prohibited_proxies:
+    - "lines of code"
+    - "number of generated tests without boundary coverage"
+    - "model-written praise"
+    - "synthetic customer quotes"
+    - "unverified willingness-to-pay claims"
+  parent_milestone: null
+pipeline:
+  - role: research
+    model: opus
+    effort: high
+    allowed_paths:
+      - docs/research/T002_name_trademark_check.md
+    forbidden_paths:
+      - ".claude/**"
+      - "config/**"
+      - "prompts/**"
+      - "tcfactory/**"
+      - "schemas/**"
+      - "factory/state/**"
+      - "factory/queue/**"
+      - "factory/proposals/**"
+      - "factory/feature_ledger.yaml"
+      - "factory/product_definition_of_done.yaml"
+      - "docs/source-of-truth/**"
+      - "specs/**"
+    context_keys:
+      - executive_decision
+      - product_strategy
+      - source_register
+    allowed_domains:
+      - uspto.gov
+      - euipo.europa.eu
+      - wipo.int
+      - pypi.org
+      - npmjs.com
+      - crates.io
+      - icann.org
+      - whois.icann.org
+    machine_gates:
+      - research-file-present
+      - research-verdict-labeled
+      - research-no-silent-upgrade
+    max_turns: 12
+    max_budget_usd: 4.0
+    task_budget_tokens: 90000
+    max_context_chars: 130000
+    require_changes: true
+    peer_messaging: false
+  - role: adversary
+    model: opus
+    effort: high
+    allowed_paths: []
+    forbidden_paths:
+      - "**"
+    read_only: true
+    allowed_domains:
+      - uspto.gov
+      - euipo.europa.eu
+      - wipo.int
+      - pypi.org
+      - npmjs.com
+      - crates.io
+      - icann.org
+      - whois.icann.org
+    machine_gates:
+      - research-file-present
+      - research-verdict-labeled
+      - research-no-silent-upgrade
+    max_turns: 8
+    max_budget_usd: 2.5
+    task_budget_tokens: 60000
+    max_context_chars: 110000
+    peer_messaging: false
+  - role: audit
+    model: sonnet
+    effort: high
+    allowed_paths: []
+    forbidden_paths:
+      - "**"
+    read_only: true
+    allowed_domains: []
+    machine_gates:
+      - research-file-present
+      - research-verdict-labeled
+      - research-no-silent-upgrade
+    max_turns: 6
+    max_budget_usd: 1.5
+    task_budget_tokens: 50000
+    max_context_chars: 110000
+    peer_messaging: false
+  - role: release
+    model: sonnet
+    effort: high
+    allowed_paths: []
+    forbidden_paths:
+      - "**"
+    read_only: true
+    allowed_domains: []
+    machine_gates:
+      - research-file-present
+      - research-verdict-labeled
+      - research-no-silent-upgrade
+    max_turns: 6
+    max_budget_usd: 1.4
+    task_budget_tokens: 50000
+    max_context_chars: 110000
+    peer_messaging: false

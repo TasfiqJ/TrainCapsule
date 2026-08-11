@@ -1415,15 +1415,16 @@ def _run_private_release_gate(
 
 
 def _empty_paused_checkpoint_can_rebase(checkpoint: PipelineCheckpoint) -> bool:
-    """Return whether a stale paused checkpoint contains no work to preserve.
+    """Return whether a stale paused/interrupted checkpoint has no work to preserve.
 
-    A controller repair may advance ``main`` while a planner is quota-paused.  Restarting
-    is lossless only when the session produced no candidate commit, result, or active
-    worktree.  Any real partial work keeps the fail-closed reconciliation requirement.
+    A controller repair may advance ``main`` while a stage is quota-paused or while queue
+    recovery has marked an interrupted task for retry. Restarting is lossless only when the
+    session produced no candidate commit, result, or active worktree. Any real partial work
+    keeps the fail-closed reconciliation requirement.
     """
 
     return (
-        checkpoint.state == PipelineState.PAUSED
+        checkpoint.state in {PipelineState.PAUSED, PipelineState.RUNNING}
         and checkpoint.candidate_sha == checkpoint.starting_sha
         and not checkpoint.results
         and checkpoint.active_role is None

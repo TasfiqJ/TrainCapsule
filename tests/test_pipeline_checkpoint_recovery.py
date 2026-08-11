@@ -51,6 +51,32 @@ def test_empty_quota_paused_checkpoint_restarts_from_verified_new_main(
     assert list((store.root / "archive").glob("T002-stale-base-*.json"))
 
 
+def test_empty_interrupted_running_checkpoint_restarts_from_verified_new_main(
+    tmp_path: Path,
+) -> None:
+    config = load_factory_config(ROOT / "config/factory.yaml")
+    task = load_task(ROOT / "tasks/T002.yaml")
+    store = _paused_checkpoint(tmp_path)
+    interrupted = store.load("T002")
+    assert interrupted is not None
+    interrupted.state = PipelineState.RUNNING
+    store.save(interrupted)
+
+    _, checkpoint = _load_checkpoint(
+        repo_root=tmp_path,
+        config=config,
+        task=task,
+        starting_sha="verified-new-main",
+        resume=True,
+    )
+
+    assert checkpoint.starting_sha == "verified-new-main"
+    assert checkpoint.candidate_sha == "verified-new-main"
+    assert checkpoint.state == PipelineState.NEW
+    assert not checkpoint.results
+    assert list((store.root / "archive").glob("T002-stale-base-*.json"))
+
+
 def test_paused_checkpoint_with_candidate_work_still_requires_explicit_reconciliation(
     tmp_path: Path,
 ) -> None:

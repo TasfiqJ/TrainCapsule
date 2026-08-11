@@ -360,6 +360,34 @@ async def _repair_or_hard_stuck(
     return False
 
 
+async def _route_planning_factory_repair(
+    *,
+    repo_root: Path,
+    factory: FactoryConfig,
+    autonomy: AutonomyConfig,
+    state: AutonomyState,
+    item: FeatureItem,
+    failure: Exception,
+) -> bool:
+    """Route protected planning findings to repair instead of planning again."""
+
+    reason = f"planning/enqueue failure: {type(failure).__name__}: {failure}"
+    if not is_factory_repair_required(reason):
+        return False
+    state.last_event = reason
+    state.current_action = "autonomous factory self-repair for planning blocker"
+    save_state(repo_root, factory, state)
+    await _repair_or_hard_stuck(
+        repo_root=repo_root,
+        factory=factory,
+        autonomy=autonomy,
+        state=state,
+        reason=reason,
+        blocker_id=item.task_id,
+    )
+    return True
+
+
 def _queue_task_ids(repo_root: Path, config: FactoryConfig) -> dict[str, set[str]]:
     dirs = queue_dirs(repo_root, config)
     return {
@@ -1419,6 +1447,15 @@ async def _run_autopilot_inner(
                 )
                 state.status = "running"
             except Exception as exc:  # noqa: BLE001
+                if await _route_planning_factory_repair(
+                    repo_root=repo_root,
+                    factory=factory,
+                    autonomy=autonomy,
+                    state=state,
+                    item=next_item,
+                    failure=exc,
+                ):
+                    return
                 state.consecutive_failures += 1
                 state.last_event = f"planning/enqueue failure: {type(exc).__name__}: {exc}"
                 save_state(repo_root, factory, state)

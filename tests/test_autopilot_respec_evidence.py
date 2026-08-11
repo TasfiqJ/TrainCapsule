@@ -19,6 +19,7 @@ import pytest
 
 from tcfactory.autopilot import (
     RespecOutcome,
+    _route_planning_factory_repair,  # pyright: ignore[reportPrivateUsage]
     _verified_repair_intent,  # pyright: ignore[reportPrivateUsage]
     is_factory_repair_required,
     recover_task_after_verified_repair,
@@ -156,6 +157,47 @@ def test_controller_scope_gap_routes_to_factory_repair_without_new_revision(
     assert item.status == "blocked"
     assert item.terminal_blocked is True
     assert item.revisions == 9
+
+
+def test_planning_controller_scope_gap_invokes_factory_repair_without_retry_count(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _repo(tmp_path)
+    config = load_factory_config(repo / "config/factory.yaml")
+    autonomy = AutonomyConfig()
+    item = _item(status="ready", revisions=11, notes=[])
+    state = AutonomyState(
+        active_task_id=item.task_id,
+        consecutive_failures=7,
+        updated_at=datetime.now(UTC),
+    )
+    captured: dict[str, object] = {}
+
+    async def fake_repair(**kwargs: object) -> bool:
+        captured.update(kwargs)
+        return True
+
+    monkeypatch.setattr("tcfactory.autopilot.save_state", _noop_save_feature_ledger)
+    monkeypatch.setattr("tcfactory.autopilot._repair_or_hard_stuck", fake_repair)
+
+    routed = asyncio.run(
+        _route_planning_factory_repair(
+            repo_root=repo,
+            factory=config,
+            autonomy=autonomy,
+            state=state,
+            item=item,
+            failure=RuntimeError(
+                f"{FACTORY_REPAIR_SCOPE_MARKER}: protected controller finding"
+            ),
+        )
+    )
+
+    assert routed is True
+    assert captured["blocker_id"] == item.task_id
+    assert FACTORY_REPAIR_SCOPE_MARKER in str(captured["reason"])
+    assert state.current_action == "autonomous factory self-repair for planning blocker"
+    assert state.consecutive_failures == 7
 
 
 def test_zero_respec_and_value_limits_mean_work_until_done(

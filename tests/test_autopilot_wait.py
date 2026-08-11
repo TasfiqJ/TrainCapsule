@@ -40,8 +40,23 @@ def test_timed_wait_is_interrupted_by_dashboard_retry(
         current_action="waiting for included Claude allowance",
         next_wake_at=now + timedelta(hours=1),
         updated_at=now,
+        blocker_reason="stale controller repair",
+        repair_status="attempt 4/5",
+        repair_attempts=4,
+        blocked_tasks=["FACTORY_REPAIR"],
+        last_repair_artifact="factory/old-repair.json",
     )
-    requested = state.model_copy(update={"status": "restarting", "next_wake_at": None})
+    requested = state.model_copy(
+        update={
+            "status": "restarting",
+            "next_wake_at": None,
+            "blocker_reason": None,
+            "repair_status": None,
+            "repair_attempts": 0,
+            "blocked_tasks": [],
+            "last_repair_artifact": None,
+        }
+    )
     saved: list[AutonomyState] = []
 
     def load_requested(_root: Path, _factory: FactoryConfig) -> AutonomyState:
@@ -71,7 +86,42 @@ def test_timed_wait_is_interrupted_by_dashboard_retry(
     assert state.status == "restarting"
     assert state.next_wake_at is None
     assert state.current_action == "retry requested; restarting now"
+    assert state.blocker_reason is None
+    assert state.repair_status is None
+    assert state.repair_attempts == 0
+    assert state.blocked_tasks == []
+    assert state.last_repair_artifact is None
     assert saved
+
+
+def test_begin_ready_task_clears_stale_repair_ui_state() -> None:
+    state = AutonomyState(
+        status="restarting",
+        current_action="retry requested",
+        blocker_reason="old protected-path blocker",
+        required_action="repair controller",
+        blocked_tasks=["FACTORY_REPAIR"],
+        repair_attempts=5,
+        repair_status="attempt 5/5",
+        last_repair_artifact="factory/repair.json",
+        consecutive_failures=12,
+        updated_at=datetime.now(UTC),
+    )
+
+    autopilot._begin_ready_task(  # pyright: ignore[reportPrivateUsage]
+        state, task_id="T002", has_packet=False
+    )
+
+    assert state.status == "running"
+    assert state.active_task_id == "T002"
+    assert state.current_action == "create task packet"
+    assert state.blocker_reason is None
+    assert state.required_action is None
+    assert state.blocked_tasks == []
+    assert state.repair_attempts == 0
+    assert state.repair_status is None
+    assert state.last_repair_artifact is None
+    assert state.consecutive_failures == 0
 
 
 def test_timed_wait_refreshes_visible_state_while_sleeping(
@@ -130,7 +180,9 @@ def test_completion_marker_is_not_final_while_main_ci_is_pending(
     monkeypatch.setattr(autopilot, "current_sha", fake_current_sha)
     marker = tmp_path / "factory/state/PRODUCT_BUILD_COMPLETE.json"
     marker.parent.mkdir(parents=True)
-    marker.write_text(f'{{"main_sha": "{sha}"}}\n', encoding="utf-8")
+    marker.write_text(
+        f'{{"main_sha": "{sha}", "audited_sha": "{sha}"}}\n', encoding="utf-8"
+    )
     github_state = factory.resolve(tmp_path, factory.github_state_path)
     save_github_state(
         github_state,
@@ -161,4 +213,29 @@ def test_completion_marker_is_not_final_while_main_ci_is_pending(
             tmp_path, factory
         )
         is False
+    )
+
+
+def test_completion_marker_rejects_a_different_audited_sha(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    factory = FactoryConfig()
+    sha = "a" * 40
+    def fixed_sha(_repo_root: Path, _ref: str = "HEAD") -> str:
+        return sha
+
+    monkeypatch.setattr(autopilot, "current_sha", fixed_sha)
+    marker = tmp_path / "factory/state/PRODUCT_BUILD_COMPLETE.json"
+    marker.parent.mkdir(parents=True)
+    marker.write_text(
+        f'{{"main_sha": "{sha}", "audited_sha": "{"b" * 40}"}}\n',
+        encoding="utf-8",
+    )
+    save_github_state(
+        factory.resolve(tmp_path, factory.github_state_path),
+        GitHubSyncState(pending=False, last_pushed_sha=sha),
+    )
+
+    assert not autopilot._completion_marker_is_final(  # pyright: ignore[reportPrivateUsage]
+        tmp_path, factory
     )

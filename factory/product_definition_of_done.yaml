@@ -84,48 +84,56 @@
       "id": "clean-install-first-value",
       "command": "bash scripts/product_proof/clean_install_first_value.sh",
       "timeout_seconds": 3600,
+      "evidence_root": ".factory/gate-results/product-proof/clean-install-first-value",
       "evidence_globs": [".factory/gate-results/product-proof/clean-install-first-value/**/*"]
     },
     {
       "id": "close-loop-real-boundary",
       "command": "bash scripts/product_proof/close_loop.sh",
       "timeout_seconds": 3600,
+      "evidence_root": ".factory/gate-results/product-proof/close-loop",
       "evidence_globs": [".factory/gate-results/product-proof/close-loop/**/*"]
     },
     {
       "id": "qualify-loop-false-green",
       "command": "bash scripts/product_proof/qualify_loop.sh",
       "timeout_seconds": 3600,
+      "evidence_root": ".factory/gate-results/product-proof/qualify-loop",
       "evidence_globs": [".factory/gate-results/product-proof/qualify-loop/**/*"]
     },
     {
       "id": "exchange-loop-policy-and-integrity",
       "command": "bash scripts/product_proof/exchange_loop.sh",
       "timeout_seconds": 3600,
+      "evidence_root": ".factory/gate-results/product-proof/exchange-loop",
       "evidence_globs": [".factory/gate-results/product-proof/exchange-loop/**/*"]
     },
     {
       "id": "diagnosis-failure-recovery",
       "command": "bash scripts/product_proof/failure_recovery.sh",
       "timeout_seconds": 3600,
+      "evidence_root": ".factory/gate-results/product-proof/failure-recovery",
       "evidence_globs": [".factory/gate-results/product-proof/failure-recovery/**/*"]
     },
     {
       "id": "upgrade-rollback-backup-restore",
       "command": "bash scripts/product_proof/lifecycle.sh",
       "timeout_seconds": 3600,
+      "evidence_root": ".factory/gate-results/product-proof/lifecycle",
       "evidence_globs": [".factory/gate-results/product-proof/lifecycle/**/*"]
     },
     {
       "id": "representative-performance-resources",
       "command": "bash scripts/product_proof/performance.sh",
       "timeout_seconds": 3600,
+      "evidence_root": ".factory/gate-results/product-proof/performance",
       "evidence_globs": [".factory/gate-results/product-proof/performance/**/*"]
     },
     {
       "id": "pilot-instrumentation-and-support",
       "command": "bash scripts/product_proof/pilot_readiness.sh",
       "timeout_seconds": 3600,
+      "evidence_root": ".factory/gate-results/product-proof/pilot-readiness",
       "evidence_globs": [".factory/gate-results/product-proof/pilot-readiness/**/*"]
     }
   ],

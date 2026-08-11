@@ -35,3 +35,5 @@ jobs:
       - run: uv run pytest
       - run: bash scripts/verify_no_secrets.sh
       - run: bash scripts/verify_factory_authority.sh
+      - run: bash scripts/gates/no_paid_usage.sh
+      - run: bash scripts/gates/self_repair_scope.sh

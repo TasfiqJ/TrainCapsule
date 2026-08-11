@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import subprocess
 from pathlib import Path
 
 import pytest
@@ -23,6 +24,15 @@ from tcfactory.models import (
 from tcfactory.yamlutil import load_yaml
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _init_repo(path: Path) -> None:
+    subprocess.run(["git", "init", "-q"], cwd=path, check=True)
+    subprocess.run(["git", "config", "user.email", "test@example.com"], cwd=path, check=True)
+    subprocess.run(["git", "config", "user.name", "Test"], cwd=path, check=True)
+    (path / "README.md").write_text("candidate\n", encoding="utf-8")
+    subprocess.run(["git", "add", "README.md"], cwd=path, check=True)
+    subprocess.run(["git", "commit", "-qm", "candidate"], cwd=path, check=True)
 
 
 def test_completion_check_requires_paths_and_commands(tmp_path: Path) -> None:
@@ -50,17 +60,30 @@ def test_version_three_completion_requires_executable_outcome_proofs(tmp_path: P
 
 
 def test_outcome_proof_must_run_and_emit_raw_evidence(tmp_path: Path) -> None:
+    _init_repo(tmp_path)
     evidence = ".factory/gate-results/product-proof/first-value/result.json"
+    script = tmp_path / "proof.sh"
+    script.write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        "printf 'fresh proof\\n' > \"$TCF_PRODUCT_PROOF_OUTPUT_DIR/result.json\"\n"
+        "digest=$(sha256sum \"$TCF_PRODUCT_PROOF_OUTPUT_DIR/result.json\" | cut -d' ' -f1)\n"
+        "printf '{\"schema_version\":\"traincapsule.product-proof/v1\","
+        "\"proof_id\":\"%s\",\"candidate_sha\":\"%s\",\"status\":\"pass\","
+        "\"environment_digest\":\"test-env\",\"oracle_version\":\"test-oracle-v1\","
+        "\"artifacts\":{\"result.json\":\"%s\"}}\\n' "
+        "\"$TCF_PRODUCT_PROOF_ID\" \"$TCF_PRODUCT_PROOF_CANDIDATE_SHA\" \"$digest\" "
+        "> \"$TCF_PRODUCT_PROOF_OUTPUT_DIR/manifest.json\"\n",
+        encoding="utf-8",
+    )
     definition = {
         "version": 3,
         "outcome_proofs": [
             {
                 "id": "first-value",
-                "command": (
-                    "mkdir -p .factory/gate-results/product-proof/first-value "
-                    f"&& printf '{{}}' > {evidence}"
-                ),
+                "command": "bash proof.sh",
                 "timeout_seconds": 5,
+                "evidence_root": ".factory/gate-results/product-proof/first-value",
                 "evidence_globs": [evidence],
             }
         ],
@@ -69,6 +92,11 @@ def test_outcome_proof_must_run_and_emit_raw_evidence(tmp_path: Path) -> None:
 
 
 def test_outcome_proof_rejects_success_without_evidence(tmp_path: Path) -> None:
+    _init_repo(tmp_path)
+    stale_root = tmp_path / ".factory/gate-results/product-proof/first-value"
+    stale_root.mkdir(parents=True)
+    (stale_root / "manifest.json").write_text("{}\n", encoding="utf-8")
+    (stale_root / "result.json").write_text("stale\n", encoding="utf-8")
     definition = {
         "version": 3,
         "outcome_proofs": [
@@ -76,12 +104,48 @@ def test_outcome_proof_rejects_success_without_evidence(tmp_path: Path) -> None:
                 "id": "first-value",
                 "command": "true",
                 "timeout_seconds": 5,
+                "evidence_root": ".factory/gate-results/product-proof/first-value",
                 "evidence_globs": [".factory/gate-results/product-proof/first-value/**"],
             }
         ],
     }
     failures = deterministic_completion_check(tmp_path, definition)
-    assert any("produced no evidence" in value for value in failures)
+    assert any("produced no manifest.json" in value for value in failures)
+
+
+def test_outcome_proof_rejects_wrong_candidate_binding(tmp_path: Path) -> None:
+    _init_repo(tmp_path)
+    script = tmp_path / "wrong-proof.sh"
+    script.write_text(
+        "#!/usr/bin/env bash\n"
+        "set -euo pipefail\n"
+        "printf 'proof\\n' > \"$TCF_PRODUCT_PROOF_OUTPUT_DIR/result.json\"\n"
+        "digest=$(sha256sum \"$TCF_PRODUCT_PROOF_OUTPUT_DIR/result.json\" | cut -d' ' -f1)\n"
+        "printf '{\"schema_version\":\"traincapsule.product-proof/v1\","
+        "\"proof_id\":\"first-value\",\"candidate_sha\":\"wrong\","
+        "\"status\":\"pass\",\"environment_digest\":\"env\","
+        "\"oracle_version\":\"oracle\",\"artifacts\":{\"result.json\":\"%s\"}}\\n' "
+        "\"$digest\" > \"$TCF_PRODUCT_PROOF_OUTPUT_DIR/manifest.json\"\n",
+        encoding="utf-8",
+    )
+    definition = {
+        "version": 3,
+        "outcome_proofs": [
+            {
+                "id": "first-value",
+                "command": "bash wrong-proof.sh",
+                "timeout_seconds": 5,
+                "evidence_root": ".factory/gate-results/product-proof/first-value",
+                "evidence_globs": [
+                    ".factory/gate-results/product-proof/first-value/result.json"
+                ],
+            }
+        ],
+    }
+
+    failures = deterministic_completion_check(tmp_path, definition)
+
+    assert any("wrong candidate_sha" in value for value in failures)
 
 
 @pytest.mark.parametrize("contradiction", ["missing_items", "blockers"])
@@ -196,6 +260,10 @@ def test_completion_audit_wiring_keeps_reviews_blind_until_adjudication(
     )
     monkeypatch.setattr(completion_module, "save_feature_ledger", no_op)
     monkeypatch.setattr(completion_module, "commit_all", no_op)
+    def fixed_sha(_repo_root: Path, _ref: str = "HEAD") -> str:
+        return "a" * 40
+
+    monkeypatch.setattr(completion_module, "current_sha", fixed_sha)
     ledger = FeatureLedger(
         source_of_truth="test",
         tasks=[
@@ -209,7 +277,7 @@ def test_completion_audit_wiring_keeps_reviews_blind_until_adjudication(
         ],
     )
 
-    outcome, added = asyncio.run(
+    outcome, added, audited_sha = asyncio.run(
         completion_module.audit_and_expand_or_complete(
             repo_root=tmp_path,
             config=FactoryConfig(auth_mode="unrestricted"),
@@ -220,6 +288,7 @@ def test_completion_audit_wiring_keeps_reviews_blind_until_adjudication(
 
     assert outcome == "expanded"
     assert added == ["AUTO003"]
+    assert audited_sha == "a" * 40
     assert captured["primary-audit"] == []
     assert captured["adversarial-audit"] == []
     assert len(captured["completion-adjudicator"]) == 2

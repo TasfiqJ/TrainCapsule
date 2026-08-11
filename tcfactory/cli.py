@@ -775,7 +775,7 @@ def completion_audit(
     factory = load_factory_config(repo_root / config_path)
     autonomy = load_autonomy_config(factory.resolve(repo_root, factory.autonomy_config_path))
     ledger = load_feature_ledger(factory.resolve(repo_root, factory.feature_ledger_path))
-    outcome, evidence = asyncio.run(
+    outcome, evidence, audited_sha = asyncio.run(
         audit_and_expand_or_complete(
             repo_root=repo_root,
             config=factory,
@@ -783,7 +783,9 @@ def completion_audit(
             audits_required=autonomy.completion_audits_required,
         )
     )
-    console.print_json(data={"outcome": outcome, "evidence": evidence})
+    console.print_json(
+        data={"outcome": outcome, "evidence": evidence, "audited_sha": audited_sha}
+    )
 
 
 @app.command("autonomy-disable")

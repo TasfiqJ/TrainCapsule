@@ -206,6 +206,12 @@ async def _wait_until(
             and disk_state.status == "restarting"
             and disk_state.next_wake_at is None
         ):
+            state.repair_attempts = disk_state.repair_attempts
+            state.repair_status = disk_state.repair_status
+            state.blocker_reason = disk_state.blocker_reason
+            state.required_action = disk_state.required_action
+            state.blocked_tasks = list(disk_state.blocked_tasks)
+            state.last_repair_artifact = disk_state.last_repair_artifact
             state.status = "restarting"
             state.current_action = "retry requested; restarting now"
             state.last_event = "timed wait interrupted by an explicit retry request"
@@ -222,6 +228,23 @@ async def _wait_until(
         state.next_wake_at = wake_at
         save_state(repo_root, factory, state)
         await asyncio.sleep(min(max(1.0, poll_seconds), remaining))
+
+
+def _begin_ready_task(state: AutonomyState, *, task_id: str, has_packet: bool) -> None:
+    """Publish live work truth and clear repair metadata from the incident just recovered."""
+
+    state.status = "running"
+    state.active_task_id = task_id
+    state.current_action = "enqueue task" if has_packet else "create task packet"
+    state.next_wake_at = None
+    state.blocker_reason = None
+    state.required_action = None
+    state.blocked_tasks = []
+    state.repair_attempts = 0
+    state.repair_status = None
+    state.last_repair_artifact = None
+    state.consecutive_failures = 0
+    state.last_event = f"active work started for {task_id}: {state.current_action}"
 
 
 def _prepare_restart_state(state: AutonomyState) -> bool:
@@ -599,15 +622,25 @@ def _verified_repair_intent(
     return item, artifact_path
 
 
-def _write_completion(repo_root: Path, config: FactoryConfig, ledger: FeatureLedger) -> Path:
+def _write_completion(
+    repo_root: Path,
+    config: FactoryConfig,
+    ledger: FeatureLedger,
+    *,
+    audited_sha: str,
+) -> Path:
     path = repo_root / "factory" / "state" / "PRODUCT_BUILD_COMPLETE.json"
     audit_roots = sorted(config.resolve(repo_root, config.completion_dir).glob("*"))
     latest_audit = str(audit_roots[-1]) if audit_roots else None
     main_sha = current_sha(repo_root, "main")
     github_state = load_github_state(config.resolve(repo_root, config.github_state_path))
-    if github_state.pending or github_state.last_pushed_sha != main_sha:
+    if (
+        main_sha != audited_sha
+        or github_state.pending
+        or github_state.last_pushed_sha != audited_sha
+    ):
         raise AutopilotError(
-            "Product completion marker requires non-pending GitHub state bound to exact main SHA"
+            "Product completion marker requires the audited SHA to remain exact on main and GitHub"
         )
     write_json(
         path,
@@ -615,6 +648,7 @@ def _write_completion(repo_root: Path, config: FactoryConfig, ledger: FeatureLed
             "completion_audit_root": latest_audit,
             "completed_at": _now().isoformat(),
             "main_sha": main_sha,
+            "audited_sha": audited_sha,
             "github_synced_sha": github_state.last_pushed_sha,
             "target": "product_build",
             "passed_tasks": [item.task_id for item in ledger.tasks if item.status == "passed"],
@@ -638,7 +672,8 @@ def _completion_marker_is_final(repo_root: Path, config: FactoryConfig) -> bool:
         return False
     payload = read_json(marker, {})
     marker_sha = payload.get("main_sha")
-    if not isinstance(marker_sha, str):
+    audited_sha = payload.get("audited_sha")
+    if not isinstance(marker_sha, str) or audited_sha != marker_sha:
         return False
     github_state = load_github_state(config.resolve(repo_root, config.github_state_path))
     return (
@@ -1185,14 +1220,18 @@ async def _run_autopilot_inner(
             save_state(repo_root, factory, state)
             try:
                 if factory.completion_audit_enabled:
-                    outcome, completion_evidence = await audit_and_expand_or_complete(
+                    outcome, completion_evidence, audited_sha = await audit_and_expand_or_complete(
                         repo_root=repo_root,
                         config=factory,
                         ledger=ledger,
                         audits_required=autonomy.completion_audits_required,
                     )
                 else:
-                    outcome, completion_evidence = "complete", []
+                    outcome, completion_evidence, audited_sha = (
+                        "complete",
+                        [],
+                        current_sha(repo_root, "main"),
+                    )
             except QuotaLimitPause as exc:
                 state.status = "paused"
                 state.next_wake_at = exc.record.resume_at + timedelta(
@@ -1277,6 +1316,17 @@ async def _run_autopilot_inner(
                     return
                 continue
 
+            observed_main = current_sha(repo_root, "main")
+            if observed_main != audited_sha:
+                state.status = "blocked"
+                state.last_event = (
+                    "Product completion audit candidate changed before release synchronization: "
+                    f"{observed_main} != {audited_sha}"
+                )
+                state.blocked_tasks = ["PRODUCT_COMPLETION"]
+                save_state(repo_root, factory, state)
+                _notify(autonomy, state.last_event)
+                return
             try:
                 github_result = _sync_github_best_effort(
                     repo_root=repo_root,
@@ -1312,7 +1362,12 @@ async def _run_autopilot_inner(
                     wake_at=state.next_wake_at,
                 )
                 continue
-            complete_path = _write_completion(repo_root, factory, ledger)
+            complete_path = _write_completion(
+                repo_root,
+                factory,
+                ledger,
+                audited_sha=audited_sha,
+            )
             state.status = "complete"
             state.active_task_id = None
             state.current_action = None
@@ -1455,9 +1510,10 @@ async def _run_autopilot_inner(
 
         next_item = ledger.next_ready()
         if next_item is not None:
-            state.active_task_id = next_item.task_id
-            state.current_action = (
-                "create task packet" if not next_item.packet_path else "enqueue task"
+            _begin_ready_task(
+                state,
+                task_id=next_item.task_id,
+                has_packet=bool(next_item.packet_path),
             )
             save_state(repo_root, factory, state)
             try:

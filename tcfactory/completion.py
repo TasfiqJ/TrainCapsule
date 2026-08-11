@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import os
+import shutil
 from pathlib import Path
 from typing import Any, cast
 
@@ -25,6 +27,68 @@ from .yamlutil import load_yaml
 
 class CompletionBlocked(RuntimeError):
     pass
+
+
+def _proof_root(repo_root: Path, raw: object) -> Path:
+    relative = str(raw or "").strip()
+    if not relative:
+        raise CompletionBlocked("Outcome proof has no isolated evidence_root")
+    root = (repo_root / relative).resolve()
+    protected_root = (repo_root / ".factory/gate-results/product-proof").resolve()
+    try:
+        root.relative_to(protected_root)
+    except ValueError as exc:
+        raise CompletionBlocked(
+            f"Outcome proof evidence_root escapes the isolated proof area: {relative}"
+        ) from exc
+    if root == protected_root:
+        raise CompletionBlocked("Outcome proof must use its own child evidence_root")
+    return root
+
+
+def _validate_proof_manifest(*, root: Path, proof_id: str, candidate_sha: str) -> str | None:
+    manifest_path = root / "manifest.json"
+    if not manifest_path.is_file():
+        return f"Outcome proof {proof_id!r} produced no manifest.json"
+    try:
+        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        return f"Outcome proof {proof_id!r} manifest is unreadable: {exc}"
+    if not isinstance(payload, dict):
+        return f"Outcome proof {proof_id!r} manifest is not a mapping"
+    typed_payload = cast(dict[str, object], payload)
+    expected = {
+        "schema_version": "traincapsule.product-proof/v1",
+        "proof_id": proof_id,
+        "candidate_sha": candidate_sha,
+        "status": "pass",
+    }
+    for key, value in expected.items():
+        if typed_payload.get(key) != value:
+            return f"Outcome proof {proof_id!r} manifest has wrong {key}"
+    for key in ("environment_digest", "oracle_version"):
+        observed = typed_payload.get(key)
+        if not isinstance(observed, str) or not observed.strip():
+            return f"Outcome proof {proof_id!r} manifest has no {key}"
+    artifacts = typed_payload.get("artifacts")
+    if not isinstance(artifacts, dict) or not artifacts:
+        return f"Outcome proof {proof_id!r} manifest has no hashed artifacts"
+    for raw_path, raw_digest in cast(dict[object, object], artifacts).items():
+        if not isinstance(raw_path, str) or not isinstance(raw_digest, str):
+            return f"Outcome proof {proof_id!r} manifest has an invalid artifact entry"
+        path = (root / raw_path).resolve()
+        try:
+            path.relative_to(root)
+        except ValueError:
+            return f"Outcome proof {proof_id!r} artifact escapes evidence_root: {raw_path}"
+        if (
+            len(raw_digest) != 64
+            or any(char not in "0123456789abcdef" for char in raw_digest)
+            or not path.is_file()
+            or hashlib.sha256(path.read_bytes()).hexdigest() != raw_digest
+        ):
+            return f"Outcome proof {proof_id!r} artifact is missing or has wrong digest: {raw_path}"
+    return None
 
 
 def load_definition(repo_root: Path, config: FactoryConfig) -> dict[str, Any]:
@@ -100,11 +164,25 @@ def deterministic_completion_check(
             if not evidence_globs:
                 failures.append(f"Outcome proof {proof_id!r} has no raw evidence globs")
                 continue
+            try:
+                evidence_root = _proof_root(repo_root, proof.get("evidence_root"))
+            except CompletionBlocked as exc:
+                failures.append(f"Outcome proof {proof_id!r}: {exc}")
+                continue
+            if evidence_root.exists():
+                shutil.rmtree(evidence_root)
+            evidence_root.mkdir(parents=True, exist_ok=True)
+            candidate_sha = current_sha(repo_root)
             completed = run_command(
                 ["bash", "-lc", command],
                 cwd=repo_root,
                 check=False,
                 timeout=int(str(proof.get("timeout_seconds", 1800))),
+                env={
+                    "TCF_PRODUCT_PROOF_OUTPUT_DIR": str(evidence_root),
+                    "TCF_PRODUCT_PROOF_CANDIDATE_SHA": candidate_sha,
+                    "TCF_PRODUCT_PROOF_ID": proof_id,
+                },
             )
             if completed.returncode != 0:
                 detail = (completed.stderr or completed.stdout)[-1500:]
@@ -112,8 +190,24 @@ def deterministic_completion_check(
                     f"Outcome proof {proof_id!r} failed ({completed.returncode}): {detail}"
                 )
                 continue
+            manifest_error = _validate_proof_manifest(
+                root=evidence_root,
+                proof_id=proof_id,
+                candidate_sha=candidate_sha,
+            )
+            if manifest_error:
+                failures.append(manifest_error)
+                continue
             for pattern in evidence_globs:
-                if not list(repo_root.glob(pattern)):
+                matches = [path.resolve() for path in repo_root.glob(pattern) if path.is_file()]
+                inside_root: list[Path] = []
+                for path in matches:
+                    try:
+                        path.relative_to(evidence_root)
+                    except ValueError:
+                        continue
+                    inside_root.append(path)
+                if not inside_root:
                     failures.append(
                         f"Outcome proof {proof_id!r} produced no evidence matching {pattern}"
                     )
@@ -403,6 +497,7 @@ def run_private_completion_gate(
     repo_root: Path,
     config: FactoryConfig,
     run_id: str,
+    candidate_sha: str | None = None,
 ) -> dict[str, Any]:
     """Run the external hidden product-completion suite against a clean main worktree."""
 
@@ -412,7 +507,7 @@ def run_private_completion_gate(
             f"{config.private_gate_runner_env} is unset; private completion cannot be certified"
         )
     runner = Path(runner_value).expanduser()
-    base_sha = current_sha(repo_root, "main")
+    base_sha = candidate_sha or current_sha(repo_root, "main")
     worktree = create_worktree(
         repo_root,
         config.resolve(repo_root, config.worktree_dir),
@@ -475,16 +570,20 @@ async def audit_and_expand_or_complete(
     config: FactoryConfig,
     ledger: FeatureLedger,
     audits_required: int = 2,
-) -> tuple[str, list[str]]:
+) -> tuple[str, list[str], str]:
     """Independently challenge product completion, then complete or expand the roadmap."""
 
     if not ledger.build_complete():
         raise CompletionBlocked("Completion audit may run only after current build tasks pass")
+    audited_sha = current_sha(repo_root, "main")
     definition = load_definition(repo_root, config)
     deterministic_failures = deterministic_completion_check(repo_root, definition)
     run_id = utc_stamp()
     root = config.resolve(repo_root, config.completion_dir) / run_id
-    write_json(root / "deterministic-precheck.json", {"failures": deterministic_failures})
+    write_json(
+        root / "deterministic-precheck.json",
+        {"audited_sha": audited_sha, "failures": deterministic_failures},
+    )
 
     reports: list[CompletionAuditReport] = []
     labels = ["primary-audit", "adversarial-audit", "third-audit"]
@@ -518,12 +617,20 @@ async def audit_and_expand_or_complete(
             role_name=RoleName.COMPLETION_ADJUDICATOR,
         )
 
+    observed_sha = current_sha(repo_root, "main")
+    if observed_sha != audited_sha:
+        raise CompletionBlocked(
+            "Main changed during completion audit; the unaudited candidate cannot be completed: "
+            f"{observed_sha} != {audited_sha}"
+        )
+
     private_completion: dict[str, Any] | None = None
     if _reports_agree_complete(reports) and not deterministic_failures:
         private_completion = run_private_completion_gate(
             repo_root=repo_root,
             config=config,
             run_id=run_id,
+            candidate_sha=audited_sha,
         )
         if private_completion.get("passed") is not True:
             result = private_completion.get("result")
@@ -540,6 +647,7 @@ async def audit_and_expand_or_complete(
     write_json(
         root / "audit-set.json",
         {
+            "audited_sha": audited_sha,
             "audits": [report.model_dump(mode="json") for report in reports],
             "adjudicator": final_report.model_dump(mode="json") if final_report else None,
             "deterministic_failures": deterministic_failures,
@@ -556,12 +664,13 @@ async def audit_and_expand_or_complete(
         write_json(
             root / "PRODUCT_BUILD_COMPLETE_AUDIT.json",
             {
+                "audited_sha": audited_sha,
                 "evidence": evidence,
                 "audit_root": str(root),
                 "private_completion": private_completion,
             },
         )
-        return "complete", evidence
+        return "complete", evidence, audited_sha
 
     if decision.verdict == CompletionVerdict.BLOCKED:
         raise CompletionBlocked("; ".join(decision.blockers) or decision.summary)
@@ -614,4 +723,4 @@ async def audit_and_expand_or_complete(
             "missing_items": [item.model_dump(mode="json") for item in missing],
         },
     )
-    return "expanded", added
+    return "expanded", added, audited_sha

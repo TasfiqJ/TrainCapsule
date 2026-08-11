@@ -2,8 +2,10 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 import subprocess
 from dataclasses import dataclass
+from datetime import UTC, datetime
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -47,6 +49,9 @@ class ValueEvidence(BaseModel):
     evidence_classes: list[ValueEvidenceClass] = Field(default_factory=list[ValueEvidenceClass])
     falsification_results: dict[str, bool] = Field(default_factory=dict)
     external_verification: str | None = None
+    external_issuer: str | None = None
+    external_reference: str | None = None
+    external_observed_at: datetime | None = None
     limitations: list[str] = Field(default_factory=list)
     notes: list[str] = Field(default_factory=list)
 
@@ -85,6 +90,47 @@ def _load_evidence(repo_root: Path, contract: ValueContract) -> ValueEvidence:
     return evidence
 
 
+def _load_external_evidence(
+    repo_root: Path, task: TaskPacket
+) -> tuple[ValueEvidence, Path, Path]:
+    """Load a maintainer-controlled receipt that is outside the candidate repository.
+
+    External adoption, payment, and maintainer confirmation are facts the autonomous
+    builder cannot attest for itself.  The receipt root is deliberately supplied by the
+    trusted launcher and must not resolve inside the repository.
+    """
+
+    root_value = os.getenv("TCF_EXTERNAL_VALUE_RECEIPT_DIR", "").strip()
+    if not root_value:
+        raise ValueGateError(
+            "TCF_EXTERNAL_VALUE_RECEIPT_DIR is unset; external truth remains unverified"
+        )
+    root = Path(root_value).expanduser().resolve()
+    try:
+        root.relative_to(repo_root.resolve())
+    except ValueError:
+        pass
+    else:
+        raise ValueGateError("External value receipts must live outside the candidate repository")
+    path = (root / f"{task.task_id}.json").resolve()
+    try:
+        path.relative_to(root)
+    except ValueError as exc:  # pragma: no cover - task IDs are schema constrained
+        raise ValueGateError("External value receipt path escapes its trusted root") from exc
+    if not path.is_file():
+        raise ValueGateError(f"Trusted external value receipt is missing for {task.task_id}")
+    try:
+        evidence = ValueEvidence.model_validate_json(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise ValueGateError(f"Trusted external value receipt is unreadable: {exc}") from exc
+    if evidence.metric != task.value_contract.primary_metric:
+        raise ValueGateError(
+            f"External receipt metric {evidence.metric!r} does not match "
+            f"{task.value_contract.primary_metric!r}"
+        )
+    return evidence, root, path
+
+
 def value_contract_digest(contract: ValueContract) -> str:
     payload = json.dumps(
         contract.model_dump(mode="json"), sort_keys=True, separators=(",", ":")
@@ -114,6 +160,15 @@ def _verify_measured_evidence(
         raise ValueGateError("Measured value evidence has no executable measurement_command")
     if not evidence.source_commit:
         raise ValueGateError("Measured value evidence has no source_commit")
+    dirty = subprocess.run(
+        ["git", "status", "--porcelain"],
+        cwd=repo_root,
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if dirty.returncode != 0 or dirty.stdout.strip():
+        raise ValueGateError("Value evidence can certify only a clean committed candidate")
     candidate_head = _git_head(repo_root)
     ancestry = subprocess.run(
         ["git", "merge-base", "--is-ancestor", evidence.source_commit, candidate_head],
@@ -138,16 +193,47 @@ def _verify_measured_evidence(
         raise ValueGateError(f"Value evidence is missing required classes: {missing_classes}")
     if not evidence.raw_artifacts:
         raise ValueGateError("Measured value evidence must name raw, inspectable artifacts")
-    for raw in evidence.raw_artifacts:
+    for raw, expected_hash in evidence.artifact_hashes.items():
         path = _safe_repo_path(repo_root, raw)
+        if expected_hash == "DELETED":
+            if path.exists():
+                raise ValueGateError(
+                    f"Value evidence says changed path was deleted but it exists: {raw}"
+                )
+            continue
+        if len(expected_hash) != 64 or any(
+            char not in "0123456789abcdef" for char in expected_hash
+        ):
+            raise ValueGateError(f"Value artifact has invalid SHA-256: {raw}")
         if not path.is_file():
-            raise ValueGateError(f"Value raw artifact is missing: {raw}")
-        expected_hash = evidence.artifact_hashes.get(raw)
-        if not expected_hash:
-            raise ValueGateError(f"Value raw artifact has no recorded SHA-256: {raw}")
+            raise ValueGateError(f"Value artifact is missing: {raw}")
         actual_hash = hashlib.sha256(path.read_bytes()).hexdigest()
         if actual_hash != expected_hash:
-            raise ValueGateError(f"Value raw artifact digest mismatch: {raw}")
+            raise ValueGateError(f"Value artifact digest mismatch: {raw}")
+    for raw in evidence.raw_artifacts:
+        if raw not in evidence.artifact_hashes:
+            raise ValueGateError(f"Value raw artifact has no recorded SHA-256: {raw}")
+
+    changed = subprocess.run(
+        ["git", "diff", "--name-only", "-z", f"{evidence.source_commit}..{candidate_head}"],
+        cwd=repo_root,
+        capture_output=True,
+        check=False,
+    )
+    if changed.returncode != 0:
+        raise ValueGateError("Cannot enumerate the candidate surface covered by value evidence")
+    changed_paths = {
+        value.decode("utf-8", errors="strict")
+        for value in changed.stdout.split(b"\0")
+        if value
+    }
+    evidence_path = contract.evidence_path or ""
+    uncovered = sorted(changed_paths - {evidence_path} - set(evidence.artifact_hashes))
+    if uncovered:
+        raise ValueGateError(
+            "Value evidence does not hash every candidate change since source_commit: "
+            + ", ".join(uncovered)
+        )
     missing_falsifications = [
         item
         for item in contract.falsification_criteria
@@ -156,6 +242,68 @@ def _verify_measured_evidence(
     if missing_falsifications:
         raise ValueGateError(
             "The evidence did not execute every predeclared falsification attempt: "
+            + "; ".join(missing_falsifications)
+        )
+
+
+def _verify_external_evidence(
+    *, repo_root: Path, task: TaskPacket, evidence: ValueEvidence, receipt_root: Path
+) -> None:
+    contract = task.value_contract
+    if evidence.task_id != task.task_id:
+        raise ValueGateError(
+            f"External receipt task_id={evidence.task_id!r} does not match {task.task_id!r}"
+        )
+    if evidence.source_commit != _git_head(repo_root):
+        raise ValueGateError("External receipt is not bound to the exact candidate SHA")
+    if evidence.preregistered_contract_sha256 != value_contract_digest(contract):
+        raise ValueGateError("External receipt is not bound to the frozen value contract")
+    required_classes = set(contract.required_evidence_classes)
+    observed_classes = set(evidence.evidence_classes)
+    missing_classes = sorted(value.value for value in required_classes - observed_classes)
+    if missing_classes:
+        raise ValueGateError(f"External receipt is missing required classes: {missing_classes}")
+    if evidence.passed is not True:
+        raise ValueGateError("External receipt does not record a passing attributable outcome")
+    method = evidence.method.strip().lower()
+    if not method or any(
+        term in method for term in ("self-authored", "model-written", "synthetic")
+    ):
+        raise ValueGateError("External receipt method is missing or self-authored/synthetic")
+    if not (evidence.external_issuer or "").strip():
+        raise ValueGateError("External receipt has no attributable issuer")
+    if not (evidence.external_reference or "").strip():
+        raise ValueGateError("External receipt has no independently inspectable reference")
+    if evidence.external_observed_at is None:
+        raise ValueGateError("External receipt has no observation timestamp")
+    observed_at = evidence.external_observed_at
+    if observed_at.tzinfo is None:
+        raise ValueGateError("External receipt timestamp must include a timezone")
+    if observed_at.astimezone(UTC) > datetime.now(UTC):
+        raise ValueGateError("External receipt timestamp is in the future")
+    if not evidence.raw_artifacts:
+        raise ValueGateError("External receipt has no inspectable raw artifacts")
+    for raw in evidence.raw_artifacts:
+        path = (receipt_root / raw).resolve()
+        try:
+            path.relative_to(receipt_root)
+        except ValueError as exc:
+            raise ValueGateError(
+                f"External artifact escapes the trusted receipt root: {raw}"
+            ) from exc
+        expected_hash = evidence.artifact_hashes.get(raw)
+        if not expected_hash or len(expected_hash) != 64:
+            raise ValueGateError(f"External artifact has no valid SHA-256: {raw}")
+        if not path.is_file() or hashlib.sha256(path.read_bytes()).hexdigest() != expected_hash:
+            raise ValueGateError(f"External artifact is missing or has the wrong digest: {raw}")
+    missing_falsifications = [
+        item
+        for item in contract.falsification_criteria
+        if evidence.falsification_results.get(item) is not True
+    ]
+    if missing_falsifications:
+        raise ValueGateError(
+            "External receipt did not execute every predeclared falsification attempt: "
             + "; ".join(missing_falsifications)
         )
 
@@ -341,7 +489,13 @@ def evaluate_value_contract(
         )
     elif contract.mode == ValueGateMode.EXTERNAL:
         try:
-            evidence = _load_evidence(repo_root, contract)
+            evidence, receipt_root, receipt_path = _load_external_evidence(repo_root, task)
+            _verify_external_evidence(
+                repo_root=repo_root,
+                task=task,
+                evidence=evidence,
+                receipt_root=receipt_root,
+            )
         except ValueGateError as exc:
             assessment = ValueAssessment(
                 status=ValueStatus.EXTERNAL_EVIDENCE_REQUIRED,
@@ -352,7 +506,7 @@ def evaluate_value_contract(
                 ),
                 contract_mode=contract.mode,
                 primary_metric=contract.primary_metric,
-                evidence_paths=[contract.evidence_path] if contract.evidence_path else [],
+                evidence_paths=[],
                 limitations=[str(exc)],
                 commercially_validated=False,
             )
@@ -381,7 +535,7 @@ def evaluate_value_contract(
                 summary="Real external behavior evidence satisfies the declared commercial gate.",
                 contract_mode=contract.mode,
                 primary_metric=contract.primary_metric,
-                evidence_paths=[contract.evidence_path] if contract.evidence_path else [],
+                evidence_paths=[str(receipt_path)],
                 evidence_classes=evidence.evidence_classes,
                 limitations=evidence.limitations,
                 commercially_validated=ValueEvidenceClass.PAID in evidence.evidence_classes,
@@ -396,7 +550,7 @@ def evaluate_value_contract(
                 ),
                 contract_mode=contract.mode,
                 primary_metric=contract.primary_metric,
-                evidence_paths=[contract.evidence_path] if contract.evidence_path else [],
+                evidence_paths=[str(receipt_path)],
                 evidence_classes=evidence.evidence_classes,
                 limitations=[
                     *evidence.limitations,

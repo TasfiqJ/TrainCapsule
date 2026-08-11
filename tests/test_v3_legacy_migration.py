@@ -4,11 +4,14 @@ from collections import Counter
 from pathlib import Path
 from typing import cast
 
+from typer.testing import CliRunner
+
 from scripts.generate_v3_legacy_migration import (
     build_mapping,
     rendered_mapping,
     verify_installed,
 )
+from tcfactory.cli import app
 from tcfactory.feature_ledger import load_feature_ledger
 from tcfactory.v3.enums import WorkStatus
 from tcfactory.v3.migrations import (
@@ -126,3 +129,35 @@ def test_non_resuming_queue_archive_receipt_is_fully_verifiable() -> None:
     assert isinstance(files, list) and len(cast(list[object], files)) == 3
     assert isinstance(state_directories, list)
     assert len(cast(list[object], state_directories)) == len(WorkStatus)
+
+
+def test_exact_roadmap_migration_cli_dry_run_is_read_only() -> None:
+    mapping = ROOT / "factory/roadmap/migrations/v2_to_v3.yaml"
+    queue_root = ROOT / "factory/queue"
+    before_mapping = mapping.read_bytes()
+    before_queue = {
+        path.relative_to(queue_root).as_posix(): path.read_bytes()
+        for path in queue_root.rglob("*")
+        if path.is_file()
+    }
+    runner = CliRunner()
+    assert runner.invoke(app, ["migrate-roadmap", "--dry-run"]).exit_code == 2
+    result = runner.invoke(
+        app,
+        [
+            "migrate-roadmap",
+            "--from-v2",
+            "--dry-run",
+            "--repo",
+            str(ROOT),
+        ],
+    )
+    assert result.exit_code == 0, result.output
+    assert '"legacyRecords": 124' in result.output
+    assert '"mutation": false' in result.output.lower()
+    assert mapping.read_bytes() == before_mapping
+    assert {
+        path.relative_to(queue_root).as_posix(): path.read_bytes()
+        for path in queue_root.rglob("*")
+        if path.is_file()
+    } == before_queue

@@ -166,6 +166,28 @@ def migrate(
     )
 
 
+@app.command("migrate-roadmap")
+def migrate_roadmap(
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+    from_v2: Annotated[bool, typer.Option("--from-v2")] = False,
+    dry_run: Annotated[bool, typer.Option("--dry-run")] = False,
+    apply: Annotated[bool, typer.Option("--apply")] = False,
+    acknowledge_local_write: Annotated[
+        bool, typer.Option("--acknowledge-local-write")
+    ] = False,
+) -> None:
+    """Migrate the historical V2 roadmap through the explicit V3 mapping."""
+
+    if not from_v2:
+        raise typer.BadParameter("roadmap migration requires --from-v2")
+    migrate(
+        repo=repo,
+        dry_run=dry_run,
+        apply=apply,
+        acknowledge_local_write=acknowledge_local_write,
+    )
+
+
 @config_app.command("validate")
 def config_validate(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
     root = _resolve_repo(repo)

@@ -184,7 +184,7 @@ Migrate the V2 factory/bootstrap repository to the bounded V3 product and factor
 - Preserved the observed status distribution exactly: 1 passed, 1 paused, 2 external-wait, and 120 blocked. T002 remains FACTORY history with no mapped work item and cannot be automatically resumed.
 - Mapped 88 explicitly represented concepts to existing bounded V3 work, preserved 7 source/factory items as FACTORY history, and marked 29 broad or unselected designs DEFERRED_DESIGN. No title-similarity inference activates work.
 - Added deterministic generation and validation. Every mapping target must exist in the authoritative 109-item V3 roadmap; multiple legacy concepts may map to one bounded V3 item, but no V3 dependency contains a legacy task ID.
-- Added explicit dry-run/apply CLI behavior. Apply requires local-write acknowledgement, never invokes a model, and is idempotent.
+- Added exact `tcfactory migrate-roadmap --from-v2 --dry-run` behavior plus a reviewed real apply path. Apply requires local-write acknowledgement, never invokes a model, and is idempotent.
 - Copied the exact stopped V2 queue into `factory/state/v3-queue/archive/v2/v2-20260811T212024Z-885df1dd93b8` with `autoResume: false`, while retaining the original three files byte-for-byte. The tracked archive receipt binds the source, copied files, manifest, STOP, PAUSE, and all empty V3 state directories.
 - Made startup fail closed unless the legacy ledger archive, mapping, V3 targets, and queue archive receipt all verify.
 - Marked V3-MIG-010 through V3-MIG-015 passed-engineering in the deterministic roadmap generator. Human work V3-MIG-016 remains WAITING_HUMAN.

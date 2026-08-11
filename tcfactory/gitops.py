@@ -8,6 +8,12 @@ from pathlib import Path
 from .models import CommitType, TaskPacket
 from .util import run_command, slugify
 
+_RUNTIME_ONLY_GIT_PATHS = (
+    ":(exclude,top).mcp.json",
+    ":(exclude,top)factory/.mcp.json",
+    ":(exclude,top)factory/.claude/**",
+)
+
 
 @dataclass(frozen=True)
 class Worktree:
@@ -119,11 +125,14 @@ def changed_files(worktree: Path, base_sha: str) -> list[str]:
 
 
 def commit_all(worktree: Path, message: str) -> str | None:
-    status = run_command(["git", "status", "--porcelain"], cwd=worktree).stdout.strip()
+    pathspecs = [".", *_RUNTIME_ONLY_GIT_PATHS]
+    status = run_command(
+        ["git", "status", "--porcelain", "--", *pathspecs], cwd=worktree
+    ).stdout.strip()
     if not status:
         return current_sha(worktree)
     git_identity(worktree)
-    run_command(["git", "add", "-A"], cwd=worktree)
+    run_command(["git", "add", "-A", "--", *pathspecs], cwd=worktree)
     run_command(["git", "commit", "-m", message], cwd=worktree)
     return current_sha(worktree)
 

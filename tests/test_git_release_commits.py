@@ -53,6 +53,35 @@ def test_commit_all_uses_operator_identity(tmp_path: Path) -> None:
     assert author == "Test User <test@example.com>"
 
 
+def test_commit_all_excludes_ephemeral_claude_runtime_scaffolding(tmp_path: Path) -> None:
+    base = _init_repo(tmp_path)
+    (tmp_path / ".mcp.json").write_text("", encoding="utf-8")
+    runtime_dir = tmp_path / "factory" / ".claude"
+    runtime_dir.mkdir(parents=True)
+    (runtime_dir / "settings.json").write_text("", encoding="utf-8")
+    (tmp_path / "factory" / ".mcp.json").write_text("", encoding="utf-8")
+    (tmp_path / "roadmap.yaml").write_text("status: paused\n", encoding="utf-8")
+
+    committed = commit_all(tmp_path, "update roadmap")
+
+    assert committed is not None
+    assert committed != base
+    committed_paths = run_command(
+        ["git", "show", "--pretty=", "--name-only", committed], cwd=tmp_path
+    ).stdout.splitlines()
+    assert committed_paths == ["roadmap.yaml"]
+    untracked = set(
+        run_command(
+            ["git", "ls-files", "--others", "--exclude-standard"], cwd=tmp_path
+        ).stdout.splitlines()
+    )
+    assert untracked == {
+        ".mcp.json",
+        "factory/.claude/settings.json",
+        "factory/.mcp.json",
+    }
+
+
 def test_changed_files_expands_directories_and_filters_only_empty_sentinels(
     tmp_path: Path,
 ) -> None:

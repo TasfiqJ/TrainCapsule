@@ -1,0 +1,21 @@
+version: 3
+trustedRootEnvironmentVariable: TCF_HUMAN_APPROVAL_ROOT
+allowRepositoryFallback: false
+requireSignature: true
+allowedSignatureAlgorithms:
+  - ed25519
+  - external-trusted-root
+requireExactCandidateSha: true
+requireArtifactDigests: true
+rejectExpired: true
+rejectSynthetic: true
+agentWritable: false
+scopes:
+  - SOURCE_OF_TRUTH_MIGRATION
+  - EXTERNAL_RELEASE
+  - COMMERCIAL_PACK_RELEASE
+  - TRUST_CORE_CHANGE
+  - SECURITY_BOUNDARY_CHANGE
+  - CUSTOMER_CLAIM
+  - ROADMAP_EXPANSION
+  - WEDGE_DECISION

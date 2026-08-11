@@ -1,96 +1,187 @@
-{
-  "version": 2,
-  "contexts": {
-    "company_product_brief": [
-      "docs/source-of-truth/final-2026-08-09/README.md",
-      "docs/source-of-truth/final-2026-08-09/00_EXECUTIVE_BUILD_DECISION.md",
-      "docs/source-of-truth/final-2026-08-09/03_PRODUCT_STRATEGY_AND_REQUIREMENTS.md",
-      "docs/source-of-truth/final-2026-08-09/04_TECHNICAL_ARCHITECTURE.md",
-      "docs/source-of-truth/final-2026-08-09/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC.md",
-      "docs/source-of-truth/final-2026-08-09/08_ACQUISITION_THESIS.md",
-      "docs/source-of-truth/final-2026-08-09/09_CAREER_AND_HIRING_THESIS.md",
-      "docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md",
-      "docs/source-of-truth/final-2026-08-09/13_SOURCE_REGISTER.md",
-      "docs/source-of-truth/final-2026-08-09/14_CLAUDE_CODE_MASTER_BUILD_PROMPT.md",
-      "docs/source-of-truth/final-2026-08-09/TRAINCAPSULE_FINAL_MASTER_PLAN.md",
-      "docs/source-of-truth/final-2026-08-09/SUPERSESSION_AND_MIGRATION.md",
-      "docs/source-of-truth/final-2026-08-09/FINAL_AUDIT_REPORT.md"
-    ],
-    "executive_decision": [
-      "docs/source-of-truth/final-2026-08-09/00_EXECUTIVE_BUILD_DECISION.md"
-    ],
-    "product_strategy": [
-      "docs/source-of-truth/final-2026-08-09/03_PRODUCT_STRATEGY_AND_REQUIREMENTS.md"
-    ],
-    "architecture": [
-      "docs/source-of-truth/final-2026-08-09/04_TECHNICAL_ARCHITECTURE.md"
-    ],
-    "trust_spec": [
-      "docs/source-of-truth/final-2026-08-09/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC.md"
-    ],
-    "roadmap": [
-      "docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md"
-    ],
-    "build_prompt": [
-      "docs/source-of-truth/final-2026-08-09/14_CLAUDE_CODE_MASTER_BUILD_PROMPT.md"
-    ],
-    "source_register": [
-      "docs/source-of-truth/final-2026-08-09/13_SOURCE_REGISTER.md"
-    ],
-    "security": [
-      "docs/source-of-truth/final-2026-08-09/04_TECHNICAL_ARCHITECTURE.md",
-      "docs/source-of-truth/final-2026-08-09/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC.md",
-      "SECURITY.md"
-    ],
-    "factory": [
-      "CLAUDE.md",
-      ".factory/README.md",
-      "SOURCE_PRECEDENCE.md"
-    ],
-    "acquisition": [
-      "docs/source-of-truth/final-2026-08-09/08_ACQUISITION_THESIS.md"
-    ],
-    "career": [
-      "docs/source-of-truth/final-2026-08-09/09_CAREER_AND_HIRING_THESIS.md"
-    ],
-    "product_definition": [
-      "docs/source-of-truth/final-2026-08-09/03_PRODUCT_STRATEGY_AND_REQUIREMENTS.md",
-      "factory/product_definition_of_done.yaml",
-      "config/value_policy.yaml"
-    ],
-    "source_authority": [
-      "SOURCE_PRECEDENCE.md",
-      "docs/CONTEXT_INDEX.yaml",
-      "docs/source-of-truth/final-2026-08-09/13_SOURCE_REGISTER.md"
-    ],
-    "research_evidence": [
-      "prompts/research.md",
-      "tcfactory/research_policy.py",
-      "scripts/gates/output_and_integration_gate.py"
-    ],
-    "coding_standards": [
-      "CLAUDE.md",
-      "pyproject.toml",
-      "docs/source-of-truth/final-2026-08-09/14_CLAUDE_CODE_MASTER_BUILD_PROMPT.md"
-    ],
-    "quality_policy": [
-      "tcfactory/quality_policy.py",
-      "scripts/gates/fast_quality.sh",
-      "factory/product_definition_of_done.yaml"
-    ],
-    "runtime_adapters": [
-      "docs/source-of-truth/final-2026-08-09/04_TECHNICAL_ARCHITECTURE.md",
-      "config/factory.yaml",
-      "config/claude_features.yaml"
-    ],
-    "performance": [
-      "docs/source-of-truth/final-2026-08-09/03_PRODUCT_STRATEGY_AND_REQUIREMENTS.md",
-      "docs/source-of-truth/final-2026-08-09/04_TECHNICAL_ARCHITECTURE.md",
-      "prompts/performance.md"
-    ],
-    "definition_of_done": [
-      "factory/product_definition_of_done.yaml",
-      "config/value_policy.yaml"
-    ]
-  }
-}
+version: 3
+activeBundle: docs/source-of-truth/v3-2026-08-11
+groups:
+  product_normative:
+    authorityClass: normative_product
+    scope: Bounded product definition, supported envelope, outputs, truth states, and claims.
+    includeRoles: [planner, specification, builder, adversary, milestone_auditor]
+    excludeRoles: [factory_repair]
+    freshnessPolicy: manifest_locked
+    entries:
+      - path: docs/source-of-truth/v3-2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3.md
+        authorityClass: normative_executive
+        scope: Company and build authorization.
+        includeRoles: [planner, specification, builder, adversary, milestone_auditor]
+        excludeRoles: [factory_repair]
+        freshnessPolicy: manifest_locked
+      - path: docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md
+        authorityClass: normative_product
+        scope: Product strategy and requirements.
+        includeRoles: [planner, specification, builder, adversary, milestone_auditor]
+        excludeRoles: [factory_repair]
+        freshnessPolicy: manifest_locked
+  technical_architecture:
+    authorityClass: normative_architecture
+    scope: Product architecture, interfaces, security, testing, and packaging.
+    includeRoles: [planner, specification, builder, integration_scout, adversary, security, performance]
+    excludeRoles: [market_research]
+    freshnessPolicy: manifest_locked
+    entries:
+      - path: docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md
+        authorityClass: normative_architecture
+        scope: Technical architecture.
+        includeRoles: [planner, specification, builder, integration_scout, adversary, security, performance]
+        excludeRoles: [market_research]
+        freshnessPolicy: manifest_locked
+  trust_core:
+    authorityClass: normative_trust
+    scope: Evidence, identity, reduction, recovery, qualification, approval, and claim law.
+    includeRoles: [planner, specification, builder, adversary, security, milestone_auditor]
+    excludeRoles: [market_research]
+    freshnessPolicy: manifest_locked
+    entries:
+      - path: docs/source-of-truth/v3-2026-08-11/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md
+        authorityClass: normative_trust
+        scope: Trust and qualification specification.
+        includeRoles: [planner, specification, builder, adversary, security, milestone_auditor]
+        excludeRoles: [market_research]
+        freshnessPolicy: manifest_locked
+  commercial:
+    authorityClass: normative_commercial
+    scope: Offer, ICP, evidence gates, claims, pricing hypotheses, and GTM boundaries.
+    includeRoles: [planner, market_research, native_substitute_reviewer, wedge_reviewer]
+    excludeRoles: [builder, factory_repair]
+    freshnessPolicy: manifest_locked
+    entries:
+      - path: docs/source-of-truth/v3-2026-08-11/06_COMMERCIAL_MODEL_AND_GTM_V3.md
+        authorityClass: normative_commercial
+        scope: Commercial model and validation plan.
+        includeRoles: [planner, market_research, native_substitute_reviewer, wedge_reviewer]
+        excludeRoles: [builder, factory_repair]
+        freshnessPolicy: manifest_locked
+  roadmap:
+    authorityClass: normative_roadmap
+    scope: Gate-based milestones, lanes, bounded backlog, and dispositions.
+    includeRoles: [planner, specification, milestone_auditor, wedge_reviewer]
+    excludeRoles: [factory_repair]
+    freshnessPolicy: manifest_locked
+    entries:
+      - path: docs/source-of-truth/v3-2026-08-11/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md
+        authorityClass: normative_roadmap
+        scope: Gate-based roadmap.
+        includeRoles: [planner, specification, milestone_auditor, wedge_reviewer]
+        excludeRoles: [factory_repair]
+        freshnessPolicy: manifest_locked
+  current_facts:
+    authorityClass: current_fact
+    scope: Dated upstream, native, competitor, and factory capability facts.
+    includeRoles: [planner, research, native_substitute_reviewer, wedge_reviewer, trust_reviewer]
+    excludeRoles: [factory_repair]
+    freshnessPolicy: recheck_before_customer_claim
+    entries:
+      - path: docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md
+        authorityClass: current_fact
+        scope: Current source and competitive register.
+        includeRoles: [planner, research, native_substitute_reviewer, wedge_reviewer, trust_reviewer]
+        excludeRoles: [factory_repair]
+        freshnessPolicy: recheck_before_customer_claim
+  factory_control:
+    authorityClass: normative_factory
+    scope: Bounded controller behavior, executor protocol, release, recovery, and operator controls.
+    includeRoles: [planner, factory_repair, milestone_auditor]
+    excludeRoles: [market_research]
+    freshnessPolicy: manifest_locked
+    entries:
+      - path: docs/source-of-truth/v3-2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md
+        authorityClass: normative_factory
+        scope: Factory redesign specification.
+        includeRoles: [planner, factory_repair, milestone_auditor]
+        excludeRoles: [market_research]
+        freshnessPolicy: manifest_locked
+      - path: docs/source-of-truth/v3-2026-08-11/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md
+        authorityClass: executor_policy
+        scope: Bounded Claude backend execution contract.
+        includeRoles: [planner, specification, builder, adversary, factory_repair]
+        excludeRoles: [market_research]
+        freshnessPolicy: manifest_locked
+  advisory_acquisition:
+    authorityClass: advisory
+    scope: Historical acquisition planning; never routine build authority.
+    includeRoles: [acquisition_advisory]
+    excludeRoles: [planner, specification, builder, adversary, factory_repair, milestone_auditor]
+    freshnessPolicy: on_explicit_request
+    entries: []
+  advisory_career:
+    authorityClass: advisory
+    scope: Historical career planning; never routine build authority.
+    includeRoles: [career_advisory]
+    excludeRoles: [planner, specification, builder, adversary, factory_repair, milestone_auditor]
+    freshnessPolicy: on_explicit_request
+    entries: []
+
+# Temporary compatibility aliases for V2 packet parsing. V3 groups above are canonical.
+contexts:
+  executive_decision:
+    - docs/source-of-truth/v3-2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3.md
+  product_strategy:
+    - docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md
+  product_definition:
+    - docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md
+  architecture:
+    - docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md
+  trust_spec:
+    - docs/source-of-truth/v3-2026-08-11/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md
+  commercial:
+    - docs/source-of-truth/v3-2026-08-11/06_COMMERCIAL_MODEL_AND_GTM_V3.md
+  roadmap:
+    - docs/source-of-truth/v3-2026-08-11/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md
+  source_register:
+    - docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md
+  current_facts:
+    - docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md
+  build_prompt:
+    - docs/source-of-truth/v3-2026-08-11/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md
+  factory:
+    - docs/source-of-truth/v3-2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md
+    - SOURCE_PRECEDENCE.md
+  factory_control:
+    - docs/source-of-truth/v3-2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md
+    - SOURCE_PRECEDENCE.md
+  source_authority:
+    - SOURCE_PRECEDENCE.md
+    - docs/CONTEXT_INDEX.yaml
+    - docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md
+  security:
+    - docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md
+    - docs/source-of-truth/v3-2026-08-11/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md
+    - SECURITY.md
+  research_evidence:
+    - prompts/research.md
+    - tcfactory/research_policy.py
+    - scripts/gates/output_and_integration_gate.py
+  coding_standards:
+    - docs/source-of-truth/v3-2026-08-11/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md
+    - CLAUDE.md
+    - pyproject.toml
+  quality_policy:
+    - tcfactory/quality_policy.py
+    - scripts/gates/fast_quality.sh
+  runtime_adapters:
+    - docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md
+    - config/factory.yaml
+    - config/claude_features.yaml
+  performance:
+    - docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md
+    - docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md
+  definition_of_done:
+    - docs/source-of-truth/v3-2026-08-11/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md
+  company_product_brief:
+    - docs/source-of-truth/v3-2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3.md
+    - docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md
+    - docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md
+    - docs/source-of-truth/v3-2026-08-11/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md
+    - docs/source-of-truth/v3-2026-08-11/06_COMMERCIAL_MODEL_AND_GTM_V3.md
+    - docs/source-of-truth/v3-2026-08-11/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md
+    - docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md
+    - docs/source-of-truth/v3-2026-08-11/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md
+    - docs/source-of-truth/v3-2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md

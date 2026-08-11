@@ -1,0 +1,98 @@
+{
+  "snapshotVersion": 1,
+  "capturedAt": "2026-08-11T21:20:24Z",
+  "repository": "/home/jasim/projects/traincapsule",
+  "branch": "main",
+  "head": "6b480232fa92b069103da44c475bd17bcb3e6bd1",
+  "origin": "https://github.com/TasfiqJ/TrainCapsule.git",
+  "safetyRef": "safety/traincapsule-v3-pre-migration-20260811T212024Z",
+  "controller": {
+    "status": "stopped",
+    "scheduledTask": "TrainCapsule Lights-Out Autopilot",
+    "scheduledTaskEnabled": false,
+    "singleInstanceLockReleased": true,
+    "pauseControlPresent": true,
+    "stopControlPresent": true
+  },
+  "queue": {
+    "summary": {
+      "pending": [],
+      "running": [],
+      "paused": ["T002"],
+      "done": ["T001"],
+      "failed": [],
+      "blocked": []
+    },
+    "files": [
+      {
+        "path": "factory/queue/done/T001.yaml",
+        "bytes": 8851,
+        "sha256": "f8eded6f36711a2dbe3bd4cc1597b5b825d5b46ef25694a6cfa50aaa6b50597a"
+      },
+      {
+        "path": "factory/queue/paused/T002.pause.json",
+        "bytes": 179,
+        "sha256": "c33258f5f9c3476de4b1835bff76893446560e5c714329007b6be83d154ff689"
+      },
+      {
+        "path": "factory/queue/paused/T002.yaml",
+        "bytes": 29744,
+        "sha256": "b11bb3d937ad0b85c7406076b577bcdaa6e4e3afcdd8a3fd4c7cc8a7ddbb0d04"
+      }
+    ]
+  },
+  "trackedInputs": [
+    {
+      "path": "factory/feature_ledger.yaml",
+      "bytes": 79523,
+      "sha256": "ab5d10c6718d3a9fdf53dd78cf0c387e995cd1723cf10b76fb53e14af559c994"
+    },
+    {
+      "path": "factory/task_catalog.yaml",
+      "bytes": 283357,
+      "sha256": "d6c2e8ac08ff0b7dc84504a7b6c56e1133fbcfc89ae85774dfcf670caef29e21"
+    },
+    {
+      "path": "factory/product_definition_of_done.yaml",
+      "bytes": 11628,
+      "sha256": "6b677831a297cb41aa4424ca7484e4abf3f9a242586264313146b14ac13a397c"
+    },
+    {
+      "path": "tasks/T002.yaml",
+      "bytes": 29744,
+      "sha256": "b11bb3d937ad0b85c7406076b577bcdaa6e4e3afcdd8a3fd4c7cc8a7ddbb0d04"
+    },
+    {
+      "path": "config/factory.yaml",
+      "bytes": 1898,
+      "sha256": "04d4e4c7dd4577d54b8905bc146a582799a4560f2ca4a01da6547d286a614833"
+    },
+    {
+      "path": "config/autonomy.yaml",
+      "bytes": 1478,
+      "sha256": "c20c173549200d7131481fdc36a334bc7de20ac6a3f9997062bd8b8a17c4197f"
+    }
+  ],
+  "runtimeStateTopLevel": [
+    {"path": "factory/state/autonomy.json", "bytes": 521, "sha256": "bbfa45ef374d2adcc6decd9ffe75288f3e5b7858276e752b5e7356b91da935b4"},
+    {"path": "factory/state/autopilot.lock", "bytes": 54, "sha256": "bd575fb6aa9bbff567c328ad9f000a0ca698485a09516e9512b87d089eb17afd"},
+    {"path": "factory/state/autopilot.pid", "bytes": 6, "sha256": "bde408b2880d3fc559d13da2bbff30f015176890b032eff8b10ce07a30a5a791"},
+    {"path": "factory/state/CALIBRATION_EVIDENCE.json", "bytes": 4822, "sha256": "5251b0c975334d52f15d8703e55b029c35c0c90202bde52e182052fd49959d86"},
+    {"path": "factory/state/CALIBRATION_PASSED", "bytes": 187, "sha256": "6d72e24f018986c08ee6e59f79008c4959650303e90a7a8ad773f286ddf3e47f"},
+    {"path": "factory/state/github-sync.json", "bytes": 299, "sha256": "4482efa6c79486708c1479cca72e2029ff7e9eaf185fc498d53c31509b3f5689"},
+    {"path": "factory/state/heartbeat.json", "bytes": 283, "sha256": "d38d6b042302c4c084bc9b50fc9212f19677c3ca33b324380e43095d1d1c72c2"},
+    {"path": "factory/state/ledger.json", "bytes": 2670283, "sha256": "ca8d1da306adcdfa345bbea9ec9b5f71492139046251a6e7067d6839a2f0c779"},
+    {"path": "factory/state/PAUSE", "bytes": 16, "sha256": "150a7945882f40a391273402fa1787abeb678080db0505463c24be2b1bb9445d"},
+    {"path": "factory/state/provenance.jsonl", "bytes": 96503, "sha256": "86ab318fe9c867ad101f9727f66d4c620a04c234d40b48e9d53447a1b5a37852"},
+    {"path": "factory/state/STOP", "bytes": 15, "sha256": "eacc76530ff96cf732b30a6ada9915e429827e0fc116102a797b9f54df90dc06"},
+    {"path": "factory/state/VERIFIED_REPAIR_RETRY_CONSUMED.json", "bytes": 383, "sha256": "71ce15ebac6e351138094f5e724fc09010eaacb072c89d68c8962e75b92c2b09"}
+  ],
+  "runtimeInventory": {
+    "factoryQueue": {"files": 3, "bytes": 38774},
+    "factoryStateRecursive": {"files": 283, "bytes": 6232507},
+    "factoryWorktreesRecursive": {"files": 34133, "bytes": 2195568494},
+    "factoryRecoveryRecursive": {"files": 17, "bytes": 194045},
+    "factoryCompletionRecursive": {"files": 0, "bytes": 0}
+  },
+  "preservation": "Runtime files, worktrees, candidate branches, logs, checkpoints, and evidence remain in place. This tracked record contains metadata and hashes only."
+}

@@ -1,0 +1,106 @@
+{
+  "manifestVersion": 3,
+  "bundleVersion": "v3-2026-08-11",
+  "generatedAt": "2026-08-11T20:26:41Z",
+  "migrationBaseSha": "6b480232fa92b069103da44c475bd17bcb3e6bd1",
+  "supersededBundle": "docs/source-of-truth/final-2026-08-09",
+  "hashAlgorithm": "sha256",
+  "canonicalization": {
+    "textEncoding": "utf-8",
+    "lineEndings": "lf",
+    "trailingNewline": true
+  },
+  "selfHashIncluded": false,
+  "normativeOrder": [
+    "00_EXECUTIVE_BUILD_DECISION_V3.md",
+    "03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md",
+    "04_TECHNICAL_ARCHITECTURE_V3.md",
+    "05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md",
+    "06_COMMERCIAL_MODEL_AND_GTM_V3.md",
+    "12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md",
+    "FACTORY_LOOP_REDESIGN_SPEC.md",
+    "14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md"
+  ],
+  "currentFactFiles": [
+    "13_SOURCE_REGISTER_V3.md"
+  ],
+  "files": [
+    {
+      "path": "README.md",
+      "logicalId": "readme",
+      "sha256": "a4d148e77547e31fb9180ffd20abcad8f6a667056ec65e0d3c5637cb089f5b06",
+      "bytes": 1301,
+      "authorityClass": "metadata"
+    },
+    {
+      "path": "00_EXECUTIVE_BUILD_DECISION_V3.md",
+      "logicalId": "00_executive_build_decision_v3",
+      "sha256": "292e0b1d7e3a6225db7ed70dae67cb7557cef2a5e91081bd7149f827a120d484",
+      "bytes": 15667,
+      "authorityClass": "normative_executive"
+    },
+    {
+      "path": "03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md",
+      "logicalId": "03_product_strategy_and_requirements_v3",
+      "sha256": "a1e4ab535d13296512e1a4f7385aee32b08bd9a297e5e9f0452c12a3a97678b3",
+      "bytes": 18897,
+      "authorityClass": "normative_product"
+    },
+    {
+      "path": "04_TECHNICAL_ARCHITECTURE_V3.md",
+      "logicalId": "04_technical_architecture_v3",
+      "sha256": "bdfcbbdcc9a3a5db534017fbde84cbf5e29b4941c2c753327c5fd62f34f7ff2f",
+      "bytes": 30734,
+      "authorityClass": "normative_architecture"
+    },
+    {
+      "path": "05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md",
+      "logicalId": "05_trust_replay_reduction_and_capsule_spec_v3",
+      "sha256": "3a521fdc41c8ff1a0378a8666a1a45a6fd83addce2420ab38dc1d6417c0c0d0c",
+      "bytes": 26434,
+      "authorityClass": "normative_trust"
+    },
+    {
+      "path": "06_COMMERCIAL_MODEL_AND_GTM_V3.md",
+      "logicalId": "06_commercial_model_and_gtm_v3",
+      "sha256": "21c204e3d2912d18dc30a456ca6694a1958a5490b2e9a593507a39bc326c5ace",
+      "bytes": 24429,
+      "authorityClass": "normative_commercial"
+    },
+    {
+      "path": "12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md",
+      "logicalId": "12_gate_based_roadmap_and_backlog_v3",
+      "sha256": "4a6c6c660581711ca44bbee7d43f37c2ce244c4f117c84ba1802c19385e5fb37",
+      "bytes": 23211,
+      "authorityClass": "normative_roadmap"
+    },
+    {
+      "path": "13_SOURCE_REGISTER_V3.md",
+      "logicalId": "13_source_register_v3",
+      "sha256": "dcc37f38e4071bc19ccc7607ca100ee39f2808485daa564a7337adb117551cef",
+      "bytes": 14560,
+      "authorityClass": "current_fact"
+    },
+    {
+      "path": "14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md",
+      "logicalId": "14_claude_code_master_build_prompt_v3",
+      "sha256": "d7377e6f1fe86a7a0a70d951ac11a47e717c6988ace97368567bcd343de6b0d5",
+      "bytes": 12104,
+      "authorityClass": "executor_policy"
+    },
+    {
+      "path": "FACTORY_LOOP_REDESIGN_SPEC.md",
+      "logicalId": "factory_loop_redesign_spec",
+      "sha256": "69500bdc0b9a42cd8bba6190912f5be3e2615189f0c8a9bd2f7c0b700f42cdc6",
+      "bytes": 30852,
+      "authorityClass": "normative_factory"
+    },
+    {
+      "path": "REPOSITORY_AUDIT_AND_FILE_CHANGE_MATRIX.md",
+      "logicalId": "repository_audit_and_file_change_matrix",
+      "sha256": "f7bf3f7c8c1abbbe76db4dc79e279de79c2e88081d442ac6cd9c393719a27f79",
+      "bytes": 49946,
+      "authorityClass": "audit_evidence"
+    }
+  ]
+}

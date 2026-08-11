@@ -304,20 +304,13 @@ def test_product_completion_requires_commercialization_ready_production_evidence
     )
 
 
-def test_company_product_brief_routes_the_supplied_business_and_build_corpus() -> None:
+def test_company_product_brief_routes_v3_without_advisory_material() -> None:
     contexts = load_yaml(ROOT / "docs/CONTEXT_INDEX.yaml")["contexts"]
     brief = set(contexts["company_product_brief"])
-    assert {
-        "docs/source-of-truth/final-2026-08-09/00_EXECUTIVE_BUILD_DECISION.md",
-        "docs/source-of-truth/final-2026-08-09/03_PRODUCT_STRATEGY_AND_REQUIREMENTS.md",
-        "docs/source-of-truth/final-2026-08-09/04_TECHNICAL_ARCHITECTURE.md",
-        "docs/source-of-truth/final-2026-08-09/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC.md",
-        "docs/source-of-truth/final-2026-08-09/08_ACQUISITION_THESIS.md",
-        "docs/source-of-truth/final-2026-08-09/09_CAREER_AND_HIRING_THESIS.md",
-        "docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md",
-        "docs/source-of-truth/final-2026-08-09/14_CLAUDE_CODE_MASTER_BUILD_PROMPT.md",
-        "docs/source-of-truth/final-2026-08-09/TRAINCAPSULE_FINAL_MASTER_PLAN.md",
-    }.issubset(brief)
+    assert len(brief) == 9
+    assert all("docs/source-of-truth/v3-2026-08-11/" in path for path in brief)
+    assert not any("ACQUISITION" in path or "CAREER" in path for path in brief)
+    assert not any("final-2026-08-09" in path for path in brief)
 
 
 def test_private_completion_gate_runs_outside_repository(

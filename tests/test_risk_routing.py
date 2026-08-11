@@ -1,7 +1,9 @@
 from __future__ import annotations
 
+import inspect
 from pathlib import Path
 
+from tcfactory.config import load_task
 from tcfactory.feature_ledger import FeatureItem
 from tcfactory.models import (
     Gate,
@@ -12,6 +14,7 @@ from tcfactory.models import (
     Stage,
     TaskPacket,
 )
+from tcfactory.pipeline import run_pipeline
 from tcfactory.risk import (
     CONTEXT_CHARS_PER_TOKEN,
     MIN_STAGE_WORK_TOKENS,
@@ -19,6 +22,8 @@ from tcfactory.risk import (
     effective_risk,
     load_risk_profiles,
     planning_pipeline,
+    required_task_budget_tokens,
+    with_working_token_reserve,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -133,6 +138,23 @@ def test_every_profile_reserves_working_tokens_after_maximum_context() -> None:
                 stage.max_context_chars + CONTEXT_CHARS_PER_TOKEN - 1
             ) // CONTEXT_CHARS_PER_TOKEN
             assert stage.task_budget_tokens >= context_tokens + MIN_STAGE_WORK_TOKENS
+
+
+def test_legacy_t002_release_receives_runtime_working_token_reserve() -> None:
+    """Recovered packets must benefit without rewriting their authority YAML."""
+    task = load_task(ROOT / "tasks/T002.yaml")
+    release = next(stage for stage in task.pipeline if stage.role == RoleName.RELEASE)
+
+    assert release.max_context_chars == 110_000
+    assert release.task_budget_tokens == 16_000
+    upgraded = with_working_token_reserve(release)
+    assert upgraded.task_budget_tokens == required_task_budget_tokens(110_000) == 51_500
+
+
+def test_pipeline_applies_runtime_working_token_reserve_before_stage_execution() -> None:
+    source = inspect.getsource(run_pipeline)
+
+    assert "with_working_token_reserve(task.pipeline[checkpoint.stage_index])" in source
 
 
 def test_integration_keeps_independent_specification_before_builder() -> None:

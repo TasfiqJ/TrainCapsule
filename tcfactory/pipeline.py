@@ -59,6 +59,7 @@ from .observability import append_event
 from .provenance import append_provenance
 from .quality_policy import QualityPolicyError, enforce_candidate_quality
 from .quota import AuthenticationPause, QuotaLimitPause
+from .risk import with_working_token_reserve
 from .util import run_command, utc_stamp, write_json
 from .value import ValueGateError, evaluate_value_contract
 
@@ -1130,7 +1131,8 @@ async def run_pipeline(
     console.rule(f"TrainCapsule AI Factory — {task.task_id} — {run_id}")
     try:
         while checkpoint.stage_index < len(task.pipeline):
-            stage = task.pipeline[checkpoint.stage_index]
+            stage = with_working_token_reserve(task.pipeline[checkpoint.stage_index])
+            task.pipeline[checkpoint.stage_index] = stage
             key = stage.role.value
             checkpoint.stage_attempts[key] = checkpoint.stage_attempts.get(key, 0) + 1
             attempt = checkpoint.stage_attempts[key]

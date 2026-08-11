@@ -164,6 +164,26 @@ def _mutating_stages(packet: TaskPacket, tier: RiskTier) -> list[Stage]:
     return [specifications[0] if specifications else proposed[-1]]
 
 
+def required_task_budget_tokens(context_chars: int) -> int:
+    """Return a task-token ceiling that preserves work room after cached context."""
+
+    context_token_estimate = (
+        context_chars + CONTEXT_CHARS_PER_TOKEN - 1
+    ) // CONTEXT_CHARS_PER_TOKEN
+    return context_token_estimate + MIN_STAGE_WORK_TOKENS
+
+
+def with_working_token_reserve(stage: Stage) -> Stage:
+    """Upgrade legacy packets whose context can consume their whole task budget."""
+
+    if stage.max_context_chars is None:
+        return stage
+    required = required_task_budget_tokens(stage.max_context_chars)
+    if (stage.task_budget_tokens or 0) >= required:
+        return stage
+    return stage.model_copy(update={"task_budget_tokens": required})
+
+
 def _apply_stage_profile(stage: Stage, profile: dict[str, Any], context_chars: int) -> Stage:
     override = _role_override(profile, stage.role)
     effective_context_chars = min(
@@ -177,12 +197,9 @@ def _apply_stage_profile(stage: Stage, profile: dict[str, Any], context_chars: i
     # Reserve a bounded working allowance after the maximum context payload. This is a
     # Max-subscription token ceiling only; it does not enable paid usage or raise the
     # controller's dollar caps.
-    context_token_estimate = (
-        effective_context_chars + CONTEXT_CHARS_PER_TOKEN - 1
-    ) // CONTEXT_CHARS_PER_TOKEN
     override["task_budget_tokens"] = max(
         int(override.get("task_budget_tokens") or 0),
-        context_token_estimate + MIN_STAGE_WORK_TOKENS,
+        required_task_budget_tokens(effective_context_chars),
     )
     override["context_keys"] = list(dict.fromkeys(stage.context_keys))
     return stage.model_copy(update=override)

@@ -26,6 +26,20 @@ _RANK = {
     RiskTier.TRUST_CORE: 3,
 }
 
+_SECURITY_WORDS = {
+    "security",
+    "sandbox",
+    "credential",
+    "secret",
+    "auth",
+    "oauth",
+    "containment",
+    "sanitization",
+    "air-gapped",
+    "private",
+    "supply-chain",
+    "signature",
+}
 _INTEGRATION_WORDS = {
     "adapter",
     "integration",
@@ -307,6 +321,7 @@ def apply_risk_profile(
                     read_only=True,
                     require_changes=False,
                     forbidden_paths=["**"],
+                    allowed_domains=list(owner.allowed_domains),
                     machine_gates=[],
                     context_keys=item.context_keys,
                 ),

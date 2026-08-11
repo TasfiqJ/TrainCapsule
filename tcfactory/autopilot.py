@@ -603,11 +603,19 @@ def _write_completion(repo_root: Path, config: FactoryConfig, ledger: FeatureLed
     path = repo_root / "factory" / "state" / "PRODUCT_BUILD_COMPLETE.json"
     audit_roots = sorted(config.resolve(repo_root, config.completion_dir).glob("*"))
     latest_audit = str(audit_roots[-1]) if audit_roots else None
+    main_sha = current_sha(repo_root, "main")
+    github_state = load_github_state(config.resolve(repo_root, config.github_state_path))
+    if github_state.pending or github_state.last_pushed_sha != main_sha:
+        raise AutopilotError(
+            "Product completion marker requires non-pending GitHub state bound to exact main SHA"
+        )
     write_json(
         path,
         {
             "completion_audit_root": latest_audit,
             "completed_at": _now().isoformat(),
+            "main_sha": main_sha,
+            "github_synced_sha": github_state.last_pushed_sha,
             "target": "product_build",
             "passed_tasks": [item.task_id for item in ledger.tasks if item.status == "passed"],
             "external_wait": [
@@ -622,6 +630,22 @@ def _write_completion(repo_root: Path, config: FactoryConfig, ledger: FeatureLed
         },
     )
     return path
+
+
+def _completion_marker_is_final(repo_root: Path, config: FactoryConfig) -> bool:
+    marker = repo_root / "factory" / "state" / "PRODUCT_BUILD_COMPLETE.json"
+    if not marker.is_file():
+        return False
+    payload = read_json(marker, {})
+    marker_sha = payload.get("main_sha")
+    if not isinstance(marker_sha, str):
+        return False
+    github_state = load_github_state(config.resolve(repo_root, config.github_state_path))
+    return (
+        not github_state.pending
+        and github_state.last_pushed_sha == marker_sha
+        and current_sha(repo_root, "main") == marker_sha
+    )
 
 
 @dataclass(frozen=True)
@@ -974,13 +998,18 @@ async def _run_autopilot_inner(
         state.current_action = "automatic independent repair retry"
         save_state(repo_root, factory, state)
     existing_completion = repo_root / "factory" / "state" / "PRODUCT_BUILD_COMPLETE.json"
-    if existing_completion.exists():
+    if _completion_marker_is_final(repo_root, factory):
         state.status = "complete"
         state.active_task_id = None
         state.current_action = None
         state.last_event = f"existing product completion marker: {existing_completion}"
         save_state(repo_root, factory, state)
         return
+    if existing_completion.exists():
+        # A prior version wrote this marker before required main CI completed. Preserve
+        # fail-closed restart semantics: pending GitHub state invalidates the marker and
+        # the normal completion path will recreate it only after exact-SHA CI succeeds.
+        existing_completion.unlink()
     _prepare_restart_state(state)
     save_state(repo_root, factory, state)
     append_event(
@@ -1248,7 +1277,6 @@ async def _run_autopilot_inner(
                     return
                 continue
 
-            complete_path = _write_completion(repo_root, factory, ledger)
             try:
                 github_result = _sync_github_best_effort(
                     repo_root=repo_root,
@@ -1263,6 +1291,28 @@ async def _run_autopilot_inner(
                 save_state(repo_root, factory, state)
                 _notify(autonomy, state.last_event)
                 return
+            if github_result.get("error"):
+                state.status = "waiting_github"
+                state.current_action = "finish exact-SHA main CI before product completion"
+                state.next_wake_at = _now() + timedelta(
+                    seconds=autonomy.hard_stuck_retry_seconds
+                )
+                state.last_event = (
+                    "Product completion proof passed, but GitHub synchronization or required "
+                    f"CI is still pending: {github_result.get('error')}"
+                )
+                save_state(repo_root, factory, state)
+                if once:
+                    return
+                await _wait_until(
+                    repo_root=repo_root,
+                    factory=factory,
+                    autonomy=autonomy,
+                    state=state,
+                    wake_at=state.next_wake_at,
+                )
+                continue
+            complete_path = _write_completion(repo_root, factory, ledger)
             state.status = "complete"
             state.active_task_id = None
             state.current_action = None

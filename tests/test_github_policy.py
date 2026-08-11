@@ -14,6 +14,7 @@ from tcfactory.github_sync import (
     push_main_with_retry,
     record_verified_task,
     should_push,
+    wait_for_remote_ci,
 )
 from tcfactory.models import RiskTier
 
@@ -108,3 +109,93 @@ def test_push_helper_executes_only_the_full_main_refspec(
             "refs/heads/main:refs/heads/main",
         ]
     ]
+
+
+def test_remote_ci_uses_only_newest_main_push_for_exact_sha(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    sha = "a" * 40
+    runs: list[dict[str, Any]] = [
+        {
+            "databaseId": 10,
+            "status": "completed",
+            "conclusion": "failure",
+            "workflowName": "AI factory quality",
+            "headSha": sha,
+            "headBranch": "main",
+            "event": "push",
+            "createdAt": "2026-08-11T10:00:00Z",
+            "url": "https://example.test/old",
+        },
+        {
+            "databaseId": 11,
+            "status": "completed",
+            "conclusion": "success",
+            "workflowName": "AI factory quality",
+            "headSha": sha,
+            "headBranch": "main",
+            "event": "push",
+            "createdAt": "2026-08-11T10:01:00Z",
+            "url": "https://example.test/new",
+        },
+        {
+            "databaseId": 12,
+            "status": "completed",
+            "conclusion": "success",
+            "workflowName": "AI factory quality",
+            "headSha": sha,
+            "headBranch": "feature",
+            "event": "pull_request",
+            "createdAt": "2026-08-11T10:02:00Z",
+            "url": "https://example.test/pr",
+        },
+    ]
+    def fake_runs(_repo_root: Path, _sha: str) -> list[dict[str, Any]]:
+        return runs
+
+    monkeypatch.setattr("tcfactory.github_sync._workflow_runs", fake_runs)
+
+    result = wait_for_remote_ci(
+        tmp_path,
+        GitHubConfig(enabled=True),
+        sha,
+        not_before=datetime(2026, 8, 11, 10, 0, 30, tzinfo=UTC),
+    )
+
+    assert result["status"] == "pass"
+    assert [run["databaseId"] for run in result["runs"]] == [11]
+
+
+def test_remote_ci_rejects_latest_failed_push_even_if_old_run_passed(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    sha = "b" * 40
+    runs: list[dict[str, Any]] = [
+        {
+            "databaseId": 20,
+            "status": "completed",
+            "conclusion": "success",
+            "workflowName": "AI factory quality",
+            "headSha": sha,
+            "headBranch": "main",
+            "event": "push",
+            "createdAt": "2026-08-11T10:00:00Z",
+        },
+        {
+            "databaseId": 21,
+            "status": "completed",
+            "conclusion": "failure",
+            "workflowName": "AI factory quality",
+            "headSha": sha,
+            "headBranch": "main",
+            "event": "push",
+            "createdAt": "2026-08-11T10:01:00Z",
+        },
+    ]
+    def fake_runs(_repo_root: Path, _sha: str) -> list[dict[str, Any]]:
+        return runs
+
+    monkeypatch.setattr("tcfactory.github_sync._workflow_runs", fake_runs)
+
+    with pytest.raises(GitHubSyncError, match="failed"):
+        wait_for_remote_ci(tmp_path, GitHubConfig(enabled=True), sha)

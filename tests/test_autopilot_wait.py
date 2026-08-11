@@ -7,6 +7,7 @@ from typing import cast
 import pytest
 
 from tcfactory import autopilot
+from tcfactory.github_sync import GitHubSyncState, save_github_state
 from tcfactory.models import AutonomyConfig, AutonomyState, FactoryConfig
 
 
@@ -115,3 +116,49 @@ def test_timed_wait_refreshes_visible_state_while_sleeping(
     assert result == "elapsed"
     assert saved
     assert saved[0].next_wake_at == wake_at
+
+
+def test_completion_marker_is_not_final_while_main_ci_is_pending(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    factory = FactoryConfig()
+    sha = "a" * 40
+
+    def fake_current_sha(_repo_root: Path, _ref: str = "HEAD") -> str:
+        return sha
+
+    monkeypatch.setattr(autopilot, "current_sha", fake_current_sha)
+    marker = tmp_path / "factory/state/PRODUCT_BUILD_COMPLETE.json"
+    marker.parent.mkdir(parents=True)
+    marker.write_text(f'{{"main_sha": "{sha}"}}\n', encoding="utf-8")
+    github_state = factory.resolve(tmp_path, factory.github_state_path)
+    save_github_state(
+        github_state,
+        GitHubSyncState(pending=True, last_pushed_sha=sha),
+    )
+
+    assert (
+        autopilot._completion_marker_is_final(  # pyright: ignore[reportPrivateUsage]
+            tmp_path, factory
+        )
+        is False
+    )
+
+    save_github_state(
+        github_state,
+        GitHubSyncState(pending=False, last_pushed_sha=sha),
+    )
+    assert autopilot._completion_marker_is_final(  # pyright: ignore[reportPrivateUsage]
+        tmp_path, factory
+    )
+
+    save_github_state(
+        github_state,
+        GitHubSyncState(pending=False, last_pushed_sha="b" * 40),
+    )
+    assert (
+        autopilot._completion_marker_is_final(  # pyright: ignore[reportPrivateUsage]
+            tmp_path, factory
+        )
+        is False
+    )

@@ -21,6 +21,7 @@ from tcfactory.pipeline import (
     review_failure_fingerprint,
     route_repair_findings,
 )
+from tcfactory.stage_policy import normalize_claude_led_nodes
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -170,3 +171,47 @@ def test_existing_valid_candidate_is_not_forced_to_create_a_cosmetic_diff() -> N
     source = inspect.getsource(_execute_stage)
     assert "declared PASS but produced no repository change" not in source
     assert "Deterministic gates, not file motion" in source
+
+
+def test_cold_restart_upgrades_legacy_serial_model_chain() -> None:
+    task = TaskPacket(
+        task_id="T900",
+        title="Ship a supported API",
+        phase="P0",
+        goal="Deliver first value through the real API",
+        source_of_truth=["README.md"],
+        acceptance_criteria=["The supported API completes the user job"],
+        outputs=["packages/api/service.py"],
+        stop_conditions=["Authority missing"],
+        gates=[Gate(name="quality", command="true")],
+        pipeline=[
+            Stage(
+                role=RoleName.BUILDER,
+                allowed_paths=["packages/**"],
+                forbidden_paths=["docs/source-of-truth/**"],
+                allowed_domains=["example.test"],
+                machine_gates=["quality"],
+                require_changes=True,
+            ),
+            Stage(role=RoleName.ADVERSARY, read_only=True, forbidden_paths=["**"]),
+            Stage(role=RoleName.AUDIT, read_only=True, forbidden_paths=["**"]),
+            Stage(role=RoleName.RELEASE, read_only=True, forbidden_paths=["**"]),
+        ],
+    )
+
+    normalized = normalize_claude_led_nodes(task)
+
+    assert [stage.role for stage in normalized.pipeline] == [
+        RoleName.BUILDER,
+        RoleName.ADVERSARY,
+    ]
+    owner, verifier = normalized.pipeline
+    assert owner.allowed_paths == ["**"]
+    assert "tcfactory/**" in owner.forbidden_paths
+    assert owner.require_changes is False
+    assert owner.machine_gates == ["quality"]
+    assert verifier.allowed_domains == ["example.test"]
+    assert verifier.machine_gates == []
+    assert normalized.gates[0].stages == [RoleName.BUILDER]
+    assert normalized.repair.mutating_role == RoleName.BUILDER
+    assert normalized.repair.restart_review_from == RoleName.ADVERSARY

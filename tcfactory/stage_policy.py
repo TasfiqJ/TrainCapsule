@@ -136,6 +136,82 @@ def objective_stage_criteria(role: RoleName) -> list[str]:
     return [*COMMON_OBJECTIVE_CRITERIA, *ROLE_OBJECTIVE_CRITERIA.get(role, ())]
 
 
+def normalize_claude_led_nodes(packet: TaskPacket) -> TaskPacket:
+    """Upgrade persisted legacy packets to the current owner/proof node contract.
+
+    Queue packets and crash checkpoints can outlive the controller process that created
+    them.  A cold restart must not resurrect the former planner -> builder -> several
+    reviewer -> release model chain merely because that older shape was serialized before
+    a controller upgrade.  Product decisions remain with one writable Claude owner; one
+    blind adversary challenges the candidate; deterministic/private/value/CI gates retain
+    release authority.
+    """
+
+    writable = [
+        stage
+        for stage in packet.pipeline
+        if stage.role not in REVIEW_ROLES and stage.read_only is not True
+    ]
+    if not writable:
+        return packet
+
+    preferred_role = packet.repair.mutating_role
+    owner = next(
+        (stage for stage in reversed(writable) if stage.role == preferred_role),
+        writable[-1],
+    )
+    internal_task = packet.task_id.startswith(("PLAN_", "FACTORY_REPAIR_"))
+    if internal_task:
+        owner_paths = list(owner.allowed_paths)
+        owner_forbidden = list(owner.forbidden_paths)
+    else:
+        owner_paths = ["**"]
+        owner_forbidden = list(
+            dict.fromkeys([*owner.forbidden_paths, *sorted(PRODUCT_PROTECTED_PATHS)])
+        )
+
+    required_gates = [gate.name for gate in packet.gates if gate.required]
+    owner = owner.model_copy(
+        update={
+            "read_only": False,
+            "require_changes": False,
+            "allowed_paths": owner_paths,
+            "forbidden_paths": owner_forbidden,
+            "machine_gates": required_gates,
+        }
+    )
+    stages = [owner]
+
+    if packet.risk_tier != RiskTier.MECHANICAL and not packet.task_id.startswith("PLAN_"):
+        prior_adversary = next(
+            (stage for stage in packet.pipeline if stage.role == RoleName.ADVERSARY),
+            Stage(role=RoleName.ADVERSARY),
+        )
+        stages.append(
+            prior_adversary.model_copy(
+                update={
+                    "read_only": True,
+                    "require_changes": False,
+                    "allowed_paths": [],
+                    "forbidden_paths": ["**"],
+                    "allowed_domains": list(owner.allowed_domains),
+                    "machine_gates": [],
+                }
+            )
+        )
+
+    gates = [gate.model_copy(update={"stages": [owner.role]}) for gate in packet.gates]
+    repair = packet.repair.model_copy(
+        update={
+            "mutating_role": owner.role,
+            "restart_review_from": (
+                RoleName.ADVERSARY if len(stages) > 1 else owner.role
+            ),
+        }
+    )
+    return packet.model_copy(update={"pipeline": stages, "gates": gates, "repair": repair})
+
+
 def apply_objective_stage_contracts(packet: TaskPacket) -> TaskPacket:
     stages: list[Stage] = []
     required_gates = [gate.name for gate in packet.gates if gate.required]

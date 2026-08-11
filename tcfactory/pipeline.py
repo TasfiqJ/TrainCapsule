@@ -67,6 +67,7 @@ from .risk import with_working_token_reserve
 from .stage_policy import (
     PRODUCT_PROTECTED_PATHS,
     apply_objective_stage_contracts,
+    normalize_claude_led_nodes,
     objective_pipeline_errors,
 )
 from .util import path_matches, run_command, utc_stamp, write_json
@@ -1453,6 +1454,8 @@ async def run_pipeline(
     resume: bool = True,
 ) -> dict[str, object]:
     repo_root = repo_root.resolve()
+    if config.execution_mode == "claude_led_nodes":
+        task = normalize_claude_led_nodes(task)
     task = apply_objective_stage_contracts(task)
     contract_errors = objective_pipeline_errors(task)
     if contract_errors:

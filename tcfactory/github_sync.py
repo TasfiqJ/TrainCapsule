@@ -3,7 +3,7 @@ from __future__ import annotations
 import json
 import shutil
 import time
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, Literal, cast
 
@@ -248,7 +248,7 @@ def _workflow_runs(repo_root: Path, sha: str) -> list[dict[str, Any]]:
             "--limit",
             "30",
             "--json",
-            "databaseId,status,conclusion,workflowName,headSha,url",
+            "databaseId,status,conclusion,workflowName,headSha,headBranch,event,createdAt,url",
         ],
         cwd=repo_root,
         check=False,
@@ -262,7 +262,23 @@ def _workflow_runs(repo_root: Path, sha: str) -> list[dict[str, Any]]:
     return cast(list[dict[str, Any]], value) if isinstance(value, list) else []
 
 
-def wait_for_remote_ci(repo_root: Path, config: GitHubConfig, sha: str) -> dict[str, Any]:
+def _run_created_at(run: dict[str, Any]) -> datetime | None:
+    value = run.get("createdAt")
+    if not isinstance(value, str):
+        return None
+    try:
+        return datetime.fromisoformat(value.replace("Z", "+00:00"))
+    except ValueError:
+        return None
+
+
+def wait_for_remote_ci(
+    repo_root: Path,
+    config: GitHubConfig,
+    sha: str,
+    *,
+    not_before: datetime | None = None,
+) -> dict[str, Any]:
     ci = config.remote_ci
     deadline = time.monotonic() + ci.timeout_seconds
     last_runs: list[dict[str, Any]] = []
@@ -270,21 +286,38 @@ def wait_for_remote_ci(repo_root: Path, config: GitHubConfig, sha: str) -> dict[
         runs = [
             run
             for run in _workflow_runs(repo_root, sha)
-            if run.get("workflowName") == ci.workflow_name and run.get("headSha") == sha
+            if run.get("workflowName") == ci.workflow_name
+            and run.get("headSha") == sha
+            and run.get("headBranch") == config.branch
+            and run.get("event") == "push"
+            and (
+                not_before is None
+                or (
+                    (created_at := _run_created_at(run)) is not None
+                    and created_at >= not_before
+                )
+            )
         ]
-        last_runs = runs
+        runs.sort(
+            key=lambda run: (
+                _run_created_at(run) or datetime.min.replace(tzinfo=UTC),
+                int(run.get("databaseId") or 0),
+            ),
+            reverse=True,
+        )
+        latest = runs[:1]
+        last_runs = latest
         if not runs:
             time.sleep(ci.poll_seconds)
             continue
-        if any(run.get("status") != "completed" for run in runs):
+        if latest[0].get("status") != "completed":
             time.sleep(ci.poll_seconds)
             continue
-        failures = [run for run in runs if run.get("conclusion") != "success"]
-        if failures:
+        if latest[0].get("conclusion") != "success":
             raise RemoteCIFailure(
-                f"Remote workflow {ci.workflow_name!r} failed for {sha[:12]}: {failures}"
+                f"Remote workflow {ci.workflow_name!r} failed for {sha[:12]}: {latest}"
             )
-        return {"status": "pass", "runs": runs}
+        return {"status": "pass", "runs": latest}
     message = (
         f"Timed out waiting for workflow {ci.workflow_name!r} on {sha[:12]}; "
         f"last observed runs: {last_runs}"
@@ -350,7 +383,9 @@ def sync_github(
     try:
         _pre_push_checks(repo_root)
         _ensure_no_divergence(repo_root, config, local_sha)
+        pushed_at: datetime | None = None
         if _remote_sha(repo_root, config) != local_sha:
+            pushed_at = datetime.now(UTC) - timedelta(seconds=30)
             push_main_with_retry(
                 repo_root,
                 config,
@@ -364,7 +399,12 @@ def sync_github(
                 )
         main_ci: dict[str, Any] | None = None
         if config.remote_ci.enabled and config.wait_for_main_ci_after_push:
-            main_ci = wait_for_remote_ci(repo_root, config, local_sha)
+            main_ci = wait_for_remote_ci(
+                repo_root,
+                config,
+                local_sha,
+                not_before=pushed_at,
+            )
         state.tasks_since_push = 0
         state.last_push_at = now
         state.last_pushed_sha = local_sha
@@ -418,13 +458,21 @@ def run_remote_ci(
         )
     _ensure_no_divergence(repo_root, config, candidate_sha)
     artifact_dir.mkdir(parents=True, exist_ok=True)
-    push_main_with_retry(
-        repo_root,
-        config,
-        "refs/heads/main:refs/heads/main",
-    )
+    pushed_at: datetime | None = None
+    if _remote_sha(repo_root, config) != candidate_sha:
+        pushed_at = datetime.now(UTC) - timedelta(seconds=30)
+        push_main_with_retry(
+            repo_root,
+            config,
+            "refs/heads/main:refs/heads/main",
+        )
     try:
-        result = wait_for_remote_ci(repo_root, config, candidate_sha)
+        result = wait_for_remote_ci(
+            repo_root,
+            config,
+            candidate_sha,
+            not_before=pushed_at,
+        )
         payload: dict[str, object] = {
             "required": True,
             "status": "pass",

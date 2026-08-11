@@ -67,7 +67,12 @@ def _ledger(item: FeatureItem) -> FeatureLedger:
     return FeatureLedger(source_of_truth="test", tasks=[item])
 
 
-def _run_respec(repo: Path, item: FeatureItem, error_text: str) -> RespecOutcome:
+def _run_respec(
+    repo: Path,
+    item: FeatureItem,
+    error_text: str,
+    autonomy: AutonomyConfig | None = None,
+) -> RespecOutcome:
     config = load_factory_config(repo / "config/factory.yaml")
     dirs = queue_dirs(repo, config)
     (dirs["failed"] / "T001.error.txt").write_text(error_text, encoding="utf-8")
@@ -75,7 +80,7 @@ def _run_respec(repo: Path, item: FeatureItem, error_text: str) -> RespecOutcome
         respec_failed_item(
             repo_root=repo,
             factory=config,
-            autonomy=AutonomyConfig(),
+            autonomy=autonomy or AutonomyConfig(),
             ledger=_ledger(item),
             item=item,
         )
@@ -126,6 +131,35 @@ def test_value_redesign_ceiling_reports_its_own_cause(tmp_path: Path) -> None:
     assert "Material-value redesign ceiling reached" in outcome.block_reason
     assert "Material-value redesign ceiling reached" in reason
     assert outcome.evidence_path == "factory/queue/failed/T001.error.txt"
+
+
+def test_zero_respec_and_value_limits_mean_work_until_done(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _repo(tmp_path)
+    item = _item(revisions=100, value_revisions=100, notes=[])
+    autonomy = AutonomyConfig(max_respecifications_per_task=0, value_redesign_limit=0)
+    monkeypatch.setattr("tcfactory.autopilot.commit_all", _noop_commit_all)
+    monkeypatch.setattr("tcfactory.autopilot.save_feature_ledger", _noop_save_feature_ledger)
+    monkeypatch.setattr(
+        "tcfactory.autopilot.create_and_promote_task_packet",
+        _stub_create_and_promote_task_packet,
+    )
+
+    outcome = _run_respec(
+        repo,
+        item,
+        "PipelineFailure: material-value gate rejected the predeclared threshold.",
+        autonomy,
+    )
+
+    assert outcome.changed is True
+    assert outcome.block_reason is None
+    assert item.status == "ready"
+    assert item.terminal_blocked is False
+    assert item.revisions == 101
+    assert item.value_revisions == 101
+    assert any("Value redesign 101/unlimited" in note for note in item.notes)
 
 
 def _noop_commit_all(*args: object, **kwargs: object) -> None:

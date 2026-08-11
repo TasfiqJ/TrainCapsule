@@ -54,6 +54,27 @@ class AutopilotError(RuntimeError):
     pass
 
 
+def _finite_ceiling_reached(current: int, ceiling: int) -> bool:
+    """Return whether a configured finite ceiling is exhausted.
+
+    Autonomy limits use zero to mean unlimited. Infrastructure recovery remains bounded
+    separately so a session rotates into a fresh specification instead of repeating the
+    identical execution forever.
+    """
+
+    return ceiling > 0 and current >= ceiling
+
+
+def _finite_ceiling_exceeded(current: int, ceiling: int) -> bool:
+    """Return whether a configured finite inclusive ceiling was exceeded."""
+
+    return ceiling > 0 and current > ceiling
+
+
+def _ceiling_label(ceiling: int) -> str:
+    return str(ceiling) if ceiling > 0 else "unlimited"
+
+
 def is_external_evidence_block(error: str) -> bool:
     """Recognize a truthful external wait without treating it as broken code."""
 
@@ -778,7 +799,7 @@ async def respec_failed_item(
         save_feature_ledger(factory.resolve(repo_root, factory.feature_ledger_path), ledger)
         commit_all(repo_root, f"recover infrastructure {item.task_id.lower()}")
         return RespecOutcome(changed=True)
-    if current >= ceiling:
+    if _finite_ceiling_reached(current, ceiling):
         item.status = "blocked"
         item.terminal_blocked = True
         if infrastructure_exhausted:
@@ -816,13 +837,14 @@ async def respec_failed_item(
     item.terminal_blocked = False
     if value_failure:
         item.notes.append(
-            f"Value redesign {item.value_revisions}/{autonomy.value_redesign_limit}: preserve the "
+            f"Value redesign {item.value_revisions}/"
+            f"{_ceiling_label(autonomy.value_redesign_limit)}: preserve the "
             "predeclared customer outcome and threshold; change the mechanism rather than lowering "
             "the bar after observing the result."
         )
     else:
         item.notes.append(
-            f"Revision {item.revisions} requested after bounded pipeline failure; preserve the "
+            f"Revision {item.revisions} requested after verified pipeline failure; preserve the "
             "original outcome and strengthen specification/gates."
         )
     for queue_state in ("failed", "blocked"):
@@ -1147,14 +1169,16 @@ async def _run_autopilot_inner(
                 )
                 if (
                     not autonomy.auto_expand_roadmap
-                    or expansion_count > autonomy.max_completion_expansions
+                    or _finite_ceiling_exceeded(
+                        expansion_count, autonomy.max_completion_expansions
+                    )
                 ):
                     state.status = "blocked"
                     state.blocked_tasks = ["PRODUCT_COMPLETION"]
                     state.last_event = (
                         "Completion audit found additional work, but automatic roadmap "
                         f"expansion is disabled or exceeded its ceiling ({expansion_count}/"
-                        f"{autonomy.max_completion_expansions})."
+                        f"{_ceiling_label(autonomy.max_completion_expansions)})."
                     )
                     save_state(repo_root, factory, state)
                     _notify(autonomy, state.last_event)

@@ -440,7 +440,12 @@ class AutonomyConfig(BaseModel):
     auto_repair_factory: bool = True
     max_self_repair_attempts: int = Field(default=3, ge=0, le=5)
     allow_paid_usage: Literal[False] = False
-    max_respecifications_per_task: int = Field(default=3, ge=0, le=10)
+    max_respecifications_per_task: int = Field(
+        default=3,
+        ge=0,
+        le=10,
+        description="Finite task re-specification ceiling; zero means work until done.",
+    )
     max_consecutive_infrastructure_recoveries: int = Field(default=2, ge=0, le=10)
     idle_poll_seconds: int = Field(default=60, ge=5, le=3600)
     quota_reset_buffer_seconds: int = Field(default=0, ge=0, le=3600)
@@ -457,14 +462,24 @@ class AutonomyConfig(BaseModel):
     external_blocker_sleep_seconds: int = Field(default=3600, ge=60, le=86_400)
     auto_expand_roadmap: bool = True
     completion_audits_required: int = Field(default=2, ge=2, le=3)
-    max_completion_expansions: int = Field(default=5, ge=0, le=20)
+    max_completion_expansions: int = Field(
+        default=5,
+        ge=0,
+        le=20,
+        description="Finite completion-roadmap expansion ceiling; zero means unlimited.",
+    )
     github_sync_enabled: bool = True
     push_after_verified_tasks: int = Field(default=3, ge=1, le=50)
     push_interval_seconds: int = Field(default=1800, ge=60, le=86_400)
     push_before_quota_pause: bool = True
     push_on_integration_or_trust_task: bool = True
     push_at_completion: bool = True
-    value_redesign_limit: int = Field(default=2, ge=0, le=5)
+    value_redesign_limit: int = Field(
+        default=2,
+        ge=0,
+        le=5,
+        description="Finite material-value redesign ceiling; zero means work until done.",
+    )
     heartbeat_seconds: int = Field(default=30, ge=5, le=3600)
     peer_cohort_timeout_seconds: int = Field(default=1200, ge=60, le=7200)
 

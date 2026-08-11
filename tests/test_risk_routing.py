@@ -12,7 +12,14 @@ from tcfactory.models import (
     Stage,
     TaskPacket,
 )
-from tcfactory.risk import apply_risk_profile, effective_risk, load_risk_profiles, planning_pipeline
+from tcfactory.risk import (
+    CONTEXT_CHARS_PER_TOKEN,
+    MIN_STAGE_WORK_TOKENS,
+    apply_risk_profile,
+    effective_risk,
+    load_risk_profiles,
+    planning_pipeline,
+)
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -105,6 +112,27 @@ def test_mechanical_planning_omits_expensive_adversary() -> None:
     stages, _, _ = planning_pipeline(item, profiles)
     assert [stage.role for stage in stages] == [RoleName.PLANNER]
     assert all(stage.model == "haiku" for stage in stages)
+
+
+def test_every_profile_reserves_working_tokens_after_maximum_context() -> None:
+    """A context payload must not consume the role's entire task-token allowance."""
+    profiles = load_risk_profiles(ROOT / "config/risk_profiles.yaml")
+    for tier in RiskTier:
+        item = FeatureItem(
+            task_id=f"PLAN_{tier.value.upper()}",
+            outcome="Plan a bounded regression task",
+            lead_role="Planner",
+            phase="test",
+            risk_tier=tier,
+        )
+        stages, _, _ = planning_pipeline(item, profiles)
+        for stage in stages:
+            assert stage.max_context_chars is not None
+            assert stage.task_budget_tokens is not None
+            context_tokens = (
+                stage.max_context_chars + CONTEXT_CHARS_PER_TOKEN - 1
+            ) // CONTEXT_CHARS_PER_TOKEN
+            assert stage.task_budget_tokens >= context_tokens + MIN_STAGE_WORK_TOKENS
 
 
 def test_integration_keeps_independent_specification_before_builder() -> None:

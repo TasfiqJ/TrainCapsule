@@ -16,6 +16,9 @@ from .models import (
 )
 from .yamlutil import load_yaml
 
+CONTEXT_CHARS_PER_TOKEN = 4
+MIN_STAGE_WORK_TOKENS = 24_000
+
 _RANK = {
     RiskTier.MECHANICAL: 0,
     RiskTier.STANDARD: 1,
@@ -163,9 +166,23 @@ def _mutating_stages(packet: TaskPacket, tier: RiskTier) -> list[Stage]:
 
 def _apply_stage_profile(stage: Stage, profile: dict[str, Any], context_chars: int) -> Stage:
     override = _role_override(profile, stage.role)
-    override["max_context_chars"] = min(
+    effective_context_chars = min(
         stage.max_context_chars or context_chars,
         context_chars,
+    )
+    override["max_context_chars"] = effective_context_chars
+    # Claude's task budget includes the cache-creation tokens for controller-provided
+    # context. Several live planner/reviewer sessions consumed ~24k tokens before their
+    # first tool call, leaving only hundreds of tokens under the old profile values.
+    # Reserve a bounded working allowance after the maximum context payload. This is a
+    # Max-subscription token ceiling only; it does not enable paid usage or raise the
+    # controller's dollar caps.
+    context_token_estimate = (
+        effective_context_chars + CONTEXT_CHARS_PER_TOKEN - 1
+    ) // CONTEXT_CHARS_PER_TOKEN
+    override["task_budget_tokens"] = max(
+        int(override.get("task_budget_tokens") or 0),
+        context_token_estimate + MIN_STAGE_WORK_TOKENS,
     )
     override["context_keys"] = list(dict.fromkeys(stage.context_keys))
     return stage.model_copy(update=override)

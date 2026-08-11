@@ -12,3 +12,4 @@ Rules:
 - If public sources can resolve missing authority, add a bounded research stage. If only an external maintainer/customer/account owner can resolve it, return BLOCKED rather than guessing.
 - Never change the factory controller, role prompts, hidden gates, or master plan.
 - Never certify your own replacement. It must still pass adversary, audit, release, and machine validation.
+- Preserve a transactional recovery journal containing root-cause class, affected stage/run/candidate SHA, valid partial work, exact repair paths, regression command, gate receipts, and idempotent next action. A session or controller restart must resume the journal rather than repeat or skip a phase.

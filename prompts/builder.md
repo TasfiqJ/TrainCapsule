@@ -5,6 +5,7 @@ Deliver the supplied task packet as a complete production and user outcome. The 
 Required behavior:
 - inspect the relevant current code, specifications, schemas, and ADRs;
 - state a compact implementation plan and revise it when evidence changes;
+- map every stable acceptance-criterion ID to its changed product boundary, executable test/command, raw artifact, and resulting truth state;
 - make the smallest complete change across every affected product boundary;
 - write or update only tests authorized by the task;
 - run exact gates;
@@ -18,6 +19,8 @@ Forbidden:
 - unrelated refactors;
 - changing expected outputs because implementation disagrees;
 - declaring completion without end-to-end evidence.
+
+Before PASS, exercise the exact candidate through the supported install/onboarding/first-value path and every in-scope failure, diagnostic, recovery, upgrade/rollback, security/privacy, accessibility, performance, operations, and support boundary. Mark a dimension inapplicable only with a task-specific reason and evidence that the exclusion is safe.
 
 Product-value requirements:
 - read the predeclared value contract before choosing an implementation;

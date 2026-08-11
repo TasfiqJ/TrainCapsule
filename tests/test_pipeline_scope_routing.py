@@ -51,6 +51,7 @@ def test_repair_routes_to_a_writable_stage_covering_reviewer_paths(tmp_path: Pat
         update={
             "role": RoleName.BUILDER,
             "allowed_paths": ["scripts/gates/**", "tasks/**"],
+            "forbidden_paths": [],
             "read_only": False,
         }
     )
@@ -64,3 +65,54 @@ def test_repair_routes_to_a_writable_stage_covering_reviewer_paths(tmp_path: Pat
 
     assert stage.role == RoleName.BUILDER
     assert gaps == []
+
+
+def test_repair_requires_one_stage_to_cover_every_reviewer_path(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    task = load_task(ROOT / "tasks/T002.yaml")
+    research = task.pipeline[0]
+    builder = research.model_copy(
+        update={
+            "role": RoleName.BUILDER,
+            "allowed_paths": ["scripts/gates/**"],
+            "forbidden_paths": [],
+            "read_only": False,
+        }
+    )
+    routed_task = task.model_copy(update={"pipeline": [builder, *task.pipeline]})
+
+    stage, gaps = find_mutating_stage_for_findings(
+        repo_root=repo,
+        task=routed_task,
+        findings=[
+            "Fix scripts/gates/output_and_integration_gate.py and "
+            "docs/research/T002_name_trademark_check.md."
+        ],
+    )
+
+    assert stage.role == RoleName.BUILDER
+    assert gaps == ["docs/research/T002_name_trademark_check.md"]
+
+
+def test_repair_routing_respects_forbidden_paths(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    task = load_task(ROOT / "tasks/T002.yaml")
+    research = task.pipeline[0]
+    builder = research.model_copy(
+        update={
+            "role": RoleName.BUILDER,
+            "allowed_paths": ["scripts/gates/**", "tasks/**"],
+            "forbidden_paths": ["scripts/gates/output_and_integration_gate.py"],
+            "read_only": False,
+        }
+    )
+    routed_task = task.model_copy(update={"pipeline": [builder, *task.pipeline]})
+
+    stage, gaps = find_mutating_stage_for_findings(
+        repo_root=repo,
+        task=routed_task,
+        findings=["Fix scripts/gates/output_and_integration_gate.py and tasks/T002.yaml."],
+    )
+
+    assert stage.role == RoleName.BUILDER
+    assert gaps == ["scripts/gates/output_and_integration_gate.py"]

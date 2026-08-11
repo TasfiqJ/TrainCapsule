@@ -126,18 +126,16 @@
       ],
       "network_default": "allowlist",
       "allowed_domains": [
-        "docs.anthropic.com",
-        "docs.github.com",
-        "github.com",
-        "docs.nvidia.com",
-        "docs.pytorch.org",
-        "pytorch.org",
-        "docs.ray.io",
-        "slurm.schedmd.com",
-        "kubernetes.io",
-        "opencontainers.org",
-        "opentelemetry.io",
-        "arxiv.org"
+        "uspto.gov",
+        "euipo.europa.eu",
+        "wipo.int",
+        "ised-isde.canada.ca",
+        "pypi.org",
+        "npmjs.com",
+        "crates.io",
+        "icann.org",
+        "whois.icann.org",
+        "rdap.verisign.com"
       ],
       "gate_profiles": [
         "contract",

@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import re
+import subprocess
 import sys
 from typing import cast
 
@@ -20,6 +21,115 @@ PLACEHOLDERS = (
     re.compile(r"\bplaceholder\s+implementation\b", re.IGNORECASE),
     re.compile(r"return\s+['\"]TODO['\"]", re.IGNORECASE),
 )
+
+
+def _run_generic_research_evidence_gate(
+    *, task_id: str, task: dict[str, object], outputs: list[object]
+) -> int:
+    pipeline = cast(list[dict[str, object]], task.get("pipeline") or [])
+    research_stage = next(
+        (stage for stage in pipeline if stage.get("role") == "research"),
+        None,
+    )
+    if research_stage is None:
+        print("research-evidence check requires a research stage", file=sys.stderr)
+        return 1
+
+    declared = [str(value).replace("\\", "/") for value in outputs]
+    record_value = next(
+        (
+            value
+            for value in declared
+            if value.startswith("docs/research/") and value.endswith(".md")
+        ),
+        None,
+    )
+    manifest_value = next(
+        (
+            value
+            for value in declared
+            if value == f"docs/evidence/{task_id}/manifest.json"
+        ),
+        None,
+    )
+    plan_value = next(
+        (
+            value
+            for value in declared
+            if value == f"docs/evidence/{task_id}/query-plan.json"
+        ),
+        None,
+    )
+    missing_declarations = [
+        label
+        for label, value in (
+            ("research record", record_value),
+            ("evidence manifest", manifest_value),
+            ("query plan", plan_value),
+        )
+        if value is None
+    ]
+    if missing_declarations:
+        print(
+            "research packet is missing standard output declarations: "
+            + ", ".join(missing_declarations),
+            file=sys.stderr,
+        )
+        return 1
+    assert record_value is not None
+    assert manifest_value is not None
+    assert plan_value is not None
+    record_path = ROOT / record_value
+    manifest_path = ROOT / manifest_value
+    plan_path = ROOT / plan_value
+    missing_files = [
+        str(path.relative_to(ROOT))
+        for path in (record_path, manifest_path, plan_path)
+        if not path.is_file()
+    ]
+    if missing_files:
+        print(
+            "research evidence bundle is missing: " + ", ".join(missing_files),
+            file=sys.stderr,
+        )
+        return 1
+
+    record = record_path.read_text(encoding="utf-8", errors="replace")
+    try:
+        _verdict, labels = parse_research_record(record)
+    except ResearchPolicyError as exc:
+        print(f"research record is invalid: {exc}", file=sys.stderr)
+        return 1
+    consistency_errors = validate_verdict_consistency(record)
+    if consistency_errors:
+        print("; ".join(consistency_errors), file=sys.stderr)
+        return 1
+    allowed_domains = {
+        str(value).lower()
+        for value in cast(list[object], research_stage.get("allowed_domains") or [])
+    }
+    head = subprocess.run(
+        ["git", "rev-parse", "HEAD"],
+        cwd=ROOT,
+        text=True,
+        capture_output=True,
+        check=True,
+    ).stdout.strip()
+    manifest_errors = validate_evidence_manifest(
+        repo_root=ROOT,
+        manifest_path=manifest_path,
+        labels=labels,
+        allowed_domains=allowed_domains,
+        task_id=task_id,
+        query_plan_path=plan_path,
+        current_candidate_sha=head,
+        require_version=2,
+    )
+    if manifest_errors:
+        print("; ".join(manifest_errors), file=sys.stderr)
+        return 1
+    print(f"PASS {task_id}: version-2 research evidence contract is reproducible")
+    return 0
 
 
 def main() -> int:
@@ -59,6 +169,13 @@ def main() -> int:
             file=sys.stderr,
         )
         return 1
+
+    if check == "research-evidence":
+        return _run_generic_research_evidence_gate(
+            task_id=task_id,
+            task=task,
+            outputs=typed_outputs,
+        )
 
     if task_id == "T002":
         record_path = ROOT / "docs/research/T002_name_trademark_check.md"

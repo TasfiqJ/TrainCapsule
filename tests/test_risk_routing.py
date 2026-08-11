@@ -15,6 +15,7 @@ from tcfactory.models import (
     TaskPacket,
 )
 from tcfactory.pipeline import run_pipeline
+from tcfactory.planner import planning_task_for
 from tcfactory.risk import (
     CONTEXT_CHARS_PER_TOKEN,
     MIN_STAGE_WORK_TOKENS,
@@ -25,6 +26,7 @@ from tcfactory.risk import (
     required_task_budget_tokens,
     with_working_token_reserve,
 )
+from tcfactory.stage_policy import objective_pipeline_errors
 
 ROOT = Path(__file__).resolve().parents[1]
 
@@ -115,8 +117,22 @@ def test_mechanical_planning_omits_expensive_adversary() -> None:
         risk_tier=RiskTier.MECHANICAL,
     )
     stages, _, _ = planning_pipeline(item, profiles)
-    assert [stage.role for stage in stages] == [RoleName.PLANNER]
+    assert [stage.role for stage in stages] == [RoleName.PLANNER, RoleName.RELEASE]
     assert all(stage.model == "sonnet" for stage in stages)
+
+
+def test_every_planning_risk_tier_satisfies_runtime_objective_policy() -> None:
+    profiles = load_risk_profiles(ROOT / "config/risk_profiles.yaml")
+    for index, tier in enumerate(RiskTier):
+        item = FeatureItem(
+            task_id=f"T91{index}",
+            outcome="Compile an exact executable task contract",
+            lead_role="Planner",
+            phase="Planning",
+            risk_tier=tier,
+        )
+        packet = planning_task_for(item, profiles=profiles)
+        assert objective_pipeline_errors(packet) == []
 
 
 def test_every_profile_reserves_working_tokens_after_maximum_context() -> None:

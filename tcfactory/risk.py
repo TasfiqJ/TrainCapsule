@@ -14,6 +14,7 @@ from .models import (
     TaskPacket,
     ValueGateMode,
 )
+from .stage_policy import apply_objective_stage_contracts
 from .yamlutil import load_yaml
 
 CONTEXT_CHARS_PER_TOKEN = 4
@@ -259,8 +260,7 @@ def planning_pipeline(
         "factory/queue/**",
         "factory/feature_ledger.yaml",
         "factory/product_definition_of_done.yaml",
-        "docs/TrainCapsule_Matrix_Definitive_Master_Plan_v1.0.md",
-        "docs/MASTER_PLAN_INDEX.md",
+        "docs/source-of-truth/**",
         "docs/CONTEXT_INDEX.yaml",
     ]
     planner = _apply_stage_profile(
@@ -275,11 +275,11 @@ def planning_pipeline(
         context_chars,
     )
     stages = [planner]
-    # Task-packet planning is deliberately cheaper than implementation review.
-    # Mechanical work relies on schema/path validation. Standard and integration work add
-    # one read-only release sanity check. Trust-core planning also receives an independent
-    # Opus adversary because an underspecified contract can invalidate the product.
-    if tier == RiskTier.TRUST_CORE:
+    # Planning packets are executable contracts, so their review depth must match the
+    # objective policy enforced by run_pipeline. Mechanical planning keeps the inexpensive
+    # planner/release pair; higher-risk contracts receive independent adversarial review,
+    # and integration/trust contracts also receive a separate audit.
+    if tier != RiskTier.MECHANICAL:
         stages.append(
             _apply_stage_profile(
                 Stage(role=RoleName.ADVERSARY, read_only=True, forbidden_paths=["**"]),
@@ -287,14 +287,21 @@ def planning_pipeline(
                 context_chars,
             )
         )
-    if tier != RiskTier.MECHANICAL:
+    if tier in {RiskTier.INTEGRATION, RiskTier.TRUST_CORE}:
         stages.append(
             _apply_stage_profile(
-                Stage(role=RoleName.RELEASE, read_only=True, forbidden_paths=["**"]),
+                Stage(role=RoleName.AUDIT, read_only=True, forbidden_paths=["**"]),
                 profile,
                 context_chars,
             )
         )
+    stages.append(
+        _apply_stage_profile(
+            Stage(role=RoleName.RELEASE, read_only=True, forbidden_paths=["**"]),
+            profile,
+            context_chars,
+        )
+    )
     return stages, float(profile["task_budget_usd"]), int(profile["repair_cycles"])
 
 
@@ -397,7 +404,7 @@ def apply_risk_profile(
     if tier == RiskTier.TRUST_CORE:
         repair_models.append("fable")
 
-    return packet.model_copy(
+    routed = packet.model_copy(
         update={
             "risk_tier": tier,
             "context_keys": list(dict.fromkeys(item.context_keys + packet.context_keys)),
@@ -424,3 +431,4 @@ def apply_risk_profile(
             "task_budget_usd": float(profile["task_budget_usd"]),
         }
     )
+    return apply_objective_stage_contracts(routed)

@@ -52,6 +52,45 @@
     ],
     "career": [
       "docs/source-of-truth/final-2026-08-09/09_CAREER_AND_HIRING_THESIS.md"
+    ],
+    "product_definition": [
+      "docs/source-of-truth/final-2026-08-09/03_PRODUCT_STRATEGY_AND_REQUIREMENTS.md",
+      "factory/product_definition_of_done.yaml",
+      "config/value_policy.yaml"
+    ],
+    "source_authority": [
+      "SOURCE_PRECEDENCE.md",
+      "docs/CONTEXT_INDEX.yaml",
+      "docs/source-of-truth/final-2026-08-09/13_SOURCE_REGISTER.md"
+    ],
+    "research_evidence": [
+      "prompts/research.md",
+      "tcfactory/research_policy.py",
+      "scripts/gates/output_and_integration_gate.py"
+    ],
+    "coding_standards": [
+      "CLAUDE.md",
+      "pyproject.toml",
+      "docs/source-of-truth/final-2026-08-09/14_CLAUDE_CODE_MASTER_BUILD_PROMPT.md"
+    ],
+    "quality_policy": [
+      "tcfactory/quality_policy.py",
+      "scripts/gates/fast_quality.sh",
+      "factory/product_definition_of_done.yaml"
+    ],
+    "runtime_adapters": [
+      "docs/source-of-truth/final-2026-08-09/04_TECHNICAL_ARCHITECTURE.md",
+      "config/factory.yaml",
+      "config/claude_features.yaml"
+    ],
+    "performance": [
+      "docs/source-of-truth/final-2026-08-09/03_PRODUCT_STRATEGY_AND_REQUIREMENTS.md",
+      "docs/source-of-truth/final-2026-08-09/04_TECHNICAL_ARCHITECTURE.md",
+      "prompts/performance.md"
+    ],
+    "definition_of_done": [
+      "factory/product_definition_of_done.yaml",
+      "config/value_policy.yaml"
     ]
   }
 }

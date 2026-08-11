@@ -190,7 +190,7 @@ def should_launch_scout(features: ClaudeFeaturesConfig, task: TaskPacket, stage:
     return config.enabled and stage.role == RoleName.BUILDER and task.risk_tier in config.risk_tiers
 
 
-def _default_goal(task: TaskPacket, max_turns: int) -> str:
+def _default_goal(task: TaskPacket, _max_turns: int) -> str:
     required_gates = (
         ", ".join(gate.name for gate in task.gates if gate.required) or "all required gates"
     )
@@ -199,7 +199,8 @@ def _default_goal(task: TaskPacket, max_turns: int) -> str:
         f"{required_gates} exit successfully; no forbidden or protected path changes; "
         "no test, oracle, value threshold, "
         "or expected result is weakened; and git diff contains only allowed task work. "
-        f"Stop and return BLOCKED instead of guessing, or stop after {max_turns} evaluated turns."
+        "Continue through renewable controller sessions until complete; return BLOCKED only "
+        "for an irreducible authority or external-evidence gap instead of guessing."
     )
 
 

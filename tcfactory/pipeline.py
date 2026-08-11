@@ -19,6 +19,7 @@ from .commit_messages import stage_commit_message
 from .gates import (
     PathPolicyError,
     PrivateGateError,
+    file_sha256,
     run_gate,
     run_private_gate,
     select_gates,
@@ -61,6 +62,7 @@ from .provenance import append_provenance
 from .quality_policy import QualityPolicyError, enforce_candidate_quality
 from .quota import AuthenticationPause, QuotaLimitPause
 from .risk import with_working_token_reserve
+from .stage_policy import apply_objective_stage_contracts, objective_pipeline_errors
 from .util import path_matches, run_command, utc_stamp, write_json
 from .value import ValueGateError, evaluate_value_contract
 
@@ -337,6 +339,7 @@ def _role_requires_changes(role: RoleName) -> bool:
         RoleName.BUILDER,
         RoleName.RESEARCH,
         RoleName.RECOVERY,
+        RoleName.FACTORY_REPAIR,
     }
 
 
@@ -369,7 +372,7 @@ def repository_finding_paths(repo_root: Path, findings: list[str]) -> list[str]:
     paths: set[str] = set()
     for finding in findings:
         for raw in FINDING_PATH_RE.findall(finding):
-            normalized = raw.replace("\\", "/")
+            normalized = raw.replace("\\", "/").rstrip(".,;:!?)]}")
             while normalized.startswith("./"):
                 normalized = normalized[2:]
             relative = Path(normalized)
@@ -399,14 +402,66 @@ def find_mutating_stage_for_findings(
         for stage in task.pipeline
         if _role_requires_changes(stage.role) and stage.read_only is not True
     ]
-    scored = [
-        (sum(path_matches(path, stage.allowed_paths) for path in paths), stage)
+    candidates = candidates or [fallback]
+    coverage = [
+        (
+            stage,
+            {
+                path
+                for path in paths
+                if path_matches(path, stage.allowed_paths)
+                and not path_matches(path, stage.forbidden_paths)
+            },
+        )
         for stage in candidates
     ]
-    best_score, best_stage = max(scored, key=lambda item: item[0], default=(0, fallback))
-    if best_score == 0:
-        return fallback, paths
-    return best_stage, []
+    best_stage, covered = max(coverage, key=lambda item: len(item[1]))
+    gaps = sorted(set(paths) - covered)
+    return best_stage, gaps
+
+
+def cumulative_scope_gaps(task: TaskPacket, changed: list[str]) -> list[str]:
+    """Return candidate paths that no writable task stage is authorized to change."""
+
+    writable = [
+        stage
+        for stage in task.pipeline
+        if _role_requires_changes(stage.role) and stage.read_only is not True
+    ]
+    return sorted(
+        path
+        for path in changed
+        if not any(
+            path_matches(path, stage.allowed_paths)
+            and not path_matches(path, stage.forbidden_paths)
+            for stage in writable
+        )
+    )
+
+
+def validate_cumulative_candidate(
+    *,
+    worktree: Path,
+    starting_sha: str,
+    task: TaskPacket,
+    artifact_dir: Path,
+) -> list[str]:
+    """Validate the complete task delta so a failed partial commit cannot hide defects."""
+
+    cumulative_changed = changed_files(worktree, starting_sha)
+    gaps = cumulative_scope_gaps(task, cumulative_changed)
+    if gaps:
+        raise PathPolicyError(
+            "Cumulative candidate contains paths outside every writable task stage: "
+            + ", ".join(gaps)
+        )
+    enforce_candidate_quality(
+        worktree=worktree,
+        base_sha=starting_sha,
+        task=task,
+        artifact_dir=artifact_dir,
+    )
+    return cumulative_changed
 
 
 def _find_stage_index(task: TaskPacket, role: RoleName) -> int:
@@ -930,13 +985,13 @@ async def _execute_stage(
 
     if result.verdict == Verdict.PASS and not read_only:
         try:
-            enforce_candidate_quality(
+            validate_cumulative_candidate(
                 worktree=worktree.path,
-                base_sha=base_sha,
+                starting_sha=checkpoint.starting_sha,
                 task=task,
-                artifact_dir=artifact_dir,
+                artifact_dir=artifact_dir / "cumulative-quality",
             )
-        except QualityPolicyError as exc:
+        except (PathPolicyError, QualityPolicyError) as exc:
             result.verdict = Verdict.FAIL
             result.error = f"{result.error}; {exc}" if result.error else str(exc)
 
@@ -1009,6 +1064,45 @@ async def _execute_stage(
     return result, next_sha, worktree
 
 
+def validate_release_candidate(
+    *,
+    repo_root: Path,
+    config: FactoryConfig,
+    task: TaskPacket,
+    starting_sha: str,
+    candidate_sha: str,
+    run_id: str,
+) -> None:
+    """Recheck the entire candidate delta immediately before release gates."""
+
+    worktree = create_worktree(
+        repo_root,
+        config.resolve(repo_root, config.worktree_dir),
+        task_id=task.task_id,
+        run_id=run_id,
+        role="cumulative-validation",
+        attempt=1,
+        base_sha=candidate_sha,
+    )
+    artifact_dir = (
+        config.resolve(repo_root, config.artifact_dir)
+        / task.task_id
+        / run_id
+        / "cumulative-validation"
+    )
+    try:
+        validate_cumulative_candidate(
+            worktree=worktree.path,
+            starting_sha=starting_sha,
+            task=task,
+            artifact_dir=artifact_dir,
+        )
+    except (PathPolicyError, QualityPolicyError) as exc:
+        raise PipelineFailure(f"Cumulative candidate validation failed: {exc}") from exc
+    finally:
+        cleanup_worktree(repo_root, worktree, delete_branch=False)
+
+
 def _run_value_release_gate(
     *,
     repo_root: Path,
@@ -1079,6 +1173,12 @@ def _run_private_release_gate(
             "status": "runner-unavailable",
         }, None
 
+    runner = Path(runner_value).expanduser().resolve()
+    try:
+        runner_sha256 = file_sha256(runner)
+    except PrivateGateError as exc:
+        raise PipelineFailure(str(exc)) from exc
+
     worktree = create_worktree(
         repo_root,
         config.resolve(repo_root, config.worktree_dir),
@@ -1092,8 +1192,14 @@ def _run_private_release_gate(
         config.resolve(repo_root, config.artifact_dir) / task.task_id / run_id / "private-gate"
     )
     try:
+        observed_head_before = current_sha(worktree.path)
+        if observed_head_before != candidate_sha:
+            raise PipelineFailure(
+                "Private-gate worktree was not created at the requested candidate SHA: "
+                f"{observed_head_before} != {candidate_sha}."
+            )
         result = run_private_gate(
-            runner=Path(runner_value),
+            runner=runner,
             suite=private.suite,
             cwd=worktree.path,
             repo_root=repo_root,
@@ -1103,18 +1209,59 @@ def _run_private_release_gate(
             run_id=run_id,
             candidate_sha=candidate_sha,
         )
+        observed_head_after = current_sha(worktree.path)
+        mutations = changed_files(worktree.path, candidate_sha)
+        runner_sha256_after = file_sha256(runner)
     except PrivateGateError as exc:
+        cleanup_worktree(repo_root, worktree, delete_branch=False)
         raise PipelineFailure(str(exc)) from exc
+    except BaseException:
+        cleanup_worktree(repo_root, worktree, delete_branch=False)
+        raise
 
     payload: dict[str, object] = {
         "configured": True,
         "required": private.required,
         "suite": private.suite,
-        "status": "pass" if result.passed else "fail",
+        "candidate_sha": candidate_sha,
+        "observed_head_before": observed_head_before,
+        "observed_head_after": observed_head_after,
+        "runner_sha256": runner_sha256,
+        "runner_sha256_after": runner_sha256_after,
+        "candidate_mutations": mutations,
+        "status": (
+            "pass"
+            if (
+                result.passed
+                and not mutations
+                and observed_head_after == candidate_sha
+                and runner_sha256_after == runner_sha256
+            )
+            else "fail"
+        ),
         "result": result.model_dump(mode="json"),
     }
     write_json(artifact_dir / "private-gate-result.json", payload)
+    if runner_sha256_after != runner_sha256:
+        cleanup_worktree(repo_root, worktree, delete_branch=False)
+        raise PipelineFailure(
+            "External private gate runner changed while the suite was executing; "
+            f"inspect {artifact_dir}."
+        )
+    if observed_head_after != candidate_sha:
+        cleanup_worktree(repo_root, worktree, delete_branch=False)
+        raise PipelineFailure(
+            "External private gate changed the candidate worktree HEAD and cannot certify "
+            f"it: {observed_head_after} != {candidate_sha}. Inspect {artifact_dir}."
+        )
+    if mutations:
+        cleanup_worktree(repo_root, worktree, delete_branch=False)
+        raise PipelineFailure(
+            "External private gate modified the candidate worktree and cannot certify it: "
+            f"{mutations}. Inspect {artifact_dir}."
+        )
     if private.required and not result.passed:
+        cleanup_worktree(repo_root, worktree, delete_branch=False)
         raise PipelineFailure(
             "Required external private gate failed. Hidden implementation details are "
             "intentionally "
@@ -1165,6 +1312,12 @@ async def run_pipeline(
     resume: bool = True,
 ) -> dict[str, object]:
     repo_root = repo_root.resolve()
+    task = apply_objective_stage_contracts(task)
+    contract_errors = objective_pipeline_errors(task)
+    if contract_errors:
+        raise PipelineFailure(
+            "Objective pipeline contract rejected: " + "; ".join(contract_errors)
+        )
     ensure_git_repo(repo_root)
     if config.require_clean_main and not is_clean(repo_root):
         raise PipelineFailure(
@@ -1512,6 +1665,15 @@ async def run_pipeline(
                     result,
                 )
             )
+
+        validate_release_candidate(
+            repo_root=repo_root,
+            config=config,
+            task=task,
+            starting_sha=checkpoint.starting_sha,
+            candidate_sha=candidate_sha,
+            run_id=run_id,
+        )
 
         value_gate_summary = _run_value_release_gate(
             repo_root=repo_root,

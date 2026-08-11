@@ -8,9 +8,13 @@ goal: 'Produce an independently reviewable research record confirming whether th
 
   '
 source_of_truth:
-- docs/TrainCapsule_Matrix_Definitive_Master_Plan_v1.0.md
-- docs/MASTER_PLAN_INDEX.md
-- docs/PLANNER_LOOP.md
+- docs/source-of-truth/final-2026-08-09/00_EXECUTIVE_BUILD_DECISION.md
+- docs/source-of-truth/final-2026-08-09/03_PRODUCT_STRATEGY_AND_REQUIREMENTS.md
+- docs/source-of-truth/final-2026-08-09/04_TECHNICAL_ARCHITECTURE.md
+- docs/source-of-truth/final-2026-08-09/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC.md
+- docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md
+- docs/source-of-truth/final-2026-08-09/13_SOURCE_REGISTER.md
+- docs/source-of-truth/final-2026-08-09/14_CLAUDE_CODE_MASTER_BUILD_PROMPT.md
 - factory/feature_ledger.yaml
 depends_on:
 - T001
@@ -42,9 +46,11 @@ acceptance_criteria:
   unknown) computed only from the itemized findings above.
 - The record cites every source it used, and cites no source outside the allowed network
   domains.
-- A version-1 evidence manifest exists at docs/evidence/T002/manifest.json and records
-  the finding ID, evidence kind, query shape, source, UTC/offset timestamp, sanitized
-  reproduction command, raw artifact path, SHA-256, and outcome for every execution.
+- A version-2 query plan is frozen at docs/evidence/T002/query-plan.json before collection,
+  its SHA-256 is bound by docs/evidence/T002/manifest.json, and the manifest records
+  the exact task/candidate, expected finding IDs, adapters, endpoints, request shapes,
+  authoritative source class, freshness window, controls, raw artifacts, hashes, and
+  per-verdict downstream actions required by the generic research policy.
 - Sanitized raw target, control, limitation, and access-barrier artifacts are preserved
   under docs/evidence/T002/raw; every manifest hash reproduces byte-for-byte.
 - Every CLEAR finding has raw target evidence and a working positive control for every
@@ -62,6 +68,7 @@ acceptance_criteria:
   new findings.
 outputs:
 - docs/research/T002_name_trademark_check.md
+- docs/evidence/T002/query-plan.json
 - docs/evidence/T002/manifest.json
 - docs/evidence/T002/raw/**
 stop_conditions:
@@ -75,7 +82,7 @@ stop_conditions:
 - 'No network access is available to any primary trademark, package-registry, or domain-registrar
   source: mark the affected findings UNKNOWN, do not guess.'
 security:
-  network_default: deny
+  network_default: allowlist
   allow_unsandboxed_commands: false
   fail_if_sandbox_unavailable: true
   secrets: []
@@ -109,6 +116,15 @@ gates:
   required: true
 - name: research-evidence-reproducible
   command: uv run python scripts/gates/output_and_integration_gate.py T002 evidence-reproducible
+  timeout_seconds: 30
+  stages:
+  - research
+  - adversary
+  - audit
+  - release
+  required: true
+- name: research-evidence
+  command: uv run python scripts/gates/output_and_integration_gate.py T002 research-evidence
   timeout_seconds: 30
   stages:
   - research
@@ -167,6 +183,8 @@ pipeline:
   - crates.io
   - icann.org
   - whois.icann.org
+  - ised-isde.canada.ca
+  - rdap.verisign.com
   acceptance_criteria: []
   context_keys:
   - executive_decision
@@ -178,6 +196,7 @@ pipeline:
   - research-verdict-labeled
   - research-no-silent-upgrade
   - research-evidence-reproducible
+  - research-evidence
   read_only: null
   require_changes: true
   advisor_model: null
@@ -207,6 +226,8 @@ pipeline:
   - crates.io
   - icann.org
   - whois.icann.org
+  - ised-isde.canada.ca
+  - rdap.verisign.com
   acceptance_criteria: []
   context_keys:
   - executive_decision
@@ -218,6 +239,7 @@ pipeline:
   - research-verdict-labeled
   - research-no-silent-upgrade
   - research-evidence-reproducible
+  - research-evidence
   read_only: true
   require_changes: false
   advisor_model: null
@@ -253,6 +275,8 @@ pipeline:
   - crates.io
   - icann.org
   - whois.icann.org
+  - ised-isde.canada.ca
+  - rdap.verisign.com
   acceptance_criteria: []
   context_keys:
   - executive_decision
@@ -264,6 +288,7 @@ pipeline:
   - research-verdict-labeled
   - research-no-silent-upgrade
   - research-evidence-reproducible
+  - research-evidence
   read_only: true
   require_changes: false
   advisor_model: null
@@ -296,6 +321,7 @@ pipeline:
   - research-verdict-labeled
   - research-no-silent-upgrade
   - research-evidence-reproducible
+  - research-evidence
   read_only: true
   require_changes: false
   advisor_model: null

@@ -89,6 +89,10 @@ def _gate(task_id: str, name: str) -> Gate:
         "fast-quality": "bash scripts/gates/fast_quality.sh",
         "full-quality": "bash scripts/gates/full_quality.sh",
         "real-integration": f"bash scripts/gates/real_integration.sh {task_id}",
+        "research-evidence": (
+            "uv run python scripts/gates/output_and_integration_gate.py "
+            f"{task_id} research-evidence"
+        ),
         "ui-e2e": "bash scripts/gates/ui_e2e.sh",
         "milestone": f"bash scripts/gates/milestone_gate.sh {task_id}",
     }
@@ -98,6 +102,7 @@ def _gate(task_id: str, name: str) -> Gate:
         "fast-quality": 1800,
         "full-quality": 3600,
         "real-integration": 3600,
+        "research-evidence": 900,
         "ui-e2e": 3600,
         "milestone": 7200,
     }
@@ -157,7 +162,13 @@ def _initial_pipeline(
                 allowed_paths=allowed_paths,
                 forbidden_paths=sorted(set(forbidden_paths + [spec_path])),
                 allowed_domains=entry.allowed_domains,
-                acceptance_criteria=entry.acceptance_criteria,
+                acceptance_criteria=[
+                    *entry.acceptance_criteria,
+                    "Preregister a version-2 query plan bound to this task and candidate.",
+                    "Cover every expected finding with fresh, attributable raw evidence.",
+                    "Bind controls to the same adapter, endpoint, and request shape as targets.",
+                    "Run every negative or error control declared by the query plan.",
+                ],
                 machine_gates=gate_names,
                 read_only=False,
                 require_changes=True,
@@ -202,13 +213,32 @@ def task_packet_from_catalog(
     source_files.append(catalog.source_of_truth)
     source_files = list(dict.fromkeys(source_files))
     forbidden = [str(value) for value in defaults.get("forbidden_paths", [])]
-    gate_names = list(dict.fromkeys(entry.gate_profiles))
-    gates = [_gate(item.task_id, name) for name in gate_names]
     risk = effective_risk(item)
     research_only = entry.task_kind.lower() == "research"
+    gate_names = list(dict.fromkeys(entry.gate_profiles))
+    if research_only:
+        gate_names = list(dict.fromkeys([*gate_names, "research-evidence"]))
+    gates = [_gate(item.task_id, name) for name in gate_names]
     allowed_paths = list(dict.fromkeys(entry.allowed_paths))
     spec_path = f"specs/tasks/{item.task_id}.md"
     outputs = list(dict.fromkeys(entry.expected_outputs))
+    if research_only:
+        research_record = (
+            "docs/research/T002_name_trademark_check.md"
+            if item.task_id == "T002"
+            else f"docs/research/{item.task_id}_research.md"
+        )
+        evidence_root = f"docs/evidence/{item.task_id}"
+        research_outputs = [
+            research_record,
+            f"{evidence_root}/query-plan.json",
+            f"{evidence_root}/manifest.json",
+            f"{evidence_root}/raw/**",
+        ]
+        allowed_paths = list(
+            dict.fromkeys([*allowed_paths, research_record, f"{evidence_root}/**"])
+        )
+        outputs = list(dict.fromkeys([*outputs, *research_outputs]))
     value_policy = load_value_policy(repo_root / "config/value_policy.yaml")
     value_contract = contract_for_task(value_policy, item.task_id)
     if value_contract.mode == ValueGateMode.MEASURED and value_contract.evidence_path:

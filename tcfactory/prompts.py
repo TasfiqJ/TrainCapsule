@@ -37,28 +37,34 @@ def compose_task_prompt(
     packet = task.model_dump(mode="json")
     packet["active_stage"] = stage.model_dump(mode="json")
     packet["attempt"] = attempt
-    return f"""Execute exactly one bounded TrainCapsule work unit.
+    return f"""Complete the active TrainCapsule stage to its objective exit contract.
 
 TASK PACKET (authoritative for this run):
 ```json
 {json.dumps(packet, indent=2, sort_keys=True)}
 ```
 
-BOUNDED CONTEXT MANIFEST (paths and evidence, not conversational history):
+CONTEXT MANIFEST (candidate-bound routing and evidence, not conversational history):
 ```json
 {json.dumps(context_manifest, indent=2, sort_keys=True)}
 ```
 
 Operational rules:
-1. Read only the named sources and relevant code paths just in time. Do not load the entire
-   repository, master plan, or prior transcripts.
+1. Treat the manifest as the initial candidate-bound routing set, not a completeness ceiling.
+   Read every relevant authoritative source and code path needed for the stage; use focused
+   retrieval for efficiency, but never omit material company, buyer, product, architecture,
+   security, operating, or release context merely because it was not preloaded.
 2. Inspect the current candidate and exact diff before changing anything.
 3. Stay within active_stage.allowed_paths and avoid every forbidden path.
-4. Run cheap deterministic gates before spending time on broad review or speculation.
+4. Run cheap deterministic gates early, then perform every broader investigation, real-boundary
+   exercise, and objective-stage check required for a production outcome.
 5. Resolve every concrete previous finding without weakening tests, contracts, fixtures,
    or status semantics.
 6. Do not ask for interactive clarification. When authority is genuinely missing or
    contradictory, return verdict `blocked` and identify the exact missing authority.
-7. End with one structured AgentReport matching the enforced JSON schema. Machine evidence,
-   not confidence, determines promotion.
+7. Continue through renewable sessions until every active-stage criterion has inspectable
+   evidence or a truthful irreducible blocker. A turn/context boundary is a checkpoint, never a
+   reason to shrink scope, skip a criterion, or report premature completion.
+8. End each session with one structured AgentReport matching the enforced JSON schema. Machine
+   evidence, not confidence, determines promotion.
 """

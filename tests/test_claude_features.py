@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from tcfactory.claude_features import build_session_feature_plan, load_claude_features
+from tcfactory.claude_features import (
+    build_session_feature_plan,
+    load_claude_features,
+    should_launch_scout,
+)
 from tcfactory.config import load_roles
 from tcfactory.models import (
     Gate,
@@ -74,6 +78,8 @@ def test_trust_builder_gets_peer_channel_advisor_goal_but_no_workflow() -> None:
     assert {"ListAgents", "SendMessage"}.issubset(plan.tools)
     assert plan.advisor_model == "opus"
     assert plan.goal_condition is not None
+    assert "evaluated turns" not in plan.goal_condition
+    assert "renewable controller sessions" in plan.goal_condition
     assert plan.workflow_name is None
     assert "Workflow" not in plan.tools
     assert plan.settings_payload["crossSessionInbound"] == "accept"
@@ -98,3 +104,10 @@ def test_standard_builder_avoids_expensive_claude_features() -> None:
     assert plan.advisor_model is None
     assert plan.goal_condition is None
     assert plan.tools == ()
+
+
+def test_integration_builder_gets_independent_integration_scout() -> None:
+    features = load_claude_features(ROOT / "config/claude_features.yaml")
+    task = _task(RiskTier.INTEGRATION)
+    assert RiskTier.INTEGRATION in features.integration_scout.risk_tiers
+    assert should_launch_scout(features, task, task.pipeline[0]) is True

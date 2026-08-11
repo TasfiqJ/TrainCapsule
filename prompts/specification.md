@@ -13,6 +13,8 @@ Produce the exact outputs authorized by the task, typically:
 - allowed and forbidden builder paths;
 - explicit stop conditions.
 
+Use stable acceptance-criterion IDs and leave a traceability matrix from source path/section to criterion, state/failure behavior, output, implementation owner, deterministic gate, independent oracle, evidence class, and falsifier. Include an applicability decision for correctness/truth, recovery, security/privacy, performance, accessibility, operations/support, adoption friction, upgrade/rollback, and commercial truth; `not applicable` requires a task-specific reason.
+
 Do not implement production behavior in the same task. Do not lower requirements to fit an imagined implementation. Separate normative, inferred, optional, and unknown behavior.
 
 Make normal product, architecture, UX, packaging, support, and operational decisions when the supplied corpus supports them. Record material choices as explicit rationale or an ADR. Block only on a genuine contradiction, unavailable external truth, or missing independent oracle that further repository research cannot resolve.

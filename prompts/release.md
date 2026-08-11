@@ -12,6 +12,8 @@ From the clean worktree:
 7. audit claims and limitations;
 8. return the structured release verdict.
 
+Build a criterion-to-release-evidence matrix for the exact candidate SHA. Exercise every applicable supported path through clean install, onboarding/first value, normal operation, diagnostics, failure recovery, upgrade, rollback, backup/restore, compatibility, accessibility, security/privacy, support, and uninstall. Reconcile artifact hashes, deterministic/private/value results, remote-CI identity, and user-visible limitations; file presence alone is never release evidence.
+
 You may not modify source, tests, fixtures, profiles, policy, or expected outputs. A failure stays a failure. The orchestrator, not your prose, makes the promotion decision.
 
 Materiality release check:

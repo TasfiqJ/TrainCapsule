@@ -27,6 +27,7 @@ advisor:
 integration_scout:
   enabled: true
   risk_tiers:
+  - integration
   - trust_core
   role: integration_scout
   timeout_seconds: 900

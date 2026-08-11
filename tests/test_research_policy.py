@@ -2,7 +2,9 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import UTC, datetime
 from pathlib import Path
+from typing import Any, cast
 
 from tcfactory.research_policy import (
     parse_research_record,
@@ -36,6 +38,86 @@ def _entry(
         "sha256": hashlib.sha256(data).hexdigest(),
         "outcome": "controlled result",
     }
+
+
+def _write_v2_bundle(
+    tmp_path: Path,
+    *,
+    task_id: str = "T003",
+    candidate_sha: str = "a" * 40,
+    required_controls: list[str] | None = None,
+) -> tuple[Path, Path, dict[str, Any], dict[str, Any]]:
+    evidence_root = tmp_path / f"docs/evidence/{task_id}"
+    raw_root = evidence_root / "raw"
+    raw_root.mkdir(parents=True)
+    endpoint = "https://docs.example.com/search"
+    query_plan: dict[str, Any] = {
+        "version": 2,
+        "task_id": task_id,
+        "candidate_sha": candidate_sha,
+        "created_at": "2026-08-11T03:00:00Z",
+        "findings": [
+            {
+                "finding_id": "T-1",
+                "subject": "Example product identifier",
+                "claim_boundary": "Exact-match result in the declared official index",
+                "falsification_condition": "A controlled exact-match conflict is returned",
+                "queries": [
+                    {
+                        "query_id": "T-1-primary",
+                        "source_scheme": "https",
+                        "source_class": "official_documentation",
+                        "adapter": "http-json-v1",
+                        "endpoint": endpoint,
+                        "request_shape": "exact-term-json",
+                        "freshness_days": 30,
+                        "required_controls": required_controls or ["negative_control"],
+                    }
+                ],
+            }
+        ],
+    }
+    plan_path = evidence_root / "query-plan.json"
+    plan_path.write_text(json.dumps(query_plan, sort_keys=True), encoding="utf-8")
+
+    evidence: list[dict[str, object]] = []
+    for execution_id, kind, data in (
+        ("exec-target", "target", b'{"hits": 0}\n'),
+        ("exec-positive", "positive_control", b'{"hits": 1}\n'),
+        ("exec-negative", "negative_control", b'{"rejected": true}\n'),
+    ):
+        artifact_path = f"docs/evidence/{task_id}/raw/{execution_id}.json"
+        (raw_root / f"{execution_id}.json").write_bytes(data)
+        evidence.append(
+            {
+                "execution_id": execution_id,
+                "finding_id": "T-1",
+                "query_id": "T-1-primary",
+                "kind": kind,
+                "source": endpoint,
+                "source_scheme": "https",
+                "source_class": "official_documentation",
+                "adapter": "http-json-v1",
+                "endpoint": endpoint,
+                "request_shape": "exact-term-json",
+                "retrieved_at": "2026-08-11T04:00:00Z",
+                "response_status": "HTTP 200",
+                "command": "research-adapter http-json-v1 --query T-1-primary",
+                "artifact_path": artifact_path,
+                "sha256": hashlib.sha256(data).hexdigest(),
+                "outcome": "controlled result",
+            }
+        )
+    manifest: dict[str, Any] = {
+        "version": 2,
+        "task_id": task_id,
+        "candidate_sha": candidate_sha,
+        "query_plan_sha256": hashlib.sha256(plan_path.read_bytes()).hexdigest(),
+        "evidence": evidence,
+    }
+    manifest_path = evidence_root / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+    return manifest_path, plan_path, manifest, query_plan
 
 
 def test_verdict_is_computed_from_itemized_findings_not_prose() -> None:
@@ -109,6 +191,16 @@ def test_evidence_manifest_recomputes_hashes_and_requires_same_shape_controls(
     )
     assert any("hash mismatch" in error for error in errors)
 
+    strict_errors = validate_evidence_manifest(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        labels={"T-1": "CLEAR"},
+        allowed_domains={"uspto.gov"},
+        task_id="T002",
+        require_version=2,
+    )
+    assert any("version must be 2" in error for error in strict_errors)
+
 
 def test_clear_finding_rejects_a_different_shape_positive_control(tmp_path: Path) -> None:
     evidence_root = tmp_path / "docs/evidence/T002"
@@ -152,3 +244,104 @@ def test_clear_finding_rejects_a_different_shape_positive_control(tmp_path: Path
         allowed_domains={"uspto.gov"},
     )
     assert any("same-shape positive controls" in error for error in errors)
+
+
+def test_v2_manifest_is_generic_and_bound_to_preregistered_query_plan(
+    tmp_path: Path,
+) -> None:
+    manifest_path, plan_path, _manifest, _plan = _write_v2_bundle(tmp_path)
+
+    errors = validate_evidence_manifest(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        labels={"T-1": "CLEAR"},
+        allowed_domains={"example.com"},
+        task_id="T003",
+        query_plan_path=plan_path,
+        require_version=2,
+        now=datetime(2026, 8, 11, 5, tzinfo=UTC),
+    )
+
+    assert errors == []
+
+
+def test_v2_manifest_rejects_omitted_expected_findings_and_wrong_task(
+    tmp_path: Path,
+) -> None:
+    manifest_path, plan_path, manifest, plan = _write_v2_bundle(tmp_path)
+    findings = cast(list[dict[str, Any]], plan["findings"])
+    second = dict(findings[0])
+    second["finding_id"] = "T-2"
+    queries = cast(list[dict[str, Any]], second["queries"])
+    second_query = dict(queries[0])
+    second_query["query_id"] = "T-2-primary"
+    second["queries"] = [second_query]
+    findings.append(second)
+    plan_path.write_text(json.dumps(plan, sort_keys=True), encoding="utf-8")
+    manifest["query_plan_sha256"] = hashlib.sha256(plan_path.read_bytes()).hexdigest()
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    errors = validate_evidence_manifest(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        labels={"T-1": "CLEAR"},
+        allowed_domains={"example.com"},
+        task_id="T004",
+        query_plan_path=plan_path,
+        require_version=2,
+        now=datetime(2026, 8, 11, 5, tzinfo=UTC),
+    )
+
+    assert any("task_id must be T004" in error for error in errors)
+    assert any("missing=['T-2']" in error for error in errors)
+
+
+def test_v2_manifest_binds_controls_to_query_and_requires_declared_negative_control(
+    tmp_path: Path,
+) -> None:
+    manifest_path, plan_path, manifest, _plan = _write_v2_bundle(tmp_path)
+    evidence = cast(list[dict[str, Any]], manifest["evidence"])
+    evidence[:] = [entry for entry in evidence if entry["kind"] != "negative_control"]
+    positive = next(entry for entry in evidence if entry["kind"] == "positive_control")
+    positive["adapter"] = "different-adapter"
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    errors = validate_evidence_manifest(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        labels={"T-1": "CLEAR"},
+        allowed_domains={"example.com"},
+        task_id="T003",
+        query_plan_path=plan_path,
+        require_version=2,
+        now=datetime(2026, 8, 11, 5, tzinfo=UTC),
+    )
+
+    assert any("adapter differs from preregistered query" in error for error in errors)
+    assert any("lacks required controls: negative_control" in error for error in errors)
+
+
+def test_v2_manifest_rejects_stale_future_and_non_authoritative_sources(
+    tmp_path: Path,
+) -> None:
+    manifest_path, plan_path, manifest, _plan = _write_v2_bundle(tmp_path)
+    evidence = cast(list[dict[str, Any]], manifest["evidence"])
+    evidence[0]["retrieved_at"] = "2025-01-01T00:00:00Z"
+    evidence[1]["retrieved_at"] = "2026-08-12T00:00:00Z"
+    evidence[2]["source"] = "http://docs.example.com/search"
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    errors = validate_evidence_manifest(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        labels={"T-1": "CLEAR"},
+        allowed_domains={"example.com"},
+        task_id="T003",
+        query_plan_path=plan_path,
+        require_version=2,
+        now=datetime(2026, 8, 11, 5, tzinfo=UTC),
+    )
+
+    assert any("is stale" in error for error in errors)
+    assert any("retrieved_at is in the future" in error for error in errors)
+    assert any("source_scheme 'https' does not match source 'http'" in error for error in errors)

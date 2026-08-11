@@ -82,8 +82,12 @@ def _audit_prompt(
     role: str,
 ) -> str:
     prior = [report.model_dump(mode="json") for report in prior_reports]
+    lens = _audit_lens(role)
     return f"""Perform a read-only {role} of whether the automatable TrainCapsule
 commercialization-ready production build is complete.
+
+AUDIT LENS:
+{lens}
 
 Authority order:
 1. the complete company_product_brief context in docs/CONTEXT_INDEX.yaml
@@ -159,6 +163,41 @@ Rules:
 """
 
 
+def _audit_lens(role: str) -> str:
+    """Give blind completion reviewers distinct, evidence-first assignments."""
+
+    normalized = role.lower()
+    if "adversarial" in normalized:
+        return (
+            "Try to falsify completion. Construct counterexamples for false-green gates, "
+            "documentation-only capability claims, unsupported clean-install or recovery "
+            "claims, and commercial-readiness theatre."
+        )
+    if "third" in normalized:
+        return (
+            "Trace the supported buyer and operator journeys end to end, concentrating on "
+            "installation, first value, failure diagnosis, recovery, upgrade, rollback, "
+            "supportability, and measurable pilot readiness."
+        )
+    if "adjudicator" in normalized:
+        return (
+            "Reconcile the independent reports against repository evidence. Preserve every "
+            "unresolved counterexample, deduplicate equivalent work, and never decide by vote."
+        )
+    return (
+        "Build a requirement-to-evidence traceability matrix. Verify every automatable "
+        "definition-of-done claim against executable behavior and attributable artifacts."
+    )
+
+
+def _prior_reports_for(
+    label: str, reports: list[CompletionAuditReport]
+) -> list[CompletionAuditReport]:
+    """Keep evidence audits blind; only the explicit adjudicator may compare reports."""
+
+    return reports if label == "completion-adjudicator" else []
+
+
 def _system_prompt(role: str) -> str:
     return (
         f"You are the {role} in a lights-out AI software factory. You are read-only and "
@@ -171,6 +210,22 @@ def _system_prompt(role: str) -> str:
 
 def _reports_agree_complete(reports: list[CompletionAuditReport]) -> bool:
     return bool(reports) and all(report.verdict == CompletionVerdict.COMPLETE for report in reports)
+
+
+def _validate_completion_report(report: CompletionAuditReport, *, label: str) -> None:
+    """Reject internally contradictory completion verdicts before they affect the roadmap."""
+
+    if report.verdict == CompletionVerdict.COMPLETE:
+        contradictions: list[str] = []
+        if report.missing_items:
+            contradictions.append("missing_items")
+        if report.blockers:
+            contradictions.append("blockers")
+        if contradictions:
+            raise CompletionBlocked(
+                f"Completion reviewer {label} returned COMPLETE with unresolved "
+                + " and ".join(contradictions)
+            )
 
 
 def _needs_adjudicator(reports: list[CompletionAuditReport]) -> bool:
@@ -286,6 +341,7 @@ async def _one_review(
             task_id="PRODUCT_COMPLETION",
             run_id=run_id,
         )
+        _validate_completion_report(report, label=label)
         mutations = changed_files(worktree.path, base_sha)
         if mutations:
             raise CompletionBlocked(
@@ -322,6 +378,12 @@ def run_private_completion_gate(
     )
     artifact_dir = config.resolve(repo_root, config.completion_dir) / run_id / "private-gate"
     try:
+        observed_head_before = current_sha(worktree.path)
+        if observed_head_before != base_sha:
+            raise CompletionBlocked(
+                "Private-completion worktree was not created at the requested candidate SHA: "
+                f"{observed_head_before} != {base_sha}"
+            )
         try:
             result = run_private_gate(
                 runner=runner,
@@ -336,6 +398,12 @@ def run_private_completion_gate(
             )
         except PrivateGateError as exc:
             raise CompletionBlocked(str(exc)) from exc
+        observed_head_after = current_sha(worktree.path)
+        if observed_head_after != base_sha:
+            raise CompletionBlocked(
+                "External product-completion gate changed the candidate worktree HEAD: "
+                f"{observed_head_after} != {base_sha}"
+            )
         mutations = changed_files(worktree.path, base_sha)
         if mutations:
             raise CompletionBlocked(
@@ -344,6 +412,8 @@ def run_private_completion_gate(
         payload = {
             "suite": "product-completion",
             "candidate_sha": base_sha,
+            "observed_head_before": observed_head_before,
+            "observed_head_after": observed_head_after,
             "passed": result.passed,
             "result": result.model_dump(mode="json"),
         }
@@ -379,7 +449,10 @@ async def audit_and_expand_or_complete(
                 config=config,
                 definition=definition,
                 ledger=ledger,
-                prior_reports=reports,
+                # Completion auditors are independent evidence channels. Only the
+                # adjudicator receives prior reports; otherwise later auditors anchor
+                # on model prose instead of inspecting the candidate themselves.
+                prior_reports=_prior_reports_for(labels[index], reports),
                 run_id=run_id,
                 label=labels[index],
                 role_name=RoleName.COMPLETION_AUDIT,
@@ -393,7 +466,7 @@ async def audit_and_expand_or_complete(
             config=config,
             definition=definition,
             ledger=ledger,
-            prior_reports=reports,
+            prior_reports=_prior_reports_for("completion-adjudicator", reports),
             run_id=run_id,
             label="completion-adjudicator",
             role_name=RoleName.COMPLETION_ADJUDICATOR,

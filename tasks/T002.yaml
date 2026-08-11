@@ -88,8 +88,10 @@ acceptance_criteria:
   integrity but not discrimination.
 - Every source cited in the record, the query plan, and the manifest is within the
   task's allowed research domains; no other network source is used.
-- No file outside the four declared outputs (the record, the query plan, the manifest,
-  and the raw evidence directory) is created or modified by the research stage.
+- No file outside the seven declared outputs (the record, the query plan, the manifest,
+  the raw evidence directory, the value-contract evidence file, the generic evidence
+  summary, and the external-evidence ledger) is created or modified by the research
+  stage.
 - If any CLEAR finding exists, the adversary stage independently re-checks at least
   one of them using its own live query against its granted domain allowlist (not merely
   rereading the manifest) and confirms or disputes both the finding and whether its
@@ -127,6 +129,70 @@ acceptance_criteria:
   CI) with no candidate-facing release stage in this or any current product pipeline;
   no acceptance criterion may assume a release stage reads or writes anything, since
   none is ever instantiated.'
+- 'A version-2 evidence manifest and the record it supports are only half of this
+  task''s controller-checked surface: after both pipeline stages complete, tcfactory/pipeline.py''s
+  _run_value_release_gate (invoked unconditionally at the end of every task''s pipeline,
+  independent of and in addition to this proposal''s five named gates) calls tcfactory/value.py''s
+  evaluate_value_contract against the promoted candidate; because this task''s value
+  contract is controller-owned (config/value_policy.yaml''s foundational mode for
+  T002, which tcfactory/planner.py''s apply_controller_owned_catalog_minimums unconditionally
+  substitutes for whatever value_contract this proposal declares) and required, that
+  function raises PipelineFailure and blocks the entire task — regardless of how sound
+  the research/adversary bundle is — unless docs/evidence/T002/capability-value.json
+  exists and validates. The research stage must therefore write a ValueEvidence-schema
+  JSON object (tcfactory/value.py''s ValueEvidence model) to that path: task_id "T002";
+  metric equal to the frozen contract''s primary_metric ("foundational capability
+  present"); passed true only if every one of the three required_conditions below
+  is honestly true; method and a real, independently runnable measurement_command
+  (for example the exact `bash scripts/gates/real_integration.sh T002 research-evidence`
+  command that mechanically re-verifies the bundle); source_commit set to the exact
+  candidate SHA, which tcfactory/value.py''s _verify_measured_evidence requires to
+  be an ancestor of the candidate HEAD on a clean tree; preregistered_contract_sha256
+  equal to tcfactory/value.py''s value_contract_digest computed over the packet''s
+  actual (controller-substituted) value_contract — reproducible by loading the promoted
+  tasks/T002.yaml and calling that function directly, not guessed; evidence_classes
+  including "foundational_dependency" (the contract''s required_evidence_classes);
+  and raw_artifacts/artifact_hashes naming real files already in this bundle (for
+  example the manifest and record) with their true SHA-256 digests. The three required_conditions
+  are about this task''s own research-capability deliverable, not about the underlying
+  trademark verdict: target_user_outcome_demonstrated_end_to_end is true when the
+  record, query plan, manifest, and raw artifacts together give a human/legal reviewer
+  everything needed to act, whatever the itemized verdicts read; independently_reproducible_in_supported_environment
+  is true when every manifest/query-plan hash this bundle already requires actually
+  reproduces byte-for-byte; no_documentation_only_or_mock_only_substitution is true
+  when every finding is backed by real raw target/control artifacts rather than narrative
+  alone. If a genuine total stop condition prevents completing any bundle at all,
+  passed must honestly read false and the value gate is expected to return REDESIGN
+  rather than being forced to a false PASS.'
+- 'docs/evidence/T002.md and .factory/external-evidence/T002.json are two more controller-merged,
+  mandatory outputs beyond the four originally tailored ones: factory/task_catalog.yaml''s
+  T002 entry names them in expected_outputs, tcfactory/catalog.py''s task_packet_from_catalog
+  folds them into the catalog seed''s outputs, and tcfactory/planner.py''s apply_controller_owned_catalog_minimums
+  unions the catalog seed''s outputs into this proposal''s outputs at promotion regardless
+  of what is declared here; scripts/gates/output_and_integration_gate.py''s require_patterns
+  call (invoked by every check value of real_integration.sh, including "research-evidence")
+  then requires every one of the promoted packet''s declared outputs to exist as a
+  real file before any task-specific check runs, so a missing docs/evidence/T002.md
+  or .factory/external-evidence/T002.json fails the gate outright regardless of research-record
+  quality. Both are declared outputs of this proposal for that reason. docs/evidence/T002.md
+  is a short plain-language evidence-summary index pointing a reviewer at the full
+  bundle (the research record, query plan, manifest, and raw evidence); .factory/external-evidence/T002.json
+  carries the same attributable raw evidence and truth-state ledger this catalog''s
+  own generic acceptance criteria already require for every research task, scoped
+  to T002''s actual findings — neither invents a fact not already present in the tailored
+  bundle.'
+- 'Every preregistered query in docs/evidence/T002/query-plan.json declares an explicit
+  depends_on list (empty if it has no predecessor) forming an acyclic dependency graph,
+  and independent read-only source queries may fan out concurrently once the plan
+  digest and candidate SHA are frozen, while a query that needs discovery, disambiguation,
+  or another query''s result waits for that exact predecessor; synthesis waits for
+  every expected finding. tcfactory/research_policy.py''s _validate_v2_manifest (hardened
+  by commit b91994e1e967485c74560cd8154cdd64c9d66810, "feat: add dependency-aware
+  graph execution") now mechanically requires this field on every declared query,
+  rejects a self-dependency or a reference to an unknown query_id, and runs a Kahn''s-algorithm
+  cycle check over the declared graph — a query plan omitting depends_on, or declaring
+  one that cycles, fails the research-evidence and real-integration gates outright
+  regardless of finding quality.'
 - 'Complete the exact protected-roadmap outcome: Recheck product name, package, domain,
   and trademark surface'
 - Add deterministic tests or machine-checkable evidence for every implemented normative
@@ -145,9 +211,9 @@ outputs:
 - docs/evidence/T002/query-plan.json
 - docs/evidence/T002/manifest.json
 - docs/evidence/T002/raw/**
+- docs/evidence/T002/capability-value.json
 - docs/evidence/T002.md
 - .factory/external-evidence/T002.json
-- docs/evidence/T002/capability-value.json
 stop_conditions:
 - 'Source-of-truth does not name any product name at all to check: stop the entire
   task, do not invent one.'
@@ -240,9 +306,8 @@ pipeline:
   - factory/product_definition_of_done.yaml
   - factory/task_catalog.yaml
   - factory/proposals/**
-  - tasks/**
   - scripts/**
-  - specs/tasks/**
+  - specs/tasks/T002.md
   - tcfactory/**
   - Control-TrainCapsuleBuilder.ps1
   - Install-TrainCapsuleAutonomousBuilder.ps1
@@ -258,6 +323,8 @@ pipeline:
   - config/risk_profiles.yaml
   - docs/source-of-truth/**
   - scripts/gates/**
+  - specs/tasks/**
+  - tasks/**
   allowed_domains:
   - uspto.gov
   - euipo.europa.eu
@@ -280,6 +347,16 @@ pipeline:
   - Every CLEAR finding's positive control is authoritative (it actually discriminates),
     and every attempted route's outcome — including reachable-but-non-authoritative
     routes — is documented with its specific blocking mechanism.
+  - Write docs/evidence/T002/capability-value.json as a ValueEvidence-schema object
+    satisfying tcfactory/value.py's evaluate_value_contract for this task's controller-owned
+    foundational value contract; the controller's post-pipeline value-release gate
+    fails the whole task if this file is missing or does not validate, independent
+    of research/adversary quality.
+  - Write docs/evidence/T002.md and .factory/external-evidence/T002.json; both are
+    controller-merged mandatory outputs required by scripts/gates/output_and_integration_gate.py's
+    require_patterns check regardless of what this stage's own allowed_paths declares.
+  - Declare an explicit, acyclic depends_on list on every query in docs/evidence/T002/query-plan.json,
+    per tcfactory/research_policy.py's mechanically enforced dependency-graph check.
   - 'Complete the exact protected-roadmap outcome: Recheck product name, package,
     domain, and trademark surface'
   - Add deterministic tests or machine-checkable evidence for every implemented normative
@@ -289,6 +366,8 @@ pipeline:
     as pass.
   - Do not invent customer, upstream, benchmark, hardware, or production evidence.
   - Preregister a version-2 query plan bound to this task and candidate.
+  - Declare an acyclic depends_on graph for every query; fan out only independent
+    read-only retrieval and wait for predecessors before dependent queries or synthesis.
   - Cover every expected finding with fresh, attributable raw evidence.
   - Bind controls to the same adapter, endpoint, and request shape as targets.
   - Run every negative or error control declared by the query plan.

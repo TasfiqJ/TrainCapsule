@@ -112,7 +112,7 @@ tasks:
   phase: P0
   depends_on:
   - T001
-  status: packet_approved
+  status: queued
   terminal_blocked: false
   packet_path: tasks/T002.yaml
   trust_core: false
@@ -3512,4 +3512,4 @@ tasks:
   revisions: 0
   value_revisions: 0
   infrastructure_recoveries: 0
-updated_at: '2026-08-11T09:51:26.616361+00:00'
+updated_at: '2026-08-11T09:51:27.378580+00:00'

@@ -1,0 +1,164 @@
+{
+  "$defs": {
+    "AgentSession": {
+      "additionalProperties": false,
+      "properties": {
+        "sessionRef": {
+          "pattern": "^ASESS-[A-Z0-9_-]+$",
+          "title": "Sessionref",
+          "type": "string"
+        },
+        "backend": {
+          "title": "Backend",
+          "type": "string"
+        },
+        "requestId": {
+          "title": "Requestid",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/SessionState"
+        },
+        "startedAt": {
+          "title": "Startedat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sessionRef",
+        "backend",
+        "requestId",
+        "state",
+        "startedAt"
+      ],
+      "title": "AgentSession",
+      "type": "object"
+    },
+    "BackendRouteState": {
+      "enum": [
+        "AUTHENTICATED",
+        "AUTH_EXPIRED",
+        "QUOTA_WAIT",
+        "ROUTE_REFUSED"
+      ],
+      "title": "BackendRouteState",
+      "type": "string"
+    },
+    "SessionState": {
+      "enum": [
+        "STARTED",
+        "RUNNING",
+        "COMPLETED",
+        "FAILED",
+        "CANCELLED"
+      ],
+      "title": "SessionState",
+      "type": "string"
+    },
+    "UsageState": {
+      "additionalProperties": false,
+      "properties": {
+        "routeState": {
+          "$ref": "#/$defs/BackendRouteState"
+        },
+        "subscriptionCapacity": {
+          "title": "Subscriptioncapacity",
+          "type": "string"
+        },
+        "retryAt": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Retryat"
+        },
+        "estimatedApiEquivalentUsd": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Estimatedapiequivalentusd",
+          "type": "number"
+        },
+        "actualChargeUsd": {
+          "default": 0.0,
+          "minimum": 0,
+          "title": "Actualchargeusd",
+          "type": "number"
+        }
+      },
+      "required": [
+        "routeState",
+        "subscriptionCapacity"
+      ],
+      "title": "UsageState",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "session": {
+      "$ref": "#/$defs/AgentSession"
+    },
+    "state": {
+      "$ref": "#/$defs/SessionState"
+    },
+    "verdict": {
+      "title": "Verdict",
+      "type": "string"
+    },
+    "structuredOutput": {
+      "anyOf": [
+        {
+          "additionalProperties": true,
+          "type": "object"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Structuredoutput"
+    },
+    "artifactDigests": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Artifactdigests",
+      "type": "object"
+    },
+    "usage": {
+      "$ref": "#/$defs/UsageState"
+    },
+    "redactedSummary": {
+      "title": "Redactedsummary",
+      "type": "string"
+    },
+    "errorState": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BackendRouteState"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "session",
+    "state",
+    "verdict",
+    "artifactDigests",
+    "usage",
+    "redactedSummary"
+  ],
+  "title": "AgentRunResult",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/agent-run-result.schema.json"
+}

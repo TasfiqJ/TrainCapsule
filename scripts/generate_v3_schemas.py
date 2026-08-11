@@ -17,6 +17,13 @@ ROOT: Final = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from tcfactory.backends.base import (
+    AgentCapabilityReport,
+    AgentRunResult,
+    AgentTaskRequest,
+    UsageState,
+)
+from tcfactory.checkpoints import V3Checkpoint
 from tcfactory.completion import MilestoneCompletionDecision
 from tcfactory.context import V3ContextManifest
 from tcfactory.handoffs import V3Handoff
@@ -45,8 +52,12 @@ from tcfactory.value import DecisionValueResult
 
 SCHEMA_ROOT: Final = ROOT / "schemas/factory/v3"
 SCHEMAS: Final[dict[str, type[BaseModel]]] = {
+    "agent-capabilities.schema.json": AgentCapabilityReport,
+    "agent-run-result.schema.json": AgentRunResult,
+    "agent-task-request.schema.json": AgentTaskRequest,
     "autonomy-config.schema.json": AutonomyV3Config,
     "candidate-manifest.schema.json": CandidateManifest,
+    "checkpoint.schema.json": V3Checkpoint,
     "commercial-maturity-config.schema.json": CommercialMaturityConfig,
     "dispositions.schema.json": DispositionLedger,
     "executors-config.schema.json": ExecutorConfig,
@@ -68,6 +79,7 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "work-item-v3.schema.json": WorkItem,
     "work-items.schema.json": WorkItemCollection,
     "task-packet.schema.json": V3TaskPacket,
+    "usage-state.schema.json": UsageState,
     "context-manifest.schema.json": V3ContextManifest,
     "decision-value.schema.json": DecisionValueResult,
 }

@@ -1,0 +1,63 @@
+{
+  "$defs": {
+    "TranscriptRetention": {
+      "enum": [
+        "NONE",
+        "REDACTED_SUMMARY"
+      ],
+      "title": "TranscriptRetention",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "backend": {
+      "title": "Backend",
+      "type": "string"
+    },
+    "structuredOutput": {
+      "title": "Structuredoutput",
+      "type": "boolean"
+    },
+    "resume": {
+      "title": "Resume",
+      "type": "boolean"
+    },
+    "cancellation": {
+      "title": "Cancellation",
+      "type": "boolean"
+    },
+    "sandbox": {
+      "title": "Sandbox",
+      "type": "boolean"
+    },
+    "networkDenial": {
+      "title": "Networkdenial",
+      "type": "boolean"
+    },
+    "transcriptRetention": {
+      "$ref": "#/$defs/TranscriptRetention"
+    },
+    "allowedTools": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Allowedtools",
+      "type": "array"
+    }
+  },
+  "required": [
+    "backend",
+    "structuredOutput",
+    "resume",
+    "cancellation",
+    "sandbox",
+    "networkDenial",
+    "transcriptRetention",
+    "allowedTools"
+  ],
+  "title": "AgentCapabilityReport",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/agent-capabilities.schema.json"
+}

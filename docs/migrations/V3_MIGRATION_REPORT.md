@@ -92,6 +92,24 @@ Migrate the V2 factory/bootstrap repository to the bounded V3 product and factor
 - Secret scan and Git diff hygiene: pass
 - Manual read-only operator exercise: config validate/explain, status, lanes, milestones, work explain, kill-gates, and migrate dry-run passed
 
+## Phase E implementation
+
+- Added the backend-neutral `EngineeringAgentBackend` protocol and typed capability, request, session, handoff, result, usage, route-state, cancellation, and transcript-retention records.
+- Added deterministic `FakeBackend` contract tests without any model/network use and a subscription-only `ClaudeBackend` adapter around the existing async stage runner.
+- Moved credential decisions behind `ClaudeCredentialProvider`; factory-facing state exposes only `AUTHENTICATED`, `AUTH_EXPIRED`, `QUOTA_WAIT`, or `ROUTE_REFUSED`. Raw token values, account identifiers, token-file paths, controller-secret paths, and SDK environments are rejected or redacted from exportable records.
+- Refactored structured read-only review through the backend contract for deterministic tests. Live Claude review now retains only redacted message-type counts, has a finite wall-time cancellation boundary, finite turns/cost estimate, explicit Bash prefixes, network denial, backend-neutral session references, and no raw SDK message serialization or subscription-unbounded branch.
+- Upgraded checkpoints to schema-versioned digest envelopes, atomic previous generations, explicit previous-generation recovery, corrupt/incompatible quarantine, stale-candidate rejection, duplicate-active-work detection, and blocking failure semantics. V3 checkpoint state binds work item, lane, milestone, backend session reference, finite budgets, context/source digests, candidate SHA, approval state, and circuit-breaker reason.
+- Expanded generated model-matching schemas from 25 to 30.
+
+## Phase E verification
+
+- Focused backend, redaction, structured-runner, and checkpoint recovery checks: 33 passed
+- Complete Pytest suite: 456 passed
+- Ruff: pass
+- Strict Pyright: 0 errors, 0 warnings
+- Generated V3 schemas: 30 exact matches
+- Historical/V3 authority, 109-item roadmap, no-paid-usage, secret scan, and Git diff hygiene: pass
+
 ## Pending
 
-Backend adapters, checkpoint recovery, release/startup controls, prompt migration, legacy mappings, product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.
+Release/startup controls, prompt migration, legacy mappings, product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.

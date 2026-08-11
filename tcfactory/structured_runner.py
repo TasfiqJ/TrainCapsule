@@ -1,14 +1,22 @@
 from __future__ import annotations
 
+import asyncio
 import json
-from dataclasses import asdict, is_dataclass
 from pathlib import Path
 from typing import Any, TypeVar, cast
 
 from claude_agent_sdk import EffortLevel, SandboxSettings
 from pydantic import BaseModel
 
-from .auth import assert_max_oauth_only, sanitized_agent_environment
+from .auth import sanitized_agent_environment
+from .backends.base import (
+    AgentTaskRequest,
+    BackendRouteState,
+    EngineeringAgentBackend,
+    Handoff,
+    SessionState,
+)
+from .backends.claude import ClaudeCredentialProvider
 from .ledger import Ledger
 from .models import (
     AgentReport,
@@ -24,20 +32,27 @@ from .quota import (
     classify_failure_texts,
     disposition_from_rate_limit_info,
 )
-from .util import write_json
+from .util import redact_sensitive, write_json
+from .v3.base import sha256_digest
 
 T = TypeVar("T", bound=BaseModel)
 
 
-def _message_to_json(message: object) -> dict[str, Any]:
-    if is_dataclass(message) and not isinstance(message, type):
-        data = asdict(message)
-    elif hasattr(message, "__dict__"):
-        data = dict(vars(message))
-    else:
-        data = {"repr": repr(message)}
-    data["_type"] = type(message).__name__
-    return data
+DEFAULT_BASH_ALLOWLIST = (
+    "git status",
+    "git diff",
+    "git show",
+    "python -m pytest",
+    "uv run pytest",
+)
+
+
+def validate_bash_command(command: str, allowlist: list[str]) -> None:
+    normalized = " ".join(command.split())
+    if any(marker in normalized for marker in (";", "&&", "||", "`", "$(")):
+        raise ValueError("compound or substituting Bash commands are forbidden")
+    if not any(normalized == item or normalized.startswith(item + " ") for item in allowlist):
+        raise ValueError(f"Bash command is outside the explicit allowlist: {normalized}")
 
 
 async def run_structured_read_only_review[T: BaseModel](
@@ -57,6 +72,9 @@ async def run_structured_read_only_review[T: BaseModel](
     role: RoleName,
     task_id: str,
     run_id: str,
+    backend: EngineeringAgentBackend | None = None,
+    max_wall_time_seconds: int = 1800,
+    bash_allowlist: list[str] | None = None,
 ) -> T:
     """Run one fresh, read-only Claude session and enforce structured output.
 
@@ -65,28 +83,64 @@ async def run_structured_read_only_review[T: BaseModel](
     sleep through and retry later.
     """
 
-    try:
-        assert_max_oauth_only(require_long_lived_token=True)
-    except RuntimeError as exc:
-        raise AuthenticationPause(str(exc)) from exc
+    if max_wall_time_seconds <= 0 or max_wall_time_seconds > 14_400:
+        raise ValueError("structured review wall time must be finite and <= 14400 seconds")
+    allowed_bash: list[str] = (
+        list(DEFAULT_BASH_ALLOWLIST) if bash_allowlist is None else bash_allowlist
+    )
+    schema_digest = sha256_digest(
+        (json.dumps(schema, separators=(",", ":"), sort_keys=True) + "\n").encode()
+    )
+    if backend is not None:
+        request = AgentTaskRequest(
+            request_id=f"AREQ-{run_id.upper().replace('-', '_')}-{role.value.upper()}",
+            work_item_id=task_id,
+            role=role.value,
+            cwd=str(cwd.resolve()),
+            prompt=prompt,
+            system_prompt=system_prompt,
+            schema_digest=schema_digest,
+            context_digest=sha256_digest(prompt.encode()),
+            source_digest=sha256_digest(system_prompt.encode()),
+            max_turns=max_turns,
+            max_wall_time_seconds=max_wall_time_seconds,
+            allowed_tools=["Read", "Grep", "Glob", "Bash"],
+            bash_allowlist=allowed_bash,
+            network_allowed=False,
+        )
+        session = backend.start(request)
+        handoff = Handoff(
+            work_item_id=task_id,
+            candidate_sha="0" * 40,
+            next_action="Produce the bounded structured review result.",
+            artifact_digests={},
+            findings=[],
+        )
+        run_result = backend.resume(session, handoff)
+        if run_result.state is not SessionState.COMPLETED:
+            raise RuntimeError((run_result.error_state or BackendRouteState.ROUTE_REFUSED).value)
+        result = result_type.model_validate(run_result.structured_output)
+        artifact_dir.mkdir(parents=True, exist_ok=True)
+        write_json(artifact_dir / "structured-result.json", result.model_dump(mode="json"))
+        write_json(artifact_dir / "usage.json", run_result.usage.model_dump(mode="json"))
+        write_json(artifact_dir / "request-summary.json", request.exportable_summary())
+        return result
+
+    credential_state = ClaudeCredentialProvider(require_long_lived_token=True).state()
+    if credential_state is not BackendRouteState.AUTHENTICATED:
+        raise AuthenticationPause(credential_state.value)
     try:
         from claude_agent_sdk import ClaudeAgentOptions, ResultMessage, query
     except ImportError as exc:
         raise RuntimeError("claude-agent-sdk is not installed") from exc
 
     ledger = Ledger(config.resolve(repo_root, config.ledger_path), config.monthly_budget_usd)
-    subscription_unbounded = config.work_until_done and config.auth_mode == "max_oauth_only"
-    if not (subscription_unbounded and config.disable_max_oauth_budget_caps):
-        ledger.assert_budget(max_budget_usd)
-    effective_turns = max(max_turns, config.review_session_turn_floor)
-    effective_budget = (
-        None
-        if subscription_unbounded and config.disable_max_oauth_budget_caps
-        else max_budget_usd
-    )
+    ledger.assert_budget(max_budget_usd)
+    effective_turns = min(max_turns, 200)
+    effective_budget = max_budget_usd
 
     artifact_dir.mkdir(parents=True, exist_ok=True)
-    transcript = artifact_dir / "transcript.jsonl"
+    transcript = artifact_dir / "transcript-summary.json"
     stderr_path = artifact_dir / "claude-stderr.log"
     environment = sanitized_agent_environment(
         {
@@ -107,7 +161,7 @@ async def run_structured_read_only_review[T: BaseModel](
 
     def stderr_sink(line: str) -> None:
         with stderr_path.open("a", encoding="utf-8") as handle:
-            handle.write(line)
+            handle.write(redact_sensitive(line))
             if not line.endswith("\n"):
                 handle.write("\n")
 
@@ -116,12 +170,16 @@ async def run_structured_read_only_review[T: BaseModel](
         system_prompt={
             "type": "preset",
             "preset": "claude_code",
-            "append": system_prompt,
+            "append": (
+                system_prompt
+                + "\n\nBash is restricted to these command prefixes: "
+                + ", ".join(allowed_bash)
+            ),
             "exclude_dynamic_sections": True,
         },
         setting_sources=["project"],
-        tools=["Read", "Grep", "Glob", "Bash"],
-        allowed_tools=["Read", "Grep", "Glob", "Bash"],
+        tools=["Read", "Grep", "Glob", *( ["Bash"] if allowed_bash else [])],
+        allowed_tools=["Read", "Grep", "Glob", *( ["Bash"] if allowed_bash else [])],
         disallowed_tools=["Write", "Edit", "WebFetch", "WebSearch", "Agent"],
         permission_mode="dontAsk",
         model=model,
@@ -154,22 +212,35 @@ async def run_structured_read_only_review[T: BaseModel](
     result_message: ResultMessage | None = None
     caught_error: str | None = None
     machine_limit = None
+    message_counts: dict[str, int] = {}
     try:
-        async for message in query(prompt=prompt, options=options):
-            with transcript.open("a", encoding="utf-8") as handle:
-                handle.write(json.dumps(_message_to_json(message), default=str) + "\n")
-            if type(message).__name__ == "RateLimitEvent":
-                machine_limit = disposition_from_rate_limit_info(
-                    getattr(message, "rate_limit_info", None),
-                    quota_fallback_wait_seconds=config.quota_fallback_wait_seconds,
-                    transient_retry_seconds=config.transient_retry_seconds,
-                )
-                if machine_limit is not None:
-                    break
-            if isinstance(message, ResultMessage):
-                result_message = message
+        async with asyncio.timeout(max_wall_time_seconds):
+            async for message in query(prompt=prompt, options=options):
+                message_type = type(message).__name__
+                message_counts[message_type] = message_counts.get(message_type, 0) + 1
+                if message_type == "RateLimitEvent":
+                    machine_limit = disposition_from_rate_limit_info(
+                        getattr(message, "rate_limit_info", None),
+                        quota_fallback_wait_seconds=config.quota_fallback_wait_seconds,
+                        transient_retry_seconds=config.transient_retry_seconds,
+                    )
+                    if machine_limit is not None:
+                        break
+                if isinstance(message, ResultMessage):
+                    result_message = message
+    except TimeoutError:
+        caught_error = "structured review exceeded its finite wall-time ceiling"
     except Exception as exc:  # noqa: BLE001
-        caught_error = f"{type(exc).__name__}: {exc}"
+        caught_error = f"{type(exc).__name__}: {redact_sensitive(str(exc))}"
+    write_json(
+        transcript,
+        {
+            "retention": "REDACTED_SUMMARY",
+            "messageTypes": message_counts,
+            "promptStored": False,
+            "sdkMessagesStored": False,
+        },
+    )
 
     if machine_limit is not None:
         if machine_limit.kind == PauseKind.AUTHENTICATION:
@@ -208,13 +279,16 @@ async def run_structured_read_only_review[T: BaseModel](
 
     result = result_type.model_validate(result_message.structured_output)
     write_json(artifact_dir / "structured-result.json", result.model_dump(mode="json"))
+    backend_session_ref = "ASESS-CLAUDE-" + sha256_digest(
+        str(result_message.session_id).encode()
+    ).split(":", 1)[1][:16].upper()
     usage_payload = {
-        "session_id": result_message.session_id,
-        "total_cost_usd": float(result_message.total_cost_usd or 0.0),
+        "backend_session_ref": backend_session_ref,
+        "estimated_api_equivalent_usd": float(result_message.total_cost_usd or 0.0),
+        "actual_subscription_charge_usd": 0.0,
         "num_turns": int(result_message.num_turns or 0),
         "duration_ms": int(result_message.duration_ms or 0),
-        "usage": result_message.usage or {},
-        "model_usage": result_message.model_usage or {},
+        "route_state": BackendRouteState.AUTHENTICATED.value,
     }
     write_json(artifact_dir / "usage.json", usage_payload)
 
@@ -231,12 +305,12 @@ async def run_structured_read_only_review[T: BaseModel](
                 summary="Structured read-only review completed.",
                 evidence=[str(artifact_dir / "structured-result.json")],
             ),
-            session_id=result_message.session_id,
+            session_id=backend_session_ref,
             total_cost_usd=float(result_message.total_cost_usd or 0.0),
             num_turns=int(result_message.num_turns or 0),
             duration_ms=int(result_message.duration_ms or 0),
-            usage=dict(result_message.usage or {}),
-            model_usage=dict(result_message.model_usage or {}),
+            usage={},
+            model_usage={},
             terminal_reason=result_message.terminal_reason,
             artifact_dir=str(artifact_dir),
         )

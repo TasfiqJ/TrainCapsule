@@ -20,6 +20,13 @@ _SENSITIVE_KEY = re.compile(
 _SENSITIVE_VALUE = re.compile(
     r"(?i)(?:bearer\s+|(?:sk|ghp|github_pat|oauth)[-_])[A-Za-z0-9._-]{8,}"
 )
+_SENSITIVE_ACCOUNT = re.compile(
+    r"(?i)\b(?:account|organization|tenant)[_-]?id\s*[:=]\s*[^\s,;]+"
+)
+_SENSITIVE_PATH = re.compile(
+    r"(?i)(?:[/\\][^\s'\"]*)?(?:claude-oauth-token|controller-secret|private-gate)"
+    r"(?:[^\s'\"]*)"
+)
 _SAFE_ENV_KEYS = {
     "CI",
     "COLORTERM",
@@ -96,6 +103,8 @@ def redact_sensitive(value: str) -> str:
     """Redact credentials and host-specific home paths from exportable text."""
 
     redacted = _SENSITIVE_VALUE.sub("[REDACTED]", value)
+    redacted = _SENSITIVE_ACCOUNT.sub("[REDACTED_ACCOUNT]", redacted)
+    redacted = _SENSITIVE_PATH.sub("[REDACTED_PATH]", redacted)
     candidates = {
         os.environ.get("HOME"),
         os.environ.get("USERPROFILE"),

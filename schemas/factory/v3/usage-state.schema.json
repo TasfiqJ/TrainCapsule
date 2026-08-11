@@ -1,0 +1,56 @@
+{
+  "$defs": {
+    "BackendRouteState": {
+      "enum": [
+        "AUTHENTICATED",
+        "AUTH_EXPIRED",
+        "QUOTA_WAIT",
+        "ROUTE_REFUSED"
+      ],
+      "title": "BackendRouteState",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "routeState": {
+      "$ref": "#/$defs/BackendRouteState"
+    },
+    "subscriptionCapacity": {
+      "title": "Subscriptioncapacity",
+      "type": "string"
+    },
+    "retryAt": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Retryat"
+    },
+    "estimatedApiEquivalentUsd": {
+      "default": 0.0,
+      "minimum": 0,
+      "title": "Estimatedapiequivalentusd",
+      "type": "number"
+    },
+    "actualChargeUsd": {
+      "default": 0.0,
+      "minimum": 0,
+      "title": "Actualchargeusd",
+      "type": "number"
+    }
+  },
+  "required": [
+    "routeState",
+    "subscriptionCapacity"
+  ],
+  "title": "UsageState",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/usage-state.schema.json"
+}

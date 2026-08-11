@@ -12,7 +12,7 @@ The exact baseline and results are recorded in `V3_BASELINE_REPORT.md`: 394 test
 | V3 models | strict work items, transitions, milestones, maturity, approvals, receipts, candidate manifest | passed |
 | Scheduler/policy | lane independence, WIP, deterministic score, finite retries, repeated finding, hard stuck | passed; 40 focused checks and 430-test full-suite regression |
 | Completion/context/value | proposal-only expansion, scoped context/freshness, terminal value outcomes | passed; focused adversarial coverage and 443-test full-suite regression |
-| Backend | protocol, Claude adapter, fake backend, redaction, checkpoint recovery | pending |
+| Backend | protocol, Claude adapter, fake backend, redaction, checkpoint recovery | passed; 33 focused checks and 456-test full-suite regression |
 | Release/startup | PR-mode dry run, exact SHA, bounded restart, portable controls | pending |
 | Legacy migration | 124-entry mapping, dry run, queue archive, deterministic migration | pending |
 | Product preflight | identity golden vectors, CAS, importer, native baseline, completeness, eligibility, CLI | pending |

@@ -1,0 +1,97 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "requestId": {
+      "pattern": "^AREQ-[A-Z0-9_-]+$",
+      "title": "Requestid",
+      "type": "string"
+    },
+    "workItemId": {
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "role": {
+      "title": "Role",
+      "type": "string"
+    },
+    "cwd": {
+      "title": "Cwd",
+      "type": "string"
+    },
+    "prompt": {
+      "minLength": 1,
+      "title": "Prompt",
+      "type": "string"
+    },
+    "systemPrompt": {
+      "minLength": 1,
+      "title": "Systemprompt",
+      "type": "string"
+    },
+    "schemaDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Schemadigest",
+      "type": "string"
+    },
+    "contextDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Contextdigest",
+      "type": "string"
+    },
+    "sourceDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourcedigest",
+      "type": "string"
+    },
+    "maxTurns": {
+      "maximum": 200,
+      "minimum": 1,
+      "title": "Maxturns",
+      "type": "integer"
+    },
+    "maxWallTimeSeconds": {
+      "maximum": 14400,
+      "minimum": 1,
+      "title": "Maxwalltimeseconds",
+      "type": "integer"
+    },
+    "allowedTools": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Allowedtools",
+      "type": "array"
+    },
+    "bashAllowlist": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Bashallowlist",
+      "type": "array"
+    },
+    "networkAllowed": {
+      "default": false,
+      "title": "Networkallowed",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "requestId",
+    "workItemId",
+    "role",
+    "cwd",
+    "prompt",
+    "systemPrompt",
+    "schemaDigest",
+    "contextDigest",
+    "sourceDigest",
+    "maxTurns",
+    "maxWallTimeSeconds",
+    "allowedTools",
+    "bashAllowlist"
+  ],
+  "title": "AgentTaskRequest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/agent-task-request.schema.json"
+}

@@ -1,6 +1,21 @@
 {
   "version": 2,
   "contexts": {
+    "company_product_brief": [
+      "docs/source-of-truth/final-2026-08-09/README.md",
+      "docs/source-of-truth/final-2026-08-09/00_EXECUTIVE_BUILD_DECISION.md",
+      "docs/source-of-truth/final-2026-08-09/03_PRODUCT_STRATEGY_AND_REQUIREMENTS.md",
+      "docs/source-of-truth/final-2026-08-09/04_TECHNICAL_ARCHITECTURE.md",
+      "docs/source-of-truth/final-2026-08-09/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC.md",
+      "docs/source-of-truth/final-2026-08-09/08_ACQUISITION_THESIS.md",
+      "docs/source-of-truth/final-2026-08-09/09_CAREER_AND_HIRING_THESIS.md",
+      "docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md",
+      "docs/source-of-truth/final-2026-08-09/13_SOURCE_REGISTER.md",
+      "docs/source-of-truth/final-2026-08-09/14_CLAUDE_CODE_MASTER_BUILD_PROMPT.md",
+      "docs/source-of-truth/final-2026-08-09/TRAINCAPSULE_FINAL_MASTER_PLAN.md",
+      "docs/source-of-truth/final-2026-08-09/SUPERSESSION_AND_MIGRATION.md",
+      "docs/source-of-truth/final-2026-08-09/FINAL_AUDIT_REPORT.md"
+    ],
     "executive_decision": [
       "docs/source-of-truth/final-2026-08-09/00_EXECUTIVE_BUILD_DECISION.md"
     ],

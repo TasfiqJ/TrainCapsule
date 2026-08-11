@@ -86,11 +86,18 @@ def _audit_prompt(
 commercialization-ready production build is complete.
 
 Authority order:
-1. docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md
-2. accepted ADRs and versioned specifications in the repository
-3. factory/product_definition_of_done.yaml
-4. factory/feature_ledger.yaml
-5. executable repository state and evidence artifacts
+1. the complete company_product_brief context in docs/CONTEXT_INDEX.yaml
+2. docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md
+3. accepted ADRs and versioned specifications in the repository
+4. factory/product_definition_of_done.yaml
+5. factory/feature_ledger.yaml
+6. executable repository state and evidence artifacts
+
+The supplied corpus is the founder-level company and product brief. Synthesize its buyer,
+product, architecture, trust, acquisition, operating, roadmap, and build intent. Do not
+treat a missing preference, a task boundary, or multiple defensible implementation options
+as an operator blocker: choose the strongest evidence-backed production option, require an
+ADR when the choice is materially consequential, and continue.
 
 Do not infer completion from line count, generated prose, dashboards, self-reported
 confidence, or a green unit suite alone. Inspect actual implementation paths, schemas,
@@ -132,18 +139,21 @@ Rules:
   external pilot/validation packet. Do not confuse these artifacts with proof of demand.
 - Treat documentation-only, screenshot-only, mock-only, happy-path-only, or model-authored
   evidence as insufficient for runtime, operational, usability, or commercial claims.
-- Return INCOMPLETE with the smallest dependency-ordered bounded work items when
-  implementation remains.
+- Return INCOMPLETE with complete dependency-ordered production work items when
+  implementation remains. Each item may cross components when necessary to deliver a
+  coherent end-to-end user outcome.
 - New task IDs must be unique uppercase IDs beginning with AUTO and a zero-padded number,
   such as AUTO001.
-- Each missing item must be small enough for one separately specified, built, attacked,
-  audited, and released task.
+- Each missing item must be coherent enough to specify, build, attack, audit, and release
+  as a real outcome. Do not fragment work to minimize diff size, acceptance count, context,
+  or session length.
 - Dependencies may reference existing ledger IDs or earlier missing items in the same report.
 - Do not add speculative enterprise surface area merely to appear valuable. Add only work
   needed for the protected buyer workflow, production quality, supportability, measurable
   differentiation, or external validation readiness.
 - Return BLOCKED only for a genuine external or normative blocker that cannot be resolved
-  through another bounded research/specification task.
+  through further repository research, an autonomous product/engineering decision, an ADR,
+  or another research/specification task.
 - Never claim commercial validation, maintainer confirmation, or customer adoption
   without external evidence.
 """

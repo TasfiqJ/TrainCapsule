@@ -100,6 +100,13 @@
     "A pilot and external-validation packet can be handed to a real user without exposing hidden gates, OAuth material, restricted evidence, or internal controller machinery.",
     "Customer usage, retention, payment, renewal, maintainer confirmation, and acquisition interest remain EXTERNAL_VALIDATION_REQUIRED until independently attributable evidence exists."
   ],
+  "founder_brief_execution_required": [
+    "Planning and completion audits synthesize the company_product_brief context rather than treating roadmap tasks as isolated engineering tickets.",
+    "Routine product, architecture, UX, packaging, support, and operating decisions are made autonomously from the supplied corpus and recorded when material; ordinary ambiguity is not an operator blocker.",
+    "The delivered surface connects the protected product strategy to onboarding, first value, repeat value, reliability, supportability, value measurement, pilot readiness, and a credible paid offer.",
+    "Task boundaries, session boundaries, small diffs, token estimates, and acceptance-count conventions cannot remove work necessary for a complete sellable outcome.",
+    "Automatic completion review may expand the roadmap until every automatable requirement is satisfied; expansion count is not a product-scope ceiling."
+  ],
   "quality_floor": [
     "No critical user workflow is documentation-only, mock-only, screenshot-only, or dependent on manual source edits.",
     "Security, privacy, data lifecycle, failure recovery, compatibility, performance, accessibility, and operator support have explicit evidence or truthful non-pass states.",

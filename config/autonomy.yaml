@@ -9,7 +9,9 @@ auto_respec_failed_tasks: true
 auto_repair_factory: true
 max_self_repair_attempts: 5
 allow_paid_usage: false
-max_respecifications_per_task: 10
+# Zero means no product-scope ceiling. Repeated identical infrastructure failures still
+# rotate through recovery/re-specification and preserve durable evidence.
+max_respecifications_per_task: 0
 idle_poll_seconds: 60
 quota_reset_buffer_seconds: 0
 unknown_limit_retry_seconds: 3600
@@ -25,11 +27,15 @@ notification_command: null
 external_blocker_sleep_seconds: 3600
 auto_expand_roadmap: true
 completion_audits_required: 2
-max_completion_expansions: 20
+# Zero means independent completion audits may keep expanding the automatable roadmap
+# until the production definition of done passes.
+max_completion_expansions: 0
 github_sync_enabled: true
 push_after_verified_tasks: 2
 push_interval_seconds: 900
 push_before_quota_pause: true
 push_on_integration_or_trust_task: true
 push_at_completion: true
-value_redesign_limit: 5
+# Zero means redesign continues until the predeclared value threshold is met or a truthful
+# external/normative blocker exists; the threshold itself may never be lowered post hoc.
+value_redesign_limit: 0

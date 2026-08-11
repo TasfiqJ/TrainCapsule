@@ -1,12 +1,17 @@
 {
   "version": 2,
-  "milestone": "automatable local TrainCapsule P0-P9 product",
-  "scope_statement": "Complete the automatable local product required by the final TrainCapsule source: Close, Qualify, and Exchange loops; both initial contract packs; explicit truth and assurance states; containment; reproducible evidence; local CLI/API/viewer; recovery; and independently auditable gates. External adoption, customer incidents, payment, funding, and acquisition are never fabricated completion criteria.",
+  "milestone": "commercialization-ready automatable TrainCapsule P0-P9 production product",
+  "scope_statement": "Complete a production-quality, installable, usable, operable, supportable, and commercialization-ready product required by the final TrainCapsule source: Close, Qualify, and Exchange loops; both initial contract packs; explicit truth and assurance states; containment; reproducible evidence; supported CLI/API/viewer journeys; recovery; and independently auditable gates. Real adoption and payment remain separately attributable external truth and are never fabricated.",
   "required_paths": [
     "README.md",
     "SECURITY.md",
     "SOURCE_PRECEDENCE.md",
     "CLAIM_REGISTRY.md",
+    "docs/product/BUYER_AND_USER_WORKFLOWS.md",
+    "docs/product/INSTALL_DEPLOY_UPGRADE.md",
+    "docs/product/OPERATIONS_SUPPORT_AND_FAILURES.md",
+    "docs/product/COMMERCIAL_READINESS.md",
+    "docs/product/EXTERNAL_VALIDATION_PACKET.md",
     "docs/source-of-truth/final-2026-08-09/FINAL_MANIFEST.json",
     "PUBLIC_INCIDENT_CORPUS/index.json",
     "packages/domain",
@@ -82,7 +87,24 @@
     "CHECKPOINT_RESUME_STATE_CONSISTENCY_V1 passes declared controls and catches declared hidden faults.",
     "Every result distinguishes PASS, FAIL, UNKNOWN, INVALID_ORACLE, INFRASTRUCTURE_ERROR, and EXTERNAL_VALIDATION_REQUIRED.",
     "Private gates, protected expectations, release authority, OAuth material, and customer evidence remain outside builder-visible paths.",
-    "Pause, resume, quota wait, single-instance lock, crash recovery, and Windows-login recovery are proven."
+    "Pause, resume, quota wait, single-instance lock, crash recovery, and Windows-login recovery are proven.",
+    "A new target user can install the supported release in a clean environment and reach first attributable value without undocumented developer intervention.",
+    "The primary buyer and user journeys run end to end through real product boundaries, including non-happy-path diagnostics and recovery.",
+    "Upgrade, rollback, backup, restore, health inspection, and support evidence are reproducible and version attributable.",
+    "Representative performance and resource limits are measured against predeclared workloads without turning synthetic results into demand claims."
+  ],
+  "commercial_readiness_evidence_required": [
+    "A concrete economic buyer, daily user, painful job, differentiated outcome, and credible revenue linkage are documented against the protected product strategy.",
+    "Packaging and pricing are explicit testable hypotheses tied to delivered value, not invented willingness-to-pay evidence.",
+    "The product records privacy-safe time-to-value, successful workflow completion, failure reasons, repeat use, and support burden for real pilots.",
+    "A pilot and external-validation packet can be handed to a real user without exposing hidden gates, OAuth material, restricted evidence, or internal controller machinery.",
+    "Customer usage, retention, payment, renewal, maintainer confirmation, and acquisition interest remain EXTERNAL_VALIDATION_REQUIRED until independently attributable evidence exists."
+  ],
+  "quality_floor": [
+    "No critical user workflow is documentation-only, mock-only, screenshot-only, or dependent on manual source edits.",
+    "Security, privacy, data lifecycle, failure recovery, compatibility, performance, accessibility, and operator support have explicit evidence or truthful non-pass states.",
+    "A green unit suite alone cannot satisfy product completion; real boundaries and end-to-end behavior must be exercised.",
+    "Known limitations are visible to users and operators and cannot be laundered into release claims."
   ],
   "completion_exclusions": [
     "Real customer incident access, adoption, renewal, payment, funding, or acquisition interest.",

@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from pydantic import BaseModel, ConfigDict, Field
 
@@ -12,6 +12,10 @@ from .models import (
     ValueGateMode,
 )
 from .yamlutil import load_yaml
+
+_ADDITIVE_POLICY_LIST_FIELDS = frozenset(
+    {"required_conditions", "falsification_criteria", "prohibited_proxies"}
+)
 
 
 class ValuePolicyError(RuntimeError):
@@ -71,6 +75,14 @@ def contract_for_task(policy: ValuePolicy, task_id: str) -> ValueContract:
     for key, value in values.items():
         # Empty lists mean "use defaults" unless the task intentionally supplies values.
         if isinstance(value, list) and not value:
+            continue
+        if isinstance(value, list) and key in _ADDITIVE_POLICY_LIST_FIELDS:
+            inherited = merged.get(key, [])
+            if not isinstance(inherited, list):
+                raise ValuePolicyError(f"Value policy default {key!r} must be a list")
+            inherited_strings = cast(list[str], inherited)
+            value_strings = cast(list[str], value)
+            merged[key] = list(dict.fromkeys([*inherited_strings, *value_strings]))
             continue
         merged[key] = value
     merged["required"] = entry.mode != ValueGateMode.NOT_REQUIRED

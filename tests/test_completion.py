@@ -5,6 +5,9 @@ from pathlib import Path
 import pytest
 
 from tcfactory.completion import deterministic_completion_check
+from tcfactory.yamlutil import load_yaml
+
+ROOT = Path(__file__).resolve().parents[1]
 
 
 def test_completion_check_requires_paths_and_commands(tmp_path: Path) -> None:
@@ -24,6 +27,27 @@ def test_completion_check_requires_paths_and_commands(tmp_path: Path) -> None:
     )
     assert any("Completion command 'fails' failed (7)" in value for value in failures)
     assert not any("passes" in value for value in failures)
+
+
+def test_product_completion_requires_commercialization_ready_production_evidence() -> None:
+    definition = load_yaml(ROOT / "factory/product_definition_of_done.yaml")
+    required_paths = set(definition["required_paths"])
+    assert {
+        "docs/product/BUYER_AND_USER_WORKFLOWS.md",
+        "docs/product/INSTALL_DEPLOY_UPGRADE.md",
+        "docs/product/OPERATIONS_SUPPORT_AND_FAILURES.md",
+        "docs/product/COMMERCIAL_READINESS.md",
+        "docs/product/EXTERNAL_VALIDATION_PACKET.md",
+    }.issubset(required_paths)
+
+    readiness = definition["commercial_readiness_evidence_required"]
+    assert any("economic buyer" in item for item in readiness)
+    assert any("privacy-safe" in item for item in readiness)
+    assert any("EXTERNAL_VALIDATION_REQUIRED" in item for item in readiness)
+
+    quality_floor = definition["quality_floor"]
+    assert any("mock-only" in item for item in quality_floor)
+    assert any("end-to-end" in item for item in quality_floor)
 
 
 def test_private_completion_gate_runs_outside_repository(

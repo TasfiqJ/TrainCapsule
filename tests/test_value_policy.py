@@ -23,6 +23,10 @@ def test_measured_milestone_has_frozen_threshold() -> None:
     assert contract.minimum_material_improvement is not None
     assert contract.evidence_path
     assert contract.falsification_criteria
+    assert "target_user_outcome_demonstrated_end_to_end" in contract.required_conditions
+    assert "protected_source_requirements_satisfied" in contract.required_conditions
+    assert "component completion without a usable supported workflow" in contract.prohibited_proxies
+    assert any("target user cannot complete" in item for item in contract.falsification_criteria)
 
 
 def test_external_demand_cannot_be_synthesized() -> None:

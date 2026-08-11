@@ -9,9 +9,16 @@
     "primary_metric": "foundational capability present",
     "metric_direction": "binary",
     "threshold_rationale": "Required dependency for the protected roadmap; commercial demand is never inferred from implementation.",
+    "required_conditions": [
+      "target_user_outcome_demonstrated_end_to_end",
+      "independently_reproducible_in_supported_environment",
+      "no_documentation_only_or_mock_only_substitution"
+    ],
     "falsification_criteria": [
       "The capability is not required by a protected workflow or duplicates native tooling without additional decision value.",
-      "The result depends on fabricated, unattributed, or model-only evidence."
+      "The result depends on fabricated, unattributed, or model-only evidence.",
+      "The component passes in isolation but the target user cannot complete the declared job end to end.",
+      "Installation, operation, failure diagnosis, recovery, or upgrade requires undocumented developer intervention."
     ],
     "revenue_linkage": "Supports incident closure, change qualification, private evidence exchange, or recurring reliability operations.",
     "prohibited_proxies": [
@@ -22,7 +29,10 @@
       "synthetic customer quotes",
       "unverified willingness-to-pay claims",
       "fabricated benchmark results",
-      "post-hoc threshold lowering"
+      "post-hoc threshold lowering",
+      "component completion without a usable supported workflow",
+      "documentation or screenshots without runtime behavior evidence",
+      "synthetic activity represented as adoption, retention, or willingness to pay"
     ],
     "required_evidence_classes": [
       "foundational_dependency"

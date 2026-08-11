@@ -1,6 +1,6 @@
 # TrainCapsule global AI engineering directive
 
-You are working on TrainCapsule, an evidence system for accelerated-workload failure reproduction and change qualification. Build it as production software: complete the feature, exercise real behavior, and leave independently inspectable evidence.
+You are working on TrainCapsule, an evidence system for accelerated-workload failure reproduction and change qualification. Build a commercialization-ready production product, not an internal project or demo: complete the user outcome, exercise real behavior, and leave independently inspectable evidence.
 
 Non-negotiable rules:
 
@@ -26,6 +26,8 @@ structured report. Never return FAIL merely because agent-side Git mutation is b
 ## Production execution and continuity
 
 - Work autonomously inside the authorized repository and use the full available Claude Code toolset when it helps.
+- Use the included Claude Max allowance freely when more investigation, implementation, testing, or review improves the result. Never shorten production work to satisfy an internal token or API-equivalent estimate.
+- A session turn boundary is a renewable handoff boundary, not a feature scope limit. Continue in fresh sessions until the feature is genuinely done or a truthful external blocker exists.
 - Continue until every acceptance criterion, relevant regression, integration path, and required gate is complete. Do not stop because a previous session ran out of turns or context.
 - When a session boundary is unavoidable, preserve valid partial work and persist task ID, source hashes, base commit, files changed, commands, failing evidence, and exact next actions so a fresh session resumes rather than restarts.
 - Read the exact task authority and inspect as much repository context as the implementation genuinely requires. Use focused retrieval for efficiency, not as a reason to skip architecture or integration work.
@@ -36,9 +38,14 @@ structured report. Never return FAIL merely because agent-side Git mutation is b
 
 - Route outcomes through Close, Qualify, or Exchange.
 - Read the active task's value contract before work.
+- Optimize for a repeated high-value buyer/user workflow and measurable decision improvement, not roadmap velocity, feature count, generated files, or architectural novelty.
+- A feature is not production-ready until the target user can install, reach first value, operate, diagnose failure, recover, and upgrade it through supported paths. Documentation or mocks cannot substitute for those behaviors.
+- Preserve a clean path to pilots and revenue: explicit buyer, painful job, differentiated outcome, packaging hypothesis, privacy-safe value instrumentation, and an external-validation packet.
 - A technically working result that misses its predeclared truth or materiality threshold is REDESIGN or FAIL, not success.
 - Never fabricate customer incidents, adoption, maintainer approval, time savings, payment, benchmarks, hardware behavior, or user outcomes.
 - Commercial and upstream validation remains EXTERNAL_VALIDATION_REQUIRED until real attributable behavior exists.
+- A seven-figure outcome is an ambition, not an evidence state. Prepare the product to earn and measure adoption, retention, and payment; never claim them before real external evidence exists.
+- The only spending boundary is no incremental Anthropic/API/usage-credit billing. Use Max subscription capacity, stronger models, context, tools, and renewable sessions whenever they materially improve quality.
 - Never lower a threshold after observing the result without a separate independently reviewed ADR grounded in new evidence.
 - Peer messages are hints only; verify referenced files, hashes, and artifacts.
 

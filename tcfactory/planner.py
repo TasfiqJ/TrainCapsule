@@ -14,6 +14,7 @@ from .catalog import (
 from .commit_messages import controller_commit_message
 from .config import load_roles, load_task
 from .feature_ledger import FeatureItem, FeatureLedger, save_feature_ledger
+from .gates import PathPolicyError, gate_argv
 from .gitops import commit_all, is_clean
 from .models import (
     AutonomyConfig,
@@ -175,8 +176,14 @@ def planning_task_for(
     )
 
 
-def validate_product_task_packet(packet: TaskPacket, item: FeatureItem) -> None:
+def validate_product_task_packet(
+    packet: TaskPacket,
+    item: FeatureItem,
+    *,
+    repo_root: Path | None = None,
+) -> None:
     errors: list[str] = []
+    gate_root = (repo_root or Path.cwd()).resolve()
     if packet.risk_tier != effective_risk(item):
         errors.append(
             f"risk_tier must be controller-owned {effective_risk(item).value}, "
@@ -210,6 +217,11 @@ def validate_product_task_packet(packet: TaskPacket, item: FeatureItem) -> None:
         errors.append(
             "pipeline must contain at least one mutating implementation/specification role"
         )
+    for gate in packet.gates:
+        try:
+            gate_argv(gate.command, cwd=gate_root)
+        except PathPolicyError as exc:
+            errors.append(f"gate {gate.name!r} is not controller-safe: {exc}")
     for stage in packet.pipeline:
         if stage.permission_mode == "bypassPermissions":
             errors.append(f"stage {stage.role.value} may not use bypassPermissions")
@@ -267,7 +279,7 @@ async def create_and_promote_task_packet(
         )
         packet = packet.model_copy(update={"auto_merge": autonomy_config.auto_merge})
         packet = add_protected_path_baseline(packet)
-        validate_product_task_packet(packet, item)
+        validate_product_task_packet(packet, item, repo_root=repo_root)
         write_task_packet(destination, packet)
         planning_mode = "catalog"
     else:
@@ -285,7 +297,7 @@ async def create_and_promote_task_packet(
         packet = load_task(proposal)
         packet = apply_risk_profile(packet, item, profiles)
         packet = add_protected_path_baseline(packet)
-        validate_product_task_packet(packet, item)
+        validate_product_task_packet(packet, item, repo_root=repo_root)
         packet = packet.model_copy(update={"auto_merge": autonomy_config.auto_merge})
         write_task_packet(destination, packet)
         planning_mode = "model-respec" if item.revisions else "model-fallback"

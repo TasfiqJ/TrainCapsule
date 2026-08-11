@@ -5,6 +5,7 @@ import sys
 from pathlib import Path
 
 from tcfactory.config import load_task
+from tcfactory.gates import PathPolicyError, gate_argv
 
 
 def main() -> int:
@@ -21,6 +22,11 @@ def main() -> int:
         )
     if len(packet.acceptance_criteria) > 25:
         raise SystemExit("acceptance_criteria exceeds hard ceiling of 25")
+    for gate in packet.gates:
+        try:
+            gate_argv(gate.command, cwd=Path.cwd().resolve())
+        except PathPolicyError as exc:
+            raise SystemExit(f"gate {gate.name!r} is not controller-safe: {exc}") from exc
     return 0
 
 

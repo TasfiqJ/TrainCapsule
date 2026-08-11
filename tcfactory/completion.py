@@ -82,8 +82,8 @@ def _audit_prompt(
     role: str,
 ) -> str:
     prior = [report.model_dump(mode="json") for report in prior_reports]
-    return f"""Perform a read-only {role} of whether the automatable TrainCapsule product
-build is complete.
+    return f"""Perform a read-only {role} of whether the automatable TrainCapsule
+commercialization-ready production build is complete.
 
 Authority order:
 1. docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md
@@ -94,12 +94,16 @@ Authority order:
 
 Do not infer completion from line count, generated prose, dashboards, self-reported
 confidence, or a green unit suite alone. Inspect actual implementation paths, schemas,
-tests, adapters, release evidence, local packaging, frontend/backend integration, and
-milestone artifacts.
+tests, adapters, release evidence, supported packaging, frontend/backend integration,
+clean installation, upgrade and rollback behavior, operator diagnostics, security and
+privacy controls, representative performance, and milestone artifacts.
 
-The word COMPLETE means the full automatable demonstration product is implemented and
-independently inspectable. It does not mean customers paid, a maintainer merged a PR,
-funding exists, or an acquisition is likely. Those external facts must never be invented.
+The word COMPLETE means the full automatable production product is installable, usable,
+operable, supportable, and independently inspectable for its declared buyer and user. A
+collection of components, green unit tests, generated documentation, or a local developer
+demo is not a product. COMPLETE does not mean customers paid, a maintainer merged a PR,
+funding exists, or an acquisition is likely. Those external facts must never be invented;
+the build must instead be ready to collect attributable pilot, usage, and payment evidence.
 
 DEFINITION OF DONE:
 ```yaml
@@ -119,6 +123,15 @@ PRIOR INDEPENDENT REPORTS TO CHALLENGE OR RECONCILE:
 Rules:
 - Return COMPLETE only when every automatable requirement has concrete inspectable
   evidence and deterministic completion commands are appropriate to run.
+- Require a clean supported install-to-first-value journey, the declared Close/Qualify/
+  Exchange user workflows, realistic failure and recovery behavior, operator-facing
+  diagnostics, upgrade/rollback evidence, security/privacy review, representative
+  performance evidence, release artifacts, and actionable user/operator documentation.
+- Require commercialization readiness: a concrete buyer, painful job, differentiated
+  outcome, packaging hypothesis, measurable value instrumentation, and a ready-to-run
+  external pilot/validation packet. Do not confuse these artifacts with proof of demand.
+- Treat documentation-only, screenshot-only, mock-only, happy-path-only, or model-authored
+  evidence as insufficient for runtime, operational, usability, or commercial claims.
 - Return INCOMPLETE with the smallest dependency-ordered bounded work items when
   implementation remains.
 - New task IDs must be unique uppercase IDs beginning with AUTO and a zero-padded number,
@@ -126,9 +139,9 @@ Rules:
 - Each missing item must be small enough for one separately specified, built, attacked,
   audited, and released task.
 - Dependencies may reference existing ledger IDs or earlier missing items in the same report.
-- Do not add billing, multi-tenancy, Kubernetes, a broad provider matrix, autonomous
-  production repair, or other deferred scope unless the definitive master plan explicitly
-  requires it for the automatable product-build milestone.
+- Do not add speculative enterprise surface area merely to appear valuable. Add only work
+  needed for the protected buyer workflow, production quality, supportability, measurable
+  differentiation, or external validation readiness.
 - Return BLOCKED only for a genuine external or normative blocker that cannot be resolved
   through another bounded research/specification task.
 - Never claim commercial validation, maintainer confirmation, or customer adoption

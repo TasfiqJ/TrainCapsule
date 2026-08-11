@@ -2,8 +2,9 @@
 
 from __future__ import annotations
 
+import os
 from pathlib import Path
-from typing import Literal
+from typing import Any, Literal, cast
 
 from pydantic import Field, model_validator
 
@@ -216,3 +217,83 @@ def load_scheduler_v3(path: Path) -> SchedulerConfig:
 
 def load_executors_v3(path: Path) -> ExecutorConfig:
     return ExecutorConfig.model_validate(load_yaml(path))
+
+
+PROTECTED_ENVIRONMENT_OVERRIDES = frozenset(
+    {
+        "TCF_RELEASE_MODE",
+        "TCF_AUTO_MERGE",
+        "TCF_HUMAN_APPROVAL_ROOT_OVERRIDE",
+        "TCF_RECEIPT_TRUST_ROOT_OVERRIDE",
+        "TCF_PRIVATE_GATE_RUNNER",
+        "TCF_ALLOW_UNSANDBOXED",
+        "TCF_DISABLE_KILL_GATES",
+        "TCF_MAX_PARALLEL",
+    }
+)
+
+
+def validate_v3_configuration(repo_root: Path) -> dict[str, V3Model]:
+    """Validate the complete V3 configuration set and reject protected overrides."""
+
+    present = sorted(name for name in PROTECTED_ENVIRONMENT_OVERRIDES if os.getenv(name))
+    if present:
+        raise ValueError(f"protected V3 environment overrides are forbidden: {present}")
+    loaded: dict[str, V3Model] = {
+        "factory": load_factory_v3(repo_root / "config/factory.yaml"),
+        "autonomy": load_autonomy_v3(repo_root / "config/autonomy.yaml"),
+        "scheduler": load_scheduler_v3(repo_root / "config/scheduler.yaml"),
+        "executors": load_executors_v3(repo_root / "config/executors.yaml"),
+        "externalEvidence": ExternalEvidenceConfig.model_validate(
+            load_yaml(repo_root / "config/external_evidence.yaml")
+        ),
+        "commercialMaturity": CommercialMaturityConfig.model_validate(
+            load_yaml(repo_root / "config/commercial_maturity.yaml")
+        ),
+        "milestones": MilestonePolicyConfig.model_validate(
+            load_yaml(repo_root / "config/milestones.yaml")
+        ),
+    }
+    versions = {int(cast(Any, value).version) for value in loaded.values()}
+    if versions != {3}:
+        raise ValueError(f"mixed or legacy normal-operation configuration: {sorted(versions)}")
+    return loaded
+
+
+def explain_v3_config_field(repo_root: Path, dotted_field: str) -> dict[str, object]:
+    """Explain a field and its exact file provenance; no protected env overlay exists."""
+
+    if not dotted_field or dotted_field.startswith(".") or dotted_field.endswith("."):
+        raise ValueError("config field must be a dotted path")
+    root_name, *parts = dotted_field.split(".")
+    loaded = validate_v3_configuration(repo_root)
+    if root_name not in loaded:
+        raise KeyError(root_name)
+    value: object = loaded[root_name].model_dump(mode="json", by_alias=True)
+    for part in parts:
+        if not isinstance(value, dict) or part not in value:
+            raise KeyError(dotted_field)
+        value = cast(dict[str, object], value)[part]
+    file_names = {
+        "factory": "factory.yaml",
+        "autonomy": "autonomy.yaml",
+        "scheduler": "scheduler.yaml",
+        "executors": "executors.yaml",
+        "externalEvidence": "external_evidence.yaml",
+        "commercialMaturity": "commercial_maturity.yaml",
+        "milestones": "milestones.yaml",
+    }
+    return {
+        "field": dotted_field,
+        "value": value,
+        "source": str(repo_root / "config" / file_names[root_name]),
+        "environmentOverride": None,
+        "protected": dotted_field.startswith(
+            (
+                "factory.repository.releaseMode",
+                "factory.release",
+                "factory.runtime",
+                "externalEvidence",
+            )
+        ),
+    }

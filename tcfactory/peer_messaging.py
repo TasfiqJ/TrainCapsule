@@ -8,7 +8,8 @@ from typing import Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
-from .util import write_json
+from .util import append_jsonl_locked, resolve_within, write_json
+from .v3.base import sha256_digest
 
 _MESSAGE_RE = re.compile(
     r"^RPMSG/1\s+task=(?P<task>[A-Z][A-Z0-9_-]{1,63})\s+"
@@ -29,7 +30,9 @@ class PeerMessage(BaseModel):
     kind: Literal["finding", "blocker", "decision", "status", "challenge", "response"]
     candidate_sha: str | None = None
     artifact_path: str
+    artifact_digest: str | None = Field(default=None, pattern=r"^sha256:[0-9a-f]{64}$")
     summary: str
+    authoritative: Literal[False] = False
     sender: str | None = None
     recipient: str | None = None
     created_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
@@ -78,9 +81,23 @@ def parse_peer_message(raw: str) -> PeerMessage:
 
 
 def _append_jsonl(path: Path, payload: dict[str, Any]) -> None:
-    path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(payload, sort_keys=True, default=str) + "\n")
+    append_jsonl_locked(path, payload)
+
+
+def validate_peer_artifact(message: PeerMessage, artifact_root: Path) -> Path:
+    """Validate the advisory message's referenced artifact before it may be consumed."""
+
+    if not message.artifact_digest:
+        raise PeerMessageError("peer artifact digest is required")
+    try:
+        path = resolve_within(artifact_root, message.artifact_path, require_exists=True)
+    except ValueError as exc:
+        raise PeerMessageError(str(exc)) from exc
+    if not path.is_file():
+        raise PeerMessageError("peer artifact is not a regular file")
+    if sha256_digest(path.read_bytes()) != message.artifact_digest:
+        raise PeerMessageError("peer artifact digest mismatch")
+    return path
 
 
 def register_peer_session(message_dir: Path, record: PeerSessionRecord) -> Path:
@@ -113,6 +130,7 @@ def peer_status(message_dir: Path, task_id: str | None = None) -> dict[str, Any]
         else sorted(path for path in message_dir.glob("*") if path.is_dir())
     )
     tasks: dict[str, Any] = {}
+    warnings: list[str] = []
     for root in roots:
         if not root.exists():
             continue
@@ -120,8 +138,8 @@ def peer_status(message_dir: Path, task_id: str | None = None) -> dict[str, Any]
         for path in sorted(root.glob("*/sessions/*.json")):
             try:
                 sessions.append(json.loads(path.read_text(encoding="utf-8")))
-            except (OSError, json.JSONDecodeError):
-                continue
+            except (OSError, json.JSONDecodeError) as exc:
+                warnings.append(f"malformed durable peer session {path}: {exc}")
         messages = 0
         msg_file = root / "messages.jsonl"
         if msg_file.is_file():
@@ -129,4 +147,4 @@ def peer_status(message_dir: Path, task_id: str | None = None) -> dict[str, Any]
                 1 for line in msg_file.read_text(encoding="utf-8").splitlines() if line.strip()
             )
         tasks[root.name] = {"sessions": sessions, "message_count": messages}
-    return {"tasks": tasks}
+    return {"tasks": tasks, "corruption_warnings": warnings}

@@ -28,6 +28,9 @@ class CrossSessionMessagingConfig(BaseModel):
     )
     max_messages_per_session: int = Field(default=4, ge=1, le=20)
     max_message_chars: int = Field(default=1200, ge=128, le=5000)
+    max_peer_turns: int = Field(default=4, ge=1, le=12)
+    max_peer_context_chars: int = Field(default=12_000, ge=1000, le=50_000)
+    max_peer_wall_time_seconds: int = Field(default=900, ge=30, le=3600)
     same_machine_only: bool = True
     isolate_peer_machines: bool = True
     require_durable_handoff: bool = True
@@ -140,6 +143,15 @@ class SessionFeaturePlan:
     settings_payload: dict[str, Any]
 
 
+@dataclass(frozen=True)
+class ClaudeCapabilityReport:
+    messaging: bool = False
+    advisor: bool = False
+    goal: bool = False
+    workflow: bool = False
+    teams: bool = False
+
+
 _VERSION_RE = re.compile(r"(\d+)\.(\d+)\.(\d+)")
 
 
@@ -182,12 +194,24 @@ def make_session_name(task_id: str, role: RoleName, run_id: str, attempt: int) -
     safe_task = re.sub(r"[^a-z0-9-]+", "-", task_id.lower()).strip("-")
     safe_role = re.sub(r"[^a-z0-9-]+", "-", role.value.lower()).strip("-")
     suffix = re.sub(r"[^a-z0-9]+", "", run_id.lower())[-8:]
-    return f"rp-{safe_task}-{safe_role}-{suffix}-a{attempt}"[:80]
+    return f"tc-{safe_task}-{safe_role}-{suffix}-a{attempt}"[:80]
 
 
-def should_launch_scout(features: ClaudeFeaturesConfig, task: TaskPacket, stage: Stage) -> bool:
+def should_launch_scout(
+    features: ClaudeFeaturesConfig,
+    task: TaskPacket,
+    stage: Stage,
+    *,
+    question: str | None = None,
+) -> bool:
     config = features.integration_scout
-    return config.enabled and stage.role == RoleName.BUILDER and task.risk_tier in config.risk_tiers
+    return bool(
+        question
+        and question.strip()
+        and config.enabled
+        and stage.role == RoleName.BUILDER
+        and task.risk_tier in config.risk_tiers
+    )
 
 
 def _default_goal(task: TaskPacket, _max_turns: int) -> str:
@@ -199,8 +223,8 @@ def _default_goal(task: TaskPacket, _max_turns: int) -> str:
         f"{required_gates} exit successfully; no forbidden or protected path changes; "
         "no test, oracle, value threshold, "
         "or expected result is weakened; and git diff contains only allowed task work. "
-        "Continue through renewable controller sessions until complete; return BLOCKED only "
-        "for an irreducible authority or external-evidence gap instead of guessing."
+        "Stop at the finite session boundary and return the exact disposition when work cannot "
+        "complete: DEFER, NATIVE_SUFFICIENT, REJECTED_VALUE, WAITING_EXTERNAL, or WAITING_HUMAN."
     )
 
 
@@ -231,7 +255,15 @@ def build_session_feature_plan(
     peer_names: list[str] | None = None,
     session_name_override: str | None = None,
     peer_messaging_override: bool | None = None,
+    capabilities: ClaudeCapabilityReport | None = None,
 ) -> SessionFeaturePlan:
+    available = capabilities or ClaudeCapabilityReport(
+        messaging=True,
+        advisor=True,
+        goal=True,
+        workflow=True,
+        teams=True,
+    )
     session_name = (
         session_name_override
         or stage.session_name
@@ -240,21 +272,28 @@ def build_session_feature_plan(
     peers = tuple(peer_names or [])
     messaging_cfg = features.cross_session_messaging
     messaging = (
-        messaging_cfg.enabled
+        available.messaging
+        and messaging_cfg.enabled
         and task.risk_tier in messaging_cfg.risk_tiers
         and stage.role in messaging_cfg.roles
         and bool(peers)
     )
     if peer_messaging_override is not None:
-        messaging = peer_messaging_override and messaging_cfg.enabled and bool(peers)
+        messaging = (
+            peer_messaging_override
+            and available.messaging
+            and messaging_cfg.enabled
+            and bool(peers)
+        )
     if stage.peer_messaging or role_config.peer_messaging:
-        messaging = messaging_cfg.enabled and bool(peers)
+        messaging = available.messaging and messaging_cfg.enabled and bool(peers)
 
     advisor_cfg = features.advisor
     advisor = stage.advisor_model or role_config.advisor_model
     main_model = stage.model or role_config.model
     if (
         advisor is None
+        and available.advisor
         and advisor_cfg.enabled
         and main_model == "sonnet"
         and task.risk_tier in advisor_cfg.risk_tiers
@@ -266,6 +305,7 @@ def build_session_feature_plan(
     goal_cfg = features.goal
     if (
         goal_condition is None
+        and available.goal
         and goal_cfg.enabled
         and stage.role in goal_cfg.roles
         and task.risk_tier in goal_cfg.risk_tiers
@@ -276,7 +316,7 @@ def build_session_feature_plan(
     if goal_condition and len(goal_condition) > goal_cfg.max_condition_chars:
         goal_condition = goal_condition[: goal_cfg.max_condition_chars - 3] + "..."
 
-    workflow_name = _workflow_for_task(features, task, stage)
+    workflow_name = _workflow_for_task(features, task, stage) if available.workflow else None
     tools: list[str] = []
     if messaging:
         tools.extend(["ListAgents", "SendMessage"])
@@ -290,6 +330,13 @@ def build_session_feature_plan(
         "isolatePeerMachines": messaging_cfg.isolate_peer_machines,
         "workflowSizeGuideline": features.dynamic_workflows.size_guideline,
         "disableRemoteControl": True,
+        "peerLimits": {
+            "turns": messaging_cfg.max_peer_turns,
+            "messages": messaging_cfg.max_messages_per_session,
+            "contextChars": messaging_cfg.max_peer_context_chars,
+            "wallTimeSeconds": messaging_cfg.max_peer_wall_time_seconds,
+        },
+        "agentTeamsEnabled": bool(available.teams and features.agent_teams.enabled),
         "attribution": {"commit": "", "pr": "", "sessionUrl": False},
     }
     return SessionFeaturePlan(

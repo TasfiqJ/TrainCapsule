@@ -67,6 +67,31 @@ Migrate the V2 factory/bootstrap repository to the bounded V3 product and factor
 - No-paid-usage gate: pass
 - Secret scan and Git diff hygiene: pass
 
+## Phase D implementation
+
+- Added bounded, digest-bound V3 packets with fixed criteria/output/source limits, explicit decision contribution, non-goals, oracle, rollback, stop dispositions, deterministic task-kind templates, path/output consistency checks, and cache invalidation across work/source/context/compiler/base digests.
+- Removed the T002 catalog special case, universal `**` write-scope broadening, forced GitHub push, automatic merge, numeric task-ID private-gate selection, renewable-session language, and work-until-done token/turn clearing.
+- Added scoped V3 context manifests with per-source authority, relevance, digest, freshness, and role policy. Routine work cannot load career/acquisition context; stale current facts block only the affected work item.
+- Added milestone-only completion decisions, deterministic-evidence-first evaluation, bounded proposal-only expansion, independent review requirements, trusted external receipts, human approvals, and controlled-fixture ceilings for M3-M6.
+- Added the five terminal decision-value outcomes. Mechanical/maintenance work inherits milestone necessity; weak product outcomes stop or defer without appending work.
+- Split finding, candidate, value, human, external, release, and recovery boundaries into small typed services. Advisory findings do not block and factory repair cannot alter normative, approval, receipt, private-gate, roadmap, or value authority.
+- Added configuration validation/provenance and the read-only operator command surface for migration, configuration, lanes, milestones, work explanation, approvals, evidence, competitors, pilots, kill gates, product health, and V3 status.
+- Added versioned digest-bound backend-neutral handoffs, peer artifact validation, atomic validated writes, same-root path containment, single-writer locks, redaction, safe subprocess environments, sequenced event records, corruption warnings, and separated API-equivalent estimates from actual subscription charges.
+- Expanded generated model-matching schemas from 18 to 25.
+
+## Phase D verification
+
+- Focused planner, context, completion, value, risk, catalog, feature-adapter, durable-state, and operator checks: 71 passed
+- Complete Pytest suite: 443 passed
+- Ruff: pass
+- Strict Pyright: 0 errors, 0 warnings
+- Generated V3 schemas: 25 exact matches
+- Authoritative V3 roadmap generation: 109 exact work items
+- Historical and V3 authority gates: pass
+- No-paid-usage gate: pass
+- Secret scan and Git diff hygiene: pass
+- Manual read-only operator exercise: config validate/explain, status, lanes, milestones, work explain, kill-gates, and migrate dry-run passed
+
 ## Pending
 
-Completion/context/value behavior, backend adapters, legacy mappings, product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.
+Backend adapters, checkpoint recovery, release/startup controls, prompt migration, legacy mappings, product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.

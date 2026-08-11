@@ -1,16 +1,41 @@
 from __future__ import annotations
 
 import json
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Literal, cast
+
+from pydantic import Field
 
 from .models import FactoryConfig, Stage, TaskPacket
 from .util import read_json, run_command, sha256_file
+from .v3.base import DIGEST_PATTERN, V3Model, sha256_digest
+from .v3.work_items import WorkItem
 from .yamlutil import load_yaml
 
 
 class ContextPolicyError(RuntimeError):
     pass
+
+
+class V3ContextEntry(V3Model):
+    path: str
+    bytes: int = Field(ge=0)
+    sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    authority_class: str
+    relevance: str
+    freshness_policy: str
+    freshness_status: Literal["LOCKED", "CURRENT", "STALE", "RECHECK_REQUIRED"]
+
+
+class V3ContextManifest(V3Model):
+    version: int = Field(default=3, ge=3, le=3)
+    work_item_id: str
+    role: str
+    entries: list[V3ContextEntry]
+    excluded_groups: list[str]
+    source_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    max_context_chars: int = Field(ge=1)
 
 
 def _load_yaml(path: Path) -> dict[str, Any]:
@@ -233,4 +258,110 @@ def build_context_manifest(
                 "Required candidate-bound authority manifest exceeds max_context_chars; "
                 "increase the stage context allowance instead of omitting sources"
             )
+    return manifest
+
+
+def build_v3_context_manifest(
+    *,
+    repo_root: Path,
+    work_item: WorkItem,
+    role: str,
+    requested_groups: list[str],
+    max_context_chars: int,
+    freshness_receipts: dict[str, datetime] | None = None,
+    current_fact_max_age_days: int = 30,
+    now: datetime | None = None,
+) -> V3ContextManifest:
+    """Build a scoped V3 manifest with authority, relevance, digest, and freshness."""
+
+    if max_context_chars <= 0:
+        raise ContextPolicyError("context-size budget must be positive")
+    index_path = repo_root / "docs/CONTEXT_INDEX.yaml"
+    index = _load_yaml(index_path)
+    if index.get("version") != 3 or not isinstance(index.get("groups"), dict):
+        raise ContextPolicyError("V3 context index is missing or mixed with legacy authority")
+    groups = cast(dict[str, Any], index["groups"])
+    forbidden = {"advisory_career", "advisory_acquisition"}
+    if forbidden & set(requested_groups):
+        raise ContextPolicyError("career/acquisition context is excluded from routine work")
+    missing = set(requested_groups) - set(groups)
+    if missing:
+        raise ContextPolicyError(f"unknown V3 context groups: {sorted(missing)}")
+
+    observed = (now or datetime.now(UTC)).astimezone(UTC)
+    freshness = freshness_receipts or {}
+    entries: list[V3ContextEntry] = []
+    excluded: list[str] = sorted(forbidden)
+    for group_name in requested_groups:
+        group = cast(dict[str, Any], groups[group_name])
+        include_roles = {str(value) for value in group.get("includeRoles", [])}
+        exclude_roles = {str(value) for value in group.get("excludeRoles", [])}
+        if role in exclude_roles or (include_roles and role not in include_roles):
+            raise ContextPolicyError(
+                f"role {role} is not permitted to consume context group {group_name}"
+            )
+        group_policy = str(group.get("freshnessPolicy", "manifest_locked"))
+        group_authority = str(group.get("authorityClass", "unknown"))
+        group_scope = str(group.get("scope", group_name))
+        raw_entries_value = group.get("entries", [])
+        if not isinstance(raw_entries_value, list) or not raw_entries_value:
+            raise ContextPolicyError(f"required context group {group_name} has no entries")
+        raw_entries = cast(list[object], raw_entries_value)
+        for raw_entry in raw_entries:
+            if not isinstance(raw_entry, dict):
+                raise ContextPolicyError(f"invalid context entry in {group_name}")
+            entry = cast(dict[str, Any], raw_entry)
+            relative = str(entry.get("path", ""))
+            path = repo_root / relative
+            if not path.is_file():
+                raise ContextPolicyError(
+                    f"work item {work_item.work_item_id} lacks required fact/source: {relative}"
+                )
+            policy = str(entry.get("freshnessPolicy", group_policy))
+            status: Literal["LOCKED", "CURRENT", "STALE", "RECHECK_REQUIRED"]
+            if policy == "manifest_locked":
+                status = "LOCKED"
+            else:
+                verified_at = freshness.get(group_name)
+                if verified_at is None:
+                    status = "RECHECK_REQUIRED"
+                elif observed - verified_at.astimezone(UTC) > timedelta(
+                    days=current_fact_max_age_days
+                ):
+                    status = "STALE"
+                else:
+                    status = "CURRENT"
+                if status != "CURRENT":
+                    raise ContextPolicyError(
+                        f"work item {work_item.work_item_id} is blocked by {status.lower()} "
+                        f"current fact group {group_name}"
+                    )
+            entries.append(
+                V3ContextEntry(
+                    path=relative,
+                    bytes=path.stat().st_size,
+                    sha256=sha256_file(path),
+                    authority_class=str(entry.get("authorityClass", group_authority)),
+                    relevance=str(entry.get("scope", group_scope)),
+                    freshness_policy=policy,
+                    freshness_status=status,
+                )
+            )
+
+    ordered_entries = sorted(entries, key=lambda entry: entry.path)
+    payload = b"".join(
+        f"{entry.path}\0{entry.sha256}\n".encode() for entry in ordered_entries
+    )
+    manifest = V3ContextManifest(
+        work_item_id=work_item.work_item_id,
+        role=role,
+        entries=entries,
+        excluded_groups=excluded,
+        source_digest=sha256_digest(payload),
+        max_context_chars=max_context_chars,
+    )
+    if len(manifest.canonical_json_bytes()) > max_context_chars:
+        raise ContextPolicyError(
+            f"required context for {work_item.work_item_id} exceeds its size budget"
+        )
     return manifest

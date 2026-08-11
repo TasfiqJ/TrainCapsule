@@ -34,6 +34,13 @@ def compose_task_prompt(
     attempt: int,
     context_manifest: dict[str, object],
 ) -> str:
+    encoded_manifest = json.dumps(context_manifest, indent=2, sort_keys=True)
+    max_chars = stage.max_context_chars or 100_000
+    if len(encoded_manifest) > max_chars:
+        raise ValueError("context manifest exceeds the active stage context-size budget")
+    lowered = encoded_manifest.lower()
+    if "advisory_career" in lowered or "advisory_acquisition" in lowered:
+        raise ValueError("routine task prompt contains excluded career/acquisition context")
     packet = task.model_dump(mode="json")
     packet["active_stage"] = stage.model_dump(mode="json")
     packet["attempt"] = attempt
@@ -46,14 +53,13 @@ TASK PACKET (authoritative for this run):
 
 CONTEXT MANIFEST (candidate-bound routing and evidence, not conversational history):
 ```json
-{json.dumps(context_manifest, indent=2, sort_keys=True)}
+{encoded_manifest}
 ```
 
 Operational rules:
-1. Treat the manifest as the initial candidate-bound routing set, not a completeness ceiling.
-   Read every relevant authoritative source and code path needed for the stage; use focused
-   retrieval for efficiency, but never omit material company, buyer, product, architecture,
-   security, operating, or release context merely because it was not preloaded.
+1. Treat the manifest as the complete authorized context routing set for this stage. Retrieve
+   details just in time from only the named sources; do not load company, buyer, acquisition,
+   career, commercial, or release context unless the manifest explicitly includes it.
 2. Inspect the current candidate and exact diff before changing anything.
 3. Stay within active_stage.allowed_paths and avoid every forbidden path.
 4. Run cheap deterministic gates early, then perform every broader investigation, real-boundary
@@ -62,9 +68,9 @@ Operational rules:
    or status semantics.
 6. Do not ask for interactive clarification. When authority is genuinely missing or
    contradictory, return verdict `blocked` and identify the exact missing authority.
-7. Continue through renewable sessions until every active-stage criterion has inspectable
-   evidence or a truthful irreducible blocker. A turn/context boundary is a checkpoint, never a
-   reason to shrink scope, skip a criterion, or report premature completion.
+7. Work only within this finite session and its declared ceilings. If bounded attempts are
+   exhausted, preserve the candidate and return the exact lawful state: `DEFER`,
+   `NATIVE_SUFFICIENT`, `REJECTED_VALUE`, `WAITING_EXTERNAL`, or `WAITING_HUMAN`.
 8. End each session with one structured AgentReport matching the enforced JSON schema. Machine
    evidence, not confidence, determines promotion.
 """

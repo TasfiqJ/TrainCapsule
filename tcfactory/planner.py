@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import re
 import shlex
 import shutil
 from pathlib import Path
@@ -39,6 +40,7 @@ from .stage_policy import (
     apply_objective_stage_contracts,
     objective_pipeline_errors,
 )
+from .util import path_matches
 
 
 class TaskPacketPolicyError(RuntimeError):
@@ -299,7 +301,7 @@ def planning_task_for(
             mutating_role=RoleName.PLANNER,
         ),
         task_budget_usd=planning_budget,
-        auto_merge=True,
+        auto_merge=False,
         base_branch="main",
     )
     return apply_objective_stage_contracts(packet)
@@ -325,6 +327,37 @@ def validate_product_task_packet(
         errors.append(
             f"depends_on must be exactly {item.depends_on!r}, found {packet.depends_on!r}"
         )
+    if len(packet.acceptance_criteria) > 12:
+        errors.append("acceptance_criteria exceeds the V3 limit of 12")
+    if len(packet.outputs) > 8:
+        errors.append("outputs exceeds the V3 limit of 8")
+    if len(packet.source_of_truth) > 8:
+        errors.append("source_of_truth exceeds the default V3 limit of 8")
+    if not packet.decision_contribution.strip():
+        errors.append("decision_contribution is required")
+    if not packet.non_goals:
+        errors.append("at least one explicit non-goal is required")
+    if not packet.oracle.strip():
+        errors.append("oracle is required")
+    if not packet.rollback.strip():
+        errors.append("rollback is required")
+    if not packet.stop_conditions:
+        errors.append("stop_conditions are required")
+    universal = re.compile(
+        r"\b(?:all|every)\s+(?:company|product|roadmap|customer|commercial)\s+"
+        r"(?:criterion|criteria|requirement|task|work|need)s?\b",
+        re.IGNORECASE,
+    )
+    generic_claim = re.compile(
+        r"\b(?:production[- ]ready|enterprise[- ]ready|commercially (?:proven|validated))\b",
+        re.IGNORECASE,
+    )
+    if any(universal.search(value) for value in packet.acceptance_criteria):
+        errors.append("universal company/product criteria are forbidden")
+    if any(generic_claim.search(value) for value in packet.acceptance_criteria):
+        errors.append("generic production/commercial wording is forbidden")
+    if item.completion_kind in {"external_validation", "commercial_validation"}:
+        errors.append("AI cannot create external or commercial evidence")
     if packet.security.allow_unsandboxed_commands:
         errors.append("allow_unsandboxed_commands must remain false")
     if not packet.security.fail_if_sandbox_unavailable:
@@ -340,7 +373,27 @@ def validate_product_task_packet(
         and stage.read_only is not True
     ]
     if len(owners) != 1:
-        errors.append("pipeline must contain exactly one renewable Claude owner")
+        errors.append("pipeline must contain exactly one bounded writable owner")
+    writable_patterns = [path for owner in owners for path in owner.allowed_paths]
+    unwritable_outputs = [
+        output for output in packet.outputs if not path_matches(output, writable_patterns)
+    ]
+    if unwritable_outputs:
+        errors.append(
+            "outputs are not writable by the owner stage: "
+            + ", ".join(sorted(unwritable_outputs))
+        )
+    scope_paths = [*packet.outputs, *writable_patterns]
+    has_product = any(
+        path.startswith(("packages/traincapsule-", "src/traincapsule", "tests/product/"))
+        for path in scope_paths
+    )
+    has_factory = any(
+        path.startswith(("tcfactory/", "factory/", "config/", "prompts/", "scripts/"))
+        for path in scope_paths
+    )
+    if has_product and has_factory:
+        errors.append("packet mixes product and factory mutations")
     legacy_roles = roles.intersection(
         {
             RoleName.AUDIT,

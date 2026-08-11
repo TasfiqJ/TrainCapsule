@@ -5,6 +5,8 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
+from .util import append_jsonl_locked, redact_sensitive
+
 
 def append_provenance(path: Path, event: dict[str, Any]) -> None:
     """Write local automation provenance without changing public commit messages.
@@ -13,7 +15,11 @@ def append_provenance(path: Path, event: dict[str, Any]) -> None:
     honest audit trail while Git uses the repository owner's configured name and email.
     """
 
-    path.parent.mkdir(parents=True, exist_ok=True)
-    payload = {"recorded_at": datetime.now(UTC).isoformat(), **event}
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(payload, sort_keys=True, default=str) + "\n")
+    payload = {
+        "schema_version": 3,
+        "recorded_at": datetime.now(UTC).isoformat(),
+        "exportability_class": "INTERNAL_OPERATIONAL",
+        "redacted": True,
+        **json.loads(redact_sensitive(json.dumps(event, default=str))),
+    }
+    append_jsonl_locked(path, payload)

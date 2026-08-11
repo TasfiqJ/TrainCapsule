@@ -32,7 +32,7 @@ from .github_sync import (
     load_github_state,
     sync_github,
 )
-from .gitops import commit_all, current_sha
+from .gitops import current_sha
 from .ledger import Ledger
 from .models import (
     AGENT_REPORT_JSON_SCHEMA,
@@ -47,16 +47,255 @@ from .peer_messaging import peer_status as read_peer_status
 from .pipeline import run_pipeline
 from .queue import enqueue_task, promote_due_paused, reconcile_running, worker_loop
 from .usage import usage_health
-from .util import read_json, write_json
+from .util import atomic_write_text, read_json, resolve_within, write_json
+from .v3.approvals import HumanApprovalRecord
+from .v3.configuration import (
+    explain_v3_config_field,
+    load_factory_v3,
+    validate_v3_configuration,
+)
+from .v3.enums import Lane
+from .v3.external_evidence import TrustedEvidenceRecord
+from .v3.milestones import MilestoneRoadmap
+from .v3.work_items import WorkItemCollection
 from .value_policy import contract_for_task, load_value_policy
 from .yamlutil import load_yaml
 
 app = typer.Typer(no_args_is_help=True, help="TrainCapsule bounded multi-agent AI factory")
+config_app = typer.Typer(no_args_is_help=True, help="Validate and explain V3 configuration")
+work_app = typer.Typer(no_args_is_help=True, help="Explain V3 work items")
+approvals_app = typer.Typer(no_args_is_help=True, help="Inspect external human approvals")
+evidence_app = typer.Typer(no_args_is_help=True, help="Validate external evidence receipts")
+competitors_app = typer.Typer(no_args_is_help=True, help="Inspect competitor lane state")
+pilot_app = typer.Typer(no_args_is_help=True, help="Manage local pilot metadata")
+product_app = typer.Typer(no_args_is_help=True, help="Inspect the customer-local product")
+app.add_typer(config_app, name="config")
+app.add_typer(work_app, name="work")
+app.add_typer(approvals_app, name="approvals")
+app.add_typer(evidence_app, name="evidence")
+app.add_typer(competitors_app, name="competitors")
+app.add_typer(pilot_app, name="pilot")
+app.add_typer(product_app, name="product")
 console = Console()
 
 
 def _resolve_repo(repo: Path) -> Path:
     return repo.expanduser().resolve()
+
+
+def _v3_roadmap(repo_root: Path) -> WorkItemCollection:
+    return WorkItemCollection.model_validate(
+        load_yaml(repo_root / "factory/roadmap/work_items.yaml")
+    )
+
+
+def _v3_milestones(repo_root: Path) -> MilestoneRoadmap:
+    return MilestoneRoadmap.model_validate(load_yaml(repo_root / "factory/roadmap/milestones.yaml"))
+
+
+@app.command("migrate")
+def migrate(
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+    dry_run: Annotated[bool, typer.Option("--dry-run")] = False,
+) -> None:
+    """Review the already-installed V3 migration without changing repository state."""
+
+    if not dry_run:
+        raise typer.BadParameter("migration requires --dry-run before any explicit apply command")
+    root = _resolve_repo(repo)
+    loaded = validate_v3_configuration(root)
+    roadmap = _v3_roadmap(root)
+    console.print_json(
+        data={
+            "dryRun": True,
+            "configurationSets": sorted(loaded),
+            "workItems": len(roadmap.work_items),
+            "activeMilestone": roadmap.active_milestone,
+            "mutation": False,
+        }
+    )
+
+
+@config_app.command("validate")
+def config_validate(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
+    root = _resolve_repo(repo)
+    loaded = validate_v3_configuration(root)
+    console.print_json(
+        data={"valid": True, "version": 3, "sources": sorted(loaded), "mutation": False}
+    )
+
+
+@config_app.command("explain")
+def config_explain(
+    field: Annotated[str, typer.Argument(help="Dotted V3 field, including its config root")],
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+) -> None:
+    console.print_json(data=explain_v3_config_field(_resolve_repo(repo), field))
+
+
+@config_app.command("migrate")
+def config_migrate(
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+    dry_run: Annotated[bool, typer.Option("--dry-run")] = False,
+) -> None:
+    if not dry_run:
+        raise typer.BadParameter("config migration requires --dry-run")
+    root = _resolve_repo(repo)
+    loaded = validate_v3_configuration(root)
+    console.print_json(
+        data={
+            "dryRun": True,
+            "alreadyV3": True,
+            "files": sorted(loaded),
+            "plannedWrites": [],
+        }
+    )
+
+
+@app.command("lanes")
+def lanes(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
+    roadmap = _v3_roadmap(_resolve_repo(repo))
+    payload: dict[str, dict[str, int]] = {}
+    for lane in Lane:
+        items = [item for item in roadmap.work_items if item.lane is lane]
+        counts: dict[str, int] = {}
+        for item in items:
+            counts[item.status.value] = counts.get(item.status.value, 0) + 1
+        payload[lane.value] = counts
+    console.print_json(data={"activeMilestone": roadmap.active_milestone, "lanes": payload})
+
+
+@app.command("milestones")
+def milestones(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
+    data = _v3_milestones(_resolve_repo(repo))
+    console.print_json(data=data.model_dump(mode="json", by_alias=True))
+
+
+@work_app.command("explain")
+def work_explain(
+    work_item_id: Annotated[str, typer.Argument()],
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+) -> None:
+    item = _v3_roadmap(_resolve_repo(repo)).item(work_item_id)
+    console.print_json(data=item.model_dump(mode="json", by_alias=True))
+
+
+def _approval_root() -> Path:
+    raw = os.getenv("TCF_HUMAN_APPROVAL_ROOT")
+    if not raw:
+        raise typer.BadParameter("TCF_HUMAN_APPROVAL_ROOT is not configured")
+    root = Path(raw).expanduser().resolve()
+    if not root.is_dir():
+        raise typer.BadParameter("trusted human-approval root does not exist")
+    return root
+
+
+@approvals_app.command("list")
+def approvals_list() -> None:
+    root = _approval_root()
+    console.print_json(data={"approvals": sorted(path.name for path in root.glob("*.json"))})
+
+
+@approvals_app.command("show")
+def approvals_show(approval_id: Annotated[str, typer.Argument()]) -> None:
+    root = _approval_root()
+    path = resolve_within(root, f"{approval_id}.json", require_exists=True)
+    record = HumanApprovalRecord.model_validate_json(path.read_text(encoding="utf-8"))
+    console.print_json(data=record.model_dump(mode="json", by_alias=True))
+
+
+@approvals_app.command("record")
+def approvals_record(
+    signed_record: Annotated[Path, typer.Argument(help="Externally signed approval JSON")],
+    acknowledge_external_write: Annotated[
+        bool, typer.Option("--acknowledge-external-write")
+    ] = False,
+) -> None:
+    if not acknowledge_external_write:
+        raise typer.BadParameter("recording requires --acknowledge-external-write")
+    record = HumanApprovalRecord.model_validate_json(
+        signed_record.read_text(encoding="utf-8")
+    )
+    root = _approval_root()
+    target = resolve_within(root, f"{record.approval_id}.json")
+    if target.exists():
+        raise typer.BadParameter("approval ID already exists")
+    atomic_write_text(target, record.model_dump_json(by_alias=True, indent=2) + "\n")
+    console.print_json(data={"recorded": record.approval_id, "trustedRoot": str(root)})
+
+
+@evidence_app.command("validate")
+def evidence_validate(receipt: Annotated[Path, typer.Argument()]) -> None:
+    record = TrustedEvidenceRecord.model_validate_json(receipt.read_text(encoding="utf-8"))
+    trusted = record.require_commercial_trust()
+    console.print_json(data={"valid": True, "receiptId": trusted.receipt_id})
+
+
+@competitors_app.command("status")
+def competitors_status(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
+    items = [
+        item.model_dump(mode="json", by_alias=True)
+        for item in _v3_roadmap(_resolve_repo(repo)).work_items
+        if item.lane is Lane.COMPETITOR
+    ]
+    console.print_json(data={"lane": Lane.COMPETITOR.value, "workItems": items})
+
+
+def _pilot_path(repo_root: Path) -> Path:
+    return repo_root / "factory/state/pilot.json"
+
+
+@pilot_app.command("init")
+def pilot_init(
+    pilot_id: Annotated[str, typer.Argument()],
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+) -> None:
+    path = _pilot_path(_resolve_repo(repo))
+    if path.exists():
+        raise typer.BadParameter("pilot metadata already exists")
+    write_json(path, {"version": 3, "pilotId": pilot_id, "status": "LOCAL_DRAFT"})
+    console.print_json(data={"initialized": pilot_id, "path": str(path)})
+
+
+@pilot_app.command("validate")
+def pilot_validate(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
+    payload = read_json(_pilot_path(_resolve_repo(repo)), None)
+    typed_payload = cast(dict[str, object], payload) if isinstance(payload, dict) else {}
+    valid = typed_payload.get("version") == 3 and bool(typed_payload.get("pilotId"))
+    if not valid:
+        raise typer.BadParameter("pilot metadata is missing or invalid")
+    console.print_json(data={"valid": True, "pilot": payload})
+
+
+@pilot_app.command("status")
+def pilot_status(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
+    console.print_json(data={"pilot": read_json(_pilot_path(_resolve_repo(repo)), None)})
+
+
+@app.command("kill-gates")
+def kill_gates(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
+    root = _resolve_repo(repo)
+    factory = load_factory_v3(root / "config/factory.yaml")
+    controls = {
+        name: (root / "factory/state" / name).exists() for name in ("STOP", "PAUSE")
+    }
+    controls["HARD_STUCK"] = (root / factory.runtime.hard_stuck_file).exists()
+    console.print_json(data={"controls": controls, "mutation": False})
+
+
+@product_app.command("doctor")
+def product_doctor(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
+    root = _resolve_repo(repo)
+    expected = [
+        "packages/traincapsule-core",
+        "packages/traincapsule-ingest-pytorch",
+        "packages/traincapsule-qualify",
+        "packages/traincapsule-cli",
+    ]
+    missing = [path for path in expected if not (root / path).exists()]
+    console.print_json(data={"healthy": not missing, "missing": missing, "networkUsed": False})
+    if missing:
+        raise typer.Exit(code=1)
 
 
 @app.command("validate-task")
@@ -464,18 +703,34 @@ def status(
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
 ) -> None:
     repo_root = _resolve_repo(repo)
-    config = load_factory_config(repo_root / config_path)
-    artifact_root = config.resolve(repo_root, config.artifact_dir)
-    summaries = sorted(artifact_root.glob("*/*/pipeline-summary.json"), reverse=True)
-    if not summaries:
-        console.print("No completed pipeline summaries.")
-        return
-    for summary_path in summaries[:10]:
-        data = json.loads(summary_path.read_text(encoding="utf-8"))
-        console.print(
-            f"{data['run_id']}  {data['task_id']}  final={str(data['final_sha'])[:12]}  "
-            f"merged={data['merged']}  est=${data['cost_usd']:.2f}"
-        )
+    roadmap = _v3_roadmap(repo_root)
+    active = [item for item in roadmap.work_items if item.milestone == roadmap.active_milestone]
+    priority = {"RUNNING": 0, "QUEUED": 1, "READY": 2, "WAITING_HUMAN": 3}
+    current = min(active, key=lambda item: (priority.get(item.status.value, 9), item.work_item_id))
+    blocker = (
+        current.status.value
+        if current.status.value.startswith(("WAITING_", "BLOCKED_", "REJECTED_"))
+        else None
+    )
+    console.print_json(
+        data={
+            "activeMilestone": roadmap.active_milestone,
+            "workItemId": current.work_item_id,
+            "lane": current.lane.value,
+            "status": current.status.value,
+            "maturity": current.maturity_target.model_dump(mode="json", by_alias=True),
+            "scopedBlocker": blocker,
+            "attemptsRemaining": {
+                "plan": current.retry_policy.max_plan_attempts,
+                "repair": current.retry_policy.max_candidate_repair_cycles,
+                "restart": current.retry_policy.max_candidate_restarts,
+            },
+            "approvalStatus": {
+                "required": current.human_approval_required,
+                "references": current.human_approval_refs,
+            },
+        }
+    )
 
 
 @app.command("autopilot")
@@ -532,9 +787,11 @@ def autonomy_enable(
         console.print(f"[red]Calibration marker missing:[/red] {marker}")
         raise typer.Exit(2)
     payload["enabled"] = True
-    path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
-    commit_all(repo_root, "enable autonomy")
-    console.print(f"[green]Lights-out autonomy enabled and committed.[/green] {path}")
+    atomic_write_text(path, yaml.safe_dump(payload, sort_keys=False))
+    console.print(
+        f"[yellow]Autonomy enablement is a reviewable local diff; it was not committed.[/yellow] "
+        f"{path}"
+    )
 
 
 def _json_object(text: str, label: str) -> dict[str, object]:
@@ -796,9 +1053,27 @@ def autonomy_resume(
     repo_root = _resolve_repo(repo)
     factory = load_factory_config(repo_root / config_path)
     autonomy = load_autonomy_config(factory.resolve(repo_root, factory.autonomy_config_path))
+    stop_path = _control_file(repo_root, factory, "stop")
+    hard_stuck_path = repo_root / autonomy.hard_stuck_path
+    roadmap = _v3_roadmap(repo_root)
+    protected_states = {
+        "WAITING_HUMAN",
+        "REJECTED_VALUE",
+        "NATIVE_SUFFICIENT",
+        "CANCELLED",
+    }
+    blockers = [
+        item.work_item_id
+        for item in roadmap.work_items
+        if item.status.value in protected_states and item.milestone == roadmap.active_milestone
+    ]
+    if stop_path.exists() or hard_stuck_path.exists() or blockers:
+        console.print(
+            "[red]Refused.[/red] Generic resume cannot clear STOP/HARD_STUCK or protected "
+            f"work dispositions; blockers={blockers}. Use an explicit signed override/recovery."
+        )
+        raise typer.Exit(2)
     _control_file(repo_root, factory, "pause").unlink(missing_ok=True)
-    _control_file(repo_root, factory, "stop").unlink(missing_ok=True)
-    (repo_root / autonomy.hard_stuck_path).unlink(missing_ok=True)
     state = load_state(repo_root, factory)
     state.repair_attempts = 0
     state.repair_status = None
@@ -860,12 +1135,14 @@ def autonomy_disable(
     path = factory.resolve(repo_root, factory.autonomy_config_path)
     payload = load_yaml(path)
     payload["enabled"] = False
-    path.write_text(yaml.safe_dump(payload, sort_keys=False), encoding="utf-8")
+    atomic_write_text(path, yaml.safe_dump(payload, sort_keys=False))
     stop_path = _control_file(repo_root, factory, "stop")
     stop_path.parent.mkdir(parents=True, exist_ok=True)
     stop_path.write_text("autonomy disabled\n", encoding="utf-8")
-    commit_all(repo_root, "disable autonomy")
-    console.print("[yellow]Lights-out autonomy disabled.[/yellow]")
+    console.print(
+        "[yellow]Lights-out autonomy disabled as a reviewable local diff; "
+        "no commit was made.[/yellow]"
+    )
 
 
 @app.command("queue-reconcile")
@@ -889,8 +1166,13 @@ def start(
     """Clear pause/stop controls and run the autonomous loop in the foreground."""
     repo_root = _resolve_repo(repo)
     factory = load_factory_config(repo_root / config_path)
+    if _control_file(repo_root, factory, "stop").exists():
+        console.print(
+            "[red]Refused.[/red] Generic start cannot clear STOP; use an explicit recovery "
+            "decision with an immutable override record."
+        )
+        raise typer.Exit(2)
     _control_file(repo_root, factory, "pause").unlink(missing_ok=True)
-    _control_file(repo_root, factory, "stop").unlink(missing_ok=True)
     asyncio.run(
         run_autopilot(
             repo_root=repo_root,

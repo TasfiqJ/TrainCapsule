@@ -1,0 +1,110 @@
+{
+  "$defs": {
+    "V3ContextEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "title": "Path",
+          "type": "string"
+        },
+        "bytes": {
+          "minimum": 0,
+          "title": "Bytes",
+          "type": "integer"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "authorityClass": {
+          "title": "Authorityclass",
+          "type": "string"
+        },
+        "relevance": {
+          "title": "Relevance",
+          "type": "string"
+        },
+        "freshnessPolicy": {
+          "title": "Freshnesspolicy",
+          "type": "string"
+        },
+        "freshnessStatus": {
+          "enum": [
+            "LOCKED",
+            "CURRENT",
+            "STALE",
+            "RECHECK_REQUIRED"
+          ],
+          "title": "Freshnessstatus",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "bytes",
+        "sha256",
+        "authorityClass",
+        "relevance",
+        "freshnessPolicy",
+        "freshnessStatus"
+      ],
+      "title": "V3ContextEntry",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "workItemId": {
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "role": {
+      "title": "Role",
+      "type": "string"
+    },
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/V3ContextEntry"
+      },
+      "title": "Entries",
+      "type": "array"
+    },
+    "excludedGroups": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Excludedgroups",
+      "type": "array"
+    },
+    "sourceDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourcedigest",
+      "type": "string"
+    },
+    "maxContextChars": {
+      "minimum": 1,
+      "title": "Maxcontextchars",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "workItemId",
+    "role",
+    "entries",
+    "excludedGroups",
+    "sourceDigest",
+    "maxContextChars"
+  ],
+  "title": "V3ContextManifest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/context-manifest.schema.json"
+}

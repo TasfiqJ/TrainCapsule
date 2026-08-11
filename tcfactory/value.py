@@ -6,6 +6,7 @@ import os
 import subprocess
 from dataclasses import dataclass
 from datetime import UTC, datetime
+from enum import StrEnum
 from pathlib import Path
 
 from pydantic import BaseModel, ConfigDict, Field
@@ -20,10 +21,90 @@ from .models import (
     ValueStatus,
 )
 from .util import write_json
+from .v3.base import V3Model
+from .v3.enums import Lane, WorkKind, WorkStatus
+from .v3.enums import RiskTier as V3RiskTier
+from .v3.work_items import WorkItem
 
 
 class ValueGateError(RuntimeError):
     pass
+
+
+class DecisionValueOutcome(StrEnum):
+    NATIVE_WORKFLOW_SUFFICIENT = "NATIVE_WORKFLOW_SUFFICIENT"
+    NO_INCREMENTAL_DECISION_VALUE = "NO_INCREMENTAL_DECISION_VALUE"
+    TECHNICALLY_VALID_BUT_NOT_ECONOMIC = "TECHNICALLY_VALID_BUT_NOT_ECONOMIC"
+    INCREMENTAL_DECISION_VALUE_DEMONSTRATED = "INCREMENTAL_DECISION_VALUE_DEMONSTRATED"
+    EXTERNAL_EVIDENCE_REQUIRED = "EXTERNAL_EVIDENCE_REQUIRED"
+
+
+class DecisionValueResult(V3Model):
+    work_item_id: str
+    evaluated: bool
+    outcome: DecisionValueOutcome
+    resulting_status: WorkStatus
+    rationale: str = Field(min_length=1)
+    evidence_refs: list[str]
+    appended_work_item_ids: list[str] = Field(default_factory=list[str], max_length=0)
+
+
+def requires_decision_value_gate(item: WorkItem) -> bool:
+    """Return whether V3 policy requires a decision-level value judgment."""
+
+    text = f"{item.title} {item.decision_contribution} {item.customer_outcome}".lower()
+    if item.kind is WorkKind.MAINTENANCE or item.risk_tier is V3RiskTier.MECHANICAL:
+        return False
+    if item.lane is Lane.PRODUCT:
+        return True
+    if item.kind in {
+        WorkKind.COMMERCIAL_EXPERIMENT,
+        WorkKind.CONTROLLED_EXPERIMENT,
+        WorkKind.EXTERNAL_EVIDENCE,
+    }:
+        return True
+    return any(
+        marker in text
+        for marker in ("integration", "pack", "performance", "economic", "commercial")
+    )
+
+
+def apply_v3_value_decision(
+    item: WorkItem,
+    *,
+    outcome: DecisionValueOutcome,
+    rationale: str,
+    evidence_refs: list[str],
+) -> DecisionValueResult:
+    """Apply one terminal/bounded V3 value outcome without creating more work."""
+
+    evaluated = requires_decision_value_gate(item)
+    if not evaluated:
+        outcome = DecisionValueOutcome.INCREMENTAL_DECISION_VALUE_DEMONSTRATED
+        resulting = WorkStatus.PASSED_ENGINEERING
+        rationale = f"Inherited milestone necessity; engineering acceptance applies. {rationale}"
+    elif outcome is DecisionValueOutcome.NATIVE_WORKFLOW_SUFFICIENT:
+        resulting = WorkStatus.NATIVE_SUFFICIENT
+    elif outcome in {
+        DecisionValueOutcome.NO_INCREMENTAL_DECISION_VALUE,
+        DecisionValueOutcome.TECHNICALLY_VALID_BUT_NOT_ECONOMIC,
+    }:
+        resulting = WorkStatus.REJECTED_VALUE
+    elif outcome is DecisionValueOutcome.EXTERNAL_EVIDENCE_REQUIRED:
+        resulting = WorkStatus.WAITING_EXTERNAL
+    else:
+        resulting = WorkStatus.PASSED_ENGINEERING
+    if evaluated and not evidence_refs:
+        raise ValueGateError("decision-level value outcomes require evidence references")
+    return DecisionValueResult(
+        work_item_id=item.work_item_id,
+        evaluated=evaluated,
+        outcome=outcome,
+        resulting_status=resulting,
+        rationale=rationale,
+        evidence_refs=evidence_refs,
+        appended_work_item_ids=[],
+    )
 
 
 class ValueEvidence(BaseModel):

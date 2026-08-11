@@ -156,7 +156,7 @@ def test_model_respec_cannot_alias_multiple_gate_names_to_one_command() -> None:
         validate_product_task_packet(aliased, item, repo_root=ROOT)
 
 
-def test_product_packet_acceptance_criteria_have_no_arbitrary_count_ceiling() -> None:
+def test_product_packet_acceptance_criteria_are_bounded_at_twelve() -> None:
     ledger, catalog, profiles = _inputs()
     item = ledger.item("T002")
     packet = task_packet_from_catalog(
@@ -166,10 +166,11 @@ def test_product_packet_acceptance_criteria_have_no_arbitrary_count_ceiling() ->
         risk_profiles=profiles,
     )
     complete = add_protected_path_baseline(packet).model_copy(
-        update={"acceptance_criteria": [f"Production condition {index}" for index in range(40)]}
+        update={"acceptance_criteria": [f"Bounded condition {index}" for index in range(13)]}
     )
 
-    validate_product_task_packet(complete, item, repo_root=ROOT)
+    with pytest.raises(TaskPacketPolicyError, match="limit of 12"):
+        validate_product_task_packet(complete, item, repo_root=ROOT)
 
 
 def test_every_catalog_research_packet_declares_generic_v2_evidence_bundle() -> None:
@@ -189,18 +190,15 @@ def test_every_catalog_research_packet_declares_generic_v2_evidence_bundle() -> 
             risk_profiles=profiles,
         )
         evidence_root = f"docs/evidence/{task_id}"
-        expected_record = (
-            "docs/research/T002_name_trademark_check.md"
-            if task_id == "T002"
-            else f"docs/research/{task_id}_research.md"
-        )
+        expected_record = f"docs/research/{task_id}_research.md"
         assert expected_record in packet.outputs
         assert f"{evidence_root}/query-plan.json" in packet.outputs
         assert f"{evidence_root}/manifest.json" in packet.outputs
         assert f"{evidence_root}/raw/**" in packet.outputs
 
         research = next(stage for stage in packet.pipeline if stage.role == RoleName.RESEARCH)
-        assert research.allowed_paths == ["**"]
+        assert "**" not in research.allowed_paths
+        assert expected_record in research.allowed_paths
         assert expected_record in packet.outputs
         assert "research-evidence" in research.machine_gates
         gate = next(gate for gate in packet.gates if gate.name == "research-evidence")
@@ -219,13 +217,13 @@ def test_model_planning_cannot_drop_controller_owned_research_v2_contract() -> N
     )
     proposal = seed.model_copy(
         update={
-            "outputs": ["docs/research/T002_name_trademark_check.md"],
+            "outputs": ["docs/research/T002_research.md"],
             "gates": [],
             "security": SecurityPolicy(network_default="deny"),
             "pipeline": [
                 Stage(
                     role=RoleName.BUILDER,
-                    allowed_paths=["docs/research/T002_name_trademark_check.md"],
+                    allowed_paths=["docs/research/T002_research.md"],
                     require_changes=True,
                 )
             ],

@@ -17,6 +17,9 @@ ROOT: Final = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from tcfactory.completion import MilestoneCompletionDecision
+from tcfactory.context import V3ContextManifest
+from tcfactory.handoffs import V3Handoff
 from tcfactory.v3.approvals import HumanApprovalRecord
 from tcfactory.v3.base import json_schema_for
 from tcfactory.v3.candidate_manifest import CandidateManifest
@@ -32,10 +35,13 @@ from tcfactory.v3.dispositions import DispositionLedger
 from tcfactory.v3.external_evidence import ExternalEvidenceReceipt
 from tcfactory.v3.migrations import LegacyMigrationMap
 from tcfactory.v3.milestones import MilestoneRoadmap
+from tcfactory.v3.pipeline_services import ReleaseCandidate, V3Finding
+from tcfactory.v3.planning import V3TaskPacket
 from tcfactory.v3.recovery import FindingCounter, HardStuckRecord
 from tcfactory.v3.retry_policy import RetryPolicy
 from tcfactory.v3.scheduler import SchedulerConfig
 from tcfactory.v3.work_items import WorkItem, WorkItemCollection
+from tcfactory.value import DecisionValueResult
 
 SCHEMA_ROOT: Final = ROOT / "schemas/factory/v3"
 SCHEMAS: Final[dict[str, type[BaseModel]]] = {
@@ -47,16 +53,23 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "external-evidence-config.schema.json": ExternalEvidenceConfig,
     "external-evidence-receipt.schema.json": ExternalEvidenceReceipt,
     "factory-config.schema.json": FactoryV3Config,
+    "finding.schema.json": V3Finding,
     "finding-counter.schema.json": FindingCounter,
     "hard-stuck.schema.json": HardStuckRecord,
     "human-approval.schema.json": HumanApprovalRecord,
+    "handoff.schema.json": V3Handoff,
     "legacy-migration.schema.json": LegacyMigrationMap,
     "milestones.schema.json": MilestoneRoadmap,
+    "milestone-completion.schema.json": MilestoneCompletionDecision,
     "milestone-policy-config.schema.json": MilestonePolicyConfig,
     "retry-policy.schema.json": RetryPolicy,
+    "release-candidate.schema.json": ReleaseCandidate,
     "scheduler.schema.json": SchedulerConfig,
     "work-item-v3.schema.json": WorkItem,
     "work-items.schema.json": WorkItemCollection,
+    "task-packet.schema.json": V3TaskPacket,
+    "context-manifest.schema.json": V3ContextManifest,
+    "decision-value.schema.json": DecisionValueResult,
 }
 
 

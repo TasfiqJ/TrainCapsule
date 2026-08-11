@@ -1,0 +1,76 @@
+{
+  "$defs": {
+    "FindingOwner": {
+      "enum": [
+        "PRODUCT",
+        "FACTORY",
+        "EXTERNAL",
+        "HUMAN"
+      ],
+      "title": "FindingOwner",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "findingId": {
+      "pattern": "^FIND-[A-Z0-9_-]+$",
+      "title": "Findingid",
+      "type": "string"
+    },
+    "summary": {
+      "minLength": 1,
+      "title": "Summary",
+      "type": "string"
+    },
+    "artifactPath": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Artifactpath"
+    },
+    "artifactDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Artifactdigest"
+    },
+    "advisory": {
+      "default": false,
+      "title": "Advisory",
+      "type": "boolean"
+    },
+    "declaredOwner": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/FindingOwner"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    }
+  },
+  "required": [
+    "findingId",
+    "summary"
+  ],
+  "title": "V3Finding",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/finding.schema.json"
+}

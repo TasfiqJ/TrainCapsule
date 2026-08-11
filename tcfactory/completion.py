@@ -6,6 +6,7 @@ from pathlib import Path
 from typing import Any, cast
 
 import yaml
+from pydantic import Field, model_validator
 
 from .feature_ledger import FeatureItem, FeatureLedger, save_feature_ledger
 from .gates import PrivateGateError, run_private_gate
@@ -20,11 +21,104 @@ from .models import (
 )
 from .structured_runner import run_structured_read_only_review
 from .util import run_command, utc_stamp, write_json
+from .v3.base import DIGEST_PATTERN, V3Model
+from .v3.enums import MilestoneStatus, MilestoneType, RiskTier, WorkStatus
+from .v3.milestones import Milestone
+from .v3.work_items import WorkItemCollection
 from .yamlutil import load_yaml
 
 
 class CompletionBlocked(RuntimeError):
     pass
+
+
+class CompletionProposal(V3Model):
+    proposal_id: str = Field(pattern=r"^CPROP-[A-Z0-9_-]+$")
+    milestone_id: str = Field(pattern=r"^M[0-9]+_[A-Z0-9_]+$")
+    summary: str = Field(min_length=1)
+    proposed_work: list[str] = Field(min_length=1, max_length=5)
+    reviewer_artifact_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    accepted: bool = False
+    accepted_by_approval_ref: str | None = None
+
+    @model_validator(mode="after")
+    def require_acceptance_authority(self) -> CompletionProposal:
+        if self.accepted and not self.accepted_by_approval_ref:
+            raise ValueError("accepted completion proposal requires explicit approval reference")
+        if not self.accepted and self.accepted_by_approval_ref:
+            raise ValueError("unaccepted proposal cannot carry acceptance authority")
+        return self
+
+
+class MilestoneCompletionDecision(V3Model):
+    milestone_id: str
+    decision: MilestoneStatus
+    deterministic_failures: list[str]
+    independent_review_refs: list[str]
+    trusted_external_receipt_refs: list[str]
+    human_approval_refs: list[str]
+    proposals: list[CompletionProposal] = Field(max_length=5)
+    expansion_round: int = Field(default=0, ge=0, le=1)
+
+
+def evaluate_v3_milestone_completion(
+    *,
+    milestone: Milestone,
+    work_items: WorkItemCollection,
+    deterministic_evidence: dict[str, list[str]],
+    independent_review_refs: list[str],
+    trusted_external_receipt_refs: list[str],
+    human_approval_refs: list[str],
+    proposals: list[CompletionProposal] | None = None,
+    expansion_round: int = 0,
+    controlled_fixture_only: bool = False,
+) -> MilestoneCompletionDecision:
+    """Evaluate one milestone without allowing reviewers to mutate the roadmap."""
+
+    candidates = [
+        item for item in work_items.work_items if item.milestone == milestone.milestone_id
+    ]
+    failures: list[str] = []
+    for item in candidates:
+        if item.status not in {WorkStatus.PASSED_ENGINEERING, WorkStatus.COMPLETED}:
+            failures.append(f"{item.work_item_id} is {item.status.value}")
+        if not deterministic_evidence.get(item.work_item_id):
+            failures.append(f"{item.work_item_id} lacks deterministic evidence")
+
+    review_required = any(
+        item.risk_tier in {RiskTier.INTEGRATION, RiskTier.TRUST_CORE} for item in candidates
+    )
+    if review_required and not independent_review_refs:
+        failures.append("integration/trust milestone lacks independent adversarial review")
+
+    milestone_number = int(milestone.milestone_id.split("_", 1)[0][1:])
+    external_required = milestone.type is MilestoneType.COMMERCIAL or milestone_number >= 3
+    if external_required and (controlled_fixture_only or not trusted_external_receipt_refs):
+        decision = MilestoneStatus.WAITING_EXTERNAL
+    elif milestone.human_approval_required and not human_approval_refs:
+        decision = MilestoneStatus.WAITING_HUMAN
+    elif failures:
+        decision = MilestoneStatus.ACTIVE
+    else:
+        decision = MilestoneStatus.COMPLETED
+
+    bounded_proposals = proposals or []
+    if len(bounded_proposals) > 5:
+        raise CompletionBlocked("completion review may produce at most five proposals")
+    if expansion_round not in {0, 1}:
+        raise CompletionBlocked("completion expansion is limited to one round")
+    if any(proposal.accepted for proposal in bounded_proposals) and expansion_round == 0:
+        raise CompletionBlocked("accepted roadmap proposal must record expansion round one")
+    return MilestoneCompletionDecision(
+        milestone_id=milestone.milestone_id,
+        decision=decision,
+        deterministic_failures=failures,
+        independent_review_refs=independent_review_refs,
+        trusted_external_receipt_refs=trusted_external_receipt_refs,
+        human_approval_refs=human_approval_refs,
+        proposals=bounded_proposals,
+        expansion_round=expansion_round,
+    )
 
 
 def _proof_root(repo_root: Path, raw: object) -> Path:

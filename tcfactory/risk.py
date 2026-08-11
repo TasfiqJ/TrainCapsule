@@ -134,11 +134,10 @@ def _mutating_stages(packet: TaskPacket, tier: RiskTier) -> list[Stage]:
     return [
         owner.model_copy(
             update={
-                # Normal Claude Code can inspect and update every affected product surface.
-                # Deterministic forbidden paths still protect controller/truth/credential
-                # authority, while the task outputs describe evidence rather than a file cage.
-                "allowed_paths": ["**"],
-                "require_changes": False,
+                "allowed_paths": list(dict.fromkeys(owner.allowed_paths)),
+                "require_changes": (
+                    owner.require_changes if owner.require_changes is not None else True
+                ),
             }
         )
     ]
@@ -169,25 +168,8 @@ def with_working_token_reserve(
     """
 
     if work_until_done:
-        mutating = stage.role in {
-            RoleName.PLANNER,
-            RoleName.SPECIFICATION,
-            RoleName.BUILDER,
-            RoleName.RESEARCH,
-            RoleName.RECOVERY,
-            RoleName.FACTORY_REPAIR,
-        }
-        floor = mutating_turn_floor if mutating else review_turn_floor
-        effort = stage.effort
-        if effort in {None, "low", "medium"}:
-            effort = "high"
-        return stage.model_copy(
-            update={
-                "max_turns": max(stage.max_turns or 0, floor),
-                "max_budget_usd": None,
-                "task_budget_tokens": None,
-                "effort": effort,
-            }
+        raise RiskProfileError(
+            "work_until_done is forbidden in V3; use a finite retry/disposition policy"
         )
 
     if stage.max_context_chars is None:
@@ -253,7 +235,7 @@ def planning_pipeline(
         profile,
         context_chars,
     )
-    planner = with_working_token_reserve(planner, work_until_done=True)
+    planner = with_working_token_reserve(planner, work_until_done=False)
     # Proposal policy is a deterministic exit check. Four model sessions here previously
     # reviewed the same two files and repeatedly turned controller observations into task
     # revisions. The planner now owns the living outcome contract and repairs it directly.
@@ -265,18 +247,15 @@ def _private_gate_for(item: FeatureItem, packet: TaskPacket, tier: RiskTier) -> 
         return packet.private_gate
     if tier not in {RiskTier.INTEGRATION, RiskTier.TRUST_CORE}:
         return packet.private_gate
-    numeric = (
-        int(item.task_id[1:]) if item.task_id.startswith("T") and item.task_id[1:].isdigit() else 0
-    )
-    mature_trust = numeric in set(range(17, 21)) | set(range(39, 42)) | set(range(45, 48)) | {
-        54,
-        60,
-    }
-    suite = (
-        "trust-core-mutations"
-        if tier == RiskTier.TRUST_CORE and mature_trust
-        else "factory-negative-controls"
-    )
+    text = f"{item.outcome} {item.phase} {item.lead_role}".lower()
+    if any(marker in text for marker in ("credential", "secret", "sandbox", "security")):
+        suite = "security-boundary"
+    elif any(marker in text for marker in ("adapter", "integration", "import", "github")):
+        suite = "integration-paths"
+    elif tier == RiskTier.TRUST_CORE:
+        suite = "trust-core-mutations"
+    else:
+        suite = "factory-negative-controls"
     return PrivateGate(required=True, suite=suite, timeout_seconds=3600)
 
 
@@ -302,7 +281,7 @@ def apply_risk_profile(
         mutating_stages.append(
             with_working_token_reserve(
                 _apply_stage_profile(proposed, profile, context_chars),
-                work_until_done=True,
+                work_until_done=False,
             )
         )
 
@@ -328,7 +307,7 @@ def apply_risk_profile(
                     profile,
                     context_chars,
                 ),
-                work_until_done=True,
+                work_until_done=False,
             )
         )
 
@@ -338,30 +317,7 @@ def apply_risk_profile(
         gate.model_copy(update={"stages": [owner.role]}) for gate in packet.gates
     ]
 
-    protected_output = any(
-        value.startswith(("src/", "tests/", "profiles/", "corpus/", "contracts/"))
-        or "/src/" in value
-        for value in packet.outputs
-    )
-    private_gate = packet.private_gate
-    if tier == RiskTier.TRUST_CORE and (protected_output or item.allow_test_changes):
-        private_gate = PrivateGate(
-            required=True,
-            suite=packet.private_gate.suite or f"traincapsule-trust-{packet.task_id.lower()}",
-            timeout_seconds=max(packet.private_gate.timeout_seconds, 1800),
-        )
-    elif tier == RiskTier.INTEGRATION and item.allow_test_changes:
-        private_gate = PrivateGate(
-            required=True,
-            suite=packet.private_gate.suite or f"traincapsule-integration-{packet.task_id.lower()}",
-            timeout_seconds=max(packet.private_gate.timeout_seconds, 1200),
-        )
-
-    repair_models = ["sonnet"]
-    if tier in {RiskTier.INTEGRATION, RiskTier.TRUST_CORE}:
-        repair_models.append("opus")
-    if tier == RiskTier.TRUST_CORE:
-        repair_models.append("fable")
+    repair_models = [owner.model or "sonnet"]
 
     routed = packet.model_copy(
         update={
@@ -371,12 +327,10 @@ def apply_risk_profile(
             or tier in {RiskTier.INTEGRATION, RiskTier.TRUST_CORE},
             "allow_test_changes": item.allow_test_changes,
             "commit_type": item.commit_type,
-            "github_push": True,
+            "github_push": packet.github_push,
             "pipeline": stages,
             "gates": owner_gates,
-            "private_gate": _private_gate_for(
-                item, packet.model_copy(update={"private_gate": private_gate}), tier
-            ),
+            "private_gate": _private_gate_for(item, packet, tier),
             "repair": RepairPolicy(
                 enabled=True,
                 max_cycles=int(profile["repair_cycles"]),
@@ -385,6 +339,7 @@ def apply_risk_profile(
                 mutating_role=mutating_stages[-1].role,
             ),
             "task_budget_usd": float(profile["task_budget_usd"]),
+            "auto_merge": False,
         }
     )
     return apply_objective_stage_contracts(routed)

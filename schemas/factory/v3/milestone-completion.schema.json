@@ -1,0 +1,143 @@
+{
+  "$defs": {
+    "CompletionProposal": {
+      "additionalProperties": false,
+      "properties": {
+        "proposalId": {
+          "pattern": "^CPROP-[A-Z0-9_-]+$",
+          "title": "Proposalid",
+          "type": "string"
+        },
+        "milestoneId": {
+          "pattern": "^M[0-9]+_[A-Z0-9_]+$",
+          "title": "Milestoneid",
+          "type": "string"
+        },
+        "summary": {
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        },
+        "proposedWork": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Proposedwork",
+          "type": "array"
+        },
+        "reviewerArtifactDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Reviewerartifactdigest",
+          "type": "string"
+        },
+        "accepted": {
+          "default": false,
+          "title": "Accepted",
+          "type": "boolean"
+        },
+        "acceptedByApprovalRef": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Acceptedbyapprovalref"
+        }
+      },
+      "required": [
+        "proposalId",
+        "milestoneId",
+        "summary",
+        "proposedWork",
+        "reviewerArtifactDigest"
+      ],
+      "title": "CompletionProposal",
+      "type": "object"
+    },
+    "MilestoneStatus": {
+      "enum": [
+        "PROPOSED",
+        "ACTIVE",
+        "WAITING_EXTERNAL",
+        "WAITING_HUMAN",
+        "PAUSED",
+        "COMPLETED",
+        "CANCELLED"
+      ],
+      "title": "MilestoneStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "milestoneId": {
+      "title": "Milestoneid",
+      "type": "string"
+    },
+    "decision": {
+      "$ref": "#/$defs/MilestoneStatus"
+    },
+    "deterministicFailures": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Deterministicfailures",
+      "type": "array"
+    },
+    "independentReviewRefs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Independentreviewrefs",
+      "type": "array"
+    },
+    "trustedExternalReceiptRefs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Trustedexternalreceiptrefs",
+      "type": "array"
+    },
+    "humanApprovalRefs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Humanapprovalrefs",
+      "type": "array"
+    },
+    "proposals": {
+      "items": {
+        "$ref": "#/$defs/CompletionProposal"
+      },
+      "maxItems": 5,
+      "title": "Proposals",
+      "type": "array"
+    },
+    "expansionRound": {
+      "default": 0,
+      "maximum": 1,
+      "minimum": 0,
+      "title": "Expansionround",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "milestoneId",
+    "decision",
+    "deterministicFailures",
+    "independentReviewRefs",
+    "trustedExternalReceiptRefs",
+    "humanApprovalRefs",
+    "proposals"
+  ],
+  "title": "MilestoneCompletionDecision",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/milestone-completion.schema.json"
+}

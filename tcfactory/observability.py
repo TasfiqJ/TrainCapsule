@@ -6,7 +6,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any, cast
 
-from .util import read_json, write_json
+from .util import atomic_write_text, read_json, redact_sensitive, single_writer_lock, write_json
 
 
 def _now() -> datetime:
@@ -23,6 +23,7 @@ def append_event(
     role: str | None = None,
     detail: str | None = None,
     data: dict[str, Any] | None = None,
+    exportability_class: str = "SUPPORT_SAFE",
 ) -> None:
     """Append one compact controller-owned event.
 
@@ -30,25 +31,35 @@ def append_event(
     gate details. They are operational metadata for status, recovery, and audit commands.
     """
 
-    payload: dict[str, Any] = {
-        "at": _now().isoformat(),
-        "event": event,
-        "component": component,
-        "pid": os.getpid(),
-    }
-    if task_id:
-        payload["task_id"] = task_id
-    if run_id:
-        payload["run_id"] = run_id
-    if role:
-        payload["role"] = role
-    if detail:
-        payload["detail"] = detail[:2000]
-    if data:
-        payload["data"] = data
     path.parent.mkdir(parents=True, exist_ok=True)
-    with path.open("a", encoding="utf-8") as handle:
-        handle.write(json.dumps(payload, sort_keys=True, default=str) + "\n")
+    lock = path.with_suffix(path.suffix + ".lock")
+    with single_writer_lock(lock):
+        existing = path.read_text(encoding="utf-8") if path.is_file() else ""
+        sequence = sum(1 for line in existing.splitlines() if line.strip()) + 1
+        payload: dict[str, Any] = {
+            "event_schema": 3,
+            "sequence": sequence,
+            "at": _now().isoformat(),
+            "event": event,
+            "component": component,
+            "pid": os.getpid(),
+            "exportability_class": exportability_class,
+            "redacted": True,
+        }
+        if task_id:
+            payload["task_id"] = task_id
+        if run_id:
+            payload["run_id"] = run_id
+        if role:
+            payload["role"] = role
+        if detail:
+            payload["detail"] = redact_sensitive(detail)[:2000]
+        if data:
+            payload["data"] = json.loads(redact_sensitive(json.dumps(data, default=str)))
+        atomic_write_text(
+            path,
+            existing + json.dumps(payload, sort_keys=True, default=str) + "\n",
+        )
 
 
 def write_heartbeat(
@@ -108,7 +119,16 @@ def tail_events(path: Path, *, limit: int = 100) -> list[dict[str, Any]]:
     for line in lines[-max(1, limit) :]:
         try:
             value = json.loads(line)
-        except json.JSONDecodeError:
+        except json.JSONDecodeError as exc:
+            result.append(
+                {
+                    "event_schema": 3,
+                    "event": "corruption_warning",
+                    "component": "observability",
+                    "detail": f"malformed event record: {exc}",
+                    "redacted": True,
+                }
+            )
             continue
         if isinstance(value, dict):
             result.append(cast(dict[str, Any], value))

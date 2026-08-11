@@ -1,0 +1,48 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "workItemId": {
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "manifestDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Manifestdigest",
+      "type": "string"
+    },
+    "factoryCiPassed": {
+      "title": "Factorycipassed",
+      "type": "boolean"
+    },
+    "productCiPassed": {
+      "title": "Productcipassed",
+      "type": "boolean"
+    },
+    "humanGatePassed": {
+      "title": "Humangatepassed",
+      "type": "boolean"
+    },
+    "externalGatePassed": {
+      "title": "Externalgatepassed",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "workItemId",
+    "candidateSha",
+    "manifestDigest",
+    "factoryCiPassed",
+    "productCiPassed",
+    "humanGatePassed",
+    "externalGatePassed"
+  ],
+  "title": "ReleaseCandidate",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/release-candidate.schema.json"
+}

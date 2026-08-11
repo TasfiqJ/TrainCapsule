@@ -3,10 +3,10 @@ from __future__ import annotations
 import os
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 from .models import StageResult
-from .util import read_json, write_json
+from .util import read_json, single_writer_lock, write_json
 
 
 class Ledger:
@@ -18,12 +18,26 @@ class Ledger:
         self.monthly_budget_usd = float(env_budget) if env_budget else monthly_budget_usd
 
     def _load(self) -> dict[str, Any]:
-        return read_json(self.path, {"version": 1, "runs": []})
+        value = read_json(self.path, {"version": 2, "runs": []})
+        if not isinstance(value, dict):
+            raise RuntimeError(f"malformed durable ledger: {self.path}")
+        typed = cast(dict[str, Any], value)
+        if not isinstance(typed.get("runs"), list):
+            raise RuntimeError(f"malformed durable ledger: {self.path}")
+        return typed
 
     def append(self, result: StageResult) -> None:
-        data = self._load()
-        data["runs"].append(result.model_dump(mode="json"))
-        write_json(self.path, data)
+        with single_writer_lock(self.path.with_suffix(self.path.suffix + ".lock")):
+            data = self._load()
+            record = result.model_dump(mode="json")
+            record["estimated_api_equivalent_usd"] = float(
+                record.get("total_cost_usd", 0.0) or 0.0
+            )
+            record["actual_subscription_charge_usd"] = 0.0
+            record["capacity_source"] = "subscription"
+            data["version"] = 2
+            data["runs"].append(record)
+            write_json(self.path, data)
 
     def current_month_cost(self) -> float:
         prefix = datetime.now(UTC).strftime("%Y%m")

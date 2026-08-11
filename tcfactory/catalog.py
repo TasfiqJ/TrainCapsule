@@ -19,6 +19,9 @@ from .models import (
     ValueGateMode,
 )
 from .risk import apply_risk_profile, effective_risk
+from .v3.base import sha256_digest
+from .v3.planning import V3TaskPacket, compile_work_item_packet
+from .v3.work_items import WorkItem
 from .value_policy import contract_for_task, load_value_policy
 from .yamlutil import load_yaml
 
@@ -226,11 +229,7 @@ def task_packet_from_catalog(
     spec_path = f"specs/tasks/{item.task_id}.md"
     outputs = list(dict.fromkeys(entry.expected_outputs))
     if research_only:
-        research_record = (
-            "docs/research/T002_name_trademark_check.md"
-            if item.task_id == "T002"
-            else f"docs/research/{item.task_id}_research.md"
-        )
+        research_record = f"docs/research/{item.task_id}_research.md"
         evidence_root = f"docs/evidence/{item.task_id}"
         research_outputs = [
             research_record,
@@ -342,7 +341,7 @@ def task_packet_from_catalog(
             mutating_role=RoleName.RESEARCH if research_only else RoleName.BUILDER,
         ),
         task_budget_usd=task_budget,
-        auto_merge=True,
+        auto_merge=False,
         base_branch="main",
     )
     routed = apply_risk_profile(packet, item, risk_profiles)
@@ -363,4 +362,40 @@ def write_task_packet(path: Path, packet: TaskPacket) -> None:
     path.write_text(
         yaml.safe_dump(packet.model_dump(mode="json"), sort_keys=False, allow_unicode=True),
         encoding="utf-8",
+    )
+
+
+def compile_v3_packet(
+    *,
+    item: WorkItem,
+    source_documents: list[str],
+    allowed_paths: list[str],
+    outputs: list[str],
+    acceptance_criteria: list[str],
+    non_goals: list[str],
+    oracle: str,
+    rollback: str,
+    stop_conditions: list[str],
+    stop_disposition: str,
+    source_digest: str,
+    context_digest: str,
+    base_sha: str,
+) -> V3TaskPacket:
+    """Compile a typed V3 packet with this compiler implementation digest."""
+
+    return compile_work_item_packet(
+        item,
+        source_documents=source_documents,
+        allowed_paths=allowed_paths,
+        outputs=outputs,
+        acceptance_criteria=acceptance_criteria,
+        non_goals=non_goals,
+        oracle=oracle,
+        rollback=rollback,
+        stop_conditions=stop_conditions,
+        stop_disposition=stop_disposition,
+        source_digest=source_digest,
+        context_digest=context_digest,
+        compiler_digest=sha256_digest(Path(__file__).read_bytes()),
+        base_sha=base_sha,
     )

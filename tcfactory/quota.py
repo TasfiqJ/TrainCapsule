@@ -8,6 +8,7 @@ from pathlib import Path
 from typing import cast
 
 from .models import PauseKind, QuotaPauseRecord, StageResult
+from .util import redact_sensitive
 
 _LIMIT_MARKERS: tuple[tuple[PauseKind, re.Pattern[str]], ...] = (
     (
@@ -112,12 +113,14 @@ def stage_failure_texts(result: StageResult, artifact_dir: Path) -> list[tuple[s
     """
     texts: list[tuple[str, str]] = []
     if result.error:
-        texts.append(("stage.error", result.error))
+        texts.append(("stage.error", redact_sensitive(result.error)))
     if result.terminal_reason:
-        texts.append(("stage.terminal_reason", result.terminal_reason))
+        texts.append(("stage.terminal_reason", redact_sensitive(result.terminal_reason)))
     stderr_path = artifact_dir / "claude-stderr.log"
     if stderr_path.exists():
-        texts.append(("claude-stderr.log", _safe_read(stderr_path)[-100_000:]))
+        texts.append(
+            ("claude-stderr.log", redact_sensitive(_safe_read(stderr_path)[-100_000:]))
+        )
     return texts
 
 

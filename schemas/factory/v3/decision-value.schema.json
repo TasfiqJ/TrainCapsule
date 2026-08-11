@@ -1,0 +1,86 @@
+{
+  "$defs": {
+    "DecisionValueOutcome": {
+      "enum": [
+        "NATIVE_WORKFLOW_SUFFICIENT",
+        "NO_INCREMENTAL_DECISION_VALUE",
+        "TECHNICALLY_VALID_BUT_NOT_ECONOMIC",
+        "INCREMENTAL_DECISION_VALUE_DEMONSTRATED",
+        "EXTERNAL_EVIDENCE_REQUIRED"
+      ],
+      "title": "DecisionValueOutcome",
+      "type": "string"
+    },
+    "WorkStatus": {
+      "enum": [
+        "PROPOSED",
+        "READY",
+        "QUEUED",
+        "RUNNING",
+        "PAUSED_QUOTA",
+        "WAITING_EXTERNAL",
+        "WAITING_HUMAN",
+        "BLOCKED_TECHNICAL",
+        "BLOCKED_POLICY",
+        "PASSED_ENGINEERING",
+        "REJECTED_VALUE",
+        "NATIVE_SUFFICIENT",
+        "DEFERRED",
+        "SUPERSEDED",
+        "CANCELLED",
+        "COMPLETED"
+      ],
+      "title": "WorkStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "workItemId": {
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "evaluated": {
+      "title": "Evaluated",
+      "type": "boolean"
+    },
+    "outcome": {
+      "$ref": "#/$defs/DecisionValueOutcome"
+    },
+    "resultingStatus": {
+      "$ref": "#/$defs/WorkStatus"
+    },
+    "rationale": {
+      "minLength": 1,
+      "title": "Rationale",
+      "type": "string"
+    },
+    "evidenceRefs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Evidencerefs",
+      "type": "array"
+    },
+    "appendedWorkItemIds": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 0,
+      "title": "Appendedworkitemids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "workItemId",
+    "evaluated",
+    "outcome",
+    "resultingStatus",
+    "rationale",
+    "evidenceRefs"
+  ],
+  "title": "DecisionValueResult",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/decision-value.schema.json"
+}

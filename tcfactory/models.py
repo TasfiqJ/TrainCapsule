@@ -295,6 +295,9 @@ class TaskPacket(BaseModel):
     title: str
     phase: str
     goal: str
+    decision_contribution: str = "Advance only this bounded roadmap decision."
+    oracle: str = "The declared deterministic gates and candidate-bound evidence."
+    rollback: str = "Revert only this task's candidate commit and preserve evidence."
     source_of_truth: list[str]
     depends_on: list[str] = Field(default_factory=list)
     inputs: list[str] = Field(default_factory=list)

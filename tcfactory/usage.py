@@ -52,6 +52,15 @@ def usage_health(path: Path) -> dict[str, Any]:
 
     total_usage = sum(value["reported_usage"] for value in by_family.values())
     total_cost = sum(value["estimated_usd"] for value in by_family.values())
+    actual_subscription_charge = 0.0
+    for raw_run in runs:
+        if not isinstance(raw_run, dict):
+            continue
+        raw_charge = cast(dict[str, object], raw_run).get(
+            "actual_subscription_charge_usd", 0.0
+        )
+        if isinstance(raw_charge, (int, float)) and not isinstance(raw_charge, bool):
+            actual_subscription_charge += float(raw_charge)
     denominator = total_usage or total_cost or sum(value["stages"] for value in by_family.values())
 
     def share(family: str) -> float:
@@ -90,4 +99,7 @@ def usage_health(path: Path) -> dict[str, Any]:
         ),
         "by_family": dict(by_family),
         "stage_count": len(runs),
+        "estimated_api_equivalent_usd": total_cost,
+        "actual_subscription_charge_usd": actual_subscription_charge,
+        "subscription_capacity": "not_authoritatively_reported",
     }

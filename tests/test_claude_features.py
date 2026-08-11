@@ -73,21 +73,22 @@ def test_trust_builder_gets_peer_channel_and_goal_but_no_forced_advisor() -> Non
         role_config=roles[RoleName.BUILDER],
         run_id="run-12345678",
         attempt=1,
-        peer_names=["rp-t999-integration-scout-12345678-a1"],
+        peer_names=["tc-t999-integration-scout-12345678-a1"],
     )
     assert plan.peer_messaging is True
     assert {"ListAgents", "SendMessage"}.issubset(plan.tools)
     assert plan.advisor_model is None
     assert plan.goal_condition is not None
     assert "evaluated turns" not in plan.goal_condition
-    assert "renewable controller sessions" in plan.goal_condition
+    assert "finite session boundary" in plan.goal_condition
+    assert plan.session_name.startswith("tc-")
     assert plan.workflow_name is None
     assert "Workflow" not in plan.tools
     assert plan.settings_payload["crossSessionInbound"] == "accept"
     assert plan.settings_payload["isolatePeerMachines"] is True
 
 
-def test_standard_builder_gets_renewable_goal_without_forced_specialists() -> None:
+def test_standard_builder_gets_bounded_goal_without_forced_specialists() -> None:
     features = load_claude_features(ROOT / "config/claude_features.yaml")
     roles = load_roles(ROOT / "config/roles.yaml")
     task = _task(RiskTier.STANDARD)
@@ -104,7 +105,7 @@ def test_standard_builder_gets_renewable_goal_without_forced_specialists() -> No
     assert plan.peer_messaging is False
     assert plan.advisor_model is None
     assert plan.goal_condition is not None
-    assert "renewable controller sessions" in plan.goal_condition
+    assert "finite session boundary" in plan.goal_condition
     assert plan.tools == ()
 
 

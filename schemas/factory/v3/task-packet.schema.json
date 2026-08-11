@@ -1,0 +1,232 @@
+{
+  "$defs": {
+    "Lane": {
+      "enum": [
+        "PRODUCT",
+        "MARKET",
+        "COMPETITOR",
+        "TRUST",
+        "FACTORY"
+      ],
+      "title": "Lane",
+      "type": "string"
+    },
+    "RiskTier": {
+      "enum": [
+        "MECHANICAL",
+        "STANDARD",
+        "INTEGRATION",
+        "TRUST_CORE",
+        "EXTERNAL"
+      ],
+      "title": "RiskTier",
+      "type": "string"
+    },
+    "WorkKind": {
+      "enum": [
+        "CODE",
+        "SPECIFICATION",
+        "RESEARCH",
+        "CONTROLLED_EXPERIMENT",
+        "EXTERNAL_EVIDENCE",
+        "HUMAN_REVIEW",
+        "COMMERCIAL_EXPERIMENT",
+        "MAINTENANCE",
+        "MIGRATION"
+      ],
+      "title": "WorkKind",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "title": {
+      "minLength": 1,
+      "title": "Title",
+      "type": "string"
+    },
+    "lane": {
+      "$ref": "#/$defs/Lane"
+    },
+    "milestone": {
+      "pattern": "^M[0-9]+_[A-Z0-9_]+$",
+      "title": "Milestone",
+      "type": "string"
+    },
+    "kind": {
+      "$ref": "#/$defs/WorkKind"
+    },
+    "riskTier": {
+      "$ref": "#/$defs/RiskTier"
+    },
+    "template": {
+      "minLength": 1,
+      "title": "Template",
+      "type": "string"
+    },
+    "goal": {
+      "minLength": 1,
+      "title": "Goal",
+      "type": "string"
+    },
+    "decisionContribution": {
+      "minLength": 1,
+      "title": "Decisioncontribution",
+      "type": "string"
+    },
+    "nonGoals": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "title": "Nongoals",
+      "type": "array"
+    },
+    "acceptanceCriteria": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 12,
+      "minItems": 1,
+      "title": "Acceptancecriteria",
+      "type": "array"
+    },
+    "outputs": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 8,
+      "title": "Outputs",
+      "type": "array"
+    },
+    "sourceDocuments": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "title": "Sourcedocuments",
+      "type": "array"
+    },
+    "allowedPaths": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Allowedpaths",
+      "type": "array"
+    },
+    "forbiddenPaths": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 24,
+      "title": "Forbiddenpaths",
+      "type": "array"
+    },
+    "oracle": {
+      "minLength": 1,
+      "title": "Oracle",
+      "type": "string"
+    },
+    "rollback": {
+      "minLength": 1,
+      "title": "Rollback",
+      "type": "string"
+    },
+    "stopConditions": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "title": "Stopconditions",
+      "type": "array"
+    },
+    "stopDisposition": {
+      "minLength": 1,
+      "title": "Stopdisposition",
+      "type": "string"
+    },
+    "workItemDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Workitemdigest",
+      "type": "string"
+    },
+    "sourceDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourcedigest",
+      "type": "string"
+    },
+    "contextDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Contextdigest",
+      "type": "string"
+    },
+    "compilerDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Compilerdigest",
+      "type": "string"
+    },
+    "baseSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Basesha",
+      "type": "string"
+    },
+    "approvedSplitRef": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Approvedsplitref"
+    }
+  },
+  "required": [
+    "workItemId",
+    "title",
+    "lane",
+    "milestone",
+    "kind",
+    "riskTier",
+    "template",
+    "goal",
+    "decisionContribution",
+    "nonGoals",
+    "acceptanceCriteria",
+    "outputs",
+    "sourceDocuments",
+    "allowedPaths",
+    "oracle",
+    "rollback",
+    "stopConditions",
+    "stopDisposition",
+    "workItemDigest",
+    "sourceDigest",
+    "contextDigest",
+    "compilerDigest",
+    "baseSha"
+  ],
+  "title": "V3TaskPacket",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/task-packet.schema.json"
+}

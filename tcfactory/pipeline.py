@@ -85,6 +85,22 @@ class PipelineBlocked(RuntimeError):
     pass
 
 
+def route_v3_findings(findings: list[object]) -> list[object]:
+    """Compatibility entrypoint for the bounded V3 finding-routing service."""
+
+    from .v3.pipeline_services import V3Finding, route_finding
+
+    return [route_finding(V3Finding.model_validate(finding)) for finding in findings]
+
+
+def validate_v3_factory_repair_scope(changed_paths: list[str]) -> None:
+    """Fail closed before a factory repair can touch protected V3 authority."""
+
+    from .v3.pipeline_services import assert_factory_repair_scope
+
+    assert_factory_repair_scope(changed_paths)
+
+
 MAX_STAGE_TURNS = 200
 TURN_ESCALATION_FACTOR = 2
 MAX_REVIEW_TURN_MULTIPLIER = 4

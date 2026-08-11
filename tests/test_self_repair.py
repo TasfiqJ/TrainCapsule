@@ -10,7 +10,7 @@ from tcfactory.self_repair import (
 )
 
 
-def test_self_repair_can_change_loop_but_not_billing_or_gates() -> None:
+def test_self_repair_can_change_loop_and_ordinary_gates_but_not_spending_controls() -> None:
     task = build_self_repair_task(
         reason="RuntimeError: controller failed",
         attempt=1,
@@ -21,8 +21,11 @@ def test_self_repair_can_change_loop_but_not_billing_or_gates() -> None:
     assert "tcfactory/**" in recovery.allowed_paths
     assert "scripts/windows_task_entrypoint.sh" in recovery.allowed_paths
     assert "tcfactory/auth.py" in recovery.forbidden_paths
-    assert "scripts/gates/**" in recovery.forbidden_paths
-    assert "config/**" in recovery.forbidden_paths
+    assert "scripts/gates/**" in recovery.allowed_paths
+    assert "config/risk_profiles.yaml" in recovery.allowed_paths
+    assert "scripts/gates/no_paid_usage.sh" in recovery.forbidden_paths
+    assert "scripts/gates/self_repair_scope.sh" in recovery.forbidden_paths
+    assert "config/factory.yaml" in recovery.forbidden_paths
     assert {gate.name for gate in task.gates} == {
         "no-paid-usage",
         "secret-scan",
@@ -43,7 +46,10 @@ def test_critical_self_repair_starts_with_opus_and_mixes_repair_models() -> None
     assert task.pipeline[0].model == "opus"
     assert task.pipeline[0].role == RoleName.FACTORY_REPAIR
     assert task.pipeline[1].model == "opus"
-    assert task.pipeline[-1].model == "sonnet"
+    assert [stage.role for stage in task.pipeline] == [
+        RoleName.FACTORY_REPAIR,
+        RoleName.ADVERSARY,
+    ]
     assert task.repair.mutating_role == RoleName.FACTORY_REPAIR
     assert task.repair.builder_models == ["sonnet", "opus", "sonnet", "opus"]
     assert task.repair.mutating_retry_models == ["sonnet", "opus", "sonnet"]

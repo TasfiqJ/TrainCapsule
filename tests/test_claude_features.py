@@ -49,7 +49,8 @@ def test_claude_native_feature_policy_enables_renewable_production_work() -> Non
     scout = roles[RoleName.INTEGRATION_SCOUT]
     assert scout.max_turns >= 20
     assert scout.task_budget_tokens is None
-    assert features.integration_scout.blocking_on_non_pass is True
+    assert features.integration_scout.enabled is False
+    assert features.integration_scout.blocking_on_non_pass is False
 
 
 def test_scout_prompt_prioritizes_peer_discovery_before_inspection() -> None:
@@ -60,7 +61,7 @@ def test_scout_prompt_prioritizes_peer_discovery_before_inspection() -> None:
     assert discovery < inspection
 
 
-def test_trust_builder_gets_peer_channel_advisor_goal_but_no_workflow() -> None:
+def test_trust_builder_gets_peer_channel_and_goal_but_no_forced_advisor() -> None:
     features = load_claude_features(ROOT / "config/claude_features.yaml")
     roles = load_roles(ROOT / "config/roles.yaml")
     task = _task()
@@ -76,7 +77,7 @@ def test_trust_builder_gets_peer_channel_advisor_goal_but_no_workflow() -> None:
     )
     assert plan.peer_messaging is True
     assert {"ListAgents", "SendMessage"}.issubset(plan.tools)
-    assert plan.advisor_model == "opus"
+    assert plan.advisor_model is None
     assert plan.goal_condition is not None
     assert "evaluated turns" not in plan.goal_condition
     assert "renewable controller sessions" in plan.goal_condition
@@ -86,7 +87,7 @@ def test_trust_builder_gets_peer_channel_advisor_goal_but_no_workflow() -> None:
     assert plan.settings_payload["isolatePeerMachines"] is True
 
 
-def test_standard_builder_avoids_expensive_claude_features() -> None:
+def test_standard_builder_gets_renewable_goal_without_forced_specialists() -> None:
     features = load_claude_features(ROOT / "config/claude_features.yaml")
     roles = load_roles(ROOT / "config/roles.yaml")
     task = _task(RiskTier.STANDARD)
@@ -102,12 +103,13 @@ def test_standard_builder_avoids_expensive_claude_features() -> None:
     )
     assert plan.peer_messaging is False
     assert plan.advisor_model is None
-    assert plan.goal_condition is None
+    assert plan.goal_condition is not None
+    assert "renewable controller sessions" in plan.goal_condition
     assert plan.tools == ()
 
 
-def test_integration_builder_gets_independent_integration_scout() -> None:
+def test_integration_builder_uses_owner_selected_agents_not_forced_scout() -> None:
     features = load_claude_features(ROOT / "config/claude_features.yaml")
     task = _task(RiskTier.INTEGRATION)
     assert RiskTier.INTEGRATION in features.integration_scout.risk_tiers
-    assert should_launch_scout(features, task, task.pipeline[0]) is True
+    assert should_launch_scout(features, task, task.pipeline[0]) is False

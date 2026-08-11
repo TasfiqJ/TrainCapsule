@@ -58,7 +58,6 @@ def test_standard_catalog_task_avoids_model_planning_and_spec_session() -> None:
     assert [stage.role for stage in packet.pipeline] == [
         RoleName.BUILDER,
         RoleName.ADVERSARY,
-        RoleName.RELEASE,
     ]
     assert all(stage.model == "sonnet" for stage in packet.pipeline)
     assert packet.remote_ci_required is False
@@ -75,18 +74,12 @@ def test_integration_catalog_task_uses_opus_only_where_independent_value_exists(
     )
     roles = [stage.role for stage in packet.pipeline]
     assert roles == [
-        RoleName.SPECIFICATION,
         RoleName.BUILDER,
         RoleName.ADVERSARY,
-        RoleName.AUDIT,
-        RoleName.RELEASE,
     ]
     models = {stage.role: stage.model for stage in packet.pipeline}
-    assert models[RoleName.SPECIFICATION] == "opus"
     assert models[RoleName.BUILDER] == "sonnet"
     assert models[RoleName.ADVERSARY] == "opus"
-    assert models[RoleName.AUDIT] == "sonnet"
-    assert models[RoleName.RELEASE] == "sonnet"
     assert packet.private_gate.required is True
     assert packet.remote_ci_required is True
 
@@ -207,8 +200,8 @@ def test_every_catalog_research_packet_declares_generic_v2_evidence_bundle() -> 
         assert f"{evidence_root}/raw/**" in packet.outputs
 
         research = next(stage for stage in packet.pipeline if stage.role == RoleName.RESEARCH)
-        assert expected_record in research.allowed_paths
-        assert f"{evidence_root}/**" in research.allowed_paths
+        assert research.allowed_paths == ["**"]
+        assert expected_record in packet.outputs
         assert "research-evidence" in research.machine_gates
         gate = next(gate for gate in packet.gates if gate.name == "research-evidence")
         assert gate.command.endswith(f"{task_id} research-evidence")

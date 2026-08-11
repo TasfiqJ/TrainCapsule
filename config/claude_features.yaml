@@ -16,7 +16,7 @@ cross_session_messaging:
   isolate_peer_machines: true
   require_durable_handoff: true
 advisor:
-  enabled: true
+  enabled: false
   model: opus
   risk_tiers:
   - integration
@@ -25,7 +25,7 @@ advisor:
   - builder
   - recovery
 integration_scout:
-  enabled: true
+  enabled: false
   risk_tiers:
   - integration
   - trust_core
@@ -33,15 +33,20 @@ integration_scout:
   timeout_seconds: 900
   startup_delay_seconds: 0.75
   blocking_on_concrete_failure: true
-  blocking_on_non_pass: true
+  blocking_on_non_pass: false
 goal:
   enabled: true
   minimum_cli_version: 2.1.224
   risk_tiers:
+  - standard
   - integration
   - trust_core
   roles:
+  - planner
+  - research
   - builder
+  - recovery
+  - factory_repair
   max_condition_chars: 1800
   max_turn_clause: 100
   note: Goal mode keeps a renewable production session working; deterministic controller gates remain release authority.

@@ -44,6 +44,46 @@ def test_completion_check_requires_paths_and_commands(tmp_path: Path) -> None:
     assert not any("passes" in value for value in failures)
 
 
+def test_version_three_completion_requires_executable_outcome_proofs(tmp_path: Path) -> None:
+    failures = deterministic_completion_check(tmp_path, {"version": 3})
+    assert failures == ["Version 3 completion definition has no outcome_proofs"]
+
+
+def test_outcome_proof_must_run_and_emit_raw_evidence(tmp_path: Path) -> None:
+    evidence = ".factory/gate-results/product-proof/first-value/result.json"
+    definition = {
+        "version": 3,
+        "outcome_proofs": [
+            {
+                "id": "first-value",
+                "command": (
+                    "mkdir -p .factory/gate-results/product-proof/first-value "
+                    f"&& printf '{{}}' > {evidence}"
+                ),
+                "timeout_seconds": 5,
+                "evidence_globs": [evidence],
+            }
+        ],
+    }
+    assert deterministic_completion_check(tmp_path, definition) == []
+
+
+def test_outcome_proof_rejects_success_without_evidence(tmp_path: Path) -> None:
+    definition = {
+        "version": 3,
+        "outcome_proofs": [
+            {
+                "id": "first-value",
+                "command": "true",
+                "timeout_seconds": 5,
+                "evidence_globs": [".factory/gate-results/product-proof/first-value/**"],
+            }
+        ],
+    }
+    failures = deterministic_completion_check(tmp_path, definition)
+    assert any("produced no evidence" in value for value in failures)
+
+
 @pytest.mark.parametrize("contradiction", ["missing_items", "blockers"])
 def test_complete_report_cannot_carry_unresolved_work(contradiction: str) -> None:
     payload: dict[str, object] = {

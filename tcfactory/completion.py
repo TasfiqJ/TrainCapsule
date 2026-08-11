@@ -71,6 +71,52 @@ def deterministic_completion_check(
             failures.append(
                 f"Completion command {name!r} failed ({completed.returncode}): {detail}"
             )
+
+    # Version 3 definitions promote product/value claims from auditor prompt prose to
+    # executable, criterion-addressed journey proofs. These commands are controller-owned;
+    # product work must produce their raw artifacts rather than declaring itself complete.
+    if int(definition.get("version", 1)) >= 3:
+        proofs = cast(list[object], definition.get("outcome_proofs", []))
+        if not proofs:
+            failures.append("Version 3 completion definition has no outcome_proofs")
+        seen_ids: set[str] = set()
+        for item in proofs:
+            if not isinstance(item, dict):
+                failures.append(f"Invalid outcome_proofs entry: {item!r}")
+                continue
+            proof = cast(dict[str, object], item)
+            proof_id = str(proof.get("id") or "").strip()
+            command = str(proof.get("command") or "").strip()
+            evidence_globs = [
+                str(value) for value in cast(list[object], proof.get("evidence_globs", []))
+            ]
+            if not proof_id or proof_id in seen_ids:
+                failures.append(f"Outcome proof has missing or duplicate id: {proof_id!r}")
+                continue
+            seen_ids.add(proof_id)
+            if not command:
+                failures.append(f"Outcome proof {proof_id!r} has no executable command")
+                continue
+            if not evidence_globs:
+                failures.append(f"Outcome proof {proof_id!r} has no raw evidence globs")
+                continue
+            completed = run_command(
+                ["bash", "-lc", command],
+                cwd=repo_root,
+                check=False,
+                timeout=int(str(proof.get("timeout_seconds", 1800))),
+            )
+            if completed.returncode != 0:
+                detail = (completed.stderr or completed.stdout)[-1500:]
+                failures.append(
+                    f"Outcome proof {proof_id!r} failed ({completed.returncode}): {detail}"
+                )
+                continue
+            for pattern in evidence_globs:
+                if not list(repo_root.glob(pattern)):
+                    failures.append(
+                        f"Outcome proof {proof_id!r} produced no evidence matching {pattern}"
+                    )
     return failures
 
 

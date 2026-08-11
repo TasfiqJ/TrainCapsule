@@ -384,6 +384,7 @@ class FactoryConfig(BaseModel):
     monthly_budget_usd: float = Field(default=500.0, gt=0)
     require_clean_main: bool = True
     sandbox_enabled: bool = True
+    execution_mode: Literal["claude_led_nodes"] = "claude_led_nodes"
     work_until_done: bool = True
     disable_subscription_task_budget: bool = True
     disable_max_oauth_budget_caps: bool = True
@@ -484,6 +485,26 @@ class AutonomyConfig(BaseModel):
     peer_cohort_timeout_seconds: int = Field(default=1200, ge=60, le=7200)
 
 
+class ReviewFinding(BaseModel):
+    """Machine-routable independent-review finding.
+
+    Free-form prose remains useful evidence, but it must never decide repair authority.
+    Only a finding explicitly marked blocking and owned by a repair class participates in
+    controller routing.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    summary: str
+    blocking: bool
+    severity: Literal["critical", "high", "medium", "low", "info"]
+    criterion_id: str | None = None
+    owner_class: Literal["product", "factory", "external"]
+    repair_paths: list[str] = Field(default_factory=list)
+    counterexample: str | None = None
+    failing_evidence: list[str] = Field(default_factory=list)
+
+
 class AgentReport(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
@@ -494,6 +515,7 @@ class AgentReport(BaseModel):
     tests_run: list[str] = Field(default_factory=list)
     evidence: list[str] = Field(default_factory=list)
     findings: list[str] = Field(default_factory=list)
+    review_findings: list[ReviewFinding] = Field(default_factory=list[ReviewFinding])
     limitations: list[str] = Field(default_factory=list)
     next_actions: list[str] = Field(default_factory=list)
     value_assessment: ValueAssessment | None = None
@@ -567,6 +589,7 @@ class PipelineCheckpoint(BaseModel):
     stage_failures: dict[str, int] = Field(default_factory=dict)
     quota_resumptions: dict[str, int] = Field(default_factory=dict)
     repair_cycles: int = 0
+    review_fingerprints: dict[str, int] = Field(default_factory=dict)
     previous_findings: list[str] | None = None
     handoff_path: str | None = None
     remote_ci: dict[str, Any] = Field(default_factory=dict)

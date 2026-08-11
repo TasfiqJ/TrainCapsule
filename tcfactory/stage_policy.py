@@ -6,7 +6,6 @@ from .models import (
     RoleName,
     Stage,
     TaskPacket,
-    ValueGateMode,
 )
 
 # Objective contract strings are intentionally kept as complete prompt sentences.
@@ -86,8 +85,9 @@ ROLE_OBJECTIVE_CRITERIA: dict[RoleName, tuple[str, ...]] = {
         "Block only with a concrete reproducible counterexample tied to an exact path/symbol and candidate SHA; distinguish unavailable evidence from a product defect.",
     ),
     RoleName.ADVERSARY: (
-        "Attempt executable false-green counterexamples for status laundering, omitted subjects, circular oracles, weakened tests, mocks, corrupted evidence, malicious inputs, resource exhaustion, and missing failure/recovery paths.",
-        "Every blocking finding must name severity, exact path/symbol, failing command or artifact, counterexample, affected criterion ID, and the authorized repair owner.",
+        "Blindly challenge every applicable production dimension: criterion truth, real integrations, install and first value, repeated use, diagnostics and recovery, upgrade and rollback, security and privacy, representative performance, operability, support, accessibility, and material-value evidence.",
+        "Attempt executable false-green counterexamples for status laundering, omitted subjects, circular oracles, weakened tests, mocks, corrupted evidence, malicious inputs, resource exhaustion, synthetic commercial claims, and missing failure/recovery paths.",
+        "Every observation must use structured review_findings with blocking, severity, criterion ID, owner class, exact repair paths, failing command or artifact, and counterexample; advisory citations cannot control repair routing.",
     ),
     RoleName.AUDIT: (
         "Produce an independent criterion-to-evidence matrix and recompute claims, hashes, provenance, status arithmetic, gate identity, source authority, and candidate-SHA binding.",
@@ -143,7 +143,9 @@ def apply_objective_stage_contracts(packet: TaskPacket) -> TaskPacket:
         criteria = list(
             dict.fromkeys([*stage.acceptance_criteria, *objective_stage_criteria(stage.role)])
         )
-        machine_gates = stage.machine_gates or required_gates
+        machine_gates = list(stage.machine_gates)
+        if not machine_gates and stage.role not in REVIEW_ROLES:
+            machine_gates = required_gates
         stages.append(
             stage.model_copy(
                 update={
@@ -158,9 +160,11 @@ def apply_objective_stage_contracts(packet: TaskPacket) -> TaskPacket:
 def objective_pipeline_errors(packet: TaskPacket) -> list[str]:
     errors: list[str] = []
     roles = [stage.role for stage in packet.pipeline]
+    if not roles:
+        return ["pipeline must contain one Claude owner stage"]
     releases = [index for index, role in enumerate(roles) if role == RoleName.RELEASE]
-    if releases != [len(roles) - 1]:
-        errors.append("pipeline must contain exactly one release stage and it must be last")
+    if releases and releases != [len(roles) - 1]:
+        errors.append("a legacy model release stage must be unique and last")
 
     first_review = next(
         (index for index, role in enumerate(roles) if role in REVIEW_ROLES), len(roles)
@@ -173,24 +177,29 @@ def objective_pipeline_errors(packet: TaskPacket) -> list[str]:
             errors.append(
                 f"mutating stage {stage.role.value} cannot run after independent review begins"
             )
-        if stage.role not in REVIEW_ROLES and stage.read_only is not True:
-            if not stage.allowed_paths:
-                errors.append(f"writable stage {stage.role.value} has no allowed paths")
-            if stage.require_changes is False:
-                errors.append(f"writable stage {stage.role.value} may not disable required changes")
-        if not stage.machine_gates and stage.role not in {
+        if (
+            stage.role not in REVIEW_ROLES
+            and stage.read_only is not True
+            and not stage.allowed_paths
+        ):
+            errors.append(f"writable stage {stage.role.value} has no allowed paths")
+        if not stage.machine_gates and stage.role not in REVIEW_ROLES | {
             RoleName.COMPLETION_AUDIT,
             RoleName.COMPLETION_ADJUDICATOR,
         }:
             errors.append(f"stage {stage.role.value} has no deterministic machine gate")
 
-    required = {RoleName.RELEASE}
-    if packet.risk_tier != RiskTier.MECHANICAL:
+    writable = [
+        stage
+        for stage in packet.pipeline
+        if stage.role not in REVIEW_ROLES and stage.read_only is not True
+    ]
+    if len(writable) != 1:
+        errors.append("pipeline must contain exactly one renewable Claude owner stage")
+
+    required: set[RoleName] = set()
+    if packet.risk_tier != RiskTier.MECHANICAL and not packet.task_id.startswith("PLAN_"):
         required.add(RoleName.ADVERSARY)
-    if packet.risk_tier in {RiskTier.INTEGRATION, RiskTier.TRUST_CORE}:
-        required.add(RoleName.AUDIT)
-    if packet.value_contract.mode == ValueGateMode.MEASURED:
-        required.update({RoleName.VALUE_VALIDATOR, RoleName.VALUE_ADVERSARY})
     missing = sorted(role.value for role in required - set(roles))
     if missing:
         errors.append("pipeline is missing required objective stages: " + ", ".join(missing))

@@ -26,9 +26,9 @@ def test_planners_are_instructed_to_deliver_complete_sellable_outcomes() -> None
     autonomous = (ROOT / "prompts/autonomous_planner.md").read_text(encoding="utf-8")
     planner = (ROOT / "prompts/task_packet_planner.md").read_text(encoding="utf-8")
 
-    assert "complete founder-level product and company brief" in global_prompt
-    assert "smallest *complete sellable outcome*" in global_prompt
-    assert "as many acceptance criteria as necessary" in autonomous
-    assert "Agent sub-agents are encouraged" in autonomous
+    assert "real production product" in global_prompt
+    assert "smallest complete sellable outcome" in global_prompt
+    assert "living plan" in autonomous
+    assert "one Claude owner" in autonomous
     assert "without an arbitrary numeric cap" in planner
     assert "ordinary product and engineering decisions" in planner

@@ -241,7 +241,8 @@ def task_packet_from_catalog(
         outputs = list(dict.fromkeys([*outputs, *research_outputs]))
     value_policy = load_value_policy(repo_root / "config/value_policy.yaml")
     value_contract = contract_for_task(value_policy, item.task_id)
-    if value_contract.mode == ValueGateMode.MEASURED and value_contract.evidence_path:
+    capability_modes = {ValueGateMode.FOUNDATIONAL, ValueGateMode.MEASURED}
+    if value_contract.mode in capability_modes and value_contract.evidence_path:
         allowed_paths = list(dict.fromkeys([*allowed_paths, value_contract.evidence_path]))
         outputs = list(dict.fromkeys([*outputs, value_contract.evidence_path]))
 
@@ -289,8 +290,11 @@ def task_packet_from_catalog(
                 "a technically working but immaterial result must return to redesign."
                 if value_contract.mode == ValueGateMode.MEASURED
                 else (
-                    "Preserve the task's explicit causal link to its predeclared sellable "
-                    "milestone without inventing demand."
+                    "Produce candidate-bound capability evidence for every predeclared "
+                    "condition and falsification at the value-contract evidence path; prose "
+                    "alone cannot prove a foundational dependency."
+                    if value_contract.mode == ValueGateMode.FOUNDATIONAL
+                    else "Preserve external truth without inventing demand."
                 )
             ),
             "Never lower a value threshold after observing the result unless a separately "

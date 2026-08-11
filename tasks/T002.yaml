@@ -16,6 +16,9 @@ source_of_truth:
 - docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md
 - docs/source-of-truth/final-2026-08-09/13_SOURCE_REGISTER.md
 - factory/feature_ledger.yaml
+- docs/source-of-truth/final-2026-08-09/04_TECHNICAL_ARCHITECTURE.md
+- docs/source-of-truth/final-2026-08-09/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC.md
+- docs/source-of-truth/final-2026-08-09/14_CLAUDE_CODE_MASTER_BUILD_PROMPT.md
 depends_on:
 - T001
 inputs:
@@ -30,6 +33,9 @@ non_goals:
 - Representing a completed T002 record, regardless of its overall verdict, as satisfying
   source-of-truth's mandate to "Complete legal, domain, package, and trademark clearance
   before public release" while any trademark finding remains UNKNOWN or CONFLICT
+- Changing protected source-of-truth documents or controller-owned gate policy.
+- Expanding beyond the bounded roadmap outcome.
+- Lowering a truth, value, security, or qualification threshold.
 acceptance_criteria:
 - A research record exists at docs/research/T002_name_trademark_check.md.
 - The record quotes the exact product name ("TrainCapsule") and every CLI/package
@@ -128,11 +134,25 @@ acceptance_criteria:
   should re-litigate a reviewer-stage allowed_domains fix, since this criterion documents
   why the routing behavior makes that fix structurally impossible from within this
   task's writable paths.
+- 'Complete the exact protected-roadmap outcome: Recheck product name, package, domain,
+  and trademark surface'
+- Add deterministic tests or machine-checkable evidence for every implemented normative
+  behavior.
+- Write attributable raw evidence and truth states to .factory/external-evidence/T002.json.
+- Do not treat UNKNOWN, SKIPPED, INFRASTRUCTURE_ERROR, INVALID_ORACLE, or EXTERNAL_VALIDATION_REQUIRED
+  as pass.
+- Do not invent customer, upstream, benchmark, hardware, or production evidence.
+- Preserve the task's explicit causal link to its predeclared sellable milestone without
+  inventing demand.
+- Never lower a value threshold after observing the result unless a separately reviewed
+  ADR cites new external evidence.
 outputs:
 - docs/research/T002_name_trademark_check.md
 - docs/evidence/T002/query-plan.json
 - docs/evidence/T002/manifest.json
 - docs/evidence/T002/raw/**
+- docs/evidence/T002.md
+- .factory/external-evidence/T002.json
 stop_conditions:
 - 'Source-of-truth does not name any product name at all to check: stop the entire
   task, do not invent one.'
@@ -159,6 +179,9 @@ stop_conditions:
   out-of-scope path and recommending a separate controller-authorized task; do not
   attempt to patch the protected file from any T002 stage, and do not let this class
   of finding alone fail T002''s acceptance criteria.'
+- Protected sources conflict or do not support the intended behavior.
+- Required evidence, oracle independence, containment, or attribution cannot be established.
+- The work requires a credential, hidden gate, release authority, or unsandboxed access.
 security:
   network_default: allowlist
   allow_unsandboxed_commands: false
@@ -186,8 +209,8 @@ gates:
   stages: []
   required: true
 - name: research-evidence
-  command: bash scripts/gates/real_integration.sh T002 research-evidence
-  timeout_seconds: 120
+  command: uv run python scripts/gates/output_and_integration_gate.py T002 research-evidence
+  timeout_seconds: 900
   stages: []
   required: true
 private_gate:
@@ -208,6 +231,11 @@ pipeline:
   allowed_paths:
   - docs/research/T002_name_trademark_check.md
   - docs/evidence/T002/**
+  - docs/product/**
+  - docs/evidence/**
+  - SOURCE_PRECEDENCE.md
+  - CLAIM_REGISTRY.md
+  - .factory/external-evidence/T002.json
   forbidden_paths:
   - .claude/**
   - .factory/source-locks/**
@@ -233,6 +261,7 @@ pipeline:
   - config/context.yaml
   - config/github.yaml
   - config/risk_profiles.yaml
+  - docs/source-of-truth/**
   - scripts/gates/**
   allowed_domains:
   - uspto.gov
@@ -256,6 +285,36 @@ pipeline:
   - Every CLEAR finding's positive control is authoritative (it actually discriminates),
     and every attempted route's outcome — including reachable-but-non-authoritative
     routes — is documented with its specific blocking mechanism.
+  - 'Complete the exact protected-roadmap outcome: Recheck product name, package,
+    domain, and trademark surface'
+  - Add deterministic tests or machine-checkable evidence for every implemented normative
+    behavior.
+  - Write attributable raw evidence and truth states to .factory/external-evidence/T002.json.
+  - Do not treat UNKNOWN, SKIPPED, INFRASTRUCTURE_ERROR, INVALID_ORACLE, or EXTERNAL_VALIDATION_REQUIRED
+    as pass.
+  - Do not invent customer, upstream, benchmark, hardware, or production evidence.
+  - Preregister a version-2 query plan bound to this task and candidate.
+  - Cover every expected finding with fresh, attributable raw evidence.
+  - Bind controls to the same adapter, endpoint, and request shape as targets.
+  - Run every negative or error control declared by the query plan.
+  - Bind every conclusion to the exact candidate SHA, authoritative source, acceptance-criterion
+    ID, and independently inspectable evidence path or command.
+  - Classify authority gaps and unsupported conclusions as UNKNOWN or BLOCKED; confidence,
+    polish, file presence, and test count are never evidence by themselves.
+  - Assess correctness/truth, real user outcome, failure and recovery, security/privacy,
+    operability/support, adoption friction, and commercial truth; mark a dimension
+    not applicable only with a task-specific reason.
+  - Report exact limitations, residual risks, and the next falsifiable action without
+    claiming external adoption, payment, retention, or demand from synthetic or self-authored
+    evidence.
+  - Pre-register the decision, expected subject/finding IDs, claim boundaries, source
+    adapters/endpoints, query and request-shape fingerprints, freshness window, controls,
+    falsifiers, and per-verdict downstream actions before collecting evidence.
+  - Preserve sanitized raw request/response metadata, status, timestamp, tool/adapter
+    version, source class, candidate SHA, artifact hash, and reproduction method for
+    every target and control execution.
+  - Complete every expected finding and derive the overall conclusion mechanically;
+    research-process PASS is distinct from substantive CLEAR, CONFLICT, or UNKNOWN.
   context_keys:
   - executive_decision
   - product_strategy
@@ -288,7 +347,23 @@ pipeline:
   forbidden_paths:
   - '**'
   allowed_domains: []
-  acceptance_criteria: []
+  acceptance_criteria:
+  - Bind every conclusion to the exact candidate SHA, authoritative source, acceptance-criterion
+    ID, and independently inspectable evidence path or command.
+  - Classify authority gaps and unsupported conclusions as UNKNOWN or BLOCKED; confidence,
+    polish, file presence, and test count are never evidence by themselves.
+  - Assess correctness/truth, real user outcome, failure and recovery, security/privacy,
+    operability/support, adoption friction, and commercial truth; mark a dimension
+    not applicable only with a task-specific reason.
+  - Report exact limitations, residual risks, and the next falsifiable action without
+    claiming external adoption, payment, retention, or demand from synthetic or self-authored
+    evidence.
+  - Attempt executable false-green counterexamples for status laundering, omitted
+    subjects, circular oracles, weakened tests, mocks, corrupted evidence, malicious
+    inputs, resource exhaustion, and missing failure/recovery paths.
+  - Every blocking finding must name severity, exact path/symbol, failing command
+    or artifact, counterexample, affected criterion ID, and the authorized repair
+    owner.
   context_keys:
   - executive_decision
   - product_strategy
@@ -321,7 +396,22 @@ pipeline:
   forbidden_paths:
   - '**'
   allowed_domains: []
-  acceptance_criteria: []
+  acceptance_criteria:
+  - Bind every conclusion to the exact candidate SHA, authoritative source, acceptance-criterion
+    ID, and independently inspectable evidence path or command.
+  - Classify authority gaps and unsupported conclusions as UNKNOWN or BLOCKED; confidence,
+    polish, file presence, and test count are never evidence by themselves.
+  - Assess correctness/truth, real user outcome, failure and recovery, security/privacy,
+    operability/support, adoption friction, and commercial truth; mark a dimension
+    not applicable only with a task-specific reason.
+  - Report exact limitations, residual risks, and the next falsifiable action without
+    claiming external adoption, payment, retention, or demand from synthetic or self-authored
+    evidence.
+  - Produce an independent criterion-to-evidence matrix and recompute claims, hashes,
+    provenance, status arithmetic, gate identity, source authority, and candidate-SHA
+    binding.
+  - Sample or reproduce real boundaries and controls; a prior reviewer verdict is
+    evidence to challenge, never an oracle to copy.
   context_keys:
   - executive_decision
   - product_strategy
@@ -354,7 +444,23 @@ pipeline:
   forbidden_paths:
   - '**'
   allowed_domains: []
-  acceptance_criteria: []
+  acceptance_criteria:
+  - Bind every conclusion to the exact candidate SHA, authoritative source, acceptance-criterion
+    ID, and independently inspectable evidence path or command.
+  - Classify authority gaps and unsupported conclusions as UNKNOWN or BLOCKED; confidence,
+    polish, file presence, and test count are never evidence by themselves.
+  - Assess correctness/truth, real user outcome, failure and recovery, security/privacy,
+    operability/support, adoption friction, and commercial truth; mark a dimension
+    not applicable only with a task-specific reason.
+  - Report exact limitations, residual risks, and the next falsifiable action without
+    claiming external adoption, payment, retention, or demand from synthetic or self-authored
+    evidence.
+  - Verify the exact release SHA in a clean environment through install, onboarding/first
+    value, normal operation, diagnostics, failure recovery, upgrade, rollback, backup/restore,
+    and supported removal where applicable.
+  - Reconcile artifact hashes, deterministic/private/value gates, CI identity, user-visible
+    limitations, compatibility, security/privacy, support evidence, and every acceptance-criterion
+    ID before promotion.
   context_keys:
   - executive_decision
   - product_strategy

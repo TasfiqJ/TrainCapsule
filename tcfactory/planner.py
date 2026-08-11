@@ -28,6 +28,8 @@ from .models import (
     SecurityPolicy,
     Stage,
     TaskPacket,
+    ValueContract,
+    ValueGateMode,
 )
 from .pipeline import run_pipeline
 from .risk import apply_risk_profile, effective_risk, load_risk_profiles, planning_pipeline
@@ -67,7 +69,34 @@ def apply_controller_owned_catalog_minimums(
         (stage for stage in catalog_seed.pipeline if stage.role == RoleName.RESEARCH), None
     )
     if seed_research is None:
-        return packet
+        seed_gates = {gate.name: gate for gate in catalog_seed.gates}
+        gates = [seed_gates.get(gate.name, gate) for gate in packet.gates]
+        present = {gate.name for gate in gates}
+        gates.extend(gate for name, gate in seed_gates.items() if name not in present)
+        return packet.model_copy(
+            update={
+                "source_of_truth": list(
+                    dict.fromkeys([*packet.source_of_truth, *catalog_seed.source_of_truth])
+                ),
+                "non_goals": list(
+                    dict.fromkeys([*packet.non_goals, *catalog_seed.non_goals])
+                ),
+                "acceptance_criteria": list(
+                    dict.fromkeys(
+                        [*packet.acceptance_criteria, *catalog_seed.acceptance_criteria]
+                    )
+                ),
+                "outputs": list(dict.fromkeys([*packet.outputs, *catalog_seed.outputs])),
+                "stop_conditions": list(
+                    dict.fromkeys([*packet.stop_conditions, *catalog_seed.stop_conditions])
+                ),
+                "gates": gates,
+                "value_contract": catalog_seed.value_contract,
+                "context_keys": list(
+                    dict.fromkeys([*packet.context_keys, *catalog_seed.context_keys])
+                ),
+            }
+        )
 
     seed_gates = {gate.name: gate for gate in catalog_seed.gates}
     gates = [seed_gates.get(gate.name, gate) for gate in packet.gates]
@@ -143,6 +172,7 @@ def apply_controller_owned_catalog_minimums(
             "security": security,
             "gates": gates,
             "pipeline": pipeline,
+            "value_contract": catalog_seed.value_contract,
             "context_keys": list(
                 dict.fromkeys([*packet.context_keys, *catalog_seed.context_keys])
             ),
@@ -175,7 +205,7 @@ def planning_task_for(
     )
     packet = TaskPacket(
         task_id=planning_id,
-        title=f"Create and independently approve task packet {item.task_id}",
+        title=f"Compile executable outcome contract {item.task_id}",
         phase="Autonomous macro planning",
         goal=(
             f"Compile roadmap item {item.task_id} into one complete executable outcome contract. "
@@ -206,7 +236,8 @@ def planning_task_for(
         non_goals=[
             "Implementing product code",
             "Changing the master plan or deleting roadmap requirements",
-            "Approving the packet without independent review",
+            "Prescribing implementation files or architecture when the outcome contract "
+            "does not require it",
         ],
         acceptance_criteria=[
             f"The generated packet task_id is exactly {item.task_id}.",
@@ -218,10 +249,11 @@ def planning_task_for(
             "The specification includes an applicability matrix for correctness/truth, "
             "failure/recovery, security/privacy, performance, accessibility, operations/support, "
             "adoption friction, and commercial truth.",
-            "Allowed paths are narrow and factory authority paths are forbidden.",
+            "The Claude owner can change every affected product surface while controller, "
+            "source, credential, private-gate, and release authority stays forbidden.",
             "Every claimed output has a deterministic machine gate where feasible.",
-            "The packet uses fresh specification, implementation, adversarial, audit, and "
-            "release authority as appropriate.",
+            "The packet gives one Claude owner broad product authority and uses one independent "
+            "verifier when the risk is non-mechanical.",
             "Stop conditions preserve UNKNOWN instead of inventing missing semantic authority.",
         ],
         outputs=[proposal, spec],
@@ -243,14 +275,12 @@ def planning_task_for(
                 timeout_seconds=120,
                 stages=[
                     RoleName.PLANNER,
-                    RoleName.ADVERSARY,
-                    RoleName.AUDIT,
-                    RoleName.RELEASE,
                 ],
                 required=True,
             )
         ],
         private_gate=PrivateGate(required=False),
+        value_contract=ValueContract(required=False, mode=ValueGateMode.NOT_REQUIRED),
         pipeline=[
             stage.model_copy(update={"machine_gates": ["proposal-policy"]})
             for stage in planning_stages
@@ -265,11 +295,7 @@ def planning_task_for(
             enabled=True,
             max_cycles=planning_repairs,
             builder_models=["sonnet", "opus"],
-            restart_review_from=(
-                RoleName.ADVERSARY
-                if any(stage.role == RoleName.ADVERSARY for stage in planning_stages)
-                else RoleName.RELEASE
-            ),
+            restart_review_from=RoleName.PLANNER,
             mutating_role=RoleName.PLANNER,
         ),
         task_budget_usd=planning_budget,
@@ -304,20 +330,31 @@ def validate_product_task_packet(
     if not packet.security.fail_if_sandbox_unavailable:
         errors.append("fail_if_sandbox_unavailable must remain true")
     roles = {stage.role for stage in packet.pipeline}
-    if RoleName.RELEASE not in roles:
-        errors.append("pipeline must contain a release stage")
     if packet.risk_tier != RiskTier.MECHANICAL and RoleName.ADVERSARY not in roles:
-        errors.append("non-mechanical pipeline must contain an adversary stage")
-    if (
-        packet.risk_tier in {RiskTier.INTEGRATION, RiskTier.TRUST_CORE}
-        and RoleName.AUDIT not in roles
-    ):
-        errors.append("integration/trust pipeline must contain an audit stage")
-    if not roles.intersection(
-        {RoleName.BUILDER, RoleName.RESEARCH, RoleName.SPECIFICATION, RoleName.PLANNER}
-    ):
+        errors.append("non-mechanical pipeline must contain one independent verifier")
+    owners = [
+        stage
+        for stage in packet.pipeline
+        if stage.role
+        in {RoleName.BUILDER, RoleName.RESEARCH, RoleName.SPECIFICATION, RoleName.PLANNER}
+        and stage.read_only is not True
+    ]
+    if len(owners) != 1:
+        errors.append("pipeline must contain exactly one renewable Claude owner")
+    legacy_roles = roles.intersection(
+        {
+            RoleName.AUDIT,
+            RoleName.SECURITY,
+            RoleName.PERFORMANCE,
+            RoleName.RELEASE,
+            RoleName.VALUE_VALIDATOR,
+            RoleName.VALUE_ADVERSARY,
+        }
+    )
+    if legacy_roles:
         errors.append(
-            "pipeline must contain at least one mutating implementation/specification role"
+            "pipeline contains legacy serial review stages: "
+            + ", ".join(sorted(role.value for role in legacy_roles))
         )
     seed_research = (
         next(

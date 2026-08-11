@@ -1,5 +1,5 @@
 {
-  "version": 2,
+  "version": 3,
   "milestone": "commercialization-ready automatable TrainCapsule P0-P9 production product",
   "scope_statement": "Complete a production-quality, installable, usable, operable, supportable, and commercialization-ready product required by the final TrainCapsule source: Close, Qualify, and Exchange loops; both initial contract packs; explicit truth and assurance states; containment; reproducible evidence; supported CLI/API/viewer journeys; recovery; and independently auditable gates. Real adoption and payment remain separately attributable external truth and are never fabricated.",
   "required_paths": [
@@ -77,6 +77,56 @@
       "name": "secret scan",
       "command": "bash scripts/gates/secret_scan.sh",
       "timeout_seconds": 300
+    }
+  ],
+  "outcome_proofs": [
+    {
+      "id": "clean-install-first-value",
+      "command": "bash scripts/product_proof/clean_install_first_value.sh",
+      "timeout_seconds": 3600,
+      "evidence_globs": [".factory/gate-results/product-proof/clean-install-first-value/**/*"]
+    },
+    {
+      "id": "close-loop-real-boundary",
+      "command": "bash scripts/product_proof/close_loop.sh",
+      "timeout_seconds": 3600,
+      "evidence_globs": [".factory/gate-results/product-proof/close-loop/**/*"]
+    },
+    {
+      "id": "qualify-loop-false-green",
+      "command": "bash scripts/product_proof/qualify_loop.sh",
+      "timeout_seconds": 3600,
+      "evidence_globs": [".factory/gate-results/product-proof/qualify-loop/**/*"]
+    },
+    {
+      "id": "exchange-loop-policy-and-integrity",
+      "command": "bash scripts/product_proof/exchange_loop.sh",
+      "timeout_seconds": 3600,
+      "evidence_globs": [".factory/gate-results/product-proof/exchange-loop/**/*"]
+    },
+    {
+      "id": "diagnosis-failure-recovery",
+      "command": "bash scripts/product_proof/failure_recovery.sh",
+      "timeout_seconds": 3600,
+      "evidence_globs": [".factory/gate-results/product-proof/failure-recovery/**/*"]
+    },
+    {
+      "id": "upgrade-rollback-backup-restore",
+      "command": "bash scripts/product_proof/lifecycle.sh",
+      "timeout_seconds": 3600,
+      "evidence_globs": [".factory/gate-results/product-proof/lifecycle/**/*"]
+    },
+    {
+      "id": "representative-performance-resources",
+      "command": "bash scripts/product_proof/performance.sh",
+      "timeout_seconds": 3600,
+      "evidence_globs": [".factory/gate-results/product-proof/performance/**/*"]
+    },
+    {
+      "id": "pilot-instrumentation-and-support",
+      "command": "bash scripts/product_proof/pilot_readiness.sh",
+      "timeout_seconds": 3600,
+      "evidence_globs": [".factory/gate-results/product-proof/pilot-readiness/**/*"]
     }
   ],
   "capability_evidence_required": [

@@ -222,20 +222,51 @@ def evaluate_value_contract(
                 redesign_actions=["Rewrite the value contract before implementing the feature."],
             )
         else:
+            evidence = _load_evidence(repo_root, contract)
+            if evidence.task_id != task.task_id:
+                raise ValueGateError(
+                    f"Value evidence task_id={evidence.task_id!r} does not match "
+                    f"{task.task_id!r}"
+                )
+            _verify_measured_evidence(
+                repo_root=repo_root,
+                contract=contract,
+                evidence=evidence,
+            )
+            failed_conditions = [
+                name
+                for name in contract.required_conditions
+                if evidence.conditions.get(name) is not True
+            ]
+            capability_passed = evidence.passed is True and not failed_conditions
             assessment = ValueAssessment(
-                status=ValueStatus.PASS,
+                status=(ValueStatus.PASS if capability_passed else ValueStatus.REDESIGN),
                 summary=(
-                    "Foundational capability is tied to a predeclared sellable milestone. "
-                    "This is dependency evidence, not proof of customer demand."
+                    "Candidate-bound foundational capability evidence passed. This proves a "
+                    "technical dependency, not customer demand."
+                    if capability_passed
+                    else "Foundational capability evidence is missing or falsified."
                 ),
                 contract_mode=contract.mode,
                 primary_metric=contract.primary_metric,
-                evidence_classes=[ValueEvidenceClass.FOUNDATIONAL],
+                evidence_paths=[contract.evidence_path] if contract.evidence_path else [],
+                evidence_classes=evidence.evidence_classes,
+                falsification_attempts=list(evidence.falsification_results),
                 threshold=contract.minimum_material_improvement,
                 limitations=[
+                    *evidence.limitations,
+                    *[
+                        f"Required condition failed or missing: {name}"
+                        for name in failed_conditions
+                    ],
                     "Commercial willingness to pay remains unproven until external "
                     "revealed-preference evidence exists."
                 ],
+                redesign_actions=(
+                    []
+                    if capability_passed
+                    else ["Return the failed conditions and raw artifacts to the Claude owner."]
+                ),
                 commercially_validated=False,
             )
     elif contract.mode == ValueGateMode.MEASURED:

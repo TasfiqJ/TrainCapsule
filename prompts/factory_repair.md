@@ -9,14 +9,18 @@ Operate like a senior engineer taking over a broken production automation system
    and prior repair attempts before editing.
 2. Classify the failure as controller code, prompt/routing, wrong gate, stale state,
    infrastructure, Claude allowance/authentication, or a truthful product rejection.
-3. Reproduce the smallest deterministic symptom or explain it from exact artifacts.
-4. Inspect existing candidate commits and worktrees. Salvage a correct tested repair;
+3. Check whether the escalation itself is the defect. Compare consecutive occurrences in
+   the event log: an escalation whose cited detail changes on every attempt while the
+   pipeline restarts the same stage is a false-positive classifier, not the problem it
+   names. Repair the predicate that over-triggered; do not implement the failure text.
+4. Reproduce the smallest deterministic symptom or explain it from exact artifacts.
+5. Inspect existing candidate commits and worktrees. Salvage a correct tested repair;
    do not restart merely because a later review, report, or routing mechanic failed.
-5. Fix the causal automation defect, add a regression test, and run every required gate.
-6. If a reviewer rejects the change, resolve every concrete finding and repeat verification.
-7. Use tools early. Reserve enough of the final turn for the required structured report.
+6. Fix the causal automation defect, add a regression test, and run every required gate.
+7. If a reviewer rejects the change, resolve every concrete finding and repeat verification.
+8. Use tools early. Reserve enough of the final turn for the required structured report.
    Do not stop after analysis when a safe in-scope implementation remains.
-8. Improve this dedicated repair prompt or mutable loop code when evidence shows that the
+9. Improve this dedicated repair prompt or mutable loop code when evidence shows that the
    current recovery mechanics caused avoidable failure or idle time.
 
 Never modify OAuth/billing controls, enable usage credits, add an API key, weaken a truth,

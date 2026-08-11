@@ -86,7 +86,7 @@
     "T012": {
       "mode": "measured",
       "parent_milestone": "T012",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "attempted_case_value_record_roundtrip_success",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -150,7 +150,7 @@
     "T023": {
       "mode": "measured",
       "parent_milestone": "T023",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "clean_setup_digest_reproducibility_rate",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -266,7 +266,7 @@
     "T047": {
       "mode": "measured",
       "parent_milestone": "T047",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "hidden_boundary_fault_detection_with_zero_clean_blame",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -318,7 +318,7 @@
     "T055": {
       "mode": "measured",
       "parent_milestone": "T055",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "unsafe_perturbation_level_rejection_success",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -394,7 +394,7 @@
     "T069": {
       "mode": "measured",
       "parent_milestone": "T069",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "minimum_faithful_experiment_reproduction_success",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -466,7 +466,7 @@
     "T082": {
       "mode": "measured",
       "parent_milestone": "T082",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "clean_environment_artifact_replay_success",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -534,7 +534,7 @@
     "T094": {
       "mode": "measured",
       "parent_milestone": "T094",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "controlled_change_qualification_decision_accuracy",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -570,7 +570,7 @@
     "T098": {
       "mode": "measured",
       "parent_milestone": "T098",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "recovery_qualification_hidden_fault_detection_success",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -630,7 +630,7 @@
     "T108": {
       "mode": "measured",
       "parent_milestone": "T108",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "clean_machine_install_to_first_value_success",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -654,7 +654,7 @@
     "T109": {
       "mode": "measured",
       "parent_milestone": "T109",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "second_engineer_supported_workflow_success",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -682,7 +682,7 @@
     "T111": {
       "mode": "measured",
       "parent_milestone": "T111",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "truth_case_ledger_classification_accuracy",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -714,7 +714,7 @@
     "T114": {
       "mode": "measured",
       "parent_milestone": "T114",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "public_demo_supported_workflow_success",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -768,7 +768,7 @@
     "T120": {
       "mode": "measured",
       "parent_milestone": "T120",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "time_to_value_and_total_delivery_economics_measured",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -806,7 +806,7 @@
     "T122": {
       "mode": "measured",
       "parent_milestone": "T122",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "manual_hours_margin_and_reuse_materiality_demonstrated",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",
@@ -830,7 +830,7 @@
     "T123": {
       "mode": "measured",
       "parent_milestone": "T123",
-      "primary_metric": "all_predeclared_task_conditions_pass",
+      "primary_metric": "evidence_bound_productization_decision_issued",
       "metric_direction": "binary",
       "minimum_material_improvement": 1.0,
       "measurement_unit": "all conditions pass",

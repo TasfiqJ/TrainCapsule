@@ -1,4 +1,4 @@
-version: 9
+version: 10
 auth_mode: max_oauth_only
 allow_paid_usage: false
 repo_root: .
@@ -13,6 +13,7 @@ global_prompt: prompts/global.md
 monthly_budget_usd: 100.0
 require_clean_main: true
 sandbox_enabled: true
+execution_mode: claude_led_nodes
 work_until_done: true
 disable_subscription_task_budget: true
 disable_max_oauth_budget_caps: true

@@ -1,7 +1,7 @@
-version: 6
+version: 7
 principles:
-- Use the controller-owned task catalog before asking a model to plan.
-- Run deterministic gates before any model reviewer.
+- Compile every catalog seed with one Claude outcome owner, then run deterministic policy.
+- Run deterministic gates once after each mutation, before one independent verifier.
 - Sonnet performs routine production implementation, planning, and review.
 - Only Sonnet, Opus, and Fable are used; effort and model tier escalate with difficulty.
 - Opus is reserved for truth-critical specification, primary-source research, adversarial
@@ -9,7 +9,7 @@ principles:
 - Features have no artificial Max-subscription token or API-equivalent dollar ceiling.
   Work continues through renewable sessions with durable candidate commits and handoffs.
 - The controller may raise risk; no model may lower it.
-- Review depth follows the cost of a false green, not repository size.
+- Specialist review is verifier-selected and risk-driven, not a mandatory serial pipeline.
 - Fable is reserved for trust-core implementation that benefits from a long autonomous
   session; it falls back to Opus and then Sonnet when its included Max allowance is unavailable.
 - Model selection never substitutes for evidence; deterministic gates, independent review,
@@ -88,8 +88,7 @@ profiles:
         max_turns: 4
         max_budget_usd: 0.3
         task_budget_tokens: 6000
-    reviewers:
-    - release
+    reviewers: []
   standard:
     context_chars: 70000
     task_budget_usd: 12
@@ -163,7 +162,6 @@ profiles:
         task_budget_tokens: 16000
     reviewers:
     - adversary
-    - release
   integration:
     context_chars: 110000
     task_budget_usd: 24
@@ -237,8 +235,6 @@ profiles:
         task_budget_tokens: 28000
     reviewers:
     - adversary
-    - audit
-    - release
   trust_core:
     context_chars: 150000
     task_budget_usd: 34
@@ -313,5 +309,3 @@ profiles:
         task_budget_tokens: 36000
     reviewers:
     - adversary
-    - audit
-    - release

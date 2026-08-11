@@ -86,4 +86,23 @@ def contract_for_task(policy: ValuePolicy, task_id: str) -> ValueContract:
             continue
         merged[key] = value
     merged["required"] = entry.mode != ValueGateMode.NOT_REQUIRED
+    if entry.mode == ValueGateMode.FOUNDATIONAL and not merged.get("evidence_path"):
+        merged["evidence_path"] = f"docs/evidence/{task_id}/capability-value.json"
+    if entry.mode == ValueGateMode.MEASURED:
+        if merged.get("primary_metric") == "all_predeclared_task_conditions_pass":
+            raise ValuePolicyError(
+                f"Measured task {task_id} uses a tautological completion metric"
+            )
+        required_conditions = [
+            str(value) for value in cast(list[object], merged.get("required_conditions", []))
+        ]
+        required_conditions.append(f"{task_id.lower()}_primary_outcome_observed")
+        merged["required_conditions"] = list(dict.fromkeys(required_conditions))
+        falsifications = [
+            str(value) for value in cast(list[object], merged.get("falsification_criteria", []))
+        ]
+        falsifications.append(
+            f"{task_id} primary user outcome does not meet the predeclared metric"
+        )
+        merged["falsification_criteria"] = list(dict.fromkeys(falsifications))
     return ValueContract.model_validate(merged)

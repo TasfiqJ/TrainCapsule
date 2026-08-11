@@ -160,7 +160,7 @@ def test_turn_limited_review_with_fix_instructions_routes_directly_to_repair() -
     assert review_turn_retry_update(stage, result, _role_config(max_turns=10)) is None
 
 
-def test_reviewer_next_actions_reach_the_mutating_repair_context_first() -> None:
+def test_reviewer_advice_and_limitations_do_not_gain_repair_authority() -> None:
     result = _result(
         role=RoleName.ADVERSARY,
         report=AgentReport(
@@ -174,11 +174,7 @@ def test_reviewer_next_actions_reach_the_mutating_repair_context_first() -> None
 
     routed = findings_from_result(result)
 
-    assert routed == [
-        "The checker accepts a prohibited claim.",
-        "Reviewer-directed repair: Add the counterexample and remove the blanket exemption.",
-        "Known limitation: Only this boundary was mutated.",
-    ]
+    assert routed == ["The checker accepts a prohibited claim."]
 
 
 def test_unknown_review_truncated_before_gates_retries_same_role() -> None:

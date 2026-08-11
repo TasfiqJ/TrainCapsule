@@ -88,12 +88,10 @@ def test_objective_pipeline_rejects_review_before_mutation_and_nonfinal_release(
     assert any("cannot run after independent review" in error for error in errors)
 
 
-def test_measured_pipeline_requires_independent_value_reviews_in_order() -> None:
+def test_measured_pipeline_uses_deterministic_value_gate_not_serial_value_models() -> None:
     packet = _packet(
         _stage(RoleName.BUILDER, read_only=False),
         _stage(RoleName.ADVERSARY, read_only=True),
-        _stage(RoleName.AUDIT, read_only=True),
-        _stage(RoleName.RELEASE, read_only=True),
     ).model_copy(
         update={
             "value_contract": ValueContract(
@@ -111,17 +109,13 @@ def test_measured_pipeline_requires_independent_value_reviews_in_order() -> None
             )
         }
     )
-    errors = objective_pipeline_errors(packet)
-    assert any("value_adversary" in error and "value_validator" in error for error in errors)
+    assert objective_pipeline_errors(packet) == []
 
 
 def test_valid_integration_pipeline_satisfies_objective_order() -> None:
     packet = _packet(
-        _stage(RoleName.SPECIFICATION, read_only=False),
         _stage(RoleName.BUILDER, read_only=False),
         _stage(RoleName.ADVERSARY, read_only=True),
-        _stage(RoleName.AUDIT, read_only=True),
-        _stage(RoleName.RELEASE, read_only=True),
     )
     assert objective_pipeline_errors(packet) == []
 

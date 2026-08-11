@@ -1,8 +1,10 @@
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import os
 import re
+from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -116,6 +118,10 @@ STRUCTURED_OUTPUT_FAULT_MARKERS = (
 FACTORY_REPAIR_SCOPE_MARKER = "factory_repair_required"
 FINDING_PATH_RE = re.compile(
     r"(?<![A-Za-z0-9_.-])((?:[A-Za-z0-9_.()\-]+/)+[A-Za-z0-9_.()\-]+)"
+)
+NON_BLOCKING_FINDING_RE = re.compile(
+    r"^\W*(?:non[\s_-]?blocking|verified[\s_-]sound|advisory|informational|observation|nit)\b",
+    re.IGNORECASE,
 )
 
 
@@ -377,7 +383,7 @@ def repository_finding_paths(repo_root: Path, findings: list[str]) -> list[str]:
     paths: set[str] = set()
     for finding in findings:
         for raw in FINDING_PATH_RE.findall(finding):
-            normalized = raw.replace("\\", "/").rstrip(".,;:!?)]}")
+            normalized = raw.replace("\\", "/").strip("(").rstrip(".,;:!?)]}")
             while normalized.startswith("./"):
                 normalized = normalized[2:]
             relative = Path(normalized)
@@ -415,6 +421,41 @@ def controller_owned_finding_paths(paths: list[str]) -> list[str]:
     )
 
 
+def repair_demand_findings(findings: list[str]) -> list[str]:
+    """Keep only findings that demand a change, without dropping a failing review."""
+
+    demands = [finding for finding in findings if not NON_BLOCKING_FINDING_RE.match(finding)]
+    return demands or list(findings)
+
+
+def review_failure_fingerprint(
+    *, role: RoleName, candidate_sha: str, findings: list[str]
+) -> str:
+    """Identify a verifier counterexample that made no candidate progress."""
+
+    normalized = [" ".join(value.lower().split()) for value in findings]
+    payload = "\n".join([role.value, candidate_sha, *sorted(normalized)])
+    return hashlib.sha256(payload.encode("utf-8")).hexdigest()
+
+
+def _stage_may_write(stage: Stage, path: str) -> bool:
+    return _policy_path_matches(path, stage.allowed_paths) and not _policy_path_matches(
+        path, stage.forbidden_paths
+    )
+
+
+def stage_repairable_finding_paths(
+    *, repo_root: Path, stage: Stage, findings: list[str]
+) -> list[str]:
+    """Return cited paths this writable stage is authorized to change."""
+
+    return sorted(
+        path
+        for path in repository_finding_paths(repo_root, findings)
+        if _stage_may_write(stage, path)
+    )
+
+
 def find_mutating_stage_for_findings(
     *, repo_root: Path, task: TaskPacket, findings: list[str]
 ) -> tuple[Stage, list[str]]:
@@ -435,20 +476,53 @@ def find_mutating_stage_for_findings(
     ]
     candidates = candidates or [fallback]
     coverage = [
-        (
-            stage,
-            {
-                path
-                for path in paths
-                if _policy_path_matches(path, stage.allowed_paths)
-                and not _policy_path_matches(path, stage.forbidden_paths)
-            },
-        )
+        (stage, {path for path in paths if _stage_may_write(stage, path)})
         for stage in candidates
     ]
     best_stage, covered = max(coverage, key=lambda item: len(item[1]))
     gaps = sorted(set(paths) - covered)
     return best_stage, gaps
+
+
+@dataclass(frozen=True)
+class RepairRouting:
+    """Controller routing for an independent review's actual repair demands."""
+
+    stage: Stage
+    demands: list[str]
+    repairable_paths: list[str]
+    scope_gaps: list[str]
+
+    @property
+    def blocked_by_scope(self) -> bool:
+        return bool(self.scope_gaps) and not self.repairable_paths
+
+    @property
+    def controller_owned_gaps(self) -> list[str]:
+        return controller_owned_finding_paths(self.scope_gaps)
+
+
+def route_repair_findings(
+    *, repo_root: Path, task: TaskPacket, findings: list[str]
+) -> RepairRouting:
+    """Route only blocking repair demands, retaining advisory scope citations as evidence."""
+
+    demands = repair_demand_findings(findings)
+    stage, scope_gaps = find_mutating_stage_for_findings(
+        repo_root=repo_root,
+        task=task,
+        findings=demands,
+    )
+    return RepairRouting(
+        stage=stage,
+        demands=demands,
+        repairable_paths=stage_repairable_finding_paths(
+            repo_root=repo_root,
+            stage=stage,
+            findings=demands,
+        ),
+        scope_gaps=scope_gaps,
+    )
 
 
 def cumulative_scope_gaps(task: TaskPacket, changed: list[str]) -> list[str]:
@@ -505,11 +579,31 @@ def _find_stage_index(task: TaskPacket, role: RoleName) -> int:
 def findings_from_result(result: StageResult) -> list[str]:
     findings: list[str] = []
     if result.report:
-        findings.extend(result.report.findings)
-        findings.extend(
-            f"Reviewer-directed repair: {action}" for action in result.report.next_actions
-        )
-        findings.extend(f"Known limitation: {item}" for item in result.report.limitations)
+        blocking = [item for item in result.report.review_findings if item.blocking]
+        if blocking:
+            for item in blocking:
+                parts = [
+                    f"{item.severity.upper()} BLOCKING: {item.summary}",
+                    f"Owner: {item.owner_class}",
+                ]
+                if item.criterion_id:
+                    parts.append(f"Criterion: {item.criterion_id}")
+                if item.repair_paths:
+                    parts.append("Repair paths: " + ", ".join(item.repair_paths))
+                if item.counterexample:
+                    parts.append("Counterexample: " + item.counterexample)
+                if item.failing_evidence:
+                    parts.append("Evidence: " + "; ".join(item.failing_evidence))
+                findings.append(". ".join(parts))
+        elif result.report.review_findings:
+            findings.append(
+                "Independent review returned a non-pass verdict without a blocking "
+                "structured finding; repeat verification rather than routing advisory text."
+            )
+        else:
+            # Compatibility for durable reports created before structured findings existed.
+            # Next actions and limitations are evidence, never implicit repair authority.
+            findings.extend(repair_demand_findings(result.report.findings))
     if result.error:
         findings.append(result.error)
     for gate in result.gate_results:
@@ -990,11 +1084,6 @@ async def _execute_stage(
 
     result.base_sha = base_sha
     read_only = role_config.read_only if stage.read_only is None else stage.read_only
-    require_changes = (
-        _role_requires_changes(stage.role)
-        if stage.require_changes is None
-        else stage.require_changes
-    )
     changed = changed_files(worktree.path, base_sha)
     result.changed_files = changed
     path_policy_valid = True
@@ -1005,10 +1094,9 @@ async def _execute_stage(
             forbidden=stage.forbidden_paths,
             read_only=read_only,
         )
-        if require_changes and result.verdict == Verdict.PASS and not changed:
-            raise PathPolicyError(
-                f"Stage {stage.role.value} declared PASS but produced no repository change."
-            )
+        # A renewable owner may inherit a candidate that already satisfies the objective.
+        # Requiring a cosmetic diff created deliberate churn and rejected valid recovered
+        # work. Deterministic gates, not file motion, decide whether a no-diff PASS is true.
     except PathPolicyError as exc:
         path_policy_valid = False
         result.verdict = Verdict.FAIL
@@ -1565,6 +1653,24 @@ async def run_pipeline(
                     )
                 )
 
+            if stage.role in review_roles:
+                fingerprint = review_failure_fingerprint(
+                    role=stage.role,
+                    candidate_sha=candidate_sha,
+                    findings=findings,
+                )
+                repeat_count = checkpoint.review_fingerprints.get(fingerprint, 0) + 1
+                checkpoint.review_fingerprints[fingerprint] = repeat_count
+                checkpoint_store.save(checkpoint)
+                if repeat_count >= 3:
+                    raise PipelineFailure(
+                        f"{FACTORY_REPAIR_SCOPE_MARKER}: Independent verifier "
+                        f"{stage.role.value} repeated the same counterexample three times "
+                        f"against unchanged candidate {candidate_sha[:12]}. Preserve the "
+                        "candidate and repair verifier/routing no-progress behavior instead "
+                        "of consuming another task revision."
+                    )
+
             if (
                 stage.role in review_roles
                 and task.repair.enabled
@@ -1573,13 +1679,15 @@ async def run_pipeline(
                     or checkpoint.repair_cycles < task.repair.max_cycles
                 )
             ):
-                mutating, scope_gaps = find_mutating_stage_for_findings(
+                routing = route_repair_findings(
                     repo_root=repo_root,
                     task=task,
                     findings=findings,
                 )
-                if scope_gaps:
-                    controller_gaps = controller_owned_finding_paths(scope_gaps)
+                mutating = routing.stage
+                scope_gaps = routing.scope_gaps
+                if routing.blocked_by_scope:
+                    controller_gaps = routing.controller_owned_gaps
                     if controller_gaps:
                         detail = (
                             f"{FACTORY_REPAIR_SCOPE_MARKER}: Reviewer {stage.role.value} "
@@ -1615,6 +1723,26 @@ async def run_pipeline(
                         detail=detail,
                     )
                     raise PipelineFailure(detail)
+                if routing.controller_owned_gaps:
+                    append_event(
+                        config.resolve(repo_root, config.event_log_path),
+                        event="repair_scope_citation_retained",
+                        component="pipeline",
+                        task_id=task.task_id,
+                        run_id=run_id,
+                        role=stage.role.value,
+                        detail=(
+                            f"Reviewer {stage.role.value} cited controller-owned paths "
+                            f"{', '.join(routing.controller_owned_gaps)} as evidence while "
+                            f"{mutating.role.value} remains authorized to repair "
+                            f"{', '.join(routing.repairable_paths)}; repairing in scope."
+                        ),
+                        data={
+                            "controller_owned_gaps": routing.controller_owned_gaps,
+                            "repairable_paths": routing.repairable_paths,
+                            "repair_role": mutating.role.value,
+                        },
+                    )
                 repair_findings = list(findings)
                 repaired = False
                 # Stays None if no repair cycle ran, so the terminal message falls back

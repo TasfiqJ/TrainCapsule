@@ -12,7 +12,6 @@ from .models import (
     RoleName,
     Stage,
     TaskPacket,
-    ValueGateMode,
 )
 from .stage_policy import apply_objective_stage_contracts
 from .yamlutil import load_yaml
@@ -27,21 +26,6 @@ _RANK = {
     RiskTier.TRUST_CORE: 3,
 }
 
-_SECURITY_WORDS = {
-    "security",
-    "sandbox",
-    "credential",
-    "secret",
-    "auth",
-    "oauth",
-    "containment",
-    "sanitization",
-    "air-gapped",
-    "private",
-    "supply-chain",
-    "signature",
-}
-_PERFORMANCE_WORDS = {"performance", "benchmark", "latency", "throughput", "load test"}
 _INTEGRATION_WORDS = {
     "adapter",
     "integration",
@@ -112,23 +96,12 @@ def _role_override(profile: dict[str, Any], role: RoleName) -> dict[str, Any]:
     return deepcopy(typed_value)
 
 
-def _needs_security(item: FeatureItem, packet: TaskPacket) -> bool:
-    text = " ".join([item.outcome, item.lead_role, packet.title, packet.goal]).lower()
-    return any(word in text for word in _SECURITY_WORDS)
-
-
-def _needs_performance(item: FeatureItem, packet: TaskPacket) -> bool:
-    text = " ".join([item.outcome, item.lead_role, packet.title, packet.goal]).lower()
-    return any(word in text for word in _PERFORMANCE_WORDS)
-
-
 def _mutating_stages(packet: TaskPacket, tier: RiskTier) -> list[Stage]:
-    """Select the minimum useful write stages for the task risk.
+    """Select one Claude owner for plan/research/build decisions.
 
-    The controller-owned catalog already provides the task contract. Ordinary work therefore
-    needs one implementation/research session. Integration and trust work may retain one
-    independent specification session before the implementation session. Research-only trust
-    tasks may retain specification plus research. The sequence is capped at two write stages.
+    Separate specification and implementation owners fragmented context and made the
+    controller decide architecture.  The owner may still delegate specialists with Claude
+    Code's Agent tool, but the pipeline keeps one renewable mutating context.
     """
 
     proposed = [
@@ -143,26 +116,18 @@ def _mutating_stages(packet: TaskPacket, tier: RiskTier) -> list[Stage]:
 
     builders = [stage for stage in proposed if stage.role == RoleName.BUILDER]
     researchers = [stage for stage in proposed if stage.role == RoleName.RESEARCH]
-    specifications = [stage for stage in proposed if stage.role == RoleName.SPECIFICATION]
-
-    if tier == RiskTier.MECHANICAL:
-        return [builders[-1] if builders else researchers[-1] if researchers else proposed[-1]]
-
-    if builders:
-        selected: list[Stage] = []
-        if tier in {RiskTier.INTEGRATION, RiskTier.TRUST_CORE} and specifications:
-            selected.append(specifications[0])
-        elif tier == RiskTier.TRUST_CORE and researchers:
-            selected.append(researchers[0])
-        selected.append(builders[-1])
-        return selected[:2]
-
-    if researchers:
-        if tier == RiskTier.TRUST_CORE and specifications:
-            return [specifications[0], researchers[-1]]
-        return [researchers[-1]]
-
-    return [specifications[0] if specifications else proposed[-1]]
+    owner = builders[-1] if builders else researchers[-1] if researchers else proposed[-1]
+    return [
+        owner.model_copy(
+            update={
+                # Normal Claude Code can inspect and update every affected product surface.
+                # Deterministic forbidden paths still protect controller/truth/credential
+                # authority, while the task outputs describe evidence rather than a file cage.
+                "allowed_paths": ["**"],
+                "require_changes": False,
+            }
+        )
+    ]
 
 
 def required_task_budget_tokens(context_chars: int) -> int:
@@ -274,35 +239,11 @@ def planning_pipeline(
         profile,
         context_chars,
     )
-    stages = [planner]
-    # Planning packets are executable contracts, so their review depth must match the
-    # objective policy enforced by run_pipeline. Mechanical planning keeps the inexpensive
-    # planner/release pair; higher-risk contracts receive independent adversarial review,
-    # and integration/trust contracts also receive a separate audit.
-    if tier != RiskTier.MECHANICAL:
-        stages.append(
-            _apply_stage_profile(
-                Stage(role=RoleName.ADVERSARY, read_only=True, forbidden_paths=["**"]),
-                profile,
-                context_chars,
-            )
-        )
-    if tier in {RiskTier.INTEGRATION, RiskTier.TRUST_CORE}:
-        stages.append(
-            _apply_stage_profile(
-                Stage(role=RoleName.AUDIT, read_only=True, forbidden_paths=["**"]),
-                profile,
-                context_chars,
-            )
-        )
-    stages.append(
-        _apply_stage_profile(
-            Stage(role=RoleName.RELEASE, read_only=True, forbidden_paths=["**"]),
-            profile,
-            context_chars,
-        )
-    )
-    return stages, float(profile["task_budget_usd"]), int(profile["repair_cycles"])
+    planner = with_working_token_reserve(planner, work_until_done=True)
+    # Proposal policy is a deterministic exit check. Four model sessions here previously
+    # reviewed the same two files and repeatedly turned controller observations into task
+    # revisions. The planner now owns the living outcome contract and repairs it directly.
+    return [planner], float(profile["task_budget_usd"]), int(profile["repair_cycles"])
 
 
 def _private_gate_for(item: FeatureItem, packet: TaskPacket, tier: RiskTier) -> PrivateGate:
@@ -344,40 +285,43 @@ def apply_risk_profile(
     for proposed in _mutating_stages(packet, tier):
         if proposed.read_only:
             proposed = proposed.model_copy(update={"read_only": False})
-        mutating_stages.append(_apply_stage_profile(proposed, profile, context_chars))
+        mutating_stages.append(
+            with_working_token_reserve(
+                _apply_stage_profile(proposed, profile, context_chars),
+                work_until_done=True,
+            )
+        )
 
-    stages: list[Stage] = list(mutating_stages)
-    reviewers = list(profile.get("reviewers", []))
-    if _needs_security(item, packet) and "security" not in reviewers:
-        reviewers.insert(-1 if reviewers else 0, "security")
-    if _needs_performance(item, packet) and "performance" not in reviewers:
-        reviewers.insert(-1 if reviewers else 0, "performance")
-
-    # Measured milestones receive two explicit commercial-materiality reviews. They run
-    # only on the small set of predeclared milestone tasks; ordinary feature work relies
-    # on the deterministic value contract and avoids this extra model cost. The release
-    # reviewer remains last so it sees the technical and value-adversarial verdicts.
-    if packet.value_contract.mode == ValueGateMode.MEASURED:
-        release_positions = [index for index, name in enumerate(reviewers) if name == "release"]
-        insert_at = release_positions[0] if release_positions else len(reviewers)
-        reviewers[insert_at:insert_at] = ["value_validator", "value_adversary"]
-
-    for name in reviewers:
-        role = RoleName(name)
+    owner = mutating_stages[-1]
+    stages: list[Stage] = [owner]
+    # One blind verifier challenges every non-mechanical product candidate. Security,
+    # performance, integration, value and release applicability are dimensions of this
+    # proof node, not mandatory serial model sessions. Deterministic/private/value/CI gates
+    # remain separate release authority.
+    if tier != RiskTier.MECHANICAL:
         stages.append(
-            _apply_stage_profile(
+            with_working_token_reserve(
+                _apply_stage_profile(
                 Stage(
-                    role=role,
+                    role=RoleName.ADVERSARY,
                     read_only=True,
                     require_changes=False,
                     forbidden_paths=["**"],
-                    machine_gates=[gate.name for gate in packet.gates],
+                    machine_gates=[],
                     context_keys=item.context_keys,
                 ),
-                profile,
-                context_chars,
+                    profile,
+                    context_chars,
+                ),
+                work_until_done=True,
             )
         )
+
+    # Machine gates run after mutations, not again after every read-only opinion. A repair
+    # uses the same owner role and therefore reruns the exact gates on the changed candidate.
+    owner_gates = [
+        gate.model_copy(update={"stages": [owner.role]}) for gate in packet.gates
+    ]
 
     protected_output = any(
         value.startswith(("src/", "tests/", "profiles/", "corpus/", "contracts/"))
@@ -414,6 +358,7 @@ def apply_risk_profile(
             "commit_type": item.commit_type,
             "github_push": True,
             "pipeline": stages,
+            "gates": owner_gates,
             "private_gate": _private_gate_for(
                 item, packet.model_copy(update={"private_gate": private_gate}), tier
             ),
@@ -421,11 +366,7 @@ def apply_risk_profile(
                 enabled=True,
                 max_cycles=int(profile["repair_cycles"]),
                 builder_models=repair_models,
-                restart_review_from=(
-                    RoleName.ADVERSARY
-                    if any(stage.role == RoleName.ADVERSARY for stage in stages)
-                    else RoleName.RELEASE
-                ),
+                restart_review_from=(RoleName.ADVERSARY if len(stages) > 1 else owner.role),
                 mutating_role=mutating_stages[-1].role,
             ),
             "task_budget_usd": float(profile["task_budget_usd"]),

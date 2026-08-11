@@ -17,8 +17,6 @@ from tcfactory.models import (
 from tcfactory.pipeline import run_pipeline
 from tcfactory.planner import planning_task_for
 from tcfactory.risk import (
-    CONTEXT_CHARS_PER_TOKEN,
-    MIN_STAGE_WORK_TOKENS,
     apply_risk_profile,
     effective_risk,
     load_risk_profiles,
@@ -70,7 +68,6 @@ def test_standard_pipeline_uses_sonnet_for_every_stage() -> None:
     assert [stage.role for stage in packet.pipeline] == [
         RoleName.BUILDER,
         RoleName.ADVERSARY,
-        RoleName.RELEASE,
     ]
     assert all(stage.model == "sonnet" for stage in packet.pipeline)
     assert packet.private_gate.required is False
@@ -90,7 +87,7 @@ def test_integration_pipeline_reserves_opus_for_spec_and_adversary() -> None:
     models = {stage.role: stage.model for stage in packet.pipeline}
     assert models[RoleName.BUILDER] == "sonnet"
     assert models[RoleName.ADVERSARY] == "opus"
-    assert models[RoleName.AUDIT] == "sonnet"
+    assert set(models) == {RoleName.BUILDER, RoleName.ADVERSARY}
     assert packet.private_gate.required is True
     assert packet.remote_ci_required is True
 
@@ -117,7 +114,7 @@ def test_mechanical_planning_omits_expensive_adversary() -> None:
         risk_tier=RiskTier.MECHANICAL,
     )
     stages, _, _ = planning_pipeline(item, profiles)
-    assert [stage.role for stage in stages] == [RoleName.PLANNER, RoleName.RELEASE]
+    assert [stage.role for stage in stages] == [RoleName.PLANNER]
     assert all(stage.model == "sonnet" for stage in stages)
 
 
@@ -135,8 +132,7 @@ def test_every_planning_risk_tier_satisfies_runtime_objective_policy() -> None:
         assert objective_pipeline_errors(packet) == []
 
 
-def test_every_profile_reserves_working_tokens_after_maximum_context() -> None:
-    """A context payload must not consume the role's entire task-token allowance."""
+def test_every_planning_profile_is_renewable_without_a_feature_token_cap() -> None:
     profiles = load_risk_profiles(ROOT / "config/risk_profiles.yaml")
     for tier in RiskTier:
         item = FeatureItem(
@@ -149,11 +145,9 @@ def test_every_profile_reserves_working_tokens_after_maximum_context() -> None:
         stages, _, _ = planning_pipeline(item, profiles)
         for stage in stages:
             assert stage.max_context_chars is not None
-            assert stage.task_budget_tokens is not None
-            context_tokens = (
-                stage.max_context_chars + CONTEXT_CHARS_PER_TOKEN - 1
-            ) // CONTEXT_CHARS_PER_TOKEN
-            assert stage.task_budget_tokens >= context_tokens + MIN_STAGE_WORK_TOKENS
+            assert stage.task_budget_tokens is None
+            assert stage.max_budget_usd is None
+            assert stage.max_turns == 200
 
 
 def test_t002_release_retains_working_reserve_before_renewable_runtime_policy() -> None:
@@ -190,7 +184,7 @@ def test_pipeline_applies_runtime_working_token_reserve_before_stage_execution()
     assert "work_until_done=config.work_until_done" in source
 
 
-def test_integration_keeps_independent_specification_before_builder() -> None:
+def test_integration_collapses_specification_into_one_broad_product_owner() -> None:
     profiles = load_risk_profiles(ROOT / "config/risk_profiles.yaml")
     packet = _packet().model_copy(
         update={
@@ -220,10 +214,11 @@ def test_integration_keeps_independent_specification_before_builder() -> None:
         context_keys=["runtime_adapters"],
     )
     routed = apply_risk_profile(packet, item, profiles)
-    assert [stage.role for stage in routed.pipeline[:2]] == [
-        RoleName.SPECIFICATION,
+    assert [stage.role for stage in routed.pipeline] == [
         RoleName.BUILDER,
+        RoleName.ADVERSARY,
     ]
-    assert routed.pipeline[0].model == "opus"
-    assert routed.pipeline[1].model == "sonnet"
+    assert routed.pipeline[0].allowed_paths == ["**"]
+    assert routed.pipeline[0].require_changes is False
+    assert routed.pipeline[0].model == "sonnet"
     assert routed.repair.mutating_role == RoleName.BUILDER

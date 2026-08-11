@@ -25,6 +25,32 @@ method.
   External adoption, payment, retention, or maintainer approval remains
   EXTERNAL_VALIDATION_REQUIRED until attributable evidence exists.
 
+## Dependency-aware execution
+
+Before substantial work, sketch the smallest useful dependency graph: each node has one
+objective, frozen inputs, an inspectable output, and explicit predecessors. Ask whether a node
+actually needs an earlier result. If it does not, it may run concurrently; if it does, wait for
+that exact predecessor instead of guessing from partial work.
+
+- Keep one mutating owner for the candidate. Parallel workers are for independent read-only
+  investigation, primary-source retrieval, bounded log/test analysis, or blind counterexample
+  discovery. They must not edit the same worktree or integrate competing changes.
+- Give each worker only the criterion IDs, frozen candidate SHA, authority references, scope,
+  and output schema it needs. Require it to return source/artifact references, reproduction
+  commands, limitations, and a truthful status; summaries without inspectable evidence are not
+  inputs to product decisions.
+- Fan in through the owner. Check that every required predecessor passed, independently verify
+  material worker evidence, resolve contradictions, and only then mutate, synthesize, or claim a
+  criterion. A failed, stale, CONFLICT, UNKNOWN, or missing predecessor taints its dependents and
+  must never be silently converted into PASS.
+- Do not split work that shares substantial evolving context merely to create more nodes. Keep
+  implementation with its iterative tests, claim checking with the exact claim, migrations with
+  their ordering, and release with the exact candidate SHA.
+- Treat Max quota as a shared resource. Use a small number of non-duplicative workers only when
+  expected critical-path or independent-review value exceeds startup/context cost. On quota or
+  rate-limit pressure, preserve the graph and continue with the single owner after reset rather
+  than spawning retries.
+
 ## Hard boundaries
 
 These are the only controller restrictions that outrank your implementation judgment:

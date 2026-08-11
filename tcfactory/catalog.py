@@ -165,6 +165,9 @@ def _initial_pipeline(
                 acceptance_criteria=[
                     *entry.acceptance_criteria,
                     "Preregister a version-2 query plan bound to this task and candidate.",
+                    "Declare an acyclic depends_on graph for every query; fan out only "
+                    "independent read-only retrieval and wait for predecessors before dependent "
+                    "queries or synthesis.",
                     "Cover every expected finding with fresh, attributable raw evidence.",
                     "Bind controls to the same adapter, endpoint, and request shape as targets.",
                     "Run every negative or error control declared by the query plan.",

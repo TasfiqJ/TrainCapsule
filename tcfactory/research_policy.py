@@ -77,9 +77,7 @@ def validate_verdict_consistency(record: str) -> list[str]:
     else:
         expected = "clear"
     if verdict != expected:
-        return [
-            f"overall verdict {verdict!r} contradicts itemized findings; expected {expected!r}"
-        ]
+        return [f"overall verdict {verdict!r} contradicts itemized findings; expected {expected!r}"]
     return []
 
 
@@ -365,6 +363,7 @@ def _validate_v2_manifest(
         return [*errors, "research query plan must contain expected findings"]
 
     planned_queries: dict[str, dict[str, Any]] = {}
+    query_dependencies: dict[str, list[str]] = {}
     finding_queries: dict[str, list[str]] = {}
     for finding_index, raw_finding in enumerate(cast(list[object], raw_findings), start=1):
         if not isinstance(raw_finding, dict):
@@ -398,6 +397,23 @@ def _validate_v2_manifest(
             if not query_id or query_id in planned_queries:
                 errors.append(f"duplicate or empty research query_id: {query_id!r}")
                 continue
+            raw_dependencies = query.get("depends_on")
+            dependencies: list[str] = []
+            if "depends_on" not in query:
+                errors.append(f"query-plan query {query_id} must declare depends_on")
+            elif not isinstance(raw_dependencies, list):
+                errors.append(f"query-plan query {query_id} depends_on must be a list")
+            else:
+                for raw_dependency in cast(list[object], raw_dependencies):
+                    dependency = str(raw_dependency).strip()
+                    if not dependency:
+                        errors.append(f"query-plan query {query_id} has an empty dependency")
+                    elif dependency in dependencies:
+                        errors.append(
+                            f"query-plan query {query_id} repeats dependency {dependency!r}"
+                        )
+                    else:
+                        dependencies.append(dependency)
             required_controls_value = query.get("required_controls", [])
             required_controls: set[str] = (
                 {str(value) for value in cast(list[object], required_controls_value)}
@@ -432,8 +448,46 @@ def _validate_v2_manifest(
             normalized = dict(query)
             normalized["finding_id"] = finding_id
             normalized["required_controls"] = required_controls
+            normalized["depends_on"] = dependencies
             planned_queries[query_id] = normalized
+            query_dependencies[query_id] = dependencies
             finding_queries[finding_id].append(query_id)
+
+    for query_id, dependencies in query_dependencies.items():
+        for dependency in dependencies:
+            if dependency == query_id:
+                errors.append(f"query-plan query {query_id} cannot depend on itself")
+            elif dependency not in planned_queries:
+                errors.append(
+                    f"query-plan query {query_id} depends on unknown query {dependency!r}"
+                )
+
+    # Kahn's algorithm makes the controller, not model prose, decide whether the declared
+    # research schedule is executable. Unknown and self dependencies were already attributed
+    # above; omit them here so they do not create a second misleading cycle finding.
+    unresolved: dict[str, set[str]] = {
+        query_id: {
+            dependency
+            for dependency in dependencies
+            if dependency in planned_queries and dependency != query_id
+        }
+        for query_id, dependencies in query_dependencies.items()
+    }
+    while unresolved:
+        ready = sorted(
+            query_id for query_id, dependencies in unresolved.items() if not dependencies
+        )
+        if not ready:
+            errors.append(
+                "research query dependency graph contains a cycle: " + ", ".join(sorted(unresolved))
+            )
+            break
+        ready_set = set(ready)
+        next_unresolved: dict[str, set[str]] = {}
+        for query_id, remaining_dependencies in unresolved.items():
+            if query_id not in ready_set:
+                next_unresolved[query_id] = remaining_dependencies - ready_set
+        unresolved = next_unresolved
 
     expected_findings = set(finding_queries)
     observed_findings = set(labels)

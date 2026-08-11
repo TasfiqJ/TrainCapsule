@@ -13,3 +13,6 @@ def test_python_quality_gates_use_the_pinned_shared_environment() -> None:
         assert '"$UV_BIN" run --active --no-sync ruff check .' in script
         assert '"$UV_BIN" run --active --no-sync pyright' in script
         assert '"$UV_BIN" run --active --no-sync python -m pytest -q' in script
+        assert "jq " not in script
+        assert '"$SHARED_VENV/bin/python" - "$1"' in script
+        assert "except (OSError, json.JSONDecodeError)" in script

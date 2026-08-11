@@ -71,6 +71,7 @@ def _write_v2_bundle(
                         "endpoint": endpoint,
                         "request_shape": "exact-term-json",
                         "freshness_days": 30,
+                        "depends_on": [],
                         "required_controls": required_controls or ["negative_control"],
                     }
                 ],
@@ -263,6 +264,72 @@ def test_v2_manifest_is_generic_and_bound_to_preregistered_query_plan(
     )
 
     assert errors == []
+
+
+def test_v2_query_plan_requires_an_acyclic_dependency_graph(tmp_path: Path) -> None:
+    manifest_path, plan_path, manifest, plan = _write_v2_bundle(tmp_path)
+    finding = cast(list[dict[str, Any]], plan["findings"])[0]
+    primary = cast(list[dict[str, Any]], finding["queries"])[0]
+    primary["depends_on"] = ["T-1-secondary"]
+    secondary = dict(primary)
+    secondary["query_id"] = "T-1-secondary"
+    secondary["depends_on"] = ["T-1-primary"]
+    finding["queries"] = [primary, secondary]
+    plan_path.write_text(json.dumps(plan, sort_keys=True), encoding="utf-8")
+    manifest["query_plan_sha256"] = hashlib.sha256(plan_path.read_bytes()).hexdigest()
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    errors = validate_evidence_manifest(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        labels={"T-1": "CLEAR"},
+        allowed_domains={"example.com"},
+        task_id="T003",
+        query_plan_path=plan_path,
+        require_version=2,
+        now=datetime(2026, 8, 11, 5, tzinfo=UTC),
+    )
+
+    assert any("query dependency graph contains a cycle" in error for error in errors)
+
+
+def test_v2_query_plan_rejects_missing_and_unknown_dependencies(tmp_path: Path) -> None:
+    manifest_path, plan_path, manifest, plan = _write_v2_bundle(tmp_path)
+    query = cast(list[dict[str, Any]], cast(list[dict[str, Any]], plan["findings"])[0]["queries"])[
+        0
+    ]
+    query.pop("depends_on")
+    plan_path.write_text(json.dumps(plan, sort_keys=True), encoding="utf-8")
+    manifest["query_plan_sha256"] = hashlib.sha256(plan_path.read_bytes()).hexdigest()
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    missing_errors = validate_evidence_manifest(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        labels={"T-1": "CLEAR"},
+        allowed_domains={"example.com"},
+        task_id="T003",
+        query_plan_path=plan_path,
+        require_version=2,
+        now=datetime(2026, 8, 11, 5, tzinfo=UTC),
+    )
+    assert any("must declare depends_on" in error for error in missing_errors)
+
+    query["depends_on"] = ["not-preregistered"]
+    plan_path.write_text(json.dumps(plan, sort_keys=True), encoding="utf-8")
+    manifest["query_plan_sha256"] = hashlib.sha256(plan_path.read_bytes()).hexdigest()
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+    unknown_errors = validate_evidence_manifest(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        labels={"T-1": "CLEAR"},
+        allowed_domains={"example.com"},
+        task_id="T003",
+        query_plan_path=plan_path,
+        require_version=2,
+        now=datetime(2026, 8, 11, 5, tzinfo=UTC),
+    )
+    assert any("unknown query 'not-preregistered'" in error for error in unknown_errors)
 
 
 def test_v2_manifest_rejects_omitted_expected_findings_and_wrong_task(

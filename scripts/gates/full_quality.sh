@@ -28,10 +28,23 @@ export UV_OFFLINE=1
 "$UV_BIN" run --active --no-sync pyright
 "$UV_BIN" run --active --no-sync python -m pytest -q
 
+root_script_present() {
+  "$SHARED_VENV/bin/python" - "$1" <<'PY'
+import json
+import sys
+
+try:
+    payload = json.loads(open("package.json", encoding="utf-8").read())
+except (OSError, json.JSONDecodeError):
+    raise SystemExit(1) from None
+raise SystemExit(0 if sys.argv[1] in payload.get("scripts", {}) else 1)
+PY
+}
+
 run_root_script_if_present() {
   local script=$1
   if [[ -f package.json ]] && command -v pnpm >/dev/null 2>&1 \
-    && jq -e --arg script "$script" '.scripts[$script] != null' package.json >/dev/null; then
+    && root_script_present "$script"; then
     pnpm run "$script"
   fi
 }

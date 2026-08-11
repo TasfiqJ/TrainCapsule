@@ -108,6 +108,15 @@ _LAUNDER_NEGATION_RE = re.compile(
     r"|refus\w*|reject\w*|forbid\w*|prohibit\w*|prevent\w*|guard\w*|block\w*|detect\w*"
     r"|violation\w*|must\s+remain|stays?|remains?)\b"
 )
+# Evidence often explains a negative control across wrapped prose lines, for example
+# "NB8 fails if ... EXTERNAL_VALIDATION_REQUIRED ... as PASS". The directional
+# conversion text is intentional test evidence, not a conversion. This narrower
+# pattern is only consulted for inert/prose spans and therefore can never rescue live
+# executable code.
+_PROSE_PREVENTION_RE = re.compile(
+    r"(?is)(?:fails?|rejects?|blocks?|detects?|prevents?|guards?)\s+(?:when|if)\b.{0,320}$"
+    r"|\b(?:launders?|converts?|promotes?|maps?|treats?)\s+no\b"
+)
 # Loose proximity heuristic retained as reviewer-visible signal, never a hard
 # failure. Case-sensitive: status tokens are upper-case by convention and a
 # case-insensitive version is too noisy on prose.
@@ -250,9 +259,7 @@ def _first_launder_match(text: str) -> re.Match[str] | None:
     return None
 
 
-def _diff_line_windows(
-    worktree: Path, diff: str
-) -> list[tuple[str, list[tuple[int, str, bool]]]]:
+def _diff_line_windows(worktree: Path, diff: str) -> list[tuple[str, list[tuple[int, str, bool]]]]:
     """Return per-hunk new-file lines as (line number, text, is_added).
 
     Context lines let the detector see an added PASS assignment under an
@@ -300,9 +307,7 @@ def _diff_line_windows(
     return windows
 
 
-def _multiline_launder_findings(
-    worktree: Path, diff: str
-) -> tuple[list[str], list[str]]:
+def _multiline_launder_findings(worktree: Path, diff: str) -> tuple[list[str], list[str]]:
     violations: list[str] = []
     warnings: list[str] = []
     for path_value, lines in _diff_line_windows(worktree, diff):
@@ -357,9 +362,7 @@ def scan_candidate(
     warnings: list[str] = []
 
     test_changes = [
-        path
-        for path in changed
-        if _TEST_PATH_RE.search(path) and not _PLANNING_SPEC_RE.match(path)
+        path for path in changed if _TEST_PATH_RE.search(path) and not _PLANNING_SPEC_RE.match(path)
     ]
     existing_test_changes = [
         path
@@ -427,9 +430,7 @@ def scan_candidate(
                     f"fixture or pattern data, not live code: {text.strip()[:160]}"
                 )
             else:
-                violations.append(
-                    f"Candidate adds {label} in {path_value}: {text.strip()[:160]}"
-                )
+                violations.append(f"Candidate adds {label} in {path_value}: {text.strip()[:160]}")
 
     # Multi-line exception swallowing (`except Exception:` newline `pass`) is
     # invisible to the per-line scan; check each file's added lines joined.
@@ -443,52 +444,62 @@ def scan_candidate(
                 f"in {path_value}: except Exception: / pass"
             )
 
-    for path_value, text in added:
-        # Status laundering is judged per line with three severities:
-        #   1. A conversion match in live code (outside every string literal
-        #      and comment) of a code file is always a hard violation; wording
-        #      like "not" on the same line never rescues executable code.
-        #   2. A match that cannot execute (prose/data file, string literal,
-        #      or comment) with an explicit negation/exclusion on the line is
-        #      truthful evidence ABOUT laundering — reviewer warning.
-        #   3. An inert match in a fixture context (test paths and this
-        #      detector's own definitions) is fixture data — reviewer warning.
-        #      This removes the self-referential trap where a regression test
-        #      for this detector was itself flagged as laundering, hard-failing
-        #      the very stage adding it (see factory/queue/failed/T001 history).
-        #   Everything else fails closed as a violation naming file and line.
-        launder_match = _first_launder_match(text)
-        if launder_match is not None:
-            snippet = text.strip()[:160]
-            live_code = _is_code_file(path_value) and not _is_inert(text, launder_match)
-            if live_code:
-                violations.append(
-                    "Candidate appears to convert an uncertainty/error status into PASS "
-                    f"in {path_value}: {snippet}"
+    for path_value, lines in _diff_line_windows(worktree, diff):
+        for index, (line_number, text, is_added) in enumerate(lines):
+            if not is_added:
+                continue
+            # Status laundering is judged per line with three severities:
+            #   1. A conversion match in live code (outside every string literal
+            #      and comment) of a code file is always a hard violation; wording
+            #      like "not" on the same line never rescues executable code.
+            #   2. A match that cannot execute (prose/data file, string literal,
+            #      or comment) with an explicit negation/exclusion on the line is
+            #      truthful evidence ABOUT laundering — reviewer warning.
+            #   3. An inert match in a fixture context (test paths and this
+            #      detector's own definitions) is fixture data — reviewer warning.
+            #      This removes the self-referential trap where a regression test
+            #      for this detector was itself flagged as laundering, hard-failing
+            #      the very stage adding it (see factory/queue/failed/T001 history).
+            #   Everything else fails closed as a violation naming file and line.
+            launder_match = _first_launder_match(text)
+            if launder_match is not None:
+                snippet = text.strip()[:160]
+                live_code = _is_code_file(path_value) and not _is_inert(text, launder_match)
+                context_start = max(0, index - 2)
+                prose_prefix = "\n".join(
+                    [entry[1] for entry in lines[context_start:index]]
+                    + [text[: launder_match.end()]]
                 )
-            elif _LAUNDER_NEGATION_RE.search(text):
+                if live_code:
+                    violations.append(
+                        "Candidate appears to convert an uncertainty/error status into PASS "
+                        f"in {path_value} line {line_number}: {snippet}"
+                    )
+                elif _LAUNDER_NEGATION_RE.search(text) or _PROSE_PREVENTION_RE.search(prose_prefix):
+                    warnings.append(
+                        "Status-conversion phrasing is negated/prevented in inert text; "
+                        "reviewer must confirm it describes prevention, not behaviour, in "
+                        f"{path_value} line {line_number}: {snippet}"
+                    )
+                elif _is_fixture_context(path_value) and (
+                    not _is_code_file(path_value) or _is_inert(text, launder_match)
+                ):
+                    warnings.append(
+                        "Inert status-laundering pattern; reviewer must confirm "
+                        f"it is an inert test fixture, not live code, in {path_value} "
+                        f"line {line_number}: {snippet}"
+                    )
+                else:
+                    violations.append(
+                        "Candidate appears to convert an uncertainty/error status into PASS "
+                        f"in {path_value} line {line_number}: {snippet}"
+                    )
+            elif _STATUS_PROXIMITY_RE.search(text):
                 warnings.append(
-                    "Status-conversion phrasing is negated/excluded on the line; reviewer "
-                    f"must confirm it describes prevention, not behaviour, in {path_value}: "
-                    f"{snippet}"
+                    "Uncertainty and pass statuses appear together; reviewer must confirm no "
+                    f"status conversion in {path_value} line {line_number}: "
+                    f"{text.strip()[:160]}"
                 )
-            elif _is_fixture_context(path_value) and (
-                not _is_code_file(path_value) or _is_inert(text, launder_match)
-            ):
-                warnings.append(
-                    "Inert status-laundering pattern; reviewer must confirm "
-                    f"it is an inert test fixture, not live code, in {path_value}: {snippet}"
-                )
-            else:
-                violations.append(
-                    "Candidate appears to convert an uncertainty/error status into PASS "
-                    f"in {path_value}: {snippet}"
-                )
-        elif _STATUS_PROXIMITY_RE.search(text):
-            warnings.append(
-                "Uncertainty and pass statuses appear together; reviewer must confirm no "
-                f"status conversion in {path_value}: {text.strip()[:160]}"
-            )
 
     multiline_violations, multiline_warnings = _multiline_launder_findings(worktree, diff)
     violations.extend(multiline_violations)

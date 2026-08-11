@@ -44,10 +44,25 @@ console = Console()
 
 _VERIFIED_REPAIR_RETRY = Path("factory/state/VERIFIED_REPAIR_RETRY.json")
 _VERIFIED_REPAIR_CONSUMED = Path("factory/state/VERIFIED_REPAIR_RETRY_CONSUMED.json")
+_EXTERNAL_EVIDENCE_BLOCK_MARKERS = (
+    "external value evidence is required",
+    "external_evidence_required",
+)
 
 
 class AutopilotError(RuntimeError):
     pass
+
+
+def is_external_evidence_block(error: str) -> bool:
+    """Recognize a truthful external wait without treating it as broken code."""
+
+    normalized = error.lower()
+    return any(marker in normalized for marker in _EXTERNAL_EVIDENCE_BLOCK_MARKERS)
+
+
+def _queue_block_error_path(repo_root: Path, config: FactoryConfig, task_id: str) -> Path:
+    return queue_dirs(repo_root, config)["blocked"] / f"{task_id}.error.txt"
 
 
 def is_infrastructure_failure(error: str) -> bool:
@@ -352,9 +367,24 @@ def sync_ledger_from_queue(
         elif item.task_id in queue["failed"]:
             item.status = "respec_required"
         elif item.task_id in queue["blocked"]:
-            # A queue-level PipelineBlocked result still receives bounded autonomous
-            # re-specification. Only a ledger item marked terminal_blocked is final.
-            item.status = "respec_required"
+            error_path = _queue_block_error_path(repo_root, config, item.task_id)
+            error = error_path.read_text(encoding="utf-8") if error_path.is_file() else ""
+            if is_external_evidence_block(error):
+                # A model cannot manufacture adoption, legal clearance, payment, or
+                # other independent evidence. Preserve that truthful wait in the
+                # roadmap instead of spending re-specification and self-repair cycles.
+                item.status = "external_wait"
+                relative = (
+                    str(error_path.relative_to(repo_root))
+                    if error_path.is_relative_to(repo_root)
+                    else str(error_path)
+                )
+                if relative not in item.evidence:
+                    item.evidence.append(relative)
+            else:
+                # Other queue-level PipelineBlocked results still receive bounded
+                # autonomous re-specification. Only terminal_blocked is final.
+                item.status = "respec_required"
         elif item.task_id in queue["pending"]:
             item.status = "queued"
         elif item.packet_path and item.status not in {"passed", "external_wait", "deferred"}:
@@ -450,6 +480,12 @@ def terminal_blocker_reason(repo_root: Path, factory: FactoryConfig, item: Featu
             relative = error_path
         error = error_path.read_text(encoding="utf-8", errors="replace").strip()
         return f"Durable queue artifact {relative}: {error or 'empty error artifact'}"
+    if item.status == "external_wait":
+        evidence = f" Recorded evidence: {item.evidence[-1]}." if item.evidence else ""
+        return (
+            f"Task {item.task_id} is waiting for independently attributable external evidence."
+            f"{evidence}"
+        )
     return "Terminal automatable blocker has no durable queue error artifact."
 
 
@@ -1212,6 +1248,11 @@ async def _run_autopilot_inner(
                 return
             continue
 
+        # Do not leave the dashboard claiming "automatic re-specification" while a
+        # normal product stage is already active. Persist the transition before the
+        # potentially long model call begins.
+        state.current_action = "execute queued task pipeline"
+        save_state(repo_root, factory, state)
         processed = await process_one(
             repo_root=repo_root,
             config=factory,
@@ -1415,19 +1456,56 @@ async def _run_autopilot_inner(
             return
 
         blocked = visible_blocked_task_ids(ledger)
+        external_wait = next(
+            (item for item in ledger.tasks if item.status == "external_wait"), None
+        )
         state.status = "blocked" if blocked else "idle"
         state.blocked_tasks = blocked
-        state.active_task_id = None
-        state.current_action = None
+        state.active_task_id = external_wait.task_id if external_wait is not None else None
+        state.current_action = (
+            "waiting for independently attributable external evidence"
+            if external_wait is not None
+            else None
+        )
+        state.blocker_reason = (
+            terminal_blocker_reason(repo_root, factory, external_wait)
+            if external_wait is not None
+            else None
+        )
+        state.required_action = (
+            "Provide the independent evidence described in the blocker, attach it to the "
+            "task's declared evidence path, then press Retry / resume loop."
+            if external_wait is not None
+            else None
+        )
+        state.next_wake_at = (
+            _now() + timedelta(seconds=autonomy.external_blocker_sleep_seconds)
+            if external_wait is not None
+            else None
+        )
         state.last_event = (
-            f"No dependency-ready automatable task. Blocked: {', '.join(blocked)}"
-            if blocked
-            else "No queued or ready task; waiting for roadmap state change."
+            f"Waiting for external evidence for {external_wait.task_id}; no autonomous "
+            "repair can truthfully create it."
+            if external_wait is not None
+            else (
+                f"No dependency-ready automatable task. Blocked: {', '.join(blocked)}"
+                if blocked
+                else "No queued or ready task; waiting for roadmap state change."
+            )
         )
         save_state(repo_root, factory, state)
         if once:
             return
-        await asyncio.sleep(autonomy.idle_poll_seconds)
+        if external_wait is not None and state.next_wake_at is not None:
+            await _wait_until(
+                repo_root=repo_root,
+                factory=factory,
+                autonomy=autonomy,
+                state=state,
+                wake_at=state.next_wake_at,
+            )
+        else:
+            await asyncio.sleep(autonomy.idle_poll_seconds)
 
 
 async def run_autopilot(

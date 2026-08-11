@@ -3,8 +3,10 @@ from __future__ import annotations
 from pathlib import Path
 
 from tcfactory.autopilot import (
+    is_external_evidence_block,
     is_infrastructure_failure,
     sync_ledger_from_queue,
+    terminal_blocker_reason,
     terminal_root_blocker,
     visible_blocked_task_ids,
 )
@@ -95,6 +97,47 @@ def test_queue_block_routes_to_autonomous_respecification(tmp_path: Path) -> Non
     assert sync_ledger_from_queue(tmp_path, config, ledger)
     assert item.status == "respec_required"
     assert ledger.next_ready() is None
+
+
+def test_external_evidence_block_waits_without_spending_a_respecification(
+    tmp_path: Path,
+) -> None:
+    ledger = _ledger()
+    item = ledger.item("T002")
+    item.packet_path = "tasks/T002.yaml"
+    item.status = "packet_approved"
+    config = FactoryConfig()
+    blocked = queue_dirs(tmp_path, config)["blocked"] / "T002.yaml"
+    blocked.write_text("task_id: T002\n", encoding="utf-8")
+    blocked.with_suffix(".error.txt").write_text(
+        "PipelineBlocked: External value evidence is required and cannot be "
+        "manufactured by the autonomous builder.\n",
+        encoding="utf-8",
+    )
+
+    assert sync_ledger_from_queue(tmp_path, config, ledger)
+    assert item.status == "external_wait"
+    assert item.evidence == ["factory/queue/blocked/T002.error.txt"]
+    assert visible_blocked_task_ids(ledger) == ["T002", "T003"]
+    assert item.revisions == 0
+
+
+def test_only_canonical_external_evidence_blocks_enter_external_wait() -> None:
+    assert is_external_evidence_block("EXTERNAL_EVIDENCE_REQUIRED")
+    assert is_external_evidence_block("External value evidence is required")
+    assert not is_external_evidence_block("ordinary reviewer rejection")
+
+
+def test_external_wait_without_queue_residue_still_has_a_truthful_ui_reason(
+    tmp_path: Path,
+) -> None:
+    item = _ledger().item("T003")
+    item.evidence = ["evidence/external/T003.json"]
+
+    reason = terminal_blocker_reason(tmp_path, FactoryConfig(), item)
+
+    assert "independently attributable external evidence" in reason
+    assert "evidence/external/T003.json" in reason
 
 
 def test_terminal_blocked_queue_entry_stays_terminal(tmp_path: Path) -> None:

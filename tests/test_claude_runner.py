@@ -1,4 +1,7 @@
+from pathlib import Path
 from types import SimpleNamespace
+
+import pytest
 
 from tcfactory.claude_runner import (
     needs_report_continuation,
@@ -6,6 +9,7 @@ from tcfactory.claude_runner import (
     report_continuation_overrides,
     select_result_message,
     subprocess_env_scrub_value,
+    writable_uv_cache_dir,
 )
 
 
@@ -19,6 +23,20 @@ def test_provider_task_budget_uses_current_minimum() -> None:
 def test_only_read_only_roles_force_subprocess_environment_scrubbing() -> None:
     assert subprocess_env_scrub_value(read_only=True) == "1"
     assert subprocess_env_scrub_value(read_only=False) == "0"
+
+
+def test_stages_get_a_reusable_writable_uv_cache_outside_the_candidate_tree(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr("tcfactory.claude_runner.tempfile.tempdir", str(tmp_path))
+
+    cache = writable_uv_cache_dir(tmp_path / "TrainCapsule")
+
+    assert cache == tmp_path / "traincapsule-factory/uv-cache/TrainCapsule"
+    assert cache.is_dir()
+    probe = cache / "write-probe"
+    probe.write_text("ok", encoding="utf-8")
+    assert probe.read_text(encoding="utf-8") == "ok"
 
 
 def test_late_plain_peer_result_does_not_replace_structured_result() -> None:

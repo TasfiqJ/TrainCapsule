@@ -80,9 +80,7 @@ def _task() -> TaskPacket:
     )
 
 
-def _scan(
-    tmp_path: Path, relative: str, body: str, *, commit: bool = True
-) -> dict[str, Any]:
+def _scan(tmp_path: Path, relative: str, body: str, *, commit: bool = True) -> dict[str, Any]:
     base = _repo(tmp_path)
     target = tmp_path / relative
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -120,9 +118,7 @@ def test_status_conversion_still_fails_closed(tmp_path: Path, line: str) -> None
 
 
 @pytest.mark.parametrize("line", LAUNDERING_LINES)
-def test_status_conversion_in_uncommitted_new_file_still_fails(
-    tmp_path: Path, line: str
-) -> None:
+def test_status_conversion_in_uncommitted_new_file_still_fails(tmp_path: Path, line: str) -> None:
     """The gate runs before the stage's changes are committed, so a brand-new
     file is untracked and absent from `git diff <base>`. Its content must be
     scanned anyway; otherwise any pattern can hide in a new file.
@@ -215,6 +211,34 @@ def test_ambiguous_proximity_is_surfaced_as_a_reviewer_warning(tmp_path: Path) -
     assert report["violations"] == []
     assert any("reviewer must confirm no status conversion" in w for w in report["warnings"])
     assert any("docs/evidence/table.md" in w for w in report["warnings"])
+
+
+def test_wrapped_prose_negative_control_is_a_warning_not_a_violation(tmp_path: Path) -> None:
+    body = (
+        "NB8 fails if any row disagrees with the evidence ledger or restates a\n"
+        "EXTERNAL_VALIDATION_REQUIRED state as PASS.\n"
+    )
+
+    report = _scan(tmp_path, "docs/evidence/T002.md", body)
+
+    assert report["passed"] is True
+    assert report["violations"] == []
+    assert any("negated/prevented" in warning for warning in report["warnings"])
+
+
+def test_raw_negative_control_output_with_no_laundering_is_only_a_warning(
+    tmp_path: Path,
+) -> None:
+    line = (
+        "[FAIL] NB8: claim table launders no non-pass state "
+        "(ledger='EXTERNAL_VALIDATION_REQUIRED' recorded as PASS)"
+    )
+
+    report = _scan(tmp_path, "docs/evidence/T002/raw/verifier.txt", line + "\n")
+
+    assert report["passed"] is True
+    assert report["violations"] == []
+    assert any("negated/prevented" in warning for warning in report["warnings"])
 
 
 def test_word_boundaries_ignore_identifiers(tmp_path: Path) -> None:

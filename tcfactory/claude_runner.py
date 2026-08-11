@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import tempfile
 from dataclasses import asdict, is_dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
@@ -45,6 +46,16 @@ REPORT_CONTINUATION_MAX_TURNS = 4
 def subprocess_env_scrub_value(*, read_only: bool) -> str:
     """Keep reviewers hardened without disabling configured writes for mutating roles."""
     return "1" if read_only else "0"
+
+
+def writable_uv_cache_dir(repo_root: Path) -> Path:
+    """Give bounded stages one reusable writable cache outside the candidate tree."""
+
+    path = (
+        Path(tempfile.gettempdir()) / "traincapsule-factory" / "uv-cache" / repo_root.resolve().name
+    )
+    path.mkdir(parents=True, exist_ok=True)
+    return path
 
 
 def report_continuation_overrides() -> dict[str, Any]:
@@ -266,6 +277,11 @@ async def run_agent_stage(
             "TCF_MESSAGE_AUDIT_PATH": str((artifact_dir / "peer-messages.jsonl").resolve()),
             "TCF_SESSION_AUDIT_PATH": str((artifact_dir / "session-events.jsonl").resolve()),
             "TCF_STOP_FAILURE_PATH": str((artifact_dir / "stop-failures.jsonl").resolve()),
+            # Claude's sandbox deliberately makes the account home read-only. uv defaults
+            # to ~/.cache/uv, which caused otherwise-correct quality gates to fail in
+            # multiple live T001/T002 stages. Keep cache writes outside both HOME and the
+            # candidate tree so they cannot pollute diffs or violate allowed_paths.
+            "UV_CACHE_DIR": str(writable_uv_cache_dir(repo_root)),
             "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
             "CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS": "0" if feature_plan.workflow_name else "1",
             "ENABLE_CLAUDEAI_MCP_SERVERS": "false",

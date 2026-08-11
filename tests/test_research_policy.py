@@ -293,6 +293,44 @@ def test_v2_query_plan_requires_an_acyclic_dependency_graph(tmp_path: Path) -> N
     assert any("query dependency graph contains a cycle" in error for error in errors)
 
 
+def test_v2_query_plan_accepts_a_valid_dependency_chain(tmp_path: Path) -> None:
+    manifest_path, plan_path, manifest, plan = _write_v2_bundle(tmp_path)
+    finding = cast(list[dict[str, Any]], plan["findings"])[0]
+    primary = cast(list[dict[str, Any]], finding["queries"])[0]
+    secondary = dict(primary)
+    secondary["query_id"] = "T-1-secondary"
+    secondary["depends_on"] = ["T-1-primary"]
+    finding["queries"] = [primary, secondary]
+
+    evidence = cast(list[dict[str, Any]], manifest["evidence"])
+    for original in list(evidence):
+        clone = dict(original)
+        clone["execution_id"] = f"{original['execution_id']}-secondary"
+        clone["query_id"] = "T-1-secondary"
+        original_path = tmp_path / str(original["artifact_path"])
+        clone_path = original_path.with_name(f"{original_path.stem}-secondary.json")
+        clone_path.write_bytes(original_path.read_bytes())
+        clone["artifact_path"] = clone_path.relative_to(tmp_path).as_posix()
+        evidence.append(clone)
+
+    plan_path.write_text(json.dumps(plan, sort_keys=True), encoding="utf-8")
+    manifest["query_plan_sha256"] = hashlib.sha256(plan_path.read_bytes()).hexdigest()
+    manifest_path.write_text(json.dumps(manifest, sort_keys=True), encoding="utf-8")
+
+    errors = validate_evidence_manifest(
+        repo_root=tmp_path,
+        manifest_path=manifest_path,
+        labels={"T-1": "CLEAR"},
+        allowed_domains={"example.com"},
+        task_id="T003",
+        query_plan_path=plan_path,
+        require_version=2,
+        now=datetime(2026, 8, 11, 5, tzinfo=UTC),
+    )
+
+    assert errors == []
+
+
 def test_v2_query_plan_rejects_missing_and_unknown_dependencies(tmp_path: Path) -> None:
     manifest_path, plan_path, manifest, plan = _write_v2_bundle(tmp_path)
     query = cast(list[dict[str, Any]], cast(list[dict[str, Any]], plan["findings"])[0]["queries"])[

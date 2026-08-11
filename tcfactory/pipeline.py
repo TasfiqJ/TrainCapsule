@@ -455,11 +455,7 @@ def _recover_interrupted_stage(
 
     path = Path(checkpoint.active_worktree)
     role = checkpoint.active_role
-    stage = task.pipeline[checkpoint.stage_index]
-    if stage.role != role:
-        raise PipelineBlocked(
-            f"Checkpoint role mismatch: checkpoint={role.value}, task stage={stage.role.value}"
-        )
+    stage = interrupted_stage(task, checkpoint)
     if path.exists():
         branch = run_command(["git", "branch", "--show-current"], cwd=path).stdout.strip()
         worktree = Worktree(
@@ -491,6 +487,29 @@ def _recover_interrupted_stage(
     checkpoint.state = PipelineState.RUNNING
     checkpoint.pause = None
     store.save(checkpoint)
+
+
+def interrupted_stage(task: TaskPacket, checkpoint: PipelineCheckpoint) -> Stage:
+    """Resolve a durable active stage, including reviewer-triggered repair work.
+
+    During a repair cycle the pipeline index intentionally remains on the rejecting
+    reviewer while the declared mutating role works from that review's candidate.  A
+    process restart in that window is therefore not a checkpoint-role mismatch.  Only
+    accept the task's declared mutating stage as the alternate; every other mismatch
+    remains fail-closed.
+    """
+
+    scheduled = task.pipeline[checkpoint.stage_index]
+    role = checkpoint.active_role
+    if role is None or scheduled.role == role:
+        return scheduled
+    if task.repair.enabled:
+        mutating = _find_mutating_stage(task)
+        if mutating.role == role:
+            return mutating
+    raise PipelineBlocked(
+        f"Checkpoint role mismatch: checkpoint={role.value}, task stage={scheduled.role.value}"
+    )
 
 
 async def _execute_stage(

@@ -13,12 +13,19 @@ what actually failed in T001.
 
 from __future__ import annotations
 
+from pathlib import Path
+
+import pytest
+
 from tcfactory.checkpoints import new_checkpoint
+from tcfactory.config import load_task
 from tcfactory.models import AgentReport, RoleConfig, RoleName, Stage, StageResult, Verdict
 from tcfactory.pipeline import (
     MAX_REVIEW_TURN_MULTIPLIER,
     MAX_STAGE_TURNS,
+    PipelineBlocked,
     escalated_turn_budget,
+    interrupted_stage,
     preserve_mutating_candidate,
     retry_stage_update,
     review_report_hit_budget_ceiling,
@@ -184,6 +191,41 @@ def test_product_rejection_that_mentions_budget_is_not_reclassified() -> None:
     )
 
     assert not review_report_hit_budget_ceiling(result)
+
+
+def test_interrupted_reviewer_repair_resolves_declared_mutating_stage() -> None:
+    """A restart during T002 research repair must not report a role mismatch."""
+    repo_root = Path(__file__).resolve().parents[1]
+    task = load_task(repo_root / "tasks/T002.yaml")
+    checkpoint = new_checkpoint(
+        task_id=task.task_id,
+        run_id="20260811T003507Z",
+        starting_sha="a" * 40,
+    )
+    checkpoint.stage_index = next(
+        index for index, stage in enumerate(task.pipeline) if stage.role == RoleName.RELEASE
+    )
+    checkpoint.active_role = RoleName.RESEARCH
+
+    assert interrupted_stage(task, checkpoint).role == RoleName.RESEARCH
+
+
+def test_interrupted_unexpected_role_mismatch_stays_blocked() -> None:
+    """Only the predeclared repair role earns alternate-stage recovery."""
+    repo_root = Path(__file__).resolve().parents[1]
+    task = load_task(repo_root / "tasks/T002.yaml")
+    checkpoint = new_checkpoint(
+        task_id=task.task_id,
+        run_id="20260811T003507Z",
+        starting_sha="a" * 40,
+    )
+    checkpoint.stage_index = next(
+        index for index, stage in enumerate(task.pipeline) if stage.role == RoleName.RELEASE
+    )
+    checkpoint.active_role = RoleName.SECURITY
+
+    with pytest.raises(PipelineBlocked, match="Checkpoint role mismatch"):
+        interrupted_stage(task, checkpoint)
 
 
 def test_review_retry_is_bounded_to_four_times_its_declared_budget() -> None:

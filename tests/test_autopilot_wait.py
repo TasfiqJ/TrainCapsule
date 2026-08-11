@@ -1,4 +1,5 @@
 import asyncio
+import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
@@ -9,6 +10,31 @@ import pytest
 from tcfactory import autopilot
 from tcfactory.github_sync import GitHubSyncState, save_github_state
 from tcfactory.models import AutonomyConfig, AutonomyState, FactoryConfig
+
+
+def test_load_state_migrates_legacy_quota_wait_without_crashing(tmp_path: Path) -> None:
+    factory = FactoryConfig()
+    state_path = factory.resolve(tmp_path, factory.autonomy_state_path)
+    state_path.parent.mkdir(parents=True)
+    state_path.write_text(
+        json.dumps(
+            {
+                "version": 1,
+                "status": "quota_wait",
+                "active_task_id": "T002",
+                "current_action": "waiting for Claude Max reset",
+                "updated_at": datetime.now(UTC).isoformat(),
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    state = autopilot.load_state(tmp_path, factory)
+
+    assert state.status == "paused"
+    assert state.active_task_id == "T002"
+    assert state.current_action == "waiting for Claude Max reset"
+    assert state.last_event == "migrated legacy quota_wait state to paused"
 
 
 def test_controller_restart_preserves_a_future_quota_wake() -> None:

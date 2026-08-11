@@ -173,7 +173,14 @@ def load_state(repo_root: Path, config: FactoryConfig) -> AutonomyState:
     path = _state_path(repo_root, config)
     if not path.exists():
         return AutonomyState(updated_at=_now())
-    return AutonomyState.model_validate(read_json(path, {}))
+    payload = read_json(path, {})
+    # Older launcher/dashboard helpers used the presentation-only label `quota_wait`.
+    # Normalize it before strict validation so a truthful durable wait can never make the
+    # controller crash-loop precisely when its scheduled reset arrives.
+    if payload.get("status") == "quota_wait":
+        payload["status"] = "paused"
+        payload["last_event"] = "migrated legacy quota_wait state to paused"
+    return AutonomyState.model_validate(payload)
 
 
 def save_state(repo_root: Path, config: FactoryConfig, state: AutonomyState) -> None:

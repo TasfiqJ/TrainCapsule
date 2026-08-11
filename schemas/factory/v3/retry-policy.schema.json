@@ -1,0 +1,40 @@
+{
+  "additionalProperties": false,
+  "description": "Zero means no attempts; it never means unlimited.",
+  "properties": {
+    "maxPlanAttempts": {
+      "maximum": 5,
+      "minimum": 0,
+      "title": "Maxplanattempts",
+      "type": "integer"
+    },
+    "maxCandidateRepairCycles": {
+      "maximum": 10,
+      "minimum": 0,
+      "title": "Maxcandidaterepaircycles",
+      "type": "integer"
+    },
+    "maxSameFindingRepeats": {
+      "default": 2,
+      "maximum": 5,
+      "minimum": 1,
+      "title": "Maxsamefindingrepeats",
+      "type": "integer"
+    },
+    "maxCandidateRestarts": {
+      "default": 1,
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Maxcandidaterestarts",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "maxPlanAttempts",
+    "maxCandidateRepairCycles"
+  ],
+  "title": "RetryPolicy",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/retry-policy.schema.json"
+}

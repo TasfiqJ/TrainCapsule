@@ -9,7 +9,7 @@ The exact baseline and results are recorded in `V3_BASELINE_REPORT.md`: 394 test
 | Area | Required evidence | Current state |
 |---|---|---|
 | Source authority | deterministic manifest; positive and tamper/duplicate/archive negatives | passed |
-| V3 models | strict work items, transitions, milestones, maturity, approvals, receipts, candidate manifest | pending |
+| V3 models | strict work items, transitions, milestones, maturity, approvals, receipts, candidate manifest | passed |
 | Scheduler/policy | lane independence, WIP, deterministic score, finite retries, repeated finding, hard stuck | pending |
 | Completion/context/value | proposal-only expansion, scoped context/freshness, terminal value outcomes | pending |
 | Backend | protocol, Claude adapter, fake backend, redaction, checkpoint recovery | pending |

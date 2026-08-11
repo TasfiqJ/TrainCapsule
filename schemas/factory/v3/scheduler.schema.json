@@ -1,0 +1,196 @@
+{
+  "$defs": {
+    "FactoryMaintenancePolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "allowMutatingOnlyOnControllerFailure": {
+          "title": "Allowmutatingonlyoncontrollerfailure",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "allowMutatingOnlyOnControllerFailure"
+      ],
+      "title": "FactoryMaintenancePolicy",
+      "type": "object"
+    },
+    "Lane": {
+      "enum": [
+        "PRODUCT",
+        "MARKET",
+        "COMPETITOR",
+        "TRUST",
+        "FACTORY"
+      ],
+      "title": "Lane",
+      "type": "string"
+    },
+    "LaneWipLimit": {
+      "additionalProperties": false,
+      "properties": {
+        "mutating": {
+          "maximum": 4,
+          "minimum": 0,
+          "title": "Mutating",
+          "type": "integer"
+        },
+        "readOnly": {
+          "maximum": 8,
+          "minimum": 0,
+          "title": "Readonly",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "mutating",
+        "readOnly"
+      ],
+      "title": "LaneWipLimit",
+      "type": "object"
+    },
+    "SchedulerWeights": {
+      "additionalProperties": false,
+      "properties": {
+        "currentMilestoneCriticalPath": {
+          "title": "Currentmilestonecriticalpath",
+          "type": "integer"
+        },
+        "customerDecisionRelevance": {
+          "title": "Customerdecisionrelevance",
+          "type": "integer"
+        },
+        "externalEvidenceUnblock": {
+          "title": "Externalevidenceunblock",
+          "type": "integer"
+        },
+        "nativeEquivalenceRisk": {
+          "title": "Nativeequivalencerisk",
+          "type": "integer"
+        },
+        "trustReleaseBlocker": {
+          "title": "Trustreleaseblocker",
+          "type": "integer"
+        },
+        "reusableSameFamilyValue": {
+          "title": "Reusablesamefamilyvalue",
+          "type": "integer"
+        },
+        "shortFeedbackCycle": {
+          "title": "Shortfeedbackcycle",
+          "type": "integer"
+        },
+        "speculativeSurfaceArea": {
+          "title": "Speculativesurfacearea",
+          "type": "integer"
+        },
+        "securityOrIntegrationBurden": {
+          "title": "Securityorintegrationburden",
+          "type": "integer"
+        },
+        "likelyNativeDuplication": {
+          "title": "Likelynativeduplication",
+          "type": "integer"
+        },
+        "contextOrQuotaCost": {
+          "title": "Contextorquotacost",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "currentMilestoneCriticalPath",
+        "customerDecisionRelevance",
+        "externalEvidenceUnblock",
+        "nativeEquivalenceRisk",
+        "trustReleaseBlocker",
+        "reusableSameFamilyValue",
+        "shortFeedbackCycle",
+        "speculativeSurfaceArea",
+        "securityOrIntegrationBurden",
+        "likelyNativeDuplication",
+        "contextOrQuotaCost"
+      ],
+      "title": "SchedulerWeights",
+      "type": "object"
+    },
+    "WorkStatus": {
+      "enum": [
+        "PROPOSED",
+        "READY",
+        "QUEUED",
+        "RUNNING",
+        "PAUSED_QUOTA",
+        "WAITING_EXTERNAL",
+        "WAITING_HUMAN",
+        "BLOCKED_TECHNICAL",
+        "BLOCKED_POLICY",
+        "PASSED_ENGINEERING",
+        "REJECTED_VALUE",
+        "NATIVE_SUFFICIENT",
+        "DEFERRED",
+        "SUPERSEDED",
+        "CANCELLED",
+        "COMPLETED"
+      ],
+      "title": "WorkStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "activeMilestone": {
+      "pattern": "^M[0-9]+_[A-Z0-9_]+$",
+      "title": "Activemilestone",
+      "type": "string"
+    },
+    "wip": {
+      "additionalProperties": {
+        "$ref": "#/$defs/LaneWipLimit"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/Lane"
+      },
+      "title": "Wip",
+      "type": "object"
+    },
+    "factoryMaintenance": {
+      "$ref": "#/$defs/FactoryMaintenancePolicy"
+    },
+    "weights": {
+      "$ref": "#/$defs/SchedulerWeights"
+    },
+    "tieBreak": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Tiebreak",
+      "type": "array"
+    },
+    "waitingStatesDoNotBlockOtherLanes": {
+      "items": {
+        "$ref": "#/$defs/WorkStatus"
+      },
+      "title": "Waitingstatesdonotblockotherlanes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "activeMilestone",
+    "wip",
+    "factoryMaintenance",
+    "weights",
+    "tieBreak",
+    "waitingStatesDoNotBlockOtherLanes"
+  ],
+  "title": "SchedulerConfig",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/scheduler.schema.json"
+}

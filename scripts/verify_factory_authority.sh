@@ -20,6 +20,11 @@ for path in "${required[@]}"; do
 done
 python3 scripts/gates/validate_source_manifest.py
 python3 scripts/gates/source_of_truth_integrity.py
+schema_python=python3
+if [[ -x .venv/bin/python ]]; then
+  schema_python=.venv/bin/python
+fi
+"$schema_python" scripts/generate_v3_schemas.py --check
 python3 - <<'PY'
 from pathlib import Path
 from tcfactory.yamlutil import load_yaml

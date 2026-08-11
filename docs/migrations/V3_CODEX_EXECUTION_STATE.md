@@ -7,12 +7,12 @@
 - Bundle integrity: 30/30 declared files, 542907/542907 bytes, all SHA-256 values matched
 - Controller: stopped; Windows restart task disabled; lock released
 - Baseline tests: 394 tests, Ruff, Pyright, schemas, packet checks, and all existing gates passed
-- Active phase: Phase B — typed V3 factory model and schemas
-- Completed phases: baseline, controller shutdown, rollback ref, runtime metadata snapshot, prescribed bundle reading, Phase A source authority and integrity
-- Commits created by this migration: Phase A source-authority commit (this commit; exact SHA is recorded by Git)
-- Next exact action: implement strict V3 work-item, lane, milestone, maturity, approval, external-evidence, disposition, retry, and candidate-manifest models with generated schemas
+- Active phase: Phase C — V3 factory configuration, roadmap, scheduler, and policy
+- Completed phases: baseline, controller shutdown, rollback ref, runtime metadata snapshot, prescribed bundle reading, Phase A source authority and integrity, Phase B typed domain models and schemas
+- Commits created by this migration: `e331e39` (source authority); Phase B domain-model commit (this commit)
+- Next exact action: install V3 factory/autonomy/scheduler/role/executor configuration, bounded M0–M6 roadmap records, and deterministic lane scheduling
 - Unresolved blockers: qualified human source-migration approval remains external; it does not block internal engineering
-- Introduced failures: none; the Phase A full suite, Ruff, strict Pyright, historical authority gate, and V3 authority gate pass
+- Introduced failures: none; the Phase B full suite, Ruff, strict Pyright, both authority gates, generated-schema check, and secret scan pass
 
 ## Rollback
 

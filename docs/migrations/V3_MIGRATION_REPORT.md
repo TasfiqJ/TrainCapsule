@@ -20,6 +20,10 @@ Migrate the V2 factory/bootstrap repository to the bounded V3 product and factor
 - Added an external trusted-root human-approval policy; no repository fallback is permitted.
 - Preserved the legacy source-manifest verification and extended the factory authority entrypoint to require both historical and V3 integrity.
 - Added positive and adversarial integrity coverage for missing files, changed content, duplicate logical IDs, manifest self-hashing, parenthesized duplicates, stale authority, unresolved context, mixed fact/normative authority, and synthetic commercial completion.
+- Added a separate `tcfactory.v3` domain package with the exact lane, work-kind, status, disposition, ownership, engineering-maturity, commercial-maturity, milestone, evidence, approval, and release vocabularies.
+- Added strict-shape work items, bounded milestones, finite retry policy, disposition and legacy-map records, typed scheduler configuration, external evidence and human approval records, and explicit work-status transitions.
+- Added an immutable candidate manifest that binds exact SHAs, packet/context/checkpoint digests, executor identity, stage and gate artifacts, findings, approvals, evidence receipts, and release decision.
+- Added deterministic canonical JSON/digests, trusted evidence ceilings, signed external human-approval verification inputs, and 10 generated model-matching JSON schemas.
 
 ## Deviations
 
@@ -34,6 +38,16 @@ Migrate the V2 factory/bootstrap repository to the bounded V3 product and factor
 - Historical source authority: 20 files verified
 - V3 source authority: 11 canonical files verified
 - Git diff hygiene: pass
+
+## Phase B verification
+
+- Domain-model adversarial tests: 10 passed
+- Complete Pytest suite: pass
+- Ruff: pass
+- Strict Pyright: 0 errors, 0 warnings
+- Generated V3 schemas: 10 exact matches
+- Historical and V3 authority gates: pass
+- Secret scan and Git diff hygiene: pass
 
 ## Pending
 

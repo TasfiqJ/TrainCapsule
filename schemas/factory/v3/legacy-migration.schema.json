@@ -1,0 +1,136 @@
+{
+  "$defs": {
+    "Disposition": {
+      "enum": [
+        "KEEP",
+        "INTEGRATE_EXISTING_BACKEND",
+        "UPSTREAM",
+        "NARROW",
+        "REPLACE",
+        "PAUSE",
+        "STOP",
+        "NOT_REVIEWED"
+      ],
+      "title": "Disposition",
+      "type": "string"
+    },
+    "Lane": {
+      "enum": [
+        "PRODUCT",
+        "MARKET",
+        "COMPETITOR",
+        "TRUST",
+        "FACTORY"
+      ],
+      "title": "Lane",
+      "type": "string"
+    },
+    "LegacyMapRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "legacyTaskId": {
+          "pattern": "^[A-Z][A-Z0-9_-]{1,63}$",
+          "title": "Legacytaskid",
+          "type": "string"
+        },
+        "workItemId": {
+          "anyOf": [
+            {
+              "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workitemid"
+        },
+        "lane": {
+          "$ref": "#/$defs/Lane"
+        },
+        "status": {
+          "$ref": "#/$defs/WorkStatus"
+        },
+        "disposition": {
+          "$ref": "#/$defs/Disposition"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "preservedEvidenceRefs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Preservedevidencerefs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "legacyTaskId",
+        "lane",
+        "status",
+        "disposition",
+        "rationale",
+        "preservedEvidenceRefs"
+      ],
+      "title": "LegacyMapRecord",
+      "type": "object"
+    },
+    "WorkStatus": {
+      "enum": [
+        "PROPOSED",
+        "READY",
+        "QUEUED",
+        "RUNNING",
+        "PAUSED_QUOTA",
+        "WAITING_EXTERNAL",
+        "WAITING_HUMAN",
+        "BLOCKED_TECHNICAL",
+        "BLOCKED_POLICY",
+        "PASSED_ENGINEERING",
+        "REJECTED_VALUE",
+        "NATIVE_SUFFICIENT",
+        "DEFERRED",
+        "SUPERSEDED",
+        "CANCELLED",
+        "COMPLETED"
+      ],
+      "title": "WorkStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "sourceVersion": {
+      "default": 2,
+      "maximum": 2,
+      "minimum": 2,
+      "title": "Sourceversion",
+      "type": "integer"
+    },
+    "records": {
+      "items": {
+        "$ref": "#/$defs/LegacyMapRecord"
+      },
+      "title": "Records",
+      "type": "array"
+    }
+  },
+  "required": [
+    "records"
+  ],
+  "title": "LegacyMigrationMap",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/legacy-migration.schema.json"
+}

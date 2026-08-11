@@ -1,0 +1,120 @@
+{
+  "$defs": {
+    "Milestone": {
+      "additionalProperties": false,
+      "properties": {
+        "milestoneId": {
+          "pattern": "^M[0-9]+_[A-Z0-9_]+$",
+          "title": "Milestoneid",
+          "type": "string"
+        },
+        "type": {
+          "$ref": "#/$defs/MilestoneType"
+        },
+        "status": {
+          "$ref": "#/$defs/MilestoneStatus"
+        },
+        "entryCriteria": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Entrycriteria",
+          "type": "array"
+        },
+        "exitCriteria": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Exitcriteria",
+          "type": "array"
+        },
+        "requiredEvidence": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Requiredevidence",
+          "type": "array"
+        },
+        "forbiddenClaims": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Forbiddenclaims",
+          "type": "array"
+        },
+        "humanApprovalRequired": {
+          "title": "Humanapprovalrequired",
+          "type": "boolean"
+        },
+        "humanApprovalRefs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Humanapprovalrefs",
+          "type": "array"
+        }
+      },
+      "required": [
+        "milestoneId",
+        "type",
+        "status",
+        "entryCriteria",
+        "exitCriteria",
+        "requiredEvidence",
+        "forbiddenClaims",
+        "humanApprovalRequired"
+      ],
+      "title": "Milestone",
+      "type": "object"
+    },
+    "MilestoneStatus": {
+      "enum": [
+        "PROPOSED",
+        "ACTIVE",
+        "WAITING_EXTERNAL",
+        "WAITING_HUMAN",
+        "PAUSED",
+        "COMPLETED",
+        "CANCELLED"
+      ],
+      "title": "MilestoneStatus",
+      "type": "string"
+    },
+    "MilestoneType": {
+      "enum": [
+        "TRUST",
+        "ENGINEERING",
+        "COMMERCIAL"
+      ],
+      "title": "MilestoneType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "milestones": {
+      "items": {
+        "$ref": "#/$defs/Milestone"
+      },
+      "minItems": 1,
+      "title": "Milestones",
+      "type": "array"
+    }
+  },
+  "required": [
+    "milestones"
+  ],
+  "title": "MilestoneRoadmap",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/milestones.schema.json"
+}

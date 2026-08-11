@@ -1,0 +1,193 @@
+{
+  "$defs": {
+    "ArtifactLocationClass": {
+      "enum": [
+        "TRUSTED_EXTERNAL",
+        "CUSTOMER_LOCAL",
+        "REDACTED_REFERENCE"
+      ],
+      "title": "ArtifactLocationClass",
+      "type": "string"
+    },
+    "EvidenceArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "locationClass": {
+          "$ref": "#/$defs/ArtifactLocationClass"
+        }
+      },
+      "required": [
+        "name",
+        "digest",
+        "locationClass"
+      ],
+      "title": "EvidenceArtifact",
+      "type": "object"
+    },
+    "EvidenceIssuer": {
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "minLength": 1,
+          "title": "Id",
+          "type": "string"
+        },
+        "authority": {
+          "minLength": 1,
+          "title": "Authority",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "authority"
+      ],
+      "title": "EvidenceIssuer",
+      "type": "object"
+    },
+    "EvidenceSignature": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "$ref": "#/$defs/SignatureAlgorithm"
+        },
+        "keyId": {
+          "minLength": 1,
+          "title": "Keyid",
+          "type": "string"
+        },
+        "value": {
+          "minLength": 1,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "algorithm",
+        "keyId",
+        "value"
+      ],
+      "title": "EvidenceSignature",
+      "type": "object"
+    },
+    "EvidenceType": {
+      "enum": [
+        "CUSTOMER_CONVERSATION",
+        "INCIDENT_ARCHIVE_ACCESS",
+        "PAID_PREFLIGHT",
+        "PAID_PILOT",
+        "DECISION_CHANGED",
+        "SECOND_PAID_ACTION",
+        "INDEPENDENT_OPERATOR",
+        "HUMAN_REVIEW",
+        "UPSTREAM_ACCEPTANCE",
+        "PROVIDER_ACCEPTANCE"
+      ],
+      "title": "EvidenceType",
+      "type": "string"
+    },
+    "SignatureAlgorithm": {
+      "enum": [
+        "ed25519",
+        "external-trusted-root"
+      ],
+      "title": "SignatureAlgorithm",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "receiptVersion": {
+      "default": 1,
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Receiptversion",
+      "type": "integer"
+    },
+    "receiptId": {
+      "pattern": "^XREC-[A-Z0-9_-]+$",
+      "title": "Receiptid",
+      "type": "string"
+    },
+    "evidenceType": {
+      "$ref": "#/$defs/EvidenceType"
+    },
+    "subjectId": {
+      "minLength": 1,
+      "title": "Subjectid",
+      "type": "string"
+    },
+    "issuer": {
+      "$ref": "#/$defs/EvidenceIssuer"
+    },
+    "observedAt": {
+      "format": "date-time",
+      "title": "Observedat",
+      "type": "string"
+    },
+    "candidateOrOfferIdentity": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Candidateorofferidentity"
+    },
+    "outcome": {
+      "minLength": 1,
+      "title": "Outcome",
+      "type": "string"
+    },
+    "artifacts": {
+      "items": {
+        "$ref": "#/$defs/EvidenceArtifact"
+      },
+      "title": "Artifacts",
+      "type": "array"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    },
+    "signature": {
+      "$ref": "#/$defs/EvidenceSignature"
+    },
+    "syntheticTestOnly": {
+      "title": "Synthetictestonly",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "receiptId",
+    "evidenceType",
+    "subjectId",
+    "issuer",
+    "observedAt",
+    "outcome",
+    "artifacts",
+    "limitations",
+    "signature",
+    "syntheticTestOnly"
+  ],
+  "title": "ExternalEvidenceReceipt",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/external-evidence-receipt.schema.json"
+}

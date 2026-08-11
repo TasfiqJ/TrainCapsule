@@ -1,0 +1,119 @@
+{
+  "$defs": {
+    "Disposition": {
+      "enum": [
+        "KEEP",
+        "INTEGRATE_EXISTING_BACKEND",
+        "UPSTREAM",
+        "NARROW",
+        "REPLACE",
+        "PAUSE",
+        "STOP",
+        "NOT_REVIEWED"
+      ],
+      "title": "Disposition",
+      "type": "string"
+    },
+    "DispositionRecord": {
+      "additionalProperties": false,
+      "properties": {
+        "recordId": {
+          "pattern": "^DISP-[A-Z0-9_-]+$",
+          "title": "Recordid",
+          "type": "string"
+        },
+        "workItemId": {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "title": "Workitemid",
+          "type": "string"
+        },
+        "previous": {
+          "$ref": "#/$defs/Disposition"
+        },
+        "decision": {
+          "$ref": "#/$defs/Disposition"
+        },
+        "rationale": {
+          "minLength": 1,
+          "title": "Rationale",
+          "type": "string"
+        },
+        "evidenceRefs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidencerefs",
+          "type": "array"
+        },
+        "decidedBy": {
+          "$ref": "#/$defs/OwnerType"
+        },
+        "decidedAt": {
+          "format": "date-time",
+          "title": "Decidedat",
+          "type": "string"
+        },
+        "humanApprovalRef": {
+          "anyOf": [
+            {
+              "pattern": "^HAPR-[A-Z0-9_-]+$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Humanapprovalref"
+        }
+      },
+      "required": [
+        "recordId",
+        "workItemId",
+        "previous",
+        "decision",
+        "rationale",
+        "evidenceRefs",
+        "decidedBy",
+        "decidedAt"
+      ],
+      "title": "DispositionRecord",
+      "type": "object"
+    },
+    "OwnerType": {
+      "enum": [
+        "AI",
+        "FOUNDER",
+        "HUMAN_REVIEWER",
+        "CUSTOMER",
+        "EXTERNAL_PARTY"
+      ],
+      "title": "OwnerType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "records": {
+      "items": {
+        "$ref": "#/$defs/DispositionRecord"
+      },
+      "title": "Records",
+      "type": "array"
+    }
+  },
+  "required": [
+    "records"
+  ],
+  "title": "DispositionLedger",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/dispositions.schema.json"
+}

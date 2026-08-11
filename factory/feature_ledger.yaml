@@ -112,7 +112,7 @@ tasks:
   phase: P0
   depends_on:
   - T001
-  status: respec_required
+  status: queued
   terminal_blocked: false
   packet_path: tasks/T002.yaml
   trust_core: false
@@ -159,7 +159,7 @@ tasks:
   - Task packet approved through model-respec planning.
   revisions: 7
   value_revisions: 0
-  infrastructure_recoveries: 0
+  infrastructure_recoveries: 1
 - task_id: T003
   outcome: Pin current primary sources and create claim registry
   lead_role: Research
@@ -3503,4 +3503,4 @@ tasks:
   revisions: 0
   value_revisions: 0
   infrastructure_recoveries: 0
-updated_at: '2026-08-11T07:13:18.799217+00:00'
+updated_at: '2026-08-11T07:13:18.895305+00:00'

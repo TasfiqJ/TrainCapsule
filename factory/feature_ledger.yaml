@@ -112,9 +112,9 @@ tasks:
   phase: P0
   depends_on:
   - T001
-  status: ready
+  status: packet_approved
   terminal_blocked: false
-  packet_path: null
+  packet_path: tasks/T002.yaml
   trust_core: false
   risk_tier: integration
   context_keys:
@@ -148,6 +148,7 @@ tasks:
   - Automatic re-specification ceiling reached.
   - Revision 4 requested after bounded pipeline failure; preserve the original outcome
     and strengthen specification/gates.
+  - Task packet approved through model-respec planning.
   revisions: 4
   value_revisions: 0
   infrastructure_recoveries: 0
@@ -3494,4 +3495,4 @@ tasks:
   revisions: 0
   value_revisions: 0
   infrastructure_recoveries: 0
-updated_at: '2026-08-11T02:59:23.940892+00:00'
+updated_at: '2026-08-11T03:09:08.273445+00:00'

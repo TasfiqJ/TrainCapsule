@@ -52,10 +52,15 @@ acceptance_criteria:
 outputs:
 - docs/research/T002_name_trademark_check.md
 stop_conditions:
-- Source-of-truth does not name a definitive product name, package identifier, or
-  candidate domain list to check.
-- No network access is available to any primary trademark, package-registry, or domain-registrar
-  source, making the check unverifiable.
+- 'Source-of-truth does not name any product name at all to check: stop the entire
+  task, do not invent one.'
+- 'Source-of-truth names the product name but does not name a specific package identifier
+  or candidate domain for a given registry/registrar: do not invent the missing identifier;
+  mark only the affected package/domain findings UNKNOWN and still complete the checks
+  source-of-truth does support (for example the trademark search on the named product
+  name).'
+- 'No network access is available to any primary trademark, package-registry, or domain-registrar
+  source: mark the affected findings UNKNOWN, do not guess.'
 security:
   network_default: deny
   allow_unsandboxed_commands: false
@@ -63,7 +68,7 @@ security:
   secrets: []
 gates:
 - name: research-file-present
-  command: uv run python scripts/gates/output_and_integration_gate.py T002
+  command: test -f docs/research/T002_name_trademark_check.md
   timeout_seconds: 10
   stages:
   - research
@@ -72,7 +77,7 @@ gates:
   - release
   required: true
 - name: research-verdict-labeled
-  command: uv run python scripts/gates/output_and_integration_gate.py T002
+  command: grep -Eq 'Overall verdict:\s*(clear|conflicts_found|unknown)' docs/research/T002_name_trademark_check.md
   timeout_seconds: 10
   stages:
   - research
@@ -81,7 +86,8 @@ gates:
   - release
   required: true
 - name: research-no-silent-upgrade
-  command: uv run python scripts/gates/output_and_integration_gate.py T002
+  command: '! grep -Eiq ''UNKNOWN[^\n]*(upgraded|converted|treated as)[^\n]*CLEAR''
+    docs/research/T002_name_trademark_check.md'
   timeout_seconds: 10
   stages:
   - research

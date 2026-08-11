@@ -157,6 +157,26 @@ Migrate the V2 factory/bootstrap repository to the bounded V3 product and factor
 - Generated V3 schemas: 32 exact matches
 - No model session, GitHub mutation, Windows task change, or paid usage occurred
 
+## Phase H implementation
+
+- Replaced open-ended global and role instructions with one-work-item V3 contracts bound to finite packet, path, turn, token, cost, retry, and elapsed-time limits.
+- Enforced the authoritative packet ceilings of 12 acceptance criteria and 8 outputs, one mutating candidate owner, acyclic dependency handling, finite checkpoints, and no session renewal or automatic roadmap mutation.
+- Made native/bundled/agent comparison mandatory and added explicit `NATIVE_WORKFLOW_SUFFICIENT`, `NO_INCREMENTAL_DECISION_VALUE`, `UNKNOWN`, `WAITING_EXTERNAL`, and `WAITING_HUMAN` behavior.
+- Added the V3 concrete finding format with reproducible fingerprints and a limit of eight findings per review.
+- Added specialist contracts for native/substitute review, bounded commercial experiment preparation, human approval packets, wedge review, and milestone audit.
+- Removed acquisition/career influence from routine planning and prohibited fabricated commercial evidence, external receipts, approvals, benchmarks, integrations, and release authority.
+- Replaced all active-role open ceilings with explicit limits of at most 64 turns, 96,000 task tokens, and a 12.0 API-equivalent estimate. The stopped runtime was not invoked.
+
+## Phase H verification
+
+- Focused prompt, planner, Claude-feature, dependency-graph, and model-routing checks: 16 passed
+- Complete Pytest suite: 478 passed
+- Ruff: pass
+- Strict Pyright: 0 errors, 0 warnings
+- Credential scan: pass
+- All active role prompts exist and all active roles have finite turn, token, and estimate ceilings
+- No model session, network mutation, GitHub mutation, runtime restart, or paid usage occurred
+
 ## Pending
 
-Prompt migration, legacy mappings, product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.
+Legacy mappings, product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.

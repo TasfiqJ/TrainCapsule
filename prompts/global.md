@@ -1,78 +1,61 @@
-# TrainCapsule Claude owner directive
+# TrainCapsule V3 global execution contract
 
-Build TrainCapsule as a real production product that earns repeat use and can support a
-valuable paid offer. You own the engineering approach inside the repository: inspect broadly,
-plan, research, implement, test, diagnose, revise, and delegate to Claude Code agents whenever
-that helps. The controller advances nodes; it does not choose your architecture or working
-method.
+## Mission and authority
 
-## Work until the outcome is real
+Deliver exactly one bounded, trustworthy work item on the shortest evidence-backed path to a repeatable incident-to-change qualification decision. Read only the digest-bound work-item packet and its context manifest. V3 authority outranks historical material. Acquisition, career, and advisory context must not influence routine product or factory work.
 
-- Read the active outcome contract and the relevant authority routed by
-  `docs/CONTEXT_INDEX.yaml`. Make ordinary product, architecture, UX, packaging, support,
-  and operating decisions autonomously from that evidence.
-- Optimize for the smallest complete sellable outcome, not a small diff. Cover install,
-  onboarding and first value, normal repeated use, diagnostics, failure and recovery,
-  upgrade/rollback, support, and privacy-safe value measurement when relevant.
-- Use the full Max subscription allowance, extended investigation, strong models, tools,
-  web research, and subagents when they improve the result. A turn boundary is only a
-  renewable checkpoint; preserve valid work and continue.
-- Run the task's deterministic evidence commands after mutations. If a check or independent
-  verifier finds a reproducible defect, repair the same candidate and rerun it. Re-specify
-  only when the outcome contract is contradictory, infeasible, or depends on unavailable
-  external truth.
-- A technically working result that misses a predeclared material threshold is REDESIGN.
-  External adoption, payment, retention, or maintainer approval remains
-  EXTERNAL_VALIDATION_REQUIRED until attributable evidence exists.
+Do not expand the packet, create speculative scaffolding, or mutate the roadmap. A planning gap may be returned as an advisory proposal for a human or authorized scheduler; it is never an automatic roadmap change.
+
+## Finite packet and session
+
+- One typed work item per session.
+- No more than 12 acceptance criteria.
+- No more than 8 declared outputs.
+- Modify only allowed paths and produce only declared outputs.
+- Treat explicit non-goals and stop conditions as binding.
+- Use finite turn, token, cost, retry, and elapsed-time limits. Zero never means unbounded.
+- At a session boundary, emit a truthful checkpoint or terminal state. Do not renew the session or widen scope merely because work remains.
+
+## Native-first decision
+
+Before adding proprietary behavior, identify what the complete approved native, bundled, or agent-assisted workflow already provides. State the exact decision-level gap and the evidence that would make the disposition NATIVE_WORKFLOW_SUFFICIENT or NO_INCREMENTAL_DECISION_VALUE. If no material gap remains, stop with that disposition; do not duplicate the native system.
+
+## Truth and authority boundaries
+
+Keep technical result, epistemic claim, operational decision, and commercial maturity separate. Use these technical states exactly where applicable: PASS, FAIL, UNKNOWN, INVALID_EVIDENCE, INVALID_ORACLE, INFRASTRUCTURE_ERROR, POLICY_BLOCKED, and EXPIRED. UNKNOWN is valid and must never be hidden or upgraded.
+
+Do not fabricate or infer customer demand, payment, adoption, external integration, human approval, hardware fault, root cause, or universal safety. Synthetic records must be labeled SYNTHETIC_TEST_ONLY. If external evidence is required, stop with WAITING_EXTERNAL. If human approval is required, bind the approval packet to the exact candidate SHA and artifact digests, list limitations and reviewer qualifications, and stop with WAITING_HUMAN. Never create the approval or external receipt yourself.
+
+## Findings
+
+Return at most 8 findings total. A blocking finding must be reproducible and use:
+
+    findingId:
+    severity:
+    blocking:
+    criterion:
+    fingerprint:
+    evidence:
+    reproduction:
+    expected:
+    observed:
+    ownerClass: PRODUCT | FACTORY | EXTERNAL | HUMAN
+    minimalRepair:
+
+Future enhancements, style preferences, and speculative risks are advisory, not blocking. When a fingerprint reaches its configured repetition limit, escalate and stop instead of reporting it as new.
 
 ## Dependency-aware execution
 
-Before substantial work, sketch the smallest useful dependency graph: each node has one
-objective, frozen inputs, an inspectable output, and explicit predecessors. Ask whether a node
-actually needs an earlier result. If it does not, it may run concurrently; if it does, wait for
-that exact predecessor instead of guessing from partial work.
+Honor the packet's acyclic dependency graph. Keep one mutating owner for the candidate. Read-only reviewers inspect a frozen candidate SHA and cannot alter it. A changed prerequisite taints its dependents until they are reverified. Treat Max quota as a shared resource and stay within the finite role budget. Parallelize only independent read-only work; never create concurrent mutation of the same candidate.
 
-- Keep one mutating owner for the candidate. Parallel workers are for independent read-only
-  investigation, primary-source retrieval, bounded log/test analysis, or blind counterexample
-  discovery. They must not edit the same worktree or integrate competing changes.
-- Give each worker only the criterion IDs, frozen candidate SHA, authority references, scope,
-  and output schema it needs. Require it to return source/artifact references, reproduction
-  commands, limitations, and a truthful status; summaries without inspectable evidence are not
-  inputs to product decisions.
-- Fan in through the owner. Check that every required predecessor passed, independently verify
-  material worker evidence, resolve contradictions, and only then mutate, synthesize, or claim a
-  criterion. A failed, stale, CONFLICT, UNKNOWN, or missing predecessor taints its dependents and
-  must never be silently converted into PASS.
-- Do not split work that shares substantial evolving context merely to create more nodes. Keep
-  implementation with its iterative tests, claim checking with the exact claim, migrations with
-  their ordering, and release with the exact candidate SHA.
-- Treat Max quota as a shared resource. Use a small number of non-duplicative workers only when
-  expected critical-path or independent-review value exceeds startup/context cost. On quota or
-  rate-limit pressure, preserve the graph and continue with the single owner after reset rather
-  than spawning retries.
+## Implementation and verification
 
-## Hard boundaries
+Implement the smallest complete behavior that satisfies the packet. Use typed interfaces, deterministic serialization, versioned schemas, explicit errors, redaction, and no silent fallback. Do not hide network activity, weaken tests, disable checks, swallow broad exceptions, expose secrets, or present placeholders, mocks, synthetic evidence, or unexecuted benchmarks as real outcomes.
 
-These are the only controller restrictions that outrank your implementation judgment:
+Where relevant, test positive, negative, boundary, malformed-input, tamper, UNKNOWN, failure, and regression cases. Trust-critical claims require the independent oracle or differential method named by the packet. An infrastructure failure is not a product FAIL.
 
-1. Use Claude Max OAuth only. Never add an API key, paid-credit route, overage, purchase, or
-   other incremental Anthropic/API spending.
-2. Do not modify protected source authority, credentials, hidden/private gates, OAuth/auth
-   controls, Git history, or release/push authority. Stay inside the authorized repository;
-   do not access unrelated computer data.
-3. Never fabricate, repair, discard, or reinterpret evidence to obtain PASS. UNKNOWN,
-   SKIPPED, INVALID_ORACLE, INFRASTRUCTURE_ERROR, and EXTERNAL_VALIDATION_REQUIRED stay
-   distinct. Do not replace a required real boundary with a mock and call it complete.
-4. Preserve candidate SHA, raw artifacts, provenance, falsifiers, value thresholds, and
-   user-visible limitations. A blocking claim must cite executable evidence.
+## Release and handoff
 
-Git staging, commits, main synchronization, private gates, and release are controller-owned.
-Make the product changes and report truthful evidence; a denied Git mutation is not a task
-failure.
+Do not force-push, rewrite unrelated history, push directly to main, merge trust/integration changes, or approve an external/commercial release. Preserve the exact base and candidate SHAs. Release only through a draft pull request under current policy.
 
-## Node result
-
-Return PASS only when the current node's outcome and evidence commands are complete. For an
-independent review, put every blocking issue in `review_findings` with severity, criterion,
-owner class, exact repair paths, and a reproducible counterexample. Advisory observations
-must use `blocking: false` and cannot control repair routing.
+Return the packet's structured handoff with work item, status, SHAs, outcome, changed files, acceptance and oracle evidence, gate results, native comparison, truth states, limitations, bounded findings, external evidence required, human approval required, rollback, and one next recommended action already within the approved roadmap.

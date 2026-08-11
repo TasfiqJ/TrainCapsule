@@ -3,9 +3,9 @@ planner:
   model: sonnet
   fallback_models: [opus]
   effort: high
-  max_turns: 200
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 24
+  max_budget_usd: 8.0
+  task_budget_tokens: 48000
   tools: [Read, Grep, Glob, Write, Edit, Bash, WebFetch, WebSearch, Agent]
   disallowed_tools: []
   permission_mode: acceptEdits
@@ -16,9 +16,9 @@ specification:
   model: opus
   fallback_models: [sonnet]
   effort: xhigh
-  max_turns: 200
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 32
+  max_budget_usd: 12.0
+  task_budget_tokens: 64000
   tools: [Read, Grep, Glob, Write, Edit, Bash, WebFetch, WebSearch, Agent]
   disallowed_tools: []
   permission_mode: acceptEdits
@@ -29,9 +29,9 @@ research:
   model: opus
   fallback_models: [sonnet]
   effort: xhigh
-  max_turns: 200
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 24
+  max_budget_usd: 8.0
+  task_budget_tokens: 48000
   tools: [Read, Grep, Glob, Write, Edit, Bash, WebFetch, WebSearch, Agent]
   disallowed_tools: []
   permission_mode: acceptEdits
@@ -42,9 +42,9 @@ builder:
   model: sonnet
   fallback_models: [opus]
   effort: max
-  max_turns: 200
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 64
+  max_budget_usd: 12.0
+  task_budget_tokens: 96000
   tools: [Read, Grep, Glob, Write, Edit, Bash, WebFetch, WebSearch, Agent]
   disallowed_tools: []
   permission_mode: acceptEdits
@@ -55,9 +55,9 @@ integration_scout:
   model: sonnet
   fallback_models: [opus]
   effort: high
-  max_turns: 100
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 24
+  max_budget_usd: 8.0
+  task_budget_tokens: 32000
   tools: [Read, Grep, Glob, Bash, ListAgents, SendMessage]
   disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
@@ -70,9 +70,9 @@ adversary:
   model: opus
   fallback_models: [sonnet]
   effort: max
-  max_turns: 100
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 32
+  max_budget_usd: 12.0
+  task_budget_tokens: 48000
   tools: [Read, Grep, Glob, Bash, WebFetch, WebSearch]
   disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
@@ -83,9 +83,9 @@ audit:
   model: sonnet
   fallback_models: [opus]
   effort: xhigh
-  max_turns: 80
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 24
+  max_budget_usd: 8.0
+  task_budget_tokens: 32000
   tools: [Read, Grep, Glob, Bash]
   disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
@@ -96,9 +96,9 @@ security:
   model: opus
   fallback_models: [sonnet]
   effort: max
-  max_turns: 120
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 32
+  max_budget_usd: 12.0
+  task_budget_tokens: 48000
   tools: [Read, Grep, Glob, Bash, WebFetch, WebSearch]
   disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
@@ -109,9 +109,9 @@ performance:
   model: sonnet
   fallback_models: [opus]
   effort: xhigh
-  max_turns: 100
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 24
+  max_budget_usd: 8.0
+  task_budget_tokens: 32000
   tools: [Read, Grep, Glob, Bash]
   disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
@@ -122,9 +122,9 @@ value_validator:
   model: sonnet
   fallback_models: [opus]
   effort: xhigh
-  max_turns: 100
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 24
+  max_budget_usd: 8.0
+  task_budget_tokens: 32000
   tools: [Read, Grep, Glob, Bash, WebFetch, WebSearch]
   disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
@@ -135,9 +135,9 @@ value_adversary:
   model: opus
   fallback_models: [sonnet]
   effort: max
-  max_turns: 100
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 24
+  max_budget_usd: 8.0
+  task_budget_tokens: 32000
   tools: [Read, Grep, Glob, Bash, WebFetch, WebSearch]
   disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
@@ -148,9 +148,9 @@ release:
   model: sonnet
   fallback_models: [opus]
   effort: xhigh
-  max_turns: 100
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 24
+  max_budget_usd: 8.0
+  task_budget_tokens: 32000
   tools: [Read, Grep, Glob, Bash]
   disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
@@ -161,9 +161,9 @@ recovery:
   model: opus
   fallback_models: [sonnet]
   effort: max
-  max_turns: 200
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 64
+  max_budget_usd: 12.0
+  task_budget_tokens: 96000
   tools: [Read, Grep, Glob, Write, Edit, Bash, WebFetch, WebSearch, Agent]
   disallowed_tools: []
   permission_mode: acceptEdits
@@ -174,9 +174,9 @@ factory_repair:
   model: opus
   fallback_models: [sonnet]
   effort: max
-  max_turns: 200
-  max_budget_usd: 1000.0
-  task_budget_tokens: null
+  max_turns: 64
+  max_budget_usd: 12.0
+  task_budget_tokens: 96000
   tools: [Read, Grep, Glob, Write, Edit, Bash, WebFetch, WebSearch, Agent]
   disallowed_tools: []
   permission_mode: acceptEdits

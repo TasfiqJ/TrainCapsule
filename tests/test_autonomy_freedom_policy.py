@@ -21,14 +21,14 @@ def test_live_autonomy_uses_finite_v3_limits() -> None:
     assert _finite_ceiling_exceeded(4, 3) is True
 
 
-def test_planners_are_instructed_to_deliver_complete_sellable_outcomes() -> None:
+def test_planners_are_instructed_to_deliver_one_bounded_v3_item() -> None:
     global_prompt = (ROOT / "prompts/global.md").read_text(encoding="utf-8")
     autonomous = (ROOT / "prompts/autonomous_planner.md").read_text(encoding="utf-8")
     planner = (ROOT / "prompts/task_packet_planner.md").read_text(encoding="utf-8")
 
-    assert "real production product" in global_prompt
-    assert "smallest complete sellable outcome" in global_prompt
-    assert "living plan" in autonomous
-    assert "one Claude owner" in autonomous
+    assert "exactly one bounded, trustworthy work item" in global_prompt
+    assert "Do not expand the packet" in global_prompt
+    assert "exactly one dependency-ready V3 work item" in autonomous
+    assert "do not promote or schedule them" in autonomous
     assert "no more than 12 acceptance criteria" in planner
-    assert "ordinary product and engineering decisions" in planner
+    assert "no more than 8 declared outputs" in planner

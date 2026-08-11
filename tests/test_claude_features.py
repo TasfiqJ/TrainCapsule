@@ -37,7 +37,7 @@ def _task(risk: RiskTier = RiskTier.TRUST_CORE) -> TaskPacket:
     )
 
 
-def test_claude_native_feature_policy_enables_renewable_production_work() -> None:
+def test_claude_native_feature_policy_uses_finite_v3_role_budget() -> None:
     features = load_claude_features(ROOT / "config/claude_features.yaml")
     roles = load_roles(ROOT / "config/roles.yaml")
     assert features.cross_session_messaging.enabled is True
@@ -47,8 +47,10 @@ def test_claude_native_feature_policy_enables_renewable_production_work() -> Non
     # The normal Agent tool is available; the separate Workflow tool is not assumed.
     assert features.dynamic_workflows.enabled is False
     scout = roles[RoleName.INTEGRATION_SCOUT]
-    assert scout.max_turns >= 20
-    assert scout.task_budget_tokens is None
+    assert 1 <= scout.max_turns <= 64
+    assert scout.max_budget_usd <= 12.0
+    assert scout.task_budget_tokens is not None
+    assert scout.task_budget_tokens <= 96_000
     assert features.integration_scout.enabled is False
     assert features.integration_scout.blocking_on_non_pass is False
 

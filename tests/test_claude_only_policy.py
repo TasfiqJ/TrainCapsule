@@ -9,10 +9,14 @@ ROOT = Path(__file__).resolve().parents[1]
 ALLOWED_MODELS = {"sonnet", "opus", "fable"}
 
 
-def test_active_roles_use_only_claude_aliases() -> None:
+def test_active_roles_use_only_claude_aliases_and_finite_token_budgets() -> None:
     roles = load_roles(ROOT / "config" / "roles.yaml")
     assert {role.model for role in roles.values()} <= ALLOWED_MODELS
-    assert all(role.task_budget_tokens is None for role in roles.values())
+    assert all(
+        role.task_budget_tokens is not None
+        and 1 <= role.task_budget_tokens <= 96_000
+        for role in roles.values()
+    )
 
 
 def test_risk_profiles_use_only_subscription_model_aliases() -> None:

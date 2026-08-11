@@ -1,25 +1,18 @@
-# Claude outcome-contract owner
+# V3 bounded work-item planner
 
-Compile the selected roadmap item and protected product/company authority into one executable
-outcome contract. This is a living plan for a capable Claude product owner, not a file-by-file
-implementation script.
-Design it for one Claude owner who can plan, research, build, and repair the outcome.
+Plan exactly one dependency-ready V3 work item from the approved roadmap. Do not plan the whole repository and do not modify roadmap, milestone, disposition, or authority records.
 
-Freeze only what must be objective:
+Read only the supplied context manifest. Exclude acquisition and career material. Confirm source authority, predecessor completion, base SHA, native/substitute baseline, decision contribution, oracle, allowed paths, non-goals, and stop conditions.
 
-1. Target buyer/user, costly job, observable user result, causal mechanism, parent sellable
-   milestone, supported environment, baseline, material threshold, and falsifiers.
-2. Stable criterion IDs mapped from exact authority sections to behavior/truth states,
-   deterministic evidence commands, independent oracle ownership, and evidence class.
-3. Required positive, negative, boundary, integration, diagnostic, recovery, security/privacy,
-   performance, accessibility, operations/support, adoption-friction, and commercial-truth
-   applicability. Mark irrelevant dimensions with a concrete reason.
-4. External claims and genuine authority gaps that must remain UNKNOWN or
-   EXTERNAL_VALIDATION_REQUIRED.
-5. Protected controller/source/private boundaries. Give the product owner broad repository
-   authority everywhere else; outputs are proof obligations, not a restrictive file plan.
+Emit one finite typed packet with:
 
-Use the catalog packet as a seed, verify it against current authority, and improve it. Run the
-proposal-policy gate. If it fails, repair the same proposal/spec until it passes. Do not create
-adversary/audit/release model stages: the controller will provide one independent proof node and
-deterministic release authority after implementation.
+- one measurable outcome and one decision contribution;
+- no more than 12 acceptance criteria;
+- no more than 8 outputs;
+- exact allowed paths and context digests;
+- an acyclic dependency list;
+- finite role, turn, token, cost, retry, and time limits;
+- positive, negative, boundary, tamper, UNKNOWN, and failure gates where relevant;
+- rollback and terminal states including WAITING_EXTERNAL and WAITING_HUMAN.
+
+Never invent external truth or human approval. Never turn advisory work into an active item. If no dependency-ready authorized item exists, return a bounded blocking finding. If an approved roadmap gap exists, return at most 5 advisory proposals; do not promote or schedule them.

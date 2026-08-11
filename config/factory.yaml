@@ -17,7 +17,7 @@ execution_mode: claude_led_nodes
 work_until_done: true
 disable_subscription_task_budget: true
 disable_max_oauth_budget_caps: true
-unsandbox_mutating_roles: true
+unsandbox_mutating_roles: false
 mutating_session_turn_floor: 200
 review_session_turn_floor: 80
 project_settings_only: false

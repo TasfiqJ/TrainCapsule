@@ -3,14 +3,28 @@ from __future__ import annotations
 from pathlib import Path
 
 from tcfactory.config import load_task
-from tcfactory.models import RoleName
+from tcfactory.models import AgentReport, ReviewFinding, RoleName, StageResult, Verdict
 from tcfactory.pipeline import (
+    blocking_review_owner,
     controller_owned_finding_paths,
     find_mutating_stage_for_findings,
     repository_finding_paths,
 )
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _review_result(findings: list[ReviewFinding]) -> StageResult:
+    return StageResult(
+        task_id="T002",
+        run_id="review",
+        role=RoleName.ADVERSARY,
+        attempt=1,
+        model="opus",
+        verdict=Verdict.FAIL,
+        report=AgentReport(verdict=Verdict.FAIL, summary="review", review_findings=findings),
+        artifact_dir="factory/artifacts/review",
+    )
 
 
 def _repo(tmp_path: Path) -> Path:
@@ -146,3 +160,47 @@ def test_controller_owned_gaps_are_separated_from_respecifiable_paths() -> None:
         "specs/tasks/T002.md",
         "tcfactory/research_policy.py",
     ]
+
+
+def test_external_owner_cannot_be_routed_to_a_product_mutator() -> None:
+    owner, blockers = blocking_review_owner(
+        _review_result(
+            [
+                ReviewFinding(
+                    summary="A real maintainer confirmation is required",
+                    blocking=True,
+                    severity="high",
+                    owner_class="external",
+                    repair_paths=["docs/evidence/T002.md"],
+                ),
+                ReviewFinding(
+                    summary="A product file could also be clarified",
+                    blocking=True,
+                    severity="medium",
+                    owner_class="product",
+                    repair_paths=["docs/evidence/T002.md"],
+                ),
+            ]
+        )
+    )
+
+    assert owner == "external"
+    assert len(blockers) == 2
+
+
+def test_factory_owner_outweighs_product_looking_repair_path() -> None:
+    owner, _ = blocking_review_owner(
+        _review_result(
+            [
+                ReviewFinding(
+                    summary="Controller routing misclassified this defect",
+                    blocking=True,
+                    severity="critical",
+                    owner_class="factory",
+                    repair_paths=["docs/evidence/T002.md"],
+                )
+            ]
+        )
+    )
+
+    assert owner == "factory"

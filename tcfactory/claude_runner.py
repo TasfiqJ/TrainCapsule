@@ -43,8 +43,9 @@ REPORT_CONTINUATION_MAX_TURNS = 4
 
 
 def subprocess_env_scrub_value(*, read_only: bool) -> str:
-    """Keep reviewers hardened without disabling configured writes for mutating roles."""
-    return "1" if read_only else "0"
+    """Strip controller credentials from every model-launched subprocess."""
+    del read_only
+    return "1"
 
 
 def writable_uv_cache_dir(worktree: Path) -> Path:
@@ -314,7 +315,7 @@ async def run_agent_stage(
             "TCF_SESSION_AUDIT_PATH": str((artifact_dir / "session-events.jsonl").resolve()),
             "TCF_STOP_FAILURE_PATH": str((artifact_dir / "stop-failures.jsonl").resolve()),
             # Keep uv's cache inside the candidate mount. This works for both hardened
-            # read-only reviews and normal unsandboxed production roles, and the ignored
+            # read-only reviews and broad sandboxed production roles, and the ignored
             # state directory cannot enter candidate diffs or commits.
             "UV_CACHE_DIR": str(writable_uv_cache_dir(worktree)),
             "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1" if read_only else "0",
@@ -324,8 +325,8 @@ async def run_agent_stage(
             "CLAUDE_CODE_MAX_RETRIES": "4",
             "CLAUDE_ASYNC_AGENT_STALL_TIMEOUT_MS": "180000",
             # The environment has already been stripped of credentials and paid API routes.
-            # SDK subprocess hardening stays on for reviewers, but mutating roles must retain
-            # the exact write authority granted by their tools, sandbox, and path hooks.
+            # SDK subprocess hardening removes controller credentials without reducing the
+            # repository write authority granted by the task and OS sandbox.
             "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": subprocess_env_scrub_value(read_only=read_only),
         }
     )

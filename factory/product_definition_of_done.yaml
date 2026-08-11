@@ -137,6 +137,23 @@
       "evidence_globs": [".factory/gate-results/product-proof/pilot-readiness/**/*"]
     }
   ],
+  "private_outcome_oracle_contract": {
+    "execution": "Candidate proof scripts and required commands are never completion authority and never run on the controller host. A private-owned driver installs the exact wheel and invokes it in a networkless, read-only, capability-dropped container that cannot access the private verifier.",
+    "hidden_inputs": [
+      "TCF_HIDDEN_NONCE",
+      "TCF_HIDDEN_INCIDENT_ID",
+      "TCF_HIDDEN_WORKLOAD",
+      "TCF_HIDDEN_EVIDENCE_DIR",
+      "TCF_HIDDEN_POLICY",
+      "TCF_HIDDEN_CHANGE",
+      "TCF_HIDDEN_CONTRACT",
+      "TCF_HIDDEN_ARTIFACT",
+      "TCF_HIDDEN_CORRUPT_CHECKPOINT"
+    ],
+    "machine_interface": "Every protected CLI operation supports --json and emits one JSON result with an explicit truth_state. Stateful commands accept --state-dir and artifact-producing commands accept --output. Doctor binds workload_id and workload_sha256; lock binds the same source; ingest and downstream artifacts bind incident and hidden evidence; analyze names last_consistent and first_inconsistent boundaries; repeated analysis emits a stable result_digest.",
+    "journey_protocol": "The private driver independently runs doctor, lock, ingest, analyze, experiment plan/run, reduce, corrupt-checkpoint recovery assessment, contract creation, valid and invalid qualification, customer export, integrity verification, tamper rejection, revocation, revoked-artifact rejection, backup/restore, checkpoint/rollback, repeatability, resource bounds, and pilot instrumentation. Recovery subcommands backup, restore, checkpoint, and rollback use --state-dir and --output. Exported pilot evidence records privacy-safe time_to_value, workflow_success, failure_reason, repeat_use, and support_correlation fields.",
+    "false_green_control": "Private randomized inputs, exact file hashes, cross-step identity bindings, non-pass counterexamples, restored-state byte equality, repeat-result equality, a 30-second representative bound, and direct artifact inspection determine the verdict. Candidate status strings, manifests, and self-authored proof scripts cannot make completion pass."
+  },
   "capability_evidence_required": [
     "Close loop captures, reduces, replays, localizes, and verifies a failure or recovery with explicit faithfulness limits.",
     "Qualify loop evaluates a controlled change against an applicable, unexpired contract and blocks false-green results.",

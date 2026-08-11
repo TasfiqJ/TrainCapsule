@@ -6,6 +6,7 @@ from pathlib import Path
 
 import pytest
 
+import tcfactory.value as value_module
 from tcfactory.models import (
     Gate,
     MetricDirection,
@@ -21,6 +22,16 @@ from tcfactory.value import ValueGateError, evaluate_value_contract, value_contr
 from tcfactory.value_policy import contract_for_task, load_value_policy
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _accept_privileged_path(_path: Path) -> None:
+    return None
+
+
+def _accept_external_signature(
+    *, receipt: Path, signature: Path, public_key: Path
+) -> None:
+    del receipt, signature, public_key
 
 
 def test_every_catalog_task_has_predeclared_value_contract() -> None:
@@ -220,6 +231,13 @@ def test_external_value_requires_trusted_exact_sha_attributable_receipt(
     }
     (receipts / f"{task.task_id}.json").write_text(json.dumps(receipt), encoding="utf-8")
     monkeypatch.setenv("TCF_EXTERNAL_VALUE_RECEIPT_DIR", str(receipts))
+    monkeypatch.setenv("TCF_EXTERNAL_VALUE_PUBLIC_KEY", str(tmp_path / "public.pem"))
+    monkeypatch.setattr(value_module, "_assert_privileged_read_only", _accept_privileged_path)
+    monkeypatch.setattr(
+        value_module,
+        "_verify_external_receipt_signature",
+        _accept_external_signature,
+    )
 
     result = evaluate_value_contract(repo_root=repo, task=task)
 
@@ -280,8 +298,81 @@ def test_external_value_rejects_wrong_task_or_self_authored_receipt(
         encoding="utf-8",
     )
     monkeypatch.setenv("TCF_EXTERNAL_VALUE_RECEIPT_DIR", str(receipts))
+    monkeypatch.setenv("TCF_EXTERNAL_VALUE_PUBLIC_KEY", str(tmp_path / "public.pem"))
+    monkeypatch.setattr(value_module, "_assert_privileged_read_only", _accept_privileged_path)
+    monkeypatch.setattr(
+        value_module,
+        "_verify_external_receipt_signature",
+        _accept_external_signature,
+    )
 
     result = evaluate_value_contract(repo_root=repo, task=task)
 
     assert result.assessment.status == ValueStatus.EXTERNAL_EVIDENCE_REQUIRED
     assert result.assessment.commercially_validated is False
+
+
+def test_external_receipt_signature_rejects_tampering(tmp_path: Path) -> None:
+    private_key = tmp_path / "private.pem"
+    public_key = tmp_path / "public.pem"
+    receipt = tmp_path / "T900.json"
+    signature = tmp_path / "T900.json.sig"
+    receipt.write_text('{"task_id":"T900"}\n', encoding="utf-8")
+    subprocess.run(
+        ["/usr/bin/openssl", "genpkey", "-algorithm", "ED25519", "-out", str(private_key)],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        [
+            "/usr/bin/openssl",
+            "pkey",
+            "-in",
+            str(private_key),
+            "-pubout",
+            "-out",
+            str(public_key),
+        ],
+        check=True,
+        capture_output=True,
+    )
+    subprocess.run(
+        [
+            "/usr/bin/openssl",
+            "pkeyutl",
+            "-sign",
+            "-inkey",
+            str(private_key),
+            "-rawin",
+            "-in",
+            str(receipt),
+            "-out",
+            str(signature),
+        ],
+        check=True,
+        capture_output=True,
+    )
+    value_module._verify_external_receipt_signature(  # pyright: ignore[reportPrivateUsage]
+        receipt=receipt,
+        signature=signature,
+        public_key=public_key,
+    )
+
+    receipt.write_text('{"task_id":"T900","paid":true}\n', encoding="utf-8")
+    with pytest.raises(ValueGateError, match="signature verification failed"):
+        value_module._verify_external_receipt_signature(  # pyright: ignore[reportPrivateUsage]
+            receipt=receipt,
+            signature=signature,
+            public_key=public_key,
+        )
+
+
+def test_external_truth_path_must_be_privileged_read_only(tmp_path: Path) -> None:
+    receipt = tmp_path / "receipt.json"
+    receipt.write_text("{}\n", encoding="utf-8")
+    receipt.chmod(0o666)
+
+    with pytest.raises(ValueGateError, match="root-owned"):
+        value_module._assert_privileged_read_only(  # pyright: ignore[reportPrivateUsage]
+            receipt
+        )

@@ -20,7 +20,7 @@ def test_provider_task_budget_uses_current_minimum() -> None:
 
 def test_only_read_only_roles_force_subprocess_environment_scrubbing() -> None:
     assert subprocess_env_scrub_value(read_only=True) == "1"
-    assert subprocess_env_scrub_value(read_only=False) == "0"
+    assert subprocess_env_scrub_value(read_only=False) == "1"
 
 
 def test_stages_get_a_sandbox_writable_uv_cache_inside_the_candidate_mount(

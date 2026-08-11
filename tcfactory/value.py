@@ -101,17 +101,25 @@ def _load_external_evidence(
     """
 
     root_value = os.getenv("TCF_EXTERNAL_VALUE_RECEIPT_DIR", "").strip()
+    public_key_value = os.getenv("TCF_EXTERNAL_VALUE_PUBLIC_KEY", "").strip()
     if not root_value:
         raise ValueGateError(
             "TCF_EXTERNAL_VALUE_RECEIPT_DIR is unset; external truth remains unverified"
         )
+    if not public_key_value:
+        raise ValueGateError(
+            "TCF_EXTERNAL_VALUE_PUBLIC_KEY is unset; external truth remains unverified"
+        )
     root = Path(root_value).expanduser().resolve()
+    public_key = Path(public_key_value).expanduser().resolve()
     try:
         root.relative_to(repo_root.resolve())
     except ValueError:
         pass
     else:
         raise ValueGateError("External value receipts must live outside the candidate repository")
+    for protected in (root, public_key):
+        _assert_privileged_read_only(protected)
     path = (root / f"{task.task_id}.json").resolve()
     try:
         path.relative_to(root)
@@ -119,6 +127,14 @@ def _load_external_evidence(
         raise ValueGateError("External value receipt path escapes its trusted root") from exc
     if not path.is_file():
         raise ValueGateError(f"Trusted external value receipt is missing for {task.task_id}")
+    signature = path.with_suffix(path.suffix + ".sig")
+    for protected in (path, signature):
+        _assert_privileged_read_only(protected)
+    _verify_external_receipt_signature(
+        receipt=path,
+        signature=signature,
+        public_key=public_key,
+    )
     try:
         evidence = ValueEvidence.model_validate_json(path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
@@ -129,6 +145,58 @@ def _load_external_evidence(
             f"{task.value_contract.primary_metric!r}"
         )
     return evidence, root, path
+
+
+def _assert_privileged_read_only(path: Path) -> None:
+    """Require external truth material to be immutable to the unprivileged factory account."""
+
+    for protected in (path, *path.parents):
+        try:
+            metadata = protected.stat()
+        except OSError as exc:
+            raise ValueGateError(
+                f"Trusted external evidence path is unavailable: {protected}"
+            ) from exc
+        if metadata.st_uid != 0 or metadata.st_mode & 0o022:
+            raise ValueGateError(
+                "Trusted external evidence and every parent must be root-owned and not "
+                f"group/world writable: {protected}"
+            )
+
+
+def _verify_external_receipt_signature(
+    *, receipt: Path, signature: Path, public_key: Path
+) -> None:
+    """Verify an Ed25519 detached signature using the launcher-pinned public key."""
+
+    key_type = subprocess.run(
+        ["/usr/bin/openssl", "pkey", "-pubin", "-in", str(public_key), "-text", "-noout"],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if key_type.returncode != 0 or "ED25519" not in (key_type.stdout + key_type.stderr).upper():
+        raise ValueGateError("External value public key is not a valid Ed25519 public key")
+    verified = subprocess.run(
+        [
+            "/usr/bin/openssl",
+            "pkeyutl",
+            "-verify",
+            "-pubin",
+            "-inkey",
+            str(public_key),
+            "-rawin",
+            "-in",
+            str(receipt),
+            "-sigfile",
+            str(signature),
+        ],
+        text=True,
+        capture_output=True,
+        check=False,
+    )
+    if verified.returncode != 0:
+        raise ValueGateError("External value receipt signature verification failed")
 
 
 def value_contract_digest(contract: ValueContract) -> str:
@@ -291,6 +359,7 @@ def _verify_external_evidence(
             raise ValueGateError(
                 f"External artifact escapes the trusted receipt root: {raw}"
             ) from exc
+        _assert_privileged_read_only(path)
         expected_hash = evidence.artifact_hashes.get(raw)
         if not expected_hash or len(expected_hash) != 64:
             raise ValueGateError(f"External artifact has no valid SHA-256: {raw}")

@@ -51,6 +51,7 @@ from .models import (
     PipelineCheckpoint,
     PipelineState,
     QuotaPauseRecord,
+    ReviewFinding,
     RoleConfig,
     RoleName,
     Stage,
@@ -616,6 +617,29 @@ def findings_from_result(result: StageResult) -> list[str]:
     if not findings:
         findings.append(f"Stage {result.role.value} returned verdict {result.verdict.value}.")
     return findings
+
+
+def blocking_review_owner(
+    result: StageResult,
+) -> tuple[str | None, list[ReviewFinding]]:
+    """Return the fail-closed repair owner declared by structured blocking findings.
+
+    External truth outranks every mutator, and factory ownership outranks product paths.
+    This prevents a malformed or mixed report from gaining product write authority merely
+    because its prose happens to mention a writable repository file.
+    """
+
+    if result.report is None:
+        return None, []
+    blocking = [finding for finding in result.report.review_findings if finding.blocking]
+    owners = {finding.owner_class for finding in blocking}
+    if "external" in owners:
+        return "external", blocking
+    if "factory" in owners:
+        return "factory", blocking
+    if "product" in owners:
+        return "product", blocking
+    return None, blocking
 
 
 def apply_scout_verdict(
@@ -1682,6 +1706,52 @@ async def run_pipeline(
                     or checkpoint.repair_cycles < task.repair.max_cycles
                 )
             ):
+                declared_owner, structured_blockers = blocking_review_owner(result)
+                if declared_owner == "external":
+                    detail = (
+                        "external_evidence_required: Independent verifier identified an "
+                        "irreducible external-truth requirement: "
+                        + " | ".join(item.summary for item in structured_blockers)
+                    )
+                    checkpoint.state = PipelineState.BLOCKED
+                    checkpoint.error = detail
+                    checkpoint_store.save(checkpoint)
+                    append_event(
+                        config.resolve(repo_root, config.event_log_path),
+                        event="external_evidence_required",
+                        component="pipeline",
+                        task_id=task.task_id,
+                        run_id=run_id,
+                        role=stage.role.value,
+                        detail=detail,
+                    )
+                    raise PipelineBlocked(detail)
+                if declared_owner == "factory":
+                    declared_paths = sorted(
+                        {
+                            path
+                            for item in structured_blockers
+                            if item.owner_class == "factory"
+                            for path in item.repair_paths
+                        }
+                    )
+                    detail = (
+                        f"{FACTORY_REPAIR_SCOPE_MARKER}: Reviewer {stage.role.value} "
+                        "assigned a blocking defect to controller-owned factory repair"
+                        + (f" at {', '.join(declared_paths)}" if declared_paths else "")
+                        + ". Preserve the product candidate; do not route this finding to a "
+                        "product mutator."
+                    )
+                    append_event(
+                        config.resolve(repo_root, config.event_log_path),
+                        event="factory_repair_owner_declared",
+                        component="pipeline",
+                        task_id=task.task_id,
+                        run_id=run_id,
+                        role=stage.role.value,
+                        detail=detail,
+                    )
+                    raise PipelineFailure(detail)
                 routing = route_repair_findings(
                     repo_root=repo_root,
                     task=task,

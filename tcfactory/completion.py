@@ -1,9 +1,7 @@
 from __future__ import annotations
 
-import hashlib
 import json
 import os
-import shutil
 from pathlib import Path
 from typing import Any, cast
 
@@ -46,51 +44,6 @@ def _proof_root(repo_root: Path, raw: object) -> Path:
     return root
 
 
-def _validate_proof_manifest(*, root: Path, proof_id: str, candidate_sha: str) -> str | None:
-    manifest_path = root / "manifest.json"
-    if not manifest_path.is_file():
-        return f"Outcome proof {proof_id!r} produced no manifest.json"
-    try:
-        payload = json.loads(manifest_path.read_text(encoding="utf-8"))
-    except (OSError, json.JSONDecodeError) as exc:
-        return f"Outcome proof {proof_id!r} manifest is unreadable: {exc}"
-    if not isinstance(payload, dict):
-        return f"Outcome proof {proof_id!r} manifest is not a mapping"
-    typed_payload = cast(dict[str, object], payload)
-    expected = {
-        "schema_version": "traincapsule.product-proof/v1",
-        "proof_id": proof_id,
-        "candidate_sha": candidate_sha,
-        "status": "pass",
-    }
-    for key, value in expected.items():
-        if typed_payload.get(key) != value:
-            return f"Outcome proof {proof_id!r} manifest has wrong {key}"
-    for key in ("environment_digest", "oracle_version"):
-        observed = typed_payload.get(key)
-        if not isinstance(observed, str) or not observed.strip():
-            return f"Outcome proof {proof_id!r} manifest has no {key}"
-    artifacts = typed_payload.get("artifacts")
-    if not isinstance(artifacts, dict) or not artifacts:
-        return f"Outcome proof {proof_id!r} manifest has no hashed artifacts"
-    for raw_path, raw_digest in cast(dict[object, object], artifacts).items():
-        if not isinstance(raw_path, str) or not isinstance(raw_digest, str):
-            return f"Outcome proof {proof_id!r} manifest has an invalid artifact entry"
-        path = (root / raw_path).resolve()
-        try:
-            path.relative_to(root)
-        except ValueError:
-            return f"Outcome proof {proof_id!r} artifact escapes evidence_root: {raw_path}"
-        if (
-            len(raw_digest) != 64
-            or any(char not in "0123456789abcdef" for char in raw_digest)
-            or not path.is_file()
-            or hashlib.sha256(path.read_bytes()).hexdigest() != raw_digest
-        ):
-            return f"Outcome proof {proof_id!r} artifact is missing or has wrong digest: {raw_path}"
-    return None
-
-
 def load_definition(repo_root: Path, config: FactoryConfig) -> dict[str, Any]:
     path = config.resolve(repo_root, config.definition_of_done_path)
     if not path.exists():
@@ -106,6 +59,7 @@ def deterministic_completion_check(
     definition: dict[str, Any],
 ) -> list[str]:
     failures: list[str] = []
+    definition_version = int(definition.get("version", 1))
     for value in cast(list[object], definition.get("required_paths", [])):
         path = repo_root / str(value)
         if not path.exists():
@@ -124,6 +78,11 @@ def deterministic_completion_check(
         else:
             failures.append(f"Invalid required_commands entry: {item!r}")
             continue
+        if not command.strip():
+            failures.append(f"Completion command {name!r} is empty")
+            continue
+        if definition_version >= 3:
+            continue
         completed = run_command(
             ["bash", "-lc", command],
             cwd=repo_root,
@@ -136,10 +95,11 @@ def deterministic_completion_check(
                 f"Completion command {name!r} failed ({completed.returncode}): {detail}"
             )
 
-    # Version 3 definitions promote product/value claims from auditor prompt prose to
-    # executable, criterion-addressed journey proofs. These commands are controller-owned;
-    # product work must produce their raw artifacts rather than declaring itself complete.
-    if int(definition.get("version", 1)) >= 3:
+    # Version 3 records the candidate's journey-evidence obligations, but the controller
+    # deliberately does not execute candidate-authored proof commands.  Product code must
+    # never run with access to the private verifier and then certify its own PASS.  Exact
+    # completion is decided later by the external hidden oracle in an isolated container.
+    if definition_version >= 3:
         proofs = cast(list[object], definition.get("outcome_proofs", []))
         if not proofs:
             failures.append("Version 3 completion definition has no outcome_proofs")
@@ -169,47 +129,11 @@ def deterministic_completion_check(
             except CompletionBlocked as exc:
                 failures.append(f"Outcome proof {proof_id!r}: {exc}")
                 continue
-            if evidence_root.exists():
-                shutil.rmtree(evidence_root)
-            evidence_root.mkdir(parents=True, exist_ok=True)
-            candidate_sha = current_sha(repo_root)
-            completed = run_command(
-                ["bash", "-lc", command],
-                cwd=repo_root,
-                check=False,
-                timeout=int(str(proof.get("timeout_seconds", 1800))),
-                env={
-                    "TCF_PRODUCT_PROOF_OUTPUT_DIR": str(evidence_root),
-                    "TCF_PRODUCT_PROOF_CANDIDATE_SHA": candidate_sha,
-                    "TCF_PRODUCT_PROOF_ID": proof_id,
-                },
-            )
-            if completed.returncode != 0:
-                detail = (completed.stderr or completed.stdout)[-1500:]
-                failures.append(
-                    f"Outcome proof {proof_id!r} failed ({completed.returncode}): {detail}"
-                )
-                continue
-            manifest_error = _validate_proof_manifest(
-                root=evidence_root,
-                proof_id=proof_id,
-                candidate_sha=candidate_sha,
-            )
-            if manifest_error:
-                failures.append(manifest_error)
-                continue
+            root_relative = evidence_root.relative_to(repo_root.resolve()).as_posix()
             for pattern in evidence_globs:
-                matches = [path.resolve() for path in repo_root.glob(pattern) if path.is_file()]
-                inside_root: list[Path] = []
-                for path in matches:
-                    try:
-                        path.relative_to(evidence_root)
-                    except ValueError:
-                        continue
-                    inside_root.append(path)
-                if not inside_root:
+                if not pattern.startswith(root_relative + "/"):
                     failures.append(
-                        f"Outcome proof {proof_id!r} produced no evidence matching {pattern}"
+                        f"Outcome proof {proof_id!r} evidence glob escapes evidence_root: {pattern}"
                     )
     return failures
 

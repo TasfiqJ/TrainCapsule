@@ -388,7 +388,7 @@ class FactoryConfig(BaseModel):
     work_until_done: bool = True
     disable_subscription_task_budget: bool = True
     disable_max_oauth_budget_caps: bool = True
-    unsandbox_mutating_roles: bool = True
+    unsandbox_mutating_roles: bool = False
     mutating_session_turn_floor: int = Field(default=200, ge=25, le=200)
     review_session_turn_floor: int = Field(default=80, ge=10, le=200)
     project_settings_only: bool = True

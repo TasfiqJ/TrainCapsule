@@ -1,17 +1,21 @@
 from __future__ import annotations
 
 import json
+import os
+import subprocess
 from pathlib import Path
+
+import pytest
 
 
 def test_project_settings_protect_controller_credentials() -> None:
     settings = json.loads(Path(".claude/settings.json").read_text(encoding="utf-8"))
     assert settings["forceLoginMethod"] == "claudeai"
     sandbox = settings["sandbox"]
-    # Mutating production roles run like normal Claude Code sessions; the controller
-    # still launches independent reviewers with an explicit SDK sandbox.
-    assert sandbox["enabled"] is False
-    assert sandbox["allowUnsandboxedCommands"] is True
+    # Mutating roles retain the whole authorized repository while the OS boundary keeps
+    # private gates, credentials, Windows, and unrelated host paths unreachable.
+    assert sandbox["enabled"] is True
+    assert sandbox["allowUnsandboxedCommands"] is False
 
     denied_reads = set(sandbox["filesystem"]["denyRead"])
     assert "~/.config/traincapsule" in denied_reads
@@ -27,3 +31,25 @@ def test_project_settings_protect_controller_credentials() -> None:
 
     matchers = {item["matcher"] for item in settings["hooks"]["PreToolUse"]}
     assert "Read|Grep|Glob|Write|Edit|Bash|WebFetch|WebSearch" in matchers
+
+
+@pytest.mark.parametrize("name", ["session_audit.py", "stop_failure_checkpoint.py"])
+def test_hooks_run_with_wsl_system_python(tmp_path: Path, name: str) -> None:
+    output = tmp_path / f"{name}.jsonl"
+    environment = {
+        **os.environ,
+        "TCF_SESSION_AUDIT_PATH": str(output),
+        "TCF_STOP_FAILURE_PATH": str(output),
+    }
+
+    completed = subprocess.run(
+        ["/usr/bin/python3", f".claude/hooks/{name}"],
+        input=json.dumps({"hook_event_name": "compatibility-test"}),
+        text=True,
+        capture_output=True,
+        check=False,
+        env=environment,
+    )
+
+    assert completed.returncode == 0, completed.stderr
+    assert json.loads(output.read_text(encoding="utf-8"))["event"] == "compatibility-test"

@@ -33,7 +33,11 @@ from .models import (
     QueuePauseMetadata,
 )
 from .observability import append_event, write_heartbeat
-from .pipeline import STRUCTURED_OUTPUT_FAULT_MARKERS, TURN_CEILING_MARKERS
+from .pipeline import (
+    FACTORY_REPAIR_SCOPE_MARKER,
+    STRUCTURED_OUTPUT_FAULT_MARKERS,
+    TURN_CEILING_MARKERS,
+)
 from .planner import archive_failed_packet, create_and_promote_task_packet
 from .queue import enqueue_task, process_one, promote_due_paused, queue_dirs, reconcile_running
 from .quota import AuthenticationPause, QuotaLimitPause
@@ -80,6 +84,12 @@ def is_external_evidence_block(error: str) -> bool:
 
     normalized = error.lower()
     return any(marker in normalized for marker in _EXTERNAL_EVIDENCE_BLOCK_MARKERS)
+
+
+def is_factory_repair_required(error: str) -> bool:
+    """Recognize a protected controller defect that task re-planning cannot fix."""
+
+    return FACTORY_REPAIR_SCOPE_MARKER in error.lower()
 
 
 def _queue_block_error_path(repo_root: Path, config: FactoryConfig, task_id: str) -> Path:
@@ -752,6 +762,21 @@ async def respec_failed_item(
         except ValueError:
             evidence_path = str(failed_error_path)
     task_path = repo_root / (item.packet_path or f"tasks/{item.task_id}.yaml")
+    if is_factory_repair_required(failed_error):
+        reason = (
+            "Verified factory self-repair is required for a protected controller-owned "
+            "review finding; task re-specification cannot authorize that repair."
+        )
+        item.status = "blocked"
+        item.terminal_blocked = True
+        item.infrastructure_recoveries = 0
+        if reason not in item.notes:
+            item.notes.append(reason)
+        return RespecOutcome(
+            changed=False,
+            block_reason=reason,
+            evidence_path=evidence_path,
+        )
     value_failure = any(
         marker in failed_error.lower()
         for marker in (

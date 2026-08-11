@@ -32,6 +32,7 @@ from .models import (
 from .pipeline import run_pipeline
 from .risk import apply_risk_profile, effective_risk, load_risk_profiles, planning_pipeline
 from .stage_policy import (
+    PRODUCT_PROTECTED_PATHS,
     REVIEW_ROLES,
     apply_objective_stage_contracts,
     objective_pipeline_errors,
@@ -42,33 +43,10 @@ class TaskPacketPolicyError(RuntimeError):
     pass
 
 
-_PROTECTED_FACTORY_PATHS = {
-    ".claude/**",
-    "config/**",
-    "prompts/**",
-    "tcfactory/**",
-    "schemas/**",
-    "factory/state/**",
-    "factory/queue/**",
-    "factory/feature_ledger.yaml",
-    "factory/product_definition_of_done.yaml",
-    "factory/task_catalog.yaml",
-    "docs/source-of-truth/**",
-    "docs/CONTEXT_INDEX.yaml",
-    "config/risk_profiles.yaml",
-    "config/context.yaml",
-    "config/github.yaml",
-    "scripts/gates/**",
-    "Control-TrainCapsuleBuilder.ps1",
-    "Install-TrainCapsuleAutonomousBuilder.ps1",
-    "bootstrap/private-gates/**",
-}
-
-
 def add_protected_path_baseline(packet: TaskPacket) -> TaskPacket:
     """Inject controller-owned protected paths into every writable product stage."""
     pipeline: list[Stage] = []
-    baseline = sorted(_PROTECTED_FACTORY_PATHS)
+    baseline = sorted(PRODUCT_PROTECTED_PATHS)
     for stage in packet.pipeline:
         if stage.read_only is True:
             pipeline.append(stage)
@@ -390,14 +368,16 @@ def validate_product_task_packet(
         if stage.permission_mode == "bypassPermissions":
             errors.append(f"stage {stage.role.value} may not use bypassPermissions")
         if stage.read_only is not True:
-            missing_forbidden = sorted(_PROTECTED_FACTORY_PATHS - set(stage.forbidden_paths))
+            missing_forbidden = sorted(
+                PRODUCT_PROTECTED_PATHS - set(stage.forbidden_paths)
+            )
             if missing_forbidden:
                 errors.append(
                     f"writable stage {stage.role.value} does not forbid protected paths: "
                     f"{missing_forbidden}"
                 )
         for allowed in stage.allowed_paths:
-            if allowed in _PROTECTED_FACTORY_PATHS or allowed.startswith("factory/state"):
+            if allowed in PRODUCT_PROTECTED_PATHS or allowed.startswith("factory/state"):
                 errors.append(
                     f"stage {stage.role.value} attempts to write protected path {allowed}"
                 )

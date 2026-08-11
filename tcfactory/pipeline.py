@@ -62,7 +62,11 @@ from .provenance import append_provenance
 from .quality_policy import QualityPolicyError, enforce_candidate_quality
 from .quota import AuthenticationPause, QuotaLimitPause
 from .risk import with_working_token_reserve
-from .stage_policy import apply_objective_stage_contracts, objective_pipeline_errors
+from .stage_policy import (
+    PRODUCT_PROTECTED_PATHS,
+    apply_objective_stage_contracts,
+    objective_pipeline_errors,
+)
 from .util import path_matches, run_command, utc_stamp, write_json
 from .value import ValueGateError, evaluate_value_contract
 
@@ -109,6 +113,7 @@ STRUCTURED_OUTPUT_FAULT_MARKERS = (
     "terminal_reason=structured_output_retry_exhausted",
     "subtype=error_max_structured_output_retries",
 )
+FACTORY_REPAIR_SCOPE_MARKER = "factory_repair_required"
 FINDING_PATH_RE = re.compile(
     r"(?<![A-Za-z0-9_.-])((?:[A-Za-z0-9_.()\-]+/)+[A-Za-z0-9_.()\-]+)"
 )
@@ -384,6 +389,32 @@ def repository_finding_paths(repo_root: Path, findings: list[str]) -> list[str]:
     return sorted(paths)
 
 
+def _policy_path_matches(path: str, patterns: list[str] | frozenset[str]) -> bool:
+    """Match a path policy, including a cited recursive-directory root.
+
+    Reviewers often cite ``docs/evidence/T002`` or ``scripts/gates`` as a repair
+    surface.  ``path_matches`` correctly matches files below ``/**`` but the directory
+    root itself is not a child, so recognize that equivalent citation explicitly.
+    """
+
+    if path_matches(path, list(patterns)):
+        return True
+    normalized = path.replace("\\", "/").rstrip("/")
+    return any(
+        pattern.replace("\\", "/").endswith("/**")
+        and normalized == pattern.replace("\\", "/")[:-3].rstrip("/")
+        for pattern in patterns
+    )
+
+
+def controller_owned_finding_paths(paths: list[str]) -> list[str]:
+    """Return findings that product-task re-specification can never authorize."""
+
+    return sorted(
+        path for path in paths if _policy_path_matches(path, PRODUCT_PROTECTED_PATHS)
+    )
+
+
 def find_mutating_stage_for_findings(
     *, repo_root: Path, task: TaskPacket, findings: list[str]
 ) -> tuple[Stage, list[str]]:
@@ -409,8 +440,8 @@ def find_mutating_stage_for_findings(
             {
                 path
                 for path in paths
-                if path_matches(path, stage.allowed_paths)
-                and not path_matches(path, stage.forbidden_paths)
+                if _policy_path_matches(path, stage.allowed_paths)
+                and not _policy_path_matches(path, stage.forbidden_paths)
             },
         )
         for stage in candidates
@@ -1526,6 +1557,27 @@ async def run_pipeline(
                     findings=findings,
                 )
                 if scope_gaps:
+                    controller_gaps = controller_owned_finding_paths(scope_gaps)
+                    if controller_gaps:
+                        detail = (
+                            f"{FACTORY_REPAIR_SCOPE_MARKER}: Reviewer {stage.role.value} "
+                            "identified protected controller-owned repair targets: "
+                            f"{', '.join(controller_gaps)}. Preserve the product candidate and "
+                            "route this failure to verified factory self-repair without consuming "
+                            "another task specification revision. Repair controller "
+                            "classification/routing; do not authorize the product task to edit "
+                            "these protected paths."
+                        )
+                        append_event(
+                            config.resolve(repo_root, config.event_log_path),
+                            event="factory_repair_scope_gap",
+                            component="pipeline",
+                            task_id=task.task_id,
+                            run_id=run_id,
+                            role=stage.role.value,
+                            detail=detail,
+                        )
+                        raise PipelineFailure(detail)
                     detail = (
                         f"Reviewer {stage.role.value} identified repair targets outside every "
                         f"writable stage: {', '.join(scope_gaps)}. Automatic task "

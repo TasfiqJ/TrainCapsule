@@ -5,6 +5,7 @@ from pathlib import Path
 from tcfactory.config import load_task
 from tcfactory.models import RoleName
 from tcfactory.pipeline import (
+    controller_owned_finding_paths,
     find_mutating_stage_for_findings,
     repository_finding_paths,
 )
@@ -15,6 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 def _repo(tmp_path: Path) -> Path:
     for relative in (
         "docs/research/T002_name_trademark_check.md",
+        "docs/evidence/T002/manifest.json",
         "scripts/gates/output_and_integration_gate.py",
         "tasks/T002.yaml",
     ):
@@ -116,3 +118,30 @@ def test_repair_routing_respects_forbidden_paths(tmp_path: Path) -> None:
 
     assert stage.role == RoleName.BUILDER
     assert gaps == ["scripts/gates/output_and_integration_gate.py"]
+
+
+def test_recursive_allowed_path_covers_a_cited_directory_root(tmp_path: Path) -> None:
+    repo = _repo(tmp_path)
+    task = load_task(ROOT / "tasks/T002.yaml")
+
+    stage, gaps = find_mutating_stage_for_findings(
+        repo_root=repo,
+        task=task,
+        findings=["Repair the evidence bundle at docs/evidence/T002 before review."],
+    )
+
+    assert stage.role == RoleName.RESEARCH
+    assert gaps == []
+
+
+def test_controller_owned_gaps_are_separated_from_respecifiable_paths() -> None:
+    paths = [
+        "scripts/gates",
+        "tcfactory/research_policy.py",
+        "specs/tasks/T002.md",
+    ]
+
+    assert controller_owned_finding_paths(paths) == [
+        "scripts/gates",
+        "tcfactory/research_policy.py",
+    ]

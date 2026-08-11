@@ -25,6 +25,34 @@ REVIEW_ROLES = {
     RoleName.COMPLETION_ADJUDICATOR,
 }
 
+
+# Product-task agents must never rewrite controller policy, authority, private gates,
+# or durable controller state.  Keep this baseline in a dependency-light module so
+# planning and runtime repair routing classify the same paths.
+PRODUCT_PROTECTED_PATHS = frozenset(
+    {
+        ".claude/**",
+        "config/**",
+        "prompts/**",
+        "tcfactory/**",
+        "schemas/**",
+        "factory/state/**",
+        "factory/queue/**",
+        "factory/feature_ledger.yaml",
+        "factory/product_definition_of_done.yaml",
+        "factory/task_catalog.yaml",
+        "docs/source-of-truth/**",
+        "docs/CONTEXT_INDEX.yaml",
+        "config/risk_profiles.yaml",
+        "config/context.yaml",
+        "config/github.yaml",
+        "scripts/gates/**",
+        "Control-TrainCapsuleBuilder.ps1",
+        "Install-TrainCapsuleAutonomousBuilder.ps1",
+        "bootstrap/private-gates/**",
+    }
+)
+
 COMMON_OBJECTIVE_CRITERIA = (
     "Bind every conclusion to the exact candidate SHA, authoritative source, acceptance-criterion ID, and independently inspectable evidence path or command.",
     "Classify authority gaps and unsupported conclusions as UNKNOWN or BLOCKED; confidence, polish, file presence, and test count are never evidence by themselves.",

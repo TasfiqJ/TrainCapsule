@@ -20,6 +20,7 @@ import pytest
 from tcfactory.autopilot import (
     RespecOutcome,
     _verified_repair_intent,  # pyright: ignore[reportPrivateUsage]
+    is_factory_repair_required,
     recover_task_after_verified_repair,
     respec_block_reason,
     respec_failed_item,
@@ -29,6 +30,7 @@ from tcfactory.checkpoints import CheckpointStore, new_checkpoint
 from tcfactory.config import load_factory_config
 from tcfactory.feature_ledger import FeatureItem, FeatureLedger, save_feature_ledger
 from tcfactory.models import AutonomyConfig, AutonomyState, PipelineState
+from tcfactory.pipeline import FACTORY_REPAIR_SCOPE_MARKER
 from tcfactory.queue import queue_dirs
 
 CEILING_NOTE = "Automatic re-specification ceiling reached."
@@ -131,6 +133,29 @@ def test_value_redesign_ceiling_reports_its_own_cause(tmp_path: Path) -> None:
     assert "Material-value redesign ceiling reached" in outcome.block_reason
     assert "Material-value redesign ceiling reached" in reason
     assert outcome.evidence_path == "factory/queue/failed/T001.error.txt"
+
+
+def test_controller_scope_gap_routes_to_factory_repair_without_new_revision(
+    tmp_path: Path,
+) -> None:
+    repo = _repo(tmp_path)
+    item = _item(revisions=9, notes=[])
+    error = (
+        f"PipelineFailure: {FACTORY_REPAIR_SCOPE_MARKER}: Reviewer adversary identified "
+        "protected controller-owned repair targets: scripts/gates, "
+        "tcfactory/research_policy.py."
+    )
+
+    outcome = _run_respec(repo, item, error)
+
+    assert is_factory_repair_required(error)
+    assert outcome.changed is False
+    assert outcome.block_reason is not None
+    assert "factory self-repair" in outcome.block_reason
+    assert outcome.evidence_path == "factory/queue/failed/T001.error.txt"
+    assert item.status == "blocked"
+    assert item.terminal_blocked is True
+    assert item.revisions == 9
 
 
 def test_zero_respec_and_value_limits_mean_work_until_done(

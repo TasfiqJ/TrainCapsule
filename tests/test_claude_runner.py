@@ -1,8 +1,6 @@
 from pathlib import Path
 from types import SimpleNamespace
 
-import pytest
-
 from tcfactory.claude_runner import (
     needs_report_continuation,
     provider_compatible_task_budget,
@@ -25,18 +23,22 @@ def test_only_read_only_roles_force_subprocess_environment_scrubbing() -> None:
     assert subprocess_env_scrub_value(read_only=False) == "0"
 
 
-def test_stages_get_a_reusable_writable_uv_cache_outside_the_candidate_tree(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def test_stages_get_a_sandbox_writable_uv_cache_inside_the_candidate_mount(
+    tmp_path: Path,
 ) -> None:
-    monkeypatch.setattr("tcfactory.claude_runner.tempfile.tempdir", str(tmp_path))
+    cache = writable_uv_cache_dir(tmp_path)
 
-    cache = writable_uv_cache_dir(tmp_path / "TrainCapsule")
-
-    assert cache == tmp_path / "traincapsule-factory/uv-cache/TrainCapsule"
+    assert cache == tmp_path / "factory/state/uv-cache"
     assert cache.is_dir()
     probe = cache / "write-probe"
     probe.write_text("ok", encoding="utf-8")
     assert probe.read_text(encoding="utf-8") == "ok"
+
+
+def test_sandbox_uv_cache_parent_is_ignored_by_candidate_git_state() -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+
+    assert "factory/state/" in (repo_root / ".gitignore").read_text(encoding="utf-8").splitlines()
 
 
 def test_late_plain_peer_result_does_not_replace_structured_result() -> None:

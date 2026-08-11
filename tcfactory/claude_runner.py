@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 import json
-import tempfile
 from dataclasses import asdict, is_dataclass, replace
 from datetime import UTC, datetime
 from pathlib import Path
@@ -48,12 +47,15 @@ def subprocess_env_scrub_value(*, read_only: bool) -> str:
     return "1" if read_only else "0"
 
 
-def writable_uv_cache_dir(repo_root: Path) -> Path:
-    """Give bounded stages one reusable writable cache outside the candidate tree."""
+def writable_uv_cache_dir(worktree: Path) -> Path:
+    """Give a bounded stage a sandbox-writable cache ignored by candidate Git state.
 
-    path = (
-        Path(tempfile.gettempdir()) / "traincapsule-factory" / "uv-cache" / repo_root.resolve().name
-    )
+    Claude's Linux sandbox exposes the candidate worktree as writable but mounts host
+    ``/tmp`` and the account home read-only.  The repository ignores this directory, so
+    uv can operate without changing the candidate or escaping the sandbox boundary.
+    """
+
+    path = worktree.resolve() / "factory/state/uv-cache"
     path.mkdir(parents=True, exist_ok=True)
     return path
 
@@ -277,11 +279,10 @@ async def run_agent_stage(
             "TCF_MESSAGE_AUDIT_PATH": str((artifact_dir / "peer-messages.jsonl").resolve()),
             "TCF_SESSION_AUDIT_PATH": str((artifact_dir / "session-events.jsonl").resolve()),
             "TCF_STOP_FAILURE_PATH": str((artifact_dir / "stop-failures.jsonl").resolve()),
-            # Claude's sandbox deliberately makes the account home read-only. uv defaults
-            # to ~/.cache/uv, which caused otherwise-correct quality gates to fail in
-            # multiple live T001/T002 stages. Keep cache writes outside both HOME and the
-            # candidate tree so they cannot pollute diffs or violate allowed_paths.
-            "UV_CACHE_DIR": str(writable_uv_cache_dir(repo_root)),
+            # Claude's sandbox deliberately makes HOME and host /tmp read-only. Keep uv's
+            # cache in the sandbox-writable candidate mount; factory/state is already
+            # ignored, so it cannot enter diffs, commits, path policy, or quality scans.
+            "UV_CACHE_DIR": str(writable_uv_cache_dir(worktree)),
             "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
             "CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS": "0" if feature_plan.workflow_name else "1",
             "ENABLE_CLAUDEAI_MCP_SERVERS": "false",

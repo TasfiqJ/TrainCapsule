@@ -118,6 +118,11 @@ gates:
   timeout_seconds: 3600
   stages: []
   required: true
+- name: research-evidence
+  command: bash scripts/gates/real_integration.sh T002 research-evidence
+  timeout_seconds: 120
+  stages: []
+  required: true
 private_gate:
   required: true
   suite: traincapsule-integration-t002
@@ -191,6 +196,7 @@ pipeline:
   - secret-scan
   - fast-quality
   - real-integration
+  - research-evidence
   read_only: false
   require_changes: true
   advisor_model: null
@@ -223,6 +229,7 @@ pipeline:
   - secret-scan
   - fast-quality
   - real-integration
+  - research-evidence
   read_only: true
   require_changes: false
   advisor_model: null
@@ -255,6 +262,7 @@ pipeline:
   - secret-scan
   - fast-quality
   - real-integration
+  - research-evidence
   read_only: true
   require_changes: false
   advisor_model: null
@@ -287,6 +295,7 @@ pipeline:
   - secret-scan
   - fast-quality
   - real-integration
+  - research-evidence
   read_only: true
   require_changes: false
   advisor_model: null

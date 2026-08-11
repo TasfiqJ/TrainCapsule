@@ -110,6 +110,27 @@ Migrate the V2 factory/bootstrap repository to the bounded V3 product and factor
 - Generated V3 schemas: 30 exact matches
 - Historical/V3 authority, 109-item roadmap, no-paid-usage, secret scan, and Git diff hygiene: pass
 
+## Phase F implementation
+
+- Replaced the direct-main GitHub synchronization path with a strict pull-request release policy. `releaseMode` is `pull_request`, `directMainPush` is false, every auto-merge mode is false, and the retained compatibility helper now refuses all direct `main` pushes.
+- Added exact candidate-branch verification, remote-main ancestry verification, release-branch fast-forward checks, full-SHA release refspecs, post-push remote-SHA verification, and unconditional force-push prohibition.
+- Added idempotent draft pull-request create/update behavior. A non-draft existing PR is rejected, PR text and command failures are redacted, the observed PR head must match the candidate SHA, and release metadata binds the candidate ref/SHA, release branch/SHA, PR number/URL, draft state, disabled auto-merge state, required checks, and timestamp.
+- Added exact required-workflow evaluation for the release SHA and PR head branch. Missing and in-progress workflows remain pending; a failed workflow fails closed; success requires every configured workflow to pass.
+- Replaced the single self-hosted workflow with five least-privilege GitHub-hosted workflows for factory quality, product unit, product contract/journeys, security, and source-of-truth integrity. Each workflow has a finite timeout, concurrency cancellation, pinned actions, explicit test scope, no secret context, and retained evidence artifacts.
+- Changed one-time GitHub setup so it verifies `origin/main` without pushing it and leaves configuration changes for the reviewed candidate flow.
+- Preserved the operator's migration-only instruction to publish the completed overhaul directly to `main`; the autonomous V3 runtime remains PR-first and cannot perform that direct push.
+
+## Phase F verification
+
+- Focused release, exact-SHA, redaction, workflow, and setup checks: 22 passed
+- Complete Pytest suite: 467 passed
+- Ruff: pass
+- Strict Pyright: 0 errors, 0 warnings
+- YAML uniqueness: 84 files passed
+- Generated V3 schemas: 30 exact matches
+- V3 configuration validation: pass without mutation
+- No GitHub branch, PR, merge, workflow run, or push was created during Phase F testing
+
 ## Pending
 
-Release/startup controls, prompt migration, legacy mappings, product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.
+Startup controls, prompt migration, legacy mappings, product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.

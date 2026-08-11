@@ -1,0 +1,47 @@
+name: TrainCapsule / Factory quality
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: factory-quality-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  factory-quality:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff # v6
+        with:
+          python-version: "3.12"
+      - name: Install locked dependencies
+        run: uv sync --extra dev --frozen
+      - name: Run factory quality scope
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p .ci-artifacts
+          uv run python scripts/verify_yaml_unique.py . 2>&1 | tee .ci-artifacts/yaml-unique.log
+          uv run python scripts/gates/catalog_consistency.py 2>&1 | tee .ci-artifacts/catalog.log
+          uv run ruff check . 2>&1 | tee .ci-artifacts/ruff.log
+          uv run pyright 2>&1 | tee .ci-artifacts/pyright.log
+          uv run pytest tests --ignore=tests/product 2>&1 | tee .ci-artifacts/factory-tests.log
+      - name: Retain factory evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: factory-quality-${{ github.run_id }}
+          path: .ci-artifacts/
+          if-no-files-found: error
+          retention-days: 14

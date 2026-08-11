@@ -1,9 +1,18 @@
 version: 3
 enabled: true
 remote: origin
+baseBranch: main
 branch: main
 visibility: private
 repository: TasfiqJ/TrainCapsule
+releaseMode: pull_request
+directMainPush: false
+releaseBranchPrefix: release/traincapsule
+createDraftPullRequest: true
+autoMergeMechanical: false
+autoMergeStandard: false
+autoMergeIntegration: false
+autoMergeTrustCore: false
 push_after_verified_tasks: 2
 push_interval_seconds: 900
 push_before_quota_pause: true
@@ -16,12 +25,16 @@ retry_backoff_seconds: 30
 verify_remote_sha: true
 remote_ci:
   enabled: true
-  workflow_name: AI factory quality
+  requiredWorkflows:
+  - TrainCapsule / Factory quality
+  - TrainCapsule / Product unit
+  - TrainCapsule / Product contract
+  - TrainCapsule / Security
+  - TrainCapsule / Source-of-truth integrity
   required_risk_tiers:
   - integration
   - trust_core
   timeout_seconds: 1800
   poll_seconds: 20
   fail_closed: true
-wait_for_main_ci_after_push: true
 commit_subject_max_chars: 50

@@ -1,0 +1,44 @@
+name: TrainCapsule / Security
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  security:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
+      - uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff # v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --extra dev --frozen
+      - name: Run security scope
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p .ci-artifacts
+          bash scripts/verify_no_secrets.sh 2>&1 | tee .ci-artifacts/no-secrets.log
+          bash scripts/gates/no_paid_usage.sh 2>&1 | tee .ci-artifacts/no-paid-usage.log
+          uv run pytest tests/test_auth.py tests/test_no_paid_usage_gate.py tests/test_path_guard.py tests/test_project_settings_security.py 2>&1 | tee .ci-artifacts/security-tests.log
+      - name: Retain security evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: security-${{ github.run_id }}
+          path: .ci-artifacts/
+          if-no-files-found: error
+          retention-days: 14

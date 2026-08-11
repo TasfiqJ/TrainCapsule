@@ -1,0 +1,40 @@
+name: TrainCapsule / Product unit
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: product-unit-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  product-unit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff # v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --extra dev --frozen
+      - name: Run product unit scope
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p .ci-artifacts
+          uv run pytest tests/product/unit 2>&1 | tee .ci-artifacts/product-unit.log
+      - name: Retain product unit evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: product-unit-${{ github.run_id }}
+          path: .ci-artifacts/
+          if-no-files-found: error
+          retention-days: 14

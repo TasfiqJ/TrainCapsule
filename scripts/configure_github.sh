@@ -11,8 +11,8 @@ if [[ -z "$(git config user.name || true)" || -z "$(git config user.email || tru
   echo "Git user.name and user.email must be configured before GitHub setup." >&2
   exit 1
 fi
-if [[ -n "$(git status --porcelain)" ]]; then
-  echo "Repository must be clean before GitHub setup." >&2
+if [[ -n "$(git status --porcelain --untracked-files=no)" ]]; then
+  echo "Tracked repository changes must be committed before GitHub setup." >&2
   git status --short >&2
   exit 1
 fi
@@ -25,10 +25,10 @@ The factory will:
   - create or attach a private repository;
   - author verified task commits with your configured Git name and email;
   - keep AI-factory provenance in local structured records;
-  - push only fast-forward history and never force-push;
+  - push only exact verified candidates to release branches and never force-push;
   - stop when remote main diverges instead of overwriting outside work;
-  - run GitHub Actions for integration and trust-core candidates;
-  - push normal verified work in small periodic batches.
+  - open draft pull requests for required GitHub-hosted validation;
+  - leave every merge to an authorized human decision.
 TEXT
 
 if ! gh auth status --hostname github.com >/dev/null 2>&1; then
@@ -82,28 +82,20 @@ if not isinstance(data, dict):
 data["enabled"] = True
 data["repository"] = sys.argv[1]
 data["visibility"] = "private"
+data["releaseMode"] = "pull_request"
+data["directMainPush"] = False
 path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
 PY
 
-git add config/github.yaml
-if ! git diff --cached --quiet; then
-  git commit -m "set up github sync"
+# Verify the protected base without updating it. The configured change is left for
+# the normal reviewed candidate flow; setup never performs a direct main push.
+if ! git ls-remote --exit-code --heads origin main >/dev/null 2>&1; then
+  echo "origin/main is missing. Establish it through an authorized bootstrap process." >&2
+  exit 1
 fi
-
-# Establish or update origin/main without rewriting history.
-if git ls-remote --exit-code --heads origin main >/dev/null 2>&1; then
-  git fetch --prune origin main
-  if ! git merge-base --is-ancestor origin/main main; then
-    echo "Remote main contains work that local main does not contain. Refusing to overwrite it." >&2
-    exit 1
-  fi
-fi
-git push -u origin main
-
-local_sha="$(git rev-parse main)"
-remote_sha="$(git ls-remote origin refs/heads/main | awk '{print $1}')"
-if [[ "$local_sha" != "$remote_sha" ]]; then
-  echo "Initial GitHub verification failed: local=$local_sha remote=$remote_sha" >&2
+git fetch --no-tags origin refs/heads/main:refs/remotes/origin/main
+if ! git merge-base --is-ancestor origin/main main; then
+  echo "Remote main contains work absent from local main. Resolve divergence first." >&2
   exit 1
 fi
 
@@ -117,7 +109,7 @@ if ! gh api --method PATCH "repos/$name_with_owner" \
   echo "The factory's mandatory local secret scan remains enabled."
 fi
 
-uv run tcfactory github-sync --force
-printf '\nGitHub synchronization is ready: %s\n' "$name_with_owner"
+printf '\nGitHub pull-request release configuration is ready: %s\n' "$name_with_owner"
+printf 'Commit config/github.yaml through the verified candidate workflow.\n'
 printf 'Verified commits will use: %s <%s>\n' \
   "$(git config user.name)" "$(git config user.email)"

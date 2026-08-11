@@ -7,12 +7,12 @@
 - Bundle integrity: 30/30 declared files, 542907/542907 bytes, all SHA-256 values matched
 - Controller: stopped; Windows restart task disabled; lock released
 - Baseline tests: 394 tests, Ruff, Pyright, schemas, packet checks, and all existing gates passed
-- Active phase: Phase C — V3 factory configuration, roadmap, scheduler, and policy
-- Completed phases: baseline, controller shutdown, rollback ref, runtime metadata snapshot, prescribed bundle reading, Phase A source authority and integrity, Phase B typed domain models and schemas
-- Commits created by this migration: `e331e39` (source authority); Phase B domain-model commit (this commit)
-- Next exact action: install V3 factory/autonomy/scheduler/role/executor configuration, bounded M0–M6 roadmap records, and deterministic lane scheduling
+- Active phase: Phase G — startup and controls
+- Completed phases: baseline, controller shutdown, rollback ref, runtime metadata snapshot, prescribed bundle reading, Phase A source authority and integrity, Phase B typed domain models and schemas, Phase C bounded configuration/roadmap/scheduling/recovery, Phase D planning/context/value/support boundaries, Phase E backend/checkpoint isolation, and Phase F pull-request release/hosted CI
+- Commits created by this migration: `e331e39` (source authority), `b77167b` (domain models), `bfaba0b` (factory policy), `2200104` (planning/support state), `5fbbca7` (backend-neutral execution), and the Phase F release-policy commit containing this record
+- Next exact action: replace infinite launcher restart behavior with a bounded supervisor, add portable start/stop/status installation controls, and verify durable stop/kill/recovery behavior without starting a paid model session
 - Unresolved blockers: qualified human source-migration approval remains external; it does not block internal engineering
-- Introduced failures: none; the Phase B full suite, Ruff, strict Pyright, both authority gates, generated-schema check, and secret scan pass
+- Introduced failures: none; the Phase F 467-test full suite, Ruff, strict Pyright, YAML uniqueness, V3 configuration validation, and generated-schema check pass
 
 ## Rollback
 

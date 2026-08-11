@@ -138,3 +138,42 @@ def test_model_respec_cannot_promote_raw_shell_gate_commands() -> None:
 
     with pytest.raises(TaskPacketPolicyError, match="not controller-safe"):
         validate_product_task_packet(unsafe, item, repo_root=ROOT)
+
+
+def test_model_respec_cannot_alias_multiple_gate_names_to_one_command() -> None:
+    ledger, catalog, profiles = _inputs()
+    item = ledger.item("T002")
+    packet = task_packet_from_catalog(
+        repo_root=ROOT,
+        item=item,
+        catalog=catalog,
+        risk_profiles=profiles,
+    )
+    command = "uv run python scripts/gates/output_and_integration_gate.py T002 file-present"
+    aliased = packet.model_copy(
+        update={
+            "gates": [
+                Gate(name="first-check", command=command),
+                Gate(name="second-check", command=command),
+            ]
+        }
+    )
+
+    with pytest.raises(TaskPacketPolicyError, match="duplicates command"):
+        validate_product_task_packet(aliased, item, repo_root=ROOT)
+
+
+def test_product_packet_acceptance_criteria_have_no_arbitrary_count_ceiling() -> None:
+    ledger, catalog, profiles = _inputs()
+    item = ledger.item("T002")
+    packet = task_packet_from_catalog(
+        repo_root=ROOT,
+        item=item,
+        catalog=catalog,
+        risk_profiles=profiles,
+    )
+    complete = add_protected_path_baseline(packet).model_copy(
+        update={"acceptance_criteria": [f"Production condition {index}" for index in range(40)]}
+    )
+
+    validate_product_task_packet(complete, item, repo_root=ROOT)

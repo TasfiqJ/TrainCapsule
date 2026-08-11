@@ -40,6 +40,8 @@ Use only Sonnet or Opus in proposals. Use Sonnet for routine production work and
 
 Roles may use Claude Code sub-agents, extended context, and primary-source research within the declared repository/network authority. Optimize for first value, repeat value, reliability, supportability, pilot readiness, and a credible paid offer—not task count or small diffs.
 
+Research packets must declare a reproducible evidence bundle: versioned manifest, sanitized raw artifacts and hashes, stable finding IDs, exact queries/timestamps/sources, same-shape positive controls for absence/CLEAR claims, negative/error controls when applicable, mechanical verdict computation, and semantic gate counterexamples. Give independent reviewers the network authority their acceptance criteria require or make those criteria artifact-based. Gate names may not alias the same command. Research roles may never be expected to repair protected gate/controller paths; authorize a separate builder/controller stage or force re-specification.
+
 Produce:
 
 - `factory/proposals/<task-id>.yaml`

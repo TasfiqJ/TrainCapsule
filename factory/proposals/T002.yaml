@@ -27,6 +27,8 @@ inputs:
   - "Phase: P0"
 outputs:
   - docs/research/T002_name_trademark_check.md
+  - docs/evidence/T002/manifest.json
+  - docs/evidence/T002/raw/**
 acceptance_criteria:
   - "A research record exists at docs/research/T002_name_trademark_check.md."
   - "The record states the exact product name and package identifiers under review, quoted from source-of-truth."
@@ -37,6 +39,8 @@ acceptance_criteria:
   - "Any CONFLICT finding includes the conflicting party/registrant, evidence link, and a plain description of the collision."
   - "The record includes an explicit overall verdict field (clear / conflicts_found / unknown) computed only from the itemized findings above."
   - "The record cites every source it used, and cites no source outside the allowed network domains."
+  - "A version-1 evidence manifest and sanitized raw artifacts preserve every target, control, limitation, timestamp, reproduction command, and SHA-256."
+  - "Every CLEAR target query has a working same-endpoint, same-query-shape positive control."
   - "No file outside outputs is created or modified by the research stage."
   - "The adversary stage independently re-checks at least one CLEAR finding and confirms or disputes it with its own evidence link."
   - "The audit stage verifies every finding cites a working evidence link and that no CONFLICT or UNKNOWN was silently converted to CLEAR."
@@ -56,19 +60,24 @@ stop_conditions:
   - "No network access is available to any primary trademark, package-registry, or domain-registrar source: mark the affected findings UNKNOWN, do not guess."
 gates:
   - name: research-file-present
-    command: "test -f docs/research/T002_name_trademark_check.md"
+    command: "uv run python scripts/gates/output_and_integration_gate.py T002 file-present"
     required: true
-    timeout_seconds: 10
+    timeout_seconds: 30
     stages: [research, adversary, audit, release]
   - name: research-verdict-labeled
-    command: "grep -Eq 'Overall verdict:\\s*(clear|conflicts_found|unknown)' docs/research/T002_name_trademark_check.md"
+    command: "uv run python scripts/gates/output_and_integration_gate.py T002 verdict-labeled"
     required: true
-    timeout_seconds: 10
+    timeout_seconds: 30
     stages: [research, adversary, audit, release]
   - name: research-no-silent-upgrade
-    command: "! grep -Eiq 'UNKNOWN[^\\n]*(upgraded|converted|treated as)[^\\n]*CLEAR' docs/research/T002_name_trademark_check.md"
+    command: "uv run python scripts/gates/output_and_integration_gate.py T002 no-silent-upgrade"
     required: true
-    timeout_seconds: 10
+    timeout_seconds: 30
+    stages: [research, adversary, audit, release]
+  - name: research-evidence-reproducible
+    command: "uv run python scripts/gates/output_and_integration_gate.py T002 evidence-reproducible"
+    required: true
+    timeout_seconds: 30
     stages: [research, adversary, audit, release]
 security:
   allow_unsandboxed_commands: false
@@ -123,6 +132,7 @@ pipeline:
     effort: high
     allowed_paths:
       - docs/research/T002_name_trademark_check.md
+      - docs/evidence/T002/**
     forbidden_paths:
       - ".claude/**"
       - "config/**"
@@ -153,6 +163,7 @@ pipeline:
       - research-file-present
       - research-verdict-labeled
       - research-no-silent-upgrade
+      - research-evidence-reproducible
     max_turns: 12
     max_budget_usd: 4.0
     task_budget_tokens: 90000
@@ -179,6 +190,7 @@ pipeline:
       - research-file-present
       - research-verdict-labeled
       - research-no-silent-upgrade
+      - research-evidence-reproducible
     max_turns: 8
     max_budget_usd: 2.5
     task_budget_tokens: 60000
@@ -191,11 +203,20 @@ pipeline:
     forbidden_paths:
       - "**"
     read_only: true
-    allowed_domains: []
+    allowed_domains:
+      - uspto.gov
+      - euipo.europa.eu
+      - wipo.int
+      - pypi.org
+      - npmjs.com
+      - crates.io
+      - icann.org
+      - whois.icann.org
     machine_gates:
       - research-file-present
       - research-verdict-labeled
       - research-no-silent-upgrade
+      - research-evidence-reproducible
     max_turns: 6
     max_budget_usd: 1.5
     task_budget_tokens: 50000
@@ -213,6 +234,7 @@ pipeline:
       - research-file-present
       - research-verdict-labeled
       - research-no-silent-upgrade
+      - research-evidence-reproducible
     max_turns: 6
     max_budget_usd: 1.4
     task_budget_tokens: 50000

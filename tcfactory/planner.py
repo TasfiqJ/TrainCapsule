@@ -195,8 +195,6 @@ def validate_product_task_packet(
         errors.append(
             f"depends_on must be exactly {item.depends_on!r}, found {packet.depends_on!r}"
         )
-    if len(packet.acceptance_criteria) > 25:
-        errors.append("acceptance_criteria exceeds the hard ceiling of 25")
     if packet.security.allow_unsandboxed_commands:
         errors.append("allow_unsandboxed_commands must remain false")
     if not packet.security.fail_if_sandbox_unavailable:
@@ -217,7 +215,15 @@ def validate_product_task_packet(
         errors.append(
             "pipeline must contain at least one mutating implementation/specification role"
         )
+    commands: dict[str, str] = {}
     for gate in packet.gates:
+        if gate.command in commands:
+            errors.append(
+                f"gate {gate.name!r} duplicates command from {commands[gate.command]!r}; "
+                "independent gate names require distinct executable checks"
+            )
+        else:
+            commands[gate.command] = gate.name
         try:
             gate_argv(gate.command, cwd=gate_root)
         except PathPolicyError as exc:

@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+import re
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -60,7 +61,7 @@ from .provenance import append_provenance
 from .quality_policy import QualityPolicyError, enforce_candidate_quality
 from .quota import AuthenticationPause, QuotaLimitPause
 from .risk import with_working_token_reserve
-from .util import run_command, utc_stamp, write_json
+from .util import path_matches, run_command, utc_stamp, write_json
 from .value import ValueGateError, evaluate_value_contract
 
 console = Console()
@@ -105,6 +106,9 @@ STRUCTURED_OUTPUT_FAULT_MARKERS = (
     # ``terminal_reason=<value>`` text and the SDK result subtype.
     "terminal_reason=structured_output_retry_exhausted",
     "subtype=error_max_structured_output_retries",
+)
+FINDING_PATH_RE = re.compile(
+    r"(?<![A-Za-z0-9_.-])((?:[A-Za-z0-9_.()\-]+/)+[A-Za-z0-9_.()\-]+)"
 )
 
 
@@ -353,6 +357,56 @@ def _find_mutating_stage(task: TaskPacket) -> Stage:
             if stage.role == role:
                 return stage
     raise PipelineFailure("Repair requested but task pipeline has no writable stage")
+
+
+def repository_finding_paths(repo_root: Path, findings: list[str]) -> list[str]:
+    """Extract credible repository paths from reviewer findings.
+
+    URLs and prose fragments are ignored unless the referenced path (or its parent for a
+    proposed new file) exists inside the repository.
+    """
+
+    paths: set[str] = set()
+    for finding in findings:
+        for raw in FINDING_PATH_RE.findall(finding):
+            normalized = raw.replace("\\", "/")
+            while normalized.startswith("./"):
+                normalized = normalized[2:]
+            relative = Path(normalized)
+            if ".." in relative.parts:
+                continue
+            candidate = repo_root / relative
+            if candidate.exists() or candidate.parent.exists():
+                paths.add(relative.as_posix())
+    return sorted(paths)
+
+
+def find_mutating_stage_for_findings(
+    *, repo_root: Path, task: TaskPacket, findings: list[str]
+) -> tuple[Stage, list[str]]:
+    """Route repair to a stage that can edit the files named by an independent review.
+
+    When every credible path is outside every writable stage, returning those paths forces
+    task re-specification instead of an impossible same-role retry loop.
+    """
+
+    fallback = _find_mutating_stage(task)
+    paths = repository_finding_paths(repo_root, findings)
+    if not paths:
+        return fallback, []
+    candidates = [
+        stage
+        for stage in task.pipeline
+        if _role_requires_changes(stage.role) and stage.read_only is not True
+    ]
+    scored = [
+        (sum(path_matches(path, stage.allowed_paths) for path in paths), stage)
+        for stage in candidates
+    ]
+    best_score, best_stage = max(scored, key=lambda item: item[0], default=(0, fallback))
+    if best_score == 0:
+        return fallback, paths
+    return best_stage, []
 
 
 def _find_stage_index(task: TaskPacket, role: RoleName) -> int:
@@ -1313,7 +1367,27 @@ async def run_pipeline(
                     or checkpoint.repair_cycles < task.repair.max_cycles
                 )
             ):
-                mutating = _find_mutating_stage(task)
+                mutating, scope_gaps = find_mutating_stage_for_findings(
+                    repo_root=repo_root,
+                    task=task,
+                    findings=findings,
+                )
+                if scope_gaps:
+                    detail = (
+                        f"Reviewer {stage.role.value} identified repair targets outside every "
+                        f"writable stage: {', '.join(scope_gaps)}. Automatic task "
+                        "re-specification is required before another repair attempt."
+                    )
+                    append_event(
+                        config.resolve(repo_root, config.event_log_path),
+                        event="repair_scope_gap",
+                        component="pipeline",
+                        task_id=task.task_id,
+                        run_id=run_id,
+                        role=stage.role.value,
+                        detail=detail,
+                    )
+                    raise PipelineFailure(detail)
                 repair_findings = list(findings)
                 repaired = False
                 # Stays None if no repair cycle ran, so the terminal message falls back

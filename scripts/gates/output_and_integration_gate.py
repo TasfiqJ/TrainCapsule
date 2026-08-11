@@ -6,6 +6,13 @@ from typing import cast
 
 from gate_common import ROOT, require_patterns, task_payload
 
+from tcfactory.research_policy import (
+    ResearchPolicyError,
+    parse_research_record,
+    validate_evidence_manifest,
+    validate_verdict_consistency,
+)
+
 CODE_SUFFIXES = {".py", ".ts", ".tsx", ".js", ".jsx", ".rs", ".go", ".sh"}
 PLACEHOLDERS = (
     re.compile(r"raise\s+NotImplementedError"),
@@ -16,10 +23,11 @@ PLACEHOLDERS = (
 
 
 def main() -> int:
-    if len(sys.argv) != 2:
-        print("usage: output_and_integration_gate.py TASK_ID", file=sys.stderr)
+    if len(sys.argv) not in {2, 3}:
+        print("usage: output_and_integration_gate.py TASK_ID [CHECK]", file=sys.stderr)
         return 2
     task_id = sys.argv[1]
+    check = sys.argv[2] if len(sys.argv) == 3 else "all"
     task = task_payload(task_id)
     outputs = task.get("outputs")
     if not isinstance(outputs, list) or not outputs:
@@ -54,21 +62,66 @@ def main() -> int:
 
     if task_id == "T002":
         record_path = ROOT / "docs/research/T002_name_trademark_check.md"
+        manifest_path = ROOT / "docs/evidence/T002/manifest.json"
+        supported = {
+            "all",
+            "file-present",
+            "verdict-labeled",
+            "no-silent-upgrade",
+            "evidence-reproducible",
+        }
+        if check not in supported:
+            print(f"unsupported T002 research check: {check}", file=sys.stderr)
+            return 1
+        if check in {"all", "file-present"}:
+            missing_research = [
+                str(path.relative_to(ROOT))
+                for path in (record_path, manifest_path)
+                if not path.is_file()
+            ]
+            if missing_research:
+                print(
+                    "T002 research bundle is missing: " + ", ".join(missing_research),
+                    file=sys.stderr,
+                )
+                return 1
+        if not record_path.is_file():
+            print("T002 research record is missing", file=sys.stderr)
+            return 1
         record = record_path.read_text(encoding="utf-8", errors="replace")
-        if not re.search(
-            r"Overall verdict:\s*(clear|conflicts_found|unknown)",
-            record,
-            re.IGNORECASE,
-        ):
-            print("T002 research record is missing a valid Overall verdict", file=sys.stderr)
+        try:
+            _verdict, labels = parse_research_record(record)
+        except ResearchPolicyError as exc:
+            print(f"T002 research record is invalid: {exc}", file=sys.stderr)
             return 1
-        if re.search(
-            r"UNKNOWN[^\n]*(upgraded|converted|treated as)[^\n]*CLEAR",
-            record,
-            re.IGNORECASE,
-        ):
-            print("T002 research record silently upgrades UNKNOWN to CLEAR", file=sys.stderr)
-            return 1
+        if check in {"all", "no-silent-upgrade"}:
+            consistency_errors = validate_verdict_consistency(record)
+            if consistency_errors:
+                print("; ".join(consistency_errors), file=sys.stderr)
+                return 1
+        if check in {"all", "evidence-reproducible"}:
+            pipeline = cast(list[dict[str, object]], task.get("pipeline") or [])
+            research_stage: dict[str, object] = {}
+            for candidate_stage in pipeline:
+                if candidate_stage.get("role") == "research":
+                    research_stage = candidate_stage
+                    break
+            allowed_domains = {
+                str(value).lower()
+                for value in cast(list[object], research_stage.get("allowed_domains") or [])
+            }
+            manifest_errors = validate_evidence_manifest(
+                repo_root=ROOT,
+                manifest_path=manifest_path,
+                labels=labels,
+                allowed_domains=allowed_domains,
+            )
+            if manifest_errors:
+                print("; ".join(manifest_errors), file=sys.stderr)
+                return 1
+    elif len(sys.argv) == 3:
+        print(f"task-specific CHECK is unsupported for {task_id}", file=sys.stderr)
+        return 2
 
     # Static, task-specific path requirements. These never execute model-authored commands.
     required_by_task: dict[str, tuple[str, ...]] = {

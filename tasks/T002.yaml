@@ -42,15 +42,28 @@ acceptance_criteria:
   unknown) computed only from the itemized findings above.
 - The record cites every source it used, and cites no source outside the allowed network
   domains.
+- A version-1 evidence manifest exists at docs/evidence/T002/manifest.json and records
+  the finding ID, evidence kind, query shape, source, UTC/offset timestamp, sanitized
+  reproduction command, raw artifact path, SHA-256, and outcome for every execution.
+- Sanitized raw target, control, limitation, and access-barrier artifacts are preserved
+  under docs/evidence/T002/raw; every manifest hash reproduces byte-for-byte.
+- Every CLEAR finding has raw target evidence and a working positive control for every
+  query shape used to support the finding. UNKNOWN and CONFLICT findings preserve raw
+  target or limitation evidence.
 - No file outside outputs is created or modified by the research stage.
 - The adversary stage independently re-checks at least one CLEAR finding and confirms
   or disputes it with its own evidence link.
 - The audit stage verifies every finding cites a working evidence link and that no
   CONFLICT or UNKNOWN was silently converted to CLEAR.
+- The declared gates reject temporary counterexamples for CONFLICT plus overall clear,
+  UNKNOWN plus overall clear, missing artifacts, changed hashes, and broken same-shape
+  controls while accepting honest negation prose.
 - The release stage only reads the record and machine gate output; it does not add
   new findings.
 outputs:
 - docs/research/T002_name_trademark_check.md
+- docs/evidence/T002/manifest.json
+- docs/evidence/T002/raw/**
 stop_conditions:
 - 'Source-of-truth does not name any product name at all to check: stop the entire
   task, do not invent one.'
@@ -68,8 +81,8 @@ security:
   secrets: []
 gates:
 - name: research-file-present
-  command: uv run python scripts/gates/output_and_integration_gate.py T002
-  timeout_seconds: 10
+  command: uv run python scripts/gates/output_and_integration_gate.py T002 file-present
+  timeout_seconds: 30
   stages:
   - research
   - adversary
@@ -77,8 +90,8 @@ gates:
   - release
   required: true
 - name: research-verdict-labeled
-  command: uv run python scripts/gates/output_and_integration_gate.py T002
-  timeout_seconds: 10
+  command: uv run python scripts/gates/output_and_integration_gate.py T002 verdict-labeled
+  timeout_seconds: 30
   stages:
   - research
   - adversary
@@ -86,8 +99,17 @@ gates:
   - release
   required: true
 - name: research-no-silent-upgrade
-  command: uv run python scripts/gates/output_and_integration_gate.py T002
-  timeout_seconds: 10
+  command: uv run python scripts/gates/output_and_integration_gate.py T002 no-silent-upgrade
+  timeout_seconds: 30
+  stages:
+  - research
+  - adversary
+  - audit
+  - release
+  required: true
+- name: research-evidence-reproducible
+  command: uv run python scripts/gates/output_and_integration_gate.py T002 evidence-reproducible
+  timeout_seconds: 30
   stages:
   - research
   - adversary
@@ -111,6 +133,7 @@ pipeline:
   permission_mode: null
   allowed_paths:
   - docs/research/T002_name_trademark_check.md
+  - docs/evidence/T002/**
   forbidden_paths:
   - .claude/**
   - config/**
@@ -154,6 +177,7 @@ pipeline:
   - research-file-present
   - research-verdict-labeled
   - research-no-silent-upgrade
+  - research-evidence-reproducible
   read_only: null
   require_changes: true
   advisor_model: null
@@ -174,7 +198,15 @@ pipeline:
   allowed_paths: []
   forbidden_paths:
   - '**'
-  allowed_domains: []
+  allowed_domains:
+  - uspto.gov
+  - euipo.europa.eu
+  - wipo.int
+  - pypi.org
+  - npmjs.com
+  - crates.io
+  - icann.org
+  - whois.icann.org
   acceptance_criteria: []
   context_keys:
   - executive_decision
@@ -185,6 +217,7 @@ pipeline:
   - research-file-present
   - research-verdict-labeled
   - research-no-silent-upgrade
+  - research-evidence-reproducible
   read_only: true
   require_changes: false
   advisor_model: null
@@ -199,13 +232,27 @@ pipeline:
   max_turns: 8
   max_budget_usd: 1.9
   task_budget_tokens: 51500
-  tools: null
+  tools:
+  - Read
+  - Grep
+  - Glob
+  - Bash
+  - WebFetch
+  - WebSearch
   disallowed_tools: null
   permission_mode: null
   allowed_paths: []
   forbidden_paths:
   - '**'
-  allowed_domains: []
+  allowed_domains:
+  - uspto.gov
+  - euipo.europa.eu
+  - wipo.int
+  - pypi.org
+  - npmjs.com
+  - crates.io
+  - icann.org
+  - whois.icann.org
   acceptance_criteria: []
   context_keys:
   - executive_decision
@@ -216,6 +263,7 @@ pipeline:
   - research-file-present
   - research-verdict-labeled
   - research-no-silent-upgrade
+  - research-evidence-reproducible
   read_only: true
   require_changes: false
   advisor_model: null
@@ -247,6 +295,7 @@ pipeline:
   - research-file-present
   - research-verdict-labeled
   - research-no-silent-upgrade
+  - research-evidence-reproducible
   read_only: true
   require_changes: false
   advisor_model: null

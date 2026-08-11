@@ -20,9 +20,14 @@ def main() -> int:
         raise SystemExit(
             f"depends_on must be {expected_dependencies!r}, found {packet.depends_on!r}"
         )
-    if len(packet.acceptance_criteria) > 25:
-        raise SystemExit("acceptance_criteria exceeds hard ceiling of 25")
+    commands: dict[str, str] = {}
     for gate in packet.gates:
+        if gate.command in commands:
+            raise SystemExit(
+                f"gate {gate.name!r} duplicates command from {commands[gate.command]!r}; "
+                "independent gate names require distinct executable checks"
+            )
+        commands[gate.command] = gate.name
         try:
             gate_argv(gate.command, cwd=Path.cwd().resolve())
         except PathPolicyError as exc:

@@ -112,7 +112,7 @@ tasks:
   phase: P0
   depends_on:
   - T001
-  status: queued
+  status: respec_required
   terminal_blocked: false
   packet_path: tasks/T002.yaml
   trust_core: false
@@ -3495,4 +3495,4 @@ tasks:
   revisions: 0
   value_revisions: 0
   infrastructure_recoveries: 0
-updated_at: '2026-08-11T03:09:08.984973+00:00'
+updated_at: '2026-08-11T03:09:10.428267+00:00'

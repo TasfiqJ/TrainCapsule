@@ -119,6 +119,7 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
     result = run_startup_preflight(repo_root)
     assert result["ready"] is True
     assert result["credentials"] == "AUTHENTICATED"
+    assert result["legacyMigrationRecords"] == 124
 
     paths.stop.write_text("stop\n", encoding="utf-8")
     with pytest.raises(RuntimeError, match="durable STOP"):

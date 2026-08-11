@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import os
+import re
 import shutil
 from collections import defaultdict
 from datetime import UTC, datetime
@@ -32,6 +33,13 @@ class V3Queue:
         directory.mkdir(parents=True, exist_ok=True)
         if directory.is_symlink():
             raise ValueError(f"queue directory cannot be a symlink: {directory}")
+
+    def initialize(self) -> None:
+        """Create the complete empty V3 state namespace without enqueueing work."""
+
+        for state in WorkStatus:
+            self._ensure_directory(self._state_dir(state))
+        self._ensure_directory(self.archive_root)
 
     def _paths(self, work_item_id: str) -> list[Path]:
         name = f"{work_item_id}.yaml"
@@ -115,36 +123,71 @@ class V3Queue:
             recovered.append(item.work_item_id)
         return recovered
 
-    def archive_v2(self, source: Path, *, archive_id: str) -> Path:
+    def archive_v2(
+        self,
+        source: Path,
+        *,
+        archive_id: str,
+        captured_at: datetime | None = None,
+    ) -> Path:
         """Copy legacy queue evidence into an immutable archive without enqueueing it."""
 
         source = source.resolve()
-        if not source.is_dir() or source == self.root:
+        if not source.is_dir():
+            raise ValueError("legacy queue archive source must be a directory")
+        if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]{0,127}", archive_id):
+            raise ValueError("legacy queue archive ID contains unsafe characters")
+        if source == self.root or source in self.root.parents or self.root in source.parents:
             raise ValueError("legacy queue archive source must be a separate directory")
+        source_files = sorted(item for item in source.rglob("*") if item.is_file())
+        symlinks = sorted(item for item in source.rglob("*") if item.is_symlink())
+        if symlinks:
+            raise ValueError(
+                "legacy queue archive source contains symlinks: "
+                f"{[path.relative_to(source).as_posix() for path in symlinks]}"
+            )
+        files: list[dict[str, str | int]] = []
+        source_hasher = hashlib.sha256()
+        for path in source_files:
+            relative = path.relative_to(source).as_posix()
+            payload = path.read_bytes()
+            digest = hashlib.sha256(payload).hexdigest()
+            files.append({"path": relative, "sha256": digest, "bytes": len(payload)})
+            source_hasher.update(relative.encode("utf-8") + b"\0")
+            source_hasher.update(digest.encode("ascii") + b"\0")
+            source_hasher.update(str(len(payload)).encode("ascii") + b"\n")
+
         target = self.archive_root / archive_id
         if target.exists():
-            raise ValueError(f"legacy queue archive already exists: {target}")
+            manifest_path = target / "ARCHIVE_MANIFEST.json"
+            if manifest_path.is_file():
+                manifest = json.loads(manifest_path.read_text(encoding="utf-8"))
+                if manifest.get("sourceDigest") == f"sha256:{source_hasher.hexdigest()}":
+                    return target
+            raise ValueError(f"legacy queue archive already exists with other evidence: {target}")
         self._ensure_directory(target.parent)
-        shutil.copytree(source, target, symlinks=True)
-        files: list[dict[str, str | int]] = []
-        for path in sorted(item for item in target.rglob("*") if item.is_file()):
-            files.append(
-                {
-                    "path": path.relative_to(target).as_posix(),
-                    "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
-                    "bytes": path.stat().st_size,
-                }
-            )
+        observed_at = captured_at or datetime.now(UTC)
+        if observed_at.tzinfo is None:
+            raise ValueError("archive captured_at must be timezone-aware")
+        temporary = target.parent / f".{archive_id}.{uuid4().hex}.tmp"
+        shutil.copytree(source, temporary, symlinks=False)
         manifest: dict[str, object] = {
             "version": 3,
             "archiveId": archive_id,
-            "capturedAt": datetime.now(UTC).isoformat(),
+            "capturedAt": observed_at.astimezone(UTC).isoformat(),
+            "sourceLabel": source.name,
+            "sourceDigest": f"sha256:{source_hasher.hexdigest()}",
             "autoResume": False,
             "files": files,
         }
-        (target / "ARCHIVE_MANIFEST.json").write_text(
-            json.dumps(manifest, indent=2, sort_keys=True) + "\n",
-            encoding="utf-8",
-            newline="\n",
-        )
+        try:
+            (temporary / "ARCHIVE_MANIFEST.json").write_text(
+                json.dumps(manifest, indent=2, sort_keys=True) + "\n",
+                encoding="utf-8",
+                newline="\n",
+            )
+            os.replace(temporary, target)
+        finally:
+            if temporary.exists():
+                shutil.rmtree(temporary)
         return target

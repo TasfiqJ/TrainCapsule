@@ -16,7 +16,7 @@ The exact baseline and results are recorded in `V3_BASELINE_REPORT.md`: 394 test
 | Release | PR-only policy, exact candidate/ref/PR SHA, no force, divergence, required hosted CI, metadata | passed; 22 focused checks and 467-test full-suite regression; no network mutation |
 | Startup/status | finite 15/60/300 restart, healthy reset, preflight, portable controls, durable stop/hard-stuck, complete status | passed; focused checks and 471-test full-suite regression; stopped launcher exercised without model use |
 | Prompts | finite packet/session, native-first, exact truth states, bounded findings, external/human stop, specialist contracts | passed; focused checks and 478-test full-suite regression; no model use |
-| Legacy migration | 124-entry mapping, dry run, queue archive, deterministic migration | pending |
+| Legacy migration | 124-entry mapping, exact ledger archive, dry/apply, non-resuming queue archive, deterministic migration | passed; 1 passed/1 paused/2 external-wait/120 blocked preserved; 88 mapped, 29 deferred, 7 factory history; original queue retained |
 | Product preflight | identity golden vectors, CAS, importer, native baseline, completeness, eligibility, CLI | pending |
 | Product journey | install through preflight; missing/native-sufficient/unsupported/policy/unknown/malicious cases | pending |
 | Security | secrets, paths, symlinks, malicious input, synthetic evidence, forged/expired approval | pending |

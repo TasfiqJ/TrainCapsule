@@ -98,21 +98,70 @@ def _v3_milestones(repo_root: Path) -> MilestoneRoadmap:
 def migrate(
     repo: Annotated[Path, typer.Option("--repo")] = Path("."),
     dry_run: Annotated[bool, typer.Option("--dry-run")] = False,
+    apply: Annotated[bool, typer.Option("--apply")] = False,
+    acknowledge_local_write: Annotated[
+        bool, typer.Option("--acknowledge-local-write")
+    ] = False,
 ) -> None:
-    """Review the already-installed V3 migration without changing repository state."""
+    """Inspect or explicitly install the deterministic, non-resuming V2 migration."""
 
-    if not dry_run:
-        raise typer.BadParameter("migration requires --dry-run before any explicit apply command")
+    if dry_run == apply:
+        raise typer.BadParameter("choose exactly one of --dry-run or --apply")
+    if apply and not acknowledge_local_write:
+        raise typer.BadParameter("--apply requires --acknowledge-local-write")
     root = _resolve_repo(repo)
+    from scripts.generate_v3_legacy_migration import (
+        build_mapping,
+        install,
+        verify_installed,
+    )
+
+    from .v3.migrations import (
+        archive_stopped_legacy_queue,
+        verify_stopped_legacy_queue,
+    )
+
+    migration = build_mapping(root)
+    status_counts: dict[str, int] = {}
+    disposition_counts: dict[str, int] = {}
+    for record in migration.records:
+        status_counts[record.legacy_status.value] = (
+            status_counts.get(record.legacy_status.value, 0) + 1
+        )
+        disposition_counts[record.v3_disposition.value] = (
+            disposition_counts.get(record.v3_disposition.value, 0) + 1
+        )
+    queue_digest, _ = verify_stopped_legacy_queue(root)
+    if apply:
+        install(root)
+        archive = archive_stopped_legacy_queue(root)
+    else:
+        archive = None
+    installed = True
+    try:
+        verify_installed(root)
+    except ValueError:
+        installed = False
     loaded = validate_v3_configuration(root)
     roadmap = _v3_roadmap(root)
     console.print_json(
         data={
-            "dryRun": True,
+            "dryRun": dry_run,
+            "applied": apply,
             "configurationSets": sorted(loaded),
             "workItems": len(roadmap.work_items),
+            "legacyRecords": len(migration.records),
+            "legacyStatuses": dict(sorted(status_counts.items())),
+            "legacyDispositions": dict(sorted(disposition_counts.items())),
+            "legacySourceDigest": migration.source_ledger_digest,
+            "legacyQueueDigest": f"sha256:{queue_digest}",
+            "legacyQueueRetained": True,
+            "legacyArchive": (
+                archive.relative_to(root).as_posix() if archive is not None else None
+            ),
+            "installed": installed,
             "activeMilestone": roadmap.active_milestone,
-            "mutation": False,
+            "mutation": apply,
         }
     )
 

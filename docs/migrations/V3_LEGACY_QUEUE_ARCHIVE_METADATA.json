@@ -1,0 +1,49 @@
+{
+  "archiveManifestDigest": "sha256:c30a6a4b7438649a05802192927ff3c5e5b4501c8a2e5066600eb86ccab1c6d1",
+  "archivePath": "factory/state/v3-queue/archive/v2/v2-20260811T212024Z-885df1dd93b8",
+  "archiveSourceDigest": "sha256:d01533164381eee69830683d79ee1f23ba4c8bdddde5c61b1183a95bd817ffee",
+  "autoResume": false,
+  "files": [
+    {
+      "bytes": 8851,
+      "path": "done/T001.yaml",
+      "sha256": "f8eded6f36711a2dbe3bd4cc1597b5b825d5b46ef25694a6cfa50aaa6b50597a"
+    },
+    {
+      "bytes": 179,
+      "path": "paused/T002.pause.json",
+      "sha256": "c33258f5f9c3476de4b1835bff76893446560e5c714329007b6be83d154ff689"
+    },
+    {
+      "bytes": 29744,
+      "path": "paused/T002.yaml",
+      "sha256": "b11bb3d937ad0b85c7406076b577bcdaa6e4e3afcdd8a3fd4c7cc8a7ddbb0d04"
+    }
+  ],
+  "migrationBaseSha": "6b480232fa92b069103da44c475bd17bcb3e6bd1",
+  "originalQueueRetained": true,
+  "pauseControlPresent": true,
+  "queueSnapshotDigest": "sha256:885df1dd93b8adce0876cd15f74a2921cb92f668fdc9bc24df27d56f638d3283",
+  "snapshotCapturedAt": "2026-08-11T21:20:24+00:00",
+  "sourceQueue": "factory/queue",
+  "stopControlPresent": true,
+  "v3StateDirectories": [
+    "blocked_policy",
+    "blocked_technical",
+    "cancelled",
+    "completed",
+    "deferred",
+    "native_sufficient",
+    "passed_engineering",
+    "paused_quota",
+    "proposed",
+    "queued",
+    "ready",
+    "rejected_value",
+    "running",
+    "superseded",
+    "waiting_external",
+    "waiting_human"
+  ],
+  "version": 3
+}

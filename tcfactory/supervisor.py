@@ -23,6 +23,10 @@ from .v3.configuration import (
     load_factory_v3,
     validate_v3_configuration,
 )
+from .v3.migrations import (
+    load_installed_legacy_migration,
+    verify_legacy_queue_archive_receipt,
+)
 from .v3.recovery import enforce_controller_restart_budget
 
 
@@ -135,6 +139,8 @@ def run_startup_preflight(repo_root: Path) -> dict[str, object]:
     config = _factory_config(repo_root)
     paths = runtime_paths(repo_root, config)
     _verify_source_integrity(repo_root)
+    legacy_migration = load_installed_legacy_migration(repo_root)
+    verify_legacy_queue_archive_receipt(repo_root)
     marker = _verify_migration_marker(repo_root, config, paths.migration_marker)
     if paths.stop.exists():
         raise RuntimeError("durable STOP is present")
@@ -159,6 +165,7 @@ def run_startup_preflight(repo_root: Path) -> dict[str, object]:
         "configVersion": 3,
         "validatedConfigs": sorted(loaded),
         "sourceIntegrity": "PASS",
+        "legacyMigrationRecords": len(legacy_migration.records),
         "migrationCompletedSha": marker.completed_sha,
         "credentials": route.value,
         "runtimeState": "CLEAN",

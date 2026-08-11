@@ -74,9 +74,33 @@ def test_legacy_archive_preserves_files_and_forbids_auto_resume(tmp_path: Path) 
     source.mkdir()
     (source / "T002.yaml").write_text("task_id: T002\n", encoding="utf-8")
     queue = V3Queue(tmp_path / "v3-queue")
-    archive = queue.archive_v2(source, archive_id="baseline")
+    queue.initialize()
+    assert all(
+        (queue.root / state.value.lower()).is_dir() for state in WorkStatus
+    )
+    archive = queue.archive_v2(source, archive_id="baseline", captured_at=NOW)
     assert (archive / "T002.yaml").read_text(encoding="utf-8") == "task_id: T002\n"
     manifest = json.loads((archive / "ARCHIVE_MANIFEST.json").read_text(encoding="utf-8"))
     assert manifest["autoResume"] is False
+    assert manifest["capturedAt"] == NOW.isoformat()
+    assert manifest["sourceDigest"].startswith("sha256:")
     assert manifest["files"][0]["path"] == "T002.yaml"
     assert source.is_dir()
+    assert queue.archive_v2(source, archive_id="baseline", captured_at=NOW) == archive
+    with pytest.raises(ValueError, match="unsafe characters"):
+        queue.archive_v2(source, archive_id="../escape", captured_at=NOW)
+
+
+def test_legacy_archive_rejects_symlinked_evidence(tmp_path: Path) -> None:
+    source = tmp_path / "legacy"
+    source.mkdir()
+    external = tmp_path / "outside.yaml"
+    external.write_text("secret: no\n", encoding="utf-8")
+    (source / "T002.yaml").symlink_to(external)
+
+    with pytest.raises(ValueError, match="contains symlinks"):
+        V3Queue(tmp_path / "v3-queue").archive_v2(
+            source,
+            archive_id="baseline",
+            captured_at=NOW,
+        )

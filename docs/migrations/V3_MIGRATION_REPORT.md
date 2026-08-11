@@ -177,6 +177,32 @@ Migrate the V2 factory/bootstrap repository to the bounded V3 product and factor
 - All active role prompts exist and all active roles have finite turn, token, and estimate ceilings
 - No model session, network mutation, GitHub mutation, runtime restart, or paid usage occurred
 
+## Phase I implementation
+
+- Preserved the complete 79,523-byte V2 feature ledger byte-for-byte at `factory/roadmap/legacy_feature_ledger.yaml`; its snapshot-bound digest remains `sha256:ab5d10c6718d3a9fdf53dd78cf0c387e995cd1723cf10b76fb53e14af559c994`.
+- Added an ordered, typed mapping for exactly T001 through T124 with original status, outcome, packet, preserved evidence references, explicit V3 disposition, bounded V3 targets, and reason.
+- Preserved the observed status distribution exactly: 1 passed, 1 paused, 2 external-wait, and 120 blocked. T002 remains FACTORY history with no mapped work item and cannot be automatically resumed.
+- Mapped 88 explicitly represented concepts to existing bounded V3 work, preserved 7 source/factory items as FACTORY history, and marked 29 broad or unselected designs DEFERRED_DESIGN. No title-similarity inference activates work.
+- Added deterministic generation and validation. Every mapping target must exist in the authoritative 109-item V3 roadmap; multiple legacy concepts may map to one bounded V3 item, but no V3 dependency contains a legacy task ID.
+- Added explicit dry-run/apply CLI behavior. Apply requires local-write acknowledgement, never invokes a model, and is idempotent.
+- Copied the exact stopped V2 queue into `factory/state/v3-queue/archive/v2/v2-20260811T212024Z-885df1dd93b8` with `autoResume: false`, while retaining the original three files byte-for-byte. The tracked archive receipt binds the source, copied files, manifest, STOP, PAUSE, and all empty V3 state directories.
+- Made startup fail closed unless the legacy ledger archive, mapping, V3 targets, and queue archive receipt all verify.
+- Marked V3-MIG-010 through V3-MIG-015 passed-engineering in the deterministic roadmap generator. Human work V3-MIG-016 remains WAITING_HUMAN.
+
+## Phase I verification
+
+- Dedicated legacy mapping, queue, and startup checks: 15 passed
+- Complete Pytest suite: 485 passed
+- Ruff: pass
+- Strict Pyright: 0 errors, 0 warnings
+- Exact V3 roadmap generation: 109 work items
+- Exact legacy generation: 124 records
+- Generated V3 schemas: 32 exact matches
+- YAML uniqueness: 88 files passed
+- Source authority, V3 configuration, credential scan, and no-paid-usage gates: pass
+- Queue archive apply and second idempotent apply: pass; originals retained, no auto-resume, STOP/PAUSE preserved
+- No model session, network mutation, GitHub mutation, runtime restart, Windows task change, or paid usage occurred
+
 ## Pending
 
-Legacy mappings, product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.
+Product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.

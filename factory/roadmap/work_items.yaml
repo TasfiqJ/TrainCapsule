@@ -346,7 +346,7 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
@@ -382,7 +382,7 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
@@ -418,7 +418,7 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
@@ -454,7 +454,7 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
@@ -490,7 +490,7 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
@@ -530,7 +530,7 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null

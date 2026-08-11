@@ -1,0 +1,1421 @@
+version: 3
+sourceVersion: 2
+migrationBaseSha: 6b480232fa92b069103da44c475bd17bcb3e6bd1
+sourceLedgerDigest: sha256:ab5d10c6718d3a9fdf53dd78cf0c387e995cd1723cf10b76fb53e14af559c994
+sourcePolicyRef: docs/source-of-truth/final-2026-08-09/12_ROADMAP_BACKLOG_AND_MASTER_BUILD_PROMPT.md#12.9-prioritized-task-ledger
+records:
+- legacyTaskId: T001
+  legacyStatus: passed
+  legacyOutcome: Commit final source-of-truth bundle and precedence rules
+  legacyPacket: tasks/T001.yaml
+  v3Disposition: FACTORY
+  mappedWorkItems:
+  - V3-MIG-003
+  - V3-MIG-004
+  reason: Historical V2 factory/source-control work; any replacement is only the listed
+    bounded V3 work and the legacy status does not transfer.
+  evidencePreserved:
+  - docs/evidence/T001
+  - docs/migrations/V3_RUNTIME_SNAPSHOT_METADATA.json
+  - factory/artifacts/T001
+  - factory/artifacts/T001/20260810T225908Z/pipeline-summary.json
+  - factory/feature_ledger.yaml
+  - factory/recovery/task-packets/T001-infrastructure-max-turns.error.txt
+  - factory/recovery/task-packets/T001-infrastructure-max-turns.yaml
+  - factory/recovery/task-packets/T001-r1.yaml
+  - factory/recovery/task-packets/T001-r2.yaml
+  - factory/recovery/task-packets/T001-r3.yaml
+  - tasks/T001.yaml
+- legacyTaskId: T002
+  legacyStatus: paused
+  legacyOutcome: Recheck product name, package, domain, and trademark surface
+  legacyPacket: tasks/T002.yaml
+  v3Disposition: FACTORY
+  mappedWorkItems: []
+  reason: Historical V2 factory/source-control work; any replacement is only the listed
+    bounded V3 work and the legacy status does not transfer.
+  evidencePreserved:
+  - docs/migrations/V3_RUNTIME_SNAPSHOT_METADATA.json
+  - factory/artifacts/T002
+  - factory/feature_ledger.yaml
+  - factory/proposals/T002.yaml
+  - factory/recovery/task-packets/T002-r1.yaml
+  - factory/recovery/task-packets/T002-r10.yaml
+  - factory/recovery/task-packets/T002-r11.yaml
+  - factory/recovery/task-packets/T002-r12.yaml
+  - factory/recovery/task-packets/T002-r2.yaml
+  - factory/recovery/task-packets/T002-r3.yaml
+  - factory/recovery/task-packets/T002-r4.yaml
+  - factory/recovery/task-packets/T002-r5.yaml
+  - factory/recovery/task-packets/T002-r6.yaml
+  - factory/recovery/task-packets/T002-r7.yaml
+  - factory/recovery/task-packets/T002-r8.yaml
+  - factory/recovery/task-packets/T002-r9.yaml
+  - specs/tasks/T002.md
+  - tasks/T002.yaml
+- legacyTaskId: T003
+  legacyStatus: blocked
+  legacyOutcome: Pin current primary sources and create claim registry
+  legacyPacket: null
+  v3Disposition: FACTORY
+  mappedWorkItems:
+  - V3-MIG-004
+  reason: Historical V2 factory/source-control work; any replacement is only the listed
+    bounded V3 work and the legacy status does not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T004
+  legacyStatus: blocked
+  legacyOutcome: Configure protected normative paths and changed-file gate
+  legacyPacket: null
+  v3Disposition: FACTORY
+  mappedWorkItems:
+  - V3-MIG-004
+  - V3-MIG-013
+  reason: Historical V2 factory/source-control work; any replacement is only the listed
+    bounded V3 work and the legacy status does not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T005
+  legacyStatus: blocked
+  legacyOutcome: Create role-separated worktree factory and durable task ledger
+  legacyPacket: null
+  v3Disposition: FACTORY
+  mappedWorkItems:
+  - V3-MIG-005
+  - V3-MIG-006
+  reason: Historical V2 factory/source-control work; any replacement is only the listed
+    bounded V3 work and the legacy status does not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T006
+  legacyStatus: blocked
+  legacyOutcome: Create quota checkpoint, pause, resume, and single-instance controls
+  legacyPacket: null
+  v3Disposition: FACTORY
+  mappedWorkItems:
+  - V3-MIG-007
+  - V3-MIG-014
+  reason: Historical V2 factory/source-control work; any replacement is only the listed
+    bounded V3 work and the legacy status does not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T007
+  legacyStatus: blocked
+  legacyOutcome: Bootstrap hidden gates outside builder-visible repository
+  legacyPacket: null
+  v3Disposition: FACTORY
+  mappedWorkItems:
+  - V3-MIG-013
+  reason: Historical V2 factory/source-control work; any replacement is only the listed
+    bounded V3 work and the legacy status does not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T008
+  legacyStatus: blocked
+  legacyOutcome: Create public distributed-workload incident corpus schema
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T009
+  legacyStatus: blocked
+  legacyOutcome: Create native/bundled/agent capability matrix
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-COMP-002
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T010
+  legacyStatus: blocked
+  legacyOutcome: Create wedge scoring model and Wedge Discovery Ledger
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-DEC-001
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T011
+  legacyStatus: blocked
+  legacyOutcome: Create monthly WEDGE_DECISION.md workflow
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-DEC-001
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T012
+  legacyStatus: blocked
+  legacyOutcome: Create immutable attempted-case and value-record schemas
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-002
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T013
+  legacyStatus: blocked
+  legacyOutcome: Define WorkloadManifest, WorkloadLock, and ChangeLock schemas
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-002
+  - V3-PROD-004
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T014
+  legacyStatus: blocked
+  legacyOutcome: Implement canonical serialization and digests
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-TRUST-001
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T015
+  legacyStatus: blocked
+  legacyOutcome: Implement workload/change lock diff and trust downgrade rules
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-004
+  - V3-PROD-005
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T016
+  legacyStatus: blocked
+  legacyOutcome: Implement EnvironmentAvailabilityRecord
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-005
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T017
+  legacyStatus: blocked
+  legacyOutcome: Define EvidenceArtifact and provenance contracts
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-002
+  - V3-PROD-003
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T018
+  legacyStatus: blocked
+  legacyOutcome: Implement atomic content-addressed object store
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-003
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T019
+  legacyStatus: blocked
+  legacyOutcome: Implement SQLite metadata and migrations
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T020
+  legacyStatus: blocked
+  legacyOutcome: Implement retention, deletion, legal hold, and revocation graph
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-TRUST-003
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T021
+  legacyStatus: blocked
+  legacyOutcome: Implement secret/data classification scan
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-TRUST-002
+  - V3-TRUST-003
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T022
+  legacyStatus: blocked
+  legacyOutcome: 'Implement initial CLI: doctor, lock, inspect'
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-010
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T023
+  legacyStatus: blocked
+  legacyOutcome: Verify clean setup and deterministic digest fixtures
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-TRUST-001
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T024
+  legacyStatus: blocked
+  legacyOutcome: Define adapter capability/loss/authority contract
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T025
+  legacyStatus: blocked
+  legacyOutcome: Implement current stable PyTorch Flight Recorder importer
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-006
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T026
+  legacyStatus: blocked
+  legacyOutcome: Implement c10d/NCCL lifecycle normalization
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-012
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T027
+  legacyStatus: blocked
+  legacyOutcome: Implement Slurm process/job/node importer
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T028
+  legacyStatus: blocked
+  legacyOutcome: Implement DCGM/NVML/XID/ECC importer
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T029
+  legacyStatus: blocked
+  legacyOutcome: Implement checkpoint/RNG/sampler reference importer
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T030
+  legacyStatus: blocked
+  legacyOutcome: Implement capture completeness states
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-008
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T031
+  legacyStatus: blocked
+  legacyOutcome: Fuzz malformed and oversized evidence inputs
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-TRUST-002
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T032
+  legacyStatus: blocked
+  legacyOutcome: Run real native trace import end to end
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T033
+  legacyStatus: blocked
+  legacyOutcome: Implement native baseline timing and effort ledger
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-COMP-001
+  - V3-COMP-003
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T034
+  legacyStatus: blocked
+  legacyOutcome: Add Flight Recorder and cloud recovery capabilities to absorption
+    register
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-COMP-002
+  - V3-COMP-004
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T035
+  legacyStatus: blocked
+  legacyOutcome: Define actor/resource/phase/state-channel IncidentIR
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T036
+  legacyStatus: blocked
+  legacyOutcome: Implement per-actor ordered trace
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T037
+  legacyStatus: blocked
+  legacyOutcome: Implement process-group/collective alignment
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-012
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T038
+  legacyStatus: blocked
+  legacyOutcome: Implement time-interval uncertainty and partial order
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-TRUST-004
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T039
+  legacyStatus: blocked
+  legacyOutcome: Implement evidence-gap propagation
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-008
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T040
+  legacyStatus: blocked
+  legacyOutcome: Release PRE_COLLECTIVE_LIFECYCLE_CONTRACT_V1
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-011
+  - V3-PROD-021
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T041
+  legacyStatus: blocked
+  legacyOutcome: Create skipped/reordered/incompatible collective faults
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-024
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T042
+  legacyStatus: blocked
+  legacyOutcome: Create data-branch, dataloader, checkpoint-wait, process-exit faults
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-024
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T043
+  legacyStatus: blocked
+  legacyOutcome: Create clean controls and delayed-but-healthy controls
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-024
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T044
+  legacyStatus: blocked
+  legacyOutcome: Implement last consistent/first observed inconsistent boundary
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-TRUST-004
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T045
+  legacyStatus: blocked
+  legacyOutcome: Implement Symptom, ObservedDivergence, and Hypothesis records
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-013
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T046
+  legacyStatus: blocked
+  legacyOutcome: Test timestamp-only alignment and hidden missing evidence
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-008
+  - V3-TRUST-004
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T047
+  legacyStatus: blocked
+  legacyOutcome: Run hidden first-boundary suite with zero clean-control blame
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-024
+  - V3-TRUST-004
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T048
+  legacyStatus: blocked
+  legacyOutcome: Define C0-C3 capture levels and recorder failure policy
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T049
+  legacyStatus: blocked
+  legacyOutcome: Implement semantic step/microbatch/phase markers
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T050
+  legacyStatus: blocked
+  legacyOutcome: Implement optional bounded local ring buffer
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T051
+  legacyStatus: blocked
+  legacyOutcome: Implement out-of-band freeze independent of failed process group
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T052
+  legacyStatus: blocked
+  legacyOutcome: Benchmark capture-on/off median and tail distributions
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T053
+  legacyStatus: blocked
+  legacyOutcome: Measure CPU, memory, storage, network, GPU, and output effects
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T054
+  legacyStatus: blocked
+  legacyOutcome: Create instrumentation-induced and instrumentation-hidden faults
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T055
+  legacyStatus: blocked
+  legacyOutcome: Issue perturbation policy verdict; disable unsafe levels
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T056
+  legacyStatus: blocked
+  legacyOutcome: Define controlled ExperimentPlan and permitted-inference contract
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-013
+  - V3-PROD-015
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T057
+  legacyStatus: blocked
+  legacyOutcome: Implement hypothesis ledger and experiment result lineage
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-013
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T058
+  legacyStatus: blocked
+  legacyOutcome: Implement cost/safety/privacy/decision-value budget
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-009
+  - V3-PROD-015
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T059
+  legacyStatus: blocked
+  legacyOutcome: Implement closure-value qualification terminal states
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-DEC-002
+  - V3-PROD-009
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T060
+  legacyStatus: blocked
+  legacyOutcome: Define faithfulness and applicability schemas
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-016
+  - V3-TRUST-005
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T061
+  legacyStatus: blocked
+  legacyOutcome: Implement rank/actor-set reduction
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-014
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T062
+  legacyStatus: blocked
+  legacyOutcome: Implement step/event-window reduction
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-014
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T063
+  legacyStatus: blocked
+  legacyOutcome: Implement process-group legality validator
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-014
+  - V3-TRUST-005
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T064
+  legacyStatus: blocked
+  legacyOutcome: Implement data/control-trigger preservation hooks
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-014
+  - V3-TRUST-005
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T065
+  legacyStatus: blocked
+  legacyOutcome: Implement model/operator/tensor reduction interfaces
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T066
+  legacyStatus: blocked
+  legacyOutcome: Implement environment/version simplification
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-005
+  - V3-PROD-014
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T067
+  legacyStatus: blocked
+  legacyOutcome: Implement multi-objective candidate cost and search budget
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-009
+  - V3-PROD-014
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T068
+  legacyStatus: blocked
+  legacyOutcome: Create trigger-removal, boundary-change, and tier-drop hidden faults
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-024
+  - V3-TRUST-005
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T069
+  legacyStatus: blocked
+  legacyOutcome: Verify Minimum Faithful Experiment on controlled flagship case
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-025
+  - V3-TRUST-005
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T070
+  legacyStatus: blocked
+  legacyOutcome: Define runner, privacy-zone, retry, and semantic-state contracts
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-017
+  - V3-PROD-018
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T071
+  legacyStatus: blocked
+  legacyOutcome: Implement local non-root OCI runner
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-017
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T072
+  legacyStatus: blocked
+  legacyOutcome: Implement source/substitute environment locks
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-005
+  - V3-PROD-017
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T073
+  legacyStatus: blocked
+  legacyOutcome: Implement structural local multi-process execution
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-025
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T074
+  legacyStatus: blocked
+  legacyOutcome: Implement federated request/result protocol
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T075
+  legacyStatus: blocked
+  legacyOutcome: Implement environment mismatch and unavailable states
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-005
+  - V3-PROD-009
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T076
+  legacyStatus: blocked
+  legacyOutcome: Implement network, mount, capability, resource, and timeout sandbox
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-017
+  - V3-TRUST-006
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T077
+  legacyStatus: blocked
+  legacyOutcome: Implement archive traversal/symlink/device/decompression protections
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-TRUST-002
+  - V3-TRUST-006
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T078
+  legacyStatus: blocked
+  legacyOutcome: Implement SBOM, dependency, license, vulnerability, and secret gates
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-027
+  - V3-TRUST-006
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T079
+  legacyStatus: blocked
+  legacyOutcome: Implement signing and provenance attestation
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-016
+  - V3-PROD-022
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T080
+  legacyStatus: blocked
+  legacyOutcome: Define tcap/OCI artifact and federated result schema
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-002
+  - V3-PROD-027
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T081
+  legacyStatus: blocked
+  legacyOutcome: Implement offline verifier and trusted launch templates
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-022
+  - V3-PROD-027
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T082
+  legacyStatus: blocked
+  legacyOutcome: Replay sanitized/public controlled artifact from clean environment
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-025
+  - V3-PROD-027
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T083
+  legacyStatus: blocked
+  legacyOutcome: Define Recovery Assurance property groups and states
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-019
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T084
+  legacyStatus: blocked
+  legacyOutcome: Implement checkpoint integrity and completeness checks
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-019
+  - V3-TRUST-007
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T085
+  legacyStatus: blocked
+  legacyOutcome: Implement optimizer/scheduler/RNG/sampler/data-cursor checks
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-019
+  - V3-TRUST-007
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T086
+  legacyStatus: blocked
+  legacyOutcome: Implement shard ownership and process-group checks
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-019
+  - V3-TRUST-007
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T087
+  legacyStatus: blocked
+  legacyOutcome: Implement numerical and performance sentinels
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-019
+  - V3-PROD-020
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T088
+  legacyStatus: blocked
+  legacyOutcome: Implement canary, rollback, and observation-window records
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-019
+  - V3-PROD-021
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T089
+  legacyStatus: blocked
+  legacyOutcome: Create false-green restart, stale sampler, and throughput regression
+    faults
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-024
+  - V3-TRUST-007
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T090
+  legacyStatus: blocked
+  legacyOutcome: Define WorkloadIncidentContract and classification
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-021
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T091
+  legacyStatus: blocked
+  legacyOutcome: Implement contract registry, applicability, drift, expiry, revocation
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-021
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T092
+  legacyStatus: blocked
+  legacyOutcome: Implement QualificationRun against ChangeLock
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-020
+  - V3-PROD-021
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T093
+  legacyStatus: blocked
+  legacyOutcome: Block stale/out-of-envelope contract passes
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-021
+  - V3-TRUST-008
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T094
+  legacyStatus: blocked
+  legacyOutcome: Run controlled change qualification end to end
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-025
+  - V3-TRUST-008
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T095
+  legacyStatus: blocked
+  legacyOutcome: Release CHECKPOINT_RESUME_STATE_CONSISTENCY_V1
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T096
+  legacyStatus: blocked
+  legacyOutcome: Create checkpoint shard, optimizer, RNG, sampler, and cursor faults
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T097
+  legacyStatus: blocked
+  legacyOutcome: Implement pack-specific evidence and experiments
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-015
+  - V3-PROD-019
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T098
+  legacyStatus: blocked
+  legacyOutcome: Run recovery and qualification hidden suite
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-TRUST-007
+  - V3-TRUST-008
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T099
+  legacyStatus: blocked
+  legacyOutcome: Define OperatorAlignmentBackend interface
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T100
+  legacyStatus: blocked
+  legacyOutcome: Benchmark OpGuard capability and integration boundary
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T101
+  legacyStatus: blocked
+  legacyOutcome: Define ScaleEmulationBackend interface
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T102
+  legacyStatus: blocked
+  legacyOutcome: Benchmark PrismLLM capability and integration boundary
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T103
+  legacyStatus: blocked
+  legacyOutcome: Implement backend stubs/conformance fixtures, not duplicate algorithms
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T104
+  legacyStatus: blocked
+  legacyOutcome: Run KEEP/INTEGRATE/UPSTREAM/NARROW/REPLACE decision
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-COMP-004
+  - V3-DEC-002
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T105
+  legacyStatus: blocked
+  legacyOutcome: Complete CLI Close/Qualify/Exchange workflow
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T106
+  legacyStatus: blocked
+  legacyOutcome: Implement thin local evidence/contract viewer
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-023
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T107
+  legacyStatus: blocked
+  legacyOutcome: Write operator, deployment, security, and incident-pack guides
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-027
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T108
+  legacyStatus: blocked
+  legacyOutcome: Run independent clean-machine installation
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-027
+  - V3-TRUST-009
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T109
+  legacyStatus: blocked
+  legacyOutcome: Run second-engineer workflow without hidden founder edits
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-TRUST-009
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T110
+  legacyStatus: blocked
+  legacyOutcome: Compare complete native/bundled/agent workflow against TrainCapsule
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-COMP-005
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T111
+  legacyStatus: blocked
+  legacyOutcome: Generate positive, negative, unknown, and no-gain case ledger
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-024
+  - V3-PROD-025
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T112
+  legacyStatus: blocked
+  legacyOutcome: Run competitor equivalence and contract-value-decay gates
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-COMP-005
+  - V3-DEC-002
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T113
+  legacyStatus: blocked
+  legacyOutcome: Generate founder technical briefs and oral-defense checklist
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T114
+  legacyStatus: blocked
+  legacyOutcome: Prepare public controlled demo and technical report
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-TRUST-010
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T115
+  legacyStatus: blocked
+  legacyOutcome: Create named-account map and qualification rubric
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-MKT-001
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T116
+  legacyStatus: blocked
+  legacyOutcome: Create paid feasibility/incident assessment offer
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-MKT-008
+  - V3-MKT-009
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T117
+  legacyStatus: blocked
+  legacyOutcome: Create local-data, DPA, IP, retention, and support templates
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-TRUST-011
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T118
+  legacyStatus: blocked
+  legacyOutcome: Begin targeted outreach after credible alpha
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-MKT-003
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T119
+  legacyStatus: external_wait
+  legacyOutcome: Run first external or highest-fidelity independent case
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-COMP-006
+  - V3-PROD-028
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T120
+  legacyStatus: blocked
+  legacyOutcome: Measure complete baseline and total delivery economics
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-PROD-009
+  - V3-REPEAT-006
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T121
+  legacyStatus: external_wait
+  legacyOutcome: Request second incident or paid qualification
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-REPEAT-001
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T122
+  legacyStatus: blocked
+  legacyOutcome: Measure trust-core changes, manual hours, margin, and reuse
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-REPEAT-005
+  - V3-REPEAT-006
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T123
+  legacyStatus: blocked
+  legacyOutcome: Issue COMPANY/PRODUCTIZED_SERVICE/REDESIGN/OPEN_SOURCE/STOP decision
+  legacyPacket: null
+  v3Disposition: MAPPED_TO_V3
+  mappedWorkItems:
+  - V3-DEC-005
+  reason: This concept is explicitly represented by the listed bounded V3 work; the
+    legacy status and dependency chain do not transfer.
+  evidencePreserved:
+  - factory/feature_ledger.yaml
+- legacyTaskId: T124
+  legacyStatus: blocked
+  legacyOutcome: Submit one meaningful upstream artifact
+  legacyPacket: null
+  v3Disposition: DEFERRED_DESIGN
+  mappedWorkItems: []
+  reason: Broad or unselected V2 design is preserved as historical input and is not
+    scheduled unless an authorized V3 work item is promoted later.
+  evidencePreserved:
+  - factory/feature_ledger.yaml

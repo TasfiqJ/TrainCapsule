@@ -1,42 +1,33 @@
 {
   "$defs": {
-    "Disposition": {
+    "LegacyDisposition": {
       "enum": [
-        "KEEP",
-        "INTEGRATE_EXISTING_BACKEND",
-        "UPSTREAM",
-        "NARROW",
-        "REPLACE",
-        "PAUSE",
-        "STOP",
-        "NOT_REVIEWED"
+        "FACTORY",
+        "MAPPED_TO_V3",
+        "DEFERRED_DESIGN"
       ],
-      "title": "Disposition",
-      "type": "string"
-    },
-    "Lane": {
-      "enum": [
-        "PRODUCT",
-        "MARKET",
-        "COMPETITOR",
-        "TRUST",
-        "FACTORY"
-      ],
-      "title": "Lane",
+      "title": "LegacyDisposition",
       "type": "string"
     },
     "LegacyMapRecord": {
       "additionalProperties": false,
       "properties": {
         "legacyTaskId": {
-          "pattern": "^[A-Z][A-Z0-9_-]{1,63}$",
+          "pattern": "^T[0-9]{3}$",
           "title": "Legacytaskid",
           "type": "string"
         },
-        "workItemId": {
+        "legacyStatus": {
+          "$ref": "#/$defs/LegacyStatus"
+        },
+        "legacyOutcome": {
+          "minLength": 1,
+          "title": "Legacyoutcome",
+          "type": "string"
+        },
+        "legacyPacket": {
           "anyOf": [
             {
-              "pattern": "^V3-[A-Z]+-[0-9]{3}$",
               "type": "string"
             },
             {
@@ -44,61 +35,60 @@
             }
           ],
           "default": null,
-          "title": "Workitemid"
+          "title": "Legacypacket"
         },
-        "lane": {
-          "$ref": "#/$defs/Lane"
+        "v3Disposition": {
+          "$ref": "#/$defs/LegacyDisposition"
         },
-        "status": {
-          "$ref": "#/$defs/WorkStatus"
+        "mappedWorkItems": {
+          "items": {
+            "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+            "type": "string"
+          },
+          "title": "Mappedworkitems",
+          "type": "array"
         },
-        "disposition": {
-          "$ref": "#/$defs/Disposition"
-        },
-        "rationale": {
+        "reason": {
           "minLength": 1,
-          "title": "Rationale",
+          "title": "Reason",
           "type": "string"
         },
-        "preservedEvidenceRefs": {
+        "evidencePreserved": {
           "items": {
             "type": "string"
           },
-          "title": "Preservedevidencerefs",
+          "title": "Evidencepreserved",
           "type": "array"
         }
       },
       "required": [
         "legacyTaskId",
-        "lane",
-        "status",
-        "disposition",
-        "rationale",
-        "preservedEvidenceRefs"
+        "legacyStatus",
+        "legacyOutcome",
+        "v3Disposition",
+        "mappedWorkItems",
+        "reason",
+        "evidencePreserved"
       ],
       "title": "LegacyMapRecord",
       "type": "object"
     },
-    "WorkStatus": {
+    "LegacyStatus": {
       "enum": [
-        "PROPOSED",
-        "READY",
-        "QUEUED",
-        "RUNNING",
-        "PAUSED_QUOTA",
-        "WAITING_EXTERNAL",
-        "WAITING_HUMAN",
-        "BLOCKED_TECHNICAL",
-        "BLOCKED_POLICY",
-        "PASSED_ENGINEERING",
-        "REJECTED_VALUE",
-        "NATIVE_SUFFICIENT",
-        "DEFERRED",
-        "SUPERSEDED",
-        "CANCELLED",
-        "COMPLETED"
+        "blocked",
+        "ready",
+        "packet_proposed",
+        "packet_approved",
+        "queued",
+        "running",
+        "paused",
+        "external_wait",
+        "passed",
+        "failed",
+        "respec_required",
+        "deferred"
       ],
-      "title": "WorkStatus",
+      "title": "LegacyStatus",
       "type": "string"
     }
   },
@@ -118,6 +108,21 @@
       "title": "Sourceversion",
       "type": "integer"
     },
+    "migrationBaseSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Migrationbasesha",
+      "type": "string"
+    },
+    "sourceLedgerDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourceledgerdigest",
+      "type": "string"
+    },
+    "sourcePolicyRef": {
+      "minLength": 1,
+      "title": "Sourcepolicyref",
+      "type": "string"
+    },
     "records": {
       "items": {
         "$ref": "#/$defs/LegacyMapRecord"
@@ -127,6 +132,9 @@
     }
   },
   "required": [
+    "migrationBaseSha",
+    "sourceLedgerDigest",
+    "sourcePolicyRef",
     "records"
   ],
   "title": "LegacyMigrationMap",

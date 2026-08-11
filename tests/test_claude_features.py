@@ -33,19 +33,18 @@ def _task(risk: RiskTier = RiskTier.TRUST_CORE) -> TaskPacket:
     )
 
 
-def test_claude_native_feature_policy_is_token_bounded() -> None:
+def test_claude_native_feature_policy_enables_renewable_production_work() -> None:
     features = load_claude_features(ROOT / "config/claude_features.yaml")
     roles = load_roles(ROOT / "config/roles.yaml")
     assert features.cross_session_messaging.enabled is True
-    assert features.cross_session_messaging.max_messages_per_session <= 4
-    assert features.agent_teams.enabled is False
-    assert features.memory.auto_memory_enabled is False
-    # The official Workflow tool is not assumed in the Python Agent SDK.
+    assert features.cross_session_messaging.max_messages_per_session <= 10
+    assert features.agent_teams.enabled is True
+    assert features.memory.auto_memory_enabled is True
+    # The normal Agent tool is available; the separate Workflow tool is not assumed.
     assert features.dynamic_workflows.enabled is False
     scout = roles[RoleName.INTEGRATION_SCOUT]
     assert scout.max_turns >= 20
-    assert scout.task_budget_tokens is not None
-    assert scout.task_budget_tokens >= 200_000
+    assert scout.task_budget_tokens is None
     assert features.integration_scout.blocking_on_non_pass is True
 
 

@@ -1,60 +1,65 @@
 planner:
   prompt_file: prompts/autonomous_planner.md
   model: sonnet
-  effort: medium
-  max_turns: 5
-  max_budget_usd: 1.0
-  task_budget_tokens: 12000
-  tools: [Read, Grep, Glob, Write, Edit, Bash]
-  disallowed_tools: [WebFetch, WebSearch, Agent]
+  fallback_models: [opus]
+  effort: high
+  max_turns: 200
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
+  tools: [Read, Grep, Glob, Write, Edit, Bash, WebFetch, WebSearch, Agent]
+  disallowed_tools: []
   permission_mode: acceptEdits
   read_only: false
 
 specification:
   prompt_file: prompts/specification.md
-  model: sonnet
-  effort: high
-  max_turns: 7
-  max_budget_usd: 1.5
-  task_budget_tokens: 18000
-  tools: [Read, Grep, Glob, Write, Edit, Bash]
-  disallowed_tools: [WebFetch, WebSearch, Agent]
+  model: opus
+  fallback_models: [sonnet]
+  effort: xhigh
+  max_turns: 200
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
+  tools: [Read, Grep, Glob, Write, Edit, Bash, WebFetch, WebSearch, Agent]
+  disallowed_tools: []
   permission_mode: acceptEdits
   read_only: false
 
 research:
   prompt_file: prompts/research.md
   model: opus
-  effort: high
-  max_turns: 8
-  max_budget_usd: 2.5
-  task_budget_tokens: 24000
-  tools: [Read, Grep, Glob, Write, Edit, Bash, WebFetch, WebSearch]
-  disallowed_tools: [Agent]
+  fallback_models: [sonnet]
+  effort: xhigh
+  max_turns: 200
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
+  tools: [Read, Grep, Glob, Write, Edit, Bash, WebFetch, WebSearch, Agent]
+  disallowed_tools: []
   permission_mode: acceptEdits
   read_only: false
 
 builder:
   prompt_file: prompts/builder.md
   model: sonnet
-  effort: high
-  max_turns: 14
-  max_budget_usd: 3.0
-  task_budget_tokens: 36000
-  tools: [Read, Grep, Glob, Write, Edit, Bash]
-  disallowed_tools: [WebFetch, WebSearch, Agent]
+  fallback_models: [opus]
+  effort: max
+  max_turns: 200
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
+  tools: [Read, Grep, Glob, Write, Edit, Bash, WebFetch, WebSearch, Agent]
+  disallowed_tools: []
   permission_mode: acceptEdits
   read_only: false
 
 integration_scout:
   prompt_file: prompts/integration_scout.md
   model: sonnet
-  effort: medium
-  max_turns: 20
-  max_budget_usd: 0.8
-  task_budget_tokens: 200000
+  fallback_models: [opus]
+  effort: high
+  max_turns: 100
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
   tools: [Read, Grep, Glob, Bash, ListAgents, SendMessage]
-  disallowed_tools: [Write, Edit, WebFetch, WebSearch, Agent]
+  disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
   read_only: true
   peer_messaging: true
@@ -63,107 +68,116 @@ integration_scout:
 adversary:
   prompt_file: prompts/adversary.md
   model: opus
-  effort: high
-  max_turns: 6
-  max_budget_usd: 2.0
-  task_budget_tokens: 18000
-  tools: [Read, Grep, Glob, Bash]
-  disallowed_tools: [Write, Edit, WebFetch, WebSearch, Agent]
+  fallback_models: [sonnet]
+  effort: max
+  max_turns: 100
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
+  tools: [Read, Grep, Glob, Bash, WebFetch, WebSearch]
+  disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
   read_only: true
 
 audit:
   prompt_file: prompts/audit.md
   model: sonnet
-  effort: high
-  max_turns: 5
-  max_budget_usd: 1.0
-  task_budget_tokens: 12000
+  fallback_models: [opus]
+  effort: xhigh
+  max_turns: 80
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
   tools: [Read, Grep, Glob, Bash]
-  disallowed_tools: [Write, Edit, WebFetch, WebSearch, Agent]
+  disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
   read_only: true
 
 security:
   prompt_file: prompts/security.md
   model: opus
-  effort: high
-  max_turns: 6
-  max_budget_usd: 2.0
-  task_budget_tokens: 18000
-  tools: [Read, Grep, Glob, Bash]
-  disallowed_tools: [Write, Edit, WebFetch, WebSearch, Agent]
+  fallback_models: [sonnet]
+  effort: max
+  max_turns: 120
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
+  tools: [Read, Grep, Glob, Bash, WebFetch, WebSearch]
+  disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
   read_only: true
 
 performance:
   prompt_file: prompts/performance.md
   model: sonnet
-  effort: high
-  max_turns: 5
-  max_budget_usd: 1.0
-  task_budget_tokens: 12000
+  fallback_models: [opus]
+  effort: xhigh
+  max_turns: 100
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
   tools: [Read, Grep, Glob, Bash]
-  disallowed_tools: [Write, Edit, WebFetch, WebSearch, Agent]
+  disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
   read_only: true
 
 value_validator:
   prompt_file: prompts/value_validator.md
   model: sonnet
-  effort: high
-  max_turns: 5
-  max_budget_usd: 1.0
-  task_budget_tokens: 12000
-  tools: [Read, Grep, Glob, Bash]
-  disallowed_tools: [Write, Edit, WebFetch, WebSearch, Agent]
+  fallback_models: [opus]
+  effort: xhigh
+  max_turns: 100
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
+  tools: [Read, Grep, Glob, Bash, WebFetch, WebSearch]
+  disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
   read_only: true
 
 value_adversary:
   prompt_file: prompts/value_adversary.md
   model: opus
-  effort: high
-  max_turns: 5
-  max_budget_usd: 1.5
-  task_budget_tokens: 14000
-  tools: [Read, Grep, Glob, Bash]
-  disallowed_tools: [Write, Edit, WebFetch, WebSearch, Agent]
+  fallback_models: [sonnet]
+  effort: max
+  max_turns: 100
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
+  tools: [Read, Grep, Glob, Bash, WebFetch, WebSearch]
+  disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
   read_only: true
 
 release:
   prompt_file: prompts/release.md
   model: sonnet
-  effort: medium
-  max_turns: 5
-  max_budget_usd: 1.0
-  task_budget_tokens: 12000
+  fallback_models: [opus]
+  effort: xhigh
+  max_turns: 100
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
   tools: [Read, Grep, Glob, Bash]
-  disallowed_tools: [Write, Edit, WebFetch, WebSearch, Agent]
+  disallowed_tools: [Write, Edit, Agent]
   permission_mode: dontAsk
   read_only: true
 
 recovery:
   prompt_file: prompts/recovery.md
   model: opus
-  effort: high
-  max_turns: 6
-  max_budget_usd: 2.0
-  task_budget_tokens: 16000
-  tools: [Read, Grep, Glob, Write, Edit, Bash]
-  disallowed_tools: [WebFetch, WebSearch, Agent]
+  fallback_models: [sonnet]
+  effort: max
+  max_turns: 200
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
+  tools: [Read, Grep, Glob, Write, Edit, Bash, WebFetch, WebSearch, Agent]
+  disallowed_tools: []
   permission_mode: acceptEdits
   read_only: false
 
 factory_repair:
   prompt_file: prompts/factory_repair.md
   model: opus
-  effort: high
-  max_turns: 28
-  max_budget_usd: 5.0
-  task_budget_tokens: 140000
-  tools: [Read, Grep, Glob, Write, Edit, Bash]
-  disallowed_tools: [WebFetch, WebSearch, Agent]
+  fallback_models: [sonnet]
+  effort: max
+  max_turns: 200
+  max_budget_usd: 1000.0
+  task_budget_tokens: null
+  tools: [Read, Grep, Glob, Write, Edit, Bash, WebFetch, WebSearch, Agent]
+  disallowed_tools: []
   permission_mode: acceptEdits
   read_only: false

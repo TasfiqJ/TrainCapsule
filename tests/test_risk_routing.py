@@ -116,7 +116,7 @@ def test_mechanical_planning_omits_expensive_adversary() -> None:
     )
     stages, _, _ = planning_pipeline(item, profiles)
     assert [stage.role for stage in stages] == [RoleName.PLANNER]
-    assert all(stage.model == "haiku" for stage in stages)
+    assert all(stage.model == "sonnet" for stage in stages)
 
 
 def test_every_profile_reserves_working_tokens_after_maximum_context() -> None:
@@ -151,10 +151,27 @@ def test_legacy_t002_release_receives_runtime_working_token_reserve() -> None:
     assert upgraded.task_budget_tokens == required_task_budget_tokens(110_000) == 51_500
 
 
+def test_work_until_done_removes_feature_token_cap_and_raises_session_floor() -> None:
+    task = load_task(ROOT / "tasks/T002.yaml")
+    research = next(stage for stage in task.pipeline if stage.role == RoleName.RESEARCH)
+
+    upgraded = with_working_token_reserve(
+        research,
+        work_until_done=True,
+        mutating_turn_floor=200,
+        review_turn_floor=80,
+    )
+
+    assert upgraded.task_budget_tokens is None
+    assert upgraded.max_budget_usd is None
+    assert upgraded.max_turns == 200
+    assert upgraded.effort in {"high", "xhigh", "max"}
+
+
 def test_pipeline_applies_runtime_working_token_reserve_before_stage_execution() -> None:
     source = inspect.getsource(run_pipeline)
 
-    assert "with_working_token_reserve(task.pipeline[checkpoint.stage_index])" in source
+    assert "work_until_done=config.work_until_done" in source
 
 
 def test_integration_keeps_independent_specification_before_builder() -> None:

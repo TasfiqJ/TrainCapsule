@@ -6,12 +6,13 @@ from tcfactory.config import load_roles
 from tcfactory.risk import load_risk_profiles
 
 ROOT = Path(__file__).resolve().parents[1]
-ALLOWED_MODELS = {"haiku", "sonnet", "opus", "fable"}
+ALLOWED_MODELS = {"sonnet", "opus", "fable"}
 
 
 def test_active_roles_use_only_claude_aliases() -> None:
     roles = load_roles(ROOT / "config" / "roles.yaml")
     assert {role.model for role in roles.values()} <= ALLOWED_MODELS
+    assert all(role.task_budget_tokens is None for role in roles.values())
 
 
 def test_risk_profiles_use_only_subscription_model_aliases() -> None:
@@ -46,7 +47,7 @@ def test_token_routing_reserves_opus_for_risk() -> None:
     standard = raw["profiles"]["standard"]["roles"]
     integration = raw["profiles"]["integration"]["roles"]
     trust = raw["profiles"]["trust_core"]["roles"]
-    assert mechanical["planner"]["model"] == "haiku"
+    assert mechanical["planner"]["model"] == "sonnet"
     assert mechanical["builder"]["model"] == "sonnet"
     assert all(role["model"] == "sonnet" for name, role in standard.items() if name != "security")
     assert integration["builder"]["model"] == "sonnet"

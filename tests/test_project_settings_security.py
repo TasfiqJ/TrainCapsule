@@ -8,8 +8,10 @@ def test_project_settings_protect_controller_credentials() -> None:
     settings = json.loads(Path(".claude/settings.json").read_text(encoding="utf-8"))
     assert settings["forceLoginMethod"] == "claudeai"
     sandbox = settings["sandbox"]
-    assert sandbox["enabled"] is True
-    assert sandbox["allowUnsandboxedCommands"] is False
+    # Mutating production roles run like normal Claude Code sessions; the controller
+    # still launches independent reviewers with an explicit SDK sandbox.
+    assert sandbox["enabled"] is False
+    assert sandbox["allowUnsandboxedCommands"] is True
 
     denied_reads = set(sandbox["filesystem"]["denyRead"])
     assert "~/.config/traincapsule" in denied_reads

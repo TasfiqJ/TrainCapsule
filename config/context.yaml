@@ -2,13 +2,13 @@ version: 2
 default_max_context_chars: 70000
 max_files: 30
 review_diff_chars: 30000
-max_failure_excerpt_chars: 10000
-max_previous_findings: 10
+max_failure_excerpt_chars: 50000
+max_previous_findings: 50
 max_diff_stat_chars: 3000
 principles:
   - Start every role in a fresh Claude session.
   - Persist state in Git, task packets, machine output, handoff files, and checkpoints—not chat history.
-  - Give agents file paths, hashes, and bounded summaries; let them retrieve detail just in time.
+  - Give agents file paths, hashes, reviewer fixes, and durable summaries; let them retrieve detail just in time.
   - Never preload the entire master plan or repository into routine sessions.
   - Never pass a prior role transcript into another role.
   - Compress logs deterministically before model review and retain full logs by path.

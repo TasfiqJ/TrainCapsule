@@ -213,7 +213,7 @@ def _workflow_for_task(
         config.enabled
         and stage.role in config.roles
         and task.risk_tier in config.risk_tiers
-        and task.task_id in config.task_allowlist
+        and (not config.task_allowlist or task.task_id in config.task_allowlist)
     ):
         return "source-crosscheck"
     return None

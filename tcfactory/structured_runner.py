@@ -75,7 +75,15 @@ async def run_structured_read_only_review[T: BaseModel](
         raise RuntimeError("claude-agent-sdk is not installed") from exc
 
     ledger = Ledger(config.resolve(repo_root, config.ledger_path), config.monthly_budget_usd)
-    ledger.assert_budget(max_budget_usd)
+    subscription_unbounded = config.work_until_done and config.auth_mode == "max_oauth_only"
+    if not (subscription_unbounded and config.disable_max_oauth_budget_caps):
+        ledger.assert_budget(max_budget_usd)
+    effective_turns = max(max_turns, config.review_session_turn_floor)
+    effective_budget = (
+        None
+        if subscription_unbounded and config.disable_max_oauth_budget_caps
+        else max_budget_usd
+    )
 
     artifact_dir.mkdir(parents=True, exist_ok=True)
     transcript = artifact_dir / "transcript.jsonl"
@@ -118,8 +126,8 @@ async def run_structured_read_only_review[T: BaseModel](
         permission_mode="dontAsk",
         model=model,
         effort=cast(EffortLevel, effort),
-        max_turns=max_turns,
-        max_budget_usd=max_budget_usd,
+        max_turns=effective_turns,
+        max_budget_usd=effective_budget,
         output_format={"type": "json_schema", "schema": schema},
         env=environment,
         strict_mcp_config=True,

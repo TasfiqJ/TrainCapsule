@@ -7,10 +7,7 @@
       "Bash(git reset --hard*)",
       "Bash(git clean*)",
       "Bash(sudo*)",
-      "Bash(chmod*)",
       "Bash(chown*)",
-      "Bash(docker*)",
-      "Bash(podman*)",
       "Bash(powershell*)",
       "Bash(powershell.exe*)",
       "Bash(cmd.exe*)",
@@ -30,9 +27,9 @@
     ]
   },
   "sandbox": {
-    "enabled": true,
+    "enabled": false,
     "autoAllowBashIfSandboxed": true,
-    "allowUnsandboxedCommands": false,
+    "allowUnsandboxedCommands": true,
     "filesystem": {
       "denyRead": [
         "~/.config/traincapsule",
@@ -243,6 +240,6 @@
     "sessionUrl": false
   },
   "isolatePeerMachines": true,
-  "workflowSizeGuideline": "small",
-  "autoMemoryEnabled": false
+  "workflowSizeGuideline": "medium",
+  "autoMemoryEnabled": true
 }

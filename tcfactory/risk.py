@@ -173,8 +173,42 @@ def required_task_budget_tokens(context_chars: int) -> int:
     return context_token_estimate + MIN_STAGE_WORK_TOKENS
 
 
-def with_working_token_reserve(stage: Stage) -> Stage:
-    """Upgrade legacy packets whose context can consume their whole task budget."""
+def with_working_token_reserve(
+    stage: Stage,
+    *,
+    work_until_done: bool = False,
+    mutating_turn_floor: int = 200,
+    review_turn_floor: int = 80,
+) -> Stage:
+    """Apply the runtime session policy to current and legacy task packets.
+
+    Finite/offline callers keep the historical token-reserve behavior.  The Max OAuth
+    autopilot removes the SDK task-token ceiling and raises the per-session turn budget;
+    the pipeline renews fresh sessions from durable candidate commits until the feature
+    passes or reaches a truthful external blocker.
+    """
+
+    if work_until_done:
+        mutating = stage.role in {
+            RoleName.PLANNER,
+            RoleName.SPECIFICATION,
+            RoleName.BUILDER,
+            RoleName.RESEARCH,
+            RoleName.RECOVERY,
+            RoleName.FACTORY_REPAIR,
+        }
+        floor = mutating_turn_floor if mutating else review_turn_floor
+        effort = stage.effort
+        if effort in {None, "low", "medium"}:
+            effort = "high"
+        return stage.model_copy(
+            update={
+                "max_turns": max(stage.max_turns or 0, floor),
+                "max_budget_usd": None,
+                "task_budget_tokens": None,
+                "effort": effort,
+            }
+        )
 
     if stage.max_context_chars is None:
         return stage
@@ -360,6 +394,8 @@ def apply_risk_profile(
     repair_models = ["sonnet"]
     if tier in {RiskTier.INTEGRATION, RiskTier.TRUST_CORE}:
         repair_models.append("opus")
+    if tier == RiskTier.TRUST_CORE:
+        repair_models.append("fable")
 
     return packet.model_copy(
         update={

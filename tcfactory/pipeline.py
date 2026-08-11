@@ -230,7 +230,13 @@ def retry_stage_update(
     original turn budget.
     """
 
-    update: dict[str, object] = {"model": model}
+    effort_order = ["low", "medium", "high", "xhigh", "max"]
+    current_effort = stage.effort or role_config.effort
+    effort_index = effort_order.index(current_effort)
+    update: dict[str, object] = {
+        "model": model,
+        "effort": effort_order[min(effort_index + 1, len(effort_order) - 1)],
+    }
     if not stage_hit_turn_ceiling(result):
         return update
     escalated = escalated_turn_budget(stage.max_turns or role_config.max_turns)
@@ -254,6 +260,11 @@ def review_turn_retry_update(
     """
 
     if not (stage_hit_turn_ceiling(result) or review_report_hit_budget_ceiling(result)):
+        return None
+    # A truncated reviewer that already returned concrete, actionable findings has done
+    # enough to start repair.  Re-running it against byte-identical input wastes a full
+    # Claude session and makes the read-only role appear to be a failed repair attempt.
+    if result.report and result.report.next_actions:
         return None
     base_turns = role_config.max_turns
     current_turns = stage.max_turns or base_turns
@@ -351,11 +362,14 @@ def _find_stage_index(task: TaskPacket, role: RoleName) -> int:
     return 0
 
 
-def _findings_from_result(result: StageResult) -> list[str]:
+def findings_from_result(result: StageResult) -> list[str]:
     findings: list[str] = []
     if result.report:
         findings.extend(result.report.findings)
-        findings.extend(result.report.limitations)
+        findings.extend(
+            f"Reviewer-directed repair: {action}" for action in result.report.next_actions
+        )
+        findings.extend(f"Known limitation: {item}" for item in result.report.limitations)
     if result.error:
         findings.append(result.error)
     for gate in result.gate_results:
@@ -378,7 +392,7 @@ def apply_scout_verdict(
 ) -> None:
     if primary.verdict != Verdict.PASS or scout.verdict == Verdict.PASS:
         return
-    findings = _findings_from_result(scout)
+    findings = findings_from_result(scout)
     if blocking_on_concrete_failure and scout.verdict == Verdict.FAIL:
         primary.verdict = Verdict.FAIL
         primary.error = "Integration scout found a concrete blocking contradiction: " + " | ".join(
@@ -532,16 +546,22 @@ async def _execute_stage(
     features = load_claude_features(config.resolve(repo_root, config.claude_features_path))
     launch_scout = should_launch_scout(features, task, stage)
     scout_config = role_configs.get(RoleName.INTEGRATION_SCOUT) if launch_scout else None
-    model_budget = stage.max_budget_usd or role_config.max_budget_usd
-    scout_budget = scout_config.max_budget_usd if scout_config is not None else 0.0
-    requested_budget = model_budget + scout_budget
-    task_spend = ledger.task_cost(task.task_id, run_id)
-    if task_spend + requested_budget > task.task_budget_usd:
-        raise PipelineFailure(
-            f"Task budget exceeded before {stage.role.value}: ${task_spend:.2f} spent, "
-            f"${requested_budget:.2f} requested, ${task.task_budget_usd:.2f} task cap."
-        )
-    ledger.assert_budget(requested_budget)
+    subscription_unbounded = (
+        config.work_until_done
+        and config.auth_mode == "max_oauth_only"
+        and config.disable_max_oauth_budget_caps
+    )
+    if not subscription_unbounded:
+        model_budget = stage.max_budget_usd or role_config.max_budget_usd
+        scout_budget = scout_config.max_budget_usd if scout_config is not None else 0.0
+        requested_budget = model_budget + scout_budget
+        task_spend = ledger.task_cost(task.task_id, run_id)
+        if task_spend + requested_budget > task.task_budget_usd:
+            raise PipelineFailure(
+                f"Task budget exceeded before {stage.role.value}: ${task_spend:.2f} spent, "
+                f"${requested_budget:.2f} requested, ${task.task_budget_usd:.2f} task cap."
+            )
+        ledger.assert_budget(requested_budget)
 
     worktree_root = config.resolve(repo_root, config.worktree_dir)
     worktree = create_worktree(
@@ -908,7 +928,7 @@ async def _execute_stage(
             if result.verdict == Verdict.PASS
             else "start a fresh bounded repair or re-specification session"
         ),
-        findings=_findings_from_result(result) if result.verdict != Verdict.PASS else [],
+        findings=findings_from_result(result) if result.verdict != Verdict.PASS else [],
     )
     checkpoint.handoff_path = str(handoff)
     append_provenance(
@@ -1131,7 +1151,12 @@ async def run_pipeline(
     console.rule(f"TrainCapsule AI Factory — {task.task_id} — {run_id}")
     try:
         while checkpoint.stage_index < len(task.pipeline):
-            stage = with_working_token_reserve(task.pipeline[checkpoint.stage_index])
+            stage = with_working_token_reserve(
+                task.pipeline[checkpoint.stage_index],
+                work_until_done=config.work_until_done,
+                mutating_turn_floor=config.mutating_session_turn_floor,
+                review_turn_floor=config.review_session_turn_floor,
+            )
             task.pipeline[checkpoint.stage_index] = stage
             key = stage.role.value
             checkpoint.stage_attempts[key] = checkpoint.stage_attempts.get(key, 0) + 1
@@ -1168,8 +1193,16 @@ async def run_pipeline(
                 continue
 
             checkpoint.stage_failures[key] = checkpoint.stage_failures.get(key, 0) + 1
-            findings = _findings_from_result(result)
+            findings = findings_from_result(result)
             console.print(f"[red]Stage failed:[/red] {findings}")
+
+            if result.verdict == Verdict.BLOCKED:
+                raise PipelineBlocked(
+                    terminal_failure_message(
+                        f"Stage {stage.role.value} reached a truthful external blocker.",
+                        result,
+                    )
+                )
 
             review_roles = {
                 RoleName.ADVERSARY,
@@ -1232,7 +1265,8 @@ async def run_pipeline(
                 and task.repair.mutating_role is not None
                 and stage.role == task.repair.mutating_role
             )
-            if stage.role == RoleName.BUILDER or is_configured_mutator:
+            renewable_mutator = config.work_until_done and _role_requires_changes(stage.role)
+            if stage.role == RoleName.BUILDER or is_configured_mutator or renewable_mutator:
                 failure_count = checkpoint.stage_failures[key]
                 candidate_sha = preserve_mutating_candidate(checkpoint, candidate_sha, next_sha)
                 if is_configured_mutator and stage.role != RoleName.BUILDER:
@@ -1241,6 +1275,9 @@ async def run_pipeline(
                 else:
                     retry_models = task.repair.builder_models
                     retry_index = failure_count
+                retry_models = retry_models or [stage.model or role_configs[stage.role].model]
+                if config.work_until_done:
+                    retry_index %= len(retry_models)
                 if retry_index < len(retry_models):
                     update = retry_stage_update(
                         stage,
@@ -1271,7 +1308,10 @@ async def run_pipeline(
             if (
                 stage.role in review_roles
                 and task.repair.enabled
-                and checkpoint.repair_cycles < task.repair.max_cycles
+                and (
+                    config.work_until_done
+                    or checkpoint.repair_cycles < task.repair.max_cycles
+                )
             ):
                 mutating = _find_mutating_stage(task)
                 repair_findings = list(findings)
@@ -1280,13 +1320,34 @@ async def run_pipeline(
                 # to the original failing stage's signal instead of raising NameError
                 # and replacing a truthful PipelineFailure with a controller crash.
                 repair_result: StageResult | None = None
-                while checkpoint.repair_cycles < task.repair.max_cycles:
+                while (
+                    config.work_until_done
+                    or checkpoint.repair_cycles < task.repair.max_cycles
+                ):
                     checkpoint.repair_cycles += 1
-                    models = task.repair.builder_models
-                    model = models[min(checkpoint.repair_cycles - 1, len(models) - 1)]
+                    models = task.repair.builder_models or [
+                        mutating.model or role_configs[mutating.role].model
+                    ]
+                    if config.work_until_done:
+                        model = models[(checkpoint.repair_cycles - 1) % len(models)]
+                    else:
+                        model = models[min(checkpoint.repair_cycles - 1, len(models) - 1)]
+                    base_effort = mutating.effort or role_configs[mutating.role].effort
+                    repair_effort = "max" if checkpoint.repair_cycles > 1 else base_effort
                     repair_stage = mutating.model_copy(
                         update={
                             "model": model,
+                            "effort": repair_effort,
+                            "max_turns": max(
+                                mutating.max_turns or 0,
+                                config.mutating_session_turn_floor,
+                            ),
+                            "max_budget_usd": (
+                                None if config.work_until_done else mutating.max_budget_usd
+                            ),
+                            "task_budget_tokens": (
+                                None if config.work_until_done else mutating.task_budget_tokens
+                            ),
                             "acceptance_criteria": mutating.acceptance_criteria
                             + [
                                 "Resolve every previous reviewer finding without "
@@ -1301,7 +1362,8 @@ async def run_pipeline(
                     repair_attempt = checkpoint.stage_attempts[repair_key]
                     console.print(
                         f"[yellow]Repair cycle "
-                        f"{checkpoint.repair_cycles}/{task.repair.max_cycles}"
+                        f"{checkpoint.repair_cycles}/"
+                        f"{'renewable' if config.work_until_done else task.repair.max_cycles}"
                         f"[/yellow] with {repair_stage.role.value} model {model}"
                     )
                     repair_result, repair_sha, _repair_worktree = await _execute_stage(
@@ -1350,7 +1412,14 @@ async def run_pipeline(
                         checkpoint_store.save(checkpoint)
                         repaired = True
                         break
-                    repair_findings.extend(_findings_from_result(repair_result))
+                    if repair_result.verdict == Verdict.BLOCKED:
+                        raise PipelineBlocked(
+                            terminal_failure_message(
+                                "Automatic repair reached a truthful external blocker.",
+                                repair_result,
+                            )
+                        )
+                    repair_findings.extend(findings_from_result(repair_result))
                     checkpoint.previous_findings = repair_findings
                     checkpoint_store.save(checkpoint)
                 if not repaired:

@@ -31,12 +31,14 @@ assert features['cross_session_messaging']['same_machine_only'] is True
 assert features['cross_session_messaging']['isolate_peer_machines'] is True
 assert features['goal']['enabled'] is True
 assert features['advisor']['enabled'] is True
-assert features['agent_teams']['enabled'] is False
+assert features['agent_teams']['enabled'] is True
+assert features['memory']['auto_memory_enabled'] is True
 assert features['dynamic_workflows']['enabled'] is False
-assert settings['sandbox']['enabled'] is True
-assert settings['sandbox']['failIfUnavailable'] is True
+assert settings['sandbox']['enabled'] is False
+assert settings['sandbox']['allowUnsandboxedCommands'] is True
 assert settings['isolatePeerMachines'] is True
+assert settings['autoMemoryEnabled'] is True
 assert settings['forceLoginMethod'] == 'claudeai'
-print('Claude-native policy passed: messaging, goal, advisor, skills, hooks, sandbox, and isolation configured.')
+print('Claude-native policy passed: renewable production agents, memory, messaging, hooks, and isolation configured.')
 PY
 printf 'A live cross-session handshake is verified later by scripts/run_one_time_calibration.sh.\n'

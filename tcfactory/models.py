@@ -179,7 +179,10 @@ class RepairPolicy(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
     enabled: bool = True
-    max_cycles: int = Field(default=2, ge=0, le=5)
+    # Retained for compatibility with finite/offline runs.  The normal Max OAuth
+    # autopilot uses renewable work-until-done sessions instead of consuming this as
+    # a feature-level ceiling.
+    max_cycles: int = Field(default=2, ge=0, le=10_000)
     builder_models: list[str] = Field(default_factory=lambda: ["sonnet", "opus"])
     mutating_retry_models: list[str] = Field(default_factory=list)
     restart_review_from: RoleName = RoleName.ADVERSARY
@@ -381,6 +384,12 @@ class FactoryConfig(BaseModel):
     monthly_budget_usd: float = Field(default=500.0, gt=0)
     require_clean_main: bool = True
     sandbox_enabled: bool = True
+    work_until_done: bool = True
+    disable_subscription_task_budget: bool = True
+    disable_max_oauth_budget_caps: bool = True
+    unsandbox_mutating_roles: bool = True
+    mutating_session_turn_floor: int = Field(default=200, ge=25, le=200)
+    review_session_turn_floor: int = Field(default=80, ge=10, le=200)
     project_settings_only: bool = True
     strict_mcp: bool = True
     max_parallel: int = Field(default=1, ge=1, le=8)

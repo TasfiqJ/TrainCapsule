@@ -3,12 +3,15 @@ cross_session_messaging:
   enabled: true
   minimum_cli_version: 2.1.224
   risk_tiers:
+  - integration
   - trust_core
   roles:
   - builder
+  - research
+  - recovery
   - integration_scout
-  max_messages_per_session: 3
-  max_message_chars: 1000
+  max_messages_per_session: 8
+  max_message_chars: 2000
   same_machine_only: true
   isolate_peer_machines: true
   require_durable_handoff: true
@@ -16,6 +19,7 @@ advisor:
   enabled: true
   model: opus
   risk_tiers:
+  - integration
   - trust_core
   roles:
   - builder
@@ -38,30 +42,28 @@ goal:
   roles:
   - builder
   max_condition_chars: 1800
-  max_turn_clause: 20
-  note: Goal mode is a bounded persistence aid; deterministic controller gates remain release authority.
+  max_turn_clause: 100
+  note: Goal mode keeps a renewable production session working; deterministic controller gates remain release authority.
 dynamic_workflows:
   enabled: false
   minimum_cli_version: 2.1.202
-  size_guideline: small
+  size_guideline: medium
   roles:
   - research
+  - builder
+  - recovery
   risk_tiers:
   - integration
   - trust_core
-  task_allowlist:
-  - T001
-  - T002
-  - T003
-  max_agents_guideline: 4
+  task_allowlist: []
+  max_agents_guideline: 6
   non_authoritative: true
-  reason: Programmatic Workflow tool use is disabled until the Python Agent SDK explicitly documents support;
-    saved workflows remain optional/manual.
+  reason: The normal Claude Code Agent tool is enabled for production roles; the separate Workflow tool remains off until the SDK exposes it reliably.
 agent_teams:
-  enabled: false
-  reason: Agent teams multiply context and token use; controller-owned fresh sessions are the default.
+  enabled: true
+  reason: Mutating production roles may delegate bounded parallel investigation while the primary session owns the result.
 memory:
-  auto_memory_enabled: false
+  auto_memory_enabled: true
   durable_handoffs_only: true
 role_skills:
   planner:

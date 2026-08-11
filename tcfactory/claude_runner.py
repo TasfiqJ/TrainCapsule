@@ -162,10 +162,6 @@ async def run_agent_stage(
         session_name_override=session_name_override,
         peer_messaging_override=peer_messaging_override,
     )
-    flag_settings_path = write_flag_settings(
-        artifact_dir / "claude-flag-settings.json", feature_plan.settings_payload
-    )
-
     message_dir = config.resolve(repo_root, config.peer_message_dir)
     peer_record = PeerSessionRecord(
         task_id=task.task_id,
@@ -205,14 +201,37 @@ async def run_agent_stage(
         (candidate for candidate in dict.fromkeys(fallback_models) if candidate != model),
         None,
     )
+    read_only = role_config.read_only if stage.read_only is None else stage.read_only
     effort = stage.effort or role_config.effort
     max_turns = stage.max_turns or role_config.max_turns
-    max_budget = stage.max_budget_usd or role_config.max_budget_usd
-    task_budget = provider_compatible_task_budget(
-        stage.task_budget_tokens or role_config.task_budget_tokens
+    subscription_unbounded = config.work_until_done and config.auth_mode == "max_oauth_only"
+    max_budget = (
+        None
+        if subscription_unbounded and config.disable_max_oauth_budget_caps
+        else stage.max_budget_usd or role_config.max_budget_usd
     )
-    read_only = role_config.read_only if stage.read_only is None else stage.read_only
+    task_budget = (
+        None
+        if subscription_unbounded and config.disable_subscription_task_budget
+        else provider_compatible_task_budget(
+            stage.task_budget_tokens or role_config.task_budget_tokens
+        )
+    )
     tools = list(stage.tools if stage.tools is not None else role_config.tools)
+    if config.work_until_done and not read_only:
+        for normal_tool in (
+            "Read",
+            "Grep",
+            "Glob",
+            "Write",
+            "Edit",
+            "Bash",
+            "WebFetch",
+            "WebSearch",
+            "Agent",
+        ):
+            if normal_tool not in tools:
+                tools.append(normal_tool)
     for tool in feature_plan.tools:
         if tool not in tools:
             tools.append(tool)
@@ -225,7 +244,22 @@ async def run_agent_stage(
         disallowed_tools = [
             tool for tool in disallowed_tools if tool not in {"ListAgents", "SendMessage"}
         ]
+    if config.work_until_done and not read_only:
+        disallowed_tools = [tool for tool in disallowed_tools if tool != "Agent"]
     permission_mode = stage.permission_mode or role_config.permission_mode
+
+    mutating_unsandboxed = (
+        config.work_until_done and config.unsandbox_mutating_roles and not read_only
+    )
+    feature_plan.settings_payload["sandbox"] = {
+        "enabled": bool(config.sandbox_enabled and not mutating_unsandboxed)
+    }
+    feature_plan.settings_payload["autoMemoryEnabled"] = bool(
+        features.memory.auto_memory_enabled and not read_only
+    )
+    flag_settings_path = write_flag_settings(
+        artifact_dir / "claude-flag-settings.json", feature_plan.settings_payload
+    )
 
     append_event(
         config.resolve(repo_root, config.event_log_path),
@@ -279,12 +313,12 @@ async def run_agent_stage(
             "TCF_MESSAGE_AUDIT_PATH": str((artifact_dir / "peer-messages.jsonl").resolve()),
             "TCF_SESSION_AUDIT_PATH": str((artifact_dir / "session-events.jsonl").resolve()),
             "TCF_STOP_FAILURE_PATH": str((artifact_dir / "stop-failures.jsonl").resolve()),
-            # Claude's sandbox deliberately makes HOME and host /tmp read-only. Keep uv's
-            # cache in the sandbox-writable candidate mount; factory/state is already
-            # ignored, so it cannot enter diffs, commits, path policy, or quality scans.
+            # Keep uv's cache inside the candidate mount. This works for both hardened
+            # read-only reviews and normal unsandboxed production roles, and the ignored
+            # state directory cannot enter candidate diffs or commits.
             "UV_CACHE_DIR": str(writable_uv_cache_dir(worktree)),
-            "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1",
-            "CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS": "0" if feature_plan.workflow_name else "1",
+            "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1" if read_only else "0",
+            "CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS": "1" if read_only else "0",
             "ENABLE_CLAUDEAI_MCP_SERVERS": "false",
             "API_TIMEOUT_MS": "300000",
             "CLAUDE_CODE_MAX_RETRIES": "4",
@@ -297,7 +331,7 @@ async def run_agent_stage(
     )
 
     sandbox: SandboxSettings | None
-    if config.sandbox_enabled:
+    if config.sandbox_enabled and not mutating_unsandboxed:
         sandbox = cast(
             SandboxSettings,
             {
@@ -383,9 +417,9 @@ async def run_agent_stage(
         )
 
     if feature_plan.goal_condition:
-        # /goal keeps one bounded Sonnet builder moving across turns. The full task packet is
-        # kept in the system context, while the small evaluator condition stays measurable.
-        system_prompt += "\n\n## Active bounded task\n" + task_prompt
+        # /goal keeps a renewable production session moving across turns. The full task
+        # packet remains in system context while the evaluator condition stays measurable.
+        system_prompt += "\n\n## Active production task\n" + task_prompt
         prompt = f"/goal {feature_plan.goal_condition}"
     else:
         prompt = task_prompt

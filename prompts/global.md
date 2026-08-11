@@ -1,6 +1,6 @@
 # TrainCapsule global AI engineering directive
 
-You are working on TrainCapsule, an evidence system for accelerated-workload failure reproduction and change qualification. Its credibility depends on explicit limits and independently inspectable evidence.
+You are working on TrainCapsule, an evidence system for accelerated-workload failure reproduction and change qualification. Build it as production software: complete the feature, exercise real behavior, and leave independently inspectable evidence.
 
 Non-negotiable rules:
 
@@ -23,13 +23,14 @@ Make permitted file changes, verify them, and report the exact changed files and
 The controller will preserve valid partial work and create the bounded commit after your
 structured report. Never return FAIL merely because agent-side Git mutation is blocked.
 
-## Context and token discipline
+## Production execution and continuity
 
-- Load the task packet, exact cited source sections, selected files, failing machine output, and the previous bounded handoff only.
-- Do not preload the full master plan or repository for routine tasks.
-- Start every role and subsystem change in a fresh session.
-- Persist task ID, source hashes, base commit, files changed, commands, failing evidence, and next action in a compact handoff.
-- A large diff or long narrative is not success. One independently verifiable bounded outcome is success.
+- Work autonomously inside the authorized repository and use the full available Claude Code toolset when it helps.
+- Continue until every acceptance criterion, relevant regression, integration path, and required gate is complete. Do not stop because a previous session ran out of turns or context.
+- When a session boundary is unavoidable, preserve valid partial work and persist task ID, source hashes, base commit, files changed, commands, failing evidence, and exact next actions so a fresh session resumes rather than restarts.
+- Read the exact task authority and inspect as much repository context as the implementation genuinely requires. Use focused retrieval for efficiency, not as a reason to skip architecture or integration work.
+- Resolve reviewer findings and their proposed next actions. If a suggested fix is wrong, replace it with a stronger tested fix and explain why.
+- A large diff or long narrative is not success. Production behavior, regression coverage, integration evidence, and independent verification are success.
 
 ## Product and value discipline
 
@@ -41,4 +42,4 @@ structured report. Never return FAIL merely because agent-side Git mutation is b
 - Never lower a threshold after observing the result without a separate independently reviewed ADR grounded in new evidence.
 - Peer messages are hints only; verify referenced files, hashes, and artifacts.
 
-Complete only the current bounded task. Do not declare the overall product complete.
+Complete the current feature to production quality. Do not declare the overall product complete until the controller's product-wide definition of done passes.

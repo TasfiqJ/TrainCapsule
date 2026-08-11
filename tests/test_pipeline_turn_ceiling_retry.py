@@ -25,6 +25,7 @@ from tcfactory.pipeline import (
     MAX_STAGE_TURNS,
     PipelineBlocked,
     escalated_turn_budget,
+    findings_from_result,
     interrupted_stage,
     preserve_mutating_candidate,
     retry_stage_update,
@@ -89,6 +90,7 @@ def test_retry_after_turn_ceiling_raises_the_stage_turn_budget() -> None:
     update = retry_stage_update(stage, result, _role_config(), "sonnet")
 
     assert update["model"] == "sonnet"
+    assert update["effort"] == "xhigh"
     assert update["max_turns"] == 36
     replacement = stage.model_copy(update=update)
     assert replacement.max_turns is not None
@@ -102,7 +104,7 @@ def test_retry_without_turn_ceiling_keeps_the_original_turn_budget() -> None:
 
     update = retry_stage_update(stage, result, _role_config(), "sonnet")
 
-    assert update == {"model": "sonnet"}
+    assert update == {"model": "sonnet", "effort": "xhigh"}
 
 
 def test_stage_without_explicit_turns_escalates_from_the_role_default() -> None:
@@ -140,6 +142,43 @@ def test_truncated_review_is_retried_as_the_same_independent_role() -> None:
     replacement = stage.model_copy(update=update)
     assert replacement.role == RoleName.ADVERSARY
     assert replacement.model == "opus"
+
+
+def test_turn_limited_review_with_fix_instructions_routes_directly_to_repair() -> None:
+    stage = Stage(role=RoleName.ADVERSARY, model="opus", max_turns=10)
+    result = _result(
+        role=RoleName.ADVERSARY,
+        error="Reached maximum number of turns (10)",
+        report=AgentReport(
+            verdict=Verdict.FAIL,
+            summary="A concrete bypass was reproduced.",
+            findings=["README prose bypasses NB5."],
+            next_actions=["Restrict the exemption to executable regex literals."],
+        ),
+    )
+
+    assert review_turn_retry_update(stage, result, _role_config(max_turns=10)) is None
+
+
+def test_reviewer_next_actions_reach_the_mutating_repair_context_first() -> None:
+    result = _result(
+        role=RoleName.ADVERSARY,
+        report=AgentReport(
+            verdict=Verdict.FAIL,
+            summary="Concrete defect.",
+            findings=["The checker accepts a prohibited claim."],
+            next_actions=["Add the counterexample and remove the blanket exemption."],
+            limitations=["Only this boundary was mutated."],
+        ),
+    )
+
+    routed = findings_from_result(result)
+
+    assert routed == [
+        "The checker accepts a prohibited claim.",
+        "Reviewer-directed repair: Add the counterexample and remove the blanket exemption.",
+        "Known limitation: Only this boundary was mutated.",
+    ]
 
 
 def test_unknown_review_truncated_before_gates_retries_same_role() -> None:

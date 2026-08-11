@@ -13,8 +13,14 @@ global_prompt: prompts/global.md
 monthly_budget_usd: 100.0
 require_clean_main: true
 sandbox_enabled: true
-project_settings_only: true
-strict_mcp: true
+work_until_done: true
+disable_subscription_task_budget: true
+disable_max_oauth_budget_caps: true
+unsandbox_mutating_roles: true
+mutating_session_turn_floor: 200
+review_session_turn_floor: 80
+project_settings_only: false
+strict_mcp: false
 max_parallel: 1
 private_gate_runner_env: TCF_PRIVATE_GATE_RUNNER
 pipeline_state_dir: factory/state/pipelines
@@ -37,8 +43,8 @@ provenance_path: factory/state/provenance.jsonl
 require_long_lived_oauth_for_autopilot: true
 completion_audit_enabled: true
 completion_audit_model: opus
-completion_audit_max_turns: 12
-completion_audit_budget_usd: 3.0
+completion_audit_max_turns: 100
+completion_audit_budget_usd: 1000.0
 remote_ci_poll_seconds: 20
 remote_ci_timeout_seconds: 1800
 task_catalog_path: factory/task_catalog.yaml

@@ -254,5 +254,9 @@ def test_active_t002_uses_research_v2_and_real_authority_sources() -> None:
     assert "docs/evidence/T002/query-plan.json" in packet.outputs
     assert "research-evidence" in {gate.name for gate in packet.gates}
     assert all((ROOT / source).is_file() for source in packet.source_of_truth)
-    for stage in packet.pipeline:
-        assert "research-evidence" in stage.machine_gates
+    research = next(stage for stage in packet.pipeline if stage.role == RoleName.RESEARCH)
+    adversary = next(stage for stage in packet.pipeline if stage.role == RoleName.ADVERSARY)
+    assert "research-evidence" in research.machine_gates
+    assert research.read_only is False
+    assert adversary.read_only is True
+    assert adversary.machine_gates == []

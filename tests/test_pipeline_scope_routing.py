@@ -143,5 +143,6 @@ def test_controller_owned_gaps_are_separated_from_respecifiable_paths() -> None:
 
     assert controller_owned_finding_paths(paths) == [
         "scripts/gates",
+        "specs/tasks/T002.md",
         "tcfactory/research_policy.py",
     ]

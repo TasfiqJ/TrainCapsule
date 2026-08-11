@@ -238,7 +238,7 @@ def test_interrupted_reviewer_repair_resolves_declared_mutating_stage() -> None:
         starting_sha="a" * 40,
     )
     checkpoint.stage_index = next(
-        index for index, stage in enumerate(task.pipeline) if stage.role == RoleName.RELEASE
+        index for index, stage in enumerate(task.pipeline) if stage.role == RoleName.ADVERSARY
     )
     checkpoint.active_role = RoleName.RESEARCH
 
@@ -255,7 +255,7 @@ def test_interrupted_unexpected_role_mismatch_stays_blocked() -> None:
         starting_sha="a" * 40,
     )
     checkpoint.stage_index = next(
-        index for index, stage in enumerate(task.pipeline) if stage.role == RoleName.RELEASE
+        index for index, stage in enumerate(task.pipeline) if stage.role == RoleName.ADVERSARY
     )
     checkpoint.active_role = RoleName.SECURITY
 

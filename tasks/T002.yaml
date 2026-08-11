@@ -240,8 +240,9 @@ pipeline:
   - factory/product_definition_of_done.yaml
   - factory/task_catalog.yaml
   - factory/proposals/**
+  - tasks/**
   - scripts/**
-  - specs/tasks/T002.md
+  - specs/tasks/**
   - tcfactory/**
   - Control-TrainCapsuleBuilder.ps1
   - Install-TrainCapsuleAutonomousBuilder.ps1

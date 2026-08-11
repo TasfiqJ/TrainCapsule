@@ -21,7 +21,6 @@ from tcfactory.risk import (
     effective_risk,
     load_risk_profiles,
     planning_pipeline,
-    required_task_budget_tokens,
     with_working_token_reserve,
 )
 from tcfactory.stage_policy import objective_pipeline_errors
@@ -150,15 +149,22 @@ def test_every_planning_profile_is_renewable_without_a_feature_token_cap() -> No
             assert stage.max_turns == 200
 
 
-def test_t002_release_retains_working_reserve_before_renewable_runtime_policy() -> None:
-    """Re-specified packets retain a reserve even before the renewable policy is applied."""
+def test_t002_adversary_uses_renewable_review_session_without_a_token_cap() -> None:
+    """The sole proof node receives a full renewable review session."""
     task = load_task(ROOT / "tasks/T002.yaml")
-    release = next(stage for stage in task.pipeline if stage.role == RoleName.RELEASE)
+    adversary = next(stage for stage in task.pipeline if stage.role == RoleName.ADVERSARY)
 
-    assert release.max_context_chars == 110_000
-    assert release.task_budget_tokens == required_task_budget_tokens(110_000) == 51_500
-    upgraded = with_working_token_reserve(release)
-    assert upgraded.task_budget_tokens == required_task_budget_tokens(110_000) == 51_500
+    assert adversary.max_context_chars == 110_000
+    assert adversary.task_budget_tokens is None
+    assert adversary.max_budget_usd is None
+    upgraded = with_working_token_reserve(
+        adversary,
+        work_until_done=True,
+        mutating_turn_floor=200,
+        review_turn_floor=80,
+    )
+    assert upgraded.task_budget_tokens is None
+    assert upgraded.max_turns == 80
 
 
 def test_work_until_done_removes_feature_token_cap_and_raises_session_floor() -> None:

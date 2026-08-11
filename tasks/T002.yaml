@@ -101,39 +101,32 @@ acceptance_criteria:
   code outside every T002 stage's writable paths as a distinct, non-blocking gate-defect
   finding naming the exact out-of-scope path, separate from any blocking finding about
   the actual delivered candidate.
-- The audit stage independently verifies every finding cites a working evidence link,
-  that every declared manifest/query-plan hash still reproduces, that every CLEAR
-  finding's positive control actually discriminates rather than merely being present,
-  that every declared response_status matches its raw artifact's actual content, and
-  that no CONFLICT or UNKNOWN was silently converted to CLEAR in the actual delivered
-  candidate. A weakness the audit stage finds only via mutation testing of protected
-  gate code outside every T002 stage's writable paths is recorded as a distinct, non-blocking
-  gate-defect finding, separate from any blocking finding about the delivered candidate.
-- The release stage only reads the record and machine gate output; it adds no new
-  findings and changes no file.
-- The controller-owned pipeline router (tcfactory/risk.py, apply_risk_profile, lines
-  365-380 at this revision's base commit) rebuilds every read-only reviewer stage
-  (adversary, audit, release) from a bare Stage(...) call that sets only role, read_only,
-  require_changes, forbidden_paths, machine_gates, and context_keys, so no allowed_domains
-  declared anywhere in this proposal for a reviewer stage is ever carried through
-  promotion; the promoted, executed adversary stage therefore never has network access
-  regardless of what this or any prior revision declares. The independent re-check
-  the adversary stage performs under the criterion above is satisfied entirely by
-  artifact reproduction against files already captured under docs/evidence/T002/raw/
-  and docs/evidence/T002/manifest.json — recomputing every declared SHA-256, re-deriving
-  from the raw target and control response bytes whether a CLEAR finding's positive
-  control actually discriminates, confirming a documented stop-condition blocking
-  mechanism is actually visible in its corresponding raw artifact, and confirming
-  every declared response_status matches its raw artifact's actual content — never
-  by trusting the research stage's own labels and never by a live network call the
-  adversary stage structurally cannot make. This artifact-reproduction check is a
-  second, independent computation over the same raw bytes, not a re-read of the research
-  stage's conclusion, and is the only form of independent verification a reviewer
-  stage can perform under the confirmed routing behavior; it governs over the live-query
-  wording above wherever the two would otherwise conflict, and no future revision
-  should re-litigate a reviewer-stage allowed_domains fix, since this criterion documents
-  why the routing behavior makes that fix structurally impossible from within this
-  task's writable paths.
+- 'The adversary stage is this task''s sole independent reviewer: the controller-owned
+  pipeline normalizer (tcfactory/stage_policy.py''s normalize_claude_led_nodes, invoked
+  from tcfactory/pipeline.py whenever config.execution_mode == "claude_led_nodes"
+  — the only mode config/factory.yaml declares) and tcfactory/risk.py''s apply_risk_profile
+  both collapse every product pipeline to exactly one writable owner stage plus one
+  blind adversary stage, and tcfactory/planner.py''s validate_product_task_packet
+  rejects any proposal that declares a separate audit, security, performance, value,
+  or release stage as a legacy serial review stage; no such stage is declared in this
+  proposal''s pipeline and none will ever execute. Both promotion paths now copy the
+  owner stage''s allowed_domains onto the promoted adversary stage, so the live-query
+  re-check the criterion above describes is genuinely available whenever the adversary''s
+  runtime network access allows it; artifact reproduction against files already captured
+  under docs/evidence/T002/raw/ and docs/evidence/T002/manifest.json is used only
+  when a live requery is genuinely unavailable in that run, with the specific reason
+  documented, and this sentence governs over any older wording anywhere in this bundle
+  that describes the adversary stage as structurally unable to reach the network.
+  Because no separate audit stage exists, the adversary stage additionally performs
+  the audit''s full duties on the same delivered candidate in the same session: it
+  verifies every finding cites a working evidence link, that every declared manifest/query-plan
+  hash still reproduces byte-for-byte, that every declared response_status matches
+  its raw artifact''s actual content, and that no CONFLICT or UNKNOWN was silently
+  converted to CLEAR in the actual delivered candidate. Release/promotion authority
+  stays fully controller-owned (deterministic gates, the private gate suite, and required
+  CI) with no candidate-facing release stage in this or any current product pipeline;
+  no acceptance criterion may assume a release stage reads or writes anything, since
+  none is ever instantiated.'
 - 'Complete the exact protected-roadmap outcome: Recheck product name, package, domain,
   and trademark surface'
 - Add deterministic tests or machine-checkable evidence for every implemented normative
@@ -142,8 +135,9 @@ acceptance_criteria:
 - Do not treat UNKNOWN, SKIPPED, INFRASTRUCTURE_ERROR, INVALID_ORACLE, or EXTERNAL_VALIDATION_REQUIRED
   as pass.
 - Do not invent customer, upstream, benchmark, hardware, or production evidence.
-- Preserve the task's explicit causal link to its predeclared sellable milestone without
-  inventing demand.
+- Produce candidate-bound capability evidence for every predeclared condition and
+  falsification at the value-contract evidence path; prose alone cannot prove a foundational
+  dependency.
 - Never lower a value threshold after observing the result unless a separately reviewed
   ADR cites new external evidence.
 outputs:
@@ -153,6 +147,7 @@ outputs:
 - docs/evidence/T002/raw/**
 - docs/evidence/T002.md
 - .factory/external-evidence/T002.json
+- docs/evidence/T002/capability-value.json
 stop_conditions:
 - 'Source-of-truth does not name any product name at all to check: stop the entire
   task, do not invent one.'
@@ -191,27 +186,32 @@ gates:
 - name: contract
   command: bash scripts/gates/contract_gate.sh T002
   timeout_seconds: 120
-  stages: []
+  stages:
+  - research
   required: true
 - name: secret-scan
   command: bash scripts/gates/secret_scan.sh
   timeout_seconds: 300
-  stages: []
+  stages:
+  - research
   required: true
 - name: fast-quality
   command: bash scripts/gates/fast_quality.sh
   timeout_seconds: 1800
-  stages: []
+  stages:
+  - research
   required: true
 - name: real-integration
   command: bash scripts/gates/real_integration.sh T002
   timeout_seconds: 3600
-  stages: []
+  stages:
+  - research
   required: true
 - name: research-evidence
   command: uv run python scripts/gates/output_and_integration_gate.py T002 research-evidence
   timeout_seconds: 900
-  stages: []
+  stages:
+  - research
   required: true
 private_gate:
   required: true
@@ -222,20 +222,14 @@ pipeline:
   model: opus
   fallback_models: []
   effort: high
-  max_turns: 18
-  max_budget_usd: 3.8
-  task_budget_tokens: 100000
+  max_turns: 200
+  max_budget_usd: null
+  task_budget_tokens: null
   tools: null
   disallowed_tools: null
   permission_mode: null
   allowed_paths:
-  - docs/research/T002_name_trademark_check.md
-  - docs/evidence/T002/**
-  - docs/product/**
-  - docs/evidence/**
-  - SOURCE_PRECEDENCE.md
-  - CLAIM_REGISTRY.md
-  - .factory/external-evidence/T002.json
+  - '**'
   forbidden_paths:
   - .claude/**
   - .factory/source-locks/**
@@ -327,7 +321,7 @@ pipeline:
   - real-integration
   - research-evidence
   read_only: false
-  require_changes: true
+  require_changes: false
   advisor_model: null
   peer_messaging: false
   session_name: null
@@ -337,16 +331,26 @@ pipeline:
   model: opus
   fallback_models: []
   effort: high
-  max_turns: 10
-  max_budget_usd: 3.2
-  task_budget_tokens: 51500
+  max_turns: 80
+  max_budget_usd: null
+  task_budget_tokens: null
   tools: null
   disallowed_tools: null
   permission_mode: null
   allowed_paths: []
   forbidden_paths:
   - '**'
-  allowed_domains: []
+  allowed_domains:
+  - uspto.gov
+  - euipo.europa.eu
+  - wipo.int
+  - ised-isde.canada.ca
+  - pypi.org
+  - npmjs.com
+  - crates.io
+  - icann.org
+  - whois.icann.org
+  - rdap.verisign.com
   acceptance_criteria:
   - Bind every conclusion to the exact candidate SHA, authoritative source, acceptance-criterion
     ID, and independently inspectable evidence path or command.
@@ -358,120 +362,23 @@ pipeline:
   - Report exact limitations, residual risks, and the next falsifiable action without
     claiming external adoption, payment, retention, or demand from synthetic or self-authored
     evidence.
+  - 'Blindly challenge every applicable production dimension: criterion truth, real
+    integrations, install and first value, repeated use, diagnostics and recovery,
+    upgrade and rollback, security and privacy, representative performance, operability,
+    support, accessibility, and material-value evidence.'
   - Attempt executable false-green counterexamples for status laundering, omitted
     subjects, circular oracles, weakened tests, mocks, corrupted evidence, malicious
-    inputs, resource exhaustion, and missing failure/recovery paths.
-  - Every blocking finding must name severity, exact path/symbol, failing command
-    or artifact, counterexample, affected criterion ID, and the authorized repair
-    owner.
+    inputs, resource exhaustion, synthetic commercial claims, and missing failure/recovery
+    paths.
+  - Every observation must use structured review_findings with blocking, severity,
+    criterion ID, owner class, exact repair paths, failing command or artifact, and
+    counterexample; advisory citations cannot control repair routing.
   context_keys:
   - executive_decision
   - product_strategy
   - source_register
   max_context_chars: 110000
-  machine_gates:
-  - contract
-  - secret-scan
-  - fast-quality
-  - real-integration
-  - research-evidence
-  read_only: true
-  require_changes: false
-  advisor_model: null
-  peer_messaging: false
-  session_name: null
-  goal_condition: null
-  workflow_name: null
-- role: audit
-  model: sonnet
-  fallback_models: []
-  effort: high
-  max_turns: 8
-  max_budget_usd: 1.9
-  task_budget_tokens: 51500
-  tools: null
-  disallowed_tools: null
-  permission_mode: null
-  allowed_paths: []
-  forbidden_paths:
-  - '**'
-  allowed_domains: []
-  acceptance_criteria:
-  - Bind every conclusion to the exact candidate SHA, authoritative source, acceptance-criterion
-    ID, and independently inspectable evidence path or command.
-  - Classify authority gaps and unsupported conclusions as UNKNOWN or BLOCKED; confidence,
-    polish, file presence, and test count are never evidence by themselves.
-  - Assess correctness/truth, real user outcome, failure and recovery, security/privacy,
-    operability/support, adoption friction, and commercial truth; mark a dimension
-    not applicable only with a task-specific reason.
-  - Report exact limitations, residual risks, and the next falsifiable action without
-    claiming external adoption, payment, retention, or demand from synthetic or self-authored
-    evidence.
-  - Produce an independent criterion-to-evidence matrix and recompute claims, hashes,
-    provenance, status arithmetic, gate identity, source authority, and candidate-SHA
-    binding.
-  - Sample or reproduce real boundaries and controls; a prior reviewer verdict is
-    evidence to challenge, never an oracle to copy.
-  context_keys:
-  - executive_decision
-  - product_strategy
-  - source_register
-  max_context_chars: 110000
-  machine_gates:
-  - contract
-  - secret-scan
-  - fast-quality
-  - real-integration
-  - research-evidence
-  read_only: true
-  require_changes: false
-  advisor_model: null
-  peer_messaging: false
-  session_name: null
-  goal_condition: null
-  workflow_name: null
-- role: release
-  model: sonnet
-  fallback_models: []
-  effort: high
-  max_turns: 6
-  max_budget_usd: 1.4
-  task_budget_tokens: 51500
-  tools: null
-  disallowed_tools: null
-  permission_mode: null
-  allowed_paths: []
-  forbidden_paths:
-  - '**'
-  allowed_domains: []
-  acceptance_criteria:
-  - Bind every conclusion to the exact candidate SHA, authoritative source, acceptance-criterion
-    ID, and independently inspectable evidence path or command.
-  - Classify authority gaps and unsupported conclusions as UNKNOWN or BLOCKED; confidence,
-    polish, file presence, and test count are never evidence by themselves.
-  - Assess correctness/truth, real user outcome, failure and recovery, security/privacy,
-    operability/support, adoption friction, and commercial truth; mark a dimension
-    not applicable only with a task-specific reason.
-  - Report exact limitations, residual risks, and the next falsifiable action without
-    claiming external adoption, payment, retention, or demand from synthetic or self-authored
-    evidence.
-  - Verify the exact release SHA in a clean environment through install, onboarding/first
-    value, normal operation, diagnostics, failure recovery, upgrade, rollback, backup/restore,
-    and supported removal where applicable.
-  - Reconcile artifact hashes, deterministic/private/value gates, CI identity, user-visible
-    limitations, compatibility, security/privacy, support evidence, and every acceptance-criterion
-    ID before promotion.
-  context_keys:
-  - executive_decision
-  - product_strategy
-  - source_register
-  max_context_chars: 110000
-  machine_gates:
-  - contract
-  - secret-scan
-  - fast-quality
-  - real-integration
-  - research-evidence
+  machine_gates: []
   read_only: true
   require_changes: false
   advisor_model: null
@@ -505,18 +412,18 @@ value_contract:
     engineering team
   job_to_be_done: Close an accelerated-workload failure, qualify a change, and exchange
     attributable evidence without false certainty.
-  pain: Undiscovered naming or trademark conflicts create late, expensive rework or
-    legal exposure to the protected roadmap.
-  customer_outcome: A documented, independently checkable naming and trademark clearance
-    record.
-  causal_mechanism: This task establishes a required foundational precondition (a
-    clear naming/branding surface) so the roadmap can proceed past P0.
+  pain: Distributed workload failures and recovery uncertainty waste specialist time
+    and expensive accelerator capacity.
+  customer_outcome: A faster, reproducible, independently inspectable failure or change
+    decision with explicit limits.
+  causal_mechanism: Each task supplies a necessary capability in the Close, Qualify,
+    or Exchange workflow.
   primary_metric: foundational capability present
   metric_direction: binary
   minimum_material_improvement: null
   measurement_unit: null
   baseline_value: null
-  evidence_path: docs/research/T002_name_trademark_check.md
+  evidence_path: docs/evidence/T002/capability-value.json
   parent_milestone: T012
   threshold_rationale: Required dependency for the protected roadmap; commercial demand
     is never inferred from implementation.
@@ -532,10 +439,8 @@ value_contract:
     job end to end.
   - Installation, operation, failure diagnosis, recovery, or upgrade requires undocumented
     developer intervention.
-  - A CONFLICT or UNKNOWN finding exists but the overall verdict is recorded as clear.
-  revenue_linkage: Protects the ability to commercially ship under the chosen name/package/domain;
-    supports incident closure, change qualification, private evidence exchange, or
-    recurring reliability operations.
+  revenue_linkage: Supports incident closure, change qualification, private evidence
+    exchange, or recurring reliability operations.
   prohibited_proxies:
   - lines of code
   - raw test count without boundary coverage

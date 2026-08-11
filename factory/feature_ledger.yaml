@@ -112,9 +112,9 @@ tasks:
   phase: P0
   depends_on:
   - T001
-  status: ready
+  status: packet_approved
   terminal_blocked: false
-  packet_path: null
+  packet_path: tasks/T002.yaml
   trust_core: false
   risk_tier: integration
   context_keys:
@@ -146,9 +146,9 @@ tasks:
     and strengthen specification/gates.
   - Task packet approved through model-respec planning.
   - The pre-overhaul controller serialized this packet while the Claude-led node upgrade
-    was being installed. Replan once from the protected catalog and authority under the
-    current owner-and-proof contract; preserve revision history and do not count this
-    controller migration as a product failure.
+    was being installed. Replan once from the protected catalog and authority under
+    the current owner-and-proof contract; preserve revision history and do not count
+    this controller migration as a product failure.
   - Automatic re-specification ceiling reached.
   - Revision 4 requested after bounded pipeline failure; preserve the original outcome
     and strengthen specification/gates.
@@ -172,6 +172,7 @@ tasks:
   - Task packet approved through model-respec planning.
   - Revision 11 requested after verified pipeline failure; preserve the original outcome
     and strengthen specification/gates.
+  - Task packet approved through model-respec planning.
   - Task packet approved through model-respec planning.
   revisions: 11
   value_revisions: 0
@@ -3519,4 +3520,4 @@ tasks:
   revisions: 0
   value_revisions: 0
   infrastructure_recoveries: 0
-updated_at: '2026-08-11T14:45:32.987369+00:00'
+updated_at: '2026-08-11T15:21:27.655907+00:00'

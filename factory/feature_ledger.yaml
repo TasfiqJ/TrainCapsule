@@ -112,7 +112,7 @@ tasks:
   phase: P0
   depends_on:
   - T001
-  status: respec_required
+  status: ready
   terminal_blocked: false
   packet_path: null
   trust_core: false
@@ -137,9 +137,14 @@ tasks:
   - Verified controller repair merged; retrying the same task without consuming a
     specification revision and preserving its last valid candidate.
   - Infrastructure-only failure recovered without consuming a specification revision.
-  revisions: 1
+  - 'Revision 2: consecutive infrastructure recoveries reached 2 without a completed
+    run, so the failure is treated as a specification defect (for example an under-sized
+    turn or budget bound) and consumes a revision.'
+  - Revision 2 requested after bounded pipeline failure; preserve the original outcome
+    and strengthen specification/gates.
+  revisions: 2
   value_revisions: 0
-  infrastructure_recoveries: 2
+  infrastructure_recoveries: 0
 - task_id: T003
   outcome: Pin current primary sources and create claim registry
   lead_role: Research
@@ -3483,4 +3488,4 @@ tasks:
   revisions: 0
   value_revisions: 0
   infrastructure_recoveries: 0
-updated_at: '2026-08-11T01:10:53.421877+00:00'
+updated_at: '2026-08-11T01:10:53.515427+00:00'

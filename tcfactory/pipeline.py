@@ -1301,6 +1301,23 @@ def _run_private_release_gate(
     return payload, worktree
 
 
+def _empty_paused_checkpoint_can_rebase(checkpoint: PipelineCheckpoint) -> bool:
+    """Return whether a stale paused checkpoint contains no work to preserve.
+
+    A controller repair may advance ``main`` while a planner is quota-paused.  Restarting
+    is lossless only when the session produced no candidate commit, result, or active
+    worktree.  Any real partial work keeps the fail-closed reconciliation requirement.
+    """
+
+    return (
+        checkpoint.state == PipelineState.PAUSED
+        and checkpoint.candidate_sha == checkpoint.starting_sha
+        and not checkpoint.results
+        and checkpoint.active_role is None
+        and checkpoint.active_worktree is None
+    )
+
+
 def _load_checkpoint(
     *,
     repo_root: Path,
@@ -1317,11 +1334,16 @@ def _load_checkpoint(
         PipelineState.BLOCKED,
     }:
         if existing.starting_sha != starting_sha:
-            raise PipelineBlocked(
-                f"Cannot resume {task.task_id}: main moved from {existing.starting_sha} to "
-                f"{starting_sha}. Reconcile the previous candidate explicitly."
-            )
-        return store, existing
+            if _empty_paused_checkpoint_can_rebase(existing):
+                store.archive(existing, suffix=f"stale-base-{utc_stamp()}")
+                existing = None
+            else:
+                raise PipelineBlocked(
+                    f"Cannot resume {task.task_id}: main moved from {existing.starting_sha} to "
+                    f"{starting_sha}. Reconcile the previous candidate explicitly."
+                )
+        if existing is not None:
+            return store, existing
     if existing:
         store.archive(existing)
     checkpoint = new_checkpoint(

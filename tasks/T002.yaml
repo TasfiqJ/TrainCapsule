@@ -63,7 +63,7 @@ security:
   secrets: []
 gates:
 - name: research-file-present
-  command: test -f docs/research/T002_name_trademark_check.md
+  command: uv run python scripts/gates/output_and_integration_gate.py T002
   timeout_seconds: 10
   stages:
   - research
@@ -72,7 +72,7 @@ gates:
   - release
   required: true
 - name: research-verdict-labeled
-  command: grep -Eq 'Overall verdict:\s*(clear|conflicts_found|unknown)' docs/research/T002_name_trademark_check.md
+  command: uv run python scripts/gates/output_and_integration_gate.py T002
   timeout_seconds: 10
   stages:
   - research
@@ -81,8 +81,7 @@ gates:
   - release
   required: true
 - name: research-no-silent-upgrade
-  command: '! grep -Eiq ''UNKNOWN[^\n]*(upgraded|converted|treated as)[^\n]*CLEAR''
-    docs/research/T002_name_trademark_check.md'
+  command: uv run python scripts/gates/output_and_integration_gate.py T002
   timeout_seconds: 10
   stages:
   - research

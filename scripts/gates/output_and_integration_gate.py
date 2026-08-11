@@ -52,6 +52,24 @@ def main() -> int:
         )
         return 1
 
+    if task_id == "T002":
+        record_path = ROOT / "docs/research/T002_name_trademark_check.md"
+        record = record_path.read_text(encoding="utf-8", errors="replace")
+        if not re.search(
+            r"Overall verdict:\s*(clear|conflicts_found|unknown)",
+            record,
+            re.IGNORECASE,
+        ):
+            print("T002 research record is missing a valid Overall verdict", file=sys.stderr)
+            return 1
+        if re.search(
+            r"UNKNOWN[^\n]*(upgraded|converted|treated as)[^\n]*CLEAR",
+            record,
+            re.IGNORECASE,
+        ):
+            print("T002 research record silently upgrades UNKNOWN to CLEAR", file=sys.stderr)
+            return 1
+
     # Static, task-specific path requirements. These never execute model-authored commands.
     required_by_task: dict[str, tuple[str, ...]] = {
         "T001": (

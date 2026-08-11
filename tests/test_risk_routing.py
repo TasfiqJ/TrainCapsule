@@ -140,13 +140,13 @@ def test_every_profile_reserves_working_tokens_after_maximum_context() -> None:
             assert stage.task_budget_tokens >= context_tokens + MIN_STAGE_WORK_TOKENS
 
 
-def test_legacy_t002_release_receives_runtime_working_token_reserve() -> None:
-    """Recovered packets must benefit without rewriting their authority YAML."""
+def test_t002_release_retains_working_reserve_before_renewable_runtime_policy() -> None:
+    """Re-specified packets retain a reserve even before the renewable policy is applied."""
     task = load_task(ROOT / "tasks/T002.yaml")
     release = next(stage for stage in task.pipeline if stage.role == RoleName.RELEASE)
 
     assert release.max_context_chars == 110_000
-    assert release.task_budget_tokens == 16_000
+    assert release.task_budget_tokens == required_task_budget_tokens(110_000) == 51_500
     upgraded = with_working_token_reserve(release)
     assert upgraded.task_budget_tokens == required_task_budget_tokens(110_000) == 51_500
 

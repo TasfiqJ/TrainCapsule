@@ -1,0 +1,74 @@
+{
+  "$defs": {
+    "CommercialMaturity": {
+      "enum": [
+        "NOT_EVALUATED",
+        "NATIVE_ADVANTAGE_UNPROVEN",
+        "NATIVE_ADVANTAGE_DEMONSTRATED",
+        "EXTERNAL_VALUE_DEMONSTRATED",
+        "COMMERCIALLY_SUPPORTED",
+        "WITHDRAWN"
+      ],
+      "title": "CommercialMaturity",
+      "type": "string"
+    },
+    "EvidenceType": {
+      "enum": [
+        "CUSTOMER_CONVERSATION",
+        "INCIDENT_ARCHIVE_ACCESS",
+        "PAID_PREFLIGHT",
+        "PAID_PILOT",
+        "DECISION_CHANGED",
+        "SECOND_PAID_ACTION",
+        "INDEPENDENT_OPERATOR",
+        "HUMAN_REVIEW",
+        "UPSTREAM_ACCEPTANCE",
+        "PROVIDER_ACCEPTANCE"
+      ],
+      "title": "EvidenceType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "syntheticEvidenceMayAdvance": {
+      "const": false,
+      "title": "Syntheticevidencemayadvance",
+      "type": "boolean"
+    },
+    "repositoryAuthoredReceiptsAreTrusted": {
+      "const": false,
+      "title": "Repositoryauthoredreceiptsaretrusted",
+      "type": "boolean"
+    },
+    "evidenceRequirements": {
+      "additionalProperties": {
+        "items": {
+          "$ref": "#/$defs/EvidenceType"
+        },
+        "type": "array"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/CommercialMaturity"
+      },
+      "title": "Evidencerequirements",
+      "type": "object"
+    }
+  },
+  "required": [
+    "syntheticEvidenceMayAdvance",
+    "repositoryAuthoredReceiptsAreTrusted",
+    "evidenceRequirements"
+  ],
+  "title": "CommercialMaturityConfig",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/commercial-maturity-config.schema.json"
+}

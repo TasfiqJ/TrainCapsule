@@ -8,6 +8,7 @@ import os
 import shutil
 import subprocess
 import sys
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Annotated, cast
 
@@ -395,6 +396,66 @@ def schema(
     write_json(output, TaskPacket.model_json_schema())
     write_json(output.with_name("agent-report.generated.json"), AGENT_REPORT_JSON_SCHEMA)
     console.print(f"Wrote schemas to {output.parent}")
+
+
+@app.command("v3-schedule")
+def v3_schedule(
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+    dry_run: Annotated[bool, typer.Option("--dry-run")] = False,
+    explain: Annotated[bool, typer.Option("--explain")] = False,
+) -> None:
+    """Simulate one deterministic V3 scheduler cycle without mutating the queue."""
+
+    if not dry_run:
+        console.print("[red]Refused.[/red] V3 scheduling is simulation-only until M0 closes.")
+        raise typer.Exit(2)
+    from tcfactory.v3.configuration import load_factory_v3, load_scheduler_v3
+    from tcfactory.v3.scheduler import schedule_cycle
+    from tcfactory.v3.work_items import WorkItemCollection
+
+    repo_root = _resolve_repo(repo)
+    factory = load_factory_v3(repo_root / "config/factory.yaml")
+    scheduler = load_scheduler_v3(repo_root / "config/scheduler.yaml")
+    work_items = WorkItemCollection.model_validate(
+        load_yaml(repo_root / factory.roadmap.work_items)
+    )
+    decided_at = datetime.now(UTC)
+    artifact = schedule_cycle(
+        work_items,
+        scheduler,
+        cycle_id=f"dry-run-{decided_at.strftime('%Y%m%dT%H%M%SZ')}",
+        decided_at=decided_at,
+        max_concurrent_mutating_sessions=(
+            factory.execution.max_concurrent_mutating_sessions
+        ),
+        max_concurrent_read_only_sessions=(
+            factory.execution.max_concurrent_read_only_sessions
+        ),
+    )
+    if explain:
+        console.print_json(
+            data={
+                "cycleId": artifact.cycle_id,
+                "activeMilestone": artifact.active_milestone,
+                "configDigest": artifact.config_digest,
+                "selectedWorkItemIds": artifact.selected_work_item_ids,
+                "evaluations": [
+                    {
+                        "workItemId": item.work_item_id,
+                        "lane": item.lane.value,
+                        "eligible": item.eligible,
+                        "score": item.score,
+                        "reasons": item.reasons,
+                    }
+                    for item in artifact.evaluations
+                    if work_items.item(item.work_item_id).milestone
+                    == scheduler.active_milestone
+                ],
+            }
+        )
+    else:
+        selected = artifact.selected_work_item_ids or ["none"]
+        console.print(f"Selected: {', '.join(selected)}")
 
 
 @app.command("status")

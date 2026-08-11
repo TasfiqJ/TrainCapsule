@@ -1,0 +1,62 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "incidentId": {
+      "minLength": 1,
+      "title": "Incidentid",
+      "type": "string"
+    },
+    "restartCount": {
+      "minimum": 1,
+      "title": "Restartcount",
+      "type": "integer"
+    },
+    "maxControllerRestarts": {
+      "minimum": 1,
+      "title": "Maxcontrollerrestarts",
+      "type": "integer"
+    },
+    "detectedAt": {
+      "format": "date-time",
+      "title": "Detectedat",
+      "type": "string"
+    },
+    "reason": {
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    },
+    "recoveryInstructions": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Recoveryinstructions",
+      "type": "array"
+    },
+    "launcherMustStop": {
+      "default": true,
+      "title": "Launchermuststop",
+      "type": "boolean"
+    }
+  },
+  "required": [
+    "incidentId",
+    "restartCount",
+    "maxControllerRestarts",
+    "detectedAt",
+    "reason",
+    "recoveryInstructions"
+  ],
+  "title": "HardStuckRecord",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/hard-stuck.schema.json"
+}

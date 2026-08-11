@@ -1,0 +1,107 @@
+{
+  "$defs": {
+    "ExecutorBackend": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "minLength": 1,
+          "title": "Adapter",
+          "type": "string"
+        },
+        "authentication": {
+          "enum": [
+            "subscription",
+            "local",
+            "test"
+          ],
+          "title": "Authentication",
+          "type": "string"
+        },
+        "enabled": {
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "maxConcurrentSessions": {
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Maxconcurrentsessions",
+          "type": "integer"
+        },
+        "capabilities": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Capabilities",
+          "type": "array"
+        },
+        "durableStateOwnedByFactory": {
+          "const": true,
+          "title": "Durablestateownedbyfactory",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "adapter",
+        "authentication",
+        "enabled",
+        "maxConcurrentSessions",
+        "capabilities",
+        "durableStateOwnedByFactory"
+      ],
+      "title": "ExecutorBackend",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "defaultBackend": {
+      "minLength": 1,
+      "title": "Defaultbackend",
+      "type": "string"
+    },
+    "allowPaidUsage": {
+      "const": false,
+      "default": false,
+      "title": "Allowpaidusage",
+      "type": "boolean"
+    },
+    "backends": {
+      "additionalProperties": {
+        "$ref": "#/$defs/ExecutorBackend"
+      },
+      "title": "Backends",
+      "type": "object"
+    },
+    "weeklyAllocationPercent": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Weeklyallocationpercent",
+      "type": "object"
+    },
+    "priorityUnderPressure": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Priorityunderpressure",
+      "type": "array"
+    }
+  },
+  "required": [
+    "defaultBackend",
+    "backends",
+    "weeklyAllocationPercent",
+    "priorityUnderPressure"
+  ],
+  "title": "ExecutorConfig",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/executors-config.schema.json"
+}

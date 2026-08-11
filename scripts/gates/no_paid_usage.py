@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 from pathlib import Path
+from typing import cast
 
 import yaml
 
@@ -15,18 +16,52 @@ DISALLOWED_BILLING_ENV = {
 }
 
 
+def _mapping(value: object, label: str) -> dict[str, object]:
+    if not isinstance(value, dict):
+        raise ValueError(f"{label} must be a mapping")
+    return cast(dict[str, object], value)
+
+
 def verify_no_paid_usage(root: Path) -> list[str]:
     failures: list[str] = []
-    factory = yaml.safe_load((root / "config/factory.yaml").read_text(encoding="utf-8"))
-    autonomy = yaml.safe_load((root / "config/autonomy.yaml").read_text(encoding="utf-8"))
+    factory = _mapping(
+        yaml.safe_load((root / "config/factory.yaml").read_text(encoding="utf-8")),
+        "config/factory.yaml",
+    )
+    autonomy = _mapping(
+        yaml.safe_load((root / "config/autonomy.yaml").read_text(encoding="utf-8")),
+        "config/autonomy.yaml",
+    )
     auth_source = (root / "tcfactory/auth.py").read_text(encoding="utf-8")
 
-    if factory.get("auth_mode") != "max_oauth_only":
-        failures.append("config/factory.yaml must use auth_mode: max_oauth_only")
-    if factory.get("allow_paid_usage") is not False:
-        failures.append("config/factory.yaml must keep allow_paid_usage: false")
-    if autonomy.get("allow_paid_usage") is not False:
-        failures.append("config/autonomy.yaml must keep allow_paid_usage: false")
+    if factory.get("version") == 3:
+        executors = _mapping(
+            yaml.safe_load((root / "config/executors.yaml").read_text(encoding="utf-8")),
+            "config/executors.yaml",
+        )
+        backends = _mapping(executors.get("backends"), "config/executors.yaml backends")
+        default_backend = executors.get("defaultBackend")
+        default = (
+            _mapping(backends.get(default_backend), "default executor backend")
+            if isinstance(default_backend, str)
+            else {}
+        )
+        if not default or default.get("authentication") != "subscription":
+            failures.append("V3 default executor must use subscription authentication")
+        for label, payload in (
+            ("config/factory.yaml", factory),
+            ("config/autonomy.yaml", autonomy),
+            ("config/executors.yaml", executors),
+        ):
+            if payload.get("allowPaidUsage") is not False:
+                failures.append(f"{label} must keep allowPaidUsage: false")
+    else:
+        if factory.get("auth_mode") != "max_oauth_only":
+            failures.append("config/factory.yaml must use auth_mode: max_oauth_only")
+        if factory.get("allow_paid_usage") is not False:
+            failures.append("config/factory.yaml must keep allow_paid_usage: false")
+        if autonomy.get("allow_paid_usage") is not False:
+            failures.append("config/autonomy.yaml must keep allow_paid_usage: false")
     if "TCF_USAGE_CREDITS_DISABLED_ACK" not in auth_source:
         failures.append("the usage-credits-disabled acknowledgement check was removed")
     for name in sorted(DISALLOWED_BILLING_ENV):

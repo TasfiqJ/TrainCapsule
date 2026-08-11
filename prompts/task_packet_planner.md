@@ -20,7 +20,7 @@ Select only the first dependency-ready feature-ledger item and create one comple
 The proposal must:
 
 - have one machine-verifiable outcome;
-- contain every acceptance criterion needed to prove the end-to-end sellable outcome, without an arbitrary numeric cap;
+- contain no more than 12 acceptance criteria for one bounded decision contribution;
 - state exact source-of-truth files and sections;
 - state exact inputs, outputs, non-goals, and stop conditions;
 - authorize all coherent repository paths needed for product code, integration, tests, packaging, documentation, operations, and support, while forbidding controller authority, protected evidence/fixtures, hidden gates, and credentials;

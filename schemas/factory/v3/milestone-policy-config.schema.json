@@ -1,0 +1,55 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "activeMilestone": {
+      "pattern": "^M[0-9]+_[A-Z0-9_]+$",
+      "title": "Activemilestone",
+      "type": "string"
+    },
+    "roadmapPath": {
+      "title": "Roadmappath",
+      "type": "string"
+    },
+    "completionMode": {
+      "const": "milestone",
+      "title": "Completionmode",
+      "type": "string"
+    },
+    "expansionMode": {
+      "const": "proposal_only",
+      "title": "Expansionmode",
+      "type": "string"
+    },
+    "sourceMigrationApprovalRequired": {
+      "const": true,
+      "title": "Sourcemigrationapprovalrequired",
+      "type": "boolean"
+    },
+    "externalMilestones": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Externalmilestones",
+      "type": "array"
+    }
+  },
+  "required": [
+    "activeMilestone",
+    "roadmapPath",
+    "completionMode",
+    "expansionMode",
+    "sourceMigrationApprovalRequired",
+    "externalMilestones"
+  ],
+  "title": "MilestonePolicyConfig",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/milestone-policy-config.schema.json"
+}

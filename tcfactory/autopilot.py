@@ -59,24 +59,25 @@ class AutopilotError(RuntimeError):
 
 
 def _finite_ceiling_reached(current: int, ceiling: int) -> bool:
-    """Return whether a configured finite ceiling is exhausted.
+    """Return whether a configured positive finite ceiling is exhausted."""
 
-    Autonomy limits use zero to mean unlimited. Infrastructure recovery remains bounded
-    separately so a session rotates into a fresh specification instead of repeating the
-    identical execution forever.
-    """
-
-    return ceiling > 0 and current >= ceiling
+    if ceiling <= 0:
+        raise ValueError("finite ceiling must be positive")
+    return current >= ceiling
 
 
 def _finite_ceiling_exceeded(current: int, ceiling: int) -> bool:
     """Return whether a configured finite inclusive ceiling was exceeded."""
 
-    return ceiling > 0 and current > ceiling
+    if ceiling <= 0:
+        raise ValueError("finite ceiling must be positive")
+    return current > ceiling
 
 
 def _ceiling_label(ceiling: int) -> str:
-    return str(ceiling) if ceiling > 0 else "unlimited"
+    if ceiling <= 0:
+        raise ValueError("finite ceiling must be positive")
+    return str(ceiling)
 
 
 def is_external_evidence_block(error: str) -> bool:

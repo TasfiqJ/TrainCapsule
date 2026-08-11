@@ -1,0 +1,290 @@
+{
+  "$defs": {
+    "CandidateAutonomy": {
+      "additionalProperties": false,
+      "properties": {
+        "maxCandidateRepairCycles": {
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Maxcandidaterepaircycles",
+          "type": "integer"
+        },
+        "maxSameFindingRepeats": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Maxsamefindingrepeats",
+          "type": "integer"
+        },
+        "maxCandidateRestarts": {
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Maxcandidaterestarts",
+          "type": "integer"
+        },
+        "preserveOnExhaustion": {
+          "const": true,
+          "title": "Preserveonexhaustion",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "maxCandidateRepairCycles",
+        "maxSameFindingRepeats",
+        "maxCandidateRestarts",
+        "preserveOnExhaustion"
+      ],
+      "title": "CandidateAutonomy",
+      "type": "object"
+    },
+    "CompletionAutonomy": {
+      "additionalProperties": false,
+      "properties": {
+        "maxExpansionRoundsPerMilestone": {
+          "maximum": 2,
+          "minimum": 1,
+          "title": "Maxexpansionroundspermilestone",
+          "type": "integer"
+        },
+        "maxExpansionItems": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Maxexpansionitems",
+          "type": "integer"
+        },
+        "roadmapExpansionRequiresHumanApproval": {
+          "const": true,
+          "title": "Roadmapexpansionrequireshumanapproval",
+          "type": "boolean"
+        },
+        "reviewersMayMutateRoadmap": {
+          "const": false,
+          "title": "Reviewersmaymutateroadmap",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "maxExpansionRoundsPerMilestone",
+        "maxExpansionItems",
+        "roadmapExpansionRequiresHumanApproval",
+        "reviewersMayMutateRoadmap"
+      ],
+      "title": "CompletionAutonomy",
+      "type": "object"
+    },
+    "ExternalAutonomy": {
+      "additionalProperties": false,
+      "properties": {
+        "aiMayCompleteExternalEvidence": {
+          "const": false,
+          "title": "Aimaycompleteexternalevidence",
+          "type": "boolean"
+        },
+        "aiMayCompleteHumanReview": {
+          "const": false,
+          "title": "Aimaycompletehumanreview",
+          "type": "boolean"
+        },
+        "syntheticEvidenceMayAdvanceCommercialMaturity": {
+          "const": false,
+          "title": "Syntheticevidencemayadvancecommercialmaturity",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "aiMayCompleteExternalEvidence",
+        "aiMayCompleteHumanReview",
+        "syntheticEvidenceMayAdvanceCommercialMaturity"
+      ],
+      "title": "ExternalAutonomy",
+      "type": "object"
+    },
+    "PlanningAutonomy": {
+      "additionalProperties": false,
+      "properties": {
+        "autoPlan": {
+          "title": "Autoplan",
+          "type": "boolean"
+        },
+        "maxPlanAttempts": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Maxplanattempts",
+          "type": "integer"
+        },
+        "maxAcceptanceCriteria": {
+          "maximum": 12,
+          "minimum": 1,
+          "title": "Maxacceptancecriteria",
+          "type": "integer"
+        },
+        "maxExpectedOutputs": {
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Maxexpectedoutputs",
+          "type": "integer"
+        },
+        "maxContextDocuments": {
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Maxcontextdocuments",
+          "type": "integer"
+        },
+        "reuseValidPlans": {
+          "title": "Reusevalidplans",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "autoPlan",
+        "maxPlanAttempts",
+        "maxAcceptanceCriteria",
+        "maxExpectedOutputs",
+        "maxContextDocuments",
+        "reuseValidPlans"
+      ],
+      "title": "PlanningAutonomy",
+      "type": "object"
+    },
+    "RecoveryAutonomy": {
+      "additionalProperties": false,
+      "properties": {
+        "autoResumeQuota": {
+          "title": "Autoresumequota",
+          "type": "boolean"
+        },
+        "autoRecoverInterrupted": {
+          "title": "Autorecoverinterrupted",
+          "type": "boolean"
+        },
+        "maxInfrastructureRecoveriesPerRun": {
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Maxinfrastructurerecoveriesperrun",
+          "type": "integer"
+        },
+        "maxFactorySelfRepairsPerIncident": {
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Maxfactoryselfrepairsperincident",
+          "type": "integer"
+        },
+        "maxControllerRestarts": {
+          "maximum": 10,
+          "minimum": 1,
+          "title": "Maxcontrollerrestarts",
+          "type": "integer"
+        },
+        "restartBackoffSeconds": {
+          "items": {
+            "type": "integer"
+          },
+          "maxItems": 5,
+          "minItems": 1,
+          "title": "Restartbackoffseconds",
+          "type": "array"
+        },
+        "requireHealthySecondsToResetRestartBudget": {
+          "minimum": 60,
+          "title": "Requirehealthysecondstoresetrestartbudget",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "autoResumeQuota",
+        "autoRecoverInterrupted",
+        "maxInfrastructureRecoveriesPerRun",
+        "maxFactorySelfRepairsPerIncident",
+        "maxControllerRestarts",
+        "restartBackoffSeconds",
+        "requireHealthySecondsToResetRestartBudget"
+      ],
+      "title": "RecoveryAutonomy",
+      "type": "object"
+    },
+    "ValueAutonomy": {
+      "additionalProperties": false,
+      "properties": {
+        "maxValueRedesigns": {
+          "maximum": 3,
+          "minimum": 1,
+          "title": "Maxvalueredesigns",
+          "type": "integer"
+        },
+        "stopOnNativeWorkflowSufficient": {
+          "const": true,
+          "title": "Stoponnativeworkflowsufficient",
+          "type": "boolean"
+        },
+        "stopOnNoIncrementalDecisionValue": {
+          "const": true,
+          "title": "Stoponnoincrementaldecisionvalue",
+          "type": "boolean"
+        },
+        "stopOnTechnicallyValidButUneconomic": {
+          "const": true,
+          "title": "Stopontechnicallyvalidbutuneconomic",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "maxValueRedesigns",
+        "stopOnNativeWorkflowSufficient",
+        "stopOnNoIncrementalDecisionValue",
+        "stopOnTechnicallyValidButUneconomic"
+      ],
+      "title": "ValueAutonomy",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "enabled": {
+      "default": false,
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "allowPaidUsage": {
+      "const": false,
+      "default": false,
+      "title": "Allowpaidusage",
+      "type": "boolean"
+    },
+    "planning": {
+      "$ref": "#/$defs/PlanningAutonomy"
+    },
+    "candidate": {
+      "$ref": "#/$defs/CandidateAutonomy"
+    },
+    "recovery": {
+      "$ref": "#/$defs/RecoveryAutonomy"
+    },
+    "value": {
+      "$ref": "#/$defs/ValueAutonomy"
+    },
+    "completion": {
+      "$ref": "#/$defs/CompletionAutonomy"
+    },
+    "external": {
+      "$ref": "#/$defs/ExternalAutonomy"
+    }
+  },
+  "required": [
+    "planning",
+    "candidate",
+    "recovery",
+    "value",
+    "completion",
+    "external"
+  ],
+  "title": "AutonomyV3Config",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/autonomy-config.schema.json"
+}

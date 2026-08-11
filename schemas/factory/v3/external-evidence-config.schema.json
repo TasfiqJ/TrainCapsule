@@ -1,0 +1,73 @@
+{
+  "$defs": {
+    "EvidenceType": {
+      "enum": [
+        "CUSTOMER_CONVERSATION",
+        "INCIDENT_ARCHIVE_ACCESS",
+        "PAID_PREFLIGHT",
+        "PAID_PILOT",
+        "DECISION_CHANGED",
+        "SECOND_PAID_ACTION",
+        "INDEPENDENT_OPERATOR",
+        "HUMAN_REVIEW",
+        "UPSTREAM_ACCEPTANCE",
+        "PROVIDER_ACCEPTANCE"
+      ],
+      "title": "EvidenceType",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "trustedRootEnvironmentVariable": {
+      "minLength": 1,
+      "title": "Trustedrootenvironmentvariable",
+      "type": "string"
+    },
+    "allowRepositoryFallback": {
+      "const": false,
+      "title": "Allowrepositoryfallback",
+      "type": "boolean"
+    },
+    "receiptSchema": {
+      "title": "Receiptschema",
+      "type": "string"
+    },
+    "requireSignature": {
+      "const": true,
+      "title": "Requiresignature",
+      "type": "boolean"
+    },
+    "agentWritable": {
+      "const": false,
+      "title": "Agentwritable",
+      "type": "boolean"
+    },
+    "allowedEvidenceTypes": {
+      "items": {
+        "$ref": "#/$defs/EvidenceType"
+      },
+      "title": "Allowedevidencetypes",
+      "type": "array"
+    }
+  },
+  "required": [
+    "trustedRootEnvironmentVariable",
+    "allowRepositoryFallback",
+    "receiptSchema",
+    "requireSignature",
+    "agentWritable",
+    "allowedEvidenceTypes"
+  ],
+  "title": "ExternalEvidenceConfig",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/external-evidence-config.schema.json"
+}

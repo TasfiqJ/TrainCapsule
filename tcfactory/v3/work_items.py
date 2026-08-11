@@ -134,6 +134,7 @@ class WorkItem(V3Model):
     customer_outcome: str
     depends_on: list[str]
     soft_depends_on: list[str]
+    source_dependency_expression: str | None = None
     blocks_commercial_release: bool
     priority: int = Field(ge=0, le=100)
     risk_tier: RiskTier

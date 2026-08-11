@@ -179,6 +179,18 @@
           "title": "Softdependson",
           "type": "array"
         },
+        "sourceDependencyExpression": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sourcedependencyexpression"
+        },
         "blocksCommercialRelease": {
           "title": "Blockscommercialrelease",
           "type": "boolean"

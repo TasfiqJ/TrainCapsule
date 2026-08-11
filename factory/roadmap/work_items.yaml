@@ -1,0 +1,4033 @@
+version: 3
+activeMilestone: M0_FACTORY_MIGRATED
+workItems:
+- version: 3
+  workItemId: V3-MIG-001
+  title: Pause autopilot and snapshot repository/runtime state
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Pause autopilot and snapshot repository/runtime state
+  customerOutcome: Pause autopilot and snapshot repository/runtime state
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: —
+  blocksCommercialRelease: false
+  priority: 99
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: COMPLETED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - baseline SHA, clean status, queue/checkpoint export
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-002
+  title: Create immutable migration branch and rollback tag/instructions
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Create immutable migration branch and rollback tag/instructions
+  customerOutcome: Create immutable migration branch and rollback tag/instructions
+  dependsOn:
+  - V3-MIG-001
+  softDependsOn: []
+  sourceDependencyExpression: '001'
+  blocksCommercialRelease: false
+  priority: 98
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: COMPLETED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - branch/tag refs, rollback drill
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-003
+  title: Install V3 documents without mutating old bundle
+  lane: TRUST
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Install V3 documents without mutating old bundle
+  customerOutcome: Install V3 documents without mutating old bundle
+  dependsOn:
+  - V3-MIG-001
+  softDependsOn: []
+  sourceDependencyExpression: '001'
+  blocksCommercialRelease: true
+  priority: 97
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PASSED_ENGINEERING
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - source tree, authority diff
+  externalReceiptRequired: false
+  humanApprovalRequired: true
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-004
+  title: Replace source-precedence and context-index policy
+  lane: TRUST
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Replace source-precedence and context-index policy
+  customerOutcome: Replace source-precedence and context-index policy
+  dependsOn:
+  - V3-MIG-003
+  softDependsOn: []
+  sourceDependencyExpression: '003'
+  blocksCommercialRelease: true
+  priority: 96
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PASSED_ENGINEERING
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - integrity tests, normative/current-fact separation
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-005
+  title: Add V3 work-item, milestone, maturity, disposition models
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Add V3 work-item, milestone, maturity, disposition models
+  customerOutcome: Add V3 work-item, milestone, maturity, disposition models
+  dependsOn:
+  - V3-MIG-003
+  softDependsOn: []
+  sourceDependencyExpression: '003'
+  blocksCommercialRelease: false
+  priority: 95
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PASSED_ENGINEERING
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - schemas, model tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-006
+  title: Add lane-aware scheduler and deterministic score
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Add lane-aware scheduler and deterministic score
+  customerOutcome: Add lane-aware scheduler and deterministic score
+  dependsOn:
+  - V3-MIG-005
+  softDependsOn: []
+  sourceDependencyExpression: '005'
+  blocksCommercialRelease: false
+  priority: 94
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PASSED_ENGINEERING
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - scheduler simulation and unit tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-007
+  title: Enforce finite planning, repair, redesign, expansion, and restart budgets
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Enforce finite planning, repair, redesign, expansion, and
+    restart budgets
+  customerOutcome: Enforce finite planning, repair, redesign, expansion, and restart
+    budgets
+  dependsOn:
+  - V3-MIG-005
+  softDependsOn: []
+  sourceDependencyExpression: '005'
+  blocksCommercialRelease: false
+  priority: 93
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PASSED_ENGINEERING
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - retry tests, no-zero-unlimited test
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-008
+  title: Add signed human-approval model and trusted-root verification
+  lane: TRUST
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Add signed human-approval model and trusted-root verification
+  customerOutcome: Add signed human-approval model and trusted-root verification
+  dependsOn:
+  - V3-MIG-005
+  softDependsOn: []
+  sourceDependencyExpression: '005'
+  blocksCommercialRelease: true
+  priority: 92
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PASSED_ENGINEERING
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - positive/negative/expiry/SHA tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-009
+  title: Generalize signed external-evidence receipts
+  lane: MARKET
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Generalize signed external-evidence receipts
+  customerOutcome: Generalize signed external-evidence receipts
+  dependsOn:
+  - V3-MIG-005
+  softDependsOn: []
+  sourceDependencyExpression: '005'
+  blocksCommercialRelease: true
+  priority: 91
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PASSED_ENGINEERING
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - invalid/synthetic/issuer tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-010
+  title: Convert completion audit to milestone proposal-only behavior
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Convert completion audit to milestone proposal-only behavior
+  customerOutcome: Convert completion audit to milestone proposal-only behavior
+  dependsOn:
+  - V3-MIG-005
+  - V3-MIG-007
+  softDependsOn: []
+  sourceDependencyExpression: 005,007
+  blocksCommercialRelease: false
+  priority: 90
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - proposal artifact; no ledger mutation
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-011
+  title: Add backend-neutral executor interface and Claude adapter
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Add backend-neutral executor interface and Claude adapter
+  customerOutcome: Add backend-neutral executor interface and Claude adapter
+  dependsOn:
+  - V3-MIG-005
+  softDependsOn: []
+  sourceDependencyExpression: '005'
+  blocksCommercialRelease: false
+  priority: 89
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - protocol tests; current Claude flow preserved
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-012
+  title: Change release path from direct main to draft PR
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Change release path from direct main to draft PR
+  customerOutcome: Change release path from direct main to draft PR
+  dependsOn:
+  - V3-MIG-005
+  softDependsOn: []
+  sourceDependencyExpression: '005'
+  blocksCommercialRelease: false
+  priority: 88
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - PR dry run, exact-SHA checks
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-013
+  title: Split factory, product, security, and source-integrity CI
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Split factory, product, security, and source-integrity CI
+  customerOutcome: Split factory, product, security, and source-integrity CI
+  dependsOn:
+  - V3-MIG-012
+  softDependsOn: []
+  sourceDependencyExpression: '012'
+  blocksCommercialRelease: false
+  priority: 87
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - workflows and local equivalents
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-014
+  title: Make Windows/WSL controls configurable; add restart budget
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Make Windows/WSL controls configurable; add restart budget
+  customerOutcome: Make Windows/WSL controls configurable; add restart budget
+  dependsOn:
+  - V3-MIG-007
+  softDependsOn: []
+  sourceDependencyExpression: '007'
+  blocksCommercialRelease: false
+  priority: 86
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - non-hardcoded config tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-015
+  title: Migrate legacy ledger/queue/checkpoints without resuming obsolete work
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Migrate legacy ledger/queue/checkpoints without resuming obsolete
+    work
+  customerOutcome: Migrate legacy ledger/queue/checkpoints without resuming obsolete
+    work
+  dependsOn:
+  - V3-MIG-005
+  - V3-MIG-006
+  - V3-MIG-007
+  softDependsOn: []
+  sourceDependencyExpression: 005,006,007
+  blocksCommercialRelease: false
+  priority: 85
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - migration report and hashes
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-016
+  title: Human review of authority, release, and rollback
+  lane: TRUST
+  kind: HUMAN_REVIEW
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Human review of authority, release, and rollback
+  customerOutcome: Human review of authority, release, and rollback
+  dependsOn:
+  - V3-MIG-003
+  - V3-MIG-004
+  - V3-MIG-005
+  - V3-MIG-006
+  - V3-MIG-007
+  - V3-MIG-008
+  - V3-MIG-009
+  - V3-MIG-010
+  - V3-MIG-011
+  - V3-MIG-012
+  - V3-MIG-013
+  - V3-MIG-014
+  - V3-MIG-015
+  softDependsOn: []
+  sourceDependencyExpression: 003–015
+  blocksCommercialRelease: true
+  priority: 84
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: WAITING_HUMAN
+  ownerType: HUMAN_REVIEWER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - signed source-migration approval
+  externalReceiptRequired: false
+  humanApprovalRequired: true
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-017
+  title: Run controlled migration rehearsal and rollback
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Run controlled migration rehearsal and rollback
+  customerOutcome: Run controlled migration rehearsal and rollback
+  dependsOn:
+  - V3-MIG-006
+  - V3-MIG-007
+  - V3-MIG-008
+  - V3-MIG-009
+  - V3-MIG-010
+  - V3-MIG-011
+  - V3-MIG-012
+  - V3-MIG-013
+  - V3-MIG-014
+  - V3-MIG-015
+  softDependsOn: []
+  sourceDependencyExpression: 006–015
+  blocksCommercialRelease: false
+  priority: 83
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - full transcript and restored SHA
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-018
+  title: Enable V3 controller in observation mode
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Enable V3 controller in observation mode
+  customerOutcome: Enable V3 controller in observation mode
+  dependsOn:
+  - V3-MIG-016
+  - V3-MIG-017
+  softDependsOn: []
+  sourceDependencyExpression: 016,017
+  blocksCommercialRelease: false
+  priority: 82
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - scheduler decisions with no mutation
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-019
+  title: Execute one mechanical and one standard V3 task
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Execute one mechanical and one standard V3 task
+  customerOutcome: Execute one mechanical and one standard V3 task
+  dependsOn:
+  - V3-MIG-018
+  softDependsOn: []
+  sourceDependencyExpression: 018
+  blocksCommercialRelease: false
+  priority: 81
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - candidate manifests, PRs, CI
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MIG-020
+  title: Close M0 and archive legacy active queue
+  lane: FACTORY
+  kind: MIGRATION
+  milestone: M0_FACTORY_MIGRATED
+  decisionContribution: Close M0 and archive legacy active queue
+  customerOutcome: Close M0 and archive legacy active queue
+  dependsOn:
+  - V3-MIG-019
+  softDependsOn: []
+  sourceDependencyExpression: 019
+  blocksCommercialRelease: false
+  priority: 80
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NOT_EVALUATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - milestone completion record
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-001
+  title: Create product monorepo/package skeleton
+  lane: PRODUCT
+  kind: CODE
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Create product monorepo/package skeleton
+  customerOutcome: Create product monorepo/package skeleton
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M0
+  blocksCommercialRelease: false
+  priority: 89
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - clean install, package import
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-002
+  title: Define product result, identity, evidence, and case schemas
+  lane: PRODUCT
+  kind: CODE
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Define product result, identity, evidence, and case schemas
+  customerOutcome: Define product result, identity, evidence, and case schemas
+  dependsOn:
+  - V3-PROD-001
+  softDependsOn: []
+  sourceDependencyExpression: '001'
+  blocksCommercialRelease: false
+  priority: 88
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - schema round-trip/compatibility
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-001
+  title: Build independent canonical serialization/identity oracle
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Build independent canonical serialization/identity oracle
+  customerOutcome: Build independent canonical serialization/identity oracle
+  dependsOn:
+  - V3-PROD-002
+  softDependsOn: []
+  sourceDependencyExpression: PROD-002
+  blocksCommercialRelease: true
+  priority: 87
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - independent implementation, negative cases
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-003
+  title: Implement content-addressed local evidence manifest
+  lane: PRODUCT
+  kind: CODE
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Implement content-addressed local evidence manifest
+  customerOutcome: Implement content-addressed local evidence manifest
+  dependsOn:
+  - V3-PROD-002
+  softDependsOn: []
+  sourceDependencyExpression: PROD-002
+  blocksCommercialRelease: false
+  priority: 86
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - tamper/mixing tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-004
+  title: Implement workload identity
+  lane: PRODUCT
+  kind: CODE
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Implement workload identity
+  customerOutcome: Implement workload identity
+  dependsOn:
+  - V3-PROD-002
+  - V3-TRUST-001
+  softDependsOn: []
+  sourceDependencyExpression: PROD-002,TRUST-001
+  blocksCommercialRelease: false
+  priority: 85
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - drift and weak-identity tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-005
+  title: Implement environment identity
+  lane: PRODUCT
+  kind: CODE
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Implement environment identity
+  customerOutcome: Implement environment identity
+  dependsOn:
+  - V3-PROD-002
+  - V3-TRUST-001
+  softDependsOn: []
+  sourceDependencyExpression: PROD-002,TRUST-001
+  blocksCommercialRelease: false
+  priority: 84
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - material/immaterial drift tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-006
+  title: Implement PyTorch Flight Recorder importer
+  lane: PRODUCT
+  kind: CODE
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Implement PyTorch Flight Recorder importer
+  customerOutcome: Implement PyTorch Flight Recorder importer
+  dependsOn:
+  - V3-PROD-003
+  - V3-PROD-005
+  softDependsOn: []
+  sourceDependencyExpression: PROD-003–005
+  blocksCommercialRelease: false
+  priority: 83
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - official-format fixtures, malformed inputs
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-COMP-001
+  title: Freeze current PyTorch Flight Recorder capability baseline
+  lane: COMPETITOR
+  kind: CONTROLLED_EXPERIMENT
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Freeze current PyTorch Flight Recorder capability baseline
+  customerOutcome: Freeze current PyTorch Flight Recorder capability baseline
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M0
+  blocksCommercialRelease: false
+  priority: 82
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: INTEGRATE_EXISTING_BACKEND
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - official sources, commands, findings
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-007
+  title: Emit native findings without attribution laundering
+  lane: PRODUCT
+  kind: CODE
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Emit native findings without attribution laundering
+  customerOutcome: Emit native findings without attribution laundering
+  dependsOn:
+  - V3-PROD-006
+  - V3-COMP-001
+  softDependsOn: []
+  sourceDependencyExpression: PROD-006,COMP-001
+  blocksCommercialRelease: false
+  priority: 81
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - source labels and tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-008
+  title: Implement evidence-completeness report for initial pack
+  lane: PRODUCT
+  kind: CODE
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Implement evidence-completeness report for initial pack
+  customerOutcome: Implement evidence-completeness report for initial pack
+  dependsOn:
+  - V3-PROD-006
+  softDependsOn: []
+  sourceDependencyExpression: PROD-006
+  blocksCommercialRelease: false
+  priority: 80
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - full missing/conflicting state matrix
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-009
+  title: Implement eligibility and economic preflight
+  lane: PRODUCT
+  kind: CODE
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Implement eligibility and economic preflight
+  customerOutcome: Implement eligibility and economic preflight
+  dependsOn:
+  - V3-PROD-007
+  - V3-PROD-008
+  softDependsOn: []
+  sourceDependencyExpression: PROD-007,008
+  blocksCommercialRelease: false
+  priority: 79
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - all terminal outcomes
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-010
+  title: Implement local CLI through preflight
+  lane: PRODUCT
+  kind: CODE
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Implement local CLI through preflight
+  customerOutcome: Implement local CLI through preflight
+  dependsOn:
+  - V3-PROD-003
+  - V3-PROD-009
+  softDependsOn: []
+  sourceDependencyExpression: PROD-003–009
+  blocksCommercialRelease: false
+  priority: 78
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - install-to-preflight journey
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-002
+  title: Threat model importer, CAS, identity, CLI, and local storage
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Threat model importer, CAS, identity, CLI, and local storage
+  customerOutcome: Threat model importer, CAS, identity, CLI, and local storage
+  dependsOn:
+  - V3-PROD-010
+  softDependsOn: []
+  sourceDependencyExpression: PROD-010
+  blocksCommercialRelease: true
+  priority: 77
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - security review and tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-003
+  title: Implement deterministic redaction and export policy
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Implement deterministic redaction and export policy
+  customerOutcome: Implement deterministic redaction and export policy
+  dependsOn:
+  - V3-PROD-003
+  softDependsOn: []
+  sourceDependencyExpression: PROD-003
+  blocksCommercialRelease: true
+  priority: 76
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - secret and policy tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-COMP-002
+  title: Build complete native/bundled/agent capability matrix
+  lane: COMPETITOR
+  kind: RESEARCH
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Build complete native/bundled/agent capability matrix
+  customerOutcome: Build complete native/bundled/agent capability matrix
+  dependsOn:
+  - V3-COMP-001
+  softDependsOn: []
+  sourceDependencyExpression: COMP-001
+  blocksCommercialRelease: false
+  priority: 75
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: INTEGRATE_EXISTING_BACKEND
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - dated source register
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-COMP-003
+  title: Reproduce native baseline on initial controlled case
+  lane: COMPETITOR
+  kind: CONTROLLED_EXPERIMENT
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Reproduce native baseline on initial controlled case
+  customerOutcome: Reproduce native baseline on initial controlled case
+  dependsOn:
+  - V3-PROD-006
+  - V3-COMP-001
+  softDependsOn: []
+  sourceDependencyExpression: PROD-006,COMP-001
+  blocksCommercialRelease: false
+  priority: 74
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: INTEGRATE_EXISTING_BACKEND
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - commands, artifacts, operator effort
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-COMP-004
+  title: Define the exact unowned decision gap
+  lane: COMPETITOR
+  kind: RESEARCH
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Define the exact unowned decision gap
+  customerOutcome: Define the exact unowned decision gap
+  dependsOn:
+  - V3-COMP-002
+  - V3-COMP-003
+  softDependsOn: []
+  sourceDependencyExpression: COMP-002,003
+  blocksCommercialRelease: false
+  priority: 73
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: INTEGRATE_EXISTING_BACKEND
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - decision-level differential
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MKT-001
+  title: Build 30-account reachable map
+  lane: MARKET
+  kind: RESEARCH
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Build 30-account reachable map
+  customerOutcome: Build 30-account reachable map
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M0
+  blocksCommercialRelease: true
+  priority: 72
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - attributable account records
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MKT-002
+  title: Prepare interview guide and evidence policy
+  lane: MARKET
+  kind: RESEARCH
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Prepare interview guide and evidence policy
+  customerOutcome: Prepare interview guide and evidence policy
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M0
+  blocksCommercialRelease: true
+  priority: 71
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - review-ready packet
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MKT-003
+  title: Record 15 qualified conversations
+  lane: MARKET
+  kind: EXTERNAL_EVIDENCE
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Record 15 qualified conversations
+  customerOutcome: Record 15 qualified conversations
+  dependsOn:
+  - V3-MKT-001
+  - V3-MKT-002
+  softDependsOn: []
+  sourceDependencyExpression: MKT-001,002
+  blocksCommercialRelease: true
+  priority: 70
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: WAITING_EXTERNAL
+  ownerType: FOUNDER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - external receipts/notes
+  externalReceiptRequired: true
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MKT-004
+  title: Record 5 incident timelines
+  lane: MARKET
+  kind: EXTERNAL_EVIDENCE
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Record 5 incident timelines
+  customerOutcome: Record 5 incident timelines
+  dependsOn:
+  - V3-MKT-003
+  softDependsOn: []
+  sourceDependencyExpression: MKT-003
+  blocksCommercialRelease: true
+  priority: 69
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: WAITING_EXTERNAL
+  ownerType: FOUNDER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - sanitized timelines
+  externalReceiptRequired: true
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MKT-005
+  title: Identify 3 real upcoming changes
+  lane: MARKET
+  kind: RESEARCH
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Identify 3 real upcoming changes
+  customerOutcome: Identify 3 real upcoming changes
+  dependsOn:
+  - V3-MKT-003
+  softDependsOn: []
+  sourceDependencyExpression: MKT-003
+  blocksCommercialRelease: true
+  priority: 68
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - named decision/deadline
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MKT-006
+  title: Qualify 2 pilot candidates
+  lane: MARKET
+  kind: RESEARCH
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Qualify 2 pilot candidates
+  customerOutcome: Qualify 2 pilot candidates
+  dependsOn:
+  - V3-MKT-004
+  - V3-MKT-005
+  softDependsOn: []
+  sourceDependencyExpression: MKT-004,005
+  blocksCommercialRelease: true
+  priority: 67
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - ICP score and next action
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MKT-007
+  title: Secure lawful access to one real trace/archive
+  lane: MARKET
+  kind: RESEARCH
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Secure lawful access to one real trace/archive
+  customerOutcome: Secure lawful access to one real trace/archive
+  dependsOn:
+  - V3-MKT-004
+  softDependsOn: []
+  sourceDependencyExpression: MKT-004
+  blocksCommercialRelease: true
+  priority: 66
+  riskTier: STANDARD
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - access/rights receipt
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-DEC-001
+  title: Conduct M1 wedge review
+  lane: TRUST
+  kind: HUMAN_REVIEW
+  milestone: M1_NATIVE_PREFLIGHT
+  decisionContribution: Conduct M1 wedge review
+  customerOutcome: Conduct M1 wedge review
+  dependsOn:
+  - V3-PROD-001
+  - V3-PROD-002
+  - V3-TRUST-001
+  - V3-PROD-003
+  - V3-PROD-004
+  - V3-PROD-005
+  - V3-PROD-006
+  - V3-COMP-001
+  - V3-PROD-007
+  - V3-PROD-008
+  - V3-PROD-009
+  - V3-PROD-010
+  - V3-TRUST-002
+  - V3-TRUST-003
+  - V3-COMP-002
+  - V3-COMP-003
+  - V3-COMP-004
+  - V3-MKT-001
+  - V3-MKT-002
+  - V3-MKT-003
+  - V3-MKT-004
+  - V3-MKT-005
+  - V3-MKT-006
+  - V3-MKT-007
+  softDependsOn: []
+  sourceDependencyExpression: all M1 critical items
+  blocksCommercialRelease: true
+  priority: 65
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: CONTROLLED_VALIDATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
+  disposition: KEEP
+  status: WAITING_HUMAN
+  ownerType: HUMAN_REVIEWER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - KEEP/NARROW/REPLACE/STOP decision
+  externalReceiptRequired: false
+  humanApprovalRequired: true
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-011
+  title: Define initial pack schema and mechanism boundaries
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Define initial pack schema and mechanism boundaries
+  customerOutcome: Define initial pack schema and mechanism boundaries
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M1 decision
+  blocksCommercialRelease: false
+  priority: 79
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - pack spec and negative boundaries
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-004
+  title: Build independent observed-boundary oracle
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Build independent observed-boundary oracle
+  customerOutcome: Build independent observed-boundary oracle
+  dependsOn:
+  - V3-PROD-011
+  softDependsOn: []
+  sourceDependencyExpression: PROD-011
+  blocksCommercialRelease: true
+  priority: 78
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - positive/ambiguous/missing-rank cases
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-012
+  title: Implement rank/process-group lifecycle alignment
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Implement rank/process-group lifecycle alignment
+  customerOutcome: Implement rank/process-group lifecycle alignment
+  dependsOn:
+  - V3-PROD-011
+  - V3-TRUST-004
+  softDependsOn: []
+  sourceDependencyExpression: PROD-011,TRUST-004
+  blocksCommercialRelease: false
+  priority: 77
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - controlled traces
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-013
+  title: Implement hypothesis ledger and plan schema
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Implement hypothesis ledger and plan schema
+  customerOutcome: Implement hypothesis ledger and plan schema
+  dependsOn:
+  - V3-PROD-011
+  softDependsOn: []
+  sourceDependencyExpression: PROD-011
+  blocksCommercialRelease: false
+  priority: 76
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - falsifier and status tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-014
+  title: Implement registered reduction operators for initial pack
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Implement registered reduction operators for initial pack
+  customerOutcome: Implement registered reduction operators for initial pack
+  dependsOn:
+  - V3-PROD-011
+  softDependsOn: []
+  sourceDependencyExpression: PROD-011
+  blocksCommercialRelease: false
+  priority: 75
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - precondition and rollback tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-005
+  title: Build reduction-faithfulness oracle
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Build reduction-faithfulness oracle
+  customerOutcome: Build reduction-faithfulness oracle
+  dependsOn:
+  - V3-PROD-014
+  softDependsOn: []
+  sourceDependencyExpression: PROD-014
+  blocksCommercialRelease: true
+  priority: 74
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - independent negative controls
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-015
+  title: Implement pack-specific experiment planner
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Implement pack-specific experiment planner
+  customerOutcome: Implement pack-specific experiment planner
+  dependsOn:
+  - V3-PROD-012
+  - V3-TRUST-005
+  - V3-PROD-014
+  softDependsOn: []
+  sourceDependencyExpression: PROD-012–014,TRUST-005
+  blocksCommercialRelease: false
+  priority: 73
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - bounded plans, no universal planner
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-016
+  title: Implement signed faithfulness contract
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Implement signed faithfulness contract
+  customerOutcome: Implement signed faithfulness contract
+  dependsOn:
+  - V3-PROD-014
+  - V3-PROD-015
+  softDependsOn: []
+  sourceDependencyExpression: PROD-014,015
+  blocksCommercialRelease: false
+  priority: 72
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - tamper, drift, expiry tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-017
+  title: Implement customer-local runner preflight/materialization
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Implement customer-local runner preflight/materialization
+  customerOutcome: Implement customer-local runner preflight/materialization
+  dependsOn:
+  - V3-PROD-002
+  - V3-PROD-016
+  softDependsOn: []
+  sourceDependencyExpression: PROD-002,016
+  blocksCommercialRelease: false
+  priority: 71
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - containment/resource tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-006
+  title: Complete runner threat model and containment tests
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Complete runner threat model and containment tests
+  customerOutcome: Complete runner threat model and containment tests
+  dependsOn:
+  - V3-PROD-017
+  softDependsOn: []
+  sourceDependencyExpression: PROD-017
+  blocksCommercialRelease: true
+  priority: 70
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - escape/network/path tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-018
+  title: Implement execution records and artifact capture
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Implement execution records and artifact capture
+  customerOutcome: Implement execution records and artifact capture
+  dependsOn:
+  - V3-PROD-017
+  softDependsOn: []
+  sourceDependencyExpression: PROD-017
+  blocksCommercialRelease: false
+  priority: 69
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - identity/tamper tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-019
+  title: Implement Recovery Property contracts
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Implement Recovery Property contracts
+  customerOutcome: Implement Recovery Property contracts
+  dependsOn:
+  - V3-PROD-002
+  softDependsOn: []
+  sourceDependencyExpression: PROD-002
+  blocksCommercialRelease: false
+  priority: 68
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - per-property oracle schema
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-007
+  title: Implement independent recovery aggregation oracle
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Implement independent recovery aggregation oracle
+  customerOutcome: Implement independent recovery aggregation oracle
+  dependsOn:
+  - V3-PROD-019
+  softDependsOn: []
+  sourceDependencyExpression: PROD-019
+  blocksCommercialRelease: true
+  priority: 67
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - fail/unknown/optional tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-020
+  title: Implement baseline/candidate comparator
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Implement baseline/candidate comparator
+  customerOutcome: Implement baseline/candidate comparator
+  dependsOn:
+  - V3-PROD-016
+  - V3-TRUST-007
+  - V3-PROD-018
+  - V3-PROD-019
+  softDependsOn: []
+  sourceDependencyExpression: PROD-016,018,019,TRUST-007
+  blocksCommercialRelease: false
+  priority: 66
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - decision matrix tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-008
+  title: Build independent qualification semantics oracle
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Build independent qualification semantics oracle
+  customerOutcome: Build independent qualification semantics oracle
+  dependsOn:
+  - V3-PROD-020
+  softDependsOn: []
+  sourceDependencyExpression: PROD-020
+  blocksCommercialRelease: true
+  priority: 65
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - invalid-oracle and unknown tests
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-021
+  title: Implement local incident-contract registry
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Implement local incident-contract registry
+  customerOutcome: Implement local incident-contract registry
+  dependsOn:
+  - V3-PROD-020
+  softDependsOn: []
+  sourceDependencyExpression: PROD-020
+  blocksCommercialRelease: false
+  priority: 64
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - create/verify/expire/supersede
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-022
+  title: Implement external verifier
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Implement external verifier
+  customerOutcome: Implement external verifier
+  dependsOn:
+  - V3-PROD-021
+  - V3-TRUST-001
+  - V3-PROD-005
+  - V3-PROD-007
+  - V3-PROD-008
+  softDependsOn: []
+  sourceDependencyExpression: PROD-021,TRUST-001,005,007,008
+  blocksCommercialRelease: false
+  priority: 63
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - independent verification
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-023
+  title: Implement thin local report viewer
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Implement thin local report viewer
+  customerOutcome: Implement thin local report viewer
+  dependsOn:
+  - V3-PROD-020
+  - V3-PROD-022
+  softDependsOn: []
+  sourceDependencyExpression: PROD-020–022
+  blocksCommercialRelease: false
+  priority: 62
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - report/machine-record consistency
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-024
+  title: Build controlled omitted/reordered/data-branch/rank-exit cases
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Build controlled omitted/reordered/data-branch/rank-exit cases
+  customerOutcome: Build controlled omitted/reordered/data-branch/rank-exit cases
+  dependsOn:
+  - V3-PROD-011
+  softDependsOn: []
+  sourceDependencyExpression: PROD-011
+  blocksCommercialRelease: false
+  priority: 61
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - labeled controlled corpus
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-025
+  title: Execute CPU/local multi-process journeys
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Execute CPU/local multi-process journeys
+  customerOutcome: Execute CPU/local multi-process journeys
+  dependsOn:
+  - V3-PROD-012
+  - V3-PROD-024
+  softDependsOn: []
+  sourceDependencyExpression: PROD-012–024
+  blocksCommercialRelease: false
+  priority: 60
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - end-to-end evidence
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-026
+  title: Execute real 2–8 GPU controlled journey
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Execute real 2–8 GPU controlled journey
+  customerOutcome: Execute real 2–8 GPU controlled journey
+  dependsOn:
+  - V3-PROD-025
+  - V3-TRUST-006
+  softDependsOn: []
+  sourceDependencyExpression: PROD-025,TRUST-006
+  blocksCommercialRelease: false
+  priority: 59
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - real GPU artifacts
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-COMP-005
+  title: Run head-to-head native versus TrainCapsule case
+  lane: COMPETITOR
+  kind: CONTROLLED_EXPERIMENT
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Run head-to-head native versus TrainCapsule case
+  customerOutcome: Run head-to-head native versus TrainCapsule case
+  dependsOn:
+  - V3-PROD-026
+  softDependsOn: []
+  sourceDependencyExpression: PROD-026
+  blocksCommercialRelease: false
+  priority: 58
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: INTEGRATE_EXISTING_BACKEND
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - decision differential
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-027
+  title: Add upgrade/rollback and offline bundle
+  lane: PRODUCT
+  kind: CODE
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Add upgrade/rollback and offline bundle
+  customerOutcome: Add upgrade/rollback and offline bundle
+  dependsOn:
+  - V3-PROD-022
+  - V3-PROD-026
+  softDependsOn: []
+  sourceDependencyExpression: PROD-022,026
+  blocksCommercialRelease: false
+  priority: 57
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - install/rollback evidence
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-009
+  title: Independent operator executes controlled journey
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Independent operator executes controlled journey
+  customerOutcome: Independent operator executes controlled journey
+  dependsOn:
+  - V3-PROD-027
+  softDependsOn: []
+  sourceDependencyExpression: PROD-027
+  blocksCommercialRelease: true
+  priority: 56
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - signed operator receipt
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-010
+  title: Human review of controlled demonstration
+  lane: TRUST
+  kind: HUMAN_REVIEW
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: Human review of controlled demonstration
+  customerOutcome: Human review of controlled demonstration
+  dependsOn:
+  - V3-PROD-011
+  - V3-TRUST-004
+  - V3-PROD-012
+  - V3-PROD-013
+  - V3-PROD-014
+  - V3-TRUST-005
+  - V3-PROD-015
+  - V3-PROD-016
+  - V3-PROD-017
+  - V3-TRUST-006
+  - V3-PROD-018
+  - V3-PROD-019
+  - V3-TRUST-007
+  - V3-PROD-020
+  - V3-TRUST-008
+  - V3-PROD-021
+  - V3-PROD-022
+  - V3-PROD-023
+  - V3-PROD-024
+  - V3-PROD-025
+  - V3-PROD-026
+  - V3-COMP-005
+  - V3-PROD-027
+  - V3-TRUST-009
+  softDependsOn: []
+  sourceDependencyExpression: all M2 trust/product
+  blocksCommercialRelease: true
+  priority: 55
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: WAITING_HUMAN
+  ownerType: HUMAN_REVIEWER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - scoped approval
+  externalReceiptRequired: false
+  humanApprovalRequired: true
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-DEC-002
+  title: M2 product/native/value disposition
+  lane: TRUST
+  kind: HUMAN_REVIEW
+  milestone: M2_CONTROLLED_QUALIFICATION
+  decisionContribution: M2 product/native/value disposition
+  customerOutcome: M2 product/native/value disposition
+  dependsOn:
+  - V3-COMP-005
+  - V3-TRUST-010
+  softDependsOn: []
+  sourceDependencyExpression: COMP-005,TRUST-010
+  blocksCommercialRelease: true
+  priority: 54
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+  disposition: KEEP
+  status: WAITING_HUMAN
+  ownerType: HUMAN_REVIEWER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - continue/narrow/stop
+  externalReceiptRequired: false
+  humanApprovalRequired: true
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MKT-008
+  title: Finalize paid preflight offer and scope
+  lane: MARKET
+  kind: EXTERNAL_EVIDENCE
+  milestone: M3_PAID_PREFLIGHT
+  decisionContribution: Finalize paid preflight offer and scope
+  customerOutcome: Finalize paid preflight offer and scope
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M2
+  blocksCommercialRelease: true
+  priority: 69
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: WAITING_EXTERNAL
+  ownerType: FOUNDER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - offer document
+  externalReceiptRequired: true
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MKT-009
+  title: Finalize pricing experiment and commercial terms
+  lane: MARKET
+  kind: RESEARCH
+  milestone: M3_PAID_PREFLIGHT
+  decisionContribution: Finalize pricing experiment and commercial terms
+  customerOutcome: Finalize pricing experiment and commercial terms
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M2
+  blocksCommercialRelease: true
+  priority: 68
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - pricing ledger
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-011
+  title: Complete customer security/procurement packet
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M3_PAID_PREFLIGHT
+  decisionContribution: Complete customer security/procurement packet
+  customerOutcome: Complete customer security/procurement packet
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M2
+  blocksCommercialRelease: true
+  priority: 67
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - security documents
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-012
+  title: Contract qualified distributed-training adviser
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M3_PAID_PREFLIGHT
+  decisionContribution: Contract qualified distributed-training adviser
+  customerOutcome: Contract qualified distributed-training adviser
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M2
+  blocksCommercialRelease: true
+  priority: 66
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - external receipt
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-013
+  title: Contract security reviewer
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M3_PAID_PREFLIGHT
+  decisionContribution: Contract security reviewer
+  customerOutcome: Contract security reviewer
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M2
+  blocksCommercialRelease: true
+  priority: 65
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - external receipt
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-028
+  title: Run real-archive preflight without unsupported execution claims
+  lane: PRODUCT
+  kind: CODE
+  milestone: M3_PAID_PREFLIGHT
+  decisionContribution: Run real-archive preflight without unsupported execution claims
+  customerOutcome: Run real-archive preflight without unsupported execution claims
+  dependsOn:
+  - V3-MKT-007
+  softDependsOn: []
+  sourceDependencyExpression: MKT-007,M2
+  blocksCommercialRelease: true
+  priority: 64
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - local evidence report
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-COMP-006
+  title: Run customer-case native baseline
+  lane: COMPETITOR
+  kind: CONTROLLED_EXPERIMENT
+  milestone: M3_PAID_PREFLIGHT
+  decisionContribution: Run customer-case native baseline
+  customerOutcome: Run customer-case native baseline
+  dependsOn:
+  - V3-PROD-028
+  softDependsOn: []
+  sourceDependencyExpression: PROD-028
+  blocksCommercialRelease: true
+  priority: 63
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: INTEGRATE_EXISTING_BACKEND
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - exact native result
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MKT-010
+  title: Secure customer approval for paid preflight proposal
+  lane: MARKET
+  kind: EXTERNAL_EVIDENCE
+  milestone: M3_PAID_PREFLIGHT
+  decisionContribution: Secure customer approval for paid preflight proposal
+  customerOutcome: Secure customer approval for paid preflight proposal
+  dependsOn:
+  - V3-MKT-008
+  - V3-MKT-009
+  - V3-MKT-006
+  - V3-TRUST-011
+  softDependsOn: []
+  sourceDependencyExpression: MKT-006,008–009,TRUST-011
+  blocksCommercialRelease: true
+  priority: 62
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: WAITING_EXTERNAL
+  ownerType: FOUNDER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - signed/external receipt
+  externalReceiptRequired: true
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-DEC-003
+  title: Authorize paid preflight
+  lane: TRUST
+  kind: HUMAN_REVIEW
+  milestone: M3_PAID_PREFLIGHT
+  decisionContribution: Authorize paid preflight
+  customerOutcome: Authorize paid preflight
+  dependsOn:
+  - V3-PROD-028
+  - V3-COMP-006
+  - V3-TRUST-012
+  - V3-MKT-010
+  softDependsOn: []
+  sourceDependencyExpression: PROD-028,COMP-006,TRUST-012–013,MKT-010
+  blocksCommercialRelease: true
+  priority: 61
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: WAITING_HUMAN
+  ownerType: HUMAN_REVIEWER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - founder/human decision
+  externalReceiptRequired: false
+  humanApprovalRequired: true
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PILOT-001
+  title: Record paid engagement and exact scope
+  lane: MARKET
+  kind: EXTERNAL_EVIDENCE
+  milestone: M4_PAID_PILOT
+  decisionContribution: Record paid engagement and exact scope
+  customerOutcome: Record paid engagement and exact scope
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M3
+  blocksCommercialRelease: true
+  priority: 59
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: WAITING_EXTERNAL
+  ownerType: FOUNDER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - signed paid receipt
+  externalReceiptRequired: true
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PILOT-002
+  title: Import and lock customer-local case
+  lane: PRODUCT
+  kind: CODE
+  milestone: M4_PAID_PILOT
+  decisionContribution: Import and lock customer-local case
+  customerOutcome: Import and lock customer-local case
+  dependsOn:
+  - V3-PILOT-001
+  softDependsOn: []
+  sourceDependencyExpression: '001'
+  blocksCommercialRelease: true
+  priority: 58
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - customer-local manifest
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PILOT-003
+  title: Complete native workflow baseline
+  lane: COMPETITOR
+  kind: CONTROLLED_EXPERIMENT
+  milestone: M4_PAID_PILOT
+  decisionContribution: Complete native workflow baseline
+  customerOutcome: Complete native workflow baseline
+  dependsOn:
+  - V3-PILOT-002
+  softDependsOn: []
+  sourceDependencyExpression: '002'
+  blocksCommercialRelease: true
+  priority: 57
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: INTEGRATE_EXISTING_BACKEND
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - commands/findings/decision
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PILOT-004
+  title: Produce evidence/eligibility decision
+  lane: PRODUCT
+  kind: CODE
+  milestone: M4_PAID_PILOT
+  decisionContribution: Produce evidence/eligibility decision
+  customerOutcome: Produce evidence/eligibility decision
+  dependsOn:
+  - V3-PILOT-002
+  - V3-PILOT-003
+  softDependsOn: []
+  sourceDependencyExpression: 002,003
+  blocksCommercialRelease: true
+  priority: 56
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - preflight
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PILOT-005
+  title: Human approve case-specific experiment/reduction plan
+  lane: TRUST
+  kind: HUMAN_REVIEW
+  milestone: M4_PAID_PILOT
+  decisionContribution: Human approve case-specific experiment/reduction plan
+  customerOutcome: Human approve case-specific experiment/reduction plan
+  dependsOn:
+  - V3-PILOT-004
+  softDependsOn: []
+  sourceDependencyExpression: '004'
+  blocksCommercialRelease: true
+  priority: 55
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: WAITING_HUMAN
+  ownerType: HUMAN_REVIEWER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - signed approval
+  externalReceiptRequired: false
+  humanApprovalRequired: true
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PILOT-006
+  title: Construct and verify faithful experiment
+  lane: PRODUCT
+  kind: CODE
+  milestone: M4_PAID_PILOT
+  decisionContribution: Construct and verify faithful experiment
+  customerOutcome: Construct and verify faithful experiment
+  dependsOn:
+  - V3-PILOT-005
+  softDependsOn: []
+  sourceDependencyExpression: '005'
+  blocksCommercialRelease: true
+  priority: 54
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - faithfulness record
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PILOT-007
+  title: Execute baseline and candidate locally
+  lane: PRODUCT
+  kind: CODE
+  milestone: M4_PAID_PILOT
+  decisionContribution: Execute baseline and candidate locally
+  customerOutcome: Execute baseline and candidate locally
+  dependsOn:
+  - V3-PILOT-006
+  softDependsOn: []
+  sourceDependencyExpression: '006'
+  blocksCommercialRelease: true
+  priority: 53
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - execution records
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PILOT-008
+  title: Evaluate Recovery Assurance
+  lane: PRODUCT
+  kind: CODE
+  milestone: M4_PAID_PILOT
+  decisionContribution: Evaluate Recovery Assurance
+  customerOutcome: Evaluate Recovery Assurance
+  dependsOn:
+  - V3-PILOT-007
+  softDependsOn: []
+  sourceDependencyExpression: '007'
+  blocksCommercialRelease: true
+  priority: 52
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - property matrix
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PILOT-009
+  title: Issue bounded qualification decision
+  lane: PRODUCT
+  kind: CODE
+  milestone: M4_PAID_PILOT
+  decisionContribution: Issue bounded qualification decision
+  customerOutcome: Issue bounded qualification decision
+  dependsOn:
+  - V3-PILOT-007
+  - V3-PILOT-008
+  softDependsOn: []
+  sourceDependencyExpression: 007,008
+  blocksCommercialRelease: true
+  priority: 51
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - signed result
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PILOT-010
+  title: Human approve customer-facing claims
+  lane: TRUST
+  kind: HUMAN_REVIEW
+  milestone: M4_PAID_PILOT
+  decisionContribution: Human approve customer-facing claims
+  customerOutcome: Human approve customer-facing claims
+  dependsOn:
+  - V3-PILOT-009
+  softDependsOn: []
+  sourceDependencyExpression: 009
+  blocksCommercialRelease: true
+  priority: 50
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: WAITING_HUMAN
+  ownerType: HUMAN_REVIEWER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - signed approval
+  externalReceiptRequired: false
+  humanApprovalRequired: true
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PILOT-011
+  title: Obtain customer decision/value feedback
+  lane: MARKET
+  kind: EXTERNAL_EVIDENCE
+  milestone: M4_PAID_PILOT
+  decisionContribution: Obtain customer decision/value feedback
+  customerOutcome: Obtain customer decision/value feedback
+  dependsOn:
+  - V3-PILOT-009
+  - V3-PILOT-010
+  softDependsOn: []
+  sourceDependencyExpression: 009,010
+  blocksCommercialRelease: true
+  priority: 49
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: WAITING_EXTERNAL
+  ownerType: FOUNDER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - attributable receipt
+  externalReceiptRequired: true
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PILOT-012
+  title: Install reusable local contract and runbook
+  lane: PRODUCT
+  kind: CODE
+  milestone: M4_PAID_PILOT
+  decisionContribution: Install reusable local contract and runbook
+  customerOutcome: Install reusable local contract and runbook
+  dependsOn:
+  - V3-PILOT-009
+  softDependsOn: []
+  sourceDependencyExpression: 009
+  blocksCommercialRelease: true
+  priority: 48
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - independent verification
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PILOT-013
+  title: Schedule and contract the included second execution
+  lane: MARKET
+  kind: EXTERNAL_EVIDENCE
+  milestone: M4_PAID_PILOT
+  decisionContribution: Schedule and contract the included second execution
+  customerOutcome: Schedule and contract the included second execution
+  dependsOn:
+  - V3-PILOT-001
+  - V3-PILOT-012
+  softDependsOn: []
+  sourceDependencyExpression: 001,012
+  blocksCommercialRelease: true
+  priority: 47
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: WAITING_EXTERNAL
+  ownerType: FOUNDER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - dated commitment
+  externalReceiptRequired: true
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-DEC-004
+  title: Pilot disposition
+  lane: TRUST
+  kind: HUMAN_REVIEW
+  milestone: M4_PAID_PILOT
+  decisionContribution: Pilot disposition
+  customerOutcome: Pilot disposition
+  dependsOn:
+  - V3-PILOT-011
+  - V3-PILOT-012
+  - V3-PILOT-013
+  softDependsOn: []
+  sourceDependencyExpression: 011–013
+  blocksCommercialRelease: true
+  priority: 46
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: WAITING_HUMAN
+  ownerType: HUMAN_REVIEWER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - continue/narrow/stop
+  externalReceiptRequired: false
+  humanApprovalRequired: true
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-REPEAT-001
+  title: Record second paid/contracted action
+  lane: MARKET
+  kind: EXTERNAL_EVIDENCE
+  milestone: M5_PAID_REPEAT
+  decisionContribution: Record second paid/contracted action
+  customerOutcome: Record second paid/contracted action
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M4
+  blocksCommercialRelease: true
+  priority: 49
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: WAITING_EXTERNAL
+  ownerType: FOUNDER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - signed receipt
+  externalReceiptRequired: true
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-REPEAT-002
+  title: Detect candidate/environment drift
+  lane: PRODUCT
+  kind: CODE
+  milestone: M5_PAID_REPEAT
+  decisionContribution: Detect candidate/environment drift
+  customerOutcome: Detect candidate/environment drift
+  dependsOn:
+  - V3-REPEAT-001
+  softDependsOn: []
+  sourceDependencyExpression: '001'
+  blocksCommercialRelease: true
+  priority: 48
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - drift report
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-REPEAT-003
+  title: Requalify existing contract
+  lane: PRODUCT
+  kind: CODE
+  milestone: M5_PAID_REPEAT
+  decisionContribution: Requalify existing contract
+  customerOutcome: Requalify existing contract
+  dependsOn:
+  - V3-REPEAT-002
+  softDependsOn: []
+  sourceDependencyExpression: '002'
+  blocksCommercialRelease: true
+  priority: 47
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - new decision
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-REPEAT-004
+  title: Independent operator completes workflow
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M5_PAID_REPEAT
+  decisionContribution: Independent operator completes workflow
+  customerOutcome: Independent operator completes workflow
+  dependsOn:
+  - V3-REPEAT-003
+  softDependsOn: []
+  sourceDependencyExpression: '003'
+  blocksCommercialRelease: true
+  priority: 46
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - operator receipt
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-REPEAT-005
+  title: Measure retained effort and value
+  lane: MARKET
+  kind: RESEARCH
+  milestone: M5_PAID_REPEAT
+  decisionContribution: Measure retained effort and value
+  customerOutcome: Measure retained effort and value
+  dependsOn:
+  - V3-REPEAT-003
+  softDependsOn: []
+  sourceDependencyExpression: '003'
+  blocksCommercialRelease: true
+  priority: 45
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - customer receipt
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-REPEAT-006
+  title: Measure delivery economics
+  lane: MARKET
+  kind: RESEARCH
+  milestone: M5_PAID_REPEAT
+  decisionContribution: Measure delivery economics
+  customerOutcome: Measure delivery economics
+  dependsOn:
+  - V3-REPEAT-003
+  softDependsOn: []
+  sourceDependencyExpression: '003'
+  blocksCommercialRelease: true
+  priority: 44
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - internal cost record
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-DEC-005
+  title: Repeat/productization disposition
+  lane: TRUST
+  kind: HUMAN_REVIEW
+  milestone: M5_PAID_REPEAT
+  decisionContribution: Repeat/productization disposition
+  customerOutcome: Repeat/productization disposition
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: 004–006
+  blocksCommercialRelease: true
+  priority: 43
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: EXTERNAL_VALUE_DEMONSTRATED
+  disposition: KEEP
+  status: WAITING_HUMAN
+  ownerType: HUMAN_REVIEWER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - continue/narrow/stop
+  externalReceiptRequired: false
+  humanApprovalRequired: true
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PACK-001
+  title: Consolidate pack from repeated cases
+  lane: PRODUCT
+  kind: CODE
+  milestone: M6_COMMERCIALLY_SUPPORTED_PACK
+  decisionContribution: Consolidate pack from repeated cases
+  customerOutcome: Consolidate pack from repeated cases
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M5
+  blocksCommercialRelease: true
+  priority: 39
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: COMMERCIALLY_SUPPORTED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - versioned pack
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PACK-002
+  title: Demonstrate third same-family case without core rewrite
+  lane: PRODUCT
+  kind: CODE
+  milestone: M6_COMMERCIALLY_SUPPORTED_PACK
+  decisionContribution: Demonstrate third same-family case without core rewrite
+  customerOutcome: Demonstrate third same-family case without core rewrite
+  dependsOn:
+  - V3-PACK-001
+  softDependsOn: []
+  sourceDependencyExpression: '001'
+  blocksCommercialRelease: true
+  priority: 38
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: COMMERCIALLY_SUPPORTED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - case evidence
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-COMP-007
+  title: Refresh complete-substitute benchmark
+  lane: COMPETITOR
+  kind: CONTROLLED_EXPERIMENT
+  milestone: M6_COMMERCIALLY_SUPPORTED_PACK
+  decisionContribution: Refresh complete-substitute benchmark
+  customerOutcome: Refresh complete-substitute benchmark
+  dependsOn:
+  - V3-COMP-001
+  softDependsOn: []
+  sourceDependencyExpression: '001'
+  blocksCommercialRelease: true
+  priority: 37
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: COMMERCIALLY_SUPPORTED
+  disposition: INTEGRATE_EXISTING_BACKEND
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - current sources/run
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-014
+  title: Final pack oracle/security review
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M6_COMMERCIALLY_SUPPORTED_PACK
+  decisionContribution: Final pack oracle/security review
+  customerOutcome: Final pack oracle/security review
+  dependsOn:
+  - V3-PACK-001
+  - V3-PACK-002
+  - V3-COMP-007
+  softDependsOn: []
+  sourceDependencyExpression: 001–003
+  blocksCommercialRelease: true
+  priority: 36
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: COMMERCIALLY_SUPPORTED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - independent reports
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-TRUST-015
+  title: Qualified human commercial-pack approval
+  lane: TRUST
+  kind: SPECIFICATION
+  milestone: M6_COMMERCIALLY_SUPPORTED_PACK
+  decisionContribution: Qualified human commercial-pack approval
+  customerOutcome: Qualified human commercial-pack approval
+  dependsOn:
+  - V3-TRUST-014
+  softDependsOn: []
+  sourceDependencyExpression: '014'
+  blocksCommercialRelease: true
+  priority: 35
+  riskTier: TRUST_CORE
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: COMMERCIALLY_SUPPORTED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - signed approval
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-PROD-029
+  title: Publish support/upgrade/deprecation policy
+  lane: PRODUCT
+  kind: CODE
+  milestone: M6_COMMERCIALLY_SUPPORTED_PACK
+  decisionContribution: Publish support/upgrade/deprecation policy
+  customerOutcome: Publish support/upgrade/deprecation policy
+  dependsOn:
+  - V3-PROD-015
+  softDependsOn: []
+  sourceDependencyExpression: '015'
+  blocksCommercialRelease: true
+  priority: 34
+  riskTier: INTEGRATION
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: COMMERCIALLY_SUPPORTED
+  disposition: KEEP
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
+  packetPath: null
+  evidenceRequired:
+  - operator docs
+  externalReceiptRequired: false
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-MKT-011
+  title: Offer protected-workload agreement
+  lane: MARKET
+  kind: EXTERNAL_EVIDENCE
+  milestone: M6_COMMERCIALLY_SUPPORTED_PACK
+  decisionContribution: Offer protected-workload agreement
+  customerOutcome: Offer protected-workload agreement
+  dependsOn: []
+  softDependsOn: []
+  sourceDependencyExpression: M5
+  blocksCommercialRelease: true
+  priority: 33
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: COMMERCIALLY_SUPPORTED
+  disposition: KEEP
+  status: WAITING_EXTERNAL
+  ownerType: FOUNDER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - customer response
+  externalReceiptRequired: true
+  humanApprovalRequired: false
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null
+- version: 3
+  workItemId: V3-DEC-006
+  title: Mark pack commercially supported or refuse
+  lane: TRUST
+  kind: HUMAN_REVIEW
+  milestone: M6_COMMERCIALLY_SUPPORTED_PACK
+  decisionContribution: Mark pack commercially supported or refuse
+  customerOutcome: Mark pack commercially supported or refuse
+  dependsOn:
+  - V3-PACK-001
+  - V3-PACK-002
+  - V3-COMP-007
+  - V3-TRUST-014
+  - V3-TRUST-015
+  - V3-PROD-029
+  - V3-MKT-011
+  softDependsOn: []
+  sourceDependencyExpression: all M6
+  blocksCommercialRelease: true
+  priority: 32
+  riskTier: EXTERNAL
+  maturityTarget:
+    engineering: EXTERNAL_VALIDATED
+    commercial: COMMERCIALLY_SUPPORTED
+  disposition: KEEP
+  status: WAITING_HUMAN
+  ownerType: HUMAN_REVIEWER
+  automatable: false
+  packetPath: null
+  evidenceRequired:
+  - maturity decision
+  externalReceiptRequired: false
+  humanApprovalRequired: true
+  retryPolicy:
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
+    maxSameFindingRepeats: 2
+    maxCandidateRestarts: 1
+  externalEvidenceRefs: []
+  humanApprovalRefs: []
+  createdAt: null
+  updatedAt: null

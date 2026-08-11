@@ -1,55 +1,40 @@
-version: 10
-auth_mode: max_oauth_only
-allow_paid_usage: false
-repo_root: .
-task_dir: tasks
-artifact_dir: factory/artifacts
-worktree_dir: factory/worktrees
-ledger_path: factory/state/ledger.json
-queue_dir: factory/queue
-worker_poll_seconds: 30
-roles_path: config/roles.yaml
-global_prompt: prompts/global.md
-monthly_budget_usd: 100.0
-require_clean_main: true
-sandbox_enabled: true
-execution_mode: claude_led_nodes
-work_until_done: true
-disable_subscription_task_budget: true
-disable_max_oauth_budget_caps: true
-unsandbox_mutating_roles: false
-mutating_session_turn_floor: 200
-review_session_turn_floor: 80
-project_settings_only: false
-strict_mcp: false
-max_parallel: 1
-private_gate_runner_env: TCF_PRIVATE_GATE_RUNNER
-pipeline_state_dir: factory/state/pipelines
-feature_ledger_path: factory/feature_ledger.yaml
-autonomy_config_path: config/autonomy.yaml
-autonomy_state_path: factory/state/autonomy.json
-quota_fallback_wait_seconds: 3600
-transient_retry_seconds: 3600
-authentication_retry_seconds: 3600
-crash_resume_delay_seconds: 120
-autopilot_lock_path: factory/state/autopilot.lock
-completion_dir: factory/completion
-definition_of_done_path: factory/product_definition_of_done.yaml
-risk_profiles_path: config/risk_profiles.yaml
-context_config_path: config/context.yaml
-context_index_path: docs/CONTEXT_INDEX.yaml
-github_config_path: config/github.yaml
-github_state_path: factory/state/github-sync.json
-provenance_path: factory/state/provenance.jsonl
-require_long_lived_oauth_for_autopilot: true
-completion_audit_enabled: true
-completion_audit_model: opus
-completion_audit_max_turns: 100
-completion_audit_budget_usd: 1000.0
-remote_ci_poll_seconds: 20
-remote_ci_timeout_seconds: 1800
-task_catalog_path: factory/task_catalog.yaml
-claude_features_path: config/claude_features.yaml
-value_policy_path: config/value_policy.yaml
-peer_message_dir: factory/messages
-event_log_path: factory/logs/events.jsonl
+version: 3
+allowPaidUsage: false
+repository:
+  baseBranch: main
+  releaseMode: pull_request
+  directMainPush: false
+  requireCleanBase: true
+  candidateManifestRequired: true
+execution:
+  backend: claude
+  maxConcurrentMutatingSessions: 1
+  maxConcurrentReadOnlySessions: 1
+  workUntilDone: false
+  checkpointEveryStage: true
+  preserveCandidateOnFailure: true
+sourceOfTruth:
+  activeBundle: docs/source-of-truth/v3-2026-08-11
+  manifest: docs/source-of-truth/v3-2026-08-11/FINAL_MANIFEST_V3.json
+  contextIndex: docs/CONTEXT_INDEX.yaml
+  integrityGate: source-of-truth-integrity
+roadmap:
+  milestones: factory/roadmap/milestones.yaml
+  workItems: factory/roadmap/work_items.yaml
+  dispositions: factory/roadmap/dispositions.yaml
+  legacyMap: factory/roadmap/migrations/v2_to_v3.yaml
+  completionMode: milestone
+  expansionMode: proposal_only
+runtime:
+  localStateRootEnvironmentVariable: TCF_RUNTIME_ROOT
+  singleInstanceLock: true
+  hardStuckFile: HARD_STUCK.json
+  redactSecrets: true
+  rawCustomerEvidenceInRepository: false
+release:
+  createDraftPullRequest: true
+  autoMergeMechanical: false
+  autoMergeStandard: false
+  autoMergeIntegration: false
+  autoMergeTrustCore: false
+  requireCandidateShaMatch: true

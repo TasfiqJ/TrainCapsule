@@ -1,41 +1,37 @@
-version: 1
-enabled: true
-auto_plan: true
-auto_enqueue: true
-auto_merge: true
-auto_resume_quota: true
-auto_recover_interrupted: true
-auto_respec_failed_tasks: true
-auto_repair_factory: true
-max_self_repair_attempts: 5
-allow_paid_usage: false
-# Zero means no product-scope ceiling. Repeated identical infrastructure failures still
-# rotate through recovery/re-specification and preserve durable evidence.
-max_respecifications_per_task: 0
-idle_poll_seconds: 60
-quota_reset_buffer_seconds: 0
-unknown_limit_retry_seconds: 3600
-max_consecutive_factory_failures: 100
-completion_target: product_build
-stop_file: factory/state/STOP
-pause_file: factory/state/PAUSE
-hard_stuck_path: factory/state/HARD_STUCK.json
-hard_stuck_retry_seconds: 3600
-calibration_marker: factory/state/CALIBRATION_PASSED
-require_calibration: true
-notification_command: null
-external_blocker_sleep_seconds: 3600
-auto_expand_roadmap: true
-completion_audits_required: 2
-# Zero means independent completion audits may keep expanding the automatable roadmap
-# until the production definition of done passes.
-max_completion_expansions: 0
-github_sync_enabled: true
-push_after_verified_tasks: 2
-push_interval_seconds: 900
-push_before_quota_pause: true
-push_on_integration_or_trust_task: true
-push_at_completion: true
-# Zero means redesign continues until the predeclared value threshold is met or a truthful
-# external/normative blocker exists; the threshold itself may never be lowered post hoc.
-value_redesign_limit: 0
+version: 3
+enabled: false
+allowPaidUsage: false
+planning:
+  autoPlan: true
+  maxPlanAttempts: 2
+  maxAcceptanceCriteria: 12
+  maxExpectedOutputs: 8
+  maxContextDocuments: 8
+  reuseValidPlans: true
+candidate:
+  maxCandidateRepairCycles: 3
+  maxSameFindingRepeats: 2
+  maxCandidateRestarts: 1
+  preserveOnExhaustion: true
+recovery:
+  autoResumeQuota: true
+  autoRecoverInterrupted: true
+  maxInfrastructureRecoveriesPerRun: 3
+  maxFactorySelfRepairsPerIncident: 1
+  maxControllerRestarts: 3
+  restartBackoffSeconds: [15, 60, 300]
+  requireHealthySecondsToResetRestartBudget: 1800
+value:
+  maxValueRedesigns: 1
+  stopOnNativeWorkflowSufficient: true
+  stopOnNoIncrementalDecisionValue: true
+  stopOnTechnicallyValidButUneconomic: true
+completion:
+  maxExpansionRoundsPerMilestone: 1
+  maxExpansionItems: 5
+  roadmapExpansionRequiresHumanApproval: true
+  reviewersMayMutateRoadmap: false
+external:
+  aiMayCompleteExternalEvidence: false
+  aiMayCompleteHumanReview: false
+  syntheticEvidenceMayAdvanceCommercialMaturity: false

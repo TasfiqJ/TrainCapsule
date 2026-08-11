@@ -20,22 +20,39 @@ if str(ROOT) not in sys.path:
 from tcfactory.v3.approvals import HumanApprovalRecord
 from tcfactory.v3.base import json_schema_for
 from tcfactory.v3.candidate_manifest import CandidateManifest
+from tcfactory.v3.configuration import (
+    AutonomyV3Config,
+    CommercialMaturityConfig,
+    ExecutorConfig,
+    ExternalEvidenceConfig,
+    FactoryV3Config,
+    MilestonePolicyConfig,
+)
 from tcfactory.v3.dispositions import DispositionLedger
 from tcfactory.v3.external_evidence import ExternalEvidenceReceipt
 from tcfactory.v3.migrations import LegacyMigrationMap
 from tcfactory.v3.milestones import MilestoneRoadmap
+from tcfactory.v3.recovery import FindingCounter, HardStuckRecord
 from tcfactory.v3.retry_policy import RetryPolicy
 from tcfactory.v3.scheduler import SchedulerConfig
 from tcfactory.v3.work_items import WorkItem, WorkItemCollection
 
 SCHEMA_ROOT: Final = ROOT / "schemas/factory/v3"
 SCHEMAS: Final[dict[str, type[BaseModel]]] = {
+    "autonomy-config.schema.json": AutonomyV3Config,
     "candidate-manifest.schema.json": CandidateManifest,
+    "commercial-maturity-config.schema.json": CommercialMaturityConfig,
     "dispositions.schema.json": DispositionLedger,
+    "executors-config.schema.json": ExecutorConfig,
+    "external-evidence-config.schema.json": ExternalEvidenceConfig,
     "external-evidence-receipt.schema.json": ExternalEvidenceReceipt,
+    "factory-config.schema.json": FactoryV3Config,
+    "finding-counter.schema.json": FindingCounter,
+    "hard-stuck.schema.json": HardStuckRecord,
     "human-approval.schema.json": HumanApprovalRecord,
     "legacy-migration.schema.json": LegacyMigrationMap,
     "milestones.schema.json": MilestoneRoadmap,
+    "milestone-policy-config.schema.json": MilestonePolicyConfig,
     "retry-policy.schema.json": RetryPolicy,
     "scheduler.schema.json": SchedulerConfig,
     "work-item-v3.schema.json": WorkItem,

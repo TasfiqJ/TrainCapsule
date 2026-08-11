@@ -1,0 +1,11 @@
+version: 3
+activeMilestone: M0_FACTORY_MIGRATED
+roadmapPath: factory/roadmap/milestones.yaml
+completionMode: milestone
+expansionMode: proposal_only
+sourceMigrationApprovalRequired: true
+externalMilestones:
+  - M3_PAID_PREFLIGHT
+  - M4_PAID_PILOT
+  - M5_PAID_REPEAT
+  - M6_COMMERCIALLY_SUPPORTED_PACK

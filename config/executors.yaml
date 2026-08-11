@@ -1,0 +1,29 @@
+version: 3
+defaultBackend: claude
+allowPaidUsage: false
+backends:
+  claude:
+    adapter: tcfactory.backends.claude.ClaudeBackend
+    authentication: subscription
+    enabled: true
+    maxConcurrentSessions: 2
+    capabilities:
+      - repository_read
+      - bounded_repository_write
+      - deterministic_gate_execution
+      - web_research_when_policy_allows
+    durableStateOwnedByFactory: true
+weeklyAllocationPercent:
+  planning: 10
+  productImplementation: 45
+  adversarialVerification: 20
+  trustResearch: 15
+  factoryMaintenance: 5
+  reserve: 5
+priorityUnderPressure:
+  - paidOrExternalMilestoneBlocker
+  - trustOrSecurityBlocker
+  - controlledProductCriticalPath
+  - nativeComparison
+  - factoryMaintenance
+  - deferredPlatformBreadth

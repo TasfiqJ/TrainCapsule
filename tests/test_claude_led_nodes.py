@@ -143,7 +143,7 @@ def test_mixed_advisory_controller_citation_repairs_product_in_scope(tmp_path: P
 def test_factory_declares_claude_led_node_execution() -> None:
     config = load_factory_config(ROOT / "config/factory.yaml")
     assert config.execution_mode == "claude_led_nodes"
-    assert config.work_until_done is True
+    assert config.work_until_done is False
     assert config.allow_paid_usage is False
 
 

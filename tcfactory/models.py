@@ -182,7 +182,12 @@ class RepairPolicy(BaseModel):
     # Retained for compatibility with finite/offline runs.  The normal Max OAuth
     # autopilot uses renewable work-until-done sessions instead of consuming this as
     # a feature-level ceiling.
-    max_cycles: int = Field(default=2, ge=0, le=10_000)
+    max_cycles: int = Field(
+        default=2,
+        ge=0,
+        le=10_000,
+        description="Finite repair ceiling; zero disables automatic repair.",
+    )
     builder_models: list[str] = Field(default_factory=lambda: ["sonnet", "opus"])
     mutating_retry_models: list[str] = Field(default_factory=list)
     restart_review_from: RoleName = RoleName.ADVERSARY
@@ -439,15 +444,25 @@ class AutonomyConfig(BaseModel):
     auto_recover_interrupted: bool = True
     auto_respec_failed_tasks: bool = True
     auto_repair_factory: bool = True
-    max_self_repair_attempts: int = Field(default=3, ge=0, le=5)
+    max_self_repair_attempts: int = Field(
+        default=3,
+        ge=0,
+        le=5,
+        description="Finite self-repair ceiling; zero disables factory self-repair.",
+    )
     allow_paid_usage: Literal[False] = False
     max_respecifications_per_task: int = Field(
         default=3,
+        ge=1,
+        le=10,
+        description="Finite task re-specification ceiling; unlimited is forbidden.",
+    )
+    max_consecutive_infrastructure_recoveries: int = Field(
+        default=2,
         ge=0,
         le=10,
-        description="Finite task re-specification ceiling; zero means work until done.",
+        description="Finite recovery ceiling; zero disables infrastructure recovery.",
     )
-    max_consecutive_infrastructure_recoveries: int = Field(default=2, ge=0, le=10)
     idle_poll_seconds: int = Field(default=60, ge=5, le=3600)
     quota_reset_buffer_seconds: int = Field(default=0, ge=0, le=3600)
     unknown_limit_retry_seconds: int = Field(default=3600, ge=60, le=86_400)
@@ -465,9 +480,9 @@ class AutonomyConfig(BaseModel):
     completion_audits_required: int = Field(default=2, ge=2, le=3)
     max_completion_expansions: int = Field(
         default=5,
-        ge=0,
+        ge=1,
         le=20,
-        description="Finite completion-roadmap expansion ceiling; zero means unlimited.",
+        description="Finite proposal-only expansion ceiling; unlimited is forbidden.",
     )
     github_sync_enabled: bool = True
     push_after_verified_tasks: int = Field(default=3, ge=1, le=50)
@@ -477,9 +492,9 @@ class AutonomyConfig(BaseModel):
     push_at_completion: bool = True
     value_redesign_limit: int = Field(
         default=2,
-        ge=0,
+        ge=1,
         le=5,
-        description="Finite material-value redesign ceiling; zero means work until done.",
+        description="Finite material-value redesign ceiling; unlimited is forbidden.",
     )
     heartbeat_seconds: int = Field(default=30, ge=5, le=3600)
     peer_cohort_timeout_seconds: int = Field(default=1200, ge=60, le=7200)

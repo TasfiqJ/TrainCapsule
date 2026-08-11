@@ -14,8 +14,27 @@ def _load_yaml(path: Path) -> object:
     return load_yaml(path)
 
 
+def _is_v3_payload(value: object) -> bool:
+    return isinstance(value, dict) and cast(dict[str, object], value).get("version") == 3
+
+
 def load_factory_config(path: Path) -> FactoryConfig:
-    config = FactoryConfig.model_validate(_load_yaml(path))
+    raw = _load_yaml(path)
+    if _is_v3_payload(raw):
+        from tcfactory.v3.configuration import FactoryV3Config
+
+        v3 = FactoryV3Config.model_validate(raw)
+        config = FactoryConfig(
+            version=3,
+            allow_paid_usage=False,
+            require_clean_main=v3.repository.require_clean_base,
+            work_until_done=False,
+            max_parallel=v3.execution.max_concurrent_mutating_sessions,
+            context_index_path=v3.source_of_truth.context_index,
+            autonomy_config_path="config/autonomy.yaml",
+        )
+    else:
+        config = FactoryConfig.model_validate(raw)
     overrides: dict[str, object] = {}
 
     monthly_budget = os.getenv("TCF_MONTHLY_ESTIMATED_USD_CAP") or os.getenv(
@@ -44,14 +63,43 @@ def load_factory_config(path: Path) -> FactoryConfig:
 
 
 def load_autonomy_config(path: Path) -> AutonomyConfig:
-    config = AutonomyConfig.model_validate(_load_yaml(path))
+    raw = _load_yaml(path)
+    is_v3 = _is_v3_payload(raw)
+    if is_v3:
+        from tcfactory.v3.configuration import AutonomyV3Config
+
+        v3 = AutonomyV3Config.model_validate(raw)
+        config = AutonomyConfig(
+            version=3,
+            enabled=v3.enabled,
+            auto_plan=v3.planning.auto_plan,
+            auto_enqueue=True,
+            auto_merge=False,
+            auto_resume_quota=v3.recovery.auto_resume_quota,
+            auto_recover_interrupted=v3.recovery.auto_recover_interrupted,
+            auto_respec_failed_tasks=False,
+            auto_repair_factory=True,
+            max_self_repair_attempts=v3.recovery.max_factory_self_repairs_per_incident,
+            max_respecifications_per_task=v3.planning.max_plan_attempts,
+            max_consecutive_infrastructure_recoveries=(
+                v3.recovery.max_infrastructure_recoveries_per_run
+            ),
+            auto_expand_roadmap=False,
+            max_completion_expansions=v3.completion.max_expansion_rounds_per_milestone,
+            value_redesign_limit=v3.value.max_value_redesigns,
+        )
+    else:
+        config = AutonomyConfig.model_validate(raw)
     overrides: dict[str, object] = {}
     enabled = os.getenv("TCF_AUTONOMY_ENABLED")
     if enabled is not None:
         overrides["enabled"] = enabled.strip().lower() in {"1", "true", "yes", "on"}
     auto_merge = os.getenv("TCF_AUTO_MERGE")
     if auto_merge is not None:
-        overrides["auto_merge"] = auto_merge.strip().lower() in {"1", "true", "yes", "on"}
+        requested = auto_merge.strip().lower() in {"1", "true", "yes", "on"}
+        if is_v3 and requested:
+            raise ValueError("V3 policy forbids enabling automatic merge")
+        overrides["auto_merge"] = requested
     return config.model_copy(update=overrides) if overrides else config
 
 

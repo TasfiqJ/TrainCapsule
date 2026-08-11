@@ -200,33 +200,11 @@ def test_planning_controller_scope_gap_invokes_factory_repair_without_retry_coun
     assert state.consecutive_failures == 7
 
 
-def test_zero_respec_and_value_limits_mean_work_until_done(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    repo = _repo(tmp_path)
-    item = _item(revisions=100, value_revisions=100, notes=[])
-    autonomy = AutonomyConfig(max_respecifications_per_task=0, value_redesign_limit=0)
-    monkeypatch.setattr("tcfactory.autopilot.commit_all", _noop_commit_all)
-    monkeypatch.setattr("tcfactory.autopilot.save_feature_ledger", _noop_save_feature_ledger)
-    monkeypatch.setattr(
-        "tcfactory.autopilot.create_and_promote_task_packet",
-        _stub_create_and_promote_task_packet,
-    )
-
-    outcome = _run_respec(
-        repo,
-        item,
-        "PipelineFailure: material-value gate rejected the predeclared threshold.",
-        autonomy,
-    )
-
-    assert outcome.changed is True
-    assert outcome.block_reason is None
-    assert item.status == "ready"
-    assert item.terminal_blocked is False
-    assert item.revisions == 101
-    assert item.value_revisions == 101
-    assert any("Value redesign 101/unlimited" in note for note in item.notes)
+def test_zero_respec_and_value_limits_are_rejected() -> None:
+    with pytest.raises(ValueError, match="greater than or equal to 1"):
+        AutonomyConfig(max_respecifications_per_task=0)
+    with pytest.raises(ValueError, match="greater than or equal to 1"):
+        AutonomyConfig(value_redesign_limit=0)
 
 
 def _noop_commit_all(*args: object, **kwargs: object) -> None:

@@ -23,7 +23,13 @@ Migrate the V2 factory/bootstrap repository to the bounded V3 product and factor
 - Added a separate `tcfactory.v3` domain package with the exact lane, work-kind, status, disposition, ownership, engineering-maturity, commercial-maturity, milestone, evidence, approval, and release vocabularies.
 - Added strict-shape work items, bounded milestones, finite retry policy, disposition and legacy-map records, typed scheduler configuration, external evidence and human approval records, and explicit work-status transitions.
 - Added an immutable candidate manifest that binds exact SHAs, packet/context/checkpoint digests, executor identity, stage and gate artifacts, findings, approvals, evidence receipts, and release decision.
-- Added deterministic canonical JSON/digests, trusted evidence ceilings, signed external human-approval verification inputs, and 10 generated model-matching JSON schemas.
+- Added deterministic canonical JSON/digests, trusted evidence ceilings, signed external human-approval verification inputs, and 18 generated model-matching JSON schemas.
+- Replaced unbounded V2 runtime policy with finite V3 factory, autonomy, scheduler, milestone, executor, external-evidence, and commercial-maturity configuration while retaining a safe read-only V2 compatibility projection.
+- Generated the exact 109-item V3 roadmap and seven bounded milestone records from the authoritative backlog. Original dependency expressions are preserved and the resolved graph is checked for missing references and cycles.
+- Implemented deterministic active-milestone scheduling with hard dependencies, lane/global WIP, native-before-duplication ordering, exact score components, stable tie-breaking, and externally signed founder overrides.
+- Implemented a typed atomic V3 queue with per-status and per-lane views, duplicate prevention, interrupted-run isolation, and non-resuming V2 archive receipts.
+- Implemented finite repeat-finding, value-redesign, and controller-restart recovery. Exhausted restart budgets write `HARD_STUCK` and `STOP` records with exact recovery instructions.
+- Added a read-only `tcfactory v3-schedule --dry-run --explain` interface. It refuses non-dry-run use and emits a compact decision artifact scoped to the active milestone.
 
 ## Deviations
 
@@ -49,6 +55,18 @@ Migrate the V2 factory/bootstrap repository to the bounded V3 product and factor
 - Historical and V3 authority gates: pass
 - Secret scan and Git diff hygiene: pass
 
+## Phase C verification
+
+- Focused scheduler, queue, recovery, configuration, roadmap, policy, and compatibility checks: 40 passed
+- Complete Pytest suite: 430 passed
+- Ruff: pass
+- Strict Pyright: 0 errors, 0 warnings
+- Generated V3 schemas: 18 exact matches
+- Authoritative V3 roadmap generation: 109 exact work items
+- Historical and V3 authority gates: pass
+- No-paid-usage gate: pass
+- Secret scan and Git diff hygiene: pass
+
 ## Pending
 
-The file/change inventory, behavior changes, legacy mappings, test results, unresolved limitations, and deferred scope are expanded as each implementation phase lands.
+Completion/context/value behavior, backend adapters, legacy mappings, product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.

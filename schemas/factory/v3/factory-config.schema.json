@@ -1,0 +1,289 @@
+{
+  "$defs": {
+    "ExecutionPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "backend": {
+          "minLength": 1,
+          "title": "Backend",
+          "type": "string"
+        },
+        "maxConcurrentMutatingSessions": {
+          "maximum": 4,
+          "minimum": 1,
+          "title": "Maxconcurrentmutatingsessions",
+          "type": "integer"
+        },
+        "maxConcurrentReadOnlySessions": {
+          "maximum": 8,
+          "minimum": 1,
+          "title": "Maxconcurrentreadonlysessions",
+          "type": "integer"
+        },
+        "workUntilDone": {
+          "const": false,
+          "title": "Workuntildone",
+          "type": "boolean"
+        },
+        "checkpointEveryStage": {
+          "const": true,
+          "title": "Checkpointeverystage",
+          "type": "boolean"
+        },
+        "preserveCandidateOnFailure": {
+          "const": true,
+          "title": "Preservecandidateonfailure",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "backend",
+        "maxConcurrentMutatingSessions",
+        "maxConcurrentReadOnlySessions",
+        "workUntilDone",
+        "checkpointEveryStage",
+        "preserveCandidateOnFailure"
+      ],
+      "title": "ExecutionPolicy",
+      "type": "object"
+    },
+    "ReleasePolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "createDraftPullRequest": {
+          "const": true,
+          "title": "Createdraftpullrequest",
+          "type": "boolean"
+        },
+        "autoMergeMechanical": {
+          "const": false,
+          "title": "Automergemechanical",
+          "type": "boolean"
+        },
+        "autoMergeStandard": {
+          "const": false,
+          "title": "Automergestandard",
+          "type": "boolean"
+        },
+        "autoMergeIntegration": {
+          "const": false,
+          "title": "Automergeintegration",
+          "type": "boolean"
+        },
+        "autoMergeTrustCore": {
+          "const": false,
+          "title": "Automergetrustcore",
+          "type": "boolean"
+        },
+        "requireCandidateShaMatch": {
+          "const": true,
+          "title": "Requirecandidateshamatch",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "createDraftPullRequest",
+        "autoMergeMechanical",
+        "autoMergeStandard",
+        "autoMergeIntegration",
+        "autoMergeTrustCore",
+        "requireCandidateShaMatch"
+      ],
+      "title": "ReleasePolicy",
+      "type": "object"
+    },
+    "RepositoryPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "baseBranch": {
+          "const": "main",
+          "title": "Basebranch",
+          "type": "string"
+        },
+        "releaseMode": {
+          "const": "pull_request",
+          "title": "Releasemode",
+          "type": "string"
+        },
+        "directMainPush": {
+          "const": false,
+          "title": "Directmainpush",
+          "type": "boolean"
+        },
+        "requireCleanBase": {
+          "title": "Requirecleanbase",
+          "type": "boolean"
+        },
+        "candidateManifestRequired": {
+          "const": true,
+          "title": "Candidatemanifestrequired",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "baseBranch",
+        "releaseMode",
+        "directMainPush",
+        "requireCleanBase",
+        "candidateManifestRequired"
+      ],
+      "title": "RepositoryPolicy",
+      "type": "object"
+    },
+    "RoadmapPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "milestones": {
+          "title": "Milestones",
+          "type": "string"
+        },
+        "workItems": {
+          "title": "Workitems",
+          "type": "string"
+        },
+        "dispositions": {
+          "title": "Dispositions",
+          "type": "string"
+        },
+        "legacyMap": {
+          "title": "Legacymap",
+          "type": "string"
+        },
+        "completionMode": {
+          "const": "milestone",
+          "title": "Completionmode",
+          "type": "string"
+        },
+        "expansionMode": {
+          "const": "proposal_only",
+          "title": "Expansionmode",
+          "type": "string"
+        }
+      },
+      "required": [
+        "milestones",
+        "workItems",
+        "dispositions",
+        "legacyMap",
+        "completionMode",
+        "expansionMode"
+      ],
+      "title": "RoadmapPolicy",
+      "type": "object"
+    },
+    "RuntimePolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "localStateRootEnvironmentVariable": {
+          "minLength": 1,
+          "title": "Localstaterootenvironmentvariable",
+          "type": "string"
+        },
+        "singleInstanceLock": {
+          "const": true,
+          "title": "Singleinstancelock",
+          "type": "boolean"
+        },
+        "hardStuckFile": {
+          "minLength": 1,
+          "title": "Hardstuckfile",
+          "type": "string"
+        },
+        "redactSecrets": {
+          "const": true,
+          "title": "Redactsecrets",
+          "type": "boolean"
+        },
+        "rawCustomerEvidenceInRepository": {
+          "const": false,
+          "title": "Rawcustomerevidenceinrepository",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "localStateRootEnvironmentVariable",
+        "singleInstanceLock",
+        "hardStuckFile",
+        "redactSecrets",
+        "rawCustomerEvidenceInRepository"
+      ],
+      "title": "RuntimePolicy",
+      "type": "object"
+    },
+    "SourceOfTruthPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "activeBundle": {
+          "title": "Activebundle",
+          "type": "string"
+        },
+        "manifest": {
+          "title": "Manifest",
+          "type": "string"
+        },
+        "contextIndex": {
+          "title": "Contextindex",
+          "type": "string"
+        },
+        "integrityGate": {
+          "title": "Integritygate",
+          "type": "string"
+        }
+      },
+      "required": [
+        "activeBundle",
+        "manifest",
+        "contextIndex",
+        "integrityGate"
+      ],
+      "title": "SourceOfTruthPolicy",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "allowPaidUsage": {
+      "const": false,
+      "default": false,
+      "title": "Allowpaidusage",
+      "type": "boolean"
+    },
+    "repository": {
+      "$ref": "#/$defs/RepositoryPolicy"
+    },
+    "execution": {
+      "$ref": "#/$defs/ExecutionPolicy"
+    },
+    "sourceOfTruth": {
+      "$ref": "#/$defs/SourceOfTruthPolicy"
+    },
+    "roadmap": {
+      "$ref": "#/$defs/RoadmapPolicy"
+    },
+    "runtime": {
+      "$ref": "#/$defs/RuntimePolicy"
+    },
+    "release": {
+      "$ref": "#/$defs/ReleasePolicy"
+    }
+  },
+  "required": [
+    "repository",
+    "execution",
+    "sourceOfTruth",
+    "roadmap",
+    "runtime",
+    "release"
+  ],
+  "title": "FactoryV3Config",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/factory-config.schema.json"
+}

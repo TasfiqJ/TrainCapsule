@@ -112,9 +112,9 @@ tasks:
   phase: P0
   depends_on:
   - T001
-  status: ready
+  status: packet_approved
   terminal_blocked: false
-  packet_path: null
+  packet_path: tasks/T002.yaml
   trust_core: false
   risk_tier: integration
   context_keys:
@@ -156,6 +156,7 @@ tasks:
   - Task packet approved through model-respec planning.
   - Revision 7 requested after verified pipeline failure; preserve the original outcome
     and strengthen specification/gates.
+  - Task packet approved through model-respec planning.
   revisions: 7
   value_revisions: 0
   infrastructure_recoveries: 0
@@ -3502,4 +3503,4 @@ tasks:
   revisions: 0
   value_revisions: 0
   infrastructure_recoveries: 0
-updated_at: '2026-08-11T06:46:23.909344+00:00'
+updated_at: '2026-08-11T07:13:16.594543+00:00'

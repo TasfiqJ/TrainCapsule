@@ -1,10 +1,13 @@
 task_id: T002
 title: Recheck product name, package, domain, and trademark surface
 phase: P0
-goal: 'Produce an independently reviewable research record confirming whether the
-  product name "TrainCapsule", its package identifiers, and candidate domains named
-  in source-of-truth are free of blocking trademark, package-registry, and domain-availability
-  conflicts, or documenting the exact conflicts found.
+goal: 'Produce an independently reviewable research bundle confirming whether the
+  product name "TrainCapsule" and the CLI/package identifiers named in source-of-truth
+  are free of blocking trademark, package-registry, and domain-availability conflicts,
+  or documenting the exact conflicts found. The bundle is a preregistered version-2
+  query plan, a written findings record, and a version-2 evidence manifest with sanitized
+  raw artifacts; every finding is CLEAR, CONFLICT, or UNKNOWN, and UNKNOWN is preserved
+  whenever source-of-truth does not name a specific registry or domain to check.
 
   '
 source_of_truth:
@@ -26,57 +29,67 @@ non_goals:
 - Making a legal determination; only surfacing evidence for human/legal review
 acceptance_criteria:
 - A research record exists at docs/research/T002_name_trademark_check.md.
-- The record quotes the exact product name and package identifiers under review verbatim
-  from source-of-truth.
+- The record quotes the exact product name ("TrainCapsule") and every CLI/package
+  identifier under review verbatim from source-of-truth; no identifier is invented.
 - The record documents trademark search results for the product name in at least one
   primary trademark register, with source URLs and query dates.
 - The record documents package-name availability/collision status on every package
-  registry the product actually intends to publish to per source-of-truth, with source
-  URLs and query dates.
-- The record documents domain-availability status for each candidate domain named
-  in source-of-truth, with source URLs and query dates.
+  registry, and domain-availability status for every candidate domain, that source-of-truth
+  actually names an intent to use; where source-of-truth does not name a specific
+  registry or domain, the corresponding finding is UNKNOWN with a documented reason
+  instead of an invented identifier.
 - Every finding is labeled CLEAR, CONFLICT, or UNKNOWN in a machine-parseable findings
-  table; UNKNOWN is used whenever a check could not be completed and is never silently
-  upgraded to CLEAR.
+  table; UNKNOWN is used whenever a check could not be completed or a required identifier
+  is not named, and is never silently upgraded to CLEAR.
 - Any CONFLICT finding names the conflicting party/registrant, an evidence link, and
   a plain description of the collision.
 - 'The record contains exactly one canonical ''**Overall verdict: clear|conflicts_found|unknown**''
   line computed only from the itemized findings and consistent with the individual
   labels.'
-- Every source cited is within the task's allowed research domains; no other network
-  source is used.
-- A version-1 evidence manifest at docs/evidence/T002/manifest.json and sanitized
-  raw artifacts under docs/evidence/T002/raw/ record, for every query executed, the
-  finding ID, evidence kind, query shape, source, UTC/offset retrieval timestamp,
-  reproduction command, artifact path, and SHA-256; every declared hash reproduces
-  byte-for-byte.
+- A preregistered version-2 query plan exists at docs/evidence/T002/query-plan.json
+  before its queries are executed, naming every expected finding's subject, claim
+  boundary, and falsification condition, and naming every query's adapter, endpoint,
+  request_shape, source_scheme, source_class, freshness_days, and required_controls;
+  every query whose finding would rest on an absence (no trademark hit, no registry
+  collision, no registration record) declares a negative_control, and every query
+  against an endpoint that can answer empty on failure declares an error_control,
+  so that an empty answer is distinguishable from a broken lookup.
+- A version-2 evidence manifest at docs/evidence/T002/manifest.json and sanitized
+  raw artifacts under docs/evidence/T002/raw/ record, for every executed query, its
+  binding to a preregistered query_id and finding_id, evidence kind, source, retrieval
+  timestamp, response status, reproduction command, artifact path, and SHA-256; the
+  manifest's query-plan digest matches the plan file byte-for-byte, and every declared
+  evidence hash reproduces byte-for-byte.
 - Every CLEAR finding has raw target evidence and a working same-endpoint, same-query-shape
   positive control; every UNKNOWN or CONFLICT finding preserves raw target or limitation
   evidence instead of being asserted without support.
-- No file outside the three declared outputs is created or modified by the research
-  stage.
+- Every source cited in the record, the query plan, and the manifest is within the
+  task's allowed research domains; no other network source is used.
+- No file outside the four declared outputs (the record, the query plan, the manifest,
+  and the raw evidence directory) is created or modified by the research stage.
 - If any CLEAR finding exists, the adversary stage independently re-checks at least
   one of them and confirms or disputes it with its own evidence link; if every finding
   is UNKNOWN because a stop condition was genuinely invoked, the adversary stage instead
   verifies the stop condition was correctly invoked and that no finding was silently
   upgraded.
 - The audit stage verifies every finding cites a working evidence link, that every
-  declared manifest hash still reproduces, and that no CONFLICT or UNKNOWN was silently
-  converted to CLEAR.
+  declared manifest/query-plan hash still reproduces, and that no CONFLICT or UNKNOWN
+  was silently converted to CLEAR.
 - The release stage only reads the record and machine gate output; it adds no new
   findings and changes no file.
 outputs:
 - docs/research/T002_name_trademark_check.md
+- docs/evidence/T002/query-plan.json
 - docs/evidence/T002/manifest.json
 - docs/evidence/T002/raw/**
 stop_conditions:
 - 'Source-of-truth does not name any product name at all to check: stop the entire
   task, do not invent one.'
-- 'Source-of-truth names the product name but does not name a specific package identifier
-  or candidate domain for a given registry/registrar: do not invent the missing identifier;
-  mark only the affected package/domain findings UNKNOWN and still complete the checks
-  source-of-truth does support (for example the trademark search on the named product
-  name).'
+- 'Source-of-truth names the product name or CLI token but does not name a specific
+  package identifier or candidate domain for a given registry/registrar: do not invent
+  the missing identifier; mark only the affected package/domain findings UNKNOWN with
+  a documented reason, and still complete the checks source-of-truth does support
+  (for example the trademark search on the named product name).'
 - 'No network access is available to any primary trademark, package-registry, or domain-registrar
   source: mark the affected findings UNKNOWN, do not guess.'
 security:
@@ -162,11 +175,12 @@ pipeline:
   - rdap.verisign.com
   acceptance_criteria:
   - A research record exists at docs/research/T002_name_trademark_check.md.
-  - The record quotes the exact product name and package identifiers under review
+  - The record quotes the exact product name and CLI/package identifiers under review
     verbatim from source-of-truth.
   - Every finding is labeled CLEAR, CONFLICT, or UNKNOWN and never silently upgraded.
-  - A version-1 evidence manifest and sanitized raw artifacts preserve every query,
-    source, timestamp, command, and SHA-256.
+  - A preregistered version-2 query plan and a version-2 evidence manifest with sanitized
+    raw artifacts preserve every planned and executed query, source, timestamp, command,
+    and SHA-256.
   context_keys:
   - executive_decision
   - product_strategy

@@ -245,7 +245,8 @@ engineering or commercial passes.
 - Strict Pyright: 0 errors, 0 warnings
 - Ten product schemas: generated and exact
 - Wheel build: pass; factory and all four product packages plus both entry points are present
-- Network/model/GitHub/runtime/paid use: none
+- Fresh wheel install: pass; installed `doctor`, identity, and importer commands passed
+- Model/GitHub/runtime/paid use: none; the public package registry was used only for the clean install
 
 ## Legacy mapping summary
 
@@ -266,6 +267,18 @@ byte-for-byte available.
 - V3-MIG-016 human review remains `WAITING_HUMAN`; external and commercial maturity are unchanged.
 - The operator requires publishing this migration to `main`, so no draft migration PR is opened.
   Future autonomous release policy remains draft-PR-first and direct-main-disabled.
+
+## Final acceptance and recovery state
+
+- Full quality and secret gates pass with 527 tests and strict type checking at 0 errors/0 warnings.
+- Both source authorities, all generated schemas, the 109-item roadmap, the 124-record legacy map,
+  configuration validation, no-paid-usage gate, and migration dry-run pass.
+- Detached rollback rehearsal at the fixed safety SHA passes the 394-test baseline and historical
+  authority; its disposable worktree was removed.
+- Windows task `TrainCapsule Lights-Out Autopilot` is present but disabled. No `tcfactory` or launcher
+  process is running. Durable `STOP` and `PAUSE` remain present.
+- The queue remains truthful: T001 is the only done record, T002 has its preserved paused record and
+  pause metadata, and no pending/running/failed/blocked record exists.
 
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory

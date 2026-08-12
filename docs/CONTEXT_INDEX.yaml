@@ -4,184 +4,259 @@ groups:
   product_normative:
     authorityClass: normative_product
     scope: Bounded product definition, supported envelope, outputs, truth states, and claims.
-    includeRoles: [planner, specification, builder, adversary, milestone_auditor]
+    includeRoles: [planner, specification, builder, adversary, audit, value_validator, value_adversary, release]
     excludeRoles: [factory_repair]
     freshnessPolicy: manifest_locked
+    maxSources: 2
+    maxCharacters: 40000
     entries:
       - path: docs/source-of-truth/v3-2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3.md
+        sha256: 292e0b1d7e3a6225db7ed70dae67cb7557cef2a5e91081bd7149f827a120d484
         authorityClass: normative_executive
-        scope: Company and build authorization.
-        includeRoles: [planner, specification, builder, adversary, milestone_auditor]
-        excludeRoles: [factory_repair]
+        authoritySections: ["§00.2 The product being built", "§00.5 Product boundary", "§00.9 Maturity model", "§00.10 Human authority"]
+        scope: Company boundary, maturity, and human authority.
         freshnessPolicy: manifest_locked
       - path: docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md
+        sha256: a1e4ab535d13296512e1a4f7385aee32b08bd9a297e5e9f0452c12a3a97678b3
         authorityClass: normative_product
-        scope: Product strategy and requirements.
-        includeRoles: [planner, specification, builder, adversary, milestone_auditor]
-        excludeRoles: [factory_repair]
+        authoritySections: ["§03.1 Product definition", "§03.6 Product workflow", "§03.7 Product outputs", "§03.14 Required nonfunctional properties", "§03.19 Claims policy"]
+        scope: Product workflow, outputs, nonfunctional properties, and claim limits.
         freshnessPolicy: manifest_locked
+
   technical_architecture:
     authorityClass: normative_architecture
     scope: Product architecture, interfaces, security, testing, and packaging.
-    includeRoles: [planner, specification, builder, integration_scout, adversary, security, performance]
-    excludeRoles: [market_research]
+    includeRoles: [planner, specification, builder, integration_scout, adversary, audit, security, performance, release]
+    excludeRoles: [research, factory_repair]
     freshnessPolicy: manifest_locked
+    maxSources: 1
+    maxCharacters: 40000
     entries:
       - path: docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md
+        sha256: bdfcbbdcc9a3a5db534017fbde84cbf5e29b4941c2c753327c5fd62f34f7ff2f
         authorityClass: normative_architecture
-        scope: Technical architecture.
-        includeRoles: [planner, specification, builder, integration_scout, adversary, security, performance]
-        excludeRoles: [market_research]
+        authoritySections: ["§04.4 Repository layout", "§04.6 Core domain objects", "§04.16 Human approval boundary", "§04.17 Security architecture", "§04.21 Testing architecture", "§04.23 Packaging and deployment"]
+        scope: Architecture and implementation constraints.
         freshnessPolicy: manifest_locked
+
   trust_core:
     authorityClass: normative_trust
-    scope: Evidence, identity, reduction, recovery, qualification, approval, and claim law.
-    includeRoles: [planner, specification, builder, adversary, security, milestone_auditor]
-    excludeRoles: [market_research]
+    scope: Evidence, identity, native baseline, qualification, approval, and claim law.
+    includeRoles: [planner, specification, builder, adversary, audit, security, release, value_validator, value_adversary]
+    excludeRoles: [research, factory_repair]
     freshnessPolicy: manifest_locked
+    maxSources: 1
+    maxCharacters: 35000
     entries:
       - path: docs/source-of-truth/v3-2026-08-11/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md
+        sha256: 3a521fdc41c8ff1a0378a8666a1a45a6fd83addce2420ab38dc1d6417c0c0d0c
         authorityClass: normative_trust
-        scope: Trust and qualification specification.
-        includeRoles: [planner, specification, builder, adversary, security, milestone_auditor]
-        excludeRoles: [market_research]
+        authoritySections: ["§05.3 Evidence provenance", "§05.4 Evidence completeness", "§05.5 Identity law", "§05.6 Native baseline law", "§05.20 Human authority", "§05.21 AI role boundaries", "§05.29 Minimum external verifier"]
+        scope: Trust invariants and decision boundaries.
         freshnessPolicy: manifest_locked
+
   commercial:
     authorityClass: normative_commercial
     scope: Offer, ICP, evidence gates, claims, pricing hypotheses, and GTM boundaries.
-    includeRoles: [planner, market_research, native_substitute_reviewer, wedge_reviewer]
+    includeRoles: [planner, research, value_validator, value_adversary]
     excludeRoles: [builder, factory_repair]
     freshnessPolicy: manifest_locked
+    maxSources: 1
+    maxCharacters: 32000
     entries:
       - path: docs/source-of-truth/v3-2026-08-11/06_COMMERCIAL_MODEL_AND_GTM_V3.md
+        sha256: 21c204e3d2912d18dc30a456ca6694a1958a5490b2e9a593507a39bc326c5ace
         authorityClass: normative_commercial
-        scope: Commercial model and validation plan.
-        includeRoles: [planner, market_research, native_substitute_reviewer, wedge_reviewer]
-        excludeRoles: [builder, factory_repair]
+        authoritySections: ["§06.4 Ideal customer profile", "§06.6 Offer ladder", "§06.10 Complete-substitute benchmark", "§06.16 Validation gates", "§06.17 Stop and pivot rules"]
+        scope: Commercial hypotheses and gated validation.
         freshnessPolicy: manifest_locked
+
   roadmap:
     authorityClass: normative_roadmap
     scope: Gate-based milestones, lanes, bounded backlog, and dispositions.
-    includeRoles: [planner, specification, milestone_auditor, wedge_reviewer]
-    excludeRoles: [factory_repair]
+    includeRoles: [planner, specification, audit, release, recovery, factory_repair]
+    excludeRoles: []
     freshnessPolicy: manifest_locked
+    maxSources: 1
+    maxCharacters: 30000
     entries:
       - path: docs/source-of-truth/v3-2026-08-11/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md
+        sha256: 4a6c6c660581711ca44bbee7d43f37c2ce244c4f117c84ba1802c19385e5fb37
         authorityClass: normative_roadmap
-        scope: Gate-based roadmap.
-        includeRoles: [planner, specification, milestone_auditor, wedge_reviewer]
-        excludeRoles: [factory_repair]
+        authoritySections: ["§12.2 Milestone map", "§12.3 M0", "§12.4 M1", "§12.12 Legacy 124-task ledger disposition", "§12.13 Operating cadence"]
+        scope: Current milestone gates and work dispositions.
         freshnessPolicy: manifest_locked
+
   current_facts:
     authorityClass: current_fact
     scope: Dated upstream, native, competitor, and factory capability facts.
-    includeRoles: [planner, research, native_substitute_reviewer, wedge_reviewer, trust_reviewer]
-    excludeRoles: [factory_repair]
+    includeRoles: [planner, research, adversary, audit, security, value_validator, value_adversary]
+    excludeRoles: [builder, factory_repair]
     freshnessPolicy: recheck_before_customer_claim
+    maxSources: 1
+    maxCharacters: 20000
     entries:
       - path: docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md
+        sha256: dcc37f38e4071bc19ccc7607ca100ee39f2808485daa564a7337adb117551cef
         authorityClass: current_fact
-        scope: Current source and competitive register.
-        includeRoles: [planner, research, native_substitute_reviewer, wedge_reviewer, trust_reviewer]
-        excludeRoles: [factory_repair]
+        authoritySections: ["§13.2 Current native and platform baselines", "§13.3 Direct and adjacent commercial competitors", "§13.6 Capability matrix", "§13.8 Monthly update procedure", "§13.9 Claim rules"]
+        scope: Dated native, competitor, and factory facts requiring freshness evidence.
         freshnessPolicy: recheck_before_customer_claim
+
   factory_control:
     authorityClass: normative_factory
     scope: Bounded controller behavior, executor protocol, release, recovery, and operator controls.
-    includeRoles: [planner, factory_repair, milestone_auditor]
-    excludeRoles: [market_research]
+    includeRoles: [planner, audit, recovery, factory_repair, release]
+    excludeRoles: [research, builder]
     freshnessPolicy: manifest_locked
+    maxSources: 2
+    maxCharacters: 50000
     entries:
       - path: docs/source-of-truth/v3-2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md
+        sha256: 69500bdc0b9a42cd8bba6190912f5be3e2615189f0c8a9bd2f7c0b700f42cdc6
         authorityClass: normative_factory
-        scope: Factory redesign specification.
-        includeRoles: [planner, factory_repair, milestone_auditor]
-        excludeRoles: [market_research]
+        authoritySections: ["§7 Four-lane scheduler", "§10 Retry and recovery policy", "§13 Pipeline redesign", "§15 Human approval state", "§17 Agent backend abstraction", "§25 Startup and restart redesign", "§26 Git and GitHub release redesign"]
+        scope: Controller, scheduler, recovery, and release design.
         freshnessPolicy: manifest_locked
       - path: docs/source-of-truth/v3-2026-08-11/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md
+        sha256: d7377e6f1fe86a7a0a70d951ac11a47e717c6988ace97368567bcd343de6b0d5
         authorityClass: executor_policy
-        scope: Bounded Claude backend execution contract.
-        includeRoles: [planner, specification, builder, adversary, factory_repair]
-        excludeRoles: [market_research]
+        authoritySections: ["§Human authority", "§Work-item protocol", "§Factory-specific implementation rules", "§Git rules", "§Stop conditions"]
+        scope: Bounded executor contract and stop conditions.
         freshnessPolicy: manifest_locked
+
+  commercial_wedge:
+    authorityClass: scoped_context
+    scope: Narrow commercial wedge and dated substitute evidence.
+    includeRoles: [planner, research, value_validator, value_adversary]
+    excludeRoles: [builder, factory_repair]
+    freshnessPolicy: manifest_locked
+    maxSources: 2
+    maxCharacters: 50000
+    entries:
+      - path: docs/source-of-truth/v3-2026-08-11/06_COMMERCIAL_MODEL_AND_GTM_V3.md
+        sha256: 21c204e3d2912d18dc30a456ca6694a1958a5490b2e9a593507a39bc326c5ace
+        authorityClass: normative_commercial
+        authoritySections: ["§06.4 Ideal customer profile", "§06.10 Complete-substitute benchmark", "§06.16 Validation gates", "§06.17 Stop and pivot rules"]
+        scope: Wedge hypothesis and kill gates.
+        freshnessPolicy: manifest_locked
+      - path: docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md
+        sha256: dcc37f38e4071bc19ccc7607ca100ee39f2808485daa564a7337adb117551cef
+        authorityClass: current_fact
+        authoritySections: ["§13.2 Current native and platform baselines", "§13.3 Direct and adjacent commercial competitors", "§13.6 Capability matrix"]
+        scope: Dated substitute evidence.
+        freshnessPolicy: recheck_before_customer_claim
+
+  native_baseline:
+    authorityClass: scoped_context
+    scope: Native-first identity, evidence, and importer requirements.
+    includeRoles: [planner, specification, builder, integration_scout, adversary, audit, security, research]
+    excludeRoles: [factory_repair]
+    freshnessPolicy: manifest_locked
+    maxSources: 3
+    maxCharacters: 80000
+    entries:
+      - path: docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md
+        sha256: bdfcbbdcc9a3a5db534017fbde84cbf5e29b4941c2c753327c5fd62f34f7ff2f
+        authorityClass: normative_architecture
+        authoritySections: ["§04.6 Core domain objects", "§04.8 Initial native integration", "§04.9 Eligibility engine", "§04.17 Security architecture"]
+        scope: Native integration architecture.
+        freshnessPolicy: manifest_locked
+      - path: docs/source-of-truth/v3-2026-08-11/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md
+        sha256: 3a521fdc41c8ff1a0378a8666a1a45a6fd83addce2420ab38dc1d6417c0c0d0c
+        authorityClass: normative_trust
+        authoritySections: ["§05.3 Evidence provenance", "§05.4 Evidence completeness", "§05.5 Identity law", "§05.6 Native baseline law"]
+        scope: Native trust law.
+        freshnessPolicy: manifest_locked
+      - path: docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md
+        sha256: dcc37f38e4071bc19ccc7607ca100ee39f2808485daa564a7337adb117551cef
+        authorityClass: current_fact
+        authoritySections: ["§13.2 Current native and platform baselines"]
+        scope: Current native format and capability facts.
+        freshnessPolicy: recheck_before_customer_claim
+
+  pre_collective_pack:
+    authorityClass: scoped_context
+    scope: Initial pre-collective lifecycle pack only.
+    includeRoles: [planner, specification, builder, integration_scout, adversary, audit, security, performance]
+    excludeRoles: [research, factory_repair]
+    freshnessPolicy: manifest_locked
+    maxSources: 3
+    maxCharacters: 75000
+    entries:
+      - path: docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md
+        sha256: a1e4ab535d13296512e1a4f7385aee32b08bd9a297e5e9f0452c12a3a97678b3
+        authorityClass: normative_product
+        authoritySections: ["§03.8 Initial incident pack", "§03.9 Checkpoint pack policy"]
+        scope: Initial pack product boundary.
+        freshnessPolicy: manifest_locked
+      - path: docs/source-of-truth/v3-2026-08-11/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md
+        sha256: 3a521fdc41c8ff1a0378a8666a1a45a6fd83addce2420ab38dc1d6417c0c0d0c
+        authorityClass: normative_trust
+        authoritySections: ["§05.26 Initial pack: pre-collective lifecycle", "§05.27 Checkpoint/resume reference pack policy"]
+        scope: Initial pack trust boundary.
+        freshnessPolicy: manifest_locked
+      - path: docs/source-of-truth/v3-2026-08-11/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md
+        sha256: 4a6c6c660581711ca44bbee7d43f37c2ce244c4f117c84ba1802c19385e5fb37
+        authorityClass: normative_roadmap
+        authoritySections: ["§12.4 M1", "§12.5 M2", "§12.10 Checkpoint pack roadmap"]
+        scope: Initial pack gates and deferred scope.
+        freshnessPolicy: manifest_locked
+
+  market_evidence:
+    authorityClass: scoped_context
+    scope: Dated market and competitor evidence without product implementation sources.
+    includeRoles: [planner, research, value_validator, value_adversary]
+    excludeRoles: [builder, specification, factory_repair]
+    freshnessPolicy: recheck_before_customer_claim
+    maxSources: 1
+    maxCharacters: 20000
+    entries:
+      - path: docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md
+        sha256: dcc37f38e4071bc19ccc7607ca100ee39f2808485daa564a7337adb117551cef
+        authorityClass: current_fact
+        authoritySections: ["§13.2 Current native and platform baselines", "§13.3 Direct and adjacent commercial competitors", "§13.6 Capability matrix", "§13.8 Monthly update procedure"]
+        scope: Dated market evidence requiring refresh.
+        freshnessPolicy: recheck_before_customer_claim
+
+  factory_controller:
+    authorityClass: scoped_context
+    scope: Controller implementation only; excludes product and commercial strategy.
+    includeRoles: [planner, audit, recovery, factory_repair, release]
+    excludeRoles: [builder, research]
+    freshnessPolicy: manifest_locked
+    maxSources: 2
+    maxCharacters: 50000
+    entries:
+      - path: docs/source-of-truth/v3-2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md
+        sha256: 69500bdc0b9a42cd8bba6190912f5be3e2615189f0c8a9bd2f7c0b700f42cdc6
+        authorityClass: normative_factory
+        authoritySections: ["§7 Four-lane scheduler", "§8 Scheduler score", "§10 Retry and recovery policy", "§13 Pipeline redesign", "§17 Agent backend abstraction", "§25 Startup and restart redesign", "§26 Git and GitHub release redesign"]
+        scope: Controller and recovery implementation.
+        freshnessPolicy: manifest_locked
+      - path: docs/source-of-truth/v3-2026-08-11/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md
+        sha256: d7377e6f1fe86a7a0a70d951ac11a47e717c6988ace97368567bcd343de6b0d5
+        authorityClass: executor_policy
+        authoritySections: ["§Work-item protocol", "§Factory-specific implementation rules", "§Git rules", "§Stop conditions"]
+        scope: Executor protocol and stop conditions.
+        freshnessPolicy: manifest_locked
+
   advisory_acquisition:
     authorityClass: advisory
     scope: Historical acquisition planning; never routine build authority.
-    includeRoles: [acquisition_advisory]
-    excludeRoles: [planner, specification, builder, adversary, factory_repair, milestone_auditor]
+    includeRoles: []
+    excludeRoles: [planner, specification, builder, integration_scout, adversary, audit, security, performance, release, research, recovery, factory_repair, value_validator, value_adversary]
     freshnessPolicy: on_explicit_request
+    maxSources: 0
+    maxCharacters: 0
     entries: []
+
   advisory_career:
     authorityClass: advisory
     scope: Historical career planning; never routine build authority.
-    includeRoles: [career_advisory]
-    excludeRoles: [planner, specification, builder, adversary, factory_repair, milestone_auditor]
+    includeRoles: []
+    excludeRoles: [planner, specification, builder, integration_scout, adversary, audit, security, performance, release, research, recovery, factory_repair, value_validator, value_adversary]
     freshnessPolicy: on_explicit_request
+    maxSources: 0
+    maxCharacters: 0
     entries: []
-
-# Temporary compatibility aliases for V2 packet parsing. V3 groups above are canonical.
-contexts:
-  executive_decision:
-    - docs/source-of-truth/v3-2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3.md
-  product_strategy:
-    - docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md
-  product_definition:
-    - docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md
-  architecture:
-    - docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md
-  trust_spec:
-    - docs/source-of-truth/v3-2026-08-11/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md
-  commercial:
-    - docs/source-of-truth/v3-2026-08-11/06_COMMERCIAL_MODEL_AND_GTM_V3.md
-  roadmap:
-    - docs/source-of-truth/v3-2026-08-11/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md
-  source_register:
-    - docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md
-  current_facts:
-    - docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md
-  build_prompt:
-    - docs/source-of-truth/v3-2026-08-11/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md
-  factory:
-    - docs/source-of-truth/v3-2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md
-    - SOURCE_PRECEDENCE.md
-  factory_control:
-    - docs/source-of-truth/v3-2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md
-    - SOURCE_PRECEDENCE.md
-  source_authority:
-    - SOURCE_PRECEDENCE.md
-    - docs/CONTEXT_INDEX.yaml
-    - docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md
-  security:
-    - docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md
-    - docs/source-of-truth/v3-2026-08-11/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md
-    - SECURITY.md
-  research_evidence:
-    - prompts/research.md
-    - tcfactory/research_policy.py
-    - scripts/gates/output_and_integration_gate.py
-  coding_standards:
-    - docs/source-of-truth/v3-2026-08-11/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md
-    - CLAUDE.md
-    - pyproject.toml
-  quality_policy:
-    - tcfactory/quality_policy.py
-    - scripts/gates/fast_quality.sh
-  runtime_adapters:
-    - docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md
-    - config/factory.yaml
-    - config/claude_features.yaml
-  performance:
-    - docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md
-    - docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md
-  definition_of_done:
-    - docs/source-of-truth/v3-2026-08-11/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md
-  company_product_brief:
-    - docs/source-of-truth/v3-2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3.md
-    - docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md
-    - docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md
-    - docs/source-of-truth/v3-2026-08-11/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md
-    - docs/source-of-truth/v3-2026-08-11/06_COMMERCIAL_MODEL_AND_GTM_V3.md
-    - docs/source-of-truth/v3-2026-08-11/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md
-    - docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md
-    - docs/source-of-truth/v3-2026-08-11/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md
-    - docs/source-of-truth/v3-2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md

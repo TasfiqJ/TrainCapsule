@@ -23,6 +23,31 @@
       "title": "Sourcemanifestsha256",
       "type": "string"
     },
+    "ownerDirectivesSha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Ownerdirectivessha256",
+      "type": "string"
+    },
+    "milestone": {
+      "const": "M0_FACTORY_MIGRATED",
+      "default": "M0_FACTORY_MIGRATED",
+      "title": "Milestone",
+      "type": "string"
+    },
+    "acceptanceWorkItems": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Acceptanceworkitems",
+      "type": "object"
+    },
+    "acceptanceEvidenceDigests": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Acceptanceevidencedigests",
+      "type": "object"
+    },
     "completedAt": {
       "format": "date-time",
       "title": "Completedat",
@@ -32,6 +57,9 @@
   "required": [
     "completedSha",
     "sourceManifestSha256",
+    "ownerDirectivesSha256",
+    "acceptanceWorkItems",
+    "acceptanceEvidenceDigests",
     "completedAt"
   ],
   "title": "MigrationCompleteMarker",

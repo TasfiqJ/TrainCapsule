@@ -1,3 +1,5 @@
+version: 3
+
 planner:
   prompt_file: prompts/autonomous_planner.md
   model: sonnet

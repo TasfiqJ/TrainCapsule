@@ -18,8 +18,6 @@ class Milestone(V3Model):
     exit_criteria: list[str] = Field(min_length=1)
     required_evidence: list[str] = Field(min_length=1)
     forbidden_claims: list[str]
-    human_approval_required: bool
-    human_approval_refs: list[str] = Field(default_factory=list[str])
 
     @model_validator(mode="after")
     def validate_bounded_completion(self) -> Milestone:
@@ -29,12 +27,6 @@ class Milestone(V3Model):
                 "done" in normalized or "complete" in normalized
             ):
                 raise ValueError("global all-product-tasks completion is forbidden")
-        if (
-            self.status is MilestoneStatus.COMPLETED
-            and self.human_approval_required
-            and not self.human_approval_refs
-        ):
-            raise ValueError("completed milestone lacks required human approval")
         return self
 
 

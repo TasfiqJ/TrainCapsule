@@ -6,4 +6,4 @@ Challenge path traversal, symlink escape, decompression bombs, malformed schemas
 
 Do not execute unreviewed input, expose secrets, alter the candidate, widen scope, or mutate the roadmap. UNKNOWN and INVALID_EVIDENCE are valid; mocks cannot prove containment or external integration.
 
-Return at most 8 reproducible findings total in the global concrete finding format. Stop with WAITING_EXTERNAL or WAITING_HUMAN when required evidence or approval is outside the session.
+Return at most 8 reproducible findings total in the global concrete finding format. Stop with WAITING_EXTERNAL for external evidence or BLOCKED_POLICY for authority denied by machine policy.

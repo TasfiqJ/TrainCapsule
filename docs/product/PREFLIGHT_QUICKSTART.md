@@ -1,102 +1,112 @@
 # TrainCapsule local preflight quickstart
 
-This quickstart exercises the experimental, customer-local preflight. It does not run a training
-job, compare baseline/candidate executions, claim root cause, or transmit evidence to a service.
+This experimental, customer-local preflight does not run training, compare executions, claim root
+cause, transmit evidence, or depend on a person to approve a runtime action.
 
-## 1. Install and verify
+## Independent product installation
 
-From the repository root:
+The product packages are separate distributions. The factory wheel contains only `tcfactory`.
 
 ```bash
-uv sync --extra dev --frozen
-uv run traincapsule doctor --json
+uv build --offline --wheel packages/traincapsule-core
+uv build --offline --wheel packages/traincapsule-ingest-pytorch
+uv build --offline --wheel packages/traincapsule-qualify
+uv build --offline --wheel packages/traincapsule-cli
 ```
 
-`doctor` must report `networkRequired: false`.
-
-## 2. Create the incident case
+Install those four wheels into an isolated Python 3.12 environment, then verify the installed
+executable (not a source-tree import):
 
 ```bash
-uv run traincapsule case init \
+uv venv .venv-product --python 3.12
+uv pip install --python .venv-product/bin/python \
+  packages/traincapsule-core/dist/traincapsule_core-0.1.0-py3-none-any.whl \
+  packages/traincapsule-ingest-pytorch/dist/traincapsule_ingest_pytorch-0.1.0-py3-none-any.whl \
+  packages/traincapsule-qualify/dist/traincapsule_qualify-0.1.0-py3-none-any.whl \
+  packages/traincapsule-cli/dist/traincapsule_cli-0.1.0-py3-none-any.whl
+.venv-product/bin/traincapsule doctor --json
+```
+
+The product dependency graph contains neither `tcfactory` nor the Claude SDK.
+
+## Identity
+
+```bash
+.venv-product/bin/traincapsule identity workload \
+  examples/product/workload-identity-input.json --json
+
+.venv-product/bin/traincapsule identity environment \
+  examples/product/environment-identity-input.json --json
+```
+
+Environment variables are accepted as explicit decision-relevant inputs. Secret-named variables,
+embedded URL credentials, bearer/basic authorization values, private keys, and secret assignments
+are redacted by the versioned `traincapsule-redaction-v1` policy before hashing. A caller-supplied
+digest cannot override the computed digest. Workload and environment evidence policies derive
+identity strength; it is not caller-authored. Customer-attested, unverified, or conflicting identity
+can never produce
+`APPROVE_WITHIN_ENVELOPE`.
+
+## Evidence and native baseline
+
+```bash
+.venv-product/bin/traincapsule ingest pytorch-flight-recorder \
+  examples/product/flight-recorder/real-format \
   --case-id CASE-QUICKSTART \
-  --decision-owner incident-owner \
-  --decision-type "candidate approval" \
-  --decision-deadline 2026-08-12T20:00:00Z \
-  --incident-summary "controlled collective timeout" \
-  --pack-candidate ddp-hang-v1 \
-  --privacy-policy LOCAL_ONLY \
-  --output /tmp/traincapsule-quickstart/case.json \
-  --json
-```
-
-Outputs are never overwritten implicitly. Choose a new local output directory when repeating the
-journey.
-
-## 3. Bind workload and environment identity
-
-```bash
-uv run traincapsule identity workload \
-  examples/product/workload-identity-input.json \
-  --output /tmp/traincapsule-quickstart/workload.json --json
-
-uv run traincapsule identity environment \
-  examples/product/environment-identity-input.json \
-  --output /tmp/traincapsule-quickstart/environment.json --json
-```
-
-The example data identity is deliberately `CUSTOMER_ATTESTED`; that is weaker than a content or
-manifest digest and must not be presented as fully bound evidence.
-
-## 4. Import controlled Flight Recorder evidence
-
-```bash
-uv run traincapsule ingest pytorch-flight-recorder \
-  examples/product/flight-recorder/supported \
-  --case-id CASE-QUICKSTART \
-  --store /tmp/traincapsule-quickstart/evidence-store \
+  --store /tmp/traincapsule-quickstart/evidence \
   --captured-at 2026-08-11T20:00:00Z \
-  --output /tmp/traincapsule-quickstart/import.json \
-  --json
+  --output /tmp/traincapsule-quickstart/import.json --json
+
+.venv-product/bin/traincapsule native-baseline /tmp/traincapsule-quickstart/import.json \
+  --store /tmp/traincapsule-quickstart/evidence \
+  --executed-at 2026-08-11T20:01:00Z \
+  --elapsed-seconds 60 \
+  --operator-effort-seconds 0 \
+  --unresolved-question "Whether machine-verifiable evidence permits the change." \
+  --output /tmp/traincapsule-quickstart/native.json \
+  --human-output /tmp/traincapsule-quickstart/native.md --json
 ```
 
-The importer accepts only supported fixture version `1.0`, hashes raw bytes before parsing, rejects
-symlinks/non-files, keeps unknown fields and raw digests, and records native observations without
-inventing a root cause. Raw evidence remains at a customer-selected local CAS URI.
+The importer hashes raw bytes before parsing, preserves raw digests and unknown fields, uses
+no-follow bounded reads, and records missing/unknown evidence without inference. `native-baseline`
+generates both a strict machine record and a readable report from importer output. Native
+sufficiency is derived only after reopening raw artifacts from the case-local CAS and proving that
+the import entries match those bytes. The versioned lifecycle-disagreement policy carries its
+evidence references and provenance digest; the CLI has no caller-authored decision option, and
+preflight independently recomputes the same raw-evidence result.
 
-## 5. Exercise native baseline and preflight
-
-The native-baseline and preflight inputs are strict JSON records described by:
-
-- `schemas/product/native-baseline.schema.json`
-- `schemas/product/preflight-inputs.schema.json`
-
-The fully wired controlled journey constructs those records from the prior outputs and validates
-the result:
+## Bound preflight
 
 ```bash
-uv run pytest -q tests/product/test_install_to_preflight_journey.py
+.venv-product/bin/traincapsule preflight preflight-input.json \
+  --store /tmp/traincapsule-quickstart/evidence --json
 ```
 
-For direct CLI use:
+The strict input binds one incident case to workload and baseline/candidate environment identities,
+case-local verified artifacts, a classified completeness report, the generated native baseline,
+original/proposed economics. The engine itself derives versioned pack, local-access, privacy,
+export, source-version, and economics verification records from those bound inputs; preflight JSON
+cannot supply verdicts. Unknown or incomparable economics produce `UNKNOWN`, while a proposed cost
+above the original returns `TECHNICALLY_POSSIBLE_BUT_UNECONOMIC`. Before making a
+decision, the CLI reopens every referenced object from the case-local CAS with no-follow reads and
+verifies its SHA-256 digest. There is no
+human-availability input or human runtime gate. An input that cannot be verified produces `UNKNOWN`;
+a deterministic denial produces `POLICY_BLOCKED` or `OUTSIDE_SUPPORTED_ENVELOPE`.
 
-```bash
-uv run traincapsule native-baseline native-baseline-input.json --json
-uv run traincapsule preflight preflight-input.json --json
-```
-
-Eligibility can be eligible, eligible with human review, need more evidence, native sufficient,
-technically possible but uneconomic, outside the supported envelope, policy blocked, or unknown.
-Unknown cost is allowed; no ROI is fabricated.
+The copied bundle documents a human-review compatibility outcome, but the owner-directed
+zero-human runtime does not expose that value. Partially verified or customer-attested identity
+returns deterministic `UNKNOWN`/`NO_DECISION`; it never creates an intervention request and never
+self-asserts an approval.
 
 ## Exit codes
 
 | Code | Meaning |
 |---:|---|
-| 0 | success |
-| 2 | invalid or malformed input |
+| 0 | command completed and wrote/returned a truth record |
+| 2 | invalid CLI use or malformed input |
 | 3 | unsupported evidence version |
 | 4 | local policy blocked the operation |
-| 5 | local storage or output failure |
+| 5 | local storage/output failure |
 
-All commands are offline-first and operate on local paths. `--json` produces deterministic,
-machine-readable output or errors.
+With `--json`, command-body and CLI-parser errors are deterministic JSON. Commands are local-only;
+there is no SaaS or network path.

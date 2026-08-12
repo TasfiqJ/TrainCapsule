@@ -3,6 +3,9 @@
 from __future__ import annotations
 
 import json
+import os
+import stat
+import sys
 from datetime import datetime
 from enum import IntEnum
 from pathlib import Path
@@ -19,11 +22,18 @@ from traincapsule_core import (
 from traincapsule_core.evidence import EvidenceStoreError, LocalEvidenceStore
 from traincapsule_core.models import CaseEconomics
 from traincapsule_ingest_pytorch import (
+    FlightRecorderImport,
     FlightRecorderImportError,
     ImportErrorCode,
     PyTorchFlightRecorderImporter,
 )
-from traincapsule_qualify import NativeBaseline, PreflightInputs, evaluate_preflight
+from traincapsule_qualify import (
+    PreflightInputs,
+    evaluate_preflight,
+    generate_native_baseline,
+    render_native_baseline_human,
+)
+from typer._click.exceptions import ClickException
 
 app = typer.Typer(no_args_is_help=True, help="Customer-local TrainCapsule product tools.")
 case_app = typer.Typer(no_args_is_help=True, help="Create and inspect incident cases.")
@@ -55,14 +65,30 @@ def _parse_datetime(value: str) -> datetime:
 
 
 def _read_object(path: Path) -> dict[str, object]:
-    if path.is_symlink():
-        raise ValueError("input cannot be a symlink")
-    resolved = path.resolve(strict=True)
-    if not resolved.is_file():
-        raise ValueError("input must be a regular file")
-    if resolved.stat().st_size > _MAX_CONTROL_FILE_BYTES:
-        raise ValueError("input exceeds the local control-file limit")
-    raw: object = json.loads(resolved.read_bytes())
+    try:
+        descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+    except OSError as error:
+        raise ValueError("input must be an available non-symlink regular file") from error
+    try:
+        details = os.fstat(descriptor)
+        if not stat.S_ISREG(details.st_mode):
+            raise ValueError("input must be a regular file")
+        if details.st_size > _MAX_CONTROL_FILE_BYTES:
+            raise ValueError("input exceeds the local control-file limit")
+        payload = bytearray()
+        while True:
+            chunk = os.read(
+                descriptor,
+                min(1024 * 1024, _MAX_CONTROL_FILE_BYTES + 1 - len(payload)),
+            )
+            if not chunk:
+                break
+            payload.extend(chunk)
+            if len(payload) > _MAX_CONTROL_FILE_BYTES:
+                raise ValueError("input exceeds the local control-file limit")
+    finally:
+        os.close(descriptor)
+    raw: object = json.loads(bytes(payload))
     if not isinstance(raw, dict):
         raise ValueError("input JSON must be an object")
     return cast(dict[str, object], raw)
@@ -100,37 +126,60 @@ def _write_result(
     output: Path | None,
     machine: bool,
 ) -> None:
-    if isinstance(value, BaseModel):
-        payload: object = value.model_dump(mode="json", by_alias=True, exclude_none=False)
-    else:
-        payload = value
-    rendered = canonical_json_bytes(payload)
+    rendered = _render_result(value)
     if output is None:
         typer.echo(rendered.decode("utf-8"), nl=False)
         return
-    if output.exists() or output.is_symlink():
-        _fail(
-            f"output already exists: {output}",
-            code=ExitCode.LOCAL_IO_ERROR,
-            machine=machine,
-        )
-    output.parent.mkdir(parents=True, exist_ok=True)
-    if any(parent.is_symlink() for parent in (output.parent, *output.parent.parents)):
-        _fail(
-            "output path contains a symlink",
-            code=ExitCode.POLICY_BLOCKED,
-            machine=machine,
-        )
-    output.write_bytes(rendered)
+    try:
+        _write_payloads_exclusive({output: rendered})
+    except (OSError, ValueError) as error:
+        _fail(str(error), code=ExitCode.LOCAL_IO_ERROR, machine=machine)
     if machine:
         typer.echo(
-            _machine_message(ok=True, code="OK", message=str(output.resolve())).decode(
-                "utf-8"
-            ),
+            _machine_message(ok=True, code="OK", message=str(output.resolve())).decode("utf-8"),
             nl=False,
         )
     else:
         typer.echo(f"Wrote {output.resolve()}")
+
+
+def _render_result(value: BaseModel | dict[str, object]) -> bytes:
+    payload: object = (
+        value.model_dump(mode="json", by_alias=True, exclude_none=False)
+        if isinstance(value, BaseModel)
+        else value
+    )
+    return canonical_json_bytes(payload)
+
+
+def _write_payloads_exclusive(payloads: dict[Path, bytes]) -> None:
+    if len({path.resolve(strict=False) for path in payloads}) != len(payloads):
+        raise ValueError("output paths must be distinct")
+    descriptors: dict[Path, int] = {}
+    created: list[Path] = []
+    try:
+        for path in payloads:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            if any(parent.is_symlink() for parent in (path.parent, *path.parent.parents)):
+                raise ValueError("output path contains a symlink")
+            descriptor = os.open(
+                path,
+                os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
+                0o600,
+            )
+            descriptors[path] = descriptor
+            created.append(path)
+        for path, payload in payloads.items():
+            with os.fdopen(descriptors.pop(path), "wb") as handle:
+                handle.write(payload)
+                handle.flush()
+                os.fsync(handle.fileno())
+    except Exception:
+        for descriptor in descriptors.values():
+            os.close(descriptor)
+        for path in created:
+            path.unlink(missing_ok=True)
+        raise
 
 
 @app.command("doctor")
@@ -208,9 +257,7 @@ def identity_workload(
     output: Annotated[Path | None, typer.Option("--output")] = None,
     machine: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
-    _identity_command(
-        kind="workload", input_path=input_path, output=output, machine=machine
-    )
+    _identity_command(kind="workload", input_path=input_path, output=output, machine=machine)
 
 
 @identity_app.command("environment")
@@ -219,9 +266,7 @@ def identity_environment(
     output: Annotated[Path | None, typer.Option("--output")] = None,
     machine: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
-    _identity_command(
-        kind="environment", input_path=input_path, output=output, machine=machine
-    )
+    _identity_command(kind="environment", input_path=input_path, output=output, machine=machine)
 
 
 @ingest_app.command("pytorch-flight-recorder")
@@ -256,12 +301,52 @@ def ingest_pytorch_flight_recorder(
 
 @app.command("native-baseline")
 def native_baseline(
-    input_path: Annotated[Path, typer.Argument(help="Native baseline JSON.")],
+    input_path: Annotated[Path, typer.Argument(help="Flight Recorder import JSON.")],
+    store_root: Annotated[Path, typer.Option("--store")],
+    executed_at: Annotated[str, typer.Option("--executed-at")],
+    elapsed_seconds: Annotated[int, typer.Option("--elapsed-seconds", min=0)],
+    operator_effort_seconds: Annotated[int, typer.Option("--operator-effort-seconds", min=0)],
+    unresolved_question: Annotated[list[str] | None, typer.Option("--unresolved-question")] = None,
     output: Annotated[Path | None, typer.Option("--output")] = None,
+    human_output: Annotated[Path | None, typer.Option("--human-output")] = None,
     machine: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
     try:
-        baseline = NativeBaseline.model_validate(_read_object(input_path))
+        imported = FlightRecorderImport.model_validate(_read_object(input_path))
+        store = LocalEvidenceStore(store_root)
+        baseline = generate_native_baseline(
+            imported=imported,
+            command=["traincapsule", "ingest", "pytorch-flight-recorder"],
+            configuration={"source": "customer-local"},
+            elapsed_seconds=elapsed_seconds,
+            operator_effort_seconds=operator_effort_seconds,
+            unresolved_questions=unresolved_question or [],
+            executed_at=_parse_datetime(executed_at),
+            artifact_reader=lambda artifact: store.get_bytes(
+                case_id=imported.case_id, artifact=artifact
+            ),
+        )
+        report = render_native_baseline_human(baseline)
+        report_path = human_output or (output.with_suffix(".md") if output else None)
+        if report_path is not None and output is not None:
+            _write_payloads_exclusive(
+                {output: _render_result(baseline), report_path: report.encode("utf-8")}
+            )
+            if machine:
+                typer.echo(
+                    _machine_message(ok=True, code="OK", message=str(output.resolve())).decode(
+                        "utf-8"
+                    ),
+                    nl=False,
+                )
+            else:
+                typer.echo(f"Wrote {output.resolve()} and {report_path.resolve()}")
+            return
+        if report_path is not None:
+            _write_payloads_exclusive({report_path: report.encode("utf-8")})
+        if output is None and not machine:
+            typer.echo(report, nl=False)
+            return
         _write_result(baseline, output=output, machine=machine)
     except (OSError, ValueError, ValidationError, json.JSONDecodeError) as error:
         _fail(str(error), code=ExitCode.INVALID_INPUT, machine=machine)
@@ -270,15 +355,46 @@ def native_baseline(
 @app.command("preflight")
 def preflight(
     input_path: Annotated[Path, typer.Argument(help="Preflight inputs JSON.")],
+    store_root: Annotated[Path, typer.Option("--store")],
     output: Annotated[Path | None, typer.Option("--output")] = None,
     machine: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
     try:
         inputs = PreflightInputs.model_validate(_read_object(input_path))
-        _write_result(evaluate_preflight(inputs), output=output, machine=machine)
+        store = LocalEvidenceStore(store_root)
+        _write_result(
+            evaluate_preflight(
+                inputs,
+                artifact_reader=lambda artifact: store.get_bytes(
+                    case_id=inputs.incident_case.case_id,
+                    artifact=artifact,
+                ),
+            ),
+            output=output,
+            machine=machine,
+        )
     except (OSError, ValueError, ValidationError, json.JSONDecodeError) as error:
         _fail(str(error), code=ExitCode.INVALID_INPUT, machine=machine)
 
 
+def main() -> None:
+    """Console entry with JSON-form parser failures when --json was requested."""
+    machine = "--json" in sys.argv[1:]
+    try:
+        result = app(standalone_mode=False)
+        if isinstance(result, int) and result != 0:
+            raise SystemExit(result)
+    except typer.Exit as error:
+        raise SystemExit(error.exit_code) from error
+    except ClickException as error:
+        if machine:
+            sys.stderr.buffer.write(
+                _machine_message(ok=False, code="INVALID_INPUT", message=error.format_message())
+            )
+        else:
+            error.show()
+        raise SystemExit(ExitCode.INVALID_INPUT) from error
+
+
 if __name__ == "__main__":
-    app()
+    main()

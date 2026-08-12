@@ -1,125 +1,154 @@
 from __future__ import annotations
 
+import json
 from copy import deepcopy
+from pathlib import Path
+from typing import cast
 
+import pytest
 from traincapsule_core import (
     build_environment_identity,
     build_workload_identity,
     canonical_json_bytes,
     redacted_environment_digest,
 )
-from traincapsule_core.models import CompletenessState, DataIdentityPolicy
-from traincapsule_qualify import assess_completeness
+from traincapsule_core.models import IdentityStrength
 
 from .reference_identity import canonical_reference, identity_reference
 
-DIGEST_A = "sha256:" + "a" * 64
-DIGEST_B = "sha256:" + "b" * 64
+ROOT = Path(__file__).resolve().parents[2]
+WORKLOAD_VECTOR = "sha256:c84088d6ab6a489c01b070a10a30adad682fe6b6f78fd2b85b4e674865e035ab"
+ENVIRONMENT_VECTOR = "sha256:b32591c48f2141d448fdfcf0d0dbeb6edbdf2924577f46aaf24d3c7d114651f8"
 
 
 def workload_material() -> dict[str, object]:
-    return {
-        "schemaVersion": 1,
-        "sourceIdentity": {"repositoryDigest": DIGEST_A, "dirtyPatchDigest": None},
-        "entrypoint": "train.py",
-        "argumentsDigest": DIGEST_B,
-        "containerImageDigest": None,
-        "dependencyLockDigest": DIGEST_A,
-        "framework": {"name": "pytorch", "version": "2.5.1"},
-        "distributed": {
-            "strategy": "ddp",
-            "worldSize": 2,
-            "processGroupsDigest": DIGEST_B,
-        },
-        "modelStructureDigest": None,
-        "dataIdentity": {"policy": "CUSTOMER_ATTESTED", "manifestDigest": None},
-        "checkpointPolicyDigest": None,
-        "privacyClass": "CONFIDENTIAL",
-        "createdAt": "2026-08-11T20:00:00Z",
-    }
+    raw: object = json.loads((ROOT / "examples/product/workload-identity-input.json").read_bytes())
+    assert isinstance(raw, dict)
+    return cast(dict[str, object], raw)
 
 
 def environment_material() -> dict[str, object]:
-    return {
-        "schemaVersion": 1,
-        "hostKernel": "Linux 6.8",
-        "containerRuntime": "containerd 2.0",
-        "python": "3.12.4",
-        "pytorch": "2.5.1",
-        "cudaRuntime": "12.4",
-        "cudaDriver": "550.90",
-        "nccl": "2.22",
-        "gpuModel": "H100",
-        "gpuCount": 2,
-        "gpuFirmwareDigest": None,
-        "topologyDigest": DIGEST_A,
-        "scheduler": "slurm",
-        "networkClass": "infiniband",
-        "storageClass": "local-nvme",
-        "environmentVariablesDigest": DIGEST_B,
-        "redactionPolicyVersion": "v1",
-        "materializationRecipeDigest": None,
-        "createdAt": "2026-08-11T20:00:00Z",
-    }
+    raw: object = json.loads(
+        (ROOT / "examples/product/environment-identity-input.json").read_bytes()
+    )
+    assert isinstance(raw, dict)
+    return cast(dict[str, object], raw)
 
 
 def test_canonical_json_matches_independent_reference_and_utf8_lf() -> None:
     value = {"z": "évidence", "a": [2, 1], "nested": {"b": False}}
     rendered = canonical_json_bytes(value)
     assert rendered == canonical_reference(value)
-    assert rendered.endswith(b"\n")
-    assert b"\r" not in rendered
-    assert b"\xc3\xa9" in rendered
-    assert rendered.startswith(b'{"a"')
+    assert rendered.endswith(b"\n") and b"\r" not in rendered
+    assert b"\xc3\xa9" in rendered and rendered.startswith(b'{"a"')
 
 
-def test_workload_identity_matches_independent_golden_vector() -> None:
-    material = workload_material()
-    identity = build_workload_identity(material)
-    assert identity.workload_id == identity_reference(material, "workloadId")
-    assert identity.data_identity.policy is DataIdentityPolicy.CUSTOMER_ATTESTED
-    assert identity.data_identity.manifest_digest is None
+def test_fixed_committed_identity_vectors_match_independent_oracle() -> None:
+    workload = build_workload_identity(workload_material())
+    environment = build_environment_identity(environment_material())
+    assert workload.workload_id == WORKLOAD_VECTOR
+    assert environment.environment_id == ENVIRONMENT_VECTOR
+    assert workload.workload_id == identity_reference(
+        workload.model_dump(mode="json", by_alias=True), "workloadId"
+    )
+    assert environment.environment_id == identity_reference(
+        environment.model_dump(mode="json", by_alias=True), "environmentId"
+    )
 
 
-def test_identity_ignores_field_order_and_supplied_timestamp_but_not_material_drift() -> None:
+def test_identity_ignores_field_order_and_timestamp_but_detects_material_drift() -> None:
     first = workload_material()
     reordered = dict(reversed(list(first.items())))
     reordered["createdAt"] = "2030-01-01T00:00:00Z"
-    assert build_workload_identity(first).workload_id == build_workload_identity(
-        reordered
-    ).workload_id
-
+    assert (
+        build_workload_identity(first).workload_id == build_workload_identity(reordered).workload_id
+    )
     drifted = deepcopy(first)
     drifted["entrypoint"] = "train_v2.py"
-    assert build_workload_identity(first).workload_id != build_workload_identity(
-        drifted
-    ).workload_id
+    assert (
+        build_workload_identity(first).workload_id != build_workload_identity(drifted).workload_id
+    )
 
 
-def test_environment_identity_matches_independent_reference() -> None:
+def test_redaction_is_enforced_and_policy_versioned() -> None:
+    first = workload_material()
+    changed_secret = deepcopy(first)
+    variables = changed_secret["relevantEnvironmentVariables"]
+    assert isinstance(variables, dict)
+    variables["SERVICE_TOKEN"] = "different-secret"
+    assert (
+        build_workload_identity(first).workload_id
+        == build_workload_identity(changed_secret).workload_id
+    )
+    changed_public = deepcopy(first)
+    public_variables = changed_public["relevantEnvironmentVariables"]
+    assert isinstance(public_variables, dict)
+    public_variables["NCCL_DEBUG"] = "WARN"
+    assert (
+        build_workload_identity(first).workload_id
+        != build_workload_identity(changed_public).workload_id
+    )
+    with pytest.raises(ValueError, match="unsupported redaction policy"):
+        redacted_environment_digest({}, policy_version="unknown")
+    supplied = deepcopy(first)
+    supplied["relevantEnvironmentDigest"] = "sha256:" + "f" * 64
+    with pytest.raises(ValueError, match="does not match redacted variables"):
+        build_workload_identity(supplied)
+
+    embedded_first = deepcopy(first)
+    embedded_variables = embedded_first["relevantEnvironmentVariables"]
+    assert isinstance(embedded_variables, dict)
+    embedded_variables["DATABASE_URL"] = "postgres://user:secret-one@db.example/app"
+    embedded_second = deepcopy(embedded_first)
+    second_variables = embedded_second["relevantEnvironmentVariables"]
+    assert isinstance(second_variables, dict)
+    second_variables["DATABASE_URL"] = "postgres://user:secret-two@db.example/app"
+    assert (
+        build_workload_identity(embedded_first).workload_id
+        == build_workload_identity(embedded_second).workload_id
+    )
+
+
+@pytest.mark.parametrize(
+    ("policy", "digest", "strength"),
+    [
+        ("FULL_DIGEST", "sha256:" + "a" * 64, IdentityStrength.FULLY_VERIFIED),
+        ("MANIFEST_DIGEST", "sha256:" + "a" * 64, IdentityStrength.PARTIALLY_VERIFIED),
+        ("CUSTOMER_ATTESTED", None, IdentityStrength.CUSTOMER_ATTESTED),
+        ("UNAVAILABLE", None, IdentityStrength.UNVERIFIED),
+    ],
+)
+def test_data_policy_derives_identity_strength(
+    policy: str, digest: str | None, strength: IdentityStrength
+) -> None:
+    material = workload_material()
+    material["dataIdentity"] = {"policy": policy, "manifestDigest": digest}
+    assert build_workload_identity(material).identity_strength is strength
+
+
+def test_conflict_is_explicit_and_supplied_strength_is_ignored() -> None:
+    material = workload_material()
+    material["identityConflict"] = True
+    assert build_workload_identity(material).identity_strength is IdentityStrength.CONFLICTING
+    material = workload_material()
+    material["identityStrength"] = "FULLY_VERIFIED"
+    assert build_workload_identity(material).identity_strength is IdentityStrength.FULLY_VERIFIED
+
+
+@pytest.mark.parametrize(
+    ("policy", "digest", "strength"),
+    [
+        ("FULL_DIGEST", "sha256:" + "a" * 64, IdentityStrength.FULLY_VERIFIED),
+        ("MANIFEST_DIGEST", "sha256:" + "a" * 64, IdentityStrength.PARTIALLY_VERIFIED),
+        ("CUSTOMER_ATTESTED", None, IdentityStrength.CUSTOMER_ATTESTED),
+        ("UNAVAILABLE", None, IdentityStrength.UNVERIFIED),
+    ],
+)
+def test_environment_identity_strength_is_derived_without_attestation_laundering(
+    policy: str, digest: str | None, strength: IdentityStrength
+) -> None:
     material = environment_material()
-    identity = build_environment_identity(material)
-    assert identity.environment_id == identity_reference(material, "environmentId")
-
-
-def test_secret_values_are_redacted_before_environment_digest() -> None:
-    first = redacted_environment_digest(
-        {"API_TOKEN": "secret-one", "NCCL_DEBUG": "INFO"}, policy_version="v1"
-    )
-    second = redacted_environment_digest(
-        {"API_TOKEN": "secret-two", "NCCL_DEBUG": "INFO"}, policy_version="v1"
-    )
-    changed_public = redacted_environment_digest(
-        {"API_TOKEN": "secret-two", "NCCL_DEBUG": "WARN"}, policy_version="v1"
-    )
-    assert first == second
-    assert changed_public != first
-
-
-def test_customer_attestation_is_not_laundered_as_bound_identity() -> None:
-    report = assess_completeness(
-        case_id="CASE-ATTESTED",
-        requirements={"data_identity": CompletenessState.IDENTITY_UNBOUND},
-    )
-    assert report.technical_result.value == "UNKNOWN"
-    assert report.requirements[0].state is CompletenessState.IDENTITY_UNBOUND
+    material["identityPolicy"] = policy
+    material["identityEvidenceDigest"] = digest
+    material["identityStrength"] = "FULLY_VERIFIED"
+    assert build_environment_identity(material).identity_strength is strength

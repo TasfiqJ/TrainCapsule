@@ -1,0 +1,67 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "defaultMaxContextCharacters": {
+      "maximum": 200000,
+      "minimum": 1,
+      "title": "Defaultmaxcontextcharacters",
+      "type": "integer"
+    },
+    "maxSourcesPerManifest": {
+      "maximum": 16,
+      "minimum": 1,
+      "title": "Maxsourcespermanifest",
+      "type": "integer"
+    },
+    "requireEntryDigest": {
+      "const": true,
+      "title": "Requireentrydigest",
+      "type": "boolean"
+    },
+    "requireAuthoritySections": {
+      "const": true,
+      "title": "Requireauthoritysections",
+      "type": "boolean"
+    },
+    "rejectRoleMismatch": {
+      "const": true,
+      "title": "Rejectrolemismatch",
+      "type": "boolean"
+    },
+    "rejectStaleCurrentFacts": {
+      "const": true,
+      "title": "Rejectstalecurrentfacts",
+      "type": "boolean"
+    },
+    "roleDefaultGroups": {
+      "additionalProperties": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "minProperties": 1,
+      "title": "Roledefaultgroups",
+      "type": "object"
+    }
+  },
+  "required": [
+    "version",
+    "defaultMaxContextCharacters",
+    "maxSourcesPerManifest",
+    "requireEntryDigest",
+    "requireAuthoritySections",
+    "rejectRoleMismatch",
+    "rejectStaleCurrentFacts",
+    "roleDefaultGroups"
+  ],
+  "title": "ContextRoutingConfig",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/context-policy-config.schema.json"
+}

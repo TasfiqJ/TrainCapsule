@@ -1,5 +1,6 @@
 version: 3
 trustedRootEnvironmentVariable: TCF_EXTERNAL_EVIDENCE_ROOT
+trustedPublicKeyEnvironmentVariable: TCF_EXTERNAL_EVIDENCE_PUBLIC_KEY
 allowRepositoryFallback: false
 receiptSchema: schemas/factory/v3/external-evidence-receipt.schema.json
 requireSignature: true
@@ -12,6 +13,5 @@ allowedEvidenceTypes:
   - DECISION_CHANGED
   - SECOND_PAID_ACTION
   - INDEPENDENT_OPERATOR
-  - HUMAN_REVIEW
   - UPSTREAM_ACCEPTANCE
   - PROVIDER_ACCEPTANCE

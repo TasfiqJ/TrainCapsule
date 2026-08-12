@@ -4,6 +4,6 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 # shellcheck disable=SC1091
 source "$ROOT/scripts/load_factory_env.sh"
-uv run tcfactory recover
+uv run python -m tcfactory.supervisor preflight --repo "$ROOT"
 uv run tcfactory explain-blocker
-uv run tcfactory verify || true
+uv run tcfactory status || true

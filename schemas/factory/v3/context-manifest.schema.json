@@ -12,6 +12,11 @@
           "title": "Bytes",
           "type": "integer"
         },
+        "characters": {
+          "minimum": 0,
+          "title": "Characters",
+          "type": "integer"
+        },
         "sha256": {
           "pattern": "^[0-9a-f]{64}$",
           "title": "Sha256",
@@ -20,6 +25,14 @@
         "authorityClass": {
           "title": "Authorityclass",
           "type": "string"
+        },
+        "authoritySections": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Authoritysections",
+          "type": "array"
         },
         "relevance": {
           "title": "Relevance",
@@ -43,8 +56,10 @@
       "required": [
         "path",
         "bytes",
+        "characters",
         "sha256",
         "authorityClass",
+        "authoritySections",
         "relevance",
         "freshnessPolicy",
         "freshnessStatus"

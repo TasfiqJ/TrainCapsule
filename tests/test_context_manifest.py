@@ -1,17 +1,15 @@
 from __future__ import annotations
 
+from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
 
-from tcfactory.config import load_factory_config, load_task
-from tcfactory.context import ContextPolicyError, build_context_manifest
-from tcfactory.feature_ledger import load_feature_ledger
+from tcfactory.context import ContextPolicyError, build_context_manifest, build_v3_context_manifest
 from tcfactory.gitops import commit_all, current_sha
 from tcfactory.models import FactoryConfig, RoleName, SecurityPolicy, Stage, TaskPacket
-from tcfactory.planner import planning_task_for
-from tcfactory.risk import load_risk_profiles
 from tcfactory.util import run_command
+from tcfactory.v3.work_items import WorkItemCollection
 from tcfactory.yamlutil import load_yaml
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -146,42 +144,45 @@ def test_context_manifest_never_falls_back_to_live_repo_source(tmp_path: Path) -
 def test_repository_role_default_contexts_resolve_to_existing_sources() -> None:
     context_config = load_yaml(ROOT / "config/context.yaml")
     context_index = load_yaml(ROOT / "docs/CONTEXT_INDEX.yaml")
-    contexts = context_index["contexts"]
-    for role, keys in context_config["role_defaults"].items():
-        for key in keys:
-            assert key in contexts, f"{role} references unknown context key {key}"
-            for source in contexts[key]:
-                assert (ROOT / source).is_file(), (
-                    f"{role} context {key} references missing source {source}"
-                )
+    assert context_config["version"] == context_index["version"] == 3
+    groups = context_index["groups"]
+    for role, names in context_config["roleDefaultGroups"].items():
+        for name in names:
+            assert name in groups, f"{role} references unknown context group {name}"
+            assert role in groups[name]["includeRoles"]
+            assert role not in groups[name]["excludeRoles"]
+            for entry in groups[name]["entries"]:
+                assert (ROOT / entry["path"]).is_file()
+                assert len(entry["sha256"]) == 64
+                assert entry["authoritySections"]
 
 
-def test_live_t002_and_planning_packets_build_candidate_bound_context() -> None:
-    config = load_factory_config(ROOT / "config/factory.yaml")
-    base_sha = current_sha(ROOT)
-    t002 = load_task(ROOT / "tasks/T002.yaml")
-    research = next(stage for stage in t002.pipeline if stage.role == RoleName.RESEARCH)
-    research_manifest = build_context_manifest(
-        repo_root=ROOT,
-        worktree=ROOT,
-        config=config,
-        task=t002,
-        stage=research,
-        base_sha=base_sha,
-        previous_findings=[],
+def test_v3_research_context_is_bound_and_t002_stays_historical() -> None:
+    roadmap = WorkItemCollection.model_validate(
+        load_yaml(ROOT / "factory/roadmap/work_items.yaml")
     )
-    assert research_manifest["files"]
-
-    ledger = load_feature_ledger(ROOT / "factory/feature_ledger.yaml")
-    profiles = load_risk_profiles(ROOT / "config/risk_profiles.yaml")
-    planning = planning_task_for(ledger.item("T002"), profiles=profiles)
-    planning_manifest = build_context_manifest(
-        repo_root=ROOT,
-        worktree=ROOT,
-        config=config,
-        task=planning,
-        stage=planning.pipeline[0],
-        base_sha=base_sha,
-        previous_findings=[],
+    item = next(
+        item
+        for item in roadmap.work_items
+        if item.kind.value == "RESEARCH" and item.automatable
     )
-    assert planning_manifest["files"]
+    policy = load_yaml(ROOT / "config/context.yaml")
+    manifest = build_v3_context_manifest(
+        repo_root=ROOT,
+        work_item=item,
+        role="research",
+        requested_groups=policy["roleDefaultGroups"]["research"],
+        max_context_chars=policy["defaultMaxContextCharacters"],
+        freshness_receipts={
+            name: datetime.now(UTC) for name in policy["roleDefaultGroups"]["research"]
+        },
+    )
+    assert manifest.entries
+    assert manifest.work_item_id == item.work_item_id
+    migration = load_yaml(ROOT / "factory/roadmap/migrations/v2_to_v3.yaml")
+    t002 = next(
+        record for record in migration["records"] if record["legacyTaskId"] == "T002"
+    )
+    assert t002["v3Disposition"] == "DEFERRED_NON_BLOCKING"
+    assert t002["mappedWorkItems"] == []
+    assert "never auto-resumes" in t002["reason"]

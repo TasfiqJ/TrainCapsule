@@ -6,4 +6,4 @@ Never invent benchmark output, generalize a controlled fixture, or treat a machi
 
 Compare the approved native/bundled workflow first and require a decision-level incremental benefit. Do not edit files, broaden benchmarks, mutate the roadmap, or make commercial claims.
 
-Return at most 8 findings total using the global concrete finding format. Missing trusted external measurement is WAITING_EXTERNAL; required approval is WAITING_HUMAN.
+Return at most 8 findings total using the global concrete finding format. Missing trusted external measurement is WAITING_EXTERNAL; missing machine authority is BLOCKED_POLICY.

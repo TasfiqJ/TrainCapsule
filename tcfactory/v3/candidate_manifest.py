@@ -9,7 +9,7 @@ from typing import Annotated
 from pydantic import Field, model_validator
 
 from tcfactory.v3.base import V3Model, verify_bound_payloads
-from tcfactory.v3.enums import ApprovalScope, ReleaseDecision
+from tcfactory.v3.enums import ReleaseDecision
 
 Digest = Annotated[str, Field(pattern=r"^sha256:[0-9a-f]{64}$")]
 GitSha = Annotated[str, Field(pattern=r"^[0-9a-f]{40}$")]
@@ -18,8 +18,12 @@ GitSha = Annotated[str, Field(pattern=r"^[0-9a-f]{40}$")]
 class ExecutorIdentity(V3Model):
     backend: str = Field(min_length=1)
     adapter: str = Field(min_length=1)
-    model: str = Field(min_length=1)
-    session_id: str | None = None
+    capability_digest: Digest = "sha256:" + ("0" * 64)
+    executor_session_ref: str | None = None
+    # Input-only compatibility fields. They are excluded from durable semantics and
+    # must not be used by the V3 controller.
+    model: str | None = Field(default=None, exclude=True)
+    session_id: str | None = Field(default=None, exclude=True)
 
 
 class StageArtifactBinding(V3Model):
@@ -41,12 +45,6 @@ class FindingBinding(V3Model):
     artifact_digest: Digest
 
 
-class ApprovalBinding(V3Model):
-    approval_id: str = Field(pattern=r"^HAPR-[A-Z0-9_-]+$")
-    scope: ApprovalScope
-    record_digest: Digest
-
-
 class ExternalEvidenceBinding(V3Model):
     receipt_id: str = Field(pattern=r"^XREC-[A-Z0-9_-]+$")
     record_digest: Digest
@@ -63,7 +61,6 @@ class CandidateManifest(V3Model):
     stage_outputs: list[StageArtifactBinding]
     gates: list[GateBinding]
     findings: list[FindingBinding]
-    approvals: list[ApprovalBinding]
     external_evidence: list[ExternalEvidenceBinding]
     checkpoint_digest: Digest
     release_decision: ReleaseDecision
@@ -75,7 +72,6 @@ class CandidateManifest(V3Model):
             "stage artifacts": [f"{item.stage}:{item.name}" for item in self.stage_outputs],
             "gates": [item.name for item in self.gates],
             "findings": [item.fingerprint for item in self.findings],
-            "approvals": [item.approval_id for item in self.approvals],
             "external evidence": [item.receipt_id for item in self.external_evidence],
         }
         for label, identifiers in groups.items():
@@ -103,9 +99,6 @@ class CandidateManifest(V3Model):
                 f"finding:{item.fingerprint}": item.artifact_digest
                 for item in self.findings
             }
-        )
-        bindings.update(
-            {f"approval:{item.approval_id}": item.record_digest for item in self.approvals}
         )
         bindings.update(
             {

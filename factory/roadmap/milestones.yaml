@@ -2,7 +2,7 @@ version: 3
 milestones:
   - milestoneId: M0_FACTORY_MIGRATED
     type: TRUST
-    status: ACTIVE
+    status: COMPLETED
     entryCriteria:
       - current controller paused
       - baseline and state snapshot recorded
@@ -11,30 +11,28 @@ milestones:
       - old bundle archived, not silently edited
       - lane/work-item/milestone schemas active
       - finite retry and restart budgets enforced
-      - human and external evidence states implemented
+      - machine-policy and external-evidence states implemented
       - completion expansion is proposal-only
-      - release uses pull requests
+      - release uses exact-SHA gated main-only promotion and automatic revert
       - factory and product CI separated
       - current queue safely migrated
       - one mechanical and one standard simulated work item complete
       - rollback tested
-      - human approval of source migration recorded
+      - machine-verifiable owner policy and source-migration receipt recorded
     requiredEvidence:
       - migration manifest
       - test matrix
       - queue migration hashes
       - scheduler simulation artifacts
       - rollback rehearsal transcript
-      - signed source-migration approval
+      - digest-bound source-migration machine-policy receipt
     forbiddenClaims:
       - product complete
       - commercially validated
       - customer approved
-    humanApprovalRequired: true
-    humanApprovalRefs: []
   - milestoneId: M1_NATIVE_PREFLIGHT
     type: ENGINEERING
-    status: PROPOSED
+    status: ACTIVE
     entryCriteria:
       - M0_FACTORY_MIGRATED completed
     exitCriteria:
@@ -57,8 +55,6 @@ milestones:
       - real incident reproduced
       - paid demand
       - native advantage demonstrated
-    humanApprovalRequired: false
-    humanApprovalRefs: []
   - milestoneId: M2_CONTROLLED_QUALIFICATION
     type: ENGINEERING
     status: PROPOSED
@@ -74,20 +70,18 @@ milestones:
       - contract is locally verifiable, expiring, and requalifiable
       - result viewer is thin and read-only
       - real 2–8 GPU execution occurs
-      - independent operator runs the journey
-      - qualified human approves only controlled external demonstration, not commercial support
+      - independent machine verifier runs the journey
+      - deterministic policy authorizes only controlled external demonstration, not commercial support
     requiredEvidence:
       - controlled baseline and candidate cases
       - legal and illegal reduction evidence
       - real GPU execution receipt
-      - independent operator receipt
-      - signed controlled-demonstration approval
+      - independent verifier receipt
+      - digest-bound controlled-demonstration policy receipt
     forbiddenClaims:
       - commercially validated
       - customer approved
       - universal safety
-    humanApprovalRequired: true
-    humanApprovalRefs: []
   - milestoneId: M3_PAID_PREFLIGHT
     type: COMMERCIAL
     status: WAITING_EXTERNAL
@@ -97,7 +91,7 @@ milestones:
       - real evidence can be imported locally under policy
       - one customer-specific decision is in supported envelope
       - paid preflight packet, contract, security package, and pricing hypothesis are ready
-      - adviser and reviewer availability confirmed
+      - independent machine verifier availability confirmed
       - no customer or payment claim is made yet
     requiredEvidence:
       - trusted incident archive access receipt
@@ -107,8 +101,6 @@ milestones:
       - customer demand proven
       - payment received
       - commercially supported
-    humanApprovalRequired: true
-    humanApprovalRefs: []
   - milestoneId: M4_PAID_PILOT
     type: COMMERCIAL
     status: WAITING_EXTERNAL
@@ -129,12 +121,10 @@ milestones:
     requiredEvidence:
       - trusted paid pilot receipt
       - customer decision and value receipt
-      - case-specific human claim approval
+      - case-specific machine claim-policy receipt
     forbiddenClaims:
       - universal safety
       - guaranteed root cause
-    humanApprovalRequired: true
-    humanApprovalRefs: []
   - milestoneId: M5_PAID_REPEAT
     type: COMMERCIAL
     status: WAITING_EXTERNAL
@@ -145,17 +135,15 @@ milestones:
       - no trust-core rewrite
       - setup and delivery effort decline
       - contract drift and expiry work
-      - another qualified operator participates
+      - another independent verifier participates
       - margin trajectory is improving
     requiredEvidence:
       - trusted second paid action receipt
-      - independent operator receipt
+      - independent verifier receipt
       - delivery economics record
     forbiddenClaims:
       - commercially supported pack
       - repeatability beyond observed cases
-    humanApprovalRequired: false
-    humanApprovalRefs: []
   - milestoneId: M6_COMMERCIALLY_SUPPORTED_PACK
     type: COMMERCIAL
     status: WAITING_EXTERNAL
@@ -166,7 +154,7 @@ milestones:
       - paid repeat
       - third same-family case or equivalent reusable proof
       - no trust-core rewrite
-      - qualified human pack approval
+      - deterministic pack-policy verification
       - security, support, and rollback are verified
       - native advantage remains current
       - commercially supportable scope and version policy exist
@@ -175,10 +163,8 @@ milestones:
       - second paid action receipt
       - third same-family case evidence
       - current native substitute benchmark
-      - signed commercial-pack approval
+      - digest-bound commercial-pack policy receipt
     forbiddenClaims:
       - universal safety
       - guaranteed root cause
       - support outside the approved scope
-    humanApprovalRequired: true
-    humanApprovalRefs: []

@@ -1,0 +1,40 @@
+{
+  "version": 3,
+  "decisionId": "OWNER-ZERO-HUMAN-20260811",
+  "authority": "explicit repository owner direction in Codex task",
+  "effectiveDate": "2026-08-11",
+  "decision": "TrainCapsule factory operation must require zero routine or exceptional human intervention.",
+  "replaces": [
+    "mandatory qualified-human approval as an operational dependency",
+    "human approval for roadmap expansion",
+    "human merge as the only release authorization",
+    "pull-request-first autonomous release",
+    "candidate or release branch publication"
+  ],
+  "machineReplacement": [
+    "deterministic policy evaluation",
+    "candidate-SHA-bound cryptographic receipts",
+    "required hosted CI",
+    "bounded automatic recovery",
+    "exact-candidate-SHA local and private pre-promotion gates",
+    "main-only publication",
+    "required hosted main-branch CI monitoring",
+    "automatic normal revert and candidate quarantine after failed hosted checks"
+  ],
+  "publicationPolicy": {
+    "onlyBranch": "main",
+    "nonMainPushes": "FORBIDDEN",
+    "pullRequests": "FORBIDDEN_AS_RUNTIME_DEPENDENCY",
+    "forcePush": "FORBIDDEN",
+    "failedHostedChecks": "AUTOMATIC_REVERT_AND_QUARANTINE"
+  },
+  "unchangedTruthBoundaries": [
+    "external and customer evidence requires attributable cryptographic receipts",
+    "synthetic evidence cannot advance commercial maturity",
+    "GPU execution cannot be claimed without GPU evidence",
+    "UNKNOWN cannot be converted into PASS",
+    "the controller cannot author external truth"
+  ],
+  "canonicalOwnerDirectives": "config/owner_directives.yaml",
+  "canonicalOwnerDirectivesSha256": "f803e131f5717b1384645f1dedb46646eb5a589b43025b1e34c1e09591d6f7c9"
+}

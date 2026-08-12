@@ -2,8 +2,8 @@ version: 3
 allowPaidUsage: false
 repository:
   baseBranch: main
-  releaseMode: pull_request
-  directMainPush: false
+  releaseMode: owner_directed_main_only
+  directMainPush: true
   requireCleanBase: true
   candidateManifestRequired: true
 execution:
@@ -36,9 +36,15 @@ runtime:
   redactSecrets: true
   rawCustomerEvidenceInRepository: false
 release:
-  createDraftPullRequest: true
-  autoMergeMechanical: false
-  autoMergeStandard: false
-  autoMergeIntegration: false
-  autoMergeTrustCore: false
+  publicationBranch: main
+  nonMainPushesForbidden: true
+  pullRequestDependencyForbidden: true
+  monitorHostedMainChecks: true
+  automaticRevertAndQuarantine: true
   requireCandidateShaMatch: true
+operatorPolicy:
+  zeroHumanOperation: true
+  policyGateMode: deterministic_machine_policy
+  ownerDirectedDeviationRecord: config/owner_directives.yaml
+  externalTruthRemainsReceiptBound: true
+  syntheticCommercialEvidenceForbidden: true

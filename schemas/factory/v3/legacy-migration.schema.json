@@ -4,7 +4,8 @@
       "enum": [
         "FACTORY",
         "MAPPED_TO_V3",
-        "DEFERRED_DESIGN"
+        "DEFERRED_DESIGN",
+        "DEFERRED_NON_BLOCKING"
       ],
       "title": "LegacyDisposition",
       "type": "string"

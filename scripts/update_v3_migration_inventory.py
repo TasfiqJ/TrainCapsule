@@ -23,6 +23,25 @@ def inventory() -> str:
         text=True,
     )
     records = [line.split("\t", 1) for line in completed.stdout.splitlines()]
+    tracked_paths = {path for _, path in records}
+    untracked = subprocess.run(
+        ["git", "ls-files", "--others", "--exclude-standard"],
+        cwd=ROOT,
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    excluded_prefixes = (
+        "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/",
+        "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11.zip",
+    )
+    excluded_paths = {"factory/roadmap/migrations/v2_to_v3.yaml.previous"}
+    for path in untracked.stdout.splitlines():
+        if path in excluded_paths or path.startswith(excluded_prefixes):
+            continue
+        if path not in tracked_paths:
+            records.append(["A", path])
+    records.sort(key=lambda record: record[1])
     lines = [
         START,
         "## Complete tracked file inventory",

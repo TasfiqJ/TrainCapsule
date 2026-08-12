@@ -1495,6 +1495,10 @@ async def run_pipeline(
     resume: bool = True,
 ) -> dict[str, object]:
     repo_root = repo_root.resolve()
+    if config.version >= 3:
+        raise PipelineFailure(
+            "legacy V2 pipeline is disabled for V3; use V3Controller and its main-only publisher"
+        )
     if config.execution_mode == "claude_led_nodes":
         task = normalize_claude_led_nodes(task)
     task = apply_objective_stage_contracts(task)

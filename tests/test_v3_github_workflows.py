@@ -11,7 +11,11 @@ EXPECTED_FILES = {
     "product-contract.yml": "TrainCapsule / Product contract",
     "security.yml": "TrainCapsule / Security",
     "source-of-truth-integrity.yml": "TrainCapsule / Source-of-truth integrity",
+    "packaging-install.yml": "TrainCapsule / Packaging install",
+    "docs-schemas.yml": "TrainCapsule / Docs and schemas",
+    "source-freshness.yml": "TrainCapsule / Source freshness",
 }
+OPTIONAL_MANUAL_FILES = {"gpu-validation.yml": "TrainCapsule / GPU validation"}
 
 
 def test_required_workflow_files_and_config_names_match() -> None:
@@ -20,10 +24,10 @@ def test_required_workflow_files_and_config_names_match() -> None:
     config = load_github_config(root / "config" / "github.yaml")
     observed_files = {path.name for path in workflow_root.glob("*.yml")}
 
-    assert observed_files == set(EXPECTED_FILES)
+    assert observed_files == set(EXPECTED_FILES) | set(OPTIONAL_MANUAL_FILES)
     assert config.remote_ci.required_workflows == list(EXPECTED_FILES.values())
-    assert config.release_mode == "pull_request"
-    assert config.direct_main_push is False
+    assert config.release_mode == "owner_directed_main_only"
+    assert config.direct_main_push is True
 
 
 def test_required_workflows_are_bounded_hosted_and_secret_free() -> None:
@@ -38,12 +42,19 @@ def test_required_workflows_are_bounded_hosted_and_secret_free() -> None:
         assert "timeout-minutes:" in text
         assert "concurrency:" in text
         assert "permissions:\n  contents: read" in text
-        assert "retention-days:" in text
-        assert "pull_request:" in text
+        if "upload-artifact" in text:
+            assert "retention-days:" in text
+        assert "push:\n    branches: [main]" in text
+        assert "pull_request:" not in text
         assert "${{ secrets" not in text
         uses = [line for line in text.splitlines() if "uses:" in line]
         assert uses
         assert all(action.search(line) for line in uses)
+
+    gpu = (workflow_root / "gpu-validation.yml").read_text(encoding="utf-8")
+    assert "workflow_dispatch:" in gpu
+    assert "push:" not in gpu
+    assert "pull_request:" not in gpu
 
 
 def test_workflow_test_scopes_are_explicit() -> None:

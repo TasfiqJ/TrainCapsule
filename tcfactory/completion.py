@@ -22,7 +22,7 @@ from .models import (
 from .structured_runner import run_structured_read_only_review
 from .util import run_command, utc_stamp, write_json
 from .v3.base import DIGEST_PATTERN, V3Model
-from .v3.enums import MilestoneStatus, MilestoneType, RiskTier, WorkStatus
+from .v3.enums import MilestoneStatus, MilestoneType, RiskTier, WorkKind, WorkStatus
 from .v3.milestones import Milestone
 from .v3.work_items import WorkItemCollection
 from .yamlutil import load_yaml
@@ -39,14 +39,16 @@ class CompletionProposal(V3Model):
     proposed_work: list[str] = Field(min_length=1, max_length=5)
     reviewer_artifact_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     accepted: bool = False
-    accepted_by_approval_ref: str | None = None
+    accepted_by_machine_policy_ref: str | None = None
 
     @model_validator(mode="after")
     def require_acceptance_authority(self) -> CompletionProposal:
-        if self.accepted and not self.accepted_by_approval_ref:
-            raise ValueError("accepted completion proposal requires explicit approval reference")
-        if not self.accepted and self.accepted_by_approval_ref:
-            raise ValueError("unaccepted proposal cannot carry acceptance authority")
+        if self.accepted and not self.accepted_by_machine_policy_ref:
+            raise ValueError(
+                "accepted completion proposal requires an explicit machine-policy reference"
+            )
+        if not self.accepted and self.accepted_by_machine_policy_ref:
+            raise ValueError("unaccepted proposal cannot carry machine-policy authority")
         return self
 
 
@@ -55,8 +57,8 @@ class MilestoneCompletionDecision(V3Model):
     decision: MilestoneStatus
     deterministic_failures: list[str]
     independent_review_refs: list[str]
+    machine_policy_receipt_refs: list[str]
     trusted_external_receipt_refs: list[str]
-    human_approval_refs: list[str]
     proposals: list[CompletionProposal] = Field(max_length=5)
     expansion_round: int = Field(default=0, ge=0, le=1)
 
@@ -67,8 +69,8 @@ def evaluate_v3_milestone_completion(
     work_items: WorkItemCollection,
     deterministic_evidence: dict[str, list[str]],
     independent_review_refs: list[str],
+    machine_policy_receipt_refs: list[str],
     trusted_external_receipt_refs: list[str],
-    human_approval_refs: list[str],
     proposals: list[CompletionProposal] | None = None,
     expansion_round: int = 0,
     controlled_fixture_only: bool = False,
@@ -91,12 +93,16 @@ def evaluate_v3_milestone_completion(
     if review_required and not independent_review_refs:
         failures.append("integration/trust milestone lacks independent adversarial review")
 
+    machine_policy_required = any(
+        item.kind is WorkKind.MACHINE_POLICY_REVIEW for item in candidates
+    )
+    if machine_policy_required and not machine_policy_receipt_refs:
+        failures.append("milestone lacks a candidate-bound machine-policy receipt")
+
     milestone_number = int(milestone.milestone_id.split("_", 1)[0][1:])
     external_required = milestone.type is MilestoneType.COMMERCIAL or milestone_number >= 3
     if external_required and (controlled_fixture_only or not trusted_external_receipt_refs):
         decision = MilestoneStatus.WAITING_EXTERNAL
-    elif milestone.human_approval_required and not human_approval_refs:
-        decision = MilestoneStatus.WAITING_HUMAN
     elif failures:
         decision = MilestoneStatus.ACTIVE
     else:
@@ -114,8 +120,8 @@ def evaluate_v3_milestone_completion(
         decision=decision,
         deterministic_failures=failures,
         independent_review_refs=independent_review_refs,
+        machine_policy_receipt_refs=machine_policy_receipt_refs,
         trusted_external_receipt_refs=trusted_external_receipt_refs,
-        human_approval_refs=human_approval_refs,
         proposals=bounded_proposals,
         expansion_round=expansion_round,
     )

@@ -139,7 +139,7 @@ TASK_TYPE_TEMPLATES: dict[WorkKind, str] = {
     WorkKind.RESEARCH: "attributable-research-v3",
     WorkKind.CONTROLLED_EXPERIMENT: "controlled-experiment-v3",
     WorkKind.EXTERNAL_EVIDENCE: "external-evidence-wait-v3",
-    WorkKind.HUMAN_REVIEW: "human-review-wait-v3",
+    WorkKind.MACHINE_POLICY_REVIEW: "machine-policy-review-v3",
     WorkKind.COMMERCIAL_EXPERIMENT: "commercial-experiment-v3",
     WorkKind.MAINTENANCE: "factory-maintenance-v3",
     WorkKind.MIGRATION: "migration-v3",
@@ -167,11 +167,10 @@ def compile_work_item_packet(
 
     if not item.automatable or item.kind in {
         WorkKind.EXTERNAL_EVIDENCE,
-        WorkKind.HUMAN_REVIEW,
         WorkKind.COMMERCIAL_EXPERIMENT,
     }:
         raise PacketPolicyError(
-            f"{item.work_item_id} requires external or human action; AI packet refused"
+            f"{item.work_item_id} requires external evidence; AI packet refused"
         )
 
     return V3TaskPacket(

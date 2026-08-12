@@ -4,6 +4,9 @@ from .importer import (
     FlightRecorderImportError,
     ImportErrorCode,
     PyTorchFlightRecorderImporter,
+    lifecycle_disagreement_from_raw,
+    verified_lifecycle_entries,
+    verify_import_against_raw,
 )
 
 __all__ = [
@@ -12,4 +15,7 @@ __all__ = [
     "FlightRecorderImportError",
     "ImportErrorCode",
     "PyTorchFlightRecorderImporter",
+    "lifecycle_disagreement_from_raw",
+    "verify_import_against_raw",
+    "verified_lifecycle_entries",
 ]

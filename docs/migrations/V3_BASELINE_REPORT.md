@@ -1,5 +1,9 @@
 # TrainCapsule V3 baseline report
 
+> Historical baseline only. The completed migration state and owner-directed zero-human/main-only
+> deviations are recorded in `V3_MIGRATION_REPORT.md`; statements below describe the pre-migration
+> snapshot and are not active runtime policy.
+
 ## Repository baseline
 
 - Repository: `/home/jasim/projects/traincapsule`
@@ -51,7 +55,7 @@ An earlier capture attempt invoked the commands from Windows instead of WSL and 
 
 ## Baseline deviations affecting migration
 
-- Current user instruction requires all eventual publishing to `main`; the bundle's migration-branch and draft-PR instructions are obsolete for this execution. Product/factory V3 release defaults will still be implemented as pull-request mode with direct-main release disabled.
+- Current owner instruction requires all publication to `main`; the bundle's migration-branch and draft-PR instructions are superseded. The implemented V3 default is exact-SHA main-only publication with non-main pushes and PR dependency forbidden.
 - The supplied ZIP and extracted review directory are inside the repository root but remain untracked and will not be committed.
-- Human approval for V3 source migration and any external release is not fabricated by this migration. M0 remains `WAITING_HUMAN` for that evidence even when engineering gates pass.
+- The later zero-human owner override replaces operational approval with deterministic machine-policy receipts. M0 is now completed and M1 active; no external fact is fabricated by that override.
 - No GPU or customer evidence was available or claimed at baseline.

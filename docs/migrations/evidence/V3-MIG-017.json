@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "workItemId": "V3-MIG-017",
+  "result": "PASS",
+  "evidenceType": "DISPOSABLE_ROLLBACK_REHEARSAL",
+  "recordedAt": "2026-08-11T22:45:00Z",
+  "rollbackRef": "safety/traincapsule-v3-pre-migration-20260811T212024Z",
+  "restoredSha": "6b480232fa92b069103da44c475bd17bcb3e6bd1",
+  "legacyLedgerSha256": "ab5d10c6718d3a9fdf53dd78cf0c387e995cd1723cf10b76fb53e14af559c994",
+  "checks": [
+    "detached disposable worktree reached the exact rollback SHA",
+    "disposable rollback tree was clean",
+    "legacy ledger matched the snapshot-bound digest",
+    "disposable worktree was removed without modifying main or runtime state"
+  ]
+}

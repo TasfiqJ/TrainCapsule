@@ -1,4 +1,4 @@
-version: 2
+version: 3
 cross_session_messaging:
   enabled: true
   minimum_cli_version: 2.1.224

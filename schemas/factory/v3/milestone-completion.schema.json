@@ -37,7 +37,7 @@
           "title": "Accepted",
           "type": "boolean"
         },
-        "acceptedByApprovalRef": {
+        "acceptedByMachinePolicyRef": {
           "anyOf": [
             {
               "type": "string"
@@ -47,7 +47,7 @@
             }
           ],
           "default": null,
-          "title": "Acceptedbyapprovalref"
+          "title": "Acceptedbymachinepolicyref"
         }
       },
       "required": [
@@ -65,7 +65,6 @@
         "PROPOSED",
         "ACTIVE",
         "WAITING_EXTERNAL",
-        "WAITING_HUMAN",
         "PAUSED",
         "COMPLETED",
         "CANCELLED"
@@ -97,18 +96,18 @@
       "title": "Independentreviewrefs",
       "type": "array"
     },
+    "machinePolicyReceiptRefs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Machinepolicyreceiptrefs",
+      "type": "array"
+    },
     "trustedExternalReceiptRefs": {
       "items": {
         "type": "string"
       },
       "title": "Trustedexternalreceiptrefs",
-      "type": "array"
-    },
-    "humanApprovalRefs": {
-      "items": {
-        "type": "string"
-      },
-      "title": "Humanapprovalrefs",
       "type": "array"
     },
     "proposals": {
@@ -132,8 +131,8 @@
     "decision",
     "deterministicFailures",
     "independentReviewRefs",
+    "machinePolicyReceiptRefs",
     "trustedExternalReceiptRefs",
-    "humanApprovalRefs",
     "proposals"
   ],
   "title": "MilestoneCompletionDecision",

@@ -131,6 +131,8 @@ async def run_agent_stage(
     session_name_override: str | None = None,
     peer_names: list[str] | None = None,
     peer_messaging_override: bool | None = None,
+    system_prompt_override: str | None = None,
+    task_prompt_override: str | None = None,
 ) -> StageResult:
     if config.auth_mode == "max_oauth_only":
         try:
@@ -351,28 +353,34 @@ async def run_agent_stage(
     else:
         sandbox = None
 
-    system_prompt = compose_system_prompt(
-        repo_root=repo_root,
-        global_prompt_path=global_prompt_path,
-        role=role_config,
-        role_name=stage.role.value,
-    )
-    context_manifest = build_context_manifest(
-        repo_root=repo_root,
-        worktree=worktree,
-        config=config,
-        task=task,
-        stage=stage,
-        base_sha=base_sha or "HEAD",
-        previous_findings=previous_findings,
-        handoff_path=handoff_path,
-    )
-    task_prompt = compose_task_prompt(
-        task,
-        stage,
-        attempt=attempt,
-        context_manifest=context_manifest,
-    )
+    if (system_prompt_override is None) != (task_prompt_override is None):
+        raise ValueError("system and task prompt overrides must be supplied together")
+    if system_prompt_override is not None and task_prompt_override is not None:
+        system_prompt = system_prompt_override
+        task_prompt = task_prompt_override
+    else:
+        system_prompt = compose_system_prompt(
+            repo_root=repo_root,
+            global_prompt_path=global_prompt_path,
+            role=role_config,
+            role_name=stage.role.value,
+        )
+        context_manifest = build_context_manifest(
+            repo_root=repo_root,
+            worktree=worktree,
+            config=config,
+            task=task,
+            stage=stage,
+            base_sha=base_sha or "HEAD",
+            previous_findings=previous_findings,
+            handoff_path=handoff_path,
+        )
+        task_prompt = compose_task_prompt(
+            task,
+            stage,
+            attempt=attempt,
+            context_manifest=context_manifest,
+        )
     # Claude-native controls belong in the system context. In particular, do not append them
     # after `/goal`: everything after `/goal` is part of the evaluator condition, which wastes
     # tokens and weakens the distinction between task authority and optional coordination.

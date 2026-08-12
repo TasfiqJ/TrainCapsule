@@ -224,7 +224,7 @@ def _default_goal(task: TaskPacket, _max_turns: int) -> str:
         "no test, oracle, value threshold, "
         "or expected result is weakened; and git diff contains only allowed task work. "
         "Stop at the finite session boundary and return the exact disposition when work cannot "
-        "complete: DEFER, NATIVE_SUFFICIENT, REJECTED_VALUE, WAITING_EXTERNAL, or WAITING_HUMAN."
+        "complete: DEFER, NATIVE_SUFFICIENT, REJECTED_VALUE, WAITING_EXTERNAL, or BLOCKED_POLICY."
     )
 
 

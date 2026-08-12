@@ -1,0 +1,50 @@
+name: TrainCapsule / Packaging install
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: packaging-install-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  packaging-install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff # v6
+        with:
+          python-version: "3.12"
+      - name: Build independent product wheels
+        shell: bash
+        run: |
+          set -o pipefail
+          mkdir -p .ci-artifacts/wheels
+          for package in traincapsule-core traincapsule-ingest-pytorch traincapsule-qualify traincapsule-cli; do
+            uv build "packages/${package}" --wheel --out-dir .ci-artifacts/wheels
+          done
+      - name: Run full journey from clean wheel install
+        shell: bash
+        run: |
+          set -o pipefail
+          uv venv .ci-product-venv
+          uv pip install --python .ci-product-venv/bin/python .ci-artifacts/wheels/*.whl
+          .ci-product-venv/bin/traincapsule --help > .ci-artifacts/installed-cli-help.txt
+          .ci-product-venv/bin/python -c "import traincapsule_core, traincapsule_ingest_pytorch, traincapsule_qualify, traincapsule_cli"
+          TRAINCAPSULE_INSTALLED_CLI="$PWD/.ci-product-venv/bin/traincapsule" \
+            uv run pytest tests/product/test_install_to_preflight_journey.py \
+            2>&1 | tee .ci-artifacts/installed-journey.log
+      - name: Retain packaging evidence
+        if: always()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: packaging-install-${{ github.run_id }}
+          path: .ci-artifacts/
+          if-no-files-found: error
+          retention-days: 14

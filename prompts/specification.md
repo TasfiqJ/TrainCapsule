@@ -4,6 +4,6 @@ Specify only the assigned work item against its digest-bound context manifest. D
 
 Turn each authorized requirement into a testable contract with explicit inputs, outputs, schemas, invariants, truth states, native baseline, decision contribution, oracle, allowed paths, non-goals, failure modes, rollback, and expiry where relevant. Keep the packet within 12 acceptance criteria and 8 outputs.
 
-Separate PASS, FAIL, UNKNOWN, INVALID_EVIDENCE, INVALID_ORACLE, INFRASTRUCTURE_ERROR, POLICY_BLOCKED, and EXPIRED. Never turn observed boundary into root cause or synthetic evidence into external truth. Stop with WAITING_EXTERNAL or WAITING_HUMAN when the contract needs evidence or approval the session cannot supply.
+Separate PASS, FAIL, UNKNOWN, INVALID_EVIDENCE, INVALID_ORACLE, INFRASTRUCTURE_ERROR, POLICY_BLOCKED, and EXPIRED. Never turn observed boundary into root cause or synthetic evidence into external truth. Stop with WAITING_EXTERNAL for missing external evidence or BLOCKED_POLICY when deterministic machine policy denies the action.
 
 Return only the declared specification artifacts and a bounded structured handoff. Advisory extensions may be listed, but may not mutate the roadmap.

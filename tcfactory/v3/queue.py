@@ -8,15 +8,40 @@ import os
 import re
 import shutil
 from collections import defaultdict
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
 
 import yaml
+from pydantic import Field
 
+from tcfactory.util import read_json, write_json
+from tcfactory.v3.base import V3Model
 from tcfactory.v3.enums import Lane, WorkStatus
 from tcfactory.v3.work_items import WorkItem, assert_status_transition
 from tcfactory.yamlutil import load_yaml
+
+
+class QueueLease(V3Model):
+    """Durable, renewable ownership of one RUNNING V3 item."""
+
+    version: int = Field(default=3, ge=3, le=3)
+    work_item_id: str = Field(pattern=r"^V3-[A-Z]+-[0-9]{3}$")
+    owner_id: str = Field(min_length=1, max_length=128)
+    lease_id: str = Field(pattern=r"^LEASE-[A-F0-9]{32}$")
+    claimed_at: datetime
+    expires_at: datetime
+    generation: int = Field(default=1, ge=1)
+
+
+class TransitionIntent(V3Model):
+    """Write-ahead record that makes a cross-directory transition recoverable."""
+
+    version: int = Field(default=3, ge=3, le=3)
+    work_item_id: str
+    source: WorkStatus
+    target: WorkStatus
+    updated_at: datetime
 
 
 class V3Queue:
@@ -25,6 +50,8 @@ class V3Queue:
     def __init__(self, root: Path) -> None:
         self.root = root.resolve()
         self.archive_root = self.root / "archive/v2"
+        self.lease_root = self.root / ".leases"
+        self.transaction_root = self.root / ".transactions"
 
     def _state_dir(self, state: WorkStatus) -> Path:
         return self.root / state.value.lower()
@@ -40,6 +67,14 @@ class V3Queue:
         for state in WorkStatus:
             self._ensure_directory(self._state_dir(state))
         self._ensure_directory(self.archive_root)
+        self._ensure_directory(self.lease_root)
+        self._ensure_directory(self.transaction_root)
+
+    def _lease_path(self, work_item_id: str) -> Path:
+        return self.lease_root / f"{work_item_id}.json"
+
+    def _transaction_path(self, work_item_id: str) -> Path:
+        return self.transaction_root / f"{work_item_id}.json"
 
     def _paths(self, work_item_id: str) -> list[Path]:
         name = f"{work_item_id}.yaml"
@@ -75,6 +110,26 @@ class V3Queue:
         self._atomic_write(target, item)
         return target
 
+    def bind_external_evidence(
+        self,
+        work_item_id: str,
+        *,
+        receipt_id: str,
+        updated_at: datetime,
+    ) -> Path:
+        """Bind a controller-verified receipt before an outside-fact transition."""
+
+        source = self.locate(work_item_id)
+        item = WorkItem.model_validate(load_yaml(source))
+        if not item.external_receipt_required:
+            raise ValueError("work item does not require external evidence")
+        references = list(dict.fromkeys([*item.external_evidence_refs, receipt_id]))
+        payload = item.model_dump(mode="python", by_alias=False)
+        payload.update({"external_evidence_refs": references, "updated_at": updated_at})
+        updated = WorkItem.model_validate(payload)
+        self._atomic_write(source, updated)
+        return source
+
     def transition(
         self,
         work_item_id: str,
@@ -85,12 +140,154 @@ class V3Queue:
         source = self.locate(work_item_id)
         item = WorkItem.model_validate(load_yaml(source))
         assert_status_transition(item.status, target)
-        updated = item.model_copy(update={"status": target, "updated_at": updated_at})
+        # Re-validate after every state change. ``model_copy(update=...)`` alone skips
+        # Pydantic validators and previously allowed COMPLETED to bypass evidence gates.
+        payload = item.model_dump(mode="python", by_alias=False)
+        payload.update({"status": target, "updated_at": updated_at})
+        updated = WorkItem.model_validate(payload)
         destination = self._state_dir(target) / source.name
         self._ensure_directory(destination.parent)
+        intent = TransitionIntent(
+            work_item_id=work_item_id,
+            source=item.status,
+            target=target,
+            updated_at=updated_at,
+        )
+        journal = self._transaction_path(work_item_id)
+        write_json(journal, intent.model_dump(mode="json", by_alias=True))
+        # The source record is first made semantically current, then moved atomically.
+        # A crash in between is repaired from the write-ahead intent at startup.
+        self._atomic_write(source, updated)
         os.replace(source, destination)
-        self._atomic_write(destination, updated)
+        journal.unlink(missing_ok=True)
+        if target is not WorkStatus.RUNNING:
+            self._lease_path(work_item_id).unlink(missing_ok=True)
         return destination
+
+    def reconcile_transactions(self) -> list[str]:
+        """Complete interrupted transitions without guessing or discarding evidence."""
+
+        repaired: list[str] = []
+        if not self.transaction_root.is_dir():
+            return repaired
+        for journal in sorted(self.transaction_root.glob("V3-*.json")):
+            intent = TransitionIntent.model_validate(read_json(journal, {}))
+            name = f"{intent.work_item_id}.yaml"
+            source = self._state_dir(intent.source) / name
+            destination = self._state_dir(intent.target) / name
+            if destination.is_file() and not source.exists():
+                observed = WorkItem.model_validate(load_yaml(destination))
+                if observed.status is not intent.target:
+                    raise ValueError("transition destination has the wrong embedded status")
+            elif source.is_file() and not destination.exists():
+                observed = WorkItem.model_validate(load_yaml(source))
+                if observed.status is not intent.target:
+                    raise ValueError("transition source does not contain target state")
+                self._ensure_directory(destination.parent)
+                os.replace(source, destination)
+            else:
+                raise ValueError(
+                    f"ambiguous interrupted transition for {intent.work_item_id}"
+                )
+            journal.unlink()
+            repaired.append(intent.work_item_id)
+        return repaired
+
+    def items(self, *states: WorkStatus) -> list[WorkItem]:
+        """Return typed queue state in stable order."""
+
+        selected = states or tuple(WorkStatus)
+        result: list[WorkItem] = []
+        for state in selected:
+            directory = self._state_dir(state)
+            if not directory.is_dir():
+                continue
+            result.extend(
+                WorkItem.model_validate(load_yaml(path))
+                for path in sorted(directory.glob("V3-*.yaml"))
+            )
+        identifiers = [item.work_item_id for item in result]
+        if len(identifiers) != len(set(identifiers)):
+            raise ValueError("duplicate active V3 queue work item")
+        return result
+
+    def claim(
+        self,
+        work_item_id: str,
+        *,
+        owner_id: str,
+        now: datetime,
+        lease_seconds: int = 900,
+    ) -> QueueLease:
+        """Atomically claim a QUEUED item and bind it to an expiring lease."""
+
+        if lease_seconds < 30 or lease_seconds > 14_400:
+            raise ValueError("lease_seconds must be between 30 and 14400")
+        item = self.load(work_item_id)
+        if item.status is not WorkStatus.QUEUED:
+            raise ValueError("only QUEUED work may be claimed")
+        lease_path = self._lease_path(work_item_id)
+        if lease_path.exists():
+            existing = QueueLease.model_validate(read_json(lease_path, {}))
+            if existing.expires_at > now:
+                raise ValueError("work item already has an active lease")
+            lease_path.unlink()
+        lease = QueueLease(
+            work_item_id=work_item_id,
+            owner_id=owner_id,
+            lease_id=f"LEASE-{uuid4().hex.upper()}",
+            claimed_at=now,
+            expires_at=now + timedelta(seconds=lease_seconds),
+        )
+        write_json(lease_path, lease.model_dump(mode="json", by_alias=True))
+        try:
+            self.transition(work_item_id, WorkStatus.RUNNING, updated_at=now)
+            # transition deliberately clears non-RUNNING leases only.
+        except Exception:
+            lease_path.unlink(missing_ok=True)
+            raise
+        return lease
+
+    def renew(
+        self,
+        work_item_id: str,
+        *,
+        lease_id: str,
+        now: datetime,
+        lease_seconds: int = 900,
+    ) -> QueueLease:
+        lease_path = self._lease_path(work_item_id)
+        lease = QueueLease.model_validate(read_json(lease_path, {}))
+        if lease.lease_id != lease_id or lease.expires_at <= now:
+            raise ValueError("lease is missing, expired, or owned by another controller")
+        renewed = lease.model_copy(
+            update={
+                "expires_at": now + timedelta(seconds=lease_seconds),
+                "generation": lease.generation + 1,
+            }
+        )
+        write_json(lease_path, renewed.model_dump(mode="json", by_alias=True))
+        return renewed
+
+    def recover_expired_claims(self, *, now: datetime) -> list[str]:
+        """Move abandoned RUNNING work to an explicit scoped technical block."""
+
+        recovered: list[str] = []
+        for item in self.items(WorkStatus.RUNNING):
+            lease_path = self._lease_path(item.work_item_id)
+            if not lease_path.is_file():
+                expired = True
+            else:
+                lease = QueueLease.model_validate(read_json(lease_path, {}))
+                expired = lease.expires_at <= now
+            if expired:
+                self.transition(
+                    item.work_item_id,
+                    WorkStatus.BLOCKED_TECHNICAL,
+                    updated_at=now,
+                )
+                recovered.append(item.work_item_id)
+        return recovered
 
     def by_lane(self) -> dict[Lane, list[WorkItem]]:
         result: dict[Lane, list[WorkItem]] = defaultdict(list)
@@ -109,19 +306,7 @@ class V3Queue:
     def recover_interrupted(self, *, updated_at: datetime) -> list[str]:
         """Move interrupted running items to an explicit technical block, never READY."""
 
-        running = self._state_dir(WorkStatus.RUNNING)
-        if not running.is_dir():
-            return []
-        recovered: list[str] = []
-        for path in sorted(running.glob("V3-*.yaml")):
-            item = WorkItem.model_validate(load_yaml(path))
-            self.transition(
-                item.work_item_id,
-                WorkStatus.BLOCKED_TECHNICAL,
-                updated_at=updated_at,
-            )
-            recovered.append(item.work_item_id)
-        return recovered
+        return self.recover_expired_claims(now=updated_at)
 
     def archive_v2(
         self,

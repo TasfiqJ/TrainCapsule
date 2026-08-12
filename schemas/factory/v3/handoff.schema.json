@@ -36,6 +36,13 @@
           "title": "Milestone",
           "type": "string"
         },
+        "taskType": {
+          "$ref": "#/$defs/WorkKind"
+        },
+        "decisionContribution": {
+          "title": "Decisioncontribution",
+          "type": "string"
+        },
         "disposition": {
           "$ref": "#/$defs/Disposition"
         },
@@ -59,6 +66,29 @@
           "title": "Candidatesha",
           "type": "string"
         },
+        "sourceDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sourcedigest",
+          "type": "string"
+        },
+        "contextDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contextdigest",
+          "type": "string"
+        },
+        "candidateManifestDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Candidatemanifestdigest"
+        },
         "backendSessionRef": {
           "anyOf": [
             {
@@ -71,14 +101,17 @@
           "default": null,
           "title": "Backendsessionref"
         },
-        "nextAction": {
+        "nextAuthorizedTransition": {
           "minLength": 1,
-          "title": "Nextaction",
+          "title": "Nextauthorizedtransition",
           "type": "string"
         },
         "findings": {
           "items": {
-            "type": "string"
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
           },
           "title": "Findings",
           "type": "array"
@@ -89,23 +122,59 @@
           },
           "title": "Artifactdigests",
           "type": "object"
+        },
+        "circuitBreakerState": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Circuitbreakerstate"
+        },
+        "externalEvidenceRequired": {
+          "title": "Externalevidencerequired",
+          "type": "boolean"
         }
       },
       "required": [
         "workItemId",
         "lane",
         "milestone",
+        "taskType",
+        "decisionContribution",
         "disposition",
         "attempt",
         "attemptsRemaining",
         "baseSha",
         "candidateSha",
-        "nextAction",
+        "sourceDigest",
+        "contextDigest",
+        "nextAuthorizedTransition",
         "findings",
-        "artifactDigests"
+        "artifactDigests",
+        "externalEvidenceRequired"
       ],
       "title": "V3HandoffPayload",
       "type": "object"
+    },
+    "WorkKind": {
+      "enum": [
+        "CODE",
+        "SPECIFICATION",
+        "RESEARCH",
+        "CONTROLLED_EXPERIMENT",
+        "EXTERNAL_EVIDENCE",
+        "MACHINE_POLICY_REVIEW",
+        "COMMERCIAL_EXPERIMENT",
+        "MAINTENANCE",
+        "MIGRATION"
+      ],
+      "title": "WorkKind",
+      "type": "string"
     }
   },
   "additionalProperties": false,

@@ -47,32 +47,71 @@
       "title": "ExecutionPolicy",
       "type": "object"
     },
+    "OperatorPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "zeroHumanOperation": {
+          "const": true,
+          "title": "Zerohumanoperation",
+          "type": "boolean"
+        },
+        "policyGateMode": {
+          "const": "deterministic_machine_policy",
+          "title": "Policygatemode",
+          "type": "string"
+        },
+        "ownerDirectedDeviationRecord": {
+          "minLength": 1,
+          "title": "Ownerdirecteddeviationrecord",
+          "type": "string"
+        },
+        "externalTruthRemainsReceiptBound": {
+          "const": true,
+          "title": "Externaltruthremainsreceiptbound",
+          "type": "boolean"
+        },
+        "syntheticCommercialEvidenceForbidden": {
+          "const": true,
+          "title": "Syntheticcommercialevidenceforbidden",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "zeroHumanOperation",
+        "policyGateMode",
+        "ownerDirectedDeviationRecord",
+        "externalTruthRemainsReceiptBound",
+        "syntheticCommercialEvidenceForbidden"
+      ],
+      "title": "OperatorPolicy",
+      "type": "object"
+    },
     "ReleasePolicy": {
       "additionalProperties": false,
       "properties": {
-        "createDraftPullRequest": {
+        "publicationBranch": {
+          "const": "main",
+          "title": "Publicationbranch",
+          "type": "string"
+        },
+        "nonMainPushesForbidden": {
           "const": true,
-          "title": "Createdraftpullrequest",
+          "title": "Nonmainpushesforbidden",
           "type": "boolean"
         },
-        "autoMergeMechanical": {
-          "const": false,
-          "title": "Automergemechanical",
+        "pullRequestDependencyForbidden": {
+          "const": true,
+          "title": "Pullrequestdependencyforbidden",
           "type": "boolean"
         },
-        "autoMergeStandard": {
-          "const": false,
-          "title": "Automergestandard",
+        "monitorHostedMainChecks": {
+          "const": true,
+          "title": "Monitorhostedmainchecks",
           "type": "boolean"
         },
-        "autoMergeIntegration": {
-          "const": false,
-          "title": "Automergeintegration",
-          "type": "boolean"
-        },
-        "autoMergeTrustCore": {
-          "const": false,
-          "title": "Automergetrustcore",
+        "automaticRevertAndQuarantine": {
+          "const": true,
+          "title": "Automaticrevertandquarantine",
           "type": "boolean"
         },
         "requireCandidateShaMatch": {
@@ -82,11 +121,11 @@
         }
       },
       "required": [
-        "createDraftPullRequest",
-        "autoMergeMechanical",
-        "autoMergeStandard",
-        "autoMergeIntegration",
-        "autoMergeTrustCore",
+        "publicationBranch",
+        "nonMainPushesForbidden",
+        "pullRequestDependencyForbidden",
+        "monitorHostedMainChecks",
+        "automaticRevertAndQuarantine",
         "requireCandidateShaMatch"
       ],
       "title": "ReleasePolicy",
@@ -101,12 +140,12 @@
           "type": "string"
         },
         "releaseMode": {
-          "const": "pull_request",
+          "const": "owner_directed_main_only",
           "title": "Releasemode",
           "type": "string"
         },
         "directMainPush": {
-          "const": false,
+          "const": true,
           "title": "Directmainpush",
           "type": "boolean"
         },
@@ -296,6 +335,9 @@
     },
     "release": {
       "$ref": "#/$defs/ReleasePolicy"
+    },
+    "operatorPolicy": {
+      "$ref": "#/$defs/OperatorPolicy"
     }
   },
   "required": [
@@ -304,7 +346,8 @@
     "sourceOfTruth",
     "roadmap",
     "runtime",
-    "release"
+    "release",
+    "operatorPolicy"
   ],
   "title": "FactoryV3Config",
   "type": "object",

@@ -3,7 +3,6 @@
     "EligibilityOutcome": {
       "enum": [
         "ELIGIBLE_FOR_QUALIFICATION",
-        "ELIGIBLE_WITH_HUMAN_REVIEW",
         "NEEDS_MORE_EVIDENCE",
         "NATIVE_WORKFLOW_SUFFICIENT",
         "TECHNICALLY_POSSIBLE_BUT_UNECONOMIC",
@@ -13,6 +12,112 @@
       ],
       "title": "EligibilityOutcome",
       "type": "string"
+    },
+    "ExperimentEconomics": {
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "minLength": 1,
+          "title": "Basis",
+          "type": "string"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{3}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currency"
+        },
+        "estimatedCost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimatedcost"
+        },
+        "estimatedDurationSeconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimateddurationseconds"
+        }
+      },
+      "required": [
+        "basis"
+      ],
+      "title": "ExperimentEconomics",
+      "type": "object"
+    },
+    "IdentityStrength": {
+      "enum": [
+        "FULLY_VERIFIED",
+        "PARTIALLY_VERIFIED",
+        "CUSTOMER_ATTESTED",
+        "UNVERIFIED",
+        "CONFLICTING"
+      ],
+      "title": "IdentityStrength",
+      "type": "string"
+    },
+    "MachineVerification": {
+      "additionalProperties": false,
+      "properties": {
+        "outcome": {
+          "$ref": "#/$defs/VerificationOutcome"
+        },
+        "policy": {
+          "$ref": "#/$defs/PolicyName"
+        },
+        "reason": {
+          "minLength": 1,
+          "title": "Reason",
+          "type": "string"
+        },
+        "subjectDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Subjectdigest",
+          "type": "string"
+        },
+        "verifier": {
+          "const": "traincapsule-deterministic-policy",
+          "default": "traincapsule-deterministic-policy",
+          "title": "Verifier",
+          "type": "string"
+        },
+        "verifierVersion": {
+          "const": "1",
+          "default": "1",
+          "title": "Verifierversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "policy",
+        "outcome",
+        "subjectDigest",
+        "reason"
+      ],
+      "title": "MachineVerification",
+      "type": "object"
     },
     "OperationalDecision": {
       "enum": [
@@ -24,6 +129,18 @@
         "TECHNICALLY_VALID_BUT_NOT_ECONOMIC"
       ],
       "title": "OperationalDecision",
+      "type": "string"
+    },
+    "PolicyName": {
+      "enum": [
+        "PACK_FIT",
+        "LOCAL_EXECUTION_AUTHORITY",
+        "PRIVACY_POLICY",
+        "EXPORT_POLICY",
+        "SOURCE_VERSION",
+        "ECONOMICS"
+      ],
+      "title": "PolicyName",
       "type": "string"
     },
     "TechnicalResult": {
@@ -39,26 +156,81 @@
       ],
       "title": "TechnicalResult",
       "type": "string"
+    },
+    "VerificationOutcome": {
+      "enum": [
+        "VERIFIED",
+        "DENIED",
+        "UNKNOWN"
+      ],
+      "title": "VerificationOutcome",
+      "type": "string"
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "baselineEnvironmentId": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Baselineenvironmentid",
+      "type": "string"
+    },
+    "candidateEnvironmentId": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Candidateenvironmentid",
+      "type": "string"
+    },
     "caseId": {
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
       "title": "Caseid",
       "type": "string"
+    },
+    "evidenceRefs": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Evidencerefs",
+      "type": "array"
     },
     "generatedAt": {
       "format": "date-time",
       "title": "Generatedat",
       "type": "string"
     },
+    "identityStrength": {
+      "$ref": "#/$defs/IdentityStrength"
+    },
+    "inputDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Inputdigest",
+      "type": "string"
+    },
+    "nativeBaselineDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Nativebaselinedigest",
+      "type": "string"
+    },
     "operationalDecision": {
       "$ref": "#/$defs/OperationalDecision"
     },
+    "originalExperimentEconomics": {
+      "$ref": "#/$defs/ExperimentEconomics"
+    },
     "outcome": {
       "$ref": "#/$defs/EligibilityOutcome"
+    },
+    "policyVerifications": {
+      "items": {
+        "$ref": "#/$defs/MachineVerification"
+      },
+      "minItems": 1,
+      "title": "Policyverifications",
+      "type": "array"
+    },
+    "proposedExperimentEconomics": {
+      "$ref": "#/$defs/ExperimentEconomics"
     },
     "reasons": {
       "items": {
@@ -84,11 +256,26 @@
       },
       "title": "Unknowns",
       "type": "array"
+    },
+    "workloadId": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Workloadid",
+      "type": "string"
     }
   },
   "required": [
     "caseId",
+    "inputDigest",
+    "workloadId",
+    "baselineEnvironmentId",
+    "candidateEnvironmentId",
+    "evidenceRefs",
+    "nativeBaselineDigest",
+    "policyVerifications",
+    "originalExperimentEconomics",
+    "proposedExperimentEconomics",
     "outcome",
+    "identityStrength",
     "technicalResult",
     "operationalDecision",
     "reasons",

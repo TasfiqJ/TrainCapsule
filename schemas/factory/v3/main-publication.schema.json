@@ -1,0 +1,169 @@
+{
+  "$defs": {
+    "RequiredWorkflow": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "title": "Name",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "missing",
+            "queued",
+            "in_progress",
+            "completed"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "conclusion": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Conclusion"
+        },
+        "url": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Url"
+        }
+      },
+      "required": [
+        "name",
+        "status"
+      ],
+      "title": "RequiredWorkflow",
+      "type": "object"
+    },
+    "RequiredWorkflowStatus": {
+      "additionalProperties": false,
+      "properties": {
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "releaseBranch": {
+          "const": "main",
+          "default": "main",
+          "title": "Releasebranch",
+          "type": "string"
+        },
+        "status": {
+          "enum": [
+            "pending",
+            "pass",
+            "fail"
+          ],
+          "title": "Status",
+          "type": "string"
+        },
+        "workflows": {
+          "items": {
+            "$ref": "#/$defs/RequiredWorkflow"
+          },
+          "title": "Workflows",
+          "type": "array"
+        }
+      },
+      "required": [
+        "candidateSha",
+        "status",
+        "workflows"
+      ],
+      "title": "RequiredWorkflowStatus",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 3,
+      "default": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "releaseMode": {
+      "const": "owner_directed_main_only",
+      "default": "owner_directed_main_only",
+      "title": "Releasemode",
+      "type": "string"
+    },
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "publicationBranch": {
+      "const": "main",
+      "default": "main",
+      "title": "Publicationbranch",
+      "type": "string"
+    },
+    "remoteMainSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Remotemainsha",
+      "type": "string"
+    },
+    "status": {
+      "enum": [
+        "PUBLISHED_MAIN_VERIFIED",
+        "REVERTED_AND_QUARANTINED",
+        "POST_PUSH_PENDING"
+      ],
+      "title": "Status",
+      "type": "string"
+    },
+    "machinePolicyReceipt": {
+      "title": "Machinepolicyreceipt",
+      "type": "string"
+    },
+    "revertSha": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Revertsha"
+    },
+    "requiredWorkflowStatus": {
+      "$ref": "#/$defs/RequiredWorkflowStatus"
+    },
+    "updatedAt": {
+      "format": "date-time",
+      "title": "Updatedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "candidateSha",
+    "remoteMainSha",
+    "status",
+    "machinePolicyReceipt",
+    "requiredWorkflowStatus",
+    "updatedAt"
+  ],
+  "title": "GitHubReleaseMetadata",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/main-publication.schema.json"
+}

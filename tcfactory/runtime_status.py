@@ -17,7 +17,7 @@ def _current_item(roadmap: WorkItemCollection) -> WorkItem:
     active = [item for item in roadmap.work_items if item.milestone == roadmap.active_milestone]
     if not active:
         raise RuntimeError(f"active milestone {roadmap.active_milestone} has no work items")
-    priority = {"RUNNING": 0, "QUEUED": 1, "READY": 2, "WAITING_HUMAN": 3}
+    priority = {"RUNNING": 0, "QUEUED": 1, "READY": 2, "WAITING_EXTERNAL": 3}
     return min(active, key=lambda item: (priority.get(item.status.value, 9), item.work_item_id))
 
 
@@ -105,15 +105,15 @@ def build_runtime_status(repo_root: Path) -> dict[str, Any]:
             },
             "retryBudget": retry_budget,
             "restartBudget": supervisor_status(repo_root),
-            "humanBlockers": [
-                item.work_item_id for item in active if item.status.value == "WAITING_HUMAN"
-            ],
+            "interventionMode": "NONE",
             "externalBlockers": [
                 item.work_item_id for item in active if item.status.value == "WAITING_EXTERNAL"
             ],
             "candidateSha": candidate_sha,
             "factoryCi": _ci_rollup(release, factory_names),
             "productCi": _ci_rollup(release, product_names),
-            "lastReleasePr": release.pull_request_url if release is not None else None,
+            "lastMainPublication": (
+                release.model_dump(mode="json", by_alias=True) if release is not None else None
+            ),
         },
     )

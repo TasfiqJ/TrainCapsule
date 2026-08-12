@@ -60,5 +60,5 @@ state.
 - Source files match the intended baseline.
 - Historical/runtime evidence remains available.
 - No candidate branch or worktree was deleted.
-- The controller remains stopped until an operator explicitly enables it.
+- The controller remains stopped until the zero-human startup preflight and exact-SHA marker permit it.
 - The baseline factory suite and authority gate pass.

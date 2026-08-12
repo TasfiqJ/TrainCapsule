@@ -53,23 +53,60 @@ MILESTONE_IDS: Final = {
     6: "M6_COMMERCIALLY_SUPPORTED_PACK",
 }
 M0_ENGINEERING_STATE: Final = {
-    "V3-MIG-001": WorkStatus.COMPLETED,
-    "V3-MIG-002": WorkStatus.COMPLETED,
-    "V3-MIG-003": WorkStatus.PASSED_ENGINEERING,
-    "V3-MIG-004": WorkStatus.PASSED_ENGINEERING,
-    "V3-MIG-005": WorkStatus.PASSED_ENGINEERING,
-    "V3-MIG-006": WorkStatus.PASSED_ENGINEERING,
-    "V3-MIG-007": WorkStatus.PASSED_ENGINEERING,
-    "V3-MIG-008": WorkStatus.PASSED_ENGINEERING,
-    "V3-MIG-009": WorkStatus.PASSED_ENGINEERING,
-    "V3-MIG-010": WorkStatus.PASSED_ENGINEERING,
-    "V3-MIG-011": WorkStatus.PASSED_ENGINEERING,
-    "V3-MIG-012": WorkStatus.PASSED_ENGINEERING,
-    "V3-MIG-013": WorkStatus.PASSED_ENGINEERING,
-    "V3-MIG-014": WorkStatus.PASSED_ENGINEERING,
-    "V3-MIG-015": WorkStatus.PASSED_ENGINEERING,
-    "V3-MIG-016": WorkStatus.WAITING_HUMAN,
+    f"V3-MIG-{number:03d}": WorkStatus.COMPLETED for number in range(1, 21)
 }
+M0_ACCEPTANCE_EVIDENCE: Final = {
+    f"V3-MIG-{number:03d}": f"docs/migrations/evidence/V3-MIG-{number:03d}.json"
+    for number in range(16, 21)
+}
+IMPLEMENTED_M1_ITEMS: Final = {
+    "V3-PROD-001",
+    "V3-PROD-002",
+    "V3-TRUST-001",
+    "V3-PROD-003",
+    "V3-PROD-004",
+    "V3-PROD-005",
+    "V3-PROD-006",
+    "V3-PROD-007",
+    "V3-PROD-008",
+    "V3-PROD-009",
+    "V3-PROD-010",
+    "V3-TRUST-002",
+    "V3-TRUST-003",
+}
+OUTSIDE_FACT_WORK_ITEMS: Final = {
+    # These outcomes assert that an event, customer fact, or access grant exists
+    # outside the repository.  The factory may prepare surrounding material, but
+    # it cannot create or self-attest the fact itself.
+    "V3-MKT-003",
+    "V3-MKT-004",
+    "V3-MKT-005",
+    "V3-MKT-006",
+    "V3-MKT-007",
+}
+
+
+def _zero_human_text(value: str) -> str:
+    """Apply the owner-directed machine-policy override to generated roadmap text."""
+
+    replacements = (
+        (r"founder/human", "machine-policy"),
+        (r"human-approval", "machine-policy"),
+        (r"qualified human", "independent machine-policy"),
+        (r"human review", "machine-policy verification"),
+        (r"human approve", "machine policy authorizes"),
+        (r"signed source-migration approval", "digest-bound source-migration policy receipt"),
+        (r"signed approval", "digest-bound machine-policy receipt"),
+        (
+            r"change release path from direct main to draft PR",
+            "enforce exact-SHA main-only release",
+        ),
+        (r"PR dry run", "main-only publication recovery rehearsal"),
+    )
+    transformed = value
+    for pattern, replacement in replacements:
+        transformed = re.sub(pattern, replacement, transformed, flags=re.IGNORECASE)
+    return transformed
 
 
 class SourceRow:
@@ -86,9 +123,9 @@ class SourceRow:
     ) -> None:
         self.work_item_id = work_item_id
         self.lane = lane
-        self.outcome = outcome.replace("`", "").strip()
+        self.outcome = _zero_human_text(outcome.replace("`", "").strip())
         self.depends = depends.replace("`", "").strip()
-        self.evidence = evidence.replace("`", "").strip()
+        self.evidence = _zero_human_text(evidence.replace("`", "").strip())
         self.milestone_number = milestone_number
         self.milestone_position = milestone_position
 
@@ -199,14 +236,16 @@ def _dependencies(row: SourceRow, rows: list[SourceRow]) -> list[str]:
 
 def _kind(row: SourceRow) -> WorkKind:
     lowered = row.outcome.lower()
+    if row.work_item_id in OUTSIDE_FACT_WORK_ITEMS:
+        return WorkKind.EXTERNAL_EVIDENCE
     if row.work_item_id.startswith("V3-MIG-"):
-        if "human review" in lowered:
-            return WorkKind.HUMAN_REVIEW
+        if "machine-policy" in lowered or "machine policy" in lowered:
+            return WorkKind.MACHINE_POLICY_REVIEW
         return WorkKind.MIGRATION
-    if "human approve" in lowered or "human review" in lowered:
-        return WorkKind.HUMAN_REVIEW
+    if "machine policy" in lowered or "machine-policy" in lowered:
+        return WorkKind.MACHINE_POLICY_REVIEW
     if row.work_item_id.startswith("V3-DEC-"):
-        return WorkKind.HUMAN_REVIEW
+        return WorkKind.MACHINE_POLICY_REVIEW
     if row.lane is Lane.MARKET:
         external_terms = (
             "record",
@@ -234,8 +273,10 @@ def _kind(row: SourceRow) -> WorkKind:
 
 
 def _risk(row: SourceRow, kind: WorkKind) -> RiskTier:
-    if kind in {WorkKind.EXTERNAL_EVIDENCE, WorkKind.HUMAN_REVIEW}:
+    if kind is WorkKind.EXTERNAL_EVIDENCE:
         return RiskTier.EXTERNAL
+    if kind is WorkKind.MACHINE_POLICY_REVIEW:
+        return RiskTier.TRUST_CORE
     if row.lane is Lane.TRUST:
         return RiskTier.TRUST_CORE
     if row.lane is Lane.COMPETITOR or row.milestone_number >= 2:
@@ -275,8 +316,8 @@ def _status(row: SourceRow, kind: WorkKind) -> WorkStatus:
         return M0_ENGINEERING_STATE.get(row.work_item_id, WorkStatus.PROPOSED)
     if kind is WorkKind.EXTERNAL_EVIDENCE:
         return WorkStatus.WAITING_EXTERNAL
-    if kind is WorkKind.HUMAN_REVIEW:
-        return WorkStatus.WAITING_HUMAN
+    if row.work_item_id in IMPLEMENTED_M1_ITEMS:
+        return WorkStatus.PASSED_ENGINEERING
     return WorkStatus.PROPOSED
 
 
@@ -293,7 +334,7 @@ def build_collection() -> WorkItemCollection:
                 f"unresolved dependencies for {row.work_item_id}: {sorted(missing)} "
                 f"from {row.depends!r}"
             )
-        nonautomatable = kind in {WorkKind.EXTERNAL_EVIDENCE, WorkKind.HUMAN_REVIEW}
+        nonautomatable = kind is WorkKind.EXTERNAL_EVIDENCE
         items.append(
             WorkItem(
                 work_item_id=row.work_item_id,
@@ -320,23 +361,23 @@ def build_collection() -> WorkItemCollection:
                 ),
                 status=_status(row, kind),
                 owner_type=(
-                    OwnerType.HUMAN_REVIEWER
-                    if kind is WorkKind.HUMAN_REVIEW
-                    else OwnerType.FOUNDER
+                    OwnerType.EXTERNAL_PARTY
                     if kind is WorkKind.EXTERNAL_EVIDENCE
                     else OwnerType.AI
                 ),
                 automatable=not nonautomatable,
                 packet_path=None,
-                evidence_required=[row.evidence] if row.evidence not in {"", "—", "-"} else [],
+                evidence_required=(
+                    [M0_ACCEPTANCE_EVIDENCE[row.work_item_id]]
+                    if row.work_item_id in M0_ACCEPTANCE_EVIDENCE
+                    else [row.evidence]
+                    if row.evidence not in {"", "—", "-"}
+                    else []
+                ),
                 external_receipt_required=kind in {
                     WorkKind.EXTERNAL_EVIDENCE,
                     WorkKind.COMMERCIAL_EXPERIMENT,
                 },
-                human_approval_required=(
-                    kind is WorkKind.HUMAN_REVIEW
-                    or row.work_item_id == "V3-MIG-003"
-                ),
                 retry_policy=RetryPolicy(
                     max_plan_attempts=0 if nonautomatable else 2,
                     max_candidate_repair_cycles=0 if nonautomatable else 3,
@@ -344,7 +385,7 @@ def build_collection() -> WorkItemCollection:
             )
         )
     return WorkItemCollection(
-        active_milestone="M0_FACTORY_MIGRATED",
+        active_milestone="M1_NATIVE_PREFLIGHT",
         work_items=items,
     )
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import stat
 from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
@@ -54,13 +55,43 @@ class LocalEvidenceStore:
             raise EvidenceStoreError("evidence destination contains a symlink")
         temporary = path.parent / f".{path.name}.{uuid4().hex}.tmp"
         try:
-            with temporary.open("xb") as handle:
+            flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+            descriptor = os.open(temporary, flags, 0o600)
+            with os.fdopen(descriptor, "wb") as handle:
                 handle.write(payload)
                 handle.flush()
                 os.fsync(handle.fileno())
-            os.replace(temporary, path)
+            try:
+                os.link(temporary, path, follow_symlinks=False)
+            except FileExistsError as error:
+                raise EvidenceStoreError(
+                    "evidence destination changed during atomic write"
+                ) from error
+            temporary.unlink()
         finally:
             temporary.unlink(missing_ok=True)
+
+    @staticmethod
+    def _read_regular(path: Path, *, limit: int) -> bytes:
+        try:
+            descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+        except OSError as error:
+            raise EvidenceStoreError("stored evidence is unavailable or unsafe") from error
+        try:
+            details = os.fstat(descriptor)
+            if not stat.S_ISREG(details.st_mode) or details.st_size > limit:
+                raise EvidenceStoreError("stored evidence violates type or size policy")
+            payload = bytearray()
+            while True:
+                chunk = os.read(descriptor, min(1024 * 1024, limit + 1 - len(payload)))
+                if not chunk:
+                    break
+                payload.extend(chunk)
+                if len(payload) > limit:
+                    raise EvidenceStoreError("stored evidence exceeds configured policy")
+            return bytes(payload)
+        finally:
+            os.close(descriptor)
 
     def put_bytes(
         self,
@@ -86,7 +117,10 @@ class LocalEvidenceStore:
         if not metadata_path.exists() and len(existing) >= self.max_case_artifacts:
             raise EvidenceStoreError("case artifact count exceeds configured policy")
         if object_path.exists():
-            if object_path.is_symlink() or sha256_digest(object_path.read_bytes()) != digest:
+            if (
+                sha256_digest(self._read_regular(object_path, limit=self.max_artifact_bytes))
+                != digest
+            ):
                 raise EvidenceStoreError("content-address collision or substitution detected")
         else:
             self._atomic_write(object_path, payload)
@@ -105,12 +139,18 @@ class LocalEvidenceStore:
             provenance=provenance or {},
             integrity_status=EvidenceIntegrity.VALID,
         )
-        rendered = json.dumps(
-            artifact.model_dump(mode="json", by_alias=True),
-            indent=2,
-            sort_keys=True,
-        ).encode("utf-8") + b"\n"
-        if metadata_path.exists() and metadata_path.read_bytes() != rendered:
+        rendered = (
+            json.dumps(
+                artifact.model_dump(mode="json", by_alias=True),
+                indent=2,
+                sort_keys=True,
+            ).encode("utf-8")
+            + b"\n"
+        )
+        if (
+            metadata_path.exists()
+            and self._read_regular(metadata_path, limit=self.max_artifact_bytes) != rendered
+        ):
             raise EvidenceStoreError("duplicate digest has conflicting metadata")
         if not metadata_path.exists():
             self._atomic_write(metadata_path, rendered)
@@ -128,15 +168,35 @@ class LocalEvidenceStore:
         privacy_class: PrivacyClass = PrivacyClass.CONFIDENTIAL,
         provenance: dict[str, str] | None = None,
     ) -> EvidenceArtifact:
-        if source.is_symlink():
-            raise EvidenceStoreError("source evidence cannot be a symlink")
-        resolved = source.resolve(strict=True)
-        if not resolved.is_file():
-            raise EvidenceStoreError("source evidence must be a regular file")
-        payload = resolved.read_bytes()
+        flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
+        try:
+            descriptor = os.open(source, flags)
+        except OSError as error:
+            raise EvidenceStoreError(
+                "source evidence must be a non-symlink regular file"
+            ) from error
+        try:
+            source_stat = os.fstat(descriptor)
+            if not stat.S_ISREG(source_stat.st_mode):
+                raise EvidenceStoreError("source evidence must be a regular file")
+            if source_stat.st_size > self.max_artifact_bytes:
+                raise EvidenceStoreError("artifact exceeds configured size policy")
+            payload = bytearray()
+            while True:
+                chunk = os.read(
+                    descriptor,
+                    min(1024 * 1024, self.max_artifact_bytes + 1 - len(payload)),
+                )
+                if not chunk:
+                    break
+                payload.extend(chunk)
+                if len(payload) > self.max_artifact_bytes:
+                    raise EvidenceStoreError("artifact exceeds configured size policy")
+        finally:
+            os.close(descriptor)
         return self.put_bytes(
             case_id=case_id,
-            payload=payload,
+            payload=bytes(payload),
             kind=kind,
             source_adapter=source_adapter,
             source_version=source_version,
@@ -153,7 +213,7 @@ class LocalEvidenceStore:
         path = (case_root / "objects/sha256" / digest_hex).resolve()
         if not path.is_relative_to(case_root) or path.is_symlink():
             raise EvidenceStoreError("stored evidence path is unsafe")
-        payload = path.read_bytes()
-        if sha256_digest(payload) != artifact.content_digest:
+        rendered = self._read_regular(path, limit=self.max_artifact_bytes)
+        if sha256_digest(rendered) != artifact.content_digest:
             raise EvidenceStoreError("stored evidence digest mismatch")
-        return payload
+        return rendered

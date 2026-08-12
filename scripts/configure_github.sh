@@ -21,25 +21,24 @@ cat <<'TEXT'
 GitHub one-time setup
 
 The factory will:
-  - authenticate through the official GitHub CLI browser flow;
+  - require an existing non-interactive GitHub CLI authentication;
   - create or attach a private repository;
   - author verified task commits with your configured Git name and email;
   - keep AI-factory provenance in local structured records;
-  - push only exact verified candidates to release branches and never force-push;
+  - push only exact verified candidate SHAs to refs/heads/main and never force-push;
   - stop when remote main diverges instead of overwriting outside work;
-  - open draft pull requests for required GitHub-hosted validation;
-  - leave every merge to an authorized human decision.
+  - verify every required hosted workflow at that exact main SHA;
+  - quarantine and publish an ordinary main revert if hosted validation fails.
 TEXT
 
 if ! gh auth status --hostname github.com >/dev/null 2>&1; then
-  gh auth login --hostname github.com --web --git-protocol https
+  echo "GitHub CLI authentication is missing; refusing an interactive login." >&2
+  exit 1
 fi
 gh auth setup-git --hostname github.com
 
 if ! git remote get-url origin >/dev/null 2>&1; then
-  default_name="traincapsule"
-  read -r -p "Private GitHub repository name [$default_name]: " repo_name
-  repo_name="${repo_name:-$default_name}"
+  repo_name="${TCF_GITHUB_REPOSITORY_NAME:-traincapsule}"
   gh repo create "$repo_name" \
     --private \
     --source=. \
@@ -82,13 +81,14 @@ if not isinstance(data, dict):
 data["enabled"] = True
 data["repository"] = sys.argv[1]
 data["visibility"] = "private"
-data["releaseMode"] = "pull_request"
-data["directMainPush"] = False
+data["baseBranch"] = "main"
+data["branch"] = "main"
+data["releaseMode"] = "owner_directed_main_only"
+data["directMainPush"] = True
 path.write_text(yaml.safe_dump(data, sort_keys=False), encoding="utf-8")
 PY
 
-# Verify the protected base without updating it. The configured change is left for
-# the normal reviewed candidate flow; setup never performs a direct main push.
+# Verify the main-only publication base without updating it. Setup never publishes.
 if ! git ls-remote --exit-code --heads origin main >/dev/null 2>&1; then
   echo "origin/main is missing. Establish it through an authorized bootstrap process." >&2
   exit 1
@@ -109,7 +109,7 @@ if ! gh api --method PATCH "repos/$name_with_owner" \
   echo "The factory's mandatory local secret scan remains enabled."
 fi
 
-printf '\nGitHub pull-request release configuration is ready: %s\n' "$name_with_owner"
+printf '\nGitHub main-only release configuration is ready: %s\n' "$name_with_owner"
 printf 'Commit config/github.yaml through the verified candidate workflow.\n'
 printf 'Verified commits will use: %s <%s>\n' \
   "$(git config user.name)" "$(git config user.email)"

@@ -4,4 +4,4 @@ Create only the private gate explicitly authorized by the packet. Keep protected
 
 The gate must be deterministic, bounded, versioned, bound to the exact candidate SHA, and report only the minimum truthful conclusion. Distinguish FAIL, UNKNOWN, INVALID_EVIDENCE, INVALID_ORACLE, INFRASTRUCTURE_ERROR, POLICY_BLOCKED, and EXPIRED. Do not weaken public gates or use the private result as fabricated external truth.
 
-Do not change roadmap, approval, value, or release policy. Human approval remains WAITING_HUMAN. Return the declared gate artifact, verification evidence, rollback, and at most 8 concrete findings.
+Do not change roadmap, machine authority, value, or release policy. Missing machine-policy authority remains BLOCKED_POLICY. Return the declared gate artifact, verification evidence, rollback, and at most 8 concrete findings.

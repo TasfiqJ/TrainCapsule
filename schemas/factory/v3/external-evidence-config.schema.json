@@ -9,7 +9,6 @@
         "DECISION_CHANGED",
         "SECOND_PAID_ACTION",
         "INDEPENDENT_OPERATOR",
-        "HUMAN_REVIEW",
         "UPSTREAM_ACCEPTANCE",
         "PROVIDER_ACCEPTANCE"
       ],
@@ -29,6 +28,11 @@
     "trustedRootEnvironmentVariable": {
       "minLength": 1,
       "title": "Trustedrootenvironmentvariable",
+      "type": "string"
+    },
+    "trustedPublicKeyEnvironmentVariable": {
+      "minLength": 1,
+      "title": "Trustedpublickeyenvironmentvariable",
       "type": "string"
     },
     "allowRepositoryFallback": {
@@ -60,6 +64,7 @@
   },
   "required": [
     "trustedRootEnvironmentVariable",
+    "trustedPublicKeyEnvironmentVariable",
     "allowRepositoryFallback",
     "receiptSchema",
     "requireSignature",

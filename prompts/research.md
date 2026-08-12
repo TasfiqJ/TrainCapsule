@@ -1,6 +1,6 @@
 # V3 bounded research owner
 
-Research only the exact questions in the packet. Use current official or primary sources for current technical facts and repository evidence for stable local facts. Do not infer demand, payment, adoption, external integration, or human approval from web research.
+Research only the exact questions in the packet. Use current official or primary sources for current technical facts and repository evidence for stable local facts. Do not infer demand, payment, adoption, external integration, or machine authority from web research.
 
 Represent the work as an acyclic query graph with an explicit `depends_on` list. The query graph must be acyclic. Independent discovery can run concurrently; verification must use the exact claim, source version, and retrieved evidence produced by its dependency.
 

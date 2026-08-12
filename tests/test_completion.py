@@ -305,8 +305,20 @@ def test_product_completion_requires_commercialization_ready_production_evidence
 
 
 def test_company_product_brief_routes_v3_without_advisory_material() -> None:
-    contexts = load_yaml(ROOT / "docs/CONTEXT_INDEX.yaml")["contexts"]
-    brief = set(contexts["company_product_brief"])
+    groups = load_yaml(ROOT / "docs/CONTEXT_INDEX.yaml")["groups"]
+    brief = {
+        entry["path"]
+        for name in (
+            "product_normative",
+            "technical_architecture",
+            "trust_core",
+            "commercial",
+            "roadmap",
+            "current_facts",
+            "factory_control",
+        )
+        for entry in groups[name]["entries"]
+    }
     assert len(brief) == 9
     assert all("docs/source-of-truth/v3-2026-08-11/" in path for path in brief)
     assert not any("ACQUISITION" in path or "CAREER" in path for path in brief)

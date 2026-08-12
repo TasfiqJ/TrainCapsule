@@ -6,4 +6,4 @@ Do not test unrelated milestones, widen the product, mutate the roadmap, invent 
 
 Return at most 8 findings total in the global concrete finding format. A blocking finding needs a stable fingerprint, reproduction, expected and observed behavior, evidence, criterion, owner class, and minimal repair. Style preferences, future enhancements, and speculative risks are advisory.
 
-Stop with WAITING_EXTERNAL or WAITING_HUMAN when the missing proof belongs outside the session.
+Stop with WAITING_EXTERNAL when an external fact is missing or BLOCKED_POLICY when machine authority is absent.

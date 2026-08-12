@@ -22,13 +22,15 @@ def test_windows_task_runs_foreground_autopilot() -> None:
     assert "EncodedCommand" in script
     assert "Start-Process" in script
     assert "-WindowStyle Hidden" in script
-    assert "tcfactory autopilot" in entry
+    assert "tcfactory v3-controller" in entry
+    assert "tcfactory autopilot" not in entry
     assert "load_factory_env.sh" in entry
     assert "CLAUDE_CODE_OAUTH_TOKEN" not in entry
     assert "HARD_STUCK.json" in entry
     assert 'flock -n 9' in entry
     assert "single-instance lock" in entry
     assert "while true" not in entry
+    assert "while [[ ! -f" in entry
     assert "tcfactory.supervisor preflight" in entry
     assert "tcfactory.supervisor record-exit" in entry
     assert "source integrity" in entry

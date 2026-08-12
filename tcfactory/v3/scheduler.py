@@ -63,7 +63,6 @@ class SchedulerConfig(V3Model):
             raise ValueError("scheduler tie-break rules must be unique")
         required_waiting = {
             WorkStatus.WAITING_EXTERNAL,
-            WorkStatus.WAITING_HUMAN,
             WorkStatus.DEFERRED,
             WorkStatus.NATIVE_SUFFICIENT,
             WorkStatus.REJECTED_VALUE,
@@ -215,7 +214,6 @@ def _tie_key(item: WorkItem, facts: SchedulingFacts) -> tuple[int, int, int, int
         not in {
             WorkKind.RESEARCH,
             WorkKind.EXTERNAL_EVIDENCE,
-            WorkKind.HUMAN_REVIEW,
             WorkKind.CONTROLLED_EXPERIMENT,
         }
     )
@@ -242,7 +240,9 @@ def schedule_cycle(
     max_concurrent_mutating_sessions: int = 1,
     max_concurrent_read_only_sessions: int = 1,
     controller_failure: bool = False,
+    migration_bootstrap: bool = False,
     override: TrustedSchedulerOverride | None = None,
+    lane_cursor: Lane | None = None,
 ) -> SchedulerDecisionArtifact:
     """Select deterministic independent-lane work and explain every decision."""
 
@@ -269,8 +269,17 @@ def schedule_cycle(
         )
         score, components = _score(config, facts)
         reasons: list[str] = []
+        if item.milestone != config.active_milestone:
+            reasons.append(
+                f"milestone {item.milestone} is not active "
+                f"({config.active_milestone})"
+            )
         if item.status is not WorkStatus.READY:
             reasons.append(f"status {item.status} is not READY")
+        if item.external_receipt_required:
+            reasons.append(
+                "outside-fact work advances only through the trusted external receipt gate"
+            )
         if identifier in active_ids:
             reasons.append("work item is already active")
         unsatisfied = [
@@ -291,13 +300,22 @@ def schedule_cycle(
         mutating = is_mutating(item)
         lane_limit = config.wip[item.lane]
         limit = lane_limit.mutating if mutating else lane_limit.read_only
+        factory_exception = controller_failure or (
+            migration_bootstrap
+            and item.milestone == "M0_FACTORY_MIGRATED"
+            and item.kind is WorkKind.MIGRATION
+        )
+        if item.lane is Lane.FACTORY and mutating and factory_exception and limit == 0:
+            # The normative WIP rule is "0 unless controller failure". A zero in
+            # configuration is therefore a closed normal lane, not a permanent ban.
+            limit = 1
         if active_lane_mode[(item.lane, mutating)] >= limit:
             reasons.append("lane WIP limit reached")
         if (
             item.lane is Lane.FACTORY
             and mutating
             and config.factory_maintenance.allow_mutating_only_on_controller_failure
-            and not controller_failure
+            and not factory_exception
         ):
             reasons.append("mutating factory maintenance requires controller failure")
         eligible = not reasons
@@ -313,6 +331,13 @@ def schedule_cycle(
             ranked.append((-score, _tie_key(item, facts), item, facts))
 
     ranked.sort(key=lambda candidate: (candidate[0], candidate[1]))
+    if lane_cursor is not None:
+        # Rotate equally scored lane heads after every cycle. This prevents a busy
+        # lane from winning forever without changing the inspectable V3 score.
+        lanes = list(Lane)
+        start = lanes.index(lane_cursor)
+        order = {lane: index for index, lane in enumerate(lanes[start:] + lanes[:start])}
+        ranked.sort(key=lambda candidate: (candidate[0], order[candidate[2].lane], candidate[1]))
     override_record = override.require_trusted() if override is not None else None
     if override_record is not None:
         match = next(
@@ -338,6 +363,13 @@ def schedule_cycle(
             continue
         lane_limit = config.wip[item.lane]
         limit = lane_limit.mutating if mutating else lane_limit.read_only
+        factory_exception = controller_failure or (
+            migration_bootstrap
+            and item.milestone == "M0_FACTORY_MIGRATED"
+            and item.kind is WorkKind.MIGRATION
+        )
+        if item.lane is Lane.FACTORY and mutating and factory_exception and limit == 0:
+            limit = 1
         current_lane = active_lane_mode[(item.lane, mutating)]
         if current_lane + selected_lane_mode[(item.lane, mutating)] >= limit:
             continue

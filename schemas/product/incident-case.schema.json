@@ -59,6 +59,17 @@
       "title": "CaseEconomics",
       "type": "object"
     },
+    "FindingAttribution": {
+      "enum": [
+        "NATIVE_TOOL_FOUND",
+        "TRAINCAPSULE_DERIVED",
+        "HUMAN_PROVIDED",
+        "EXTERNAL_SYSTEM_PROVIDED",
+        "UNKNOWN"
+      ],
+      "title": "FindingAttribution",
+      "type": "string"
+    },
     "NativeConfidence": {
       "enum": [
         "DIRECT_OBSERVATION",
@@ -72,10 +83,14 @@
     "NativeFinding": {
       "additionalProperties": false,
       "properties": {
+        "attribution": {
+          "$ref": "#/$defs/FindingAttribution"
+        },
         "confidenceClass": {
           "$ref": "#/$defs/NativeConfidence"
         },
         "customerDecisionContribution": {
+          "minLength": 1,
           "title": "Customerdecisioncontribution",
           "type": "string"
         },
@@ -84,6 +99,7 @@
             "pattern": "^sha256:[0-9a-f]{64}$",
             "type": "string"
           },
+          "minItems": 1,
           "title": "Evidencerefs",
           "type": "array"
         },
@@ -96,6 +112,7 @@
           "items": {
             "type": "string"
           },
+          "minItems": 1,
           "title": "Limitations",
           "type": "array"
         },
@@ -124,6 +141,7 @@
       },
       "required": [
         "findingId",
+        "attribution",
         "nativeSystem",
         "nativeVersion",
         "observation",

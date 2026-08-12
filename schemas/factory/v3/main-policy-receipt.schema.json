@@ -1,0 +1,115 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 3,
+      "default": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "policy": {
+      "const": "OWNER_DIRECTED_MAIN_ONLY",
+      "default": "OWNER_DIRECTED_MAIN_ONLY",
+      "title": "Policy",
+      "type": "string"
+    },
+    "workItemId": {
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "baseSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Basesha",
+      "type": "string"
+    },
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "candidateManifestDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Candidatemanifestdigest",
+      "type": "string"
+    },
+    "packetDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Packetdigest",
+      "type": "string"
+    },
+    "sourceDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourcedigest",
+      "type": "string"
+    },
+    "contextDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Contextdigest",
+      "type": "string"
+    },
+    "checkpointDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Checkpointdigest",
+      "type": "string"
+    },
+    "gateDigests": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "minProperties": 1,
+      "title": "Gatedigests",
+      "type": "object"
+    },
+    "ownerDirectivesDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Ownerdirectivesdigest",
+      "type": "string"
+    },
+    "localGateEvidence": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "minProperties": 1,
+      "title": "Localgateevidence",
+      "type": "object"
+    },
+    "privateGateEvidence": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Privategateevidence",
+      "type": "object"
+    },
+    "createdAt": {
+      "format": "date-time",
+      "title": "Createdat",
+      "type": "string"
+    },
+    "retryBudget": {
+      "maximum": 5,
+      "minimum": 1,
+      "title": "Retrybudget",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "workItemId",
+    "baseSha",
+    "candidateSha",
+    "candidateManifestDigest",
+    "packetDigest",
+    "sourceDigest",
+    "contextDigest",
+    "checkpointDigest",
+    "gateDigests",
+    "ownerDirectivesDigest",
+    "localGateEvidence",
+    "privateGateEvidence",
+    "createdAt",
+    "retryBudget"
+  ],
+  "title": "MainOnlyMachineReceipt",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/main-policy-receipt.schema.json"
+}

@@ -27,7 +27,6 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
         {
             WorkStatus.READY,
             WorkStatus.WAITING_EXTERNAL,
-            WorkStatus.WAITING_HUMAN,
             WorkStatus.REJECTED_VALUE,
             WorkStatus.NATIVE_SUFFICIENT,
             WorkStatus.DEFERRED,
@@ -39,7 +38,6 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
         {
             WorkStatus.QUEUED,
             WorkStatus.WAITING_EXTERNAL,
-            WorkStatus.WAITING_HUMAN,
             WorkStatus.BLOCKED_TECHNICAL,
             WorkStatus.BLOCKED_POLICY,
             WorkStatus.DEFERRED,
@@ -58,7 +56,6 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
         {
             WorkStatus.PAUSED_QUOTA,
             WorkStatus.WAITING_EXTERNAL,
-            WorkStatus.WAITING_HUMAN,
             WorkStatus.BLOCKED_TECHNICAL,
             WorkStatus.BLOCKED_POLICY,
             WorkStatus.PASSED_ENGINEERING,
@@ -72,16 +69,9 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
     WorkStatus.WAITING_EXTERNAL: frozenset(
         {
             WorkStatus.READY,
+            WorkStatus.PASSED_ENGINEERING,
             WorkStatus.REJECTED_VALUE,
             WorkStatus.NATIVE_SUFFICIENT,
-            WorkStatus.DEFERRED,
-            WorkStatus.CANCELLED,
-        }
-    ),
-    WorkStatus.WAITING_HUMAN: frozenset(
-        {
-            WorkStatus.READY,
-            WorkStatus.BLOCKED_POLICY,
             WorkStatus.DEFERRED,
             WorkStatus.CANCELLED,
         }
@@ -92,7 +82,6 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
     WorkStatus.BLOCKED_POLICY: frozenset(
         {
             WorkStatus.READY,
-            WorkStatus.WAITING_HUMAN,
             WorkStatus.DEFERRED,
             WorkStatus.CANCELLED,
         }
@@ -101,7 +90,6 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
         {
             WorkStatus.COMPLETED,
             WorkStatus.WAITING_EXTERNAL,
-            WorkStatus.WAITING_HUMAN,
             WorkStatus.REJECTED_VALUE,
             WorkStatus.NATIVE_SUFFICIENT,
             WorkStatus.DEFERRED,
@@ -146,10 +134,8 @@ class WorkItem(V3Model):
     packet_path: str | None = None
     evidence_required: list[str]
     external_receipt_required: bool
-    human_approval_required: bool
     retry_policy: RetryPolicy
     external_evidence_refs: list[str] = Field(default_factory=list[str])
-    human_approval_refs: list[str] = Field(default_factory=list[str])
     created_at: datetime | None = None
     updated_at: datetime | None = None
 
@@ -164,25 +150,32 @@ class WorkItem(V3Model):
         overlap = set(self.depends_on) & set(self.soft_depends_on)
         if overlap:
             raise ValueError(f"hard and soft dependencies overlap: {sorted(overlap)}")
-        human_or_external = self.kind in {
-            WorkKind.EXTERNAL_EVIDENCE,
-            WorkKind.HUMAN_REVIEW,
-        }
-        if human_or_external and self.automatable:
-            raise ValueError("external evidence and human review are not automatable")
-        if human_or_external and self.owner_type is OwnerType.AI:
-            raise ValueError("AI cannot own external evidence or human review")
+        if self.kind is WorkKind.EXTERNAL_EVIDENCE and self.automatable:
+            raise ValueError("external evidence is not automatable")
+        if self.kind is WorkKind.EXTERNAL_EVIDENCE and self.owner_type is OwnerType.AI:
+            raise ValueError("AI cannot own external evidence")
         if self.kind is WorkKind.EXTERNAL_EVIDENCE and not self.external_receipt_required:
             raise ValueError("external evidence work requires an external receipt")
         if self.kind is WorkKind.COMMERCIAL_EXPERIMENT and not self.external_receipt_required:
             raise ValueError("commercial experiment work requires an external receipt")
-        if self.kind is WorkKind.HUMAN_REVIEW and not self.human_approval_required:
-            raise ValueError("human review work requires human approval")
+        if (
+            self.external_receipt_required
+            and self.status
+            in {
+                WorkStatus.READY,
+                WorkStatus.QUEUED,
+                WorkStatus.RUNNING,
+                WorkStatus.PASSED_ENGINEERING,
+                WorkStatus.COMPLETED,
+            }
+            and not self.external_evidence_refs
+        ):
+            raise ValueError(
+                "external-receipt work cannot advance without a bound receipt reference"
+            )
         if self.status is WorkStatus.COMPLETED:
             if self.external_receipt_required and not self.external_evidence_refs:
                 raise ValueError("completed work lacks required external receipt references")
-            if self.human_approval_required and not self.human_approval_refs:
-                raise ValueError("completed work lacks required human approval references")
             if (
                 self.maturity_target.commercial
                 not in {

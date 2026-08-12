@@ -89,7 +89,6 @@
         "DECISION_CHANGED",
         "SECOND_PAID_ACTION",
         "INDEPENDENT_OPERATOR",
-        "HUMAN_REVIEW",
         "UPSTREAM_ACCEPTANCE",
         "PROVIDER_ACCEPTANCE"
       ],

@@ -1,44 +1,5 @@
 {
   "$defs": {
-    "ApprovalBinding": {
-      "additionalProperties": false,
-      "properties": {
-        "approvalId": {
-          "pattern": "^HAPR-[A-Z0-9_-]+$",
-          "title": "Approvalid",
-          "type": "string"
-        },
-        "scope": {
-          "$ref": "#/$defs/ApprovalScope"
-        },
-        "recordDigest": {
-          "pattern": "^sha256:[0-9a-f]{64}$",
-          "title": "Recorddigest",
-          "type": "string"
-        }
-      },
-      "required": [
-        "approvalId",
-        "scope",
-        "recordDigest"
-      ],
-      "title": "ApprovalBinding",
-      "type": "object"
-    },
-    "ApprovalScope": {
-      "enum": [
-        "SOURCE_OF_TRUTH_MIGRATION",
-        "EXTERNAL_RELEASE",
-        "COMMERCIAL_PACK_RELEASE",
-        "TRUST_CORE_CHANGE",
-        "SECURITY_BOUNDARY_CHANGE",
-        "CUSTOMER_CLAIM",
-        "ROADMAP_EXPANSION",
-        "WEDGE_DECISION"
-      ],
-      "title": "ApprovalScope",
-      "type": "string"
-    },
     "ExecutorIdentity": {
       "additionalProperties": false,
       "properties": {
@@ -52,10 +13,35 @@
           "title": "Adapter",
           "type": "string"
         },
-        "model": {
-          "minLength": 1,
-          "title": "Model",
+        "capabilityDigest": {
+          "default": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Capabilitydigest",
           "type": "string"
+        },
+        "executorSessionRef": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Executorsessionref"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
         },
         "sessionId": {
           "anyOf": [
@@ -72,8 +58,7 @@
       },
       "required": [
         "backend",
-        "adapter",
-        "model"
+        "adapter"
       ],
       "title": "ExecutorIdentity",
       "type": "object"
@@ -163,8 +148,10 @@
       "enum": [
         "NOT_EVALUATED",
         "HOLD",
-        "DRAFT_PULL_REQUEST",
-        "APPROVED_FOR_MERGE",
+        "APPROVED_FOR_MAIN_PROMOTION",
+        "MAIN_PROMOTED_PENDING_HOSTED_CHECKS",
+        "MAIN_VERIFIED",
+        "REVERTED_AND_QUARANTINED",
         "REJECTED"
       ],
       "title": "ReleaseDecision",
@@ -256,13 +243,6 @@
       "title": "Findings",
       "type": "array"
     },
-    "approvals": {
-      "items": {
-        "$ref": "#/$defs/ApprovalBinding"
-      },
-      "title": "Approvals",
-      "type": "array"
-    },
     "externalEvidence": {
       "items": {
         "$ref": "#/$defs/ExternalEvidenceBinding"
@@ -294,7 +274,6 @@
     "stageOutputs",
     "gates",
     "findings",
-    "approvals",
     "externalEvidence",
     "checkpointDigest",
     "releaseDecision",

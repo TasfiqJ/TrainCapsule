@@ -1,0 +1,16 @@
+{
+  "schemaVersion": 1,
+  "workItemId": "V3-MIG-018",
+  "result": "PASS",
+  "evidenceType": "NON_MUTATING_CONTROLLER_OBSERVATION",
+  "recordedAt": "2026-08-11T22:45:00Z",
+  "verification": [
+    "tests/test_v3_config_and_roadmap.py",
+    "tests/test_v3_scheduler_and_recovery.py",
+    "tests/test_v3_supervisor_and_status.py"
+  ],
+  "runtimeMutation": false,
+  "networkUsed": false,
+  "modelUsed": false,
+  "note": "The live controller remained stopped; observation was exercised deterministically against V3 configuration, scheduling, recovery, and startup contracts."
+}

@@ -9,8 +9,7 @@ from collections.abc import Mapping
 
 def canonical_reference(value: object) -> bytes:
     return (
-        json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
-        + "\n"
+        json.dumps(value, ensure_ascii=False, separators=(",", ":"), sort_keys=True) + "\n"
     ).encode("utf-8")
 
 

@@ -1,4 +1,66 @@
 {
+  "$defs": {
+    "DataIdentityPolicy": {
+      "enum": [
+        "FULL_DIGEST",
+        "MANIFEST_DIGEST",
+        "CUSTOMER_ATTESTED",
+        "UNAVAILABLE"
+      ],
+      "title": "DataIdentityPolicy",
+      "type": "string"
+    },
+    "GpuIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "default": 0,
+          "maximum": 131072,
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "firmwareDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Firmwaredigest"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        }
+      },
+      "title": "GpuIdentity",
+      "type": "object"
+    },
+    "IdentityStrength": {
+      "enum": [
+        "FULLY_VERIFIED",
+        "PARTIALLY_VERIFIED",
+        "CUSTOMER_ATTESTED",
+        "UNVERIFIED",
+        "CONFLICTING"
+      ],
+      "title": "IdentityStrength",
+      "type": "string"
+    }
+  },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
@@ -53,14 +115,15 @@
       "title": "Environmentvariablesdigest",
       "type": "string"
     },
-    "gpuCount": {
-      "default": 0,
-      "maximum": 131072,
-      "minimum": 0,
-      "title": "Gpucount",
-      "type": "integer"
+    "gpu": {
+      "$ref": "#/$defs/GpuIdentity"
     },
-    "gpuFirmwareDigest": {
+    "hostKernel": {
+      "minLength": 1,
+      "title": "Hostkernel",
+      "type": "string"
+    },
+    "identityEvidenceDigest": {
       "anyOf": [
         {
           "pattern": "^sha256:[0-9a-f]{64}$",
@@ -71,9 +134,15 @@
         }
       ],
       "default": null,
-      "title": "Gpufirmwaredigest"
+      "title": "Identityevidencedigest"
     },
-    "gpuModel": {
+    "identityPolicy": {
+      "$ref": "#/$defs/DataIdentityPolicy"
+    },
+    "identityStrength": {
+      "$ref": "#/$defs/IdentityStrength"
+    },
+    "launcher": {
       "anyOf": [
         {
           "type": "string"
@@ -83,12 +152,7 @@
         }
       ],
       "default": null,
-      "title": "Gpumodel"
-    },
-    "hostKernel": {
-      "minLength": 1,
-      "title": "Hostkernel",
-      "type": "string"
+      "title": "Launcher"
     },
     "materializationRecipeDigest": {
       "anyOf": [
@@ -126,6 +190,11 @@
       ],
       "default": null,
       "title": "Networkclass"
+    },
+    "packagesDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Packagesdigest",
+      "type": "string"
     },
     "python": {
       "minLength": 1,
@@ -189,9 +258,13 @@
   },
   "required": [
     "environmentId",
+    "identityStrength",
+    "identityPolicy",
     "hostKernel",
     "python",
+    "packagesDigest",
     "pytorch",
+    "gpu",
     "environmentVariablesDigest",
     "redactionPolicyVersion",
     "createdAt"

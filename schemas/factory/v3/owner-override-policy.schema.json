@@ -1,0 +1,88 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "decisionId": {
+      "const": "OWNER-ZERO-HUMAN-20260811",
+      "title": "Decisionid",
+      "type": "string"
+    },
+    "authority": {
+      "const": "explicit repository owner direction in Codex task",
+      "title": "Authority",
+      "type": "string"
+    },
+    "effectiveDate": {
+      "const": "2026-08-11",
+      "title": "Effectivedate",
+      "type": "string"
+    },
+    "decision": {
+      "minLength": 1,
+      "title": "Decision",
+      "type": "string"
+    },
+    "replaces": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Replaces",
+      "type": "array"
+    },
+    "machineReplacement": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Machinereplacement",
+      "type": "array"
+    },
+    "publicationPolicy": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Publicationpolicy",
+      "type": "object"
+    },
+    "unchangedTruthBoundaries": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Unchangedtruthboundaries",
+      "type": "array"
+    },
+    "canonicalOwnerDirectives": {
+      "const": "config/owner_directives.yaml",
+      "title": "Canonicalownerdirectives",
+      "type": "string"
+    },
+    "canonicalOwnerDirectivesSha256": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Canonicalownerdirectivessha256",
+      "type": "string"
+    }
+  },
+  "required": [
+    "version",
+    "decisionId",
+    "authority",
+    "effectiveDate",
+    "decision",
+    "replaces",
+    "machineReplacement",
+    "publicationPolicy",
+    "unchangedTruthBoundaries",
+    "canonicalOwnerDirectives",
+    "canonicalOwnerDirectivesSha256"
+  ],
+  "title": "OwnerOverridePolicy",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/owner-override-policy.schema.json"
+}

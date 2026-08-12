@@ -85,6 +85,17 @@
       "title": "FrameworkIdentity",
       "type": "object"
     },
+    "IdentityStrength": {
+      "enum": [
+        "FULLY_VERIFIED",
+        "PARTIALLY_VERIFIED",
+        "CUSTOMER_ATTESTED",
+        "UNVERIFIED",
+        "CONFLICTING"
+      ],
+      "title": "IdentityStrength",
+      "type": "string"
+    },
     "PrivacyClass": {
       "enum": [
         "PUBLIC",
@@ -145,6 +156,11 @@
       "default": null,
       "title": "Checkpointpolicydigest"
     },
+    "configurationFilesDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Configurationfilesdigest",
+      "type": "string"
+    },
     "containerImageDigest": {
       "anyOf": [
         {
@@ -182,6 +198,9 @@
     "framework": {
       "$ref": "#/$defs/FrameworkIdentity"
     },
+    "identityStrength": {
+      "$ref": "#/$defs/IdentityStrength"
+    },
     "modelStructureDigest": {
       "anyOf": [
         {
@@ -197,6 +216,16 @@
     },
     "privacyClass": {
       "$ref": "#/$defs/PrivacyClass"
+    },
+    "redactionPolicyVersion": {
+      "minLength": 1,
+      "title": "Redactionpolicyversion",
+      "type": "string"
+    },
+    "relevantEnvironmentDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Relevantenvironmentdigest",
+      "type": "string"
     },
     "schemaVersion": {
       "default": 1,
@@ -216,10 +245,14 @@
   },
   "required": [
     "workloadId",
+    "identityStrength",
     "sourceIdentity",
     "entrypoint",
     "argumentsDigest",
     "dependencyLockDigest",
+    "configurationFilesDigest",
+    "relevantEnvironmentDigest",
+    "redactionPolicyVersion",
     "framework",
     "distributed",
     "dataIdentity",

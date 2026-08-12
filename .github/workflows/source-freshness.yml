@@ -1,0 +1,30 @@
+name: TrainCapsule / Source freshness
+
+on:
+  push:
+    branches: [main]
+  schedule:
+    - cron: "17 9 * * 1"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: source-freshness-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-freshness:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff # v6
+        with:
+          python-version: "3.12"
+      - run: uv sync --extra dev --frozen
+      - name: Verify source authority and freshness policy
+        run: |
+          uv run python scripts/gates/source_of_truth_integrity.py
+          uv run pytest tests/test_source_of_truth_integrity.py tests/test_v3_context_authority.py

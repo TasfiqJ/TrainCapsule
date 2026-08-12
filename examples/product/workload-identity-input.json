@@ -1,11 +1,12 @@
 {
   "argumentsDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
   "checkpointPolicyDigest": null,
+  "configurationFilesDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "containerImageDigest": null,
   "createdAt": "2026-08-11T20:00:00Z",
   "dataIdentity": {
-    "manifestDigest": null,
-    "policy": "CUSTOMER_ATTESTED"
+    "manifestDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "policy": "FULL_DIGEST"
   },
   "dependencyLockDigest": "sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
   "distributed": {
@@ -14,12 +15,11 @@
     "worldSize": 2
   },
   "entrypoint": "train.py",
-  "framework": {
-    "name": "pytorch",
-    "version": "2.5.1"
-  },
+  "framework": {"name": "pytorch", "version": "2.5.1"},
   "modelStructureDigest": null,
   "privacyClass": "CONFIDENTIAL",
+  "redactionPolicyVersion": "traincapsule-redaction-v1",
+  "relevantEnvironmentVariables": {"NCCL_DEBUG": "INFO", "SERVICE_TOKEN": "fixture-secret"},
   "schemaVersion": 1,
   "sourceIdentity": {
     "dirtyPatchDigest": null,

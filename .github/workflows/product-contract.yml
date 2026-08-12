@@ -1,8 +1,6 @@
 name: TrainCapsule / Product contract
 
 on:
-  pull_request:
-    branches: [main]
   push:
     branches: [main]
   workflow_dispatch:
@@ -34,6 +32,7 @@ jobs:
             tests/product/test_cli.py \
             tests/product/test_product_schemas.py \
             tests/product/test_qualification.py \
+            tests/product/test_install_to_preflight_journey.py \
             2>&1 | tee .ci-artifacts/product-contract.log
       - name: Retain product contract evidence
         if: always()

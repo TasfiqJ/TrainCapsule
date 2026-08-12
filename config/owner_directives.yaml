@@ -1,0 +1,30 @@
+version: 3
+authority: repository_owner
+recordedAt: "2026-08-11T00:00:00Z"
+directives:
+  unattendedOperation: REQUIRED
+  humanIntervention: FORBIDDEN
+  publicationBranch: main
+  nonMainPushes: FORBIDDEN
+  pullRequestDependency: FORBIDDEN
+  externalEvidencePolicy: NEVER_FABRICATE
+  missingEvidenceResult: UNKNOWN
+  scopedBlockersDoNotStopIndependentLanes: true
+safetyContract:
+  prePromotion:
+    requireExactCandidateSha: true
+    requireDeterministicLocalGates: true
+    requirePrivateGatesWhenConfigured: true
+    requireMachinePolicyReceipt: true
+  postPush:
+    monitorRequiredMainChecks: true
+    autoRevertFailedPromotion: true
+    quarantineFailedCandidate: true
+    finiteRetryBudgetRequired: true
+deviationsFromBundle:
+  - requirement: qualified human source and release approval
+    disposition: OWNER_OVERRIDDEN_ZERO_HUMAN
+    replacement: signed or digest-bound machine policy receipts and deterministic gates
+  - requirement: draft pull request release with human-authorized merge
+    disposition: OWNER_OVERRIDDEN_MAIN_ONLY
+    replacement: exact-SHA pre-promotion gates, main-only push, hosted verification, and automatic revert

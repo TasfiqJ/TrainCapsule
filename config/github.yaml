@@ -5,15 +5,9 @@ baseBranch: main
 branch: main
 visibility: private
 repository: TasfiqJ/TrainCapsule
-releaseMode: pull_request
-directMainPush: false
-releaseBranchPrefix: release/traincapsule
+releaseMode: owner_directed_main_only
+directMainPush: true
 releaseMetadataPath: factory/state/latest-release.json
-createDraftPullRequest: true
-autoMergeMechanical: false
-autoMergeStandard: false
-autoMergeIntegration: false
-autoMergeTrustCore: false
 push_after_verified_tasks: 2
 push_interval_seconds: 900
 push_before_quota_pause: true
@@ -32,6 +26,9 @@ remote_ci:
   - TrainCapsule / Product contract
   - TrainCapsule / Security
   - TrainCapsule / Source-of-truth integrity
+  - TrainCapsule / Packaging install
+  - TrainCapsule / Docs and schemas
+  - TrainCapsule / Source freshness
   required_risk_tiers:
   - integration
   - trust_core

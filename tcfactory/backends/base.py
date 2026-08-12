@@ -53,25 +53,40 @@ class AgentTaskRequest(V3Model):
     request_id: str = Field(pattern=r"^AREQ-[A-Z0-9_-]+$")
     work_item_id: str
     role: str
-    cwd: str
+    task_packet: dict[str, Any]
+    source_context_manifest: dict[str, Any]
+    allowed_paths: list[str] = Field(min_length=1, max_length=32)
+    forbidden_paths: list[str] = Field(default_factory=list[str], max_length=64)
+    network_policy: str = Field(pattern=r"^(DENY|ALLOWLIST)$")
+    output_schema: dict[str, Any]
+    controller_repo_root: str
+    candidate_worktree: str
+    artifact_root: str
     prompt: str = Field(min_length=1)
     system_prompt: str = Field(min_length=1)
     schema_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     context_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     source_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     max_turns: int = Field(ge=1, le=200)
+    max_tokens: int = Field(ge=1000, le=250_000)
+    max_cost_usd_equivalent: float = Field(ge=0, le=100)
     max_wall_time_seconds: int = Field(ge=1, le=14_400)
-    allowed_tools: list[str]
+    allowed_tools: list[str] = Field(alias="tools")
     bash_allowlist: list[str]
     network_allowed: bool = False
 
     @model_validator(mode="after")
     def reject_secret_material(self) -> AgentTaskRequest:
-        combined = f"{self.prompt}\n{self.system_prompt}\n{self.cwd}"
+        combined = (
+            f"{self.prompt}\n{self.system_prompt}\n{self.candidate_worktree}\n"
+            f"{self.artifact_root}\n{self.controller_repo_root}"
+        )
         if _FORBIDDEN_PROMPT_MATERIAL.search(combined):
             raise ValueError("request contains credential, account, or controller-secret material")
         if self.network_allowed:
             raise ValueError("backend-neutral V3 requests deny network by default")
+        if self.network_policy == "DENY" and self.network_allowed:
+            raise ValueError("DENY network policy cannot enable network")
         return self
 
     def exportable_summary(self) -> dict[str, object]:
@@ -85,7 +100,10 @@ class AgentTaskRequest(V3Model):
             "contextDigest": self.context_digest,
             "sourceDigest": self.source_digest,
             "maxTurns": self.max_turns,
+            "maxTokens": self.max_tokens,
+            "maxCostUsdEquivalent": self.max_cost_usd_equivalent,
             "maxWallTimeSeconds": self.max_wall_time_seconds,
+            "networkPolicy": self.network_policy,
             "networkAllowed": False,
         }
 
@@ -99,11 +117,25 @@ class AgentSession(V3Model):
 
 
 class Handoff(V3Model):
+    schema_version: int = Field(default=3, ge=3, le=3)
     work_item_id: str
+    lane: str
+    milestone: str
+    task_kind: str
+    disposition: str
+    decision_contribution: str
+    source_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    context_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     candidate_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
-    next_action: str
+    candidate_manifest_digest: str | None = Field(
+        default=None, pattern=DIGEST_PATTERN.pattern
+    )
+    next_authorized_transition: str
     artifact_digests: dict[str, str]
-    findings: list[str]
+    findings: list[dict[str, Any]]
+    attempts_remaining: int = Field(ge=0)
+    circuit_breaker_state: str | None = None
+    external_evidence_required: bool
 
 
 class UsageState(V3Model):
@@ -143,3 +175,5 @@ class EngineeringAgentBackend(Protocol):
     def cancel(self, session: AgentSession) -> None: ...
 
     def usage_state(self) -> UsageState: ...
+
+    async def execute(self, request: AgentTaskRequest) -> AgentRunResult: ...

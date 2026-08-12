@@ -19,11 +19,6 @@ class DispositionRecord(V3Model):
     evidence_refs: list[str]
     decided_by: OwnerType
     decided_at: datetime
-    human_approval_ref: str | None = Field(
-        default=None,
-        pattern=r"^HAPR-[A-Z0-9_-]+$",
-    )
-
     @model_validator(mode="after")
     def require_decision_evidence(self) -> DispositionRecord:
         if self.previous is self.decision:

@@ -1,5 +1,64 @@
 {
   "$defs": {
+    "CaseEconomics": {
+      "additionalProperties": false,
+      "properties": {
+        "currency": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{3}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currency"
+        },
+        "estimatedDelayCost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimateddelaycost"
+        },
+        "estimatedInvestigationCost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimatedinvestigationcost"
+        },
+        "estimatedOriginalRunCost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimatedoriginalruncost"
+        }
+      },
+      "title": "CaseEconomics",
+      "type": "object"
+    },
     "CompletenessState": {
       "enum": [
         "PRESENT_VALID",
@@ -16,14 +75,382 @@
       "title": "CompletenessState",
       "type": "string"
     },
-    "CostHypothesis": {
-      "enum": [
-        "VIABLE",
-        "UNECONOMIC",
-        "UNKNOWN"
+    "DataIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "manifestDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Manifestdigest"
+        },
+        "policy": {
+          "$ref": "#/$defs/DataIdentityPolicy"
+        }
+      },
+      "required": [
+        "policy"
       ],
-      "title": "CostHypothesis",
+      "title": "DataIdentity",
+      "type": "object"
+    },
+    "DataIdentityPolicy": {
+      "enum": [
+        "FULL_DIGEST",
+        "MANIFEST_DIGEST",
+        "CUSTOMER_ATTESTED",
+        "UNAVAILABLE"
+      ],
+      "title": "DataIdentityPolicy",
       "type": "string"
+    },
+    "DistributedIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "processGroupsDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Processgroupsdigest",
+          "type": "string"
+        },
+        "strategy": {
+          "minLength": 1,
+          "title": "Strategy",
+          "type": "string"
+        },
+        "worldSize": {
+          "maximum": 131072,
+          "minimum": 1,
+          "title": "Worldsize",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "strategy",
+        "worldSize",
+        "processGroupsDigest"
+      ],
+      "title": "DistributedIdentity",
+      "type": "object"
+    },
+    "EnvironmentIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "containerRuntime": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Containerruntime"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "title": "Createdat",
+          "type": "string"
+        },
+        "cudaDriver": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cudadriver"
+        },
+        "cudaRuntime": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Cudaruntime"
+        },
+        "environmentId": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Environmentid",
+          "type": "string"
+        },
+        "environmentVariablesDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Environmentvariablesdigest",
+          "type": "string"
+        },
+        "gpu": {
+          "$ref": "#/$defs/GpuIdentity"
+        },
+        "hostKernel": {
+          "minLength": 1,
+          "title": "Hostkernel",
+          "type": "string"
+        },
+        "identityEvidenceDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Identityevidencedigest"
+        },
+        "identityPolicy": {
+          "$ref": "#/$defs/DataIdentityPolicy"
+        },
+        "identityStrength": {
+          "$ref": "#/$defs/IdentityStrength"
+        },
+        "launcher": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Launcher"
+        },
+        "materializationRecipeDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Materializationrecipedigest"
+        },
+        "nccl": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Nccl"
+        },
+        "networkClass": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Networkclass"
+        },
+        "packagesDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Packagesdigest",
+          "type": "string"
+        },
+        "python": {
+          "minLength": 1,
+          "title": "Python",
+          "type": "string"
+        },
+        "pytorch": {
+          "minLength": 1,
+          "title": "Pytorch",
+          "type": "string"
+        },
+        "redactionPolicyVersion": {
+          "minLength": 1,
+          "title": "Redactionpolicyversion",
+          "type": "string"
+        },
+        "scheduler": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Scheduler"
+        },
+        "schemaVersion": {
+          "default": 1,
+          "maximum": 1,
+          "minimum": 1,
+          "title": "Schemaversion",
+          "type": "integer"
+        },
+        "storageClass": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Storageclass"
+        },
+        "topologyDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Topologydigest"
+        }
+      },
+      "required": [
+        "environmentId",
+        "identityStrength",
+        "identityPolicy",
+        "hostKernel",
+        "python",
+        "packagesDigest",
+        "pytorch",
+        "gpu",
+        "environmentVariablesDigest",
+        "redactionPolicyVersion",
+        "createdAt"
+      ],
+      "title": "EnvironmentIdentity",
+      "type": "object"
+    },
+    "EvidenceArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Artifactid",
+          "type": "string"
+        },
+        "capturedAt": {
+          "format": "date-time",
+          "title": "Capturedat",
+          "type": "string"
+        },
+        "caseId": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+          "title": "Caseid",
+          "type": "string"
+        },
+        "compression": {
+          "default": "none",
+          "title": "Compression",
+          "type": "string"
+        },
+        "contentDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contentdigest",
+          "type": "string"
+        },
+        "customerLocalUri": {
+          "pattern": "^cas://[A-Za-z0-9._/-]+$",
+          "title": "Customerlocaluri",
+          "type": "string"
+        },
+        "encryption": {
+          "default": "none",
+          "title": "Encryption",
+          "type": "string"
+        },
+        "exportPolicy": {
+          "minLength": 1,
+          "title": "Exportpolicy",
+          "type": "string"
+        },
+        "integrityStatus": {
+          "$ref": "#/$defs/EvidenceIntegrity"
+        },
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "privacyClass": {
+          "$ref": "#/$defs/PrivacyClass"
+        },
+        "provenance": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Provenance",
+          "type": "object"
+        },
+        "schemaVersion": {
+          "default": 1,
+          "maximum": 1,
+          "minimum": 1,
+          "title": "Schemaversion",
+          "type": "integer"
+        },
+        "sizeBytes": {
+          "minimum": 0,
+          "title": "Sizebytes",
+          "type": "integer"
+        },
+        "sourceAdapter": {
+          "minLength": 1,
+          "title": "Sourceadapter",
+          "type": "string"
+        },
+        "sourceVersion": {
+          "minLength": 1,
+          "title": "Sourceversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifactId",
+        "caseId",
+        "kind",
+        "sourceAdapter",
+        "sourceVersion",
+        "capturedAt",
+        "contentDigest",
+        "sizeBytes",
+        "privacyClass",
+        "customerLocalUri",
+        "exportPolicy",
+        "provenance",
+        "integrityStatus"
+      ],
+      "title": "EvidenceArtifact",
+      "type": "object"
     },
     "EvidenceCompletenessReport": {
       "additionalProperties": false,
@@ -60,6 +487,15 @@
       "title": "EvidenceCompletenessReport",
       "type": "object"
     },
+    "EvidenceIntegrity": {
+      "enum": [
+        "VALID",
+        "CORRUPTED",
+        "UNKNOWN"
+      ],
+      "title": "EvidenceIntegrity",
+      "type": "string"
+    },
     "EvidenceRequirement": {
       "additionalProperties": false,
       "properties": {
@@ -69,6 +505,14 @@
             "type": "string"
           },
           "title": "Artifactrefs",
+          "type": "array"
+        },
+        "claimNames": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Claimnames",
           "type": "array"
         },
         "detail": {
@@ -81,12 +525,24 @@
           "title": "Kind",
           "type": "string"
         },
+        "role": {
+          "$ref": "#/$defs/EvidenceRole"
+        },
         "state": {
           "$ref": "#/$defs/CompletenessState"
+        },
+        "substitutableBy": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Substitutableby",
+          "type": "array"
         }
       },
       "required": [
         "kind",
+        "role",
         "state",
         "artifactRefs",
         "detail"
@@ -94,9 +550,288 @@
       "title": "EvidenceRequirement",
       "type": "object"
     },
+    "EvidenceRole": {
+      "enum": [
+        "MANDATORY_FOR_ELIGIBILITY",
+        "MANDATORY_FOR_CLAIM",
+        "OPTIONAL",
+        "SUBSTITUTABLE",
+        "IRRECOVERABLE_AFTER_INCIDENT"
+      ],
+      "title": "EvidenceRole",
+      "type": "string"
+    },
+    "ExperimentEconomics": {
+      "additionalProperties": false,
+      "properties": {
+        "basis": {
+          "minLength": 1,
+          "title": "Basis",
+          "type": "string"
+        },
+        "currency": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{3}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currency"
+        },
+        "estimatedCost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimatedcost"
+        },
+        "estimatedDurationSeconds": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimateddurationseconds"
+        }
+      },
+      "required": [
+        "basis"
+      ],
+      "title": "ExperimentEconomics",
+      "type": "object"
+    },
+    "FindingAttribution": {
+      "enum": [
+        "NATIVE_TOOL_FOUND",
+        "TRAINCAPSULE_DERIVED",
+        "HUMAN_PROVIDED",
+        "EXTERNAL_SYSTEM_PROVIDED",
+        "UNKNOWN"
+      ],
+      "title": "FindingAttribution",
+      "type": "string"
+    },
+    "FrameworkIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "FrameworkIdentity",
+      "type": "object"
+    },
+    "GpuIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "count": {
+          "default": 0,
+          "maximum": 131072,
+          "minimum": 0,
+          "title": "Count",
+          "type": "integer"
+        },
+        "firmwareDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Firmwaredigest"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        }
+      },
+      "title": "GpuIdentity",
+      "type": "object"
+    },
+    "IdentityStrength": {
+      "enum": [
+        "FULLY_VERIFIED",
+        "PARTIALLY_VERIFIED",
+        "CUSTOMER_ATTESTED",
+        "UNVERIFIED",
+        "CONFLICTING"
+      ],
+      "title": "IdentityStrength",
+      "type": "string"
+    },
+    "IncidentCase": {
+      "additionalProperties": false,
+      "properties": {
+        "baselineEnvironmentId": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Baselineenvironmentid"
+        },
+        "candidateEnvironmentId": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Candidateenvironmentid"
+        },
+        "caseId": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+          "title": "Caseid",
+          "type": "string"
+        },
+        "decisionDeadline": {
+          "format": "date-time",
+          "title": "Decisiondeadline",
+          "type": "string"
+        },
+        "decisionOwner": {
+          "minLength": 1,
+          "title": "Decisionowner",
+          "type": "string"
+        },
+        "decisionType": {
+          "minLength": 1,
+          "title": "Decisiontype",
+          "type": "string"
+        },
+        "economics": {
+          "$ref": "#/$defs/CaseEconomics"
+        },
+        "evidenceRefs": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Evidencerefs",
+          "type": "array"
+        },
+        "incidentSummary": {
+          "minLength": 1,
+          "title": "Incidentsummary",
+          "type": "string"
+        },
+        "nativeFindings": {
+          "items": {
+            "$ref": "#/$defs/NativeFinding"
+          },
+          "title": "Nativefindings",
+          "type": "array"
+        },
+        "packCandidate": {
+          "minLength": 1,
+          "title": "Packcandidate",
+          "type": "string"
+        },
+        "privacyPolicy": {
+          "minLength": 1,
+          "title": "Privacypolicy",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "default": 1,
+          "maximum": 1,
+          "minimum": 1,
+          "title": "Schemaversion",
+          "type": "integer"
+        },
+        "status": {
+          "minLength": 1,
+          "title": "Status",
+          "type": "string"
+        },
+        "workloadId": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workloadid"
+        }
+      },
+      "required": [
+        "caseId",
+        "decisionOwner",
+        "decisionType",
+        "decisionDeadline",
+        "incidentSummary",
+        "evidenceRefs",
+        "nativeFindings",
+        "packCandidate",
+        "economics",
+        "privacyPolicy",
+        "status"
+      ],
+      "title": "IncidentCase",
+      "type": "object"
+    },
     "NativeBaseline": {
       "additionalProperties": false,
       "properties": {
+        "artifacts": {
+          "items": {
+            "$ref": "#/$defs/EvidenceArtifact"
+          },
+          "minItems": 1,
+          "title": "Artifacts",
+          "type": "array"
+        },
         "caseId": {
           "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
           "title": "Caseid",
@@ -115,14 +850,49 @@
           "title": "Configuration",
           "type": "object"
         },
-        "evidenceRefs": {
+        "decisionEvidenceRefs": {
           "items": {
             "pattern": "^sha256:[0-9a-f]{64}$",
             "type": "string"
           },
-          "minItems": 1,
-          "title": "Evidencerefs",
+          "title": "Decisionevidencerefs",
           "type": "array"
+        },
+        "decisionPolicyVersion": {
+          "const": "traincapsule-native-sufficiency-v1",
+          "default": "traincapsule-native-sufficiency-v1",
+          "title": "Decisionpolicyversion",
+          "type": "string"
+        },
+        "decisionProvenanceDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decisionprovenancedigest"
+        },
+        "decisionReached": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Decisionreached"
+        },
+        "elapsedSeconds": {
+          "minimum": 0,
+          "title": "Elapsedseconds",
+          "type": "integer"
         },
         "executedAt": {
           "format": "date-time",
@@ -133,12 +903,15 @@
           "items": {
             "$ref": "#/$defs/NativeFinding"
           },
+          "minItems": 1,
           "title": "Findings",
           "type": "array"
         },
-        "humanReviewed": {
-          "title": "Humanreviewed",
-          "type": "boolean"
+        "generationPolicyVersion": {
+          "const": "traincapsule-native-baseline-v1",
+          "default": "traincapsule-native-baseline-v1",
+          "title": "Generationpolicyversion",
+          "type": "string"
         },
         "limitations": {
           "items": {
@@ -148,17 +921,10 @@
           "title": "Limitations",
           "type": "array"
         },
-        "reviewer": {
-          "anyOf": [
-            {
-              "type": "string"
-            },
-            {
-              "type": "null"
-            }
-          ],
-          "default": null,
-          "title": "Reviewer"
+        "operatorEffortSeconds": {
+          "minimum": 0,
+          "title": "Operatoreffortseconds",
+          "type": "integer"
         },
         "schemaVersion": {
           "default": 1,
@@ -177,10 +943,12 @@
           "title": "Toolversion",
           "type": "string"
         },
-        "unresolvedCustomerDecision": {
-          "minLength": 1,
-          "title": "Unresolvedcustomerdecision",
-          "type": "string"
+        "unresolvedQuestions": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Unresolvedquestions",
+          "type": "array"
         }
       },
       "required": [
@@ -189,12 +957,14 @@
         "toolVersion",
         "command",
         "configuration",
+        "artifacts",
         "findings",
-        "evidenceRefs",
         "limitations",
-        "unresolvedCustomerDecision",
-        "executedAt",
-        "humanReviewed"
+        "elapsedSeconds",
+        "operatorEffortSeconds",
+        "decisionEvidenceRefs",
+        "unresolvedQuestions",
+        "executedAt"
       ],
       "title": "NativeBaseline",
       "type": "object"
@@ -212,10 +982,14 @@
     "NativeFinding": {
       "additionalProperties": false,
       "properties": {
+        "attribution": {
+          "$ref": "#/$defs/FindingAttribution"
+        },
         "confidenceClass": {
           "$ref": "#/$defs/NativeConfidence"
         },
         "customerDecisionContribution": {
+          "minLength": 1,
           "title": "Customerdecisioncontribution",
           "type": "string"
         },
@@ -224,6 +998,7 @@
             "pattern": "^sha256:[0-9a-f]{64}$",
             "type": "string"
           },
+          "minItems": 1,
           "title": "Evidencerefs",
           "type": "array"
         },
@@ -236,6 +1011,7 @@
           "items": {
             "type": "string"
           },
+          "minItems": 1,
           "title": "Limitations",
           "type": "array"
         },
@@ -264,6 +1040,7 @@
       },
       "required": [
         "findingId",
+        "attribution",
         "nativeSystem",
         "nativeVersion",
         "observation",
@@ -273,6 +1050,44 @@
         "customerDecisionContribution"
       ],
       "title": "NativeFinding",
+      "type": "object"
+    },
+    "PrivacyClass": {
+      "enum": [
+        "PUBLIC",
+        "INTERNAL",
+        "CONFIDENTIAL",
+        "RESTRICTED"
+      ],
+      "title": "PrivacyClass",
+      "type": "string"
+    },
+    "SourceIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "dirtyPatchDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dirtypatchdigest"
+        },
+        "repositoryDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Repositorydigest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repositoryDigest"
+      ],
+      "title": "SourceIdentity",
       "type": "object"
     },
     "TechnicalResult": {
@@ -288,157 +1103,163 @@
       ],
       "title": "TechnicalResult",
       "type": "string"
+    },
+    "WorkloadIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "argumentsDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Argumentsdigest",
+          "type": "string"
+        },
+        "checkpointPolicyDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Checkpointpolicydigest"
+        },
+        "configurationFilesDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Configurationfilesdigest",
+          "type": "string"
+        },
+        "containerImageDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Containerimagedigest"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "title": "Createdat",
+          "type": "string"
+        },
+        "dataIdentity": {
+          "$ref": "#/$defs/DataIdentity"
+        },
+        "dependencyLockDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Dependencylockdigest",
+          "type": "string"
+        },
+        "distributed": {
+          "$ref": "#/$defs/DistributedIdentity"
+        },
+        "entrypoint": {
+          "minLength": 1,
+          "title": "Entrypoint",
+          "type": "string"
+        },
+        "framework": {
+          "$ref": "#/$defs/FrameworkIdentity"
+        },
+        "identityStrength": {
+          "$ref": "#/$defs/IdentityStrength"
+        },
+        "modelStructureDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Modelstructuredigest"
+        },
+        "privacyClass": {
+          "$ref": "#/$defs/PrivacyClass"
+        },
+        "redactionPolicyVersion": {
+          "minLength": 1,
+          "title": "Redactionpolicyversion",
+          "type": "string"
+        },
+        "relevantEnvironmentDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Relevantenvironmentdigest",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "default": 1,
+          "maximum": 1,
+          "minimum": 1,
+          "title": "Schemaversion",
+          "type": "integer"
+        },
+        "sourceIdentity": {
+          "$ref": "#/$defs/SourceIdentity"
+        },
+        "workloadId": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Workloadid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workloadId",
+        "identityStrength",
+        "sourceIdentity",
+        "entrypoint",
+        "argumentsDigest",
+        "dependencyLockDigest",
+        "configurationFilesDigest",
+        "relevantEnvironmentDigest",
+        "redactionPolicyVersion",
+        "framework",
+        "distributed",
+        "dataIdentity",
+        "privacyClass",
+        "createdAt"
+      ],
+      "title": "WorkloadIdentity",
+      "type": "object"
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
-    "baselineAccess": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Baselineaccess"
+    "baselineEnvironment": {
+      "$ref": "#/$defs/EnvironmentIdentity"
     },
-    "candidateAccess": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Candidateaccess"
-    },
-    "caseId": {
-      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
-      "title": "Caseid",
-      "type": "string"
-    },
-    "completeNativeBaseline": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Completenativebaseline"
+    "candidateEnvironment": {
+      "$ref": "#/$defs/EnvironmentIdentity"
     },
     "completenessReport": {
       "$ref": "#/$defs/EvidenceCompletenessReport"
-    },
-    "costHypothesis": {
-      "$ref": "#/$defs/CostHypothesis"
-    },
-    "decisionDeadline": {
-      "format": "date-time",
-      "title": "Decisiondeadline",
-      "type": "string"
-    },
-    "decisionType": {
-      "minLength": 1,
-      "title": "Decisiontype",
-      "type": "string"
     },
     "evaluatedAt": {
       "format": "date-time",
       "title": "Evaluatedat",
       "type": "string"
     },
-    "evidenceIdentityBound": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Evidenceidentitybound"
-    },
-    "exportPolicyAllowsRequiredFlow": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Exportpolicyallowsrequiredflow"
-    },
-    "humanExpertiseAvailable": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Humanexpertiseavailable"
-    },
-    "localExecutionAvailable": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Localexecutionavailable"
+    "incidentCase": {
+      "$ref": "#/$defs/IncidentCase"
     },
     "nativeBaseline": {
-      "anyOf": [
-        {
-          "$ref": "#/$defs/NativeBaseline"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null
+      "$ref": "#/$defs/NativeBaseline"
     },
-    "nativeWorkflowResolvesDecision": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Nativeworkflowresolvesdecision"
+    "originalExperimentEconomics": {
+      "$ref": "#/$defs/ExperimentEconomics"
     },
-    "packFit": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Packfit"
-    },
-    "privacyPolicyAllowsProcessing": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Privacypolicyallowsprocessing"
+    "proposedExperimentEconomics": {
+      "$ref": "#/$defs/ExperimentEconomics"
     },
     "schemaVersion": {
       "default": 1,
@@ -447,36 +1268,29 @@
       "title": "Schemaversion",
       "type": "integer"
     },
-    "sourceVersionSupported": {
-      "anyOf": [
-        {
-          "type": "boolean"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "title": "Sourceversionsupported"
+    "verifiedArtifacts": {
+      "items": {
+        "$ref": "#/$defs/EvidenceArtifact"
+      },
+      "minItems": 1,
+      "title": "Verifiedartifacts",
+      "type": "array"
+    },
+    "workloadIdentity": {
+      "$ref": "#/$defs/WorkloadIdentity"
     }
   },
   "required": [
-    "caseId",
-    "decisionType",
-    "decisionDeadline",
     "evaluatedAt",
-    "baselineAccess",
-    "candidateAccess",
-    "evidenceIdentityBound",
-    "packFit",
-    "localExecutionAvailable",
-    "costHypothesis",
-    "privacyPolicyAllowsProcessing",
-    "exportPolicyAllowsRequiredFlow",
-    "completeNativeBaseline",
-    "nativeWorkflowResolvesDecision",
-    "humanExpertiseAvailable",
-    "sourceVersionSupported",
-    "completenessReport"
+    "incidentCase",
+    "workloadIdentity",
+    "baselineEnvironment",
+    "candidateEnvironment",
+    "verifiedArtifacts",
+    "completenessReport",
+    "nativeBaseline",
+    "originalExperimentEconomics",
+    "proposedExperimentEconomics"
   ],
   "title": "PreflightInputs",
   "type": "object"

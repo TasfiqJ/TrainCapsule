@@ -6,4 +6,4 @@ Modify only authorized factory paths. Do not change product code unless the pack
 
 Reproduce the defect, implement the smallest causal repair, and verify positive, negative, boundary, malformed-state, restart-budget, lock, recovery, and regression behavior as relevant. Do not hide infrastructure errors or fabricate successful execution.
 
-If the bounded repair cannot succeed, preserve the candidate and emit a concrete finding or HARD_STUCK. External truth is WAITING_EXTERNAL and approval is WAITING_HUMAN. Return at most 8 findings total and no automatic roadmap changes.
+If the bounded repair cannot succeed, preserve the candidate and emit a concrete finding or HARD_STUCK. External truth is WAITING_EXTERNAL and missing machine authority is BLOCKED_POLICY. Return at most 8 findings total and no automatic roadmap changes.

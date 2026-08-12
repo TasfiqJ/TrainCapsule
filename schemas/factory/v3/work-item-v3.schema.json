@@ -69,7 +69,6 @@
       "enum": [
         "AI",
         "FOUNDER",
-        "HUMAN_REVIEWER",
         "CUSTOMER",
         "EXTERNAL_PARTY"
       ],
@@ -132,7 +131,7 @@
         "RESEARCH",
         "CONTROLLED_EXPERIMENT",
         "EXTERNAL_EVIDENCE",
-        "HUMAN_REVIEW",
+        "MACHINE_POLICY_REVIEW",
         "COMMERCIAL_EXPERIMENT",
         "MAINTENANCE",
         "MIGRATION"
@@ -148,7 +147,6 @@
         "RUNNING",
         "PAUSED_QUOTA",
         "WAITING_EXTERNAL",
-        "WAITING_HUMAN",
         "BLOCKED_TECHNICAL",
         "BLOCKED_POLICY",
         "PASSED_ENGINEERING",
@@ -280,10 +278,6 @@
       "title": "Externalreceiptrequired",
       "type": "boolean"
     },
-    "humanApprovalRequired": {
-      "title": "Humanapprovalrequired",
-      "type": "boolean"
-    },
     "retryPolicy": {
       "$ref": "#/$defs/RetryPolicy"
     },
@@ -292,13 +286,6 @@
         "type": "string"
       },
       "title": "Externalevidencerefs",
-      "type": "array"
-    },
-    "humanApprovalRefs": {
-      "items": {
-        "type": "string"
-      },
-      "title": "Humanapprovalrefs",
       "type": "array"
     },
     "createdAt": {
@@ -348,7 +335,6 @@
     "automatable",
     "evidenceRequired",
     "externalReceiptRequired",
-    "humanApprovalRequired",
     "retryPolicy"
   ],
   "title": "WorkItem",

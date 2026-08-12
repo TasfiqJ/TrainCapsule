@@ -26,7 +26,7 @@ from tcfactory.checkpoints import (
     V3Checkpoint,
 )
 from tcfactory.config import load_factory_config
-from tcfactory.models import RoleName
+from tcfactory.models import FactoryConfig, RoleName, SecurityPolicy, TaskPacket
 from tcfactory.structured_runner import (
     run_structured_read_only_review,
     validate_bash_command,
@@ -50,15 +50,25 @@ def _request(**updates: object) -> AgentTaskRequest:
         "requestId": "AREQ-TEST-001",
         "workItemId": "V3-MIG-001",
         "role": "adversary",
-        "cwd": "/workspace/candidate",
+        "taskPacket": {"workItemId": "V3-MIG-001"},
+        "sourceContextManifest": {"version": 3},
+        "allowedPaths": ["tcfactory/**"],
+        "forbiddenPaths": ["config/**"],
+        "networkPolicy": "DENY",
+        "outputSchema": {"type": "object"},
+        "controllerRepoRoot": "/workspace/controller",
+        "candidateWorktree": "/workspace/candidate",
+        "artifactRoot": "/workspace/artifacts",
         "prompt": "Inspect the bounded candidate and return the schema.",
         "systemPrompt": "Do not mutate files or use the network.",
         "schemaDigest": DIGEST,
         "contextDigest": DIGEST,
         "sourceDigest": DIGEST,
         "maxTurns": 4,
+        "maxTokens": 4000,
+        "maxCostUsdEquivalent": 0,
         "maxWallTimeSeconds": 60,
-        "allowedTools": ["Read"],
+        "tools": ["Read"],
         "bashAllowlist": [],
         "networkAllowed": False,
     }
@@ -91,6 +101,25 @@ def _checkpoint(generation: int = 1, candidate_sha: str = SHA) -> V3Checkpoint:
     )
 
 
+def _handoff() -> Handoff:
+    return Handoff(
+        work_item_id="V3-MIG-001",
+        lane="FACTORY",
+        milestone="M0_FACTORY_MIGRATED",
+        task_kind="MIGRATION",
+        disposition="KEEP",
+        decision_contribution="Bounded deterministic fixture.",
+        source_digest=DIGEST,
+        context_digest=DIGEST,
+        candidate_sha=SHA,
+        next_authorized_transition="PASSED_ENGINEERING",
+        artifact_digests={},
+        findings=[],
+        attempts_remaining=1,
+        external_evidence_required=False,
+    )
+
+
 def test_fake_backend_satisfies_protocol_and_is_deterministic() -> None:
     backend = FakeBackend([{"verdict": "pass", "finding": "none"}])
     assert isinstance(backend, EngineeringAgentBackend)
@@ -98,13 +127,7 @@ def test_fake_backend_satisfies_protocol_and_is_deterministic() -> None:
     session = backend.start(_request())
     result = backend.resume(
         session,
-        Handoff(
-            work_item_id="V3-MIG-001",
-            candidate_sha=SHA,
-            next_action="Return the fixture.",
-            artifact_digests={},
-            findings=[],
-        ),
+        _handoff(),
     )
     assert result.state is SessionState.COMPLETED
     assert result.structured_output == {"verdict": "pass", "finding": "none"}
@@ -115,13 +138,7 @@ def test_fake_backend_satisfies_protocol_and_is_deterministic() -> None:
     with pytest.raises(ValueError, match="cancelled"):
         backend.resume(
             second,
-            Handoff(
-                work_item_id="V3-MIG-001",
-                candidate_sha=SHA,
-                next_action="Never runs.",
-                artifact_digests={},
-                findings=[],
-            ),
+            _handoff(),
         )
 
 
@@ -144,7 +161,7 @@ def test_request_export_never_contains_prompt_or_local_path() -> None:
     request = _request()
     exported = json.dumps(request.exportable_summary())
     assert request.prompt not in exported
-    assert request.cwd not in exported
+    assert request.candidate_worktree not in exported
     assert "systemPrompt" not in exported
     redacted = redact_sensitive(
         "account_id=customer-42 /home/user/.config/traincapsule/claude-oauth-token"
@@ -166,6 +183,40 @@ def test_claude_provider_exposes_only_backend_neutral_states(
         provider.sdk_environment()
     assert str(captured.value) == "AUTH_EXPIRED"
     assert "token" not in str(ClaudeBackend.safe_exception(RuntimeError("sk-secretvalue")))
+
+
+def test_claude_adapter_rejects_any_weakened_network_or_sandbox_boundary(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    provider = ClaudeCredentialProvider()
+    monkeypatch.setattr(
+        provider,
+        "state",
+        lambda: BackendRouteState.AUTHENTICATED,
+    )
+    backend = ClaudeBackend(provider)
+    with pytest.raises(ValueError, match="explicit DENY"):
+        backend.start(_request(networkPolicy="ALLOWLIST"))
+
+    denied = TaskPacket.model_construct(security=SecurityPolicy())
+    ClaudeBackend.require_execution_security(FactoryConfig(), denied)
+    allowlisted = TaskPacket.model_construct(
+        security=SecurityPolicy(network_default="allowlist")
+    )
+    with pytest.raises(RuntimeError, match="network-default deny"):
+        ClaudeBackend.require_execution_security(FactoryConfig(), allowlisted)
+    with pytest.raises(RuntimeError, match="requires the sandbox"):
+        ClaudeBackend.require_execution_security(
+            FactoryConfig(sandbox_enabled=False),
+            denied,
+        )
+    with pytest.raises(RuntimeError, match="fail when the sandbox"):
+        ClaudeBackend.require_execution_security(
+            FactoryConfig(),
+            TaskPacket.model_construct(
+                security=SecurityPolicy(fail_if_sandbox_unavailable=False)
+            ),
+        )
 
 
 def test_structured_runner_routes_fake_backend_without_model_usage(tmp_path: Path) -> None:

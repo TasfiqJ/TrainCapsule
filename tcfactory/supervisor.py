@@ -14,20 +14,25 @@ from pydantic import Field
 
 from .backends.base import BackendRouteState
 from .backends.claude import ClaudeCredentialProvider
+from .github_sync import MainOnlyPublisher, load_github_config
 from .gitops import current_sha
-from .util import read_json, run_command, sha256_file, write_json
-from .v3.base import SHA_PATTERN, V3Model
+from .util import read_json, resolve_within, run_command, sha256_file, write_json
+from .v3.base import SHA_PATTERN, V3Model, sha256_digest
 from .v3.configuration import (
     AutonomyV3Config,
     FactoryV3Config,
     load_factory_v3,
     validate_v3_configuration,
 )
+from .v3.enums import MilestoneStatus, WorkStatus
 from .v3.migrations import (
     load_installed_legacy_migration,
     verify_legacy_queue_archive_receipt,
 )
+from .v3.milestones import MilestoneRoadmap
 from .v3.recovery import enforce_controller_restart_budget
+from .v3.work_items import WorkItemCollection
+from .yamlutil import load_yaml
 
 
 class MigrationCompleteMarker(V3Model):
@@ -35,6 +40,10 @@ class MigrationCompleteMarker(V3Model):
     status: Literal["COMPLETE"] = "COMPLETE"
     completed_sha: str = Field(pattern=SHA_PATTERN.pattern)
     source_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    owner_directives_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    milestone: Literal["M0_FACTORY_MIGRATED"] = "M0_FACTORY_MIGRATED"
+    acceptance_work_items: dict[str, str]
+    acceptance_evidence_digests: dict[str, str]
     completed_at: datetime
 
 
@@ -120,14 +129,39 @@ def _verify_migration_marker(
     manifest = repo_root / config.source_of_truth.manifest
     if sha256_file(manifest) != marker.source_manifest_sha256:
         raise RuntimeError("migration marker source-manifest digest is stale")
+    directives = repo_root / "config/owner_directives.yaml"
+    if sha256_file(directives) != marker.owner_directives_sha256:
+        raise RuntimeError("migration marker owner-directive digest is stale")
     head = current_sha(repo_root)
-    ancestor = run_command(
-        ["git", "merge-base", "--is-ancestor", marker.completed_sha, head],
-        cwd=repo_root,
-        check=False,
-    )
-    if ancestor.returncode != 0:
-        raise RuntimeError("migration marker commit is not an ancestor of the current checkout")
+    if marker.completed_sha != head:
+        raise RuntimeError("migration marker must match the exact current checkout SHA")
+    roadmap = WorkItemCollection.model_validate(load_yaml(repo_root / config.roadmap.work_items))
+    milestones = MilestoneRoadmap.model_validate(load_yaml(repo_root / config.roadmap.milestones))
+    if milestones.milestone("M0_FACTORY_MIGRATED").status is not MilestoneStatus.COMPLETED:
+        raise RuntimeError("migration marker requires completed M0 milestone")
+    required = {f"V3-MIG-{number:03d}" for number in range(16, 21)}
+    if set(marker.acceptance_work_items) != required:
+        raise RuntimeError("migration marker acceptance work-item set is incomplete")
+    for identifier in required:
+        item = roadmap.item(identifier)
+        if item.status is not WorkStatus.COMPLETED or not item.evidence_required:
+            raise RuntimeError(f"migration acceptance item is incomplete: {identifier}")
+        if marker.acceptance_work_items[identifier] != WorkStatus.COMPLETED.value:
+            raise RuntimeError(f"migration marker status is stale: {identifier}")
+        if identifier not in marker.acceptance_evidence_digests:
+            raise RuntimeError(f"migration marker evidence digest is missing: {identifier}")
+        referenced = [
+            resolve_within(repo_root, reference, require_exists=True)
+            for reference in item.evidence_required
+        ]
+        actual_digest = sha256_digest(
+            b"\n".join(
+                f"{path.relative_to(repo_root).as_posix()}:{sha256_file(path)}".encode()
+                for path in sorted(referenced)
+            )
+        )
+        if marker.acceptance_evidence_digests[identifier] != actual_digest:
+            raise RuntimeError(f"migration marker evidence is stale: {identifier}")
     return marker
 
 
@@ -141,16 +175,24 @@ def run_startup_preflight(repo_root: Path) -> dict[str, object]:
     _verify_source_integrity(repo_root)
     legacy_migration = load_installed_legacy_migration(repo_root)
     verify_legacy_queue_archive_receipt(repo_root)
-    marker = _verify_migration_marker(repo_root, config, paths.migration_marker)
     if paths.stop.exists():
         raise RuntimeError("durable STOP is present")
     if paths.hard_stuck.exists():
         raise RuntimeError("HARD_STUCK is present")
+    github = load_github_config(repo_root / "config/github.yaml")
+    publication_recovery: dict[str, object] = {"status": "GITHUB_DISABLED"}
+    if github.enabled:
+        publisher = MainOnlyPublisher(
+            repo_root=repo_root,
+            config=github,
+            receipt_root=paths.state_root / "machine-policy-receipts",
+            quarantine_root=paths.state_root / "quarantine",
+        )
+        publication_recovery = publisher.reconcile_pending()
+    marker = _verify_migration_marker(repo_root, config, paths.migration_marker)
     running_dir = repo_root / "factory" / "queue" / "running"
     running_records = [
-        path
-        for path in running_dir.glob("*")
-        if path.is_file() and not path.name.startswith(".")
+        path for path in running_dir.glob("*") if path.is_file() and not path.name.startswith(".")
     ]
     if running_records:
         raise RuntimeError("running queue records require explicit recovery before startup")
@@ -169,6 +211,7 @@ def run_startup_preflight(repo_root: Path) -> dict[str, object]:
         "migrationCompletedSha": marker.completed_sha,
         "credentials": route.value,
         "runtimeState": "CLEAN",
+        "publicationRecovery": publication_recovery,
     }
 
 
@@ -231,6 +274,7 @@ def record_controller_exit(
 
 
 def record_controller_start(repo_root: Path, now: datetime | None = None) -> SupervisorState:
+    run_startup_preflight(repo_root)
     config = _factory_config(repo_root)
     paths = runtime_paths(repo_root, config)
     state = load_supervisor_state(paths.supervisor_state)
@@ -248,6 +292,14 @@ def supervisor_status(repo_root: Path) -> dict[str, object]:
     paths = runtime_paths(repo_root, config)
     state = load_supervisor_state(paths.supervisor_state)
     maximum = autonomy.recovery.max_controller_restarts
+    migration_status = "MISSING"
+    if paths.migration_marker.exists():
+        try:
+            _verify_migration_marker(repo_root, config, paths.migration_marker)
+        except (RuntimeError, ValueError):
+            migration_status = "STALE_OR_INVALID"
+        else:
+            migration_status = "VALID"
     return {
         "used": state.restart_attempts,
         "maximum": maximum,
@@ -255,23 +307,46 @@ def supervisor_status(repo_root: Path) -> dict[str, object]:
         "backoffSeconds": autonomy.recovery.restart_backoff_seconds,
         "healthyResetSeconds": autonomy.recovery.require_healthy_seconds_to_reset_restart_budget,
         "hardStuck": paths.hard_stuck.exists(),
-        "migrationComplete": paths.migration_marker.exists(),
+        "migrationComplete": migration_status == "VALID",
+        "migrationMarkerStatus": migration_status,
         "state": state.model_dump(mode="json", by_alias=True),
     }
 
 
 def create_migration_complete_marker(
-    repo_root: Path, *, acknowledge: bool
+    repo_root: Path, *, acknowledge: bool = False
 ) -> MigrationCompleteMarker:
-    if not acknowledge:
-        raise RuntimeError("explicit migration-complete acknowledgement is required")
+    del acknowledge  # Retained only as a compatibility flag; V3 is zero-human.
     validate_v3_configuration(repo_root)
     _verify_source_integrity(repo_root)
     config = _factory_config(repo_root)
     paths = runtime_paths(repo_root, config)
+    roadmap = WorkItemCollection.model_validate(load_yaml(repo_root / config.roadmap.work_items))
+    milestones = MilestoneRoadmap.model_validate(load_yaml(repo_root / config.roadmap.milestones))
+    if milestones.milestone("M0_FACTORY_MIGRATED").status is not MilestoneStatus.COMPLETED:
+        raise RuntimeError("cannot create migration marker before M0 is completed")
+    required = [f"V3-MIG-{number:03d}" for number in range(16, 21)]
+    evidence: dict[str, str] = {}
+    for identifier in required:
+        item = roadmap.item(identifier)
+        if item.status is not WorkStatus.COMPLETED or not item.evidence_required:
+            raise RuntimeError(f"cannot create marker before {identifier} evidence is complete")
+        referenced = [
+            resolve_within(repo_root, reference, require_exists=True)
+            for reference in item.evidence_required
+        ]
+        evidence[identifier] = sha256_digest(
+            b"\n".join(
+                f"{path.relative_to(repo_root).as_posix()}:{sha256_file(path)}".encode()
+                for path in sorted(referenced)
+            )
+        )
     marker = MigrationCompleteMarker(
         completed_sha=current_sha(repo_root),
         source_manifest_sha256=sha256_file(repo_root / config.source_of_truth.manifest),
+        owner_directives_sha256=sha256_file(repo_root / "config/owner_directives.yaml"),
+        acceptance_work_items={identifier: "COMPLETED" for identifier in required},
+        acceptance_evidence_digests=evidence,
         completed_at=datetime.now(UTC),
     )
     write_json(paths.migration_marker, marker.model_dump(mode="json", by_alias=True))
@@ -286,7 +361,7 @@ def _parser() -> argparse.ArgumentParser:
     parser.add_argument("--repo", type=Path, required=True)
     parser.add_argument("--runtime-seconds", type=int, default=0)
     parser.add_argument("--exit-code", type=int, default=1)
-    parser.add_argument("--acknowledge", action="store_true")
+    parser.add_argument("--acknowledge", action="store_true", help=argparse.SUPPRESS)
     return parser
 
 

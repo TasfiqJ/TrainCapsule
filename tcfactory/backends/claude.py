@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import Any
 
 from tcfactory.auth import assert_max_oauth_only, sanitized_agent_environment
@@ -17,7 +18,17 @@ from tcfactory.backends.base import (
     TranscriptRetention,
     UsageState,
 )
-from tcfactory.util import redact_sensitive
+from tcfactory.config import load_factory_config, load_roles
+from tcfactory.models import (
+    FactoryConfig,
+    RiskTier,
+    RoleName,
+    SecurityPolicy,
+    Stage,
+    TaskPacket,
+)
+from tcfactory.util import redact_sensitive, sha256_file, write_json
+from tcfactory.v3.planning import V3TaskPacket
 
 
 class ClaudeCredentialProvider:
@@ -61,6 +72,8 @@ class ClaudeBackend:
         )
 
     def start(self, request: AgentTaskRequest) -> AgentSession:
+        if request.network_policy != "DENY" or request.network_allowed:
+            raise ValueError("Claude V3 execution requires an explicit DENY network policy")
         state = self.credentials.state()
         if state is not BackendRouteState.AUTHENTICATED:
             raise RuntimeError(state.value)
@@ -91,9 +104,25 @@ class ClaudeBackend:
             error_state=BackendRouteState.ROUTE_REFUSED,
         )
 
+    @staticmethod
+    def require_execution_security(config: FactoryConfig, task: TaskPacket) -> None:
+        if not config.sandbox_enabled:
+            raise RuntimeError("Claude V3 execution requires the sandbox")
+        if config.unsandbox_mutating_roles or task.security.allow_unsandboxed_commands:
+            raise RuntimeError("Claude V3 execution forbids unsandboxed commands")
+        if task.security.network_default != "deny":
+            raise RuntimeError("Claude V3 execution requires network-default deny")
+        if not task.security.fail_if_sandbox_unavailable:
+            raise RuntimeError("Claude V3 execution must fail when the sandbox is unavailable")
+
     async def run_stage(self, **kwargs: Any) -> Any:
         """Run the existing stage adapter without exposing provider objects to factory state."""
 
+        config = kwargs.get("config")
+        task = kwargs.get("task")
+        if not isinstance(config, FactoryConfig) or not isinstance(task, TaskPacket):
+            raise RuntimeError("Claude stage requires typed factory and task security policy")
+        self.require_execution_security(config, task)
         from tcfactory.claude_runner import run_agent_stage
 
         return await run_agent_stage(**kwargs)
@@ -116,6 +145,130 @@ class ClaudeBackend:
             estimated_api_equivalent_usd=0.0,
             actual_charge_usd=0.0,
         )
+
+    async def execute(self, request: AgentTaskRequest) -> AgentRunResult:
+        """Execute a V3 request through the existing SDK adapter behind this boundary."""
+
+        session = self.start(request)
+        repo_root = Path(request.controller_repo_root).resolve()
+        worktree = Path(request.candidate_worktree).resolve()
+        artifact_root = Path(request.artifact_root).resolve()
+        packet = V3TaskPacket.model_validate(request.task_packet)
+        role = RoleName(request.role)
+        stage = Stage(
+            role=role,
+            max_turns=request.max_turns,
+            max_budget_usd=request.max_cost_usd_equivalent or 0.01,
+            task_budget_tokens=request.max_tokens,
+            tools=request.allowed_tools,
+            allowed_paths=request.allowed_paths,
+            forbidden_paths=request.forbidden_paths,
+            read_only=role
+            in {
+                RoleName.ADVERSARY,
+                RoleName.AUDIT,
+                RoleName.SECURITY,
+                RoleName.INTEGRATION_SCOUT,
+                RoleName.RELEASE,
+            },
+        )
+        risk = {
+            "MECHANICAL": RiskTier.MECHANICAL,
+            "STANDARD": RiskTier.STANDARD,
+            "INTEGRATION": RiskTier.INTEGRATION,
+            "TRUST_CORE": RiskTier.TRUST_CORE,
+            "EXTERNAL": RiskTier.TRUST_CORE,
+        }[packet.risk_tier.value]
+        compatibility_packet = TaskPacket(
+            task_id=packet.work_item_id,
+            title=packet.title,
+            phase=packet.milestone,
+            goal=packet.goal,
+            decision_contribution=packet.decision_contribution,
+            oracle=packet.oracle,
+            rollback=packet.rollback,
+            source_of_truth=packet.source_documents,
+            depends_on=[],
+            non_goals=packet.non_goals,
+            acceptance_criteria=packet.acceptance_criteria,
+            outputs=packet.outputs,
+            stop_conditions=packet.stop_conditions,
+            pipeline=[stage],
+            risk_tier=risk,
+            remote_ci_required=True,
+            github_push=True,
+            task_budget_usd=max(request.max_cost_usd_equivalent, 0.01),
+            auto_merge=False,
+            security=SecurityPolicy(
+                network_default="deny",
+                allow_unsandboxed_commands=False,
+                fail_if_sandbox_unavailable=True,
+            ),
+        )
+        factory = load_factory_config(repo_root / "config/factory.yaml")
+        self.require_execution_security(factory, compatibility_packet)
+        roles = load_roles(repo_root / factory.roles_path)
+        result_artifact = artifact_root / role.value
+        result_artifact.mkdir(parents=True, exist_ok=True)
+        try:
+            result = await self.run_stage(
+                repo_root=repo_root,
+                worktree=worktree,
+                config=factory,
+                task=compatibility_packet,
+                stage=stage,
+                role_config=roles[role],
+                global_prompt_path=factory.global_prompt,
+                run_id=request.request_id.lower(),
+                attempt=1,
+                artifact_dir=result_artifact,
+                base_sha=packet.base_sha,
+                system_prompt_override=request.system_prompt,
+                task_prompt_override=request.prompt,
+            )
+            result_path = result_artifact / "backend-result.json"
+            write_json(result_path, result.model_dump(mode="json"))
+            completed = session.model_copy(
+                update={
+                    "state": (
+                        SessionState.COMPLETED
+                        if result.verdict.value == "pass"
+                        else SessionState.FAILED
+                    )
+                }
+            )
+            self._sessions[session.session_ref] = completed
+            return AgentRunResult(
+                session=completed,
+                state=completed.state,
+                verdict=result.verdict.value,
+                structured_output=result.model_dump(mode="json"),
+                artifact_digests={
+                    f"{role.value}/backend-result.json": f"sha256:{sha256_file(result_path)}"
+                },
+                usage=UsageState(
+                    route_state=BackendRouteState.AUTHENTICATED,
+                    subscription_capacity="subscription",
+                    estimated_api_equivalent_usd=result.total_cost_usd,
+                    actual_charge_usd=0.0,
+                ),
+                redacted_summary=redact_sensitive(
+                    result.error or result.terminal_reason or result.verdict.value
+                ),
+            )
+        except Exception:
+            failed = session.model_copy(update={"state": SessionState.FAILED})
+            self._sessions[session.session_ref] = failed
+            return AgentRunResult(
+                session=failed,
+                state=SessionState.FAILED,
+                verdict="blocked",
+                structured_output=None,
+                artifact_digests={},
+                usage=self.usage_state(),
+                redacted_summary="backend execution failed safely",
+                error_state=BackendRouteState.ROUTE_REFUSED,
+            )
 
     @staticmethod
     def safe_exception(error: BaseException) -> RuntimeError:

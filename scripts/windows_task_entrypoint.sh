@@ -43,7 +43,7 @@ while [[ ! -f "$STATE_DIR/STOP" && ! -f "$STATE_DIR/PAUSE" ]]; do
   "$UV" run python -m tcfactory.supervisor start --repo "$ROOT" \
     >>"$LOG_DIR/autopilot.log" 2>&1
   started_epoch="$(date +%s)"
-  if "$UV" run tcfactory autopilot --repo "$ROOT" \
+  if "$UV" run tcfactory v3-controller --repo "$ROOT" \
     >>"$LOG_DIR/autopilot.log" 2>&1; then
     controller_exit=0
   else

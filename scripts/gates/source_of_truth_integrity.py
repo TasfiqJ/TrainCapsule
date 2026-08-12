@@ -3,6 +3,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import re
 import sys
@@ -31,6 +32,11 @@ REQUIRED_GROUPS = {
     "roadmap",
     "current_facts",
     "factory_control",
+    "commercial_wedge",
+    "native_baseline",
+    "pre_collective_pack",
+    "market_evidence",
+    "factory_controller",
     "advisory_acquisition",
     "advisory_career",
 }
@@ -143,19 +149,32 @@ def _validate_context(repo_root: Path) -> None:
             "includeRoles",
             "excludeRoles",
             "freshnessPolicy",
+            "maxSources",
+            "maxCharacters",
             "entries",
         ):
             if field not in group:
                 raise SourceIntegrityError(f"context group {group_name} lacks {field}")
         entries = _list(group["entries"], f"context group {group_name} entries")
+        max_sources = group["maxSources"]
+        max_characters = group["maxCharacters"]
+        if group_name.startswith("advisory_"):
+            if entries or max_sources != 0 or max_characters != 0:
+                raise SourceIntegrityError(f"advisory context group {group_name} must be empty")
+            continue
+        if not isinstance(max_sources, int) or not 0 < len(entries) <= max_sources:
+            raise SourceIntegrityError(f"context group {group_name} violates its source budget")
+        if not isinstance(max_characters, int) or max_characters < 1:
+            raise SourceIntegrityError(f"context group {group_name} lacks a character budget")
+        observed_characters = 0
         for index, raw_entry in enumerate(entries):
             entry = _mapping(raw_entry, f"{group_name} entries[{index}]")
             required = {
                 "path",
+                "sha256",
                 "authorityClass",
+                "authoritySections",
                 "scope",
-                "includeRoles",
-                "excludeRoles",
                 "freshnessPolicy",
             }
             missing = required - set(entry)
@@ -166,17 +185,41 @@ def _validate_context(repo_root: Path) -> None:
             source = entry["path"]
             if not isinstance(source, str) or not (repo_root / source).is_file():
                 raise SourceIntegrityError(f"unresolved V3 context path: {source}")
+            source_path = repo_root / source
+            actual_digest = hashlib.sha256(source_path.read_bytes()).hexdigest()
+            if entry["sha256"] != actual_digest:
+                raise SourceIntegrityError(f"context entry digest mismatch: {source}")
+            sections = _list(entry["authoritySections"], f"{group_name}[{index}] sections")
+            if not sections or any(
+                not isinstance(value, str) or not value.startswith("§")
+                for value in sections
+            ):
+                raise SourceIntegrityError(
+                    f"context entry lacks exact authority sections: {source}"
+                )
+            observed_characters += len(source_path.read_text(encoding="utf-8"))
             if "final-2026-08-09" in source or "(1)" in source:
                 raise SourceIntegrityError(
                     f"historical or duplicate file is active context: {source}"
                 )
             authority_class = entry["authorityClass"]
-            if group_name == "current_facts" and authority_class != "current_fact":
+            if (
+                group_name in {"current_facts", "market_evidence"}
+                and authority_class != "current_fact"
+            ):
                 raise SourceIntegrityError(
                     "current factual authority is mixed with normative authority"
                 )
-            if group_name != "current_facts" and authority_class == "current_fact":
+            factual_groups = {
+                "current_facts",
+                "market_evidence",
+                "commercial_wedge",
+                "native_baseline",
+            }
+            if group_name not in factual_groups and authority_class == "current_fact":
                 raise SourceIntegrityError("current factual authority appears in a normative group")
+        if observed_characters > max_characters:
+            raise SourceIntegrityError(f"context group {group_name} violates its character budget")
 
 
 def _validate_precedence(repo_root: Path) -> None:
@@ -188,19 +231,38 @@ def _validate_precedence(repo_root: Path) -> None:
         raise SourceIntegrityError("historical bundle is not explicitly classified as archive")
     if re.search(r"final-2026-08-09/.*active (?:product )?authority", text, re.IGNORECASE):
         raise SourceIntegrityError("old bundle is treated as active authority")
+    for required in (
+        "config/owner_directives.yaml",
+        "docs/migrations/V3_OWNER_DIRECTIVES.md",
+        "explicitly override",
+        "main-only",
+    ):
+        if required not in text:
+            raise SourceIntegrityError(
+                f"owner-directed authority deviation is undocumented: {required}"
+            )
 
 
-def _validate_approval_policy(repo_root: Path) -> None:
-    path = repo_root / "config/human_approval.yaml"
+def _validate_owner_directives(repo_root: Path) -> None:
+    path = repo_root / "config/owner_directives.yaml"
     payload = _mapping(load_yaml(path), str(path))
     if payload.get("version") != 3:
-        raise SourceIntegrityError("human approval policy must be version 3")
-    if payload.get("trustedRootEnvironmentVariable") != "TCF_HUMAN_APPROVAL_ROOT":
-        raise SourceIntegrityError("human approval trusted root is not externally configurable")
-    if payload.get("allowRepositoryFallback") is not False:
-        raise SourceIntegrityError("repository fallback for human approval is forbidden")
-    if payload.get("requireSignature") is not True or payload.get("agentWritable") is not False:
-        raise SourceIntegrityError("human approval policy is not fail-closed")
+        raise SourceIntegrityError("owner directives must be version 3")
+    directives = _mapping(payload.get("directives"), "owner directives")
+    expected = {
+        "unattendedOperation": "REQUIRED",
+        "humanIntervention": "FORBIDDEN",
+        "publicationBranch": "main",
+        "nonMainPushes": "FORBIDDEN",
+        "pullRequestDependency": "FORBIDDEN",
+        "externalEvidencePolicy": "NEVER_FABRICATE",
+        "missingEvidenceResult": "UNKNOWN",
+        "scopedBlockersDoNotStopIndependentLanes": True,
+    }
+    if directives != expected:
+        raise SourceIntegrityError(
+            "owner directives do not match the zero-human/main-only authority"
+        )
 
 
 def _walk_records(value: object) -> list[dict[str, Any]]:
@@ -250,7 +312,7 @@ def validate_repository(repo_root: Path) -> None:
     _validate_manifest(repo_root)
     _validate_context(repo_root)
     _validate_precedence(repo_root)
-    _validate_approval_policy(repo_root)
+    _validate_owner_directives(repo_root)
     _validate_no_synthetic_commercial_completion(repo_root)
     _validate_no_local_paths(repo_root)
 

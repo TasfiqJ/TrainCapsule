@@ -40,9 +40,7 @@ MODELS: dict[str, type[BaseModel]] = {
 
 def rendered_schema(model: type[BaseModel]) -> bytes:
     schema: dict[str, Any] = product_json_schema(model)
-    return json.dumps(schema, indent=2, sort_keys=True, ensure_ascii=False).encode(
-        "utf-8"
-    ) + b"\n"
+    return json.dumps(schema, indent=2, sort_keys=True, ensure_ascii=False).encode("utf-8") + b"\n"
 
 
 def main() -> int:

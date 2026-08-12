@@ -112,6 +112,10 @@ def load_roles(path: Path) -> dict[RoleName, RoleConfig]:
     if not isinstance(raw, dict):
         raise ValueError("roles.yaml must be a mapping")
     typed_raw = cast(dict[object, object], raw)
+    if typed_raw.get("version") != 3:
+        raise ValueError("roles.yaml must declare version 3")
     return {
-        RoleName(str(name)): RoleConfig.model_validate(value) for name, value in typed_raw.items()
+        RoleName(str(name)): RoleConfig.model_validate(value)
+        for name, value in typed_raw.items()
+        if name != "version"
     }

@@ -1,0 +1,219 @@
+{
+  "$defs": {
+    "MainOnlyMachineReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "version": {
+          "const": 3,
+          "default": 3,
+          "title": "Version",
+          "type": "integer"
+        },
+        "policy": {
+          "const": "OWNER_DIRECTED_MAIN_ONLY",
+          "default": "OWNER_DIRECTED_MAIN_ONLY",
+          "title": "Policy",
+          "type": "string"
+        },
+        "workItemId": {
+          "title": "Workitemid",
+          "type": "string"
+        },
+        "baseSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Basesha",
+          "type": "string"
+        },
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "candidateManifestDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Candidatemanifestdigest",
+          "type": "string"
+        },
+        "packetDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Packetdigest",
+          "type": "string"
+        },
+        "sourceDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sourcedigest",
+          "type": "string"
+        },
+        "contextDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contextdigest",
+          "type": "string"
+        },
+        "checkpointDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Checkpointdigest",
+          "type": "string"
+        },
+        "gateDigests": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "minProperties": 1,
+          "title": "Gatedigests",
+          "type": "object"
+        },
+        "ownerDirectivesDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Ownerdirectivesdigest",
+          "type": "string"
+        },
+        "localGateEvidence": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "minProperties": 1,
+          "title": "Localgateevidence",
+          "type": "object"
+        },
+        "privateGateEvidence": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Privategateevidence",
+          "type": "object"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "title": "Createdat",
+          "type": "string"
+        },
+        "retryBudget": {
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Retrybudget",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "workItemId",
+        "baseSha",
+        "candidateSha",
+        "candidateManifestDigest",
+        "packetDigest",
+        "sourceDigest",
+        "contextDigest",
+        "checkpointDigest",
+        "gateDigests",
+        "ownerDirectivesDigest",
+        "localGateEvidence",
+        "privateGateEvidence",
+        "createdAt",
+        "retryBudget"
+      ],
+      "title": "MainOnlyMachineReceipt",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Crash-recoverable exact-SHA main publication transaction.",
+  "properties": {
+    "version": {
+      "const": 3,
+      "default": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "transactionId": {
+      "pattern": "^MPUB-[A-Z0-9_-]+$",
+      "title": "Transactionid",
+      "type": "string"
+    },
+    "workItemId": {
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "baseSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Basesha",
+      "type": "string"
+    },
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "phase": {
+      "enum": [
+        "PREPARED",
+        "LOCAL_PROMOTED",
+        "REMOTE_PUSHED",
+        "HOSTED_PENDING",
+        "REVERT_REQUIRED",
+        "REVERT_LOCAL",
+        "REVERT_PUSHED",
+        "VERIFIED",
+        "REVERTED",
+        "HARD_STUCK"
+      ],
+      "title": "Phase",
+      "type": "string"
+    },
+    "receiptPath": {
+      "title": "Receiptpath",
+      "type": "string"
+    },
+    "machineReceipt": {
+      "$ref": "#/$defs/MainOnlyMachineReceipt"
+    },
+    "revertSha": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Revertsha"
+    },
+    "failureReason": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Failurereason"
+    },
+    "createdAt": {
+      "format": "date-time",
+      "title": "Createdat",
+      "type": "string"
+    },
+    "updatedAt": {
+      "format": "date-time",
+      "title": "Updatedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "transactionId",
+    "workItemId",
+    "baseSha",
+    "candidateSha",
+    "phase",
+    "receiptPath",
+    "machineReceipt",
+    "createdAt",
+    "updatedAt"
+  ],
+  "title": "MainPublicationTransaction",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/main-publication-transaction.schema.json"
+}

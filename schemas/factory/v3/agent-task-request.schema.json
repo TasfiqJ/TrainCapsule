@@ -14,8 +14,53 @@
       "title": "Role",
       "type": "string"
     },
-    "cwd": {
-      "title": "Cwd",
+    "taskPacket": {
+      "additionalProperties": true,
+      "title": "Taskpacket",
+      "type": "object"
+    },
+    "sourceContextManifest": {
+      "additionalProperties": true,
+      "title": "Sourcecontextmanifest",
+      "type": "object"
+    },
+    "allowedPaths": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 32,
+      "minItems": 1,
+      "title": "Allowedpaths",
+      "type": "array"
+    },
+    "forbiddenPaths": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "title": "Forbiddenpaths",
+      "type": "array"
+    },
+    "networkPolicy": {
+      "pattern": "^(DENY|ALLOWLIST)$",
+      "title": "Networkpolicy",
+      "type": "string"
+    },
+    "outputSchema": {
+      "additionalProperties": true,
+      "title": "Outputschema",
+      "type": "object"
+    },
+    "controllerRepoRoot": {
+      "title": "Controllerreporoot",
+      "type": "string"
+    },
+    "candidateWorktree": {
+      "title": "Candidateworktree",
+      "type": "string"
+    },
+    "artifactRoot": {
+      "title": "Artifactroot",
       "type": "string"
     },
     "prompt": {
@@ -49,17 +94,29 @@
       "title": "Maxturns",
       "type": "integer"
     },
+    "maxTokens": {
+      "maximum": 250000,
+      "minimum": 1000,
+      "title": "Maxtokens",
+      "type": "integer"
+    },
+    "maxCostUsdEquivalent": {
+      "maximum": 100,
+      "minimum": 0,
+      "title": "Maxcostusdequivalent",
+      "type": "number"
+    },
     "maxWallTimeSeconds": {
       "maximum": 14400,
       "minimum": 1,
       "title": "Maxwalltimeseconds",
       "type": "integer"
     },
-    "allowedTools": {
+    "tools": {
       "items": {
         "type": "string"
       },
-      "title": "Allowedtools",
+      "title": "Tools",
       "type": "array"
     },
     "bashAllowlist": {
@@ -79,15 +136,24 @@
     "requestId",
     "workItemId",
     "role",
-    "cwd",
+    "taskPacket",
+    "sourceContextManifest",
+    "allowedPaths",
+    "networkPolicy",
+    "outputSchema",
+    "controllerRepoRoot",
+    "candidateWorktree",
+    "artifactRoot",
     "prompt",
     "systemPrompt",
     "schemaDigest",
     "contextDigest",
     "sourceDigest",
     "maxTurns",
+    "maxTokens",
+    "maxCostUsdEquivalent",
     "maxWallTimeSeconds",
-    "allowedTools",
+    "tools",
     "bashAllowlist"
   ],
   "title": "AgentTaskRequest",

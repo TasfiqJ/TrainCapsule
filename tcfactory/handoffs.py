@@ -8,7 +8,7 @@ from pydantic import Field
 from .models import StageResult, TaskPacket
 from .util import resolve_within, write_json
 from .v3.base import DIGEST_PATTERN, SHA_PATTERN, V3Model, sha256_digest
-from .v3.enums import Disposition
+from .v3.enums import Disposition, WorkKind
 from .v3.work_items import WorkItem
 
 
@@ -17,15 +17,24 @@ class V3HandoffPayload(V3Model):
     work_item_id: str
     lane: str
     milestone: str
+    task_type: WorkKind
+    decision_contribution: str
     disposition: Disposition
     attempt: int = Field(ge=1)
     attempts_remaining: int = Field(ge=0)
     base_sha: str = Field(pattern=SHA_PATTERN.pattern)
     candidate_sha: str = Field(pattern=SHA_PATTERN.pattern)
+    source_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    context_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    candidate_manifest_digest: str | None = Field(
+        default=None, pattern=DIGEST_PATTERN.pattern
+    )
     backend_session_ref: str | None = None
-    next_action: str = Field(min_length=1)
-    findings: list[str]
+    next_authorized_transition: str = Field(min_length=1)
+    findings: list[dict[str, str]]
     artifact_digests: dict[str, str]
+    circuit_breaker_state: str | None = None
+    external_evidence_required: bool
 
 
 class V3Handoff(V3Model):
@@ -48,8 +57,12 @@ def write_v3_handoff(
     base_sha: str,
     candidate_sha: str,
     next_action: str,
-    findings: list[str],
+    findings: list[dict[str, str]],
     artifacts: dict[str, Path],
+    source_digest: str = "sha256:" + ("0" * 64),
+    context_digest: str = "sha256:" + ("0" * 64),
+    candidate_manifest_digest: str | None = None,
+    circuit_breaker_state: str | None = None,
     backend_session_ref: str | None = None,
 ) -> Path:
     """Write a digest-bound backend-neutral V3 handoff beneath its artifact root."""
@@ -64,15 +77,22 @@ def write_v3_handoff(
         work_item_id=work_item.work_item_id,
         lane=work_item.lane.value,
         milestone=work_item.milestone,
+        task_type=work_item.kind,
+        decision_contribution=work_item.decision_contribution,
         disposition=disposition,
         attempt=attempt,
         attempts_remaining=attempts_remaining,
         base_sha=base_sha,
         candidate_sha=candidate_sha,
+        source_digest=source_digest,
+        context_digest=context_digest,
+        candidate_manifest_digest=candidate_manifest_digest,
         backend_session_ref=backend_session_ref,
-        next_action=next_action,
+        next_authorized_transition=next_action,
         findings=findings,
         artifact_digests=artifact_digests,
+        circuit_breaker_state=circuit_breaker_state,
+        external_evidence_required=work_item.external_receipt_required,
     )
     handoff = V3Handoff(payload=payload, payload_digest=payload.canonical_digest())
     write_json(target, handoff.model_dump(mode="json", by_alias=True))

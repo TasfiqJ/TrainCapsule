@@ -25,6 +25,12 @@ def _repository_fixture(tmp_path: Path) -> Path:
     shutil.copy2(ROOT / "SOURCE_PRECEDENCE.md", tmp_path / "SOURCE_PRECEDENCE.md")
     (tmp_path / "config").mkdir()
     shutil.copy2(ROOT / "config/human_approval.yaml", tmp_path / "config/human_approval.yaml")
+    shutil.copy2(ROOT / "config/owner_directives.yaml", tmp_path / "config/owner_directives.yaml")
+    (tmp_path / "docs/migrations").mkdir(parents=True)
+    shutil.copy2(
+        ROOT / "docs/migrations/V3_OWNER_DIRECTIVES.md",
+        tmp_path / "docs/migrations/V3_OWNER_DIRECTIVES.md",
+    )
     for relative in (
         "SECURITY.md",
         "CLAUDE.md",

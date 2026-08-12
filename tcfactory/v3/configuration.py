@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import os
+from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal, cast
 
 from pydantic import Field, model_validator
 
+from tcfactory.util import sha256_file
 from tcfactory.v3.base import V3Model
 from tcfactory.v3.enums import CommercialMaturity, EvidenceType
 from tcfactory.v3.scheduler import SchedulerConfig
@@ -16,8 +18,8 @@ from tcfactory.yamlutil import load_yaml
 
 class RepositoryPolicy(V3Model):
     base_branch: Literal["main"]
-    release_mode: Literal["pull_request"]
-    direct_main_push: Literal[False]
+    release_mode: Literal["owner_directed_main_only"]
+    direct_main_push: Literal[True]
     require_clean_base: bool
     candidate_manifest_required: Literal[True]
 
@@ -60,12 +62,20 @@ class RuntimePolicy(V3Model):
 
 
 class ReleasePolicy(V3Model):
-    create_draft_pull_request: Literal[True]
-    auto_merge_mechanical: Literal[False]
-    auto_merge_standard: Literal[False]
-    auto_merge_integration: Literal[False]
-    auto_merge_trust_core: Literal[False]
+    publication_branch: Literal["main"]
+    non_main_pushes_forbidden: Literal[True]
+    pull_request_dependency_forbidden: Literal[True]
+    monitor_hosted_main_checks: Literal[True]
+    automatic_revert_and_quarantine: Literal[True]
     require_candidate_sha_match: Literal[True]
+
+
+class OperatorPolicy(V3Model):
+    zero_human_operation: Literal[True]
+    policy_gate_mode: Literal["deterministic_machine_policy"]
+    owner_directed_deviation_record: str = Field(min_length=1)
+    external_truth_remains_receipt_bound: Literal[True]
+    synthetic_commercial_evidence_forbidden: Literal[True]
 
 
 class FactoryV3Config(V3Model):
@@ -77,6 +87,96 @@ class FactoryV3Config(V3Model):
     roadmap: RoadmapPolicy
     runtime: RuntimePolicy
     release: ReleasePolicy
+    operator_policy: OperatorPolicy
+
+
+class OwnerDirectives(V3Model):
+    version: Literal[3]
+    authority: Literal["repository_owner"]
+    recorded_at: datetime
+    directives: dict[str, object]
+    safety_contract: dict[str, object]
+    deviations_from_bundle: list[dict[str, str]]
+
+    @model_validator(mode="after")
+    def require_unattended_main_only(self) -> OwnerDirectives:
+        required = {
+            "unattendedOperation": "REQUIRED",
+            "humanIntervention": "FORBIDDEN",
+            "publicationBranch": "main",
+            "nonMainPushes": "FORBIDDEN",
+            "pullRequestDependency": "FORBIDDEN",
+            "externalEvidencePolicy": "NEVER_FABRICATE",
+            "missingEvidenceResult": "UNKNOWN",
+            "scopedBlockersDoNotStopIndependentLanes": True,
+        }
+        if self.directives != required:
+            raise ValueError("owner directives differ from the exact unattended main-only contract")
+        pre = self.safety_contract.get("prePromotion")
+        post = self.safety_contract.get("postPush")
+        if not isinstance(pre, dict) or not all(
+            cast(dict[str, object], pre).get(name) is True
+            for name in (
+                "requireExactCandidateSha",
+                "requireDeterministicLocalGates",
+                "requirePrivateGatesWhenConfigured",
+                "requireMachinePolicyReceipt",
+            )
+        ):
+            raise ValueError("owner pre-promotion safety contract is incomplete")
+        if not isinstance(post, dict) or not all(
+            cast(dict[str, object], post).get(name) is True
+            for name in (
+                "monitorRequiredMainChecks",
+                "autoRevertFailedPromotion",
+                "quarantineFailedCandidate",
+                "finiteRetryBudgetRequired",
+            )
+        ):
+            raise ValueError("owner post-push safety contract is incomplete")
+        return self
+
+
+class OwnerOverridePolicy(V3Model):
+    version: Literal[3]
+    decision_id: Literal["OWNER-ZERO-HUMAN-20260811"]
+    authority: Literal["explicit repository owner direction in Codex task"]
+    effective_date: Literal["2026-08-11"]
+    decision: str = Field(min_length=1)
+    replaces: list[str] = Field(min_length=1)
+    machine_replacement: list[str] = Field(min_length=1)
+    publication_policy: dict[str, str]
+    unchanged_truth_boundaries: list[str] = Field(min_length=1)
+    canonical_owner_directives: Literal["config/owner_directives.yaml"]
+    canonical_owner_directives_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class ValidatedRuntimeSource(V3Model):
+    version: Literal[3] = 3
+    path: str
+    sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class ContextRoutingConfig(V3Model):
+    version: Literal[3]
+    default_max_context_characters: int = Field(ge=1, le=200_000)
+    max_sources_per_manifest: int = Field(ge=1, le=16)
+    require_entry_digest: Literal[True]
+    require_authority_sections: Literal[True]
+    reject_role_mismatch: Literal[True]
+    reject_stale_current_facts: Literal[True]
+    role_default_groups: dict[str, list[str]] = Field(min_length=1)
+
+
+class DisabledHumanApprovalConfig(V3Model):
+    version: Literal[3]
+    enabled: Literal[False]
+    runtime_states: list[str] = Field(max_length=0)
+    trusted_root_environment_variable: None
+    replacement: Literal["OWNER_DIRECTED_MACHINE_POLICY_RECEIPT"]
+    missing_policy_disposition: Literal["BLOCKED_POLICY"]
+    external_fact_disposition: Literal["WAITING_EXTERNAL"]
+    fabrication_forbidden: Literal[True]
 
 
 class PlanningAutonomy(V3Model):
@@ -121,13 +221,13 @@ class ValueAutonomy(V3Model):
 class CompletionAutonomy(V3Model):
     max_expansion_rounds_per_milestone: int = Field(ge=1, le=2)
     max_expansion_items: int = Field(ge=1, le=5)
-    roadmap_expansion_requires_human_approval: Literal[True]
+    roadmap_expansion_requires_machine_policy_receipt: Literal[True]
     reviewers_may_mutate_roadmap: Literal[False]
 
 
 class ExternalAutonomy(V3Model):
     ai_may_complete_external_evidence: Literal[False]
-    ai_may_complete_human_review: Literal[False]
+    machine_policy_receipts_required: Literal[True]
     synthetic_evidence_may_advance_commercial_maturity: Literal[False]
 
 
@@ -175,6 +275,7 @@ class ExecutorConfig(V3Model):
 class ExternalEvidenceConfig(V3Model):
     version: int = Field(default=3, ge=3, le=3)
     trusted_root_environment_variable: str = Field(min_length=1)
+    trusted_public_key_environment_variable: str = Field(min_length=1)
     allow_repository_fallback: Literal[False]
     receipt_schema: str
     require_signature: Literal[True]
@@ -201,7 +302,7 @@ class MilestonePolicyConfig(V3Model):
     roadmap_path: str
     completion_mode: Literal["milestone"]
     expansion_mode: Literal["proposal_only"]
-    source_migration_approval_required: Literal[True]
+    source_migration_machine_policy_receipt_required: Literal[True]
     external_milestones: list[str]
 
 
@@ -225,7 +326,6 @@ PROTECTED_ENVIRONMENT_OVERRIDES = frozenset(
     {
         "TCF_RELEASE_MODE",
         "TCF_AUTO_MERGE",
-        "TCF_HUMAN_APPROVAL_ROOT_OVERRIDE",
         "TCF_RECEIPT_TRUST_ROOT_OVERRIDE",
         "TCF_PRIVATE_GATE_RUNNER",
         "TCF_ALLOW_UNSANDBOXED",
@@ -241,6 +341,48 @@ def validate_v3_configuration(repo_root: Path) -> dict[str, V3Model]:
     present = sorted(name for name in PROTECTED_ENVIRONMENT_OVERRIDES if os.getenv(name))
     if present:
         raise ValueError(f"protected V3 environment overrides are forbidden: {present}")
+    owner_directives_path = repo_root / "config/owner_directives.yaml"
+    override_path = repo_root / "factory/policy/ZERO_HUMAN_OPERATION_OVERRIDE.json"
+    owner_directives = OwnerDirectives.model_validate(load_yaml(owner_directives_path))
+    from tcfactory.claude_features import load_claude_features
+    from tcfactory.config import load_roles
+    from tcfactory.github_sync import load_github_config
+    from tcfactory.risk import load_risk_profiles
+    from tcfactory.util import read_json
+
+    roles = load_roles(repo_root / "config/roles.yaml")
+    claude_features = load_claude_features(repo_root / "config/claude_features.yaml")
+    risk_profiles = load_risk_profiles(repo_root / "config/risk_profiles.yaml")
+    if claude_features.version != 3 or risk_profiles.get("version") != 3:
+        raise ValueError("Claude feature and risk configuration must declare version 3")
+    load_github_config(repo_root / "config/github.yaml")
+    context_index = load_yaml(repo_root / "docs/CONTEXT_INDEX.yaml")
+    if context_index.get("version") != 3 or not isinstance(context_index.get("groups"), dict):
+        raise ValueError("V3 context index is missing or invalid")
+    override = OwnerOverridePolicy.model_validate(read_json(override_path, {}))
+    if override.canonical_owner_directives_sha256 != sha256_file(owner_directives_path):
+        raise ValueError("owner override policy does not match canonical owner directives")
+    context_policy = ContextRoutingConfig.model_validate(
+        load_yaml(repo_root / "config/context.yaml")
+    )
+    groups = cast(dict[str, object], context_index["groups"])
+    configured_roles = {role.value for role in roles}
+    if set(context_policy.role_default_groups) != configured_roles:
+        raise ValueError("context role defaults must exactly match configured roles")
+    for role, group_names in context_policy.role_default_groups.items():
+        if not 0 < len(group_names) <= context_policy.max_sources_per_manifest:
+            raise ValueError(f"context defaults exceed bounded group count for role {role}")
+        for group_name in group_names:
+            raw_group = groups.get(group_name)
+            if not isinstance(raw_group, dict):
+                raise ValueError(f"unknown context group for role {role}: {group_name}")
+            group = cast(dict[str, object], raw_group)
+            include = group.get("includeRoles")
+            exclude = group.get("excludeRoles")
+            if not isinstance(include, list) or role not in include or (
+                isinstance(exclude, list) and role in exclude
+            ):
+                raise ValueError(f"context group {group_name} is not authorized for role {role}")
     loaded: dict[str, V3Model] = {
         "factory": load_factory_v3(repo_root / "config/factory.yaml"),
         "autonomy": load_autonomy_v3(repo_root / "config/autonomy.yaml"),
@@ -255,7 +397,23 @@ def validate_v3_configuration(repo_root: Path) -> dict[str, V3Model]:
         "milestones": MilestonePolicyConfig.model_validate(
             load_yaml(repo_root / "config/milestones.yaml")
         ),
+        "contextPolicy": context_policy,
+        "humanApprovalDisabled": DisabledHumanApprovalConfig.model_validate(
+            load_yaml(repo_root / "config/human_approval.yaml")
+        ),
+        "ownerDirectives": owner_directives,
+        "ownerOverridePolicy": override,
     }
+    for name, relative in {
+        "github": "config/github.yaml",
+        "roles": "config/roles.yaml",
+        "contextIndex": "docs/CONTEXT_INDEX.yaml",
+        "riskProfiles": "config/risk_profiles.yaml",
+        "claudeFeatures": "config/claude_features.yaml",
+    }.items():
+        loaded[name] = ValidatedRuntimeSource(
+            path=relative, sha256=sha256_file(repo_root / relative)
+        )
     versions = {int(cast(Any, value).version) for value in loaded.values()}
     if versions != {3}:
         raise ValueError(f"mixed or legacy normal-operation configuration: {sorted(versions)}")
@@ -284,6 +442,7 @@ def explain_v3_config_field(repo_root: Path, dotted_field: str) -> dict[str, obj
         "externalEvidence": "external_evidence.yaml",
         "commercialMaturity": "commercial_maturity.yaml",
         "milestones": "milestones.yaml",
+        "ownerDirectives": "owner_directives.yaml",
     }
     return {
         "field": dotted_field,

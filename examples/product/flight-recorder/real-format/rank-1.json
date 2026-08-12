@@ -1,0 +1,19 @@
+{
+  "entries": [
+    {
+      "collective_seq_id": 42,
+      "frames": [{"filename": "train.py", "line": 88}],
+      "input_dtypes": ["Float"],
+      "input_sizes": [[4096]],
+      "profiling_name": "nccl:all_reduce",
+      "record_id": 1002,
+      "state": "started"
+    }
+  ],
+  "pg_config": {"0": {"desc": "default", "ranks": [0, 1]}},
+  "pg_id": "0",
+  "pytorch_version": "2.5.1",
+  "rank": 1,
+  "version": "2.5",
+  "world_size": 2
+}

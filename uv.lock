@@ -2,6 +2,15 @@ version = 1
 revision = 3
 requires-python = "==3.12.*"
 
+[manifest]
+members = [
+    "traincapsule-ai-factory",
+    "traincapsule-cli",
+    "traincapsule-core",
+    "traincapsule-ingest-pytorch",
+    "traincapsule-qualify",
+]
+
 [[package]]
 name = "annotated-doc"
 version = "0.0.5"
@@ -655,6 +664,70 @@ requires-dist = [
     { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6.0" },
 ]
 provides-extras = ["dev"]
+
+[[package]]
+name = "traincapsule-cli"
+version = "0.1.0"
+source = { editable = "packages/traincapsule-cli" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "traincapsule-core" },
+    { name = "traincapsule-ingest-pytorch" },
+    { name = "traincapsule-qualify" },
+    { name = "typer" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.8" },
+    { name = "traincapsule-core", editable = "packages/traincapsule-core" },
+    { name = "traincapsule-ingest-pytorch", editable = "packages/traincapsule-ingest-pytorch" },
+    { name = "traincapsule-qualify", editable = "packages/traincapsule-qualify" },
+    { name = "typer", specifier = ">=0.12" },
+]
+
+[[package]]
+name = "traincapsule-core"
+version = "0.1.0"
+source = { editable = "packages/traincapsule-core" }
+dependencies = [
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "pydantic", specifier = ">=2.8" }]
+
+[[package]]
+name = "traincapsule-ingest-pytorch"
+version = "0.1.0"
+source = { editable = "packages/traincapsule-ingest-pytorch" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "traincapsule-core" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.8" },
+    { name = "traincapsule-core", editable = "packages/traincapsule-core" },
+]
+
+[[package]]
+name = "traincapsule-qualify"
+version = "0.1.0"
+source = { editable = "packages/traincapsule-qualify" }
+dependencies = [
+    { name = "pydantic" },
+    { name = "traincapsule-core" },
+    { name = "traincapsule-ingest-pytorch" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "pydantic", specifier = ">=2.8" },
+    { name = "traincapsule-core", editable = "packages/traincapsule-core" },
+    { name = "traincapsule-ingest-pytorch", editable = "packages/traincapsule-ingest-pytorch" },
+]
 
 [[package]]
 name = "typer"

@@ -51,9 +51,9 @@
           "title": "Maxexpansionitems",
           "type": "integer"
         },
-        "roadmapExpansionRequiresHumanApproval": {
+        "roadmapExpansionRequiresMachinePolicyReceipt": {
           "const": true,
-          "title": "Roadmapexpansionrequireshumanapproval",
+          "title": "Roadmapexpansionrequiresmachinepolicyreceipt",
           "type": "boolean"
         },
         "reviewersMayMutateRoadmap": {
@@ -65,7 +65,7 @@
       "required": [
         "maxExpansionRoundsPerMilestone",
         "maxExpansionItems",
-        "roadmapExpansionRequiresHumanApproval",
+        "roadmapExpansionRequiresMachinePolicyReceipt",
         "reviewersMayMutateRoadmap"
       ],
       "title": "CompletionAutonomy",
@@ -79,9 +79,9 @@
           "title": "Aimaycompleteexternalevidence",
           "type": "boolean"
         },
-        "aiMayCompleteHumanReview": {
-          "const": false,
-          "title": "Aimaycompletehumanreview",
+        "machinePolicyReceiptsRequired": {
+          "const": true,
+          "title": "Machinepolicyreceiptsrequired",
           "type": "boolean"
         },
         "syntheticEvidenceMayAdvanceCommercialMaturity": {
@@ -92,7 +92,7 @@
       },
       "required": [
         "aiMayCompleteExternalEvidence",
-        "aiMayCompleteHumanReview",
+        "machinePolicyReceiptsRequired",
         "syntheticEvidenceMayAdvanceCommercialMaturity"
       ],
       "title": "ExternalAutonomy",

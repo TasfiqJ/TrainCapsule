@@ -29,9 +29,9 @@ value:
 completion:
   maxExpansionRoundsPerMilestone: 1
   maxExpansionItems: 5
-  roadmapExpansionRequiresHumanApproval: true
+  roadmapExpansionRequiresMachinePolicyReceipt: true
   reviewersMayMutateRoadmap: false
 external:
   aiMayCompleteExternalEvidence: false
-  aiMayCompleteHumanReview: false
+  machinePolicyReceiptsRequired: true
   syntheticEvidenceMayAdvanceCommercialMaturity: false

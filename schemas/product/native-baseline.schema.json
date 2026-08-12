@@ -1,5 +1,127 @@
 {
   "$defs": {
+    "EvidenceArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Artifactid",
+          "type": "string"
+        },
+        "capturedAt": {
+          "format": "date-time",
+          "title": "Capturedat",
+          "type": "string"
+        },
+        "caseId": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+          "title": "Caseid",
+          "type": "string"
+        },
+        "compression": {
+          "default": "none",
+          "title": "Compression",
+          "type": "string"
+        },
+        "contentDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contentdigest",
+          "type": "string"
+        },
+        "customerLocalUri": {
+          "pattern": "^cas://[A-Za-z0-9._/-]+$",
+          "title": "Customerlocaluri",
+          "type": "string"
+        },
+        "encryption": {
+          "default": "none",
+          "title": "Encryption",
+          "type": "string"
+        },
+        "exportPolicy": {
+          "minLength": 1,
+          "title": "Exportpolicy",
+          "type": "string"
+        },
+        "integrityStatus": {
+          "$ref": "#/$defs/EvidenceIntegrity"
+        },
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "privacyClass": {
+          "$ref": "#/$defs/PrivacyClass"
+        },
+        "provenance": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Provenance",
+          "type": "object"
+        },
+        "schemaVersion": {
+          "default": 1,
+          "maximum": 1,
+          "minimum": 1,
+          "title": "Schemaversion",
+          "type": "integer"
+        },
+        "sizeBytes": {
+          "minimum": 0,
+          "title": "Sizebytes",
+          "type": "integer"
+        },
+        "sourceAdapter": {
+          "minLength": 1,
+          "title": "Sourceadapter",
+          "type": "string"
+        },
+        "sourceVersion": {
+          "minLength": 1,
+          "title": "Sourceversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifactId",
+        "caseId",
+        "kind",
+        "sourceAdapter",
+        "sourceVersion",
+        "capturedAt",
+        "contentDigest",
+        "sizeBytes",
+        "privacyClass",
+        "customerLocalUri",
+        "exportPolicy",
+        "provenance",
+        "integrityStatus"
+      ],
+      "title": "EvidenceArtifact",
+      "type": "object"
+    },
+    "EvidenceIntegrity": {
+      "enum": [
+        "VALID",
+        "CORRUPTED",
+        "UNKNOWN"
+      ],
+      "title": "EvidenceIntegrity",
+      "type": "string"
+    },
+    "FindingAttribution": {
+      "enum": [
+        "NATIVE_TOOL_FOUND",
+        "TRAINCAPSULE_DERIVED",
+        "HUMAN_PROVIDED",
+        "EXTERNAL_SYSTEM_PROVIDED",
+        "UNKNOWN"
+      ],
+      "title": "FindingAttribution",
+      "type": "string"
+    },
     "NativeConfidence": {
       "enum": [
         "DIRECT_OBSERVATION",
@@ -13,10 +135,14 @@
     "NativeFinding": {
       "additionalProperties": false,
       "properties": {
+        "attribution": {
+          "$ref": "#/$defs/FindingAttribution"
+        },
         "confidenceClass": {
           "$ref": "#/$defs/NativeConfidence"
         },
         "customerDecisionContribution": {
+          "minLength": 1,
           "title": "Customerdecisioncontribution",
           "type": "string"
         },
@@ -25,6 +151,7 @@
             "pattern": "^sha256:[0-9a-f]{64}$",
             "type": "string"
           },
+          "minItems": 1,
           "title": "Evidencerefs",
           "type": "array"
         },
@@ -37,6 +164,7 @@
           "items": {
             "type": "string"
           },
+          "minItems": 1,
           "title": "Limitations",
           "type": "array"
         },
@@ -65,6 +193,7 @@
       },
       "required": [
         "findingId",
+        "attribution",
         "nativeSystem",
         "nativeVersion",
         "observation",
@@ -75,11 +204,29 @@
       ],
       "title": "NativeFinding",
       "type": "object"
+    },
+    "PrivacyClass": {
+      "enum": [
+        "PUBLIC",
+        "INTERNAL",
+        "CONFIDENTIAL",
+        "RESTRICTED"
+      ],
+      "title": "PrivacyClass",
+      "type": "string"
     }
   },
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "artifacts": {
+      "items": {
+        "$ref": "#/$defs/EvidenceArtifact"
+      },
+      "minItems": 1,
+      "title": "Artifacts",
+      "type": "array"
+    },
     "caseId": {
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
       "title": "Caseid",
@@ -98,14 +245,49 @@
       "title": "Configuration",
       "type": "object"
     },
-    "evidenceRefs": {
+    "decisionEvidenceRefs": {
       "items": {
         "pattern": "^sha256:[0-9a-f]{64}$",
         "type": "string"
       },
-      "minItems": 1,
-      "title": "Evidencerefs",
+      "title": "Decisionevidencerefs",
       "type": "array"
+    },
+    "decisionPolicyVersion": {
+      "const": "traincapsule-native-sufficiency-v1",
+      "default": "traincapsule-native-sufficiency-v1",
+      "title": "Decisionpolicyversion",
+      "type": "string"
+    },
+    "decisionProvenanceDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Decisionprovenancedigest"
+    },
+    "decisionReached": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Decisionreached"
+    },
+    "elapsedSeconds": {
+      "minimum": 0,
+      "title": "Elapsedseconds",
+      "type": "integer"
     },
     "executedAt": {
       "format": "date-time",
@@ -116,12 +298,15 @@
       "items": {
         "$ref": "#/$defs/NativeFinding"
       },
+      "minItems": 1,
       "title": "Findings",
       "type": "array"
     },
-    "humanReviewed": {
-      "title": "Humanreviewed",
-      "type": "boolean"
+    "generationPolicyVersion": {
+      "const": "traincapsule-native-baseline-v1",
+      "default": "traincapsule-native-baseline-v1",
+      "title": "Generationpolicyversion",
+      "type": "string"
     },
     "limitations": {
       "items": {
@@ -131,17 +316,10 @@
       "title": "Limitations",
       "type": "array"
     },
-    "reviewer": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Reviewer"
+    "operatorEffortSeconds": {
+      "minimum": 0,
+      "title": "Operatoreffortseconds",
+      "type": "integer"
     },
     "schemaVersion": {
       "default": 1,
@@ -160,10 +338,12 @@
       "title": "Toolversion",
       "type": "string"
     },
-    "unresolvedCustomerDecision": {
-      "minLength": 1,
-      "title": "Unresolvedcustomerdecision",
-      "type": "string"
+    "unresolvedQuestions": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unresolvedquestions",
+      "type": "array"
     }
   },
   "required": [
@@ -172,12 +352,14 @@
     "toolVersion",
     "command",
     "configuration",
+    "artifacts",
     "findings",
-    "evidenceRefs",
     "limitations",
-    "unresolvedCustomerDecision",
-    "executedAt",
-    "humanReviewed"
+    "elapsedSeconds",
+    "operatorEffortSeconds",
+    "decisionEvidenceRefs",
+    "unresolvedQuestions",
+    "executedAt"
   ],
   "title": "NativeBaseline",
   "type": "object"

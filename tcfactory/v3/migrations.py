@@ -46,6 +46,7 @@ class LegacyDisposition(StrEnum):
     FACTORY = "FACTORY"
     MAPPED_TO_V3 = "MAPPED_TO_V3"
     DEFERRED_DESIGN = "DEFERRED_DESIGN"
+    DEFERRED_NON_BLOCKING = "DEFERRED_NON_BLOCKING"
 
 
 class LegacyMapRecord(V3Model):
@@ -74,10 +75,14 @@ class LegacyMapRecord(V3Model):
         ):
             raise ValueError("MAPPED_TO_V3 requires at least one V3 work item")
         if (
-            self.v3_disposition is LegacyDisposition.DEFERRED_DESIGN
+            self.v3_disposition
+            in {
+                LegacyDisposition.DEFERRED_DESIGN,
+                LegacyDisposition.DEFERRED_NON_BLOCKING,
+            }
             and self.mapped_work_items
         ):
-            raise ValueError("DEFERRED_DESIGN cannot activate V3 work items")
+            raise ValueError("deferred legacy work cannot activate V3 work items")
         return self
 
 

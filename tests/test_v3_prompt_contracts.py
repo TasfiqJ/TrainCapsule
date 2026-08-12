@@ -14,7 +14,7 @@ def test_required_v3_prompt_set_exists() -> None:
     required = {
         "native_substitute_reviewer.md",
         "commercial_experiment.md",
-        "human_approval_packet.md",
+        "machine_policy_receipt.md",
         "wedge_reviewer.md",
         "milestone_auditor.md",
     }
@@ -30,13 +30,13 @@ def test_global_prompt_holds_normative_v3_execution_contract() -> None:
         "NO_INCREMENTAL_DECISION_VALUE",
         "UNKNOWN is valid",
         "WAITING_EXTERNAL",
-        "WAITING_HUMAN",
+        "BLOCKED_POLICY",
         "Return at most 8 findings total",
         "fingerprint:",
         "Do not expand the packet",
         "must not influence routine product or factory work",
         "Do not renew the session",
-        "draft pull request",
+        "controller may promote an exact gate-bound candidate to `main`",
     }
     assert all(item in prompt for item in required)
     assert "work until done" not in prompt.lower()
@@ -49,7 +49,7 @@ def test_planning_prompts_are_finite_and_cannot_mutate_roadmap() -> None:
         assert "8" in prompt and "outputs" in prompt
         assert "native" in prompt.lower()
         assert "UNKNOWN" in prompt
-        assert "WAITING_HUMAN" in prompt
+        assert "BLOCKED_POLICY" in prompt
         assert "roadmap" in prompt.lower()
         assert "work until done" not in prompt.lower()
 
@@ -86,7 +86,7 @@ def test_read_only_review_prompts_bound_findings_and_truth() -> None:
         assert "roadmap" in prompt.lower()
 
 
-def test_specialist_prompts_preserve_external_and_human_authority() -> None:
+def test_specialist_prompts_preserve_external_truth_and_machine_authority() -> None:
     native = _text("native_substitute_reviewer.md")
     assert "NATIVE_WORKFLOW_SUFFICIENT" in native
     assert "NO_INCREMENTAL_DECISION_VALUE" in native
@@ -94,13 +94,13 @@ def test_specialist_prompts_preserve_external_and_human_authority() -> None:
     commercial = _text("commercial_experiment.md")
     assert "SYNTHETIC_TEST_ONLY" in commercial
     assert "WAITING_EXTERNAL" in commercial
-    assert "WAITING_HUMAN" in commercial
+    assert "BLOCKED_POLICY" in commercial
 
-    approval = _text("human_approval_packet.md")
-    assert "candidate SHA" in approval
-    assert "artifact digests" in approval
-    assert "Do not approve" in approval
-    assert "WAITING_HUMAN" in approval
+    receipt = _text("machine_policy_receipt.md")
+    assert "candidate SHA" in receipt
+    assert "gate artifacts" in receipt
+    assert "owner-directive digest" in receipt
+    assert "BLOCKED_POLICY" in receipt
 
 
 def test_every_active_role_prompt_exists() -> None:

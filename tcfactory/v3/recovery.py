@@ -22,7 +22,7 @@ class FindingEscalation(V3Model):
     status: WorkStatus
     candidate_preserved: bool = True
     proposed_dispositions: list[Disposition]
-    human_review_proposed: bool
+    machine_policy_review_proposed: bool
 
 
 class FindingCounter(V3Model):
@@ -44,7 +44,7 @@ class FindingCounter(V3Model):
             proposed_dispositions=(
                 [Disposition.NARROW, Disposition.REPLACE] if exhausted else []
             ),
-            human_review_proposed=exhausted,
+            machine_policy_review_proposed=exhausted,
         )
 
 
@@ -127,10 +127,10 @@ def enforce_controller_restart_budget(
         reason="controller restart budget exceeded",
         recovery_instructions=[
             "keep the launcher disabled",
-            "inspect the bound incident and last healthy checkpoint",
-            "repair the controller without changing product or trust authority",
-            "run deterministic controller tests",
-            "obtain explicit operator acknowledgement before clearing HARD_STUCK",
+            "preserve the bound incident and last healthy checkpoint",
+            "do not clear or resume this irrecoverable controller incident",
+            "a later autonomous run requires a new incident identity and must pass "
+            "the complete startup machine policy independently",
         ],
     )
     _atomic_json(hard_stuck_path, record)

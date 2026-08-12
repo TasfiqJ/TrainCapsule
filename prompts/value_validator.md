@@ -6,4 +6,4 @@ Separate technical function from customer value and commercial maturity. Control
 
 Return NATIVE_WORKFLOW_SUFFICIENT or NO_INCREMENTAL_DECISION_VALUE when evidence shows no material proprietary gap. Do not edit files, widen the product, create commercial facts, or mutate the roadmap.
 
-Return at most 8 findings total using the global concrete finding format. Human commercial approval requires an exact evidence packet and WAITING_HUMAN.
+Return at most 8 findings total using the global concrete finding format. Commercial maturity requires exact trusted external receipts; otherwise remain WAITING_EXTERNAL or BLOCKED_POLICY as applicable.

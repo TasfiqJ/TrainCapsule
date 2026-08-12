@@ -81,3 +81,20 @@ class FakeBackend:
             estimated_api_equivalent_usd=0.0,
             actual_charge_usd=0.0,
         )
+
+    async def execute(self, request: AgentTaskRequest) -> AgentRunResult:
+        """Execute one deterministic result without network, subprocesses, or a model."""
+
+        session = self.start(request)
+        output = self._results.pop(0) if self._results else {}
+        completed = session.model_copy(update={"state": SessionState.COMPLETED})
+        self._sessions[session.session_ref] = completed
+        return AgentRunResult(
+            session=completed,
+            state=SessionState.COMPLETED,
+            verdict=str(output.get("verdict", "pass")),
+            structured_output=output,
+            artifact_digests={},
+            usage=self.usage_state(),
+            redacted_summary="deterministic fake backend result",
+        )

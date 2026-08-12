@@ -30,10 +30,11 @@ records:
   legacyStatus: paused
   legacyOutcome: Recheck product name, package, domain, and trademark surface
   legacyPacket: tasks/T002.yaml
-  v3Disposition: FACTORY
+  v3Disposition: DEFERRED_NON_BLOCKING
   mappedWorkItems: []
-  reason: Historical V2 factory/source-control work; any replacement is only the listed
-    bounded V3 work and the legacy status does not transfer.
+  reason: Naming/trademark clearance is deferred and non-blocking for private product
+    implementation. It may reopen only at public launch, package publication, paid
+    contract, or legal-counsel request; it never auto-resumes.
   evidencePreserved:
   - docs/migrations/V3_RUNTIME_SNAPSHOT_METADATA.json
   - factory/artifacts/T002

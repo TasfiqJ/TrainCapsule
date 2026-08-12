@@ -35,9 +35,11 @@ uv run pytest -q tests/product
 uv run python scripts/generate_product_schemas.py --check
 ```
 
-The complete factory and product quality path is local and deterministic. Hosted release policy is
-pull-request-first with direct autonomous pushes to `main` disabled. The operator-directed V3
-migration itself is published to `main` as an explicit exception.
+The complete factory and product quality path is local and deterministic. The owner-directed
+runtime is fully unattended and publishes only an exact verified candidate SHA to `main`; it never
+creates or pushes a non-main branch and never depends on a pull request. Required hosted checks run
+against that exact `main` SHA. A failed or incomplete hosted result is quarantined and reverted by a
+normal follow-up commit, with finite recovery and a durable hard stop if recovery itself fails.
 
 ## Product preflight
 
@@ -53,9 +55,13 @@ individual CLI commands and exit-code contract.
 
 ## Factory runtime
 
-The migrated factory remains deliberately stopped until an operator removes the durable runtime
-stop and completes the remaining human approval. A dashboard may display status, but it does not
-mean the controller is running. Do not resume preserved V2/T002 state automatically.
+The migrated factory remains deliberately stopped while this overhaul is being verified. The final
+runtime contract is zero-human: no work item, milestone, release, recovery, or commercial path may
+wait for or fabricate a human approval. Missing external facts block only their dependent scope,
+remain `UNKNOWN` or `WAITING_EXTERNAL`, and do not stop unrelated lanes. A dashboard may display
+status while the controller is stopped. Preserved V2/T002 state is historical and never resumes
+automatically.
 
 Source precedence is defined in `SOURCE_PRECEDENCE.md`. External or customer-dependent claims must
-remain external/deferred unless backed by attributable evidence and the required human approval.
+remain external/deferred unless backed by attributable, machine-verifiable external evidence. The
+zero-human/main-only owner deviation is explicit; the copied V3 bundle remains byte-identical.

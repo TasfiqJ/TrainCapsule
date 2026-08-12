@@ -13,6 +13,7 @@ from scripts.generate_v3_legacy_migration import (
 )
 from tcfactory.cli import app
 from tcfactory.feature_ledger import load_feature_ledger
+from tcfactory.util import sha256_file
 from tcfactory.v3.enums import WorkStatus
 from tcfactory.v3.migrations import (
     LegacyDisposition,
@@ -58,16 +59,25 @@ def test_mapping_is_explicit_bounded_and_never_resumes_t002() -> None:
     by_id = {record.legacy_task_id: record for record in migration.records}
     assert Counter(record.v3_disposition for record in migration.records) == {
         LegacyDisposition.DEFERRED_DESIGN: 29,
-        LegacyDisposition.FACTORY: 7,
+        LegacyDisposition.DEFERRED_NON_BLOCKING: 1,
+        LegacyDisposition.FACTORY: 6,
         LegacyDisposition.MAPPED_TO_V3: 88,
     }
     assert by_id["T001"].legacy_status.value == "passed"
     assert by_id["T002"].legacy_status.value == "paused"
-    assert by_id["T002"].v3_disposition is LegacyDisposition.FACTORY
+    assert by_id["T002"].v3_disposition is LegacyDisposition.DEFERRED_NON_BLOCKING
     assert by_id["T002"].mapped_work_items == []
     assert by_id["T002"].legacy_packet == "tasks/T002.yaml"
     assert "factory/artifacts/T002" in by_id["T002"].evidence_preserved
     assert "specs/tasks/T002.md" in by_id["T002"].evidence_preserved
+    assert "never auto-resumes" in by_id["T002"].reason
+    assert sha256_file(ROOT / "tasks/T002.yaml") == (
+        "b11bb3d937ad0b85c7406076b577bcdaa6e4e3afcdd8a3fd4c7cc8a7ddbb0d04"
+    )
+    checklist = load_yaml(ROOT / "factory/policy/T002_LEGAL_CLEARANCE_CHECKLIST.yaml")
+    assert checklist["status"] == "DEFERRED"
+    assert checklist["blocksProductImplementation"] is False
+    assert checklist["completionPolicy"]["humanInterventionRequired"] is False
     assert all(
         "factory/feature_ledger.yaml" in record.evidence_preserved
         for record in migration.records
@@ -128,7 +138,10 @@ def test_non_resuming_queue_archive_receipt_is_fully_verifiable() -> None:
     state_directories = receipt["v3StateDirectories"]
     assert isinstance(files, list) and len(cast(list[object], files)) == 3
     assert isinstance(state_directories, list)
-    assert len(cast(list[object], state_directories)) == len(WorkStatus)
+    assert set(cast(list[str], state_directories)) == {
+        *(status.value.lower() for status in WorkStatus),
+        "waiting_human",  # historical V2 archive namespace; never a V3 runtime state
+    }
 
 
 def test_exact_roadmap_migration_cli_dry_run_is_read_only() -> None:

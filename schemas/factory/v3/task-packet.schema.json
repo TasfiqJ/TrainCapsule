@@ -29,7 +29,7 @@
         "RESEARCH",
         "CONTROLLED_EXPERIMENT",
         "EXTERNAL_EVIDENCE",
-        "HUMAN_REVIEW",
+        "MACHINE_POLICY_REVIEW",
         "COMMERCIAL_EXPERIMENT",
         "MAINTENANCE",
         "MIGRATION"

@@ -54,9 +54,7 @@ def test_supervisor_uses_exact_finite_restart_sequence_then_hard_stuck(
     now = datetime(2026, 8, 11, 20, 0, tzinfo=UTC)
 
     decisions = [
-        record_controller_exit(
-            repo_root=repo_root, runtime_seconds=10, exit_code=1, now=now
-        )
+        record_controller_exit(repo_root=repo_root, runtime_seconds=10, exit_code=1, now=now)
         for _ in range(4)
     ]
 
@@ -102,9 +100,15 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
     marker = MigrationCompleteMarker(
         completed_sha=current_sha(repo_root),
         source_manifest_sha256=sha256_file(repo_root / config.source_of_truth.manifest),
+        owner_directives_sha256=sha256_file(repo_root / "config/owner_directives.yaml"),
+        acceptance_work_items={f"V3-MIG-{number:03d}": "COMPLETED" for number in range(16, 21)},
+        acceptance_evidence_digests={
+            f"V3-MIG-{number:03d}": "sha256:" + "a" * 64 for number in range(16, 21)
+        },
         completed_at=datetime(2026, 8, 11, 21, 0, tzinfo=UTC),
     )
     write_json(paths.migration_marker, marker.model_dump(mode="json", by_alias=True))
+    monkeypatch.setattr("tcfactory.supervisor._verify_migration_marker", lambda *_: marker)
     monkeypatch.setattr("tcfactory.supervisor._verify_source_integrity", lambda _: None)
 
     class AuthenticatedProvider:
@@ -126,26 +130,74 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
         run_startup_preflight(repo_root)
 
 
+def test_startup_reconciles_publication_before_exact_sha_marker(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    paths = _patch_policy(monkeypatch, repo_root, tmp_path)
+    config = load_factory_v3(repo_root / "config/factory.yaml")
+    from tcfactory.gitops import current_sha
+
+    marker = MigrationCompleteMarker(
+        completed_sha=current_sha(repo_root),
+        source_manifest_sha256=sha256_file(repo_root / config.source_of_truth.manifest),
+        owner_directives_sha256=sha256_file(repo_root / "config/owner_directives.yaml"),
+        acceptance_work_items={f"V3-MIG-{number:03d}": "COMPLETED" for number in range(16, 21)},
+        acceptance_evidence_digests={
+            f"V3-MIG-{number:03d}": "sha256:" + "a" * 64 for number in range(16, 21)
+        },
+        completed_at=datetime(2026, 8, 11, 21, 0, tzinfo=UTC),
+    )
+    events: list[str] = []
+
+    class RecoveringPublisher:
+        def __init__(self, **_: object) -> None:
+            pass
+
+        def reconcile_pending(self) -> dict[str, object]:
+            events.append("publication")
+            return {"status": "VERIFIED"}
+
+    class AuthenticatedProvider:
+        def __init__(self, *, require_long_lived_token: bool = False) -> None:
+            assert require_long_lived_token
+
+        def state(self) -> BackendRouteState:
+            return BackendRouteState.AUTHENTICATED
+
+    def verify_marker(*_: object) -> MigrationCompleteMarker:
+        events.append("marker")
+        return marker
+
+    monkeypatch.setattr("tcfactory.supervisor._verify_source_integrity", lambda _: None)
+    monkeypatch.setattr("tcfactory.supervisor.MainOnlyPublisher", RecoveringPublisher)
+    monkeypatch.setattr("tcfactory.supervisor._verify_migration_marker", verify_marker)
+    monkeypatch.setattr("tcfactory.supervisor.ClaudeCredentialProvider", AuthenticatedProvider)
+    result = run_startup_preflight(repo_root)
+    assert events == ["publication", "marker"]
+    assert result["publicationRecovery"] == {"status": "VERIFIED"}
+    assert not paths.stop.exists()
+
+
 def test_v3_status_exposes_required_operator_fields() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     status = build_runtime_status(repo_root)
 
-    assert status["activeMilestone"] == "M0_FACTORY_MIGRATED"
+    assert status["activeMilestone"] == "M1_NATIVE_PREFLIGHT"
     assert set(status["currentWorkItem"]) == {"workItemId", "lane", "status"}
     assert set(status["retryBudget"]) == {
         "planAttemptsRemaining",
         "repairCyclesRemaining",
         "candidateRestartsRemaining",
     }
-    assert {"used", "maximum", "remaining", "healthyResetSeconds"} <= set(
-        status["restartBudget"]
-    )
+    assert {"used", "maximum", "remaining", "healthyResetSeconds"} <= set(status["restartBudget"])
     for field in (
-        "humanBlockers",
+        "interventionMode",
         "externalBlockers",
         "candidateSha",
         "factoryCi",
         "productCi",
-        "lastReleasePr",
+        "lastMainPublication",
     ):
         assert field in status
+    assert status["interventionMode"] == "NONE"

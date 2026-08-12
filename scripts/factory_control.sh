@@ -21,9 +21,16 @@ case "$ACTION" in
       echo "Startup refused: use explicit recovery and resume before start." >&2
       exit 2
     fi
+    uv run python -m tcfactory.supervisor preflight --repo "$ROOT"
     nohup bash scripts/windows_task_entrypoint.sh >> factory/logs/autopilot.log 2>&1 &
     echo $! > factory/state/autopilot.pid
-    echo "Autopilot started with PID $!."
+    sleep 2
+    if ! kill -0 "$!" 2>/dev/null; then
+      rm -f factory/state/autopilot.pid
+      echo "V3 controller failed during startup; inspect the bounded log." >&2
+      exit 70
+    fi
+    echo "V3 controller started and remained healthy through startup observation."
     ;;
   pause)
     bash scripts/pause_factory.sh
@@ -58,6 +65,33 @@ case "$ACTION" in
   milestone-status|milestones)
     uv run tcfactory milestones "$@"
     ;;
+  lanes)
+    uv run tcfactory lanes "$@"
+    ;;
+  commercial)
+    uv run tcfactory commercial-state "$@"
+    ;;
+  competitors)
+    uv run tcfactory competitors status "$@"
+    ;;
+  pilot)
+    uv run tcfactory pilot status "$@"
+    ;;
+  approvals)
+    uv run tcfactory approvals list "$@"
+    ;;
+  kill-gates)
+    uv run tcfactory kill-gates "$@"
+    ;;
+  doctor)
+    uv run tcfactory product doctor "$@"
+    ;;
+  migration)
+    uv run tcfactory migrate --dry-run "$@"
+    ;;
+  candidate-salvage)
+    uv run tcfactory candidate-salvage "$@"
+    ;;
   value)
     [[ $# -ge 1 ]] || { echo "usage: $0 value tasks/TASK.yaml" >&2; exit 2; }
     uv run tcfactory value-status "$@"
@@ -80,7 +114,7 @@ case "$ACTION" in
   *)
     cat >&2 <<'USAGE'
 usage: scripts/factory_control.sh <action> [args]
-actions: overview start pause resume stop verify recover logs queue costs roadmap schedule-dry-run milestone-status value peers blocker features github sync
+actions: overview start pause resume stop verify recover logs queue costs roadmap schedule-dry-run milestone-status lanes commercial competitors pilot approvals kill-gates doctor migration candidate-salvage value peers blocker features github sync
 USAGE
     exit 2
     ;;

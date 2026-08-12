@@ -5,7 +5,7 @@
         "PRODUCT",
         "FACTORY",
         "EXTERNAL",
-        "HUMAN"
+        "MACHINE_POLICY"
       ],
       "title": "FindingOwner",
       "type": "string"

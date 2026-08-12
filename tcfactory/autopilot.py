@@ -1719,6 +1719,8 @@ async def run_autopilot(
 
     resolved = repo_root.resolve()
     factory = load_factory_config(resolved / factory_config_path)
+    if factory.version >= 3:
+        raise RuntimeError("legacy V2 autopilot is disabled; use `tcfactory v3-controller`")
     with exclusive_autopilot_lock(resolved, factory):
         try:
             await _run_autopilot_inner(

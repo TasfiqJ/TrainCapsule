@@ -40,7 +40,6 @@ def _item() -> WorkItem:
             "packetPath": None,
             "evidenceRequired": ["queue test"],
             "externalReceiptRequired": False,
-            "humanApprovalRequired": False,
             "retryPolicy": {
                 "maxPlanAttempts": 2,
                 "maxCandidateRepairCycles": 3,

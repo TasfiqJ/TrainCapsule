@@ -93,6 +93,13 @@ def test_duplicate_metadata_conflict_and_object_substitution_are_detected(
     with pytest.raises(EvidenceStoreError, match="digest mismatch"):
         store.get_bytes(case_id="CASE-1", artifact=artifact)
 
+    object_path.unlink()
+    target = tmp_path / "attacker-controlled"
+    target.write_bytes(b"raw")
+    object_path.symlink_to(target)
+    with pytest.raises(EvidenceStoreError, match="unsafe"):
+        store.get_bytes(case_id="CASE-1", artifact=artifact)
+
 
 def test_case_artifact_count_is_bounded(tmp_path: Path) -> None:
     store = LocalEvidenceStore(tmp_path / "store", max_case_artifacts=1)

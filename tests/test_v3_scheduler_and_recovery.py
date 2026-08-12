@@ -33,6 +33,8 @@ def _item(
     status: str = "READY",
     depends_on: list[str] | None = None,
     blocks_commercial_release: bool = False,
+    milestone: str = "M1_NATIVE_PREFLIGHT",
+    external_evidence_refs: list[str] | None = None,
 ) -> WorkItem:
     return WorkItem.model_validate(
         {
@@ -41,7 +43,7 @@ def _item(
             "title": f"Work {work_item_id}",
             "lane": lane,
             "kind": kind,
-            "milestone": "M1_NATIVE_PREFLIGHT",
+            "milestone": milestone,
             "decisionContribution": "One bounded decision contribution.",
             "customerOutcome": "One bounded customer-local outcome.",
             "dependsOn": depends_on or [],
@@ -56,11 +58,11 @@ def _item(
             "disposition": "KEEP",
             "status": status,
             "ownerType": "FOUNDER" if kind == "EXTERNAL_EVIDENCE" else "AI",
-            "automatable": kind not in {"EXTERNAL_EVIDENCE", "HUMAN_REVIEW"},
+            "automatable": kind != "EXTERNAL_EVIDENCE",
             "packetPath": None,
             "evidenceRequired": ["deterministic test"],
             "externalReceiptRequired": kind == "EXTERNAL_EVIDENCE",
-            "humanApprovalRequired": kind == "HUMAN_REVIEW",
+            "externalEvidenceRefs": external_evidence_refs or [],
             "retryPolicy": {
                 "maxPlanAttempts": 0 if kind == "EXTERNAL_EVIDENCE" else 2,
                 "maxCandidateRepairCycles": 0 if kind == "EXTERNAL_EVIDENCE" else 3,
@@ -111,7 +113,6 @@ def _config() -> SchedulerConfig:
             ],
             "waitingStatesDoNotBlockOtherLanes": [
                 "WAITING_EXTERNAL",
-                "WAITING_HUMAN",
                 "DEFERRED",
                 "NATIVE_SUFFICIENT",
                 "REJECTED_VALUE",
@@ -169,6 +170,52 @@ def test_scheduler_order_is_deterministic_and_not_input_order() -> None:
     )
     assert forward.selected_work_item_ids == ["V3-PROD-001"]
     assert reverse.selected_work_item_ids == forward.selected_work_item_ids
+
+
+def test_scheduler_rejects_ready_work_outside_active_milestone() -> None:
+    current = _item("V3-PROD-001")
+    future = _item("V3-PROD-002", milestone="M2_CONTROLLED_QUALIFICATION")
+    artifact = schedule_cycle(
+        _collection(current, future),
+        _config(),
+        cycle_id="active-milestone-only",
+        decided_at=NOW,
+    )
+    assert artifact.selected_work_item_ids == [current.work_item_id]
+    future_evaluation = next(
+        item for item in artifact.evaluations if item.work_item_id == future.work_item_id
+    )
+    assert future_evaluation.eligible is False
+    assert "is not active" in future_evaluation.reasons[0]
+
+
+def test_scheduler_never_executes_outside_fact_even_with_a_receipt_reference() -> None:
+    outside_fact = _item(
+        "V3-MKT-007",
+        lane="MARKET",
+        kind="EXTERNAL_EVIDENCE",
+        status="READY",
+        external_evidence_refs=["XREC-MKT-007"],
+    )
+    artifact = schedule_cycle(
+        _collection(outside_fact),
+        _config(),
+        cycle_id="external-receipt-gate-only",
+        decided_at=NOW,
+    )
+    assert artifact.selected_work_item_ids == []
+    assert "outside-fact" in artifact.evaluations[0].reasons[-1]
+
+
+def test_outside_fact_cannot_claim_ready_or_passed_without_bound_receipt() -> None:
+    for status in ("READY", "PASSED_ENGINEERING", "COMPLETED"):
+        with pytest.raises(ValueError, match="cannot advance without a bound receipt"):
+            _item(
+                "V3-MKT-007",
+                lane="MARKET",
+                kind="EXTERNAL_EVIDENCE",
+                status=status,
+            )
 
 
 def test_lane_wip_blocks_only_that_lane() -> None:
@@ -278,7 +325,7 @@ def test_repeated_finding_and_value_redesign_stop_bounded_loops() -> None:
     assert second.status is WorkStatus.BLOCKED_TECHNICAL
     assert second.candidate_preserved is True
     assert second.proposed_dispositions
-    assert second.human_review_proposed is True
+    assert second.machine_policy_review_proposed is True
 
     redesign = value_redesign_failure(
         2,
@@ -321,4 +368,8 @@ def test_controller_restart_budget_writes_hard_stuck_and_stop(tmp_path: Path) ->
     assert record.launcher_must_stop is True
     assert hard_stuck.is_file()
     assert stop.is_file()
-    assert "operator acknowledgement" in " ".join(record.recovery_instructions)
+    instructions = " ".join(record.recovery_instructions).lower()
+    assert "irrecoverable controller incident" in instructions
+    assert "do not clear or resume" in instructions
+    assert "operator" not in instructions
+    assert "acknowledg" not in instructions

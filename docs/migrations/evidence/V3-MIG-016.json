@@ -1,0 +1,15 @@
+{
+  "schemaVersion": 1,
+  "workItemId": "V3-MIG-016",
+  "result": "PASS",
+  "evidenceType": "OWNER_DIRECTED_MACHINE_POLICY",
+  "recordedAt": "2026-08-11T22:45:00Z",
+  "authority": "config/owner_directives.yaml",
+  "policy": "factory/policy/ZERO_HUMAN_OPERATION_OVERRIDE.json",
+  "verification": [
+    "scripts/gates/source_of_truth_integrity.py",
+    "tests/test_source_of_truth_integrity.py",
+    "tests/test_v3_config_and_roadmap.py"
+  ],
+  "truthBoundary": "The owner override replaces human approval with deterministic machine-policy receipts; it does not create external, customer, GPU, or commercial evidence."
+}

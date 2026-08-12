@@ -1,4 +1,4 @@
-version: 7
+version: 3
 principles:
 - Compile every catalog seed with one Claude outcome owner, then run deterministic policy.
 - Run deterministic gates once after each mutation, before one independent verifier.

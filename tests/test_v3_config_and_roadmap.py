@@ -24,7 +24,7 @@ from tcfactory.v3.configuration import (
     load_factory_v3,
     load_scheduler_v3,
 )
-from tcfactory.v3.enums import MilestoneStatus, WorkStatus
+from tcfactory.v3.enums import MilestoneStatus, WorkKind, WorkStatus
 from tcfactory.v3.milestones import MilestoneRoadmap
 from tcfactory.v3.work_items import WorkItemCollection
 from tcfactory.yamlutil import load_yaml
@@ -51,7 +51,8 @@ def test_checked_in_v3_configuration_is_finite_and_fail_closed() -> None:
     assert isinstance(autonomy, AutonomyV3Config)
     assert isinstance(executors, ExecutorConfig)
     assert factory.allow_paid_usage is False
-    assert factory.repository.direct_main_push is False
+    assert factory.repository.direct_main_push is True
+    assert factory.repository.release_mode == "owner_directed_main_only"
     assert factory.execution.work_until_done is False
     assert all(
         value > 0
@@ -70,10 +71,14 @@ def test_checked_in_v3_configuration_is_finite_and_fail_closed() -> None:
     )
     assert autonomy.enabled is False
     assert autonomy.external.ai_may_complete_external_evidence is False
+    assert autonomy.completion.roadmap_expansion_requires_machine_policy_receipt is True
+    assert autonomy.external.machine_policy_receipts_required is True
+    assert "human" not in autonomy.model_dump_json(by_alias=True).lower()
     assert external.allow_repository_fallback is False
     assert external.agent_writable is False
     assert commercial.synthetic_evidence_may_advance is False
     assert commercial.repository_authored_receipts_are_trusted is False
+    assert milestones.source_migration_machine_policy_receipt_required is True
     assert scheduler.active_milestone == milestones.active_milestone
     assert executors.allow_paid_usage is False
 
@@ -113,10 +118,19 @@ def test_authoritative_roadmap_generation_is_exact_and_typed() -> None:
     generated = build_collection()
     assert collection == generated
     assert len(collection.work_items) == 109
-    assert collection.active_milestone == "M0_FACTORY_MIGRATED"
+    assert collection.active_milestone == "M1_NATIVE_PREFLIGHT"
     assert all(item.source_dependency_expression is not None for item in collection.work_items)
-    assert sum(item.status is WorkStatus.WAITING_EXTERNAL for item in collection.work_items) == 9
-    assert sum(item.status is WorkStatus.WAITING_HUMAN for item in collection.work_items) == 10
+    assert sum(item.status is WorkStatus.WAITING_EXTERNAL for item in collection.work_items) == 12
+    for identifier in ("V3-MKT-005", "V3-MKT-006", "V3-MKT-007"):
+        item = collection.item(identifier)
+        assert item.kind is WorkKind.EXTERNAL_EVIDENCE
+        assert item.status is WorkStatus.WAITING_EXTERNAL
+        assert item.external_receipt_required is True
+        assert item.automatable is False
+    assert "WAITING_HUMAN" not in WorkStatus.__members__
+    assert "WAITING_HUMAN" not in MilestoneStatus.__members__
+    assert sum(item.kind is WorkKind.MACHINE_POLICY_REVIEW for item in collection.work_items) == 12
+    assert "human" not in collection.model_dump_json(by_alias=True).lower()
 
 
 def test_m0_through_m6_are_bounded_and_external_milestones_remain_waiting() -> None:
@@ -124,16 +138,17 @@ def test_m0_through_m6_are_bounded_and_external_milestones_remain_waiting() -> N
         load_yaml(ROOT / "factory/roadmap/milestones.yaml")
     )
     assert len(roadmap.milestones) == 7
-    assert roadmap.milestones[0].status is MilestoneStatus.ACTIVE
+    assert roadmap.milestones[0].status is MilestoneStatus.COMPLETED
+    assert roadmap.milestones[1].status is MilestoneStatus.ACTIVE
     external = roadmap.milestones[3:]
     assert all(item.status is MilestoneStatus.WAITING_EXTERNAL for item in external)
     assert all(item.required_evidence for item in roadmap.milestones)
     assert all(item.forbidden_claims for item in roadmap.milestones)
-    assert roadmap.milestones[0].human_approval_refs == []
+    assert "human" not in roadmap.model_dump_json(by_alias=True).lower()
 
 
 def test_every_generated_schema_rejects_unknown_top_level_fields() -> None:
-    assert len(SCHEMAS) == 32
+    assert len(SCHEMAS) == 39
     for model in SCHEMAS.values():
         schema = cast(dict[str, object], model.model_json_schema(by_alias=True))
         assert schema.get("additionalProperties") is False
@@ -150,6 +165,21 @@ def test_v3_scheduler_cli_is_dry_run_only_and_does_not_mutate_roadmap() -> None:
         ["v3-schedule", "--repo", str(ROOT), "--dry-run", "--explain"],
     )
     assert result.exit_code == 0, result.output
-    assert '"activeMilestone": "M0_FACTORY_MIGRATED"' in result.output
+    assert '"activeMilestone": "M1_NATIVE_PREFLIGHT"' in result.output
     assert '"selectedWorkItemIds"' in result.output
     assert path.read_bytes() == before
+
+
+def test_v3_repository_refuses_legacy_mutating_cli_surfaces() -> None:
+    runner = CliRunner()
+    commands = (
+        ["run", "tasks/T002.yaml"],
+        ["enqueue", "tasks/T002.yaml"],
+        ["worker"],
+        ["completion-audit"],
+        ["queue-reconcile"],
+    )
+    for command in commands:
+        result = runner.invoke(app, [*command, "--repo", str(ROOT)])
+        assert result.exit_code != 0
+        assert "disabled V2 compatibility surface" in result.output

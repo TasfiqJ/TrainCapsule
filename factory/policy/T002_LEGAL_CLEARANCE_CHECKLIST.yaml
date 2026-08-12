@@ -1,0 +1,30 @@
+version: 3
+checklistId: T002-NONBLOCKING-LEGAL-CLEARANCE
+status: DEFERRED
+scope: naming_only
+triggerAny:
+  - public launch
+  - package publication
+  - paid contract
+  - legal-counsel request
+blocksProductImplementation: false
+automatedChecks:
+  - id: product-name-primary-registers
+    requiredEvidence: attributable primary-register query receipts and raw response digests
+    missingResult: UNKNOWN
+  - id: intended-package-registries
+    requiredEvidence: exact intended package identifiers and attributable registry receipts
+    missingResult: UNKNOWN
+  - id: intended-domains
+    requiredEvidence: exact intended domains and attributable RDAP/registrar receipts
+    missingResult: UNKNOWN
+  - id: collision-classification
+    requiredEvidence: mechanically derived CLEAR, CONFLICT, or UNKNOWN per subject
+    missingResult: UNKNOWN
+completionPolicy:
+  requireEveryTriggeredCheck: true
+  allowSyntheticEvidence: false
+  allowModelAssertionAsEvidence: false
+  allowUnknownAsClear: false
+  humanInterventionRequired: false
+  externalEvidenceMayRemainUnknown: true

@@ -206,7 +206,14 @@ def build_mapping(root: Path = ROOT) -> LegacyMigrationMap:
     records: list[LegacyMapRecord] = []
     for item in ledger.tasks:
         mapped = sorted(EXPLICIT_V3_EQUIVALENTS.get(item.task_id, ()))
-        if item.task_id in FACTORY_HISTORY_IDS:
+        if item.task_id == "T002":
+            disposition = LegacyDisposition.DEFERRED_NON_BLOCKING
+            reason = (
+                "Naming/trademark clearance is deferred and non-blocking for private product "
+                "implementation. It may reopen only at public launch, package publication, paid "
+                "contract, or legal-counsel request; it never auto-resumes."
+            )
+        elif item.task_id in FACTORY_HISTORY_IDS:
             disposition = LegacyDisposition.FACTORY
             reason = (
                 "Historical V2 factory/source-control work; any replacement is only "

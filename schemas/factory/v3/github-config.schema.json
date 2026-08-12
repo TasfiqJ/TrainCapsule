@@ -1,0 +1,194 @@
+{
+  "$defs": {
+    "RemoteCIConfig": {
+      "additionalProperties": false,
+      "properties": {
+        "enabled": {
+          "default": true,
+          "title": "Enabled",
+          "type": "boolean"
+        },
+        "requiredWorkflows": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Requiredworkflows",
+          "type": "array"
+        },
+        "requiredRiskTiers": {
+          "items": {
+            "$ref": "#/$defs/RiskTier"
+          },
+          "title": "Requiredrisktiers",
+          "type": "array"
+        },
+        "timeoutSeconds": {
+          "default": 1800,
+          "maximum": 14400,
+          "minimum": 60,
+          "title": "Timeoutseconds",
+          "type": "integer"
+        },
+        "pollSeconds": {
+          "default": 20,
+          "maximum": 300,
+          "minimum": 5,
+          "title": "Pollseconds",
+          "type": "integer"
+        },
+        "failClosed": {
+          "const": true,
+          "default": true,
+          "title": "Failclosed",
+          "type": "boolean"
+        }
+      },
+      "title": "RemoteCIConfig",
+      "type": "object"
+    },
+    "RiskTier": {
+      "enum": [
+        "mechanical",
+        "standard",
+        "integration",
+        "trust_core"
+      ],
+      "title": "RiskTier",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 3,
+      "default": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "enabled": {
+      "default": false,
+      "title": "Enabled",
+      "type": "boolean"
+    },
+    "remote": {
+      "const": "origin",
+      "default": "origin",
+      "title": "Remote",
+      "type": "string"
+    },
+    "baseBranch": {
+      "const": "main",
+      "default": "main",
+      "title": "Basebranch",
+      "type": "string"
+    },
+    "branch": {
+      "const": "main",
+      "default": "main",
+      "title": "Branch",
+      "type": "string"
+    },
+    "visibility": {
+      "const": "private",
+      "default": "private",
+      "title": "Visibility",
+      "type": "string"
+    },
+    "repository": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Repository"
+    },
+    "releaseMode": {
+      "const": "owner_directed_main_only",
+      "default": "owner_directed_main_only",
+      "title": "Releasemode",
+      "type": "string"
+    },
+    "directMainPush": {
+      "const": true,
+      "default": true,
+      "title": "Directmainpush",
+      "type": "boolean"
+    },
+    "releaseMetadataPath": {
+      "const": "factory/state/latest-release.json",
+      "default": "factory/state/latest-release.json",
+      "title": "Releasemetadatapath",
+      "type": "string"
+    },
+    "pushAfterVerifiedTasks": {
+      "default": 3,
+      "maximum": 50,
+      "minimum": 1,
+      "title": "Pushafterverifiedtasks",
+      "type": "integer"
+    },
+    "pushIntervalSeconds": {
+      "default": 3600,
+      "maximum": 86400,
+      "minimum": 60,
+      "title": "Pushintervalseconds",
+      "type": "integer"
+    },
+    "pushBeforeQuotaPause": {
+      "default": true,
+      "title": "Pushbeforequotapause",
+      "type": "boolean"
+    },
+    "pushAtCompletion": {
+      "default": true,
+      "title": "Pushatcompletion",
+      "type": "boolean"
+    },
+    "immediateRiskTiers": {
+      "items": {
+        "$ref": "#/$defs/RiskTier"
+      },
+      "title": "Immediaterisktiers",
+      "type": "array"
+    },
+    "retryAttempts": {
+      "default": 5,
+      "maximum": 10,
+      "minimum": 1,
+      "title": "Retryattempts",
+      "type": "integer"
+    },
+    "retryBackoffSeconds": {
+      "default": 30,
+      "maximum": 3600,
+      "minimum": 1,
+      "title": "Retrybackoffseconds",
+      "type": "integer"
+    },
+    "verifyRemoteSha": {
+      "const": true,
+      "default": true,
+      "title": "Verifyremotesha",
+      "type": "boolean"
+    },
+    "commitSubjectMaxChars": {
+      "default": 50,
+      "maximum": 72,
+      "minimum": 20,
+      "title": "Commitsubjectmaxchars",
+      "type": "integer"
+    },
+    "remoteCi": {
+      "$ref": "#/$defs/RemoteCIConfig"
+    }
+  },
+  "title": "GitHubConfig",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/github-config.schema.json"
+}

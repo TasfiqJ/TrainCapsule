@@ -26,6 +26,7 @@ from tcfactory.v3.enums import (
     Lane,
     MilestoneStatus,
     MilestoneType,
+    WorkKind,
     WorkStatus,
 )
 from tcfactory.v3.milestones import Milestone, MilestoneRoadmap
@@ -91,9 +92,7 @@ def _work_item_for_milestone(milestone: str, status: WorkStatus) -> WorkItem:
             "softDependsOn": [],
             "status": status.value,
             "externalReceiptRequired": False,
-            "humanApprovalRequired": False,
             "externalEvidenceRefs": [],
-            "humanApprovalRefs": [],
         }
     )
     return WorkItem.model_validate(payload)
@@ -152,9 +151,9 @@ def test_v3_packet_rejects_mixed_product_factory_scope() -> None:
         V3TaskPacket.model_validate(payload)
 
 
-def test_external_or_human_work_cannot_compile_as_ai_packet() -> None:
+def test_external_work_cannot_compile_as_ai_packet() -> None:
     item = next(item for item in _roadmap().work_items if not item.automatable)
-    with pytest.raises(PacketPolicyError, match="external or human action"):
+    with pytest.raises(PacketPolicyError, match="requires external evidence"):
         compile_v3_packet(
             item=item,
             source_documents=["docs/CONTEXT_INDEX.yaml"],
@@ -215,8 +214,6 @@ def test_milestone_completion_is_bounded_and_external_truth_is_not_simulated() -
         {
             "type": MilestoneType.ENGINEERING.value,
             "status": MilestoneStatus.ACTIVE.value,
-            "humanApprovalRequired": False,
-            "humanApprovalRefs": [],
         }
     )
     milestone = Milestone.model_validate(raw)
@@ -225,8 +222,8 @@ def test_milestone_completion_is_bounded_and_external_truth_is_not_simulated() -
         work_items=roadmap,
         deterministic_evidence={item.work_item_id: ["gate.json"]},
         independent_review_refs=[],
+        machine_policy_receipt_refs=[],
         trusted_external_receipt_refs=[],
-        human_approval_refs=[],
     )
     assert result.decision is MilestoneStatus.COMPLETED
 
@@ -237,11 +234,58 @@ def test_milestone_completion_is_bounded_and_external_truth_is_not_simulated() -
         work_items=WorkItemCollection(active_milestone=m3.milestone_id, work_items=[m3_item]),
         deterministic_evidence={m3_item.work_item_id: ["controlled.json"]},
         independent_review_refs=["review.json"],
+        machine_policy_receipt_refs=[],
         trusted_external_receipt_refs=[],
-        human_approval_refs=[],
         controlled_fixture_only=True,
     )
     assert external.decision is MilestoneStatus.WAITING_EXTERNAL
+
+
+def test_milestone_machine_policy_gap_stays_active_until_receipt_exists() -> None:
+    source = next(
+        item
+        for item in _roadmap().work_items
+        if item.kind is WorkKind.MACHINE_POLICY_REVIEW
+    )
+    payload = source.model_dump(mode="json", by_alias=True)
+    payload.update(
+        {
+            "milestone": "M0_FACTORY_MIGRATED",
+            "dependsOn": [],
+            "softDependsOn": [],
+            "status": WorkStatus.PASSED_ENGINEERING.value,
+        }
+    )
+    item = WorkItem.model_validate(payload)
+    milestone_payload = _milestones().milestone("M0_FACTORY_MIGRATED").model_dump(
+        mode="json", by_alias=True
+    )
+    milestone_payload["type"] = MilestoneType.ENGINEERING.value
+    milestone = Milestone.model_validate(milestone_payload)
+    collection = WorkItemCollection(
+        active_milestone=milestone.milestone_id,
+        work_items=[item],
+    )
+    blocked = evaluate_v3_milestone_completion(
+        milestone=milestone,
+        work_items=collection,
+        deterministic_evidence={item.work_item_id: ["policy-gate.json"]},
+        independent_review_refs=["independent-verifier.json"],
+        machine_policy_receipt_refs=[],
+        trusted_external_receipt_refs=[],
+    )
+    assert blocked.decision is MilestoneStatus.ACTIVE
+    assert any("machine-policy receipt" in failure for failure in blocked.deterministic_failures)
+
+    complete = evaluate_v3_milestone_completion(
+        milestone=milestone,
+        work_items=collection,
+        deterministic_evidence={item.work_item_id: ["policy-gate.json"]},
+        independent_review_refs=["independent-verifier.json"],
+        machine_policy_receipt_refs=["machine-policy.json"],
+        trusted_external_receipt_refs=[],
+    )
+    assert complete.decision is MilestoneStatus.COMPLETED
 
 
 def test_value_outcomes_are_terminal_and_never_append_work() -> None:
@@ -341,7 +385,7 @@ def test_v3_operator_cli_is_read_only_and_explains_provenance(
         ["config", "explain", "factory.repository.releaseMode", "--repo", str(ROOT)],
     )
     assert explain.exit_code == 0
-    assert "pull_request" in explain.stdout
+    assert "owner_directed_main_only" in explain.stdout
     assert runner.invoke(app, ["migrate", "--repo", str(ROOT)]).exit_code == 2
     dry = runner.invoke(app, ["migrate", "--dry-run", "--repo", str(ROOT)])
     assert dry.exit_code == 0

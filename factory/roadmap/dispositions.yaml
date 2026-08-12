@@ -1,2 +1,21 @@
 version: 3
-records: []
+records:
+  - dispositionId: V3-DISP-T002-NAMING
+    subject: T002
+    sourceScope: legacy V2 naming, package, domain, and trademark review
+    disposition: DEFERRED_NON_BLOCKING
+    blockedScope: naming_only
+    blocksProductImplementation: false
+    automaticResume: false
+    reopenGate:
+      - public launch
+      - package publication
+      - paid contract
+      - legal-counsel request
+    checklist: factory/policy/T002_LEGAL_CLEARANCE_CHECKLIST.yaml
+    preservedLegacyEvidence:
+      - factory/roadmap/migrations/v2_to_v3.yaml
+      - factory/roadmap/legacy_feature_ledger.yaml
+      - factory/artifacts/T002
+      - factory/proposals/T002.yaml
+      - factory/recovery/task-packets

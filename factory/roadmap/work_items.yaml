@@ -1,5 +1,5 @@
 version: 3
-activeMilestone: M0_FACTORY_MIGRATED
+activeMilestone: M1_NATIVE_PREFLIGHT
 workItems:
 - version: 3
   workItemId: V3-MIG-001
@@ -26,14 +26,12 @@ workItems:
   evidenceRequired:
   - baseline SHA, clean status, queue/checkpoint export
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -62,14 +60,12 @@ workItems:
   evidenceRequired:
   - branch/tag refs, rollback drill
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -91,21 +87,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PASSED_ENGINEERING
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - source tree, authority diff
   externalReceiptRequired: false
-  humanApprovalRequired: true
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -127,21 +121,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PASSED_ENGINEERING
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - integrity tests, normative/current-fact separation
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -163,21 +155,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PASSED_ENGINEERING
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - schemas, model tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -199,21 +189,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PASSED_ENGINEERING
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - scheduler simulation and unit tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -237,31 +225,29 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PASSED_ENGINEERING
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - retry tests, no-zero-unlimited test
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-MIG-008
-  title: Add signed human-approval model and trusted-root verification
+  title: Add signed machine-policy model and trusted-root verification
   lane: TRUST
-  kind: MIGRATION
+  kind: MACHINE_POLICY_REVIEW
   milestone: M0_FACTORY_MIGRATED
-  decisionContribution: Add signed human-approval model and trusted-root verification
-  customerOutcome: Add signed human-approval model and trusted-root verification
+  decisionContribution: Add signed machine-policy model and trusted-root verification
+  customerOutcome: Add signed machine-policy model and trusted-root verification
   dependsOn:
   - V3-MIG-005
   softDependsOn: []
@@ -273,21 +259,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PASSED_ENGINEERING
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - positive/negative/expiry/SHA tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -309,21 +293,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PASSED_ENGINEERING
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - invalid/synthetic/issuer tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -346,21 +328,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PASSED_ENGINEERING
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - proposal artifact; no ledger mutation
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -382,31 +362,29 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PASSED_ENGINEERING
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - protocol tests; current Claude flow preserved
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-MIG-012
-  title: Change release path from direct main to draft PR
+  title: enforce exact-SHA main-only release
   lane: FACTORY
   kind: MIGRATION
   milestone: M0_FACTORY_MIGRATED
-  decisionContribution: Change release path from direct main to draft PR
-  customerOutcome: Change release path from direct main to draft PR
+  decisionContribution: enforce exact-SHA main-only release
+  customerOutcome: enforce exact-SHA main-only release
   dependsOn:
   - V3-MIG-005
   softDependsOn: []
@@ -418,21 +396,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PASSED_ENGINEERING
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
-  - PR dry run, exact-SHA checks
+  - main-only publication recovery rehearsal, exact-SHA checks
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -454,21 +430,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PASSED_ENGINEERING
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - workflows and local equivalents
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -490,21 +464,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PASSED_ENGINEERING
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - non-hardcoded config tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -530,31 +502,29 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PASSED_ENGINEERING
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - migration report and hashes
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-MIG-016
-  title: Human review of authority, release, and rollback
+  title: machine-policy verification of authority, release, and rollback
   lane: TRUST
-  kind: HUMAN_REVIEW
+  kind: MACHINE_POLICY_REVIEW
   milestone: M0_FACTORY_MIGRATED
-  decisionContribution: Human review of authority, release, and rollback
-  customerOutcome: Human review of authority, release, and rollback
+  decisionContribution: machine-policy verification of authority, release, and rollback
+  customerOutcome: machine-policy verification of authority, release, and rollback
   dependsOn:
   - V3-MIG-003
   - V3-MIG-004
@@ -573,26 +543,24 @@ workItems:
   sourceDependencyExpression: 003–015
   blocksCommercialRelease: true
   priority: 84
-  riskTier: EXTERNAL
+  riskTier: TRUST_CORE
   maturityTarget:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: WAITING_HUMAN
-  ownerType: HUMAN_REVIEWER
-  automatable: false
+  status: COMPLETED
+  ownerType: AI
+  automatable: true
   packetPath: null
   evidenceRequired:
-  - signed source-migration approval
+  - docs/migrations/evidence/V3-MIG-016.json
   externalReceiptRequired: false
-  humanApprovalRequired: true
   retryPolicy:
-    maxPlanAttempts: 0
-    maxCandidateRepairCycles: 0
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -623,21 +591,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PROPOSED
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
-  - full transcript and restored SHA
+  - docs/migrations/evidence/V3-MIG-017.json
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -660,21 +626,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PROPOSED
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
-  - scheduler decisions with no mutation
+  - docs/migrations/evidence/V3-MIG-018.json
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -696,21 +660,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PROPOSED
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
-  - candidate manifests, PRs, CI
+  - docs/migrations/evidence/V3-MIG-019.json
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -732,21 +694,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: PROPOSED
+  status: COMPLETED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
-  - milestone completion record
+  - docs/migrations/evidence/V3-MIG-020.json
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -767,21 +727,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - clean install, package import
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -803,21 +761,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - schema round-trip/compatibility
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -839,21 +795,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - independent implementation, negative cases
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -875,21 +829,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - tamper/mixing tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -912,21 +864,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - drift and weak-identity tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -949,21 +899,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - material/immaterial drift tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -986,21 +934,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - official-format fixtures, malformed inputs
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1028,14 +974,12 @@ workItems:
   evidenceRequired:
   - official sources, commands, findings
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1058,21 +1002,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - source labels and tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1094,21 +1036,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - full missing/conflicting state matrix
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1131,21 +1071,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - all terminal outcomes
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1168,21 +1106,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - install-to-preflight journey
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1204,21 +1140,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - security review and tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1240,21 +1174,19 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
+  status: PASSED_ENGINEERING
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - secret and policy tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1283,14 +1215,12 @@ workItems:
   evidenceRequired:
   - dated source register
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1320,14 +1250,12 @@ workItems:
   evidenceRequired:
   - commands, artifacts, operator effort
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1357,14 +1285,12 @@ workItems:
   evidenceRequired:
   - decision-level differential
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1392,14 +1318,12 @@ workItems:
   evidenceRequired:
   - attributable account records
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1427,14 +1351,12 @@ workItems:
   evidenceRequired:
   - review-ready packet
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1458,20 +1380,18 @@ workItems:
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: WAITING_EXTERNAL
-  ownerType: FOUNDER
+  ownerType: EXTERNAL_PARTY
   automatable: false
   packetPath: null
   evidenceRequired:
   - external receipts/notes
   externalReceiptRequired: true
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1494,27 +1414,25 @@ workItems:
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: WAITING_EXTERNAL
-  ownerType: FOUNDER
+  ownerType: EXTERNAL_PARTY
   automatable: false
   packetPath: null
   evidenceRequired:
   - sanitized timelines
   externalReceiptRequired: true
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-MKT-005
   title: Identify 3 real upcoming changes
   lane: MARKET
-  kind: RESEARCH
+  kind: EXTERNAL_EVIDENCE
   milestone: M1_NATIVE_PREFLIGHT
   decisionContribution: Identify 3 real upcoming changes
   customerOutcome: Identify 3 real upcoming changes
@@ -1524,33 +1442,31 @@ workItems:
   sourceDependencyExpression: MKT-003
   blocksCommercialRelease: true
   priority: 68
-  riskTier: STANDARD
+  riskTier: EXTERNAL
   maturityTarget:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
-  ownerType: AI
-  automatable: true
+  status: WAITING_EXTERNAL
+  ownerType: EXTERNAL_PARTY
+  automatable: false
   packetPath: null
   evidenceRequired:
   - named decision/deadline
-  externalReceiptRequired: false
-  humanApprovalRequired: false
+  externalReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-MKT-006
   title: Qualify 2 pilot candidates
   lane: MARKET
-  kind: RESEARCH
+  kind: EXTERNAL_EVIDENCE
   milestone: M1_NATIVE_PREFLIGHT
   decisionContribution: Qualify 2 pilot candidates
   customerOutcome: Qualify 2 pilot candidates
@@ -1561,33 +1477,31 @@ workItems:
   sourceDependencyExpression: MKT-004,005
   blocksCommercialRelease: true
   priority: 67
-  riskTier: STANDARD
+  riskTier: EXTERNAL
   maturityTarget:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
-  ownerType: AI
-  automatable: true
+  status: WAITING_EXTERNAL
+  ownerType: EXTERNAL_PARTY
+  automatable: false
   packetPath: null
   evidenceRequired:
   - ICP score and next action
-  externalReceiptRequired: false
-  humanApprovalRequired: false
+  externalReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-MKT-007
   title: Secure lawful access to one real trace/archive
   lane: MARKET
-  kind: RESEARCH
+  kind: EXTERNAL_EVIDENCE
   milestone: M1_NATIVE_PREFLIGHT
   decisionContribution: Secure lawful access to one real trace/archive
   customerOutcome: Secure lawful access to one real trace/archive
@@ -1597,33 +1511,31 @@ workItems:
   sourceDependencyExpression: MKT-004
   blocksCommercialRelease: true
   priority: 66
-  riskTier: STANDARD
+  riskTier: EXTERNAL
   maturityTarget:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: PROPOSED
-  ownerType: AI
-  automatable: true
+  status: WAITING_EXTERNAL
+  ownerType: EXTERNAL_PARTY
+  automatable: false
   packetPath: null
   evidenceRequired:
   - access/rights receipt
-  externalReceiptRequired: false
-  humanApprovalRequired: false
+  externalReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-DEC-001
   title: Conduct M1 wedge review
   lane: TRUST
-  kind: HUMAN_REVIEW
+  kind: MACHINE_POLICY_REVIEW
   milestone: M1_NATIVE_PREFLIGHT
   decisionContribution: Conduct M1 wedge review
   customerOutcome: Conduct M1 wedge review
@@ -1656,26 +1568,24 @@ workItems:
   sourceDependencyExpression: all M1 critical items
   blocksCommercialRelease: true
   priority: 65
-  riskTier: EXTERNAL
+  riskTier: TRUST_CORE
   maturityTarget:
     engineering: CONTROLLED_VALIDATED
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
-  status: WAITING_HUMAN
-  ownerType: HUMAN_REVIEWER
-  automatable: false
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
   packetPath: null
   evidenceRequired:
   - KEEP/NARROW/REPLACE/STOP decision
   externalReceiptRequired: false
-  humanApprovalRequired: true
   retryPolicy:
-    maxPlanAttempts: 0
-    maxCandidateRepairCycles: 0
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1703,14 +1613,12 @@ workItems:
   evidenceRequired:
   - pack spec and negative boundaries
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1739,14 +1647,12 @@ workItems:
   evidenceRequired:
   - positive/ambiguous/missing-rank cases
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1776,14 +1682,12 @@ workItems:
   evidenceRequired:
   - controlled traces
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1812,14 +1716,12 @@ workItems:
   evidenceRequired:
   - falsifier and status tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1848,14 +1750,12 @@ workItems:
   evidenceRequired:
   - precondition and rollback tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1884,14 +1784,12 @@ workItems:
   evidenceRequired:
   - independent negative controls
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1922,14 +1820,12 @@ workItems:
   evidenceRequired:
   - bounded plans, no universal planner
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1959,14 +1855,12 @@ workItems:
   evidenceRequired:
   - tamper, drift, expiry tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -1996,14 +1890,12 @@ workItems:
   evidenceRequired:
   - containment/resource tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2032,14 +1924,12 @@ workItems:
   evidenceRequired:
   - escape/network/path tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2068,14 +1958,12 @@ workItems:
   evidenceRequired:
   - identity/tamper tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2104,14 +1992,12 @@ workItems:
   evidenceRequired:
   - per-property oracle schema
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2140,14 +2026,12 @@ workItems:
   evidenceRequired:
   - fail/unknown/optional tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2179,14 +2063,12 @@ workItems:
   evidenceRequired:
   - decision matrix tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2215,14 +2097,12 @@ workItems:
   evidenceRequired:
   - invalid-oracle and unknown tests
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2251,14 +2131,12 @@ workItems:
   evidenceRequired:
   - create/verify/expire/supersede
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2291,14 +2169,12 @@ workItems:
   evidenceRequired:
   - independent verification
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2328,14 +2204,12 @@ workItems:
   evidenceRequired:
   - report/machine-record consistency
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2364,14 +2238,12 @@ workItems:
   evidenceRequired:
   - labeled controlled corpus
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2401,14 +2273,12 @@ workItems:
   evidenceRequired:
   - end-to-end evidence
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2438,14 +2308,12 @@ workItems:
   evidenceRequired:
   - real GPU artifacts
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2474,14 +2342,12 @@ workItems:
   evidenceRequired:
   - decision differential
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2511,14 +2377,12 @@ workItems:
   evidenceRequired:
   - install/rollback evidence
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2547,24 +2411,22 @@ workItems:
   evidenceRequired:
   - signed operator receipt
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-TRUST-010
-  title: Human review of controlled demonstration
+  title: machine-policy verification of controlled demonstration
   lane: TRUST
-  kind: HUMAN_REVIEW
+  kind: MACHINE_POLICY_REVIEW
   milestone: M2_CONTROLLED_QUALIFICATION
-  decisionContribution: Human review of controlled demonstration
-  customerOutcome: Human review of controlled demonstration
+  decisionContribution: machine-policy verification of controlled demonstration
+  customerOutcome: machine-policy verification of controlled demonstration
   dependsOn:
   - V3-PROD-011
   - V3-TRUST-004
@@ -2594,33 +2456,31 @@ workItems:
   sourceDependencyExpression: all M2 trust/product
   blocksCommercialRelease: true
   priority: 55
-  riskTier: EXTERNAL
+  riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
     commercial: NATIVE_ADVANTAGE_DEMONSTRATED
   disposition: KEEP
-  status: WAITING_HUMAN
-  ownerType: HUMAN_REVIEWER
-  automatable: false
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
   packetPath: null
   evidenceRequired:
   - scoped approval
   externalReceiptRequired: false
-  humanApprovalRequired: true
   retryPolicy:
-    maxPlanAttempts: 0
-    maxCandidateRepairCycles: 0
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-DEC-002
   title: M2 product/native/value disposition
   lane: TRUST
-  kind: HUMAN_REVIEW
+  kind: MACHINE_POLICY_REVIEW
   milestone: M2_CONTROLLED_QUALIFICATION
   decisionContribution: M2 product/native/value disposition
   customerOutcome: M2 product/native/value disposition
@@ -2631,26 +2491,24 @@ workItems:
   sourceDependencyExpression: COMP-005,TRUST-010
   blocksCommercialRelease: true
   priority: 54
-  riskTier: EXTERNAL
+  riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
     commercial: NATIVE_ADVANTAGE_DEMONSTRATED
   disposition: KEEP
-  status: WAITING_HUMAN
-  ownerType: HUMAN_REVIEWER
-  automatable: false
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
   packetPath: null
   evidenceRequired:
   - continue/narrow/stop
   externalReceiptRequired: false
-  humanApprovalRequired: true
   retryPolicy:
-    maxPlanAttempts: 0
-    maxCandidateRepairCycles: 0
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2672,20 +2530,18 @@ workItems:
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
   status: WAITING_EXTERNAL
-  ownerType: FOUNDER
+  ownerType: EXTERNAL_PARTY
   automatable: false
   packetPath: null
   evidenceRequired:
   - offer document
   externalReceiptRequired: true
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2713,14 +2569,12 @@ workItems:
   evidenceRequired:
   - pricing ledger
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2748,14 +2602,12 @@ workItems:
   evidenceRequired:
   - security documents
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2783,14 +2635,12 @@ workItems:
   evidenceRequired:
   - external receipt
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2818,14 +2668,12 @@ workItems:
   evidenceRequired:
   - external receipt
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2854,14 +2702,12 @@ workItems:
   evidenceRequired:
   - local evidence report
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2890,14 +2736,12 @@ workItems:
   evidenceRequired:
   - exact native result
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2923,27 +2767,25 @@ workItems:
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
   status: WAITING_EXTERNAL
-  ownerType: FOUNDER
+  ownerType: EXTERNAL_PARTY
   automatable: false
   packetPath: null
   evidenceRequired:
   - signed/external receipt
   externalReceiptRequired: true
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-DEC-003
   title: Authorize paid preflight
   lane: TRUST
-  kind: HUMAN_REVIEW
+  kind: MACHINE_POLICY_REVIEW
   milestone: M3_PAID_PREFLIGHT
   decisionContribution: Authorize paid preflight
   customerOutcome: Authorize paid preflight
@@ -2956,26 +2798,24 @@ workItems:
   sourceDependencyExpression: PROD-028,COMP-006,TRUST-012–013,MKT-010
   blocksCommercialRelease: true
   priority: 61
-  riskTier: EXTERNAL
+  riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
-  status: WAITING_HUMAN
-  ownerType: HUMAN_REVIEWER
-  automatable: false
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
   packetPath: null
   evidenceRequired:
-  - founder/human decision
+  - machine-policy decision
   externalReceiptRequired: false
-  humanApprovalRequired: true
   retryPolicy:
-    maxPlanAttempts: 0
-    maxCandidateRepairCycles: 0
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -2997,20 +2837,18 @@ workItems:
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
   status: WAITING_EXTERNAL
-  ownerType: FOUNDER
+  ownerType: EXTERNAL_PARTY
   automatable: false
   packetPath: null
   evidenceRequired:
   - signed paid receipt
   externalReceiptRequired: true
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3039,14 +2877,12 @@ workItems:
   evidenceRequired:
   - customer-local manifest
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3075,14 +2911,12 @@ workItems:
   evidenceRequired:
   - commands/findings/decision
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3112,50 +2946,47 @@ workItems:
   evidenceRequired:
   - preflight
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-PILOT-005
-  title: Human approve case-specific experiment/reduction plan
+  title: machine policy authorizes case-specific experiment/reduction plan
   lane: TRUST
-  kind: HUMAN_REVIEW
+  kind: MACHINE_POLICY_REVIEW
   milestone: M4_PAID_PILOT
-  decisionContribution: Human approve case-specific experiment/reduction plan
-  customerOutcome: Human approve case-specific experiment/reduction plan
+  decisionContribution: machine policy authorizes case-specific experiment/reduction
+    plan
+  customerOutcome: machine policy authorizes case-specific experiment/reduction plan
   dependsOn:
   - V3-PILOT-004
   softDependsOn: []
   sourceDependencyExpression: '004'
   blocksCommercialRelease: true
   priority: 55
-  riskTier: EXTERNAL
+  riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
-  status: WAITING_HUMAN
-  ownerType: HUMAN_REVIEWER
-  automatable: false
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
   packetPath: null
   evidenceRequired:
-  - signed approval
+  - digest-bound machine-policy receipt
   externalReceiptRequired: false
-  humanApprovalRequired: true
   retryPolicy:
-    maxPlanAttempts: 0
-    maxCandidateRepairCycles: 0
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3184,14 +3015,12 @@ workItems:
   evidenceRequired:
   - faithfulness record
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3220,14 +3049,12 @@ workItems:
   evidenceRequired:
   - execution records
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3256,14 +3083,12 @@ workItems:
   evidenceRequired:
   - property matrix
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3293,50 +3118,46 @@ workItems:
   evidenceRequired:
   - signed result
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-PILOT-010
-  title: Human approve customer-facing claims
+  title: machine policy authorizes customer-facing claims
   lane: TRUST
-  kind: HUMAN_REVIEW
+  kind: MACHINE_POLICY_REVIEW
   milestone: M4_PAID_PILOT
-  decisionContribution: Human approve customer-facing claims
-  customerOutcome: Human approve customer-facing claims
+  decisionContribution: machine policy authorizes customer-facing claims
+  customerOutcome: machine policy authorizes customer-facing claims
   dependsOn:
   - V3-PILOT-009
   softDependsOn: []
   sourceDependencyExpression: 009
   blocksCommercialRelease: true
   priority: 50
-  riskTier: EXTERNAL
+  riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
-  status: WAITING_HUMAN
-  ownerType: HUMAN_REVIEWER
-  automatable: false
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
   packetPath: null
   evidenceRequired:
-  - signed approval
+  - digest-bound machine-policy receipt
   externalReceiptRequired: false
-  humanApprovalRequired: true
   retryPolicy:
-    maxPlanAttempts: 0
-    maxCandidateRepairCycles: 0
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3360,20 +3181,18 @@ workItems:
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
   status: WAITING_EXTERNAL
-  ownerType: FOUNDER
+  ownerType: EXTERNAL_PARTY
   automatable: false
   packetPath: null
   evidenceRequired:
   - attributable receipt
   externalReceiptRequired: true
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3402,14 +3221,12 @@ workItems:
   evidenceRequired:
   - independent verification
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3433,27 +3250,25 @@ workItems:
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
   status: WAITING_EXTERNAL
-  ownerType: FOUNDER
+  ownerType: EXTERNAL_PARTY
   automatable: false
   packetPath: null
   evidenceRequired:
   - dated commitment
   externalReceiptRequired: true
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-DEC-004
   title: Pilot disposition
   lane: TRUST
-  kind: HUMAN_REVIEW
+  kind: MACHINE_POLICY_REVIEW
   milestone: M4_PAID_PILOT
   decisionContribution: Pilot disposition
   customerOutcome: Pilot disposition
@@ -3465,26 +3280,24 @@ workItems:
   sourceDependencyExpression: 011–013
   blocksCommercialRelease: true
   priority: 46
-  riskTier: EXTERNAL
+  riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
-  status: WAITING_HUMAN
-  ownerType: HUMAN_REVIEWER
-  automatable: false
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
   packetPath: null
   evidenceRequired:
   - continue/narrow/stop
   externalReceiptRequired: false
-  humanApprovalRequired: true
   retryPolicy:
-    maxPlanAttempts: 0
-    maxCandidateRepairCycles: 0
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3506,20 +3319,18 @@ workItems:
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
   status: WAITING_EXTERNAL
-  ownerType: FOUNDER
+  ownerType: EXTERNAL_PARTY
   automatable: false
   packetPath: null
   evidenceRequired:
   - signed receipt
   externalReceiptRequired: true
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3548,14 +3359,12 @@ workItems:
   evidenceRequired:
   - drift report
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3584,14 +3393,12 @@ workItems:
   evidenceRequired:
   - new decision
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3620,14 +3427,12 @@ workItems:
   evidenceRequired:
   - operator receipt
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3656,14 +3461,12 @@ workItems:
   evidenceRequired:
   - customer receipt
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3692,21 +3495,19 @@ workItems:
   evidenceRequired:
   - internal cost record
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-DEC-005
   title: Repeat/productization disposition
   lane: TRUST
-  kind: HUMAN_REVIEW
+  kind: MACHINE_POLICY_REVIEW
   milestone: M5_PAID_REPEAT
   decisionContribution: Repeat/productization disposition
   customerOutcome: Repeat/productization disposition
@@ -3715,26 +3516,24 @@ workItems:
   sourceDependencyExpression: 004–006
   blocksCommercialRelease: true
   priority: 43
-  riskTier: EXTERNAL
+  riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
-  status: WAITING_HUMAN
-  ownerType: HUMAN_REVIEWER
-  automatable: false
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
   packetPath: null
   evidenceRequired:
   - continue/narrow/stop
   externalReceiptRequired: false
-  humanApprovalRequired: true
   retryPolicy:
-    maxPlanAttempts: 0
-    maxCandidateRepairCycles: 0
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3762,14 +3561,12 @@ workItems:
   evidenceRequired:
   - versioned pack
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3798,14 +3595,12 @@ workItems:
   evidenceRequired:
   - case evidence
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3834,14 +3629,12 @@ workItems:
   evidenceRequired:
   - current sources/run
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3872,24 +3665,22 @@ workItems:
   evidenceRequired:
   - independent reports
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-TRUST-015
-  title: Qualified human commercial-pack approval
+  title: independent machine-policy commercial-pack approval
   lane: TRUST
-  kind: SPECIFICATION
+  kind: MACHINE_POLICY_REVIEW
   milestone: M6_COMMERCIALLY_SUPPORTED_PACK
-  decisionContribution: Qualified human commercial-pack approval
-  customerOutcome: Qualified human commercial-pack approval
+  decisionContribution: independent machine-policy commercial-pack approval
+  customerOutcome: independent machine-policy commercial-pack approval
   dependsOn:
   - V3-TRUST-014
   softDependsOn: []
@@ -3906,16 +3697,14 @@ workItems:
   automatable: true
   packetPath: null
   evidenceRequired:
-  - signed approval
+  - digest-bound machine-policy receipt
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3944,14 +3733,12 @@ workItems:
   evidenceRequired:
   - operator docs
   externalReceiptRequired: false
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
@@ -3973,27 +3760,25 @@ workItems:
     commercial: COMMERCIALLY_SUPPORTED
   disposition: KEEP
   status: WAITING_EXTERNAL
-  ownerType: FOUNDER
+  ownerType: EXTERNAL_PARTY
   automatable: false
   packetPath: null
   evidenceRequired:
   - customer response
   externalReceiptRequired: true
-  humanApprovalRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null
 - version: 3
   workItemId: V3-DEC-006
   title: Mark pack commercially supported or refuse
   lane: TRUST
-  kind: HUMAN_REVIEW
+  kind: MACHINE_POLICY_REVIEW
   milestone: M6_COMMERCIALLY_SUPPORTED_PACK
   decisionContribution: Mark pack commercially supported or refuse
   customerOutcome: Mark pack commercially supported or refuse
@@ -4009,25 +3794,23 @@ workItems:
   sourceDependencyExpression: all M6
   blocksCommercialRelease: true
   priority: 32
-  riskTier: EXTERNAL
+  riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
     commercial: COMMERCIALLY_SUPPORTED
   disposition: KEEP
-  status: WAITING_HUMAN
-  ownerType: HUMAN_REVIEWER
-  automatable: false
+  status: PROPOSED
+  ownerType: AI
+  automatable: true
   packetPath: null
   evidenceRequired:
   - maturity decision
   externalReceiptRequired: false
-  humanApprovalRequired: true
   retryPolicy:
-    maxPlanAttempts: 0
-    maxCandidateRepairCycles: 0
+    maxPlanAttempts: 2
+    maxCandidateRepairCycles: 3
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
-  humanApprovalRefs: []
   createdAt: null
   updatedAt: null

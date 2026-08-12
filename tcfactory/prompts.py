@@ -70,7 +70,7 @@ Operational rules:
    contradictory, return verdict `blocked` and identify the exact missing authority.
 7. Work only within this finite session and its declared ceilings. If bounded attempts are
    exhausted, preserve the candidate and return the exact lawful state: `DEFER`,
-   `NATIVE_SUFFICIENT`, `REJECTED_VALUE`, `WAITING_EXTERNAL`, or `WAITING_HUMAN`.
+   `NATIVE_SUFFICIENT`, `REJECTED_VALUE`, `WAITING_EXTERNAL`, or `BLOCKED_POLICY`.
 8. End each session with one structured AgentReport matching the enforced JSON schema. Machine
    evidence, not confidence, determines promotion.
 """

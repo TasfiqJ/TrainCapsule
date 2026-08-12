@@ -1,5 +1,10 @@
 # TrainCapsule V3 test matrix
 
+> Final V3 acceptance supersedes the phase-by-phase counts below. The current pre-publication tree
+> has 552 passing tests, clean Ruff, and strict Pyright at 0 errors/0 warnings. Exact final commands,
+> commit SHA, clean-install results, and hosted main checks are appended after publication. No model,
+> network mutation, GPU run, or paid service was used for the local migration proof.
+
 ## Baseline
 
 The exact baseline and results are recorded in `V3_BASELINE_REPORT.md`: 394 tests passed, with Ruff, strict Pyright, schema comparison, packet validation, catalog validation, secrets, authority, billing, and repair-scope gates all green.
@@ -13,15 +18,15 @@ The exact baseline and results are recorded in `V3_BASELINE_REPORT.md`: 394 test
 | Scheduler/policy | lane independence, WIP, deterministic score, finite retries, repeated finding, hard stuck | passed; 40 focused checks and 430-test full-suite regression |
 | Completion/context/value | proposal-only expansion, scoped context/freshness, terminal value outcomes | passed; focused adversarial coverage and 443-test full-suite regression |
 | Backend | protocol, Claude adapter, fake backend, redaction, checkpoint recovery | passed; 33 focused checks and 456-test full-suite regression |
-| Release | PR-only policy, exact candidate/ref/PR SHA, no force, divergence, required hosted CI, metadata | passed; 22 focused checks and 467-test full-suite regression; no network mutation |
+| Release | main-only exact-SHA policy, no non-main ref, no force, divergence, durable recovery, required hosted CI, automatic ordinary revert | passed locally; publication recovery adversarial suite passed; no network mutation |
 | Startup/status | finite 15/60/300 restart, healthy reset, preflight, portable controls, durable stop/hard-stuck, complete status | passed; focused checks and 471-test full-suite regression; stopped launcher exercised without model use |
-| Prompts | finite packet/session, native-first, exact truth states, bounded findings, external/human stop, specialist contracts | passed; focused checks and 478-test full-suite regression; no model use |
+| Prompts | finite packet/session, native-first, exact truth states, bounded findings, external/policy stop, specialist contracts | passed; focused adversarial coverage; no model use |
 | Legacy migration | 124-entry mapping, exact ledger archive, dry/apply, non-resuming queue archive, deterministic migration | passed; 1 passed/1 paused/2 external-wait/120 blocked preserved; 88 mapped, 29 deferred, 7 factory history; original queue retained |
 | Product preflight | identity golden vectors, CAS, importer, native baseline, completeness, eligibility, CLI | passed; 41 product checks and 527-test full-suite regression |
 | Product journey | install through preflight; missing/native-sufficient/unsupported/policy/unknown/malicious cases | passed on controlled local fixtures; no GPU/customer claim |
 | Security | secrets, paths, symlinks, malicious input, synthetic evidence, forged/expired approval | product adversarial coverage passed; final repository secret gate is recorded below |
 | Rollback | detached disposable worktree at safety ref; authority and baseline suite | passed; exact base SHA, 394 baseline tests, worktree removed |
-| GPU/external | real GPU, customer archive, independent operator, human approval | external/deferred; never simulated as complete |
+| GPU/external | real GPU, customer archive, independent operator, customer/payment facts | external/deferred; never simulated as complete |
 
 Every final result records the exact command, SHA, pass/fail count, and whether a failure was pre-existing or introduced.
 

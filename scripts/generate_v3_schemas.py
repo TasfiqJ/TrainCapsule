@@ -26,18 +26,27 @@ from tcfactory.backends.base import (
 from tcfactory.checkpoints import V3Checkpoint
 from tcfactory.completion import MilestoneCompletionDecision
 from tcfactory.context import V3ContextManifest
+from tcfactory.github_sync import (
+    GitHubConfig,
+    GitHubReleaseMetadata,
+    MainOnlyMachineReceipt,
+    MainPublicationTransaction,
+)
 from tcfactory.handoffs import V3Handoff
 from tcfactory.supervisor import MigrationCompleteMarker, SupervisorState
-from tcfactory.v3.approvals import HumanApprovalRecord
 from tcfactory.v3.base import json_schema_for
 from tcfactory.v3.candidate_manifest import CandidateManifest
 from tcfactory.v3.configuration import (
     AutonomyV3Config,
     CommercialMaturityConfig,
+    ContextRoutingConfig,
+    DisabledHumanApprovalConfig,
     ExecutorConfig,
     ExternalEvidenceConfig,
     FactoryV3Config,
     MilestonePolicyConfig,
+    OwnerDirectives,
+    OwnerOverridePolicy,
 )
 from tcfactory.v3.dispositions import DispositionLedger
 from tcfactory.v3.external_evidence import ExternalEvidenceReceipt
@@ -60,6 +69,7 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "candidate-manifest.schema.json": CandidateManifest,
     "checkpoint.schema.json": V3Checkpoint,
     "commercial-maturity-config.schema.json": CommercialMaturityConfig,
+    "context-policy-config.schema.json": ContextRoutingConfig,
     "dispositions.schema.json": DispositionLedger,
     "executors-config.schema.json": ExecutorConfig,
     "external-evidence-config.schema.json": ExternalEvidenceConfig,
@@ -68,7 +78,13 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "finding.schema.json": V3Finding,
     "finding-counter.schema.json": FindingCounter,
     "hard-stuck.schema.json": HardStuckRecord,
-    "human-approval.schema.json": HumanApprovalRecord,
+    "human-approval-disabled-config.schema.json": DisabledHumanApprovalConfig,
+    "owner-directives.schema.json": OwnerDirectives,
+    "owner-override-policy.schema.json": OwnerOverridePolicy,
+    "github-config.schema.json": GitHubConfig,
+    "main-publication.schema.json": GitHubReleaseMetadata,
+    "main-policy-receipt.schema.json": MainOnlyMachineReceipt,
+    "main-publication-transaction.schema.json": MainPublicationTransaction,
     "handoff.schema.json": V3Handoff,
     "legacy-migration.schema.json": LegacyMigrationMap,
     "milestones.schema.json": MilestoneRoadmap,

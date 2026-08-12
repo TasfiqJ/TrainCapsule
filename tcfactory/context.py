@@ -21,8 +21,10 @@ class ContextPolicyError(RuntimeError):
 class V3ContextEntry(V3Model):
     path: str
     bytes: int = Field(ge=0)
+    characters: int = Field(ge=0)
     sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     authority_class: str
+    authority_sections: list[str] = Field(min_length=1)
     relevance: str
     freshness_policy: str
     freshness_status: Literal["LOCKED", "CURRENT", "STALE", "RECHECK_REQUIRED"]
@@ -307,6 +309,19 @@ def build_v3_context_manifest(
         if not isinstance(raw_entries_value, list) or not raw_entries_value:
             raise ContextPolicyError(f"required context group {group_name} has no entries")
         raw_entries = cast(list[object], raw_entries_value)
+        max_sources = group.get("maxSources")
+        max_characters = group.get("maxCharacters")
+        if not isinstance(max_sources, int) or max_sources < 1:
+            raise ContextPolicyError(f"context group {group_name} lacks a positive source budget")
+        if not isinstance(max_characters, int) or max_characters < 1:
+            raise ContextPolicyError(
+                f"context group {group_name} lacks a positive character budget"
+            )
+        if len(raw_entries) > max_sources:
+            raise ContextPolicyError(
+                f"context group {group_name} exceeds its {max_sources}-source budget"
+            )
+        group_characters = 0
         for raw_entry in raw_entries:
             if not isinstance(raw_entry, dict):
                 raise ContextPolicyError(f"invalid context entry in {group_name}")
@@ -317,6 +332,31 @@ def build_v3_context_manifest(
                 raise ContextPolicyError(
                     f"work item {work_item.work_item_id} lacks required fact/source: {relative}"
                 )
+            declared_digest = str(entry.get("sha256", ""))
+            actual_digest = sha256_file(path)
+            if not declared_digest or declared_digest != actual_digest:
+                raise ContextPolicyError(
+                    f"context entry digest mismatch for {relative}; refresh authority explicitly"
+                )
+            raw_sections = entry.get("authoritySections")
+            if not isinstance(raw_sections, list):
+                raise ContextPolicyError(
+                    f"context entry {relative} lacks exact authority section references"
+                )
+            authority_sections: list[str] = []
+            for value in cast(list[object], raw_sections):
+                if not isinstance(value, str) or not value.strip():
+                    raise ContextPolicyError(
+                        f"context entry {relative} lacks exact authority section references"
+                    )
+                authority_sections.append(value.strip())
+            if not authority_sections:
+                raise ContextPolicyError(
+                    f"context entry {relative} lacks exact authority section references"
+                )
+            source_text = path.read_text(encoding="utf-8")
+            source_characters = len(source_text)
+            group_characters += source_characters
             policy = str(entry.get("freshnessPolicy", group_policy))
             status: Literal["LOCKED", "CURRENT", "STALE", "RECHECK_REQUIRED"]
             if policy == "manifest_locked":
@@ -340,12 +380,18 @@ def build_v3_context_manifest(
                 V3ContextEntry(
                     path=relative,
                     bytes=path.stat().st_size,
-                    sha256=sha256_file(path),
+                    characters=source_characters,
+                    sha256=actual_digest,
                     authority_class=str(entry.get("authorityClass", group_authority)),
+                    authority_sections=authority_sections,
                     relevance=str(entry.get("scope", group_scope)),
                     freshness_policy=policy,
                     freshness_status=status,
                 )
+            )
+        if group_characters > max_characters:
+            raise ContextPolicyError(
+                f"context group {group_name} exceeds its {max_characters}-character budget"
             )
 
     ordered_entries = sorted(entries, key=lambda entry: entry.path)
@@ -360,6 +406,10 @@ def build_v3_context_manifest(
         source_digest=sha256_digest(payload),
         max_context_chars=max_context_chars,
     )
+    if sum(entry.characters for entry in entries) > max_context_chars:
+        raise ContextPolicyError(
+            f"required source context for {work_item.work_item_id} exceeds its size budget"
+        )
     if len(manifest.canonical_json_bytes()) > max_context_chars:
         raise ContextPolicyError(
             f"required context for {work_item.work_item_id} exceeds its size budget"

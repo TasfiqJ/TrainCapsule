@@ -23,8 +23,8 @@
       "title": "Productcipassed",
       "type": "boolean"
     },
-    "humanGatePassed": {
-      "title": "Humangatepassed",
+    "machinePolicyGatePassed": {
+      "title": "Machinepolicygatepassed",
       "type": "boolean"
     },
     "externalGatePassed": {
@@ -38,7 +38,7 @@
     "manifestDigest",
     "factoryCiPassed",
     "productCiPassed",
-    "humanGatePassed",
+    "machinePolicyGatePassed",
     "externalGatePassed"
   ],
   "title": "ReleaseCandidate",

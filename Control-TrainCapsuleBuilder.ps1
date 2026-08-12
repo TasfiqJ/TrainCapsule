@@ -2,7 +2,9 @@
 param(
     [ValidateSet(
         "Status", "Overview", "Start", "Pause", "Resume", "Recover", "Stop",
-        "ScheduleDryRun", "MilestoneStatus", "Verify", "Logs", "Queue", "GitHub"
+        "ScheduleDryRun", "MilestoneStatus", "Verify", "Logs", "Queue", "GitHub",
+        "Lanes", "Milestones", "Commercial", "Competitors", "Pilot", "Approvals",
+        "KillGates", "Doctor", "Migration", "CandidateSalvage"
     )]
     [string]$Action = "Status",
     [string]$RepoPath = $env:TCF_REPO_PATH,
@@ -71,6 +73,16 @@ $ControlAction = switch ($Action) {
     "Logs" { "logs" }
     "Queue" { "queue" }
     "GitHub" { "github" }
+    "Lanes" { "lanes" }
+    "Milestones" { "milestones" }
+    "Commercial" { "commercial" }
+    "Competitors" { "competitors" }
+    "Pilot" { "pilot" }
+    "Approvals" { "approvals" }
+    "KillGates" { "kill-gates" }
+    "Doctor" { "doctor" }
+    "Migration" { "migration" }
+    "CandidateSalvage" { "candidate-salvage" }
 }
 
 # The runtime script owns environment loading and redaction. OAuth values are never requested,

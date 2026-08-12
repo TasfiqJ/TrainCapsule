@@ -14,20 +14,29 @@ The previous bundle at `docs/source-of-truth/final-2026-08-09/` is immutable his
 
 Apply these sources in order, highest first:
 
-1. A verified human approval for its exact scope, candidate SHA, artifact digests, conditions, and validity period.
-2. `00_EXECUTIVE_BUILD_DECISION_V3.md`.
-3. `03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md`.
-4. `04_TECHNICAL_ARCHITECTURE_V3.md`.
-5. `05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md`.
-6. `06_COMMERCIAL_MODEL_AND_GTM_V3.md`.
-7. `12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md`.
-8. `FACTORY_LOOP_REDESIGN_SPEC.md`.
-9. `14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md`.
-10. Accepted ADRs, released pack specifications, security policies, and bounded work-item packets.
+1. Explicit repository-owner directives recorded in `config/owner_directives.yaml` and their
+   explanatory ADR `docs/migrations/V3_OWNER_DIRECTIVES.md`, limited to unattended operation and
+   main-only publication. The machine record must validate exactly; these directives do not create
+   customer, GPU, market, payment, or commercial evidence.
+2. A verified external receipt for its exact evidence scope, subject/candidate identity, artifact
+   digests, issuer, conditions, and validity period.
+3. `00_EXECUTIVE_BUILD_DECISION_V3.md`.
+4. `03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md`.
+5. `04_TECHNICAL_ARCHITECTURE_V3.md`.
+6. `05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md`.
+7. `06_COMMERCIAL_MODEL_AND_GTM_V3.md`.
+8. `12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md`.
+9. `FACTORY_LOOP_REDESIGN_SPEC.md`.
+10. `14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md`.
+11. Other accepted ADRs, released pack specifications, security policies, and bounded work-item
+    packets.
 
 Paths in items 2–9 are relative to the active V3 bundle.
 
-Human approval is authoritative only when it passes the configured trusted-root verifier. A repository file created by an AI role is not human approval.
+The owner directives explicitly override the bundle's qualified-human source/release approval and
+PR-first release clauses. They replace those operational dependencies with deterministic
+machine-policy evidence and main-only promotion/recovery. This is a disclosed deviation, not a
+claim that the immutable supplied bundle says something different.
 
 ## Current factual authority
 
@@ -54,11 +63,12 @@ When active normative sources conflict, or when a required current fact is stale
 
 1. stop only the affected work item;
 2. preserve the conflict and evidence;
-3. record `STALE`, `WAITING_HUMAN`, `BLOCKED_POLICY`, or another truthful scoped state;
-4. create an ADR or wedge-review request when policy must change;
+3. record `STALE`, `WAITING_EXTERNAL`, `BLOCKED_POLICY`, or another truthful scoped state;
+4. create a machine-verifiable ADR or policy-decision request when policy must change;
 5. continue independent work in unaffected lanes.
 
-Source monitors and engineering agents may propose changes. They may not rewrite normative policy, human approvals, external receipts, or commercial maturity.
+Source monitors and engineering agents may propose changes. They may not rewrite owner directives,
+external receipts, external facts, or commercial maturity.
 
 ## Product and commercial truth
 

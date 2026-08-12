@@ -1,0 +1,52 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "authority": {
+      "const": "repository_owner",
+      "title": "Authority",
+      "type": "string"
+    },
+    "recordedAt": {
+      "format": "date-time",
+      "title": "Recordedat",
+      "type": "string"
+    },
+    "directives": {
+      "additionalProperties": true,
+      "title": "Directives",
+      "type": "object"
+    },
+    "safetyContract": {
+      "additionalProperties": true,
+      "title": "Safetycontract",
+      "type": "object"
+    },
+    "deviationsFromBundle": {
+      "items": {
+        "additionalProperties": {
+          "type": "string"
+        },
+        "type": "object"
+      },
+      "title": "Deviationsfrombundle",
+      "type": "array"
+    }
+  },
+  "required": [
+    "version",
+    "authority",
+    "recordedAt",
+    "directives",
+    "safetyContract",
+    "deviationsFromBundle"
+  ],
+  "title": "OwnerDirectives",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/owner-directives.schema.json"
+}

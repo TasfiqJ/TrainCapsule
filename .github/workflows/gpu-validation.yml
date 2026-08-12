@@ -1,0 +1,23 @@
+name: TrainCapsule / GPU validation
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: gpu-validation-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  gpu-validation-policy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Preserve truthful hardware boundary
+        run: |
+          test "${{ github.event_name }}" = workflow_dispatch
+          test -f config/owner_directives.yaml
+          echo "This protected manual entrypoint does not claim GPU execution without a configured GPU runner and attributable hardware receipts."

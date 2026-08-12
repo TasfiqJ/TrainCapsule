@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
 
@@ -8,11 +8,9 @@ import pytest
 from pydantic import ValidationError
 
 from scripts.generate_v3_schemas import SCHEMAS, rendered_schemas
-from tcfactory.v3.approvals import HumanApprovalRecord
 from tcfactory.v3.base import sha256_digest
 from tcfactory.v3.candidate_manifest import CandidateManifest
 from tcfactory.v3.enums import (
-    ApprovalScope,
     CommercialMaturity,
     Disposition,
     EngineeringMaturity,
@@ -60,7 +58,6 @@ def _work_item(**updates: Any) -> WorkItem:
         "packetPath": "specs/v3/V3-PROD-001.yaml",
         "evidenceRequired": ["controlled fixture"],
         "externalReceiptRequired": False,
-        "humanApprovalRequired": False,
         "retryPolicy": {
             "maxPlanAttempts": 2,
             "maxCandidateRepairCycles": 3,
@@ -106,35 +103,6 @@ def _receipt(
     )
 
 
-def _approval() -> HumanApprovalRecord:
-    return HumanApprovalRecord.model_validate(
-        {
-            "schemaVersion": 1,
-            "approvalId": "HAPR-SOURCE-1",
-            "scope": "SOURCE_OF_TRUTH_MIGRATION",
-            "candidateCommit": "a" * 40,
-            "artifactDigests": {"manifest": "sha256:" + "b" * 64},
-            "reviewer": {
-                "id": "reviewer-1",
-                "displayName": "Qualified Reviewer",
-                "organization": "Independent",
-            },
-            "reviewerQualification": ["source governance"],
-            "decision": "APPROVED",
-            "conditions": [],
-            "limitations": ["source migration only"],
-            "issuedAt": NOW,
-            "expiresAt": NOW + timedelta(days=1),
-            "signature": {
-                "algorithm": "external-trusted-root",
-                "keyId": "review-key-1",
-                "value": "signed-value",
-            },
-            "syntheticTestOnly": False,
-        }
-    )
-
-
 def test_exact_v3_controlled_vocabularies() -> None:
     assert [item.value for item in Lane] == [
         "PRODUCT",
@@ -160,13 +128,10 @@ def test_work_item_rejects_unknown_fields_and_unbounded_ownership() -> None:
             automatable=False,
             externalReceiptRequired=True,
         )
-    with pytest.raises(ValidationError, match="not automatable"):
-        _work_item(
-            kind="HUMAN_REVIEW",
-            ownerType="HUMAN_REVIEWER",
-            automatable=True,
-            humanApprovalRequired=True,
-        )
+    with pytest.raises(ValidationError, match="extra_forbidden"):
+        _work_item(humanApprovalRequired=True)
+    with pytest.raises(ValidationError, match="HUMAN_REVIEWER"):
+        _work_item(ownerType="HUMAN_REVIEWER")
     with pytest.raises(ValidationError, match="commercial experiment"):
         _work_item(kind="COMMERCIAL_EXPERIMENT")
 
@@ -277,36 +242,6 @@ def test_commercially_supported_requires_second_paid_action() -> None:
         )
 
 
-def test_human_approval_is_exact_fresh_signed_and_external() -> None:
-    approval = _approval()
-    approval.require_valid(
-        scope=ApprovalScope.SOURCE_OF_TRUTH_MIGRATION,
-        candidate_commit="a" * 40,
-        artifact_digests={"manifest": "sha256:" + "b" * 64},
-        signature_valid=True,
-        source_agent_writable=False,
-        now=NOW,
-    )
-    with pytest.raises(ValueError, match="expired"):
-        approval.require_valid(
-            scope=ApprovalScope.SOURCE_OF_TRUTH_MIGRATION,
-            candidate_commit="a" * 40,
-            artifact_digests={"manifest": "sha256:" + "b" * 64},
-            signature_valid=True,
-            source_agent_writable=False,
-            now=NOW + timedelta(days=2),
-        )
-    with pytest.raises(ValueError, match="artifact digests"):
-        approval.require_valid(
-            scope=ApprovalScope.SOURCE_OF_TRUTH_MIGRATION,
-            candidate_commit="a" * 40,
-            artifact_digests={"manifest": "sha256:" + "c" * 64},
-            signature_valid=True,
-            source_agent_writable=False,
-            now=NOW,
-        )
-
-
 def test_candidate_manifest_rejects_artifact_substitution() -> None:
     artifacts = {
         "packet": b"packet",
@@ -315,7 +250,6 @@ def test_candidate_manifest_rejects_artifact_substitution() -> None:
         "stage:builder:report": b"stage report",
         "gate:unit": b"gate output",
         "finding:F-1": b"finding",
-        "approval:HAPR-SOURCE-1": b"approval",
         "external:XREC-PAID-PILOT-1": b"receipt",
     }
     manifest = CandidateManifest.model_validate(
@@ -354,13 +288,6 @@ def test_candidate_manifest_rejects_artifact_substitution() -> None:
                     "artifactDigest": sha256_digest(artifacts["finding:F-1"]),
                 }
             ],
-            "approvals": [
-                {
-                    "approvalId": "HAPR-SOURCE-1",
-                    "scope": "SOURCE_OF_TRUTH_MIGRATION",
-                    "recordDigest": sha256_digest(artifacts["approval:HAPR-SOURCE-1"]),
-                }
-            ],
             "externalEvidence": [
                 {
                     "receiptId": "XREC-PAID-PILOT-1",
@@ -396,7 +323,6 @@ def test_milestone_rejects_global_all_product_completion() -> None:
                         "exitCriteria": ["All product tasks are complete"],
                         "requiredEvidence": ["controlled fixture"],
                         "forbiddenClaims": ["commercially validated"],
-                        "humanApprovalRequired": False,
                     }
                 ],
             }

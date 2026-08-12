@@ -1,11 +1,8 @@
 """Public V3 factory domain model surface."""
 
-from tcfactory.v3.approvals import HumanApprovalRecord
 from tcfactory.v3.candidate_manifest import CandidateManifest
 from tcfactory.v3.dispositions import DispositionLedger, DispositionRecord
 from tcfactory.v3.enums import (
-    ApprovalDecision,
-    ApprovalScope,
     CommercialMaturity,
     Disposition,
     EngineeringMaturity,
@@ -14,6 +11,7 @@ from tcfactory.v3.enums import (
     MilestoneStatus,
     MilestoneType,
     OwnerType,
+    PolicyScope,
     ReleaseDecision,
     RiskTier,
     WorkKind,
@@ -35,8 +33,6 @@ from tcfactory.v3.work_items import (
 )
 
 __all__ = [
-    "ApprovalDecision",
-    "ApprovalScope",
     "CandidateManifest",
     "CommercialMaturity",
     "Disposition",
@@ -45,7 +41,6 @@ __all__ = [
     "EngineeringMaturity",
     "EvidenceType",
     "ExternalEvidenceReceipt",
-    "HumanApprovalRecord",
     "Lane",
     "LegacyMigrationMap",
     "MaturityState",
@@ -55,6 +50,7 @@ __all__ = [
     "MilestoneStatus",
     "MilestoneType",
     "OwnerType",
+    "PolicyScope",
     "ReleaseDecision",
     "RetryPolicy",
     "RiskTier",

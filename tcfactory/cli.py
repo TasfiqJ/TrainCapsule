@@ -48,16 +48,17 @@ from .pipeline import run_pipeline
 from .queue import enqueue_task, promote_due_paused, reconcile_running, worker_loop
 from .runtime_status import build_runtime_status
 from .usage import usage_health
-from .util import atomic_write_text, read_json, resolve_within, write_json
-from .v3.approvals import HumanApprovalRecord
+from .util import atomic_write_text, read_json, write_json
 from .v3.configuration import (
     explain_v3_config_field,
     load_factory_v3,
     validate_v3_configuration,
 )
+from .v3.doctor import collect_doctor_report
 from .v3.enums import Lane
 from .v3.external_evidence import TrustedEvidenceRecord
 from .v3.milestones import MilestoneRoadmap
+from .v3.pilot import create_pilot_metadata, list_pilot_metadata, load_pilot_metadata
 from .v3.work_items import WorkItemCollection
 from .value_policy import contract_for_task, load_value_policy
 from .yamlutil import load_yaml
@@ -65,7 +66,7 @@ from .yamlutil import load_yaml
 app = typer.Typer(no_args_is_help=True, help="TrainCapsule bounded multi-agent AI factory")
 config_app = typer.Typer(no_args_is_help=True, help="Validate and explain V3 configuration")
 work_app = typer.Typer(no_args_is_help=True, help="Explain V3 work items")
-approvals_app = typer.Typer(no_args_is_help=True, help="Inspect external human approvals")
+approvals_app = typer.Typer(no_args_is_help=True, help="Inspect disabled human-approval surface")
 evidence_app = typer.Typer(no_args_is_help=True, help="Validate external evidence receipts")
 competitors_app = typer.Typer(no_args_is_help=True, help="Inspect competitor lane state")
 pilot_app = typer.Typer(no_args_is_help=True, help="Manage local pilot metadata")
@@ -94,14 +95,23 @@ def _v3_milestones(repo_root: Path) -> MilestoneRoadmap:
     return MilestoneRoadmap.model_validate(load_yaml(repo_root / "factory/roadmap/milestones.yaml"))
 
 
+def _reject_legacy_v2_surface(repo_root: Path, config_path: Path, command: str) -> None:
+    """Prevent callable V2 queue/ledger commands from mutating a V3 repository."""
+
+    raw = load_yaml(repo_root / config_path)
+    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+        raise typer.BadParameter(
+            f"{command} is a disabled V2 compatibility surface; use the V3 controller, "
+            "typed roadmap, or V3 status commands"
+        )
+
+
 @app.command("migrate")
 def migrate(
     repo: Annotated[Path, typer.Option("--repo")] = Path("."),
     dry_run: Annotated[bool, typer.Option("--dry-run")] = False,
     apply: Annotated[bool, typer.Option("--apply")] = False,
-    acknowledge_local_write: Annotated[
-        bool, typer.Option("--acknowledge-local-write")
-    ] = False,
+    acknowledge_local_write: Annotated[bool, typer.Option("--acknowledge-local-write")] = False,
 ) -> None:
     """Inspect or explicitly install the deterministic, non-resuming V2 migration."""
 
@@ -172,9 +182,7 @@ def migrate_roadmap(
     from_v2: Annotated[bool, typer.Option("--from-v2")] = False,
     dry_run: Annotated[bool, typer.Option("--dry-run")] = False,
     apply: Annotated[bool, typer.Option("--apply")] = False,
-    acknowledge_local_write: Annotated[
-        bool, typer.Option("--acknowledge-local-write")
-    ] = False,
+    acknowledge_local_write: Annotated[bool, typer.Option("--acknowledge-local-write")] = False,
 ) -> None:
     """Migrate the historical V2 roadmap through the explicit V3 mapping."""
 
@@ -253,27 +261,25 @@ def work_explain(
 
 
 def _approval_root() -> Path:
-    raw = os.getenv("TCF_HUMAN_APPROVAL_ROOT")
-    if not raw:
-        raise typer.BadParameter("TCF_HUMAN_APPROVAL_ROOT is not configured")
-    root = Path(raw).expanduser().resolve()
-    if not root.is_dir():
-        raise typer.BadParameter("trusted human-approval root does not exist")
-    return root
+    raise typer.BadParameter(
+        "human approval is disabled; inspect machine policy receipts under factory state"
+    )
 
 
 @approvals_app.command("list")
 def approvals_list() -> None:
-    root = _approval_root()
-    console.print_json(data={"approvals": sorted(path.name for path in root.glob("*.json"))})
+    console.print_json(
+        data={
+            "interventionMode": "NONE",
+            "authority": "OWNER_DIRECTED_MACHINE_POLICY_RECEIPT",
+        }
+    )
 
 
 @approvals_app.command("show")
 def approvals_show(approval_id: Annotated[str, typer.Argument()]) -> None:
-    root = _approval_root()
-    path = resolve_within(root, f"{approval_id}.json", require_exists=True)
-    record = HumanApprovalRecord.model_validate_json(path.read_text(encoding="utf-8"))
-    console.print_json(data=record.model_dump(mode="json", by_alias=True))
+    del approval_id
+    _approval_root()
 
 
 @approvals_app.command("record")
@@ -283,17 +289,8 @@ def approvals_record(
         bool, typer.Option("--acknowledge-external-write")
     ] = False,
 ) -> None:
-    if not acknowledge_external_write:
-        raise typer.BadParameter("recording requires --acknowledge-external-write")
-    record = HumanApprovalRecord.model_validate_json(
-        signed_record.read_text(encoding="utf-8")
-    )
-    root = _approval_root()
-    target = resolve_within(root, f"{record.approval_id}.json")
-    if target.exists():
-        raise typer.BadParameter("approval ID already exists")
-    atomic_write_text(target, record.model_dump_json(by_alias=True, indent=2) + "\n")
-    console.print_json(data={"recorded": record.approval_id, "trustedRoot": str(root)})
+    del signed_record, acknowledge_external_write
+    _approval_root()
 
 
 @evidence_app.command("validate")
@@ -313,8 +310,16 @@ def competitors_status(repo: Annotated[Path, typer.Option("--repo")] = Path(".")
     console.print_json(data={"lane": Lane.COMPETITOR.value, "workItems": items})
 
 
-def _pilot_path(repo_root: Path) -> Path:
-    return repo_root / "factory/state/pilot.json"
+@app.command("commercial-state")
+def commercial_state(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
+    items = [
+        item.model_dump(mode="json", by_alias=True)
+        for item in _v3_roadmap(_resolve_repo(repo)).work_items
+        if item.lane in {Lane.MARKET, Lane.COMPETITOR}
+    ]
+    console.print_json(
+        data={"truthBoundary": "UNKNOWN_UNLESS_TRUSTED_EXTERNAL_RECEIPT", "workItems": items}
+    )
 
 
 @pilot_app.command("init")
@@ -322,52 +327,99 @@ def pilot_init(
     pilot_id: Annotated[str, typer.Argument()],
     repo: Annotated[Path, typer.Option("--repo")] = Path("."),
 ) -> None:
-    path = _pilot_path(_resolve_repo(repo))
-    if path.exists():
-        raise typer.BadParameter("pilot metadata already exists")
-    write_json(path, {"version": 3, "pilotId": pilot_id, "status": "LOCAL_DRAFT"})
-    console.print_json(data={"initialized": pilot_id, "path": str(path)})
+    try:
+        path = create_pilot_metadata(_resolve_repo(repo), pilot_id)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    console.print_json(
+        data={
+            "initialized": pilot_id,
+            "path": str(path),
+            "immutable": True,
+            "evidenceAuthority": "NONE",
+            "commercialMaturity": "UNKNOWN",
+        }
+    )
 
 
 @pilot_app.command("validate")
-def pilot_validate(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
-    payload = read_json(_pilot_path(_resolve_repo(repo)), None)
-    typed_payload = cast(dict[str, object], payload) if isinstance(payload, dict) else {}
-    valid = typed_payload.get("version") == 3 and bool(typed_payload.get("pilotId"))
-    if not valid:
-        raise typer.BadParameter("pilot metadata is missing or invalid")
-    console.print_json(data={"valid": True, "pilot": payload})
+def pilot_validate(
+    pilot_id: Annotated[str, typer.Argument()],
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+) -> None:
+    try:
+        path, record = load_pilot_metadata(_resolve_repo(repo), pilot_id)
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    console.print_json(
+        data={
+            "valid": True,
+            "path": str(path),
+            "pilot": record.model_dump(mode="json", by_alias=True),
+        }
+    )
 
 
 @pilot_app.command("status")
 def pilot_status(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
-    console.print_json(data={"pilot": read_json(_pilot_path(_resolve_repo(repo)), None)})
+    try:
+        records = list_pilot_metadata(_resolve_repo(repo))
+    except ValueError as exc:
+        raise typer.BadParameter(str(exc)) from exc
+    console.print_json(
+        data={
+            "pilots": [
+                {
+                    "path": str(path),
+                    **record.model_dump(mode="json", by_alias=True),
+                }
+                for path, record in records
+            ],
+            "evidenceAuthority": "NONE",
+        }
+    )
 
 
 @app.command("kill-gates")
 def kill_gates(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
     root = _resolve_repo(repo)
     factory = load_factory_v3(root / "config/factory.yaml")
-    controls = {
-        name: (root / "factory/state" / name).exists() for name in ("STOP", "PAUSE")
-    }
+    controls = {name: (root / "factory/state" / name).exists() for name in ("STOP", "PAUSE")}
     controls["HARD_STUCK"] = (root / factory.runtime.hard_stuck_file).exists()
     console.print_json(data={"controls": controls, "mutation": False})
 
 
 @product_app.command("doctor")
 def product_doctor(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
-    root = _resolve_repo(repo)
-    expected = [
-        "packages/traincapsule-core",
-        "packages/traincapsule-ingest-pytorch",
-        "packages/traincapsule-qualify",
-        "packages/traincapsule-cli",
-    ]
-    missing = [path for path in expected if not (root / path).exists()]
-    console.print_json(data={"healthy": not missing, "missing": missing, "networkUsed": False})
-    if missing:
+    report = collect_doctor_report(_resolve_repo(repo))
+    console.print_json(data=report.model_dump(mode="json", by_alias=True))
+    if not report.healthy:
         raise typer.Exit(code=1)
+
+
+@app.command("candidate-salvage")
+def candidate_salvage(
+    work_item_id: Annotated[str, typer.Argument()],
+    destination: Annotated[Path, typer.Argument()],
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+) -> None:
+    from .backends.fake import FakeBackend
+    from .v3.controller import V3Controller
+
+    class _DisabledPublisher:
+        def prepare_candidate(self, **_: object) -> dict[str, Path]:
+            raise RuntimeError("publisher is disabled for read-only salvage")
+
+        def publish(self, **_: object) -> dict[str, object]:
+            raise RuntimeError("publisher is disabled for read-only salvage")
+
+    controller = V3Controller(
+        repo_root=_resolve_repo(repo),
+        backend=FakeBackend(),
+        publisher=_DisabledPublisher(),
+    )
+    result = controller.salvage_candidate(work_item_id, destination)
+    console.print_json(data={"salvaged": str(result), "mutation": "local artifact only"})
 
 
 @app.command("validate-task")
@@ -392,6 +444,7 @@ def run(
     ] = None,
 ) -> None:
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "run")
     config = load_factory_config(repo_root / config_path)
     task_file = task_path if task_path.is_absolute() else repo_root / task_path
     task = load_task(task_file)
@@ -415,6 +468,7 @@ def plan(
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
 ) -> None:
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "plan")
     config = load_factory_config(repo_root / config_path)
     task_file = task_path if task_path.is_absolute() else repo_root / task_path
     task = load_task(task_file)
@@ -570,6 +624,7 @@ def enqueue(
     replace: Annotated[bool, typer.Option("--replace")] = False,
 ) -> None:
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "enqueue")
     config = load_factory_config(repo_root / config_path)
     source = task_path if task_path.is_absolute() else repo_root / task_path
     destination = enqueue_task(repo_root=repo_root, config=config, source=source, replace=replace)
@@ -584,6 +639,7 @@ def worker(
     poll_seconds: Annotated[int | None, typer.Option("--poll-seconds")] = None,
 ) -> None:
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "worker")
     config = load_factory_config(repo_root / config_path)
     asyncio.run(
         worker_loop(repo_root=repo_root, config=config, once=once, poll_seconds=poll_seconds)
@@ -596,6 +652,16 @@ def queue_status(
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
 ) -> None:
     repo_root = _resolve_repo(repo)
+    raw = load_yaml(repo_root / config_path)
+    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+        from .v3.queue import V3Queue
+
+        queue = V3Queue(repo_root / "factory/queue/v3")
+        counts: dict[str, int] = {}
+        for item in queue.items():
+            counts[item.status.value] = counts.get(item.status.value, 0) + 1
+        console.print_json(data={"version": 3, "queue": counts, "mutation": False})
+        return
     config = load_factory_config(repo_root / config_path)
     queue_root = config.resolve(repo_root, config.queue_dir)
     table = Table(title="TrainCapsule AI Factory queue")
@@ -621,6 +687,7 @@ def costs(
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
 ) -> None:
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "costs")
     config = load_factory_config(repo_root / config_path)
     ledger = Ledger(config.resolve(repo_root, config.ledger_path), config.monthly_budget_usd)
     data = read_json(config.resolve(repo_root, config.ledger_path), {"runs": []})
@@ -657,6 +724,7 @@ def usage_health_command(
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
 ) -> None:
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "usage-health")
     config = load_factory_config(repo_root / config_path)
     summary = usage_health(config.resolve(repo_root, config.ledger_path))
     console.print_json(data=summary)
@@ -673,6 +741,7 @@ def github_status(
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
 ) -> None:
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "github-status")
     factory = load_factory_config(repo_root / config_path)
     config = load_github_config(factory.resolve(repo_root, factory.github_config_path))
     state = load_github_state(factory.resolve(repo_root, factory.github_state_path))
@@ -688,6 +757,7 @@ def github_sync_command(
     force: Annotated[bool, typer.Option("--force")] = False,
 ) -> None:
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "github-sync")
     factory = load_factory_config(repo_root / config_path)
     result = sync_github(
         repo_root=repo_root,
@@ -736,12 +806,8 @@ def v3_schedule(
         scheduler,
         cycle_id=f"dry-run-{decided_at.strftime('%Y%m%dT%H%M%SZ')}",
         decided_at=decided_at,
-        max_concurrent_mutating_sessions=(
-            factory.execution.max_concurrent_mutating_sessions
-        ),
-        max_concurrent_read_only_sessions=(
-            factory.execution.max_concurrent_read_only_sessions
-        ),
+        max_concurrent_mutating_sessions=(factory.execution.max_concurrent_mutating_sessions),
+        max_concurrent_read_only_sessions=(factory.execution.max_concurrent_read_only_sessions),
     )
     if explain:
         console.print_json(
@@ -759,8 +825,7 @@ def v3_schedule(
                         "reasons": item.reasons,
                     }
                     for item in artifact.evaluations
-                    if work_items.item(item.work_item_id).milestone
-                    == scheduler.active_milestone
+                    if work_items.item(item.work_item_id).milestone == scheduler.active_milestone
                 ],
             }
         )
@@ -785,15 +850,54 @@ def autopilot_command(
     autonomy_path: Annotated[Path | None, typer.Option("--autonomy-config")] = None,
     once: Annotated[bool, typer.Option("--once")] = False,
 ) -> None:
-    """Run the quota-aware autonomous planner, queue, reviewer, and release loop."""
-    asyncio.run(
-        run_autopilot(
-            repo_root=_resolve_repo(repo),
-            factory_config_path=config_path,
-            autonomy_config_path=autonomy_path,
-            once=once,
-        )
+    """Compatibility spelling for the V3-only unattended controller."""
+    del config_path, autonomy_path
+    v3_controller(repo=repo, once=once)
+
+
+@app.command("v3-controller")
+def v3_controller(
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+    once: Annotated[bool, typer.Option("--once")] = False,
+) -> None:
+    """Run the V3 work-item scheduler and exact-SHA main-only release controller."""
+
+    from .backends.claude import ClaudeBackend
+    from .github_sync import MainOnlyPublisher
+    from .v3.controller import V3Controller
+
+    root = _resolve_repo(repo)
+    validate_v3_configuration(root)
+    github = load_github_config(root / "config/github.yaml")
+    runtime_root_value = os.getenv("TCF_RUNTIME_ROOT")
+    runtime_root = (
+        Path(runtime_root_value).expanduser().resolve()
+        if runtime_root_value
+        else (root / "factory/state").resolve()
     )
+    publisher = MainOnlyPublisher(
+        repo_root=root,
+        config=github,
+        receipt_root=runtime_root / "machine-policy-receipts",
+        quarantine_root=runtime_root / "quarantine",
+    )
+    controller = V3Controller(
+        repo_root=root,
+        backend=ClaudeBackend(),
+        publisher=publisher,
+    )
+
+    async def execute() -> None:
+        while True:
+            result = await controller.run_cycle()
+            console.print_json(data=result)
+            if once:
+                return
+            if (runtime_root / "STOP").exists() or (runtime_root / "PAUSE").exists():
+                return
+            await asyncio.sleep(30 if result.get("status") == "IDLE" else 2)
+
+    asyncio.run(execute())
 
 
 @app.command("autonomy-enable")
@@ -807,6 +911,7 @@ def autonomy_enable(
         console.print("[red]Refused.[/red] Re-run with --acknowledge after calibration passes.")
         raise typer.Exit(2)
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "autonomy-enable")
     factory = load_factory_config(repo_root / config_path)
     try:
         assert_max_oauth_only(
@@ -1035,6 +1140,7 @@ def mark_calibrated(
         )
         raise typer.Exit(2)
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "mark-calibrated")
     factory = load_factory_config(repo_root / config_path)
     try:
         evidence = validate_calibration_evidence(repo_root)
@@ -1060,6 +1166,7 @@ def autonomy_status(
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
 ) -> None:
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "autonomy-status")
     factory = load_factory_config(repo_root / config_path)
     autonomy = load_autonomy_config(factory.resolve(repo_root, factory.autonomy_config_path))
     state = load_state(repo_root, factory)
@@ -1102,7 +1209,6 @@ def autonomy_resume(
     hard_stuck_path = repo_root / autonomy.hard_stuck_path
     roadmap = _v3_roadmap(repo_root)
     protected_states = {
-        "WAITING_HUMAN",
         "REJECTED_VALUE",
         "NATIVE_SUFFICIENT",
         "CANCELLED",
@@ -1115,7 +1221,7 @@ def autonomy_resume(
     if stop_path.exists() or hard_stuck_path.exists() or blockers:
         console.print(
             "[red]Refused.[/red] Generic resume cannot clear STOP/HARD_STUCK or protected "
-            f"work dispositions; blockers={blockers}. Use an explicit signed override/recovery."
+            f"work dispositions; blockers={blockers}. Use deterministic machine-policy recovery."
         )
         raise typer.Exit(2)
     _control_file(repo_root, factory, "pause").unlink(missing_ok=True)
@@ -1153,6 +1259,7 @@ def completion_audit(
 ) -> None:
     """Run the independent product-completion audit or expand the roadmap."""
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "completion-audit")
     factory = load_factory_config(repo_root / config_path)
     autonomy = load_autonomy_config(factory.resolve(repo_root, factory.autonomy_config_path))
     ledger = load_feature_ledger(factory.resolve(repo_root, factory.feature_ledger_path))
@@ -1164,9 +1271,7 @@ def completion_audit(
             audits_required=autonomy.completion_audits_required,
         )
     )
-    console.print_json(
-        data={"outcome": outcome, "evidence": evidence, "audited_sha": audited_sha}
-    )
+    console.print_json(data={"outcome": outcome, "evidence": evidence, "audited_sha": audited_sha})
 
 
 @app.command("autonomy-disable")
@@ -1176,6 +1281,7 @@ def autonomy_disable(
 ) -> None:
     """Disable future automatic work and request the current autopilot to stop cleanly."""
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "autonomy-disable")
     factory = load_factory_config(repo_root / config_path)
     path = factory.resolve(repo_root, factory.autonomy_config_path)
     payload = load_yaml(path)
@@ -1196,6 +1302,7 @@ def queue_reconcile(
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
 ) -> None:
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "queue-reconcile")
     factory = load_factory_config(repo_root / config_path)
     recovered = reconcile_running(repo_root, factory)
     due = promote_due_paused(repo_root, factory)
@@ -1343,6 +1450,31 @@ def roadmap(
 ) -> None:
     """Show roadmap counts and the next dependency-ready task."""
     repo_root = _resolve_repo(repo)
+    raw = load_yaml(repo_root / config_path)
+    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+        collection = _v3_roadmap(repo_root)
+        counts: dict[str, int] = {}
+        for item in collection.work_items:
+            counts[item.status.value] = counts.get(item.status.value, 0) + 1
+        current = next(
+            (
+                item
+                for item in collection.work_items
+                if item.milestone == collection.active_milestone
+                and item.status.value not in {"COMPLETED", "CANCELLED", "DEFERRED"}
+            ),
+            None,
+        )
+        console.print_json(
+            data={
+                "version": 3,
+                "activeMilestone": collection.active_milestone,
+                "counts": counts,
+                "next": None if current is None else current.model_dump(mode="json", by_alias=True),
+                "mutation": False,
+            }
+        )
+        return
     factory = load_factory_config(repo_root / config_path)
     ledger = load_feature_ledger(factory.resolve(repo_root, factory.feature_ledger_path))
     ledger.refresh_readiness()
@@ -1403,6 +1535,7 @@ def peer_status_command(
 ) -> None:
     """Show cross-session peers and bounded message counts."""
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "peer-status")
     factory = load_factory_config(repo_root / config_path)
     console.print_json(
         data=read_peer_status(factory.resolve(repo_root, factory.peer_message_dir), task_id)
@@ -1428,6 +1561,10 @@ def explain_blocker(
 ) -> None:
     """Explain the latest durable blocker using controller state and artifacts only."""
     repo_root = _resolve_repo(repo)
+    raw = load_yaml(repo_root / config_path)
+    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+        console.print_json(data=build_runtime_status(repo_root))
+        return
     factory = load_factory_config(repo_root / config_path)
     state = load_state(repo_root, factory)
     failed = sorted((factory.resolve(repo_root, factory.queue_dir) / "failed").glob("*.yaml"))
@@ -1450,6 +1587,7 @@ def recover(
 ) -> None:
     """Reconcile interrupted queue state and promote quota pauses whose reset has passed."""
     repo_root = _resolve_repo(repo)
+    _reject_legacy_v2_surface(repo_root, config_path, "recover")
     factory = load_factory_config(repo_root / config_path)
     recovered = reconcile_running(repo_root, factory)
     resumed = promote_due_paused(repo_root, factory)

@@ -27,6 +27,14 @@
           "title": "Artifactrefs",
           "type": "array"
         },
+        "claimNames": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Claimnames",
+          "type": "array"
+        },
         "detail": {
           "minLength": 1,
           "title": "Detail",
@@ -37,18 +45,41 @@
           "title": "Kind",
           "type": "string"
         },
+        "role": {
+          "$ref": "#/$defs/EvidenceRole"
+        },
         "state": {
           "$ref": "#/$defs/CompletenessState"
+        },
+        "substitutableBy": {
+          "default": [],
+          "items": {
+            "type": "string"
+          },
+          "title": "Substitutableby",
+          "type": "array"
         }
       },
       "required": [
         "kind",
+        "role",
         "state",
         "artifactRefs",
         "detail"
       ],
       "title": "EvidenceRequirement",
       "type": "object"
+    },
+    "EvidenceRole": {
+      "enum": [
+        "MANDATORY_FOR_ELIGIBILITY",
+        "MANDATORY_FOR_CLAIM",
+        "OPTIONAL",
+        "SUBSTITUTABLE",
+        "IRRECOVERABLE_AFTER_INCIDENT"
+      ],
+      "title": "EvidenceRole",
+      "type": "string"
     },
     "TechnicalResult": {
       "enum": [

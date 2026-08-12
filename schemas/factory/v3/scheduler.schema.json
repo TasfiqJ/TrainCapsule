@@ -120,7 +120,6 @@
         "RUNNING",
         "PAUSED_QUOTA",
         "WAITING_EXTERNAL",
-        "WAITING_HUMAN",
         "BLOCKED_TECHNICAL",
         "BLOCKED_POLICY",
         "PASSED_ENGINEERING",

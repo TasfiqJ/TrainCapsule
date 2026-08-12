@@ -52,9 +52,12 @@ def test_workflow_test_scopes_are_explicit() -> None:
     assert "tests --ignore=tests/product" in (
         workflow_root / "factory-quality.yml"
     ).read_text(encoding="utf-8")
-    assert "pytest tests/product/unit" in (workflow_root / "product-unit.yml").read_text(
+    product_unit = (workflow_root / "product-unit.yml").read_text(encoding="utf-8")
+    product_contract = (workflow_root / "product-contract.yml").read_text(
         encoding="utf-8"
     )
-    assert "pytest tests/product/contract tests/product/journeys" in (
-        workflow_root / "product-contract.yml"
-    ).read_text(encoding="utf-8")
+    assert "generate_product_schemas.py --check" in product_unit
+    assert "tests/product/test_identity.py" in product_unit
+    assert "tests/product/test_evidence_store.py" in product_unit
+    assert "tests/product/test_flight_recorder_importer.py" in product_contract
+    assert "tests/product/test_cli.py" in product_contract

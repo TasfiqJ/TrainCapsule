@@ -29,7 +29,12 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p .ci-artifacts
-          uv run pytest tests/product/unit 2>&1 | tee .ci-artifacts/product-unit.log
+          uv run python scripts/generate_product_schemas.py --check
+          uv run pytest \
+            tests/product/test_identity.py \
+            tests/product/test_evidence_store.py \
+            tests/product/test_qualification.py \
+            2>&1 | tee .ci-artifacts/product-unit.log
       - name: Retain product unit evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

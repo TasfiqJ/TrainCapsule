@@ -1,0 +1,264 @@
+{
+  "$defs": {
+    "ControlKind": {
+      "enum": [
+        "POSITIVE",
+        "NEGATIVE",
+        "ERROR"
+      ],
+      "title": "ControlKind",
+      "type": "string"
+    },
+    "ResearchControl": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Artifactdigest",
+          "type": "string"
+        },
+        "expectedVerdict": {
+          "$ref": "#/$defs/ResearchVerdict"
+        },
+        "kind": {
+          "$ref": "#/$defs/ControlKind"
+        },
+        "observedVerdict": {
+          "$ref": "#/$defs/ResearchVerdict"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "kind",
+        "artifactDigest",
+        "expectedVerdict",
+        "observedVerdict"
+      ],
+      "title": "ResearchControl",
+      "type": "object"
+    },
+    "ResearchFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "claimId": {
+          "title": "Claimid",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "sourceArtifactDigests": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Sourceartifactdigests",
+          "type": "array"
+        },
+        "statement": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Statement",
+          "type": "string"
+        },
+        "verdict": {
+          "$ref": "#/$defs/ResearchVerdict"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "claimId",
+        "verdict",
+        "statement"
+      ],
+      "title": "ResearchFinding",
+      "type": "object"
+    },
+    "ResearchVerdict": {
+      "enum": [
+        "CLEAR",
+        "CONFLICT",
+        "UNKNOWN"
+      ],
+      "title": "ResearchVerdict",
+      "type": "string"
+    },
+    "SourceArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactPath": {
+          "pattern": "^[^/\\\\]+$",
+          "title": "Artifactpath",
+          "type": "string"
+        },
+        "claimIds": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Claimids",
+          "type": "array"
+        },
+        "contentDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contentdigest",
+          "type": "string"
+        },
+        "contentLength": {
+          "minimum": 0,
+          "title": "Contentlength",
+          "type": "integer"
+        },
+        "contentType": {
+          "title": "Contenttype",
+          "type": "string"
+        },
+        "finalUrl": {
+          "title": "Finalurl",
+          "type": "string"
+        },
+        "headersDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Headersdigest",
+          "type": "string"
+        },
+        "observedAt": {
+          "format": "date-time",
+          "title": "Observedat",
+          "type": "string"
+        },
+        "requestedUrl": {
+          "title": "Requestedurl",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "sourceClass": {
+          "$ref": "#/$defs/SourceClass"
+        },
+        "sourceId": {
+          "title": "Sourceid",
+          "type": "string"
+        },
+        "statusCode": {
+          "maximum": 599,
+          "minimum": 100,
+          "title": "Statuscode",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "sourceId",
+        "sourceClass",
+        "requestedUrl",
+        "finalUrl",
+        "observedAt",
+        "statusCode",
+        "contentType",
+        "contentLength",
+        "contentDigest",
+        "headersDigest",
+        "artifactPath",
+        "claimIds"
+      ],
+      "title": "SourceArtifact",
+      "type": "object"
+    },
+    "SourceClass": {
+      "enum": [
+        "OFFICIAL_REGISTRY",
+        "OFFICIAL_DOCUMENTATION",
+        "STANDARDS_BODY",
+        "COMPANY_PRIMARY",
+        "PUBLIC_REPOSITORY"
+      ],
+      "title": "SourceClass",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/research-report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifacts": {
+      "items": {
+        "$ref": "#/$defs/SourceArtifact"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Artifacts",
+      "type": "array"
+    },
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "controls": {
+      "items": {
+        "$ref": "#/$defs/ResearchControl"
+      },
+      "maxItems": 16,
+      "minItems": 3,
+      "title": "Controls",
+      "type": "array"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/ResearchFinding"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Findings",
+      "type": "array"
+    },
+    "overallVerdict": {
+      "$ref": "#/$defs/ResearchVerdict"
+    },
+    "planDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Plandigest",
+      "type": "string"
+    },
+    "reportId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Reportid",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "reportId",
+    "planDigest",
+    "workItemId",
+    "candidateSha",
+    "overallVerdict",
+    "artifacts",
+    "controls",
+    "findings"
+  ],
+  "title": "ResearchReport",
+  "type": "object"
+}

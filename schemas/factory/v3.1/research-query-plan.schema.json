@@ -1,0 +1,159 @@
+{
+  "$defs": {
+    "Lane": {
+      "enum": [
+        "PRODUCT",
+        "MARKET",
+        "COMPETITOR",
+        "TRUST",
+        "FACTORY"
+      ],
+      "title": "Lane",
+      "type": "string"
+    },
+    "ResearchClaim": {
+      "additionalProperties": false,
+      "properties": {
+        "claimId": {
+          "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+          "title": "Claimid",
+          "type": "string"
+        },
+        "question": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Question",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "claimId",
+        "question"
+      ],
+      "title": "ResearchClaim",
+      "type": "object"
+    },
+    "ResearchSource": {
+      "additionalProperties": false,
+      "properties": {
+        "claimIds": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Claimids",
+          "type": "array"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "sourceClass": {
+          "$ref": "#/$defs/SourceClass"
+        },
+        "sourceId": {
+          "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+          "title": "Sourceid",
+          "type": "string"
+        },
+        "url": {
+          "maxLength": 2048,
+          "minLength": 1,
+          "title": "Url",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "sourceId",
+        "url",
+        "sourceClass",
+        "claimIds"
+      ],
+      "title": "ResearchSource",
+      "type": "object"
+    },
+    "SourceClass": {
+      "enum": [
+        "OFFICIAL_REGISTRY",
+        "OFFICIAL_DOCUMENTATION",
+        "STANDARDS_BODY",
+        "COMPANY_PRIMARY",
+        "PUBLIC_REPOSITORY"
+      ],
+      "title": "SourceClass",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/research-query-plan.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "claims": {
+      "items": {
+        "$ref": "#/$defs/ResearchClaim"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Claims",
+      "type": "array"
+    },
+    "lane": {
+      "$ref": "#/$defs/Lane"
+    },
+    "planId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Planid",
+      "type": "string"
+    },
+    "policyId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Policyid",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "sources": {
+      "items": {
+        "$ref": "#/$defs/ResearchSource"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Sources",
+      "type": "array"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "planId",
+    "workItemId",
+    "lane",
+    "candidateSha",
+    "policyId",
+    "claims",
+    "sources"
+  ],
+  "title": "ResearchQueryPlan",
+  "type": "object"
+}

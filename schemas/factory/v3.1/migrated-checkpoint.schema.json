@@ -1,0 +1,197 @@
+{
+  "$defs": {
+    "CheckpointBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "maxTurns": {
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Maxturns",
+          "type": "integer"
+        },
+        "maxWallTimeSeconds": {
+          "maximum": 14400,
+          "minimum": 1,
+          "title": "Maxwalltimeseconds",
+          "type": "integer"
+        },
+        "planAttemptsRemaining": {
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Planattemptsremaining",
+          "type": "integer"
+        },
+        "repairCyclesRemaining": {
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Repaircyclesremaining",
+          "type": "integer"
+        },
+        "restartsRemaining": {
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Restartsremaining",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "maxTurns",
+        "maxWallTimeSeconds",
+        "planAttemptsRemaining",
+        "repairCyclesRemaining",
+        "restartsRemaining"
+      ],
+      "title": "CheckpointBudget",
+      "type": "object"
+    },
+    "Lane": {
+      "enum": [
+        "PRODUCT",
+        "MARKET",
+        "COMPETITOR",
+        "TRUST",
+        "FACTORY"
+      ],
+      "title": "Lane",
+      "type": "string"
+    },
+    "V3Checkpoint": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "approvalState": {
+          "title": "Approvalstate",
+          "type": "string"
+        },
+        "backendSessionRef": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Backendsessionref"
+        },
+        "budget": {
+          "$ref": "#/$defs/CheckpointBudget"
+        },
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "circuitBreakerReason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Circuitbreakerreason"
+        },
+        "contextDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contextdigest",
+          "type": "string"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "title": "Createdat",
+          "type": "string"
+        },
+        "findingFingerprints": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Findingfingerprints",
+          "type": "object"
+        },
+        "generation": {
+          "minimum": 1,
+          "title": "Generation",
+          "type": "integer"
+        },
+        "lane": {
+          "$ref": "#/$defs/Lane"
+        },
+        "milestone": {
+          "pattern": "^M[0-9]+_[A-Z0-9_]+$",
+          "title": "Milestone",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "default": 3,
+          "maximum": 3,
+          "minimum": 3,
+          "title": "Schemaversion",
+          "type": "integer"
+        },
+        "sourceDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sourcedigest",
+          "type": "string"
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "title": "Updatedat",
+          "type": "string"
+        },
+        "workItemId": {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "title": "Workitemid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "generation",
+        "workItemId",
+        "lane",
+        "milestone",
+        "budget",
+        "contextDigest",
+        "sourceDigest",
+        "candidateSha",
+        "approvalState",
+        "active",
+        "createdAt",
+        "updatedAt"
+      ],
+      "title": "V3Checkpoint",
+      "type": "object"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/migrated-checkpoint.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "migratedFromSchemaVersion": {
+      "const": "3",
+      "title": "Migratedfromschemaversion",
+      "type": "string"
+    },
+    "payload": {
+      "$ref": "#/$defs/V3Checkpoint"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "migratedFromSchemaVersion",
+    "payload"
+  ],
+  "title": "MigratedCheckpointV31",
+  "type": "object"
+}

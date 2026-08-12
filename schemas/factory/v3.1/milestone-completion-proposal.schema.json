@@ -1,0 +1,157 @@
+{
+  "$defs": {
+    "CommercialState": {
+      "enum": [
+        "NOT_EVALUATED",
+        "NATIVE_ADVANTAGE_UNPROVEN",
+        "PILOT_ELIGIBLE",
+        "COMMERCIALLY_SUPPORTED",
+        "WITHDRAWN"
+      ],
+      "title": "CommercialState",
+      "type": "string"
+    },
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "EpistemicState": {
+      "enum": [
+        "UNKNOWN",
+        "CONTROLLED",
+        "EXTERNALLY_VERIFIED"
+      ],
+      "title": "EpistemicState",
+      "type": "string"
+    },
+    "GitSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    },
+    "ReleaseState": {
+      "enum": [
+        "NOT_REQUESTED",
+        "BLOCKED",
+        "AUTHORIZED",
+        "PUBLISHED",
+        "REVERTED"
+      ],
+      "title": "ReleaseState",
+      "type": "string"
+    },
+    "TechnicalState": {
+      "enum": [
+        "NOT_EVALUATED",
+        "FAILED",
+        "PASSED"
+      ],
+      "title": "TechnicalState",
+      "type": "string"
+    },
+    "ValueState": {
+      "enum": [
+        "NOT_EVALUATED",
+        "REJECTED",
+        "NATIVE_SUFFICIENT",
+        "INCREMENTAL_VALUE"
+      ],
+      "title": "ValueState",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/milestone-completion-proposal.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "candidateSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "commercialState": {
+      "$ref": "#/$defs/CommercialState"
+    },
+    "completionEvidenceDigests": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 256,
+      "minItems": 1,
+      "title": "Completionevidencedigests",
+      "type": "array"
+    },
+    "epistemicState": {
+      "$ref": "#/$defs/EpistemicState"
+    },
+    "externalEvidenceRefs": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 128,
+      "title": "Externalevidencerefs",
+      "type": "array"
+    },
+    "machinePolicyReceiptDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "machinePolicyReceiptId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "milestoneId": {
+      "pattern": "^M[0-9]+_[A-Z0-9_]+$",
+      "title": "Milestoneid",
+      "type": "string"
+    },
+    "proposalId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "proposedAt": {
+      "format": "date-time",
+      "title": "Proposedat",
+      "type": "string"
+    },
+    "releaseState": {
+      "$ref": "#/$defs/ReleaseState"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "technicalState": {
+      "$ref": "#/$defs/TechnicalState"
+    },
+    "valueState": {
+      "$ref": "#/$defs/ValueState"
+    },
+    "workItemIds": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 256,
+      "minItems": 1,
+      "title": "Workitemids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "proposalId",
+    "milestoneId",
+    "candidateSha",
+    "workItemIds",
+    "completionEvidenceDigests",
+    "technicalState",
+    "epistemicState",
+    "valueState",
+    "releaseState",
+    "commercialState",
+    "machinePolicyReceiptId",
+    "machinePolicyReceiptDigest",
+    "proposedAt"
+  ],
+  "title": "MilestoneCompletionProposalV31",
+  "type": "object"
+}

@@ -1,0 +1,155 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "GitSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    },
+    "PRPublicationPhase": {
+      "enum": [
+        "PREPARED",
+        "PR_OPEN",
+        "CHECKS_PENDING",
+        "POLICY_PENDING",
+        "READY_TO_MERGE",
+        "MERGED",
+        "FAILED",
+        "REVERTED"
+      ],
+      "title": "PRPublicationPhase",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/pr-publication-transaction.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "attempt": {
+      "maximum": 20,
+      "minimum": 1,
+      "title": "Attempt",
+      "type": "integer"
+    },
+    "automatedMerge": {
+      "const": true,
+      "default": true,
+      "title": "Automatedmerge",
+      "type": "boolean"
+    },
+    "baseBranch": {
+      "const": "main",
+      "default": "main",
+      "title": "Basebranch",
+      "type": "string"
+    },
+    "baseSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "candidateBranch": {
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._/-]{0,126}[A-Za-z0-9])?$",
+      "title": "Candidatebranch",
+      "type": "string"
+    },
+    "candidateSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "candidateTreeSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "createdAt": {
+      "format": "date-time",
+      "title": "Createdat",
+      "type": "string"
+    },
+    "machinePolicyReceiptDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "machinePolicyReceiptId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "maximumAttempts": {
+      "maximum": 20,
+      "minimum": 1,
+      "title": "Maximumattempts",
+      "type": "integer"
+    },
+    "phase": {
+      "$ref": "#/$defs/PRPublicationPhase"
+    },
+    "pullRequestNumber": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pullrequestnumber"
+    },
+    "pullRequestUrl": {
+      "anyOf": [
+        {
+          "pattern": "^https://github\\.com/.+/pull/[1-9][0-9]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pullrequesturl"
+    },
+    "requiredHumanApprovals": {
+      "const": 0,
+      "default": 0,
+      "title": "Requiredhumanapprovals",
+      "type": "integer"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "transactionId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "updatedAt": {
+      "format": "date-time",
+      "title": "Updatedat",
+      "type": "string"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "transactionId",
+    "workItemId",
+    "candidateBranch",
+    "baseSha",
+    "candidateSha",
+    "candidateTreeSha",
+    "machinePolicyReceiptId",
+    "machinePolicyReceiptDigest",
+    "phase",
+    "attempt",
+    "maximumAttempts",
+    "createdAt",
+    "updatedAt"
+  ],
+  "title": "PRPublicationTransactionV31",
+  "type": "object"
+}

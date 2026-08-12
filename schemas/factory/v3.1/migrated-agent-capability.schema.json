@@ -1,0 +1,88 @@
+{
+  "$defs": {
+    "AgentCapabilityReport": {
+      "additionalProperties": false,
+      "properties": {
+        "allowedTools": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Allowedtools",
+          "type": "array"
+        },
+        "backend": {
+          "title": "Backend",
+          "type": "string"
+        },
+        "cancellation": {
+          "title": "Cancellation",
+          "type": "boolean"
+        },
+        "networkDenial": {
+          "title": "Networkdenial",
+          "type": "boolean"
+        },
+        "resume": {
+          "title": "Resume",
+          "type": "boolean"
+        },
+        "sandbox": {
+          "title": "Sandbox",
+          "type": "boolean"
+        },
+        "structuredOutput": {
+          "title": "Structuredoutput",
+          "type": "boolean"
+        },
+        "transcriptRetention": {
+          "$ref": "#/$defs/TranscriptRetention"
+        }
+      },
+      "required": [
+        "backend",
+        "structuredOutput",
+        "resume",
+        "cancellation",
+        "sandbox",
+        "networkDenial",
+        "transcriptRetention",
+        "allowedTools"
+      ],
+      "title": "AgentCapabilityReport",
+      "type": "object"
+    },
+    "TranscriptRetention": {
+      "enum": [
+        "NONE",
+        "REDACTED_SUMMARY"
+      ],
+      "title": "TranscriptRetention",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/migrated-agent-capability.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "migratedFromSchemaVersion": {
+      "const": "3",
+      "title": "Migratedfromschemaversion",
+      "type": "string"
+    },
+    "payload": {
+      "$ref": "#/$defs/AgentCapabilityReport"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "migratedFromSchemaVersion",
+    "payload"
+  ],
+  "title": "MigratedAgentCapabilityV31",
+  "type": "object"
+}

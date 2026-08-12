@@ -1,0 +1,190 @@
+{
+  "$defs": {
+    "AgentTaskRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "allowedPaths": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Allowedpaths",
+          "type": "array"
+        },
+        "artifactRoot": {
+          "title": "Artifactroot",
+          "type": "string"
+        },
+        "bashAllowlist": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Bashallowlist",
+          "type": "array"
+        },
+        "candidateWorktree": {
+          "title": "Candidateworktree",
+          "type": "string"
+        },
+        "contextDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contextdigest",
+          "type": "string"
+        },
+        "controllerRepoRoot": {
+          "title": "Controllerreporoot",
+          "type": "string"
+        },
+        "forbiddenPaths": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Forbiddenpaths",
+          "type": "array"
+        },
+        "maxCostUsdEquivalent": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Maxcostusdequivalent",
+          "type": "number"
+        },
+        "maxTokens": {
+          "maximum": 250000,
+          "minimum": 1000,
+          "title": "Maxtokens",
+          "type": "integer"
+        },
+        "maxTurns": {
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Maxturns",
+          "type": "integer"
+        },
+        "maxWallTimeSeconds": {
+          "maximum": 14400,
+          "minimum": 1,
+          "title": "Maxwalltimeseconds",
+          "type": "integer"
+        },
+        "networkAllowed": {
+          "default": false,
+          "title": "Networkallowed",
+          "type": "boolean"
+        },
+        "networkPolicy": {
+          "pattern": "^(DENY|ALLOWLIST)$",
+          "title": "Networkpolicy",
+          "type": "string"
+        },
+        "outputSchema": {
+          "additionalProperties": true,
+          "title": "Outputschema",
+          "type": "object"
+        },
+        "prompt": {
+          "minLength": 1,
+          "title": "Prompt",
+          "type": "string"
+        },
+        "requestId": {
+          "pattern": "^AREQ-[A-Z0-9_-]+$",
+          "title": "Requestid",
+          "type": "string"
+        },
+        "role": {
+          "title": "Role",
+          "type": "string"
+        },
+        "schemaDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Schemadigest",
+          "type": "string"
+        },
+        "sourceContextManifest": {
+          "additionalProperties": true,
+          "title": "Sourcecontextmanifest",
+          "type": "object"
+        },
+        "sourceDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sourcedigest",
+          "type": "string"
+        },
+        "systemPrompt": {
+          "minLength": 1,
+          "title": "Systemprompt",
+          "type": "string"
+        },
+        "taskPacket": {
+          "additionalProperties": true,
+          "title": "Taskpacket",
+          "type": "object"
+        },
+        "tools": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Tools",
+          "type": "array"
+        },
+        "workItemId": {
+          "title": "Workitemid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "requestId",
+        "workItemId",
+        "role",
+        "taskPacket",
+        "sourceContextManifest",
+        "allowedPaths",
+        "networkPolicy",
+        "outputSchema",
+        "controllerRepoRoot",
+        "candidateWorktree",
+        "artifactRoot",
+        "prompt",
+        "systemPrompt",
+        "schemaDigest",
+        "contextDigest",
+        "sourceDigest",
+        "maxTurns",
+        "maxTokens",
+        "maxCostUsdEquivalent",
+        "maxWallTimeSeconds",
+        "tools",
+        "bashAllowlist"
+      ],
+      "title": "AgentTaskRequest",
+      "type": "object"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/migrated-agent-request.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "migratedFromSchemaVersion": {
+      "const": "3",
+      "title": "Migratedfromschemaversion",
+      "type": "string"
+    },
+    "payload": {
+      "$ref": "#/$defs/AgentTaskRequest"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "migratedFromSchemaVersion",
+    "payload"
+  ],
+  "title": "MigratedAgentRequestV31",
+  "type": "object"
+}

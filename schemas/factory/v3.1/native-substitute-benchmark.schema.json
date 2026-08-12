@@ -1,0 +1,134 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "GitSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    },
+    "NativeSubstituteDisposition": {
+      "enum": [
+        "NATIVE_SUFFICIENT",
+        "INCREMENTAL_VALUE",
+        "NOT_COMPARABLE",
+        "UNKNOWN"
+      ],
+      "title": "NativeSubstituteDisposition",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/native-substitute-benchmark.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "baselineEnvironmentDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "benchmarkId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "candidateEffortMinutes": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000,
+      "title": "Candidateeffortminutes",
+      "type": "number"
+    },
+    "candidateEnvironmentDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "candidateEvidenceDigests": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Candidateevidencedigests",
+      "type": "array"
+    },
+    "candidateSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "candidateTreeSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "decisionChanged": {
+      "title": "Decisionchanged",
+      "type": "boolean"
+    },
+    "disposition": {
+      "$ref": "#/$defs/NativeSubstituteDisposition"
+    },
+    "independentOracleIds": {
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Independentoracleids",
+      "type": "array"
+    },
+    "nativeEffortMinutes": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000,
+      "title": "Nativeeffortminutes",
+      "type": "number"
+    },
+    "nativeEvidenceDigests": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Nativeevidencedigests",
+      "type": "array"
+    },
+    "nativeTool": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Nativetool",
+      "type": "string"
+    },
+    "nativeToolVersion": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Nativetoolversion",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "benchmarkId",
+    "workItemId",
+    "candidateSha",
+    "candidateTreeSha",
+    "baselineEnvironmentDigest",
+    "candidateEnvironmentDigest",
+    "nativeTool",
+    "nativeToolVersion",
+    "nativeEvidenceDigests",
+    "candidateEvidenceDigests",
+    "independentOracleIds",
+    "nativeEffortMinutes",
+    "candidateEffortMinutes",
+    "decisionChanged",
+    "disposition"
+  ],
+  "title": "NativeSubstituteBenchmarkV31",
+  "type": "object"
+}

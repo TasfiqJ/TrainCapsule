@@ -1,0 +1,126 @@
+{
+  "$defs": {
+    "ActivationMode": {
+      "enum": [
+        "OBSERVATION",
+        "CANARY",
+        "LIVE"
+      ],
+      "title": "ActivationMode",
+      "type": "string"
+    },
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "GitSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/activation-receipt.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "controllerBinaryDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "controllerConfigDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "expiresAt": {
+      "format": "date-time",
+      "title": "Expiresat",
+      "type": "string"
+    },
+    "issuedAt": {
+      "format": "date-time",
+      "title": "Issuedat",
+      "type": "string"
+    },
+    "issuerId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "issuerKeyId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "machineEnvironmentDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "machinePolicyReceiptDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "machinePolicyReceiptId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "mode": {
+      "$ref": "#/$defs/ActivationMode"
+    },
+    "nonce": {
+      "maxLength": 256,
+      "minLength": 16,
+      "title": "Nonce",
+      "type": "string"
+    },
+    "receiptId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "revocationEpoch": {
+      "minimum": 1,
+      "title": "Revocationepoch",
+      "type": "integer"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "signature": {
+      "maxLength": 1024,
+      "minLength": 32,
+      "title": "Signature",
+      "type": "string"
+    },
+    "signatureAlgorithm": {
+      "const": "ed25519",
+      "title": "Signaturealgorithm",
+      "type": "string"
+    },
+    "sourceGenerationDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "sourceGenerationId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "verifiedMainSha": {
+      "$ref": "#/$defs/GitSha"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "receiptId",
+    "verifiedMainSha",
+    "machineEnvironmentDigest",
+    "sourceGenerationId",
+    "sourceGenerationDigest",
+    "controllerBinaryDigest",
+    "controllerConfigDigest",
+    "machinePolicyReceiptId",
+    "machinePolicyReceiptDigest",
+    "mode",
+    "issuedAt",
+    "expiresAt",
+    "revocationEpoch",
+    "nonce",
+    "issuerId",
+    "issuerKeyId",
+    "signatureAlgorithm",
+    "signature"
+  ],
+  "title": "ActivationReceiptV31",
+  "type": "object"
+}

@@ -1,0 +1,115 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "FreshnessState": {
+      "enum": [
+        "FRESH",
+        "STALE",
+        "RECHECK_REQUIRED",
+        "UNKNOWN"
+      ],
+      "title": "FreshnessState",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/source-freshness-receipt.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "conflictArtifactDigests": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 32,
+      "title": "Conflictartifactdigests",
+      "type": "array"
+    },
+    "expiresAt": {
+      "format": "date-time",
+      "title": "Expiresat",
+      "type": "string"
+    },
+    "generationDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "generationId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "issuerId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "issuerKeyId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "observedAt": {
+      "format": "date-time",
+      "title": "Observedat",
+      "type": "string"
+    },
+    "receiptId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "signature": {
+      "maxLength": 1024,
+      "minLength": 32,
+      "title": "Signature",
+      "type": "string"
+    },
+    "signatureAlgorithm": {
+      "const": "ed25519",
+      "title": "Signaturealgorithm",
+      "type": "string"
+    },
+    "sourceDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "sourceId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "state": {
+      "$ref": "#/$defs/FreshnessState"
+    },
+    "wedgeWorkItemId": {
+      "anyOf": [
+        {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Wedgeworkitemid"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "receiptId",
+    "generationId",
+    "generationDigest",
+    "sourceId",
+    "sourceDigest",
+    "observedAt",
+    "expiresAt",
+    "state",
+    "issuerId",
+    "issuerKeyId",
+    "signatureAlgorithm",
+    "signature"
+  ],
+  "title": "SourceFreshnessReceiptV31",
+  "type": "object"
+}

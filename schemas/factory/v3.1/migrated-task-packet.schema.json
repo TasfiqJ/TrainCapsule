@@ -1,0 +1,257 @@
+{
+  "$defs": {
+    "Lane": {
+      "enum": [
+        "PRODUCT",
+        "MARKET",
+        "COMPETITOR",
+        "TRUST",
+        "FACTORY"
+      ],
+      "title": "Lane",
+      "type": "string"
+    },
+    "RiskTier": {
+      "enum": [
+        "MECHANICAL",
+        "STANDARD",
+        "INTEGRATION",
+        "TRUST_CORE",
+        "EXTERNAL"
+      ],
+      "title": "RiskTier",
+      "type": "string"
+    },
+    "V3TaskPacket": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptanceCriteria": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 12,
+          "minItems": 1,
+          "title": "Acceptancecriteria",
+          "type": "array"
+        },
+        "allowedPaths": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Allowedpaths",
+          "type": "array"
+        },
+        "approvedSplitRef": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Approvedsplitref"
+        },
+        "baseSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Basesha",
+          "type": "string"
+        },
+        "compilerDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Compilerdigest",
+          "type": "string"
+        },
+        "contextDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contextdigest",
+          "type": "string"
+        },
+        "decisionContribution": {
+          "minLength": 1,
+          "title": "Decisioncontribution",
+          "type": "string"
+        },
+        "forbiddenPaths": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 24,
+          "title": "Forbiddenpaths",
+          "type": "array"
+        },
+        "goal": {
+          "minLength": 1,
+          "title": "Goal",
+          "type": "string"
+        },
+        "kind": {
+          "$ref": "#/$defs/WorkKind"
+        },
+        "lane": {
+          "$ref": "#/$defs/Lane"
+        },
+        "milestone": {
+          "pattern": "^M[0-9]+_[A-Z0-9_]+$",
+          "title": "Milestone",
+          "type": "string"
+        },
+        "nonGoals": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Nongoals",
+          "type": "array"
+        },
+        "oracle": {
+          "minLength": 1,
+          "title": "Oracle",
+          "type": "string"
+        },
+        "outputs": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 8,
+          "title": "Outputs",
+          "type": "array"
+        },
+        "riskTier": {
+          "$ref": "#/$defs/RiskTier"
+        },
+        "rollback": {
+          "minLength": 1,
+          "title": "Rollback",
+          "type": "string"
+        },
+        "sourceDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sourcedigest",
+          "type": "string"
+        },
+        "sourceDocuments": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Sourcedocuments",
+          "type": "array"
+        },
+        "stopConditions": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Stopconditions",
+          "type": "array"
+        },
+        "stopDisposition": {
+          "minLength": 1,
+          "title": "Stopdisposition",
+          "type": "string"
+        },
+        "template": {
+          "minLength": 1,
+          "title": "Template",
+          "type": "string"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "version": {
+          "default": 3,
+          "maximum": 3,
+          "minimum": 3,
+          "title": "Version",
+          "type": "integer"
+        },
+        "workItemDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Workitemdigest",
+          "type": "string"
+        },
+        "workItemId": {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "title": "Workitemid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workItemId",
+        "title",
+        "lane",
+        "milestone",
+        "kind",
+        "riskTier",
+        "template",
+        "goal",
+        "decisionContribution",
+        "nonGoals",
+        "acceptanceCriteria",
+        "outputs",
+        "sourceDocuments",
+        "allowedPaths",
+        "oracle",
+        "rollback",
+        "stopConditions",
+        "stopDisposition",
+        "workItemDigest",
+        "sourceDigest",
+        "contextDigest",
+        "compilerDigest",
+        "baseSha"
+      ],
+      "title": "V3TaskPacket",
+      "type": "object"
+    },
+    "WorkKind": {
+      "enum": [
+        "CODE",
+        "SPECIFICATION",
+        "RESEARCH",
+        "CONTROLLED_EXPERIMENT",
+        "EXTERNAL_EVIDENCE",
+        "MACHINE_POLICY_REVIEW",
+        "COMMERCIAL_EXPERIMENT",
+        "MAINTENANCE",
+        "MIGRATION"
+      ],
+      "title": "WorkKind",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/migrated-task-packet.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "migratedFromSchemaVersion": {
+      "const": "3",
+      "title": "Migratedfromschemaversion",
+      "type": "string"
+    },
+    "payload": {
+      "$ref": "#/$defs/V3TaskPacket"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "migratedFromSchemaVersion",
+    "payload"
+  ],
+  "title": "MigratedTaskPacketV31",
+  "type": "object"
+}

@@ -1,0 +1,100 @@
+{
+  "$defs": {
+    "EligibilityOutcome": {
+      "enum": [
+        "ELIGIBLE_FOR_QUALIFICATION",
+        "ELIGIBLE_WITH_HUMAN_REVIEW",
+        "NEEDS_MORE_EVIDENCE",
+        "NATIVE_WORKFLOW_SUFFICIENT",
+        "TECHNICALLY_POSSIBLE_BUT_UNECONOMIC",
+        "OUTSIDE_SUPPORTED_ENVELOPE",
+        "POLICY_BLOCKED",
+        "UNKNOWN"
+      ],
+      "title": "EligibilityOutcome",
+      "type": "string"
+    },
+    "OperationalDecision": {
+      "enum": [
+        "APPROVE_WITHIN_ENVELOPE",
+        "BLOCK_CHANGE",
+        "REQUIRE_MORE_EVIDENCE",
+        "NO_DECISION",
+        "NATIVE_WORKFLOW_SUFFICIENT",
+        "TECHNICALLY_VALID_BUT_NOT_ECONOMIC"
+      ],
+      "title": "OperationalDecision",
+      "type": "string"
+    },
+    "TechnicalResult": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "UNKNOWN",
+        "INVALID_EVIDENCE",
+        "INVALID_ORACLE",
+        "INFRASTRUCTURE_ERROR",
+        "POLICY_BLOCKED",
+        "EXPIRED"
+      ],
+      "title": "TechnicalResult",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "caseId": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+      "title": "Caseid",
+      "type": "string"
+    },
+    "generatedAt": {
+      "format": "date-time",
+      "title": "Generatedat",
+      "type": "string"
+    },
+    "operationalDecision": {
+      "$ref": "#/$defs/OperationalDecision"
+    },
+    "outcome": {
+      "$ref": "#/$defs/EligibilityOutcome"
+    },
+    "reasons": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Reasons",
+      "type": "array"
+    },
+    "schemaVersion": {
+      "default": 1,
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Schemaversion",
+      "type": "integer"
+    },
+    "technicalResult": {
+      "$ref": "#/$defs/TechnicalResult"
+    },
+    "unknowns": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Unknowns",
+      "type": "array"
+    }
+  },
+  "required": [
+    "caseId",
+    "outcome",
+    "technicalResult",
+    "operationalDecision",
+    "reasons",
+    "unknowns",
+    "generatedAt"
+  ],
+  "title": "EligibilityDecision",
+  "type": "object"
+}

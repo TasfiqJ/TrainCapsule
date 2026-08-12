@@ -1,0 +1,8 @@
+{
+  "expectedRanks": [0, 1],
+  "fixtureExtension": "preserved",
+  "format": "pytorch-flight-recorder",
+  "pytorchVersion": "2.5.1",
+  "schemaVersion": "1.0",
+  "worldSize": 2
+}

@@ -1,0 +1,201 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "containerRuntime": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Containerruntime"
+    },
+    "createdAt": {
+      "format": "date-time",
+      "title": "Createdat",
+      "type": "string"
+    },
+    "cudaDriver": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cudadriver"
+    },
+    "cudaRuntime": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Cudaruntime"
+    },
+    "environmentId": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Environmentid",
+      "type": "string"
+    },
+    "environmentVariablesDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Environmentvariablesdigest",
+      "type": "string"
+    },
+    "gpuCount": {
+      "default": 0,
+      "maximum": 131072,
+      "minimum": 0,
+      "title": "Gpucount",
+      "type": "integer"
+    },
+    "gpuFirmwareDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Gpufirmwaredigest"
+    },
+    "gpuModel": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Gpumodel"
+    },
+    "hostKernel": {
+      "minLength": 1,
+      "title": "Hostkernel",
+      "type": "string"
+    },
+    "materializationRecipeDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Materializationrecipedigest"
+    },
+    "nccl": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Nccl"
+    },
+    "networkClass": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Networkclass"
+    },
+    "python": {
+      "minLength": 1,
+      "title": "Python",
+      "type": "string"
+    },
+    "pytorch": {
+      "minLength": 1,
+      "title": "Pytorch",
+      "type": "string"
+    },
+    "redactionPolicyVersion": {
+      "minLength": 1,
+      "title": "Redactionpolicyversion",
+      "type": "string"
+    },
+    "scheduler": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Scheduler"
+    },
+    "schemaVersion": {
+      "default": 1,
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Schemaversion",
+      "type": "integer"
+    },
+    "storageClass": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Storageclass"
+    },
+    "topologyDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Topologydigest"
+    }
+  },
+  "required": [
+    "environmentId",
+    "hostKernel",
+    "python",
+    "pytorch",
+    "environmentVariablesDigest",
+    "redactionPolicyVersion",
+    "createdAt"
+  ],
+  "title": "EnvironmentIdentity",
+  "type": "object"
+}

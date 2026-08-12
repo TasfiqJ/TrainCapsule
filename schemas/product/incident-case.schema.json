@@ -1,0 +1,262 @@
+{
+  "$defs": {
+    "CaseEconomics": {
+      "additionalProperties": false,
+      "properties": {
+        "currency": {
+          "anyOf": [
+            {
+              "pattern": "^[A-Z]{3}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Currency"
+        },
+        "estimatedDelayCost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimateddelaycost"
+        },
+        "estimatedInvestigationCost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimatedinvestigationcost"
+        },
+        "estimatedOriginalRunCost": {
+          "anyOf": [
+            {
+              "minimum": 0,
+              "type": "number"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Estimatedoriginalruncost"
+        }
+      },
+      "title": "CaseEconomics",
+      "type": "object"
+    },
+    "NativeConfidence": {
+      "enum": [
+        "DIRECT_OBSERVATION",
+        "DERIVED_ALIGNMENT",
+        "TOOL_HEURISTIC",
+        "UNVERIFIED_NARRATIVE"
+      ],
+      "title": "NativeConfidence",
+      "type": "string"
+    },
+    "NativeFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "confidenceClass": {
+          "$ref": "#/$defs/NativeConfidence"
+        },
+        "customerDecisionContribution": {
+          "title": "Customerdecisioncontribution",
+          "type": "string"
+        },
+        "evidenceRefs": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Evidencerefs",
+          "type": "array"
+        },
+        "findingId": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Findingid",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "nativeSystem": {
+          "minLength": 1,
+          "title": "Nativesystem",
+          "type": "string"
+        },
+        "nativeVersion": {
+          "minLength": 1,
+          "title": "Nativeversion",
+          "type": "string"
+        },
+        "observation": {
+          "minLength": 1,
+          "title": "Observation",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "default": 1,
+          "maximum": 1,
+          "minimum": 1,
+          "title": "Schemaversion",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "findingId",
+        "nativeSystem",
+        "nativeVersion",
+        "observation",
+        "evidenceRefs",
+        "confidenceClass",
+        "limitations",
+        "customerDecisionContribution"
+      ],
+      "title": "NativeFinding",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "baselineEnvironmentId": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Baselineenvironmentid"
+    },
+    "candidateEnvironmentId": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Candidateenvironmentid"
+    },
+    "caseId": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+      "title": "Caseid",
+      "type": "string"
+    },
+    "decisionDeadline": {
+      "format": "date-time",
+      "title": "Decisiondeadline",
+      "type": "string"
+    },
+    "decisionOwner": {
+      "minLength": 1,
+      "title": "Decisionowner",
+      "type": "string"
+    },
+    "decisionType": {
+      "minLength": 1,
+      "title": "Decisiontype",
+      "type": "string"
+    },
+    "economics": {
+      "$ref": "#/$defs/CaseEconomics"
+    },
+    "evidenceRefs": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "title": "Evidencerefs",
+      "type": "array"
+    },
+    "incidentSummary": {
+      "minLength": 1,
+      "title": "Incidentsummary",
+      "type": "string"
+    },
+    "nativeFindings": {
+      "items": {
+        "$ref": "#/$defs/NativeFinding"
+      },
+      "title": "Nativefindings",
+      "type": "array"
+    },
+    "packCandidate": {
+      "minLength": 1,
+      "title": "Packcandidate",
+      "type": "string"
+    },
+    "privacyPolicy": {
+      "minLength": 1,
+      "title": "Privacypolicy",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "default": 1,
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Schemaversion",
+      "type": "integer"
+    },
+    "status": {
+      "minLength": 1,
+      "title": "Status",
+      "type": "string"
+    },
+    "workloadId": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Workloadid"
+    }
+  },
+  "required": [
+    "caseId",
+    "decisionOwner",
+    "decisionType",
+    "decisionDeadline",
+    "incidentSummary",
+    "evidenceRefs",
+    "nativeFindings",
+    "packCandidate",
+    "economics",
+    "privacyPolicy",
+    "status"
+  ],
+  "title": "IncidentCase",
+  "type": "object"
+}

@@ -1,0 +1,79 @@
+{
+  "$defs": {
+    "NativeConfidence": {
+      "enum": [
+        "DIRECT_OBSERVATION",
+        "DERIVED_ALIGNMENT",
+        "TOOL_HEURISTIC",
+        "UNVERIFIED_NARRATIVE"
+      ],
+      "title": "NativeConfidence",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "confidenceClass": {
+      "$ref": "#/$defs/NativeConfidence"
+    },
+    "customerDecisionContribution": {
+      "title": "Customerdecisioncontribution",
+      "type": "string"
+    },
+    "evidenceRefs": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "title": "Evidencerefs",
+      "type": "array"
+    },
+    "findingId": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Findingid",
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Limitations",
+      "type": "array"
+    },
+    "nativeSystem": {
+      "minLength": 1,
+      "title": "Nativesystem",
+      "type": "string"
+    },
+    "nativeVersion": {
+      "minLength": 1,
+      "title": "Nativeversion",
+      "type": "string"
+    },
+    "observation": {
+      "minLength": 1,
+      "title": "Observation",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "default": 1,
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Schemaversion",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "findingId",
+    "nativeSystem",
+    "nativeVersion",
+    "observation",
+    "evidenceRefs",
+    "confidenceClass",
+    "limitations",
+    "customerDecisionContribution"
+  ],
+  "title": "NativeFinding",
+  "type": "object"
+}

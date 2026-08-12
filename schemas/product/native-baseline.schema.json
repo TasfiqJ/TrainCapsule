@@ -1,0 +1,184 @@
+{
+  "$defs": {
+    "NativeConfidence": {
+      "enum": [
+        "DIRECT_OBSERVATION",
+        "DERIVED_ALIGNMENT",
+        "TOOL_HEURISTIC",
+        "UNVERIFIED_NARRATIVE"
+      ],
+      "title": "NativeConfidence",
+      "type": "string"
+    },
+    "NativeFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "confidenceClass": {
+          "$ref": "#/$defs/NativeConfidence"
+        },
+        "customerDecisionContribution": {
+          "title": "Customerdecisioncontribution",
+          "type": "string"
+        },
+        "evidenceRefs": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Evidencerefs",
+          "type": "array"
+        },
+        "findingId": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Findingid",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "nativeSystem": {
+          "minLength": 1,
+          "title": "Nativesystem",
+          "type": "string"
+        },
+        "nativeVersion": {
+          "minLength": 1,
+          "title": "Nativeversion",
+          "type": "string"
+        },
+        "observation": {
+          "minLength": 1,
+          "title": "Observation",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "default": 1,
+          "maximum": 1,
+          "minimum": 1,
+          "title": "Schemaversion",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "findingId",
+        "nativeSystem",
+        "nativeVersion",
+        "observation",
+        "evidenceRefs",
+        "confidenceClass",
+        "limitations",
+        "customerDecisionContribution"
+      ],
+      "title": "NativeFinding",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "caseId": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+      "title": "Caseid",
+      "type": "string"
+    },
+    "command": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Command",
+      "type": "array"
+    },
+    "configuration": {
+      "additionalProperties": true,
+      "title": "Configuration",
+      "type": "object"
+    },
+    "evidenceRefs": {
+      "items": {
+        "pattern": "^sha256:[0-9a-f]{64}$",
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Evidencerefs",
+      "type": "array"
+    },
+    "executedAt": {
+      "format": "date-time",
+      "title": "Executedat",
+      "type": "string"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/NativeFinding"
+      },
+      "title": "Findings",
+      "type": "array"
+    },
+    "humanReviewed": {
+      "title": "Humanreviewed",
+      "type": "boolean"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Limitations",
+      "type": "array"
+    },
+    "reviewer": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Reviewer"
+    },
+    "schemaVersion": {
+      "default": 1,
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Schemaversion",
+      "type": "integer"
+    },
+    "toolName": {
+      "minLength": 1,
+      "title": "Toolname",
+      "type": "string"
+    },
+    "toolVersion": {
+      "minLength": 1,
+      "title": "Toolversion",
+      "type": "string"
+    },
+    "unresolvedCustomerDecision": {
+      "minLength": 1,
+      "title": "Unresolvedcustomerdecision",
+      "type": "string"
+    }
+  },
+  "required": [
+    "caseId",
+    "toolName",
+    "toolVersion",
+    "command",
+    "configuration",
+    "findings",
+    "evidenceRefs",
+    "limitations",
+    "unresolvedCustomerDecision",
+    "executedAt",
+    "humanReviewed"
+  ],
+  "title": "NativeBaseline",
+  "type": "object"
+}

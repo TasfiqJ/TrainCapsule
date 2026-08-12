@@ -1,0 +1,231 @@
+{
+  "$defs": {
+    "DataIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "manifestDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Manifestdigest"
+        },
+        "policy": {
+          "$ref": "#/$defs/DataIdentityPolicy"
+        }
+      },
+      "required": [
+        "policy"
+      ],
+      "title": "DataIdentity",
+      "type": "object"
+    },
+    "DataIdentityPolicy": {
+      "enum": [
+        "FULL_DIGEST",
+        "MANIFEST_DIGEST",
+        "CUSTOMER_ATTESTED",
+        "UNAVAILABLE"
+      ],
+      "title": "DataIdentityPolicy",
+      "type": "string"
+    },
+    "DistributedIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "processGroupsDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Processgroupsdigest",
+          "type": "string"
+        },
+        "strategy": {
+          "minLength": 1,
+          "title": "Strategy",
+          "type": "string"
+        },
+        "worldSize": {
+          "maximum": 131072,
+          "minimum": 1,
+          "title": "Worldsize",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "strategy",
+        "worldSize",
+        "processGroupsDigest"
+      ],
+      "title": "DistributedIdentity",
+      "type": "object"
+    },
+    "FrameworkIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version"
+      ],
+      "title": "FrameworkIdentity",
+      "type": "object"
+    },
+    "PrivacyClass": {
+      "enum": [
+        "PUBLIC",
+        "INTERNAL",
+        "CONFIDENTIAL",
+        "RESTRICTED"
+      ],
+      "title": "PrivacyClass",
+      "type": "string"
+    },
+    "SourceIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "dirtyPatchDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Dirtypatchdigest"
+        },
+        "repositoryDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Repositorydigest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "repositoryDigest"
+      ],
+      "title": "SourceIdentity",
+      "type": "object"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "argumentsDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Argumentsdigest",
+      "type": "string"
+    },
+    "checkpointPolicyDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Checkpointpolicydigest"
+    },
+    "containerImageDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Containerimagedigest"
+    },
+    "createdAt": {
+      "format": "date-time",
+      "title": "Createdat",
+      "type": "string"
+    },
+    "dataIdentity": {
+      "$ref": "#/$defs/DataIdentity"
+    },
+    "dependencyLockDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Dependencylockdigest",
+      "type": "string"
+    },
+    "distributed": {
+      "$ref": "#/$defs/DistributedIdentity"
+    },
+    "entrypoint": {
+      "minLength": 1,
+      "title": "Entrypoint",
+      "type": "string"
+    },
+    "framework": {
+      "$ref": "#/$defs/FrameworkIdentity"
+    },
+    "modelStructureDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Modelstructuredigest"
+    },
+    "privacyClass": {
+      "$ref": "#/$defs/PrivacyClass"
+    },
+    "schemaVersion": {
+      "default": 1,
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Schemaversion",
+      "type": "integer"
+    },
+    "sourceIdentity": {
+      "$ref": "#/$defs/SourceIdentity"
+    },
+    "workloadId": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Workloadid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "workloadId",
+    "sourceIdentity",
+    "entrypoint",
+    "argumentsDigest",
+    "dependencyLockDigest",
+    "framework",
+    "distributed",
+    "dataIdentity",
+    "privacyClass",
+    "createdAt"
+  ],
+  "title": "WorkloadIdentity",
+  "type": "object"
+}

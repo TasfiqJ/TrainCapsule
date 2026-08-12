@@ -1,0 +1,124 @@
+{
+  "$defs": {
+    "EvidenceIntegrity": {
+      "enum": [
+        "VALID",
+        "CORRUPTED",
+        "UNKNOWN"
+      ],
+      "title": "EvidenceIntegrity",
+      "type": "string"
+    },
+    "PrivacyClass": {
+      "enum": [
+        "PUBLIC",
+        "INTERNAL",
+        "CONFIDENTIAL",
+        "RESTRICTED"
+      ],
+      "title": "PrivacyClass",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifactId": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Artifactid",
+      "type": "string"
+    },
+    "capturedAt": {
+      "format": "date-time",
+      "title": "Capturedat",
+      "type": "string"
+    },
+    "caseId": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+      "title": "Caseid",
+      "type": "string"
+    },
+    "compression": {
+      "default": "none",
+      "title": "Compression",
+      "type": "string"
+    },
+    "contentDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Contentdigest",
+      "type": "string"
+    },
+    "customerLocalUri": {
+      "pattern": "^cas://[A-Za-z0-9._/-]+$",
+      "title": "Customerlocaluri",
+      "type": "string"
+    },
+    "encryption": {
+      "default": "none",
+      "title": "Encryption",
+      "type": "string"
+    },
+    "exportPolicy": {
+      "minLength": 1,
+      "title": "Exportpolicy",
+      "type": "string"
+    },
+    "integrityStatus": {
+      "$ref": "#/$defs/EvidenceIntegrity"
+    },
+    "kind": {
+      "minLength": 1,
+      "title": "Kind",
+      "type": "string"
+    },
+    "privacyClass": {
+      "$ref": "#/$defs/PrivacyClass"
+    },
+    "provenance": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Provenance",
+      "type": "object"
+    },
+    "schemaVersion": {
+      "default": 1,
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Schemaversion",
+      "type": "integer"
+    },
+    "sizeBytes": {
+      "minimum": 0,
+      "title": "Sizebytes",
+      "type": "integer"
+    },
+    "sourceAdapter": {
+      "minLength": 1,
+      "title": "Sourceadapter",
+      "type": "string"
+    },
+    "sourceVersion": {
+      "minLength": 1,
+      "title": "Sourceversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "artifactId",
+    "caseId",
+    "kind",
+    "sourceAdapter",
+    "sourceVersion",
+    "capturedAt",
+    "contentDigest",
+    "sizeBytes",
+    "privacyClass",
+    "customerLocalUri",
+    "exportPolicy",
+    "provenance",
+    "integrityStatus"
+  ],
+  "title": "EvidenceArtifact",
+  "type": "object"
+}

@@ -1,0 +1,357 @@
+{
+  "$defs": {
+    "EvidenceArtifact": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactId": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Artifactid",
+          "type": "string"
+        },
+        "capturedAt": {
+          "format": "date-time",
+          "title": "Capturedat",
+          "type": "string"
+        },
+        "caseId": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+          "title": "Caseid",
+          "type": "string"
+        },
+        "compression": {
+          "default": "none",
+          "title": "Compression",
+          "type": "string"
+        },
+        "contentDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contentdigest",
+          "type": "string"
+        },
+        "customerLocalUri": {
+          "pattern": "^cas://[A-Za-z0-9._/-]+$",
+          "title": "Customerlocaluri",
+          "type": "string"
+        },
+        "encryption": {
+          "default": "none",
+          "title": "Encryption",
+          "type": "string"
+        },
+        "exportPolicy": {
+          "minLength": 1,
+          "title": "Exportpolicy",
+          "type": "string"
+        },
+        "integrityStatus": {
+          "$ref": "#/$defs/EvidenceIntegrity"
+        },
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "privacyClass": {
+          "$ref": "#/$defs/PrivacyClass"
+        },
+        "provenance": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Provenance",
+          "type": "object"
+        },
+        "schemaVersion": {
+          "default": 1,
+          "maximum": 1,
+          "minimum": 1,
+          "title": "Schemaversion",
+          "type": "integer"
+        },
+        "sizeBytes": {
+          "minimum": 0,
+          "title": "Sizebytes",
+          "type": "integer"
+        },
+        "sourceAdapter": {
+          "minLength": 1,
+          "title": "Sourceadapter",
+          "type": "string"
+        },
+        "sourceVersion": {
+          "minLength": 1,
+          "title": "Sourceversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "artifactId",
+        "caseId",
+        "kind",
+        "sourceAdapter",
+        "sourceVersion",
+        "capturedAt",
+        "contentDigest",
+        "sizeBytes",
+        "privacyClass",
+        "customerLocalUri",
+        "exportPolicy",
+        "provenance",
+        "integrityStatus"
+      ],
+      "title": "EvidenceArtifact",
+      "type": "object"
+    },
+    "EvidenceIntegrity": {
+      "enum": [
+        "VALID",
+        "CORRUPTED",
+        "UNKNOWN"
+      ],
+      "title": "EvidenceIntegrity",
+      "type": "string"
+    },
+    "FlightRecorderEntry": {
+      "additionalProperties": false,
+      "properties": {
+        "callStack": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Callstack",
+          "type": "array"
+        },
+        "collectiveType": {
+          "minLength": 1,
+          "title": "Collectivetype",
+          "type": "string"
+        },
+        "processGroup": {
+          "minLength": 1,
+          "title": "Processgroup",
+          "type": "string"
+        },
+        "rank": {
+          "minimum": 0,
+          "title": "Rank",
+          "type": "integer"
+        },
+        "sequenceId": {
+          "minimum": 0,
+          "title": "Sequenceid",
+          "type": "integer"
+        },
+        "state": {
+          "minLength": 1,
+          "title": "State",
+          "type": "string"
+        },
+        "tensorMetadata": {
+          "anyOf": [
+            {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Tensormetadata"
+        },
+        "unknownFields": {
+          "additionalProperties": true,
+          "title": "Unknownfields",
+          "type": "object"
+        }
+      },
+      "required": [
+        "rank",
+        "processGroup",
+        "sequenceId",
+        "collectiveType",
+        "state",
+        "callStack",
+        "unknownFields"
+      ],
+      "title": "FlightRecorderEntry",
+      "type": "object"
+    },
+    "NativeConfidence": {
+      "enum": [
+        "DIRECT_OBSERVATION",
+        "DERIVED_ALIGNMENT",
+        "TOOL_HEURISTIC",
+        "UNVERIFIED_NARRATIVE"
+      ],
+      "title": "NativeConfidence",
+      "type": "string"
+    },
+    "NativeFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "confidenceClass": {
+          "$ref": "#/$defs/NativeConfidence"
+        },
+        "customerDecisionContribution": {
+          "title": "Customerdecisioncontribution",
+          "type": "string"
+        },
+        "evidenceRefs": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Evidencerefs",
+          "type": "array"
+        },
+        "findingId": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Findingid",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "nativeSystem": {
+          "minLength": 1,
+          "title": "Nativesystem",
+          "type": "string"
+        },
+        "nativeVersion": {
+          "minLength": 1,
+          "title": "Nativeversion",
+          "type": "string"
+        },
+        "observation": {
+          "minLength": 1,
+          "title": "Observation",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "default": 1,
+          "maximum": 1,
+          "minimum": 1,
+          "title": "Schemaversion",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "findingId",
+        "nativeSystem",
+        "nativeVersion",
+        "observation",
+        "evidenceRefs",
+        "confidenceClass",
+        "limitations",
+        "customerDecisionContribution"
+      ],
+      "title": "NativeFinding",
+      "type": "object"
+    },
+    "PrivacyClass": {
+      "enum": [
+        "PUBLIC",
+        "INTERNAL",
+        "CONFIDENTIAL",
+        "RESTRICTED"
+      ],
+      "title": "PrivacyClass",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifacts": {
+      "items": {
+        "$ref": "#/$defs/EvidenceArtifact"
+      },
+      "title": "Artifacts",
+      "type": "array"
+    },
+    "caseId": {
+      "title": "Caseid",
+      "type": "string"
+    },
+    "entries": {
+      "items": {
+        "$ref": "#/$defs/FlightRecorderEntry"
+      },
+      "title": "Entries",
+      "type": "array"
+    },
+    "metadataUnknownFields": {
+      "additionalProperties": true,
+      "title": "Metadataunknownfields",
+      "type": "object"
+    },
+    "missingRanks": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Missingranks",
+      "type": "array"
+    },
+    "nativeFindings": {
+      "items": {
+        "$ref": "#/$defs/NativeFinding"
+      },
+      "title": "Nativefindings",
+      "type": "array"
+    },
+    "pytorchVersion": {
+      "title": "Pytorchversion",
+      "type": "string"
+    },
+    "rawDigests": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Rawdigests",
+      "type": "object"
+    },
+    "schemaVersion": {
+      "default": 1,
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Schemaversion",
+      "type": "integer"
+    },
+    "sourceFormatVersion": {
+      "title": "Sourceformatversion",
+      "type": "string"
+    },
+    "warnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Warnings",
+      "type": "array"
+    },
+    "worldSize": {
+      "minimum": 1,
+      "title": "Worldsize",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "caseId",
+    "sourceFormatVersion",
+    "pytorchVersion",
+    "worldSize",
+    "artifacts",
+    "entries",
+    "nativeFindings",
+    "warnings",
+    "missingRanks",
+    "rawDigests",
+    "metadataUnknownFields"
+  ],
+  "title": "FlightRecorderImport",
+  "type": "object"
+}

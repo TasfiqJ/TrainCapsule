@@ -1,0 +1,7 @@
+{
+  "expectedRanks": [0],
+  "format": "pytorch-flight-recorder",
+  "pytorchVersion": "9.9.0",
+  "schemaVersion": "99.0",
+  "worldSize": 1
+}

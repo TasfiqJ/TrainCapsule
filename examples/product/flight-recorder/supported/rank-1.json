@@ -1,0 +1,13 @@
+{
+  "entries": [
+    {
+      "callStack": ["train.py:88", "distributed.py:41"],
+      "collectiveType": "all_reduce",
+      "sequenceId": 42,
+      "state": "started",
+      "tensorMetadata": {"dtype": "float32", "numel": 4096}
+    }
+  ],
+  "processGroup": "default",
+  "rank": 1
+}

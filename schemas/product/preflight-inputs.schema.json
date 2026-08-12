@@ -1,0 +1,483 @@
+{
+  "$defs": {
+    "CompletenessState": {
+      "enum": [
+        "PRESENT_VALID",
+        "PRESENT_PARTIAL",
+        "PRESENT_CONFLICTING",
+        "PRESENT_CORRUPTED",
+        "MISSING_NOT_CAPTURED",
+        "MISSING_POLICY_RESTRICTED",
+        "MISSING_TECHNICALLY_INACCESSIBLE",
+        "MISSING_VERSION_UNSUPPORTED",
+        "IDENTITY_UNBOUND",
+        "NOT_APPLICABLE"
+      ],
+      "title": "CompletenessState",
+      "type": "string"
+    },
+    "CostHypothesis": {
+      "enum": [
+        "VIABLE",
+        "UNECONOMIC",
+        "UNKNOWN"
+      ],
+      "title": "CostHypothesis",
+      "type": "string"
+    },
+    "EvidenceCompletenessReport": {
+      "additionalProperties": false,
+      "properties": {
+        "caseId": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+          "title": "Caseid",
+          "type": "string"
+        },
+        "requirements": {
+          "items": {
+            "$ref": "#/$defs/EvidenceRequirement"
+          },
+          "minItems": 1,
+          "title": "Requirements",
+          "type": "array"
+        },
+        "schemaVersion": {
+          "default": 1,
+          "maximum": 1,
+          "minimum": 1,
+          "title": "Schemaversion",
+          "type": "integer"
+        },
+        "technicalResult": {
+          "$ref": "#/$defs/TechnicalResult"
+        }
+      },
+      "required": [
+        "caseId",
+        "requirements",
+        "technicalResult"
+      ],
+      "title": "EvidenceCompletenessReport",
+      "type": "object"
+    },
+    "EvidenceRequirement": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactRefs": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Artifactrefs",
+          "type": "array"
+        },
+        "detail": {
+          "minLength": 1,
+          "title": "Detail",
+          "type": "string"
+        },
+        "kind": {
+          "minLength": 1,
+          "title": "Kind",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/CompletenessState"
+        }
+      },
+      "required": [
+        "kind",
+        "state",
+        "artifactRefs",
+        "detail"
+      ],
+      "title": "EvidenceRequirement",
+      "type": "object"
+    },
+    "NativeBaseline": {
+      "additionalProperties": false,
+      "properties": {
+        "caseId": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+          "title": "Caseid",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Command",
+          "type": "array"
+        },
+        "configuration": {
+          "additionalProperties": true,
+          "title": "Configuration",
+          "type": "object"
+        },
+        "evidenceRefs": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Evidencerefs",
+          "type": "array"
+        },
+        "executedAt": {
+          "format": "date-time",
+          "title": "Executedat",
+          "type": "string"
+        },
+        "findings": {
+          "items": {
+            "$ref": "#/$defs/NativeFinding"
+          },
+          "title": "Findings",
+          "type": "array"
+        },
+        "humanReviewed": {
+          "title": "Humanreviewed",
+          "type": "boolean"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Limitations",
+          "type": "array"
+        },
+        "reviewer": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Reviewer"
+        },
+        "schemaVersion": {
+          "default": 1,
+          "maximum": 1,
+          "minimum": 1,
+          "title": "Schemaversion",
+          "type": "integer"
+        },
+        "toolName": {
+          "minLength": 1,
+          "title": "Toolname",
+          "type": "string"
+        },
+        "toolVersion": {
+          "minLength": 1,
+          "title": "Toolversion",
+          "type": "string"
+        },
+        "unresolvedCustomerDecision": {
+          "minLength": 1,
+          "title": "Unresolvedcustomerdecision",
+          "type": "string"
+        }
+      },
+      "required": [
+        "caseId",
+        "toolName",
+        "toolVersion",
+        "command",
+        "configuration",
+        "findings",
+        "evidenceRefs",
+        "limitations",
+        "unresolvedCustomerDecision",
+        "executedAt",
+        "humanReviewed"
+      ],
+      "title": "NativeBaseline",
+      "type": "object"
+    },
+    "NativeConfidence": {
+      "enum": [
+        "DIRECT_OBSERVATION",
+        "DERIVED_ALIGNMENT",
+        "TOOL_HEURISTIC",
+        "UNVERIFIED_NARRATIVE"
+      ],
+      "title": "NativeConfidence",
+      "type": "string"
+    },
+    "NativeFinding": {
+      "additionalProperties": false,
+      "properties": {
+        "confidenceClass": {
+          "$ref": "#/$defs/NativeConfidence"
+        },
+        "customerDecisionContribution": {
+          "title": "Customerdecisioncontribution",
+          "type": "string"
+        },
+        "evidenceRefs": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "title": "Evidencerefs",
+          "type": "array"
+        },
+        "findingId": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Findingid",
+          "type": "string"
+        },
+        "limitations": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Limitations",
+          "type": "array"
+        },
+        "nativeSystem": {
+          "minLength": 1,
+          "title": "Nativesystem",
+          "type": "string"
+        },
+        "nativeVersion": {
+          "minLength": 1,
+          "title": "Nativeversion",
+          "type": "string"
+        },
+        "observation": {
+          "minLength": 1,
+          "title": "Observation",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "default": 1,
+          "maximum": 1,
+          "minimum": 1,
+          "title": "Schemaversion",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "findingId",
+        "nativeSystem",
+        "nativeVersion",
+        "observation",
+        "evidenceRefs",
+        "confidenceClass",
+        "limitations",
+        "customerDecisionContribution"
+      ],
+      "title": "NativeFinding",
+      "type": "object"
+    },
+    "TechnicalResult": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "UNKNOWN",
+        "INVALID_EVIDENCE",
+        "INVALID_ORACLE",
+        "INFRASTRUCTURE_ERROR",
+        "POLICY_BLOCKED",
+        "EXPIRED"
+      ],
+      "title": "TechnicalResult",
+      "type": "string"
+    }
+  },
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "baselineAccess": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Baselineaccess"
+    },
+    "candidateAccess": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Candidateaccess"
+    },
+    "caseId": {
+      "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
+      "title": "Caseid",
+      "type": "string"
+    },
+    "completeNativeBaseline": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Completenativebaseline"
+    },
+    "completenessReport": {
+      "$ref": "#/$defs/EvidenceCompletenessReport"
+    },
+    "costHypothesis": {
+      "$ref": "#/$defs/CostHypothesis"
+    },
+    "decisionDeadline": {
+      "format": "date-time",
+      "title": "Decisiondeadline",
+      "type": "string"
+    },
+    "decisionType": {
+      "minLength": 1,
+      "title": "Decisiontype",
+      "type": "string"
+    },
+    "evaluatedAt": {
+      "format": "date-time",
+      "title": "Evaluatedat",
+      "type": "string"
+    },
+    "evidenceIdentityBound": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Evidenceidentitybound"
+    },
+    "exportPolicyAllowsRequiredFlow": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Exportpolicyallowsrequiredflow"
+    },
+    "humanExpertiseAvailable": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Humanexpertiseavailable"
+    },
+    "localExecutionAvailable": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Localexecutionavailable"
+    },
+    "nativeBaseline": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/NativeBaseline"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "nativeWorkflowResolvesDecision": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Nativeworkflowresolvesdecision"
+    },
+    "packFit": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Packfit"
+    },
+    "privacyPolicyAllowsProcessing": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Privacypolicyallowsprocessing"
+    },
+    "schemaVersion": {
+      "default": 1,
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Schemaversion",
+      "type": "integer"
+    },
+    "sourceVersionSupported": {
+      "anyOf": [
+        {
+          "type": "boolean"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Sourceversionsupported"
+    }
+  },
+  "required": [
+    "caseId",
+    "decisionType",
+    "decisionDeadline",
+    "evaluatedAt",
+    "baselineAccess",
+    "candidateAccess",
+    "evidenceIdentityBound",
+    "packFit",
+    "localExecutionAvailable",
+    "costHypothesis",
+    "privacyPolicyAllowsProcessing",
+    "exportPolicyAllowsRequiredFlow",
+    "completeNativeBaseline",
+    "nativeWorkflowResolvesDecision",
+    "humanExpertiseAvailable",
+    "sourceVersionSupported",
+    "completenessReport"
+  ],
+  "title": "PreflightInputs",
+  "type": "object"
+}

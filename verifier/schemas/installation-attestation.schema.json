@@ -1,0 +1,88 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "InstallationState": {
+      "enum": [
+        "STAGED_NOT_ACTIVATED",
+        "READY"
+      ],
+      "title": "InstallationState",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/verifier/v3.1/installation-attestation.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "authorityValidated": {
+      "title": "Authorityvalidated",
+      "type": "boolean"
+    },
+    "checkedPaths": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "maxProperties": 32,
+      "minProperties": 1,
+      "title": "Checkedpaths",
+      "type": "object"
+    },
+    "expectedOwnerUid": {
+      "minimum": 0,
+      "title": "Expectedowneruid",
+      "type": "integer"
+    },
+    "installationRoot": {
+      "title": "Installationroot",
+      "type": "string"
+    },
+    "liveOracleVerified": {
+      "title": "Liveoracleverified",
+      "type": "boolean"
+    },
+    "liveServiceVerified": {
+      "title": "Liveserviceverified",
+      "type": "boolean"
+    },
+    "missingPrivateInputs": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 16,
+      "title": "Missingprivateinputs",
+      "type": "array"
+    },
+    "publicKeyFingerprint": {
+      "$ref": "#/$defs/Digest"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "state": {
+      "$ref": "#/$defs/InstallationState"
+    },
+    "verifierDistributionDigest": {
+      "$ref": "#/$defs/Digest"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "installationRoot",
+    "verifierDistributionDigest",
+    "publicKeyFingerprint",
+    "expectedOwnerUid",
+    "checkedPaths",
+    "missingPrivateInputs",
+    "authorityValidated",
+    "liveOracleVerified",
+    "liveServiceVerified",
+    "state"
+  ],
+  "title": "InstallationAttestation",
+  "type": "object"
+}

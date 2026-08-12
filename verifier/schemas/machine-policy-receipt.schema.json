@@ -1,0 +1,298 @@
+{
+  "$defs": {
+    "CommercialCeiling": {
+      "enum": [
+        "NOT_EVALUATED",
+        "NATIVE_ADVANTAGE_UNPROVEN",
+        "PILOT_ELIGIBLE",
+        "COMMERCIALLY_SUPPORTED",
+        "WITHDRAWN"
+      ],
+      "title": "CommercialCeiling",
+      "type": "string"
+    },
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "EngineeringCeiling": {
+      "enum": [
+        "NOT_EVALUATED",
+        "FAILED",
+        "PASSED"
+      ],
+      "title": "EngineeringCeiling",
+      "type": "string"
+    },
+    "GateResult": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "UNKNOWN"
+      ],
+      "title": "GateResult",
+      "type": "string"
+    },
+    "GitSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    },
+    "NativeDisposition": {
+      "enum": [
+        "NATIVE_SUFFICIENT",
+        "INCREMENTAL_VALUE",
+        "NOT_COMPARABLE",
+        "UNKNOWN"
+      ],
+      "title": "NativeDisposition",
+      "type": "string"
+    },
+    "RelativePath": {
+      "maxLength": 512,
+      "minLength": 1,
+      "pattern": "^[^/].*$",
+      "type": "string"
+    },
+    "ValueDisposition": {
+      "enum": [
+        "NATIVE_WORKFLOW_SUFFICIENT",
+        "NO_INCREMENTAL_DECISION_VALUE",
+        "TECHNICALLY_VALID_BUT_NOT_ECONOMIC",
+        "INCREMENTAL_DECISION_VALUE_DEMONSTRATED",
+        "EXTERNAL_EVIDENCE_REQUIRED",
+        "UNKNOWN"
+      ],
+      "title": "ValueDisposition",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/verifier/v3.1/machine-policy-receipt.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allowedClaims": {
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Allowedclaims",
+      "type": "array"
+    },
+    "baseSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "candidateManifestDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "candidateSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "candidateTreeSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "checkpointDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "commercialMaturityCeiling": {
+      "$ref": "#/$defs/CommercialCeiling"
+    },
+    "contextManifestDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "decision": {
+      "const": "PASS",
+      "title": "Decision",
+      "type": "string"
+    },
+    "decisionValueDisposition": {
+      "$ref": "#/$defs/ValueDisposition"
+    },
+    "engineeringMaturityCeiling": {
+      "$ref": "#/$defs/EngineeringCeiling"
+    },
+    "expiresAt": {
+      "format": "date-time",
+      "title": "Expiresat",
+      "type": "string"
+    },
+    "forbiddenClaims": {
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "maxItems": 64,
+      "title": "Forbiddenclaims",
+      "type": "array"
+    },
+    "independentOracleIds": {
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "maxItems": 32,
+      "minItems": 1,
+      "title": "Independentoracleids",
+      "type": "array"
+    },
+    "issuedAt": {
+      "format": "date-time",
+      "title": "Issuedat",
+      "type": "string"
+    },
+    "issuerId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "issuerKeyId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "lane": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "milestoneId": {
+      "pattern": "^M[0-9]+_[A-Z0-9_]+$",
+      "title": "Milestoneid",
+      "type": "string"
+    },
+    "nativeSubstituteDisposition": {
+      "$ref": "#/$defs/NativeDisposition"
+    },
+    "nonce": {
+      "maxLength": 256,
+      "minLength": 16,
+      "title": "Nonce",
+      "type": "string"
+    },
+    "policyId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "policyVersion": {
+      "title": "Policyversion",
+      "type": "string"
+    },
+    "privateGateRunnerDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "privateGateSuiteId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "publicationScope": {
+      "items": {
+        "$ref": "#/$defs/RelativePath"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Publicationscope",
+      "type": "array"
+    },
+    "rawEvidenceArtifactHashes": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Rawevidenceartifacthashes",
+      "type": "array"
+    },
+    "receiptId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "requestDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "requiredGateResults": {
+      "additionalProperties": {
+        "$ref": "#/$defs/GateResult"
+      },
+      "maxProperties": 128,
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "title": "Requiredgateresults",
+      "type": "object"
+    },
+    "revocationEpoch": {
+      "minimum": 1,
+      "title": "Revocationepoch",
+      "type": "integer"
+    },
+    "riskTier": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "signature": {
+      "maxLength": 128,
+      "minLength": 80,
+      "title": "Signature",
+      "type": "string"
+    },
+    "signatureAlgorithm": {
+      "const": "ed25519",
+      "title": "Signaturealgorithm",
+      "type": "string"
+    },
+    "sourceGenerationDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "sourceGenerationId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "taskPacketDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "receiptId",
+    "policyId",
+    "policyVersion",
+    "issuerId",
+    "issuerKeyId",
+    "issuedAt",
+    "expiresAt",
+    "revocationEpoch",
+    "nonce",
+    "requestDigest",
+    "workItemId",
+    "milestoneId",
+    "lane",
+    "riskTier",
+    "candidateSha",
+    "candidateTreeSha",
+    "baseSha",
+    "sourceGenerationId",
+    "sourceGenerationDigest",
+    "contextManifestDigest",
+    "taskPacketDigest",
+    "candidateManifestDigest",
+    "checkpointDigest",
+    "requiredGateResults",
+    "privateGateSuiteId",
+    "privateGateRunnerDigest",
+    "independentOracleIds",
+    "rawEvidenceArtifactHashes",
+    "nativeSubstituteDisposition",
+    "decisionValueDisposition",
+    "engineeringMaturityCeiling",
+    "commercialMaturityCeiling",
+    "allowedClaims",
+    "publicationScope",
+    "decision",
+    "signatureAlgorithm",
+    "signature"
+  ],
+  "title": "MachinePolicyReceipt",
+  "type": "object"
+}

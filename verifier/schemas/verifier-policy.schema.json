@@ -1,0 +1,234 @@
+{
+  "$defs": {
+    "CommercialCeiling": {
+      "enum": [
+        "NOT_EVALUATED",
+        "NATIVE_ADVANTAGE_UNPROVEN",
+        "PILOT_ELIGIBLE",
+        "COMMERCIALLY_SUPPORTED",
+        "WITHDRAWN"
+      ],
+      "title": "CommercialCeiling",
+      "type": "string"
+    },
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "EngineeringCeiling": {
+      "enum": [
+        "NOT_EVALUATED",
+        "FAILED",
+        "PASSED"
+      ],
+      "title": "EngineeringCeiling",
+      "type": "string"
+    },
+    "EvidenceMode": {
+      "enum": [
+        "SIMULATED",
+        "CONTROLLED_VALIDATED",
+        "LIVE_VALIDATED"
+      ],
+      "title": "EvidenceMode",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    },
+    "RelativePath": {
+      "maxLength": 512,
+      "minLength": 1,
+      "pattern": "^[^/].*$",
+      "type": "string"
+    },
+    "RiskPolicy": {
+      "additionalProperties": false,
+      "properties": {
+        "acceptedEvidenceModes": {
+          "items": {
+            "$ref": "#/$defs/EvidenceMode"
+          },
+          "maxItems": 3,
+          "minItems": 1,
+          "title": "Acceptedevidencemodes",
+          "type": "array"
+        },
+        "maximumCommercialCeiling": {
+          "$ref": "#/$defs/CommercialCeiling"
+        },
+        "maximumEngineeringCeiling": {
+          "$ref": "#/$defs/EngineeringCeiling"
+        },
+        "oracleRunnerDigests": {
+          "additionalProperties": {
+            "$ref": "#/$defs/Digest"
+          },
+          "maxProperties": 32,
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "title": "Oraclerunnerdigests",
+          "type": "object"
+        },
+        "oracleRunnerPaths": {
+          "additionalProperties": {
+            "$ref": "#/$defs/RelativePath"
+          },
+          "maxProperties": 32,
+          "minProperties": 1,
+          "propertyNames": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "title": "Oraclerunnerpaths",
+          "type": "object"
+        },
+        "requiredGates": {
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "maxItems": 128,
+          "minItems": 1,
+          "title": "Requiredgates",
+          "type": "array"
+        },
+        "requiredOracleIds": {
+          "items": {
+            "$ref": "#/$defs/Identifier"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Requiredoracleids",
+          "type": "array"
+        }
+      },
+      "required": [
+        "requiredGates",
+        "requiredOracleIds",
+        "oracleRunnerDigests",
+        "oracleRunnerPaths",
+        "acceptedEvidenceModes",
+        "maximumEngineeringCeiling",
+        "maximumCommercialCeiling"
+      ],
+      "title": "RiskPolicy",
+      "type": "object"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/verifier/v3.1/verifier-policy.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "activeSourceGenerationDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "activeSourceGenerationId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "allowedClaims": {
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Allowedclaims",
+      "type": "array"
+    },
+    "allowedPublicationScopes": {
+      "items": {
+        "$ref": "#/$defs/RelativePath"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Allowedpublicationscopes",
+      "type": "array"
+    },
+    "forbiddenClaims": {
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "maxItems": 128,
+      "title": "Forbiddenclaims",
+      "type": "array"
+    },
+    "issuerId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "issuerKeyId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "maximumEvidenceAgeSeconds": {
+      "maximum": 604800,
+      "minimum": 1,
+      "title": "Maximumevidenceageseconds",
+      "type": "integer"
+    },
+    "maximumReceiptLifetimeSeconds": {
+      "maximum": 86400,
+      "minimum": 60,
+      "title": "Maximumreceiptlifetimeseconds",
+      "type": "integer"
+    },
+    "minimumRevocationEpoch": {
+      "minimum": 1,
+      "title": "Minimumrevocationepoch",
+      "type": "integer"
+    },
+    "policyId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "policyVersion": {
+      "pattern": "^[1-9][0-9]*\\.[0-9]+\\.[0-9]+$",
+      "title": "Policyversion",
+      "type": "string"
+    },
+    "privateGateRunnerDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "privateGateSuiteId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "publicKeyFingerprint": {
+      "$ref": "#/$defs/Digest"
+    },
+    "riskPolicies": {
+      "additionalProperties": {
+        "$ref": "#/$defs/RiskPolicy"
+      },
+      "maxProperties": 32,
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "title": "Riskpolicies",
+      "type": "object"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyId",
+    "policyVersion",
+    "issuerId",
+    "issuerKeyId",
+    "publicKeyFingerprint",
+    "minimumRevocationEpoch",
+    "activeSourceGenerationId",
+    "activeSourceGenerationDigest",
+    "privateGateSuiteId",
+    "privateGateRunnerDigest",
+    "riskPolicies",
+    "allowedClaims",
+    "allowedPublicationScopes",
+    "maximumReceiptLifetimeSeconds",
+    "maximumEvidenceAgeSeconds"
+  ],
+  "title": "VerifierPolicy",
+  "type": "object"
+}

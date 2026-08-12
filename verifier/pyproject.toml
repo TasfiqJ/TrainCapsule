@@ -1,0 +1,24 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "traincapsule-independent-verifier"
+version = "3.1.0"
+description = "Independent V3.1-ZH machine-policy verifier"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+  "cryptography>=46",
+  "pydantic>=2.8",
+]
+
+[project.scripts]
+traincapsule-verifier = "traincapsule_verifier.cli:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/traincapsule_verifier"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"schemas" = "traincapsule_verifier/schemas"
+"tests/canonical-vector.json" = "traincapsule_verifier/canonical-vector.json"

@@ -1,0 +1,110 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/verifier/v3.1/revocation-list.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "expiresAt": {
+      "format": "date-time",
+      "title": "Expiresat",
+      "type": "string"
+    },
+    "issuedAt": {
+      "format": "date-time",
+      "title": "Issuedat",
+      "type": "string"
+    },
+    "issuerId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "issuerKeyId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "policyId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "policyVersion": {
+      "title": "Policyversion",
+      "type": "string"
+    },
+    "previousListDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Digest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "revocationEpoch": {
+      "minimum": 1,
+      "title": "Revocationepoch",
+      "type": "integer"
+    },
+    "revokedKeyIds": {
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "maxItems": 1000,
+      "title": "Revokedkeyids",
+      "type": "array"
+    },
+    "revokedNonces": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10000,
+      "title": "Revokednonces",
+      "type": "array"
+    },
+    "revokedReceiptIds": {
+      "items": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "maxItems": 10000,
+      "title": "Revokedreceiptids",
+      "type": "array"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "signature": {
+      "maxLength": 128,
+      "minLength": 80,
+      "title": "Signature",
+      "type": "string"
+    },
+    "signatureAlgorithm": {
+      "const": "ed25519",
+      "title": "Signaturealgorithm",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyId",
+    "policyVersion",
+    "issuerId",
+    "issuerKeyId",
+    "revocationEpoch",
+    "issuedAt",
+    "expiresAt",
+    "signatureAlgorithm",
+    "signature"
+  ],
+  "title": "RevocationList",
+  "type": "object"
+}

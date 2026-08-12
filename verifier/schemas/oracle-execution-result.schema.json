@@ -1,0 +1,104 @@
+{
+  "$defs": {
+    "CommercialCeiling": {
+      "enum": [
+        "NOT_EVALUATED",
+        "NATIVE_ADVANTAGE_UNPROVEN",
+        "PILOT_ELIGIBLE",
+        "COMMERCIALLY_SUPPORTED",
+        "WITHDRAWN"
+      ],
+      "title": "CommercialCeiling",
+      "type": "string"
+    },
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "EngineeringCeiling": {
+      "enum": [
+        "NOT_EVALUATED",
+        "FAILED",
+        "PASSED"
+      ],
+      "title": "EngineeringCeiling",
+      "type": "string"
+    },
+    "NativeDisposition": {
+      "enum": [
+        "NATIVE_SUFFICIENT",
+        "INCREMENTAL_VALUE",
+        "NOT_COMPARABLE",
+        "UNKNOWN"
+      ],
+      "title": "NativeDisposition",
+      "type": "string"
+    },
+    "OracleOutcome": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "UNKNOWN"
+      ],
+      "title": "OracleOutcome",
+      "type": "string"
+    },
+    "ValueDisposition": {
+      "enum": [
+        "NATIVE_WORKFLOW_SUFFICIENT",
+        "NO_INCREMENTAL_DECISION_VALUE",
+        "TECHNICALLY_VALID_BUT_NOT_ECONOMIC",
+        "INCREMENTAL_DECISION_VALUE_DEMONSTRATED",
+        "EXTERNAL_EVIDENCE_REQUIRED",
+        "UNKNOWN"
+      ],
+      "title": "ValueDisposition",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/verifier/v3.1/oracle-execution-result.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "commercialCeiling": {
+      "$ref": "#/$defs/CommercialCeiling"
+    },
+    "engineeringCeiling": {
+      "$ref": "#/$defs/EngineeringCeiling"
+    },
+    "nativeDisposition": {
+      "$ref": "#/$defs/NativeDisposition"
+    },
+    "outcome": {
+      "$ref": "#/$defs/OracleOutcome"
+    },
+    "rawEvidenceArtifactHashes": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Rawevidenceartifacthashes",
+      "type": "array"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "valueDisposition": {
+      "$ref": "#/$defs/ValueDisposition"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "outcome",
+    "rawEvidenceArtifactHashes",
+    "nativeDisposition",
+    "valueDisposition",
+    "engineeringCeiling",
+    "commercialCeiling"
+  ],
+  "title": "OracleExecutionResult",
+  "type": "object"
+}

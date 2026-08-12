@@ -60,6 +60,7 @@ extraPaths = [
   "packages/traincapsule-ingest-pytorch/src",
   "packages/traincapsule-qualify/src",
   "packages/traincapsule-cli/src",
+  "verifier/src",
 ]
 
 [tool.pytest.ini_options]
@@ -70,4 +71,5 @@ pythonpath = [
   "packages/traincapsule-ingest-pytorch/src",
   "packages/traincapsule-qualify/src",
   "packages/traincapsule-cli/src",
+  "verifier/src",
 ]

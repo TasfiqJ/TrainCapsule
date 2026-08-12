@@ -33,7 +33,7 @@ Durable Phase-0 evidence:
 
 ## Current phase
 
-Phase 0 — safety, inventory, baseline proof, and hostile cross-reference — is complete. Phase 1 — coherent V3.1-ZH authority and fail-closed runtime migration — has passed local acceptance and is being frozen in the containing phase commit. Phase 2 strict V3.1 contracts and the repository-side Phase 3 independent verifier are implemented and tested but remain staged for their own commits. Phase 4 automated-PR publication is not implemented and remains fail-closed.
+Phases 0 through 2 — baseline proof, coherent V3.1-ZH authority/fail-closed runtime migration, and strict V3.1 contracts — are committed. The repository-side Phase 3 independent verifier has passed hostile local acceptance and is being frozen in the containing phase commit. Phase 4 automated-PR publication is not implemented and remains fail-closed.
 
 Completed Phase 0 actions:
 
@@ -51,8 +51,10 @@ Completed Phase 0 actions:
 Completed phase commits:
 
 - Phase 0: `1f05faa` — `chore: record v3.1 zh hardening baseline`.
+- Phase 1: `75aaebd` — `spec: add coherent v3.1 zh authority`.
+- Phase 2: `b58a010` — `feat: add strict v3.1 contracts`.
 
-The containing commit is the Phase 1 authority checkpoint, with subject `spec: add coherent v3.1 zh authority`. Its exact SHA is recorded by Git and will be copied into this table by the next phase checkpoint. No draft PR exists yet.
+The containing commit is the Phase 3 repository-side independent-verifier checkpoint, with subject `feat: add independent machine verifier`. Its exact SHA is recorded by Git and will be copied into this table by the next phase checkpoint. No draft PR exists yet.
 
 Phase 1 acceptance evidence at freeze:
 
@@ -65,6 +67,15 @@ Phase 1 acceptance evidence at freeze:
 - 140 focused authority, migration, factory, contract, and verifier tests passing in the root aggregate replay;
 - repository-wide Ruff and strict Pyright passing in the factory acceptance replay;
 - five V3.1 M0 records intentionally `PENDING_FINALIZATION`; the evidence gate fails closed until real independent authorization and automated-PR evidence exist.
+
+Phase 2 and repository-side Phase 3 acceptance evidence:
+
+- 23/23 strict V3.1 contract schemas exact and lossless V3 migration envelopes tested;
+- 11/11 independent-verifier public schemas and canonical vector exact;
+- 62/62 verifier and V3.1 contract tests passing after hostile replay;
+- caller-selected identity, path traversal, revocation rollback, linked-receipt revocation, writable-root, activation-laundering, future/lifetime, garbage-attestation, oracle, and descriptor-exhaustion controls passing;
+- clean offline verifier wheel/install passing with no `tcfactory`, source-tree, private key, minted receipt, or bytecode artifact;
+- installation remains `STAGED_NOT_ACTIVATED`: no private policy, oracle authority, signing key, revocation state, service, GitHub credential, or live receipt is committed or claimed.
 
 ## Exact baseline evidence
 
@@ -154,7 +165,7 @@ The STOP marker and disabled product-controller task must remain unchanged until
 
 ## Next exact action
 
-Commit and push the accepted Phase 1 checkpoint on the hardening branch, then integrate the staged strict contracts and independent verifier before implementing Phase 4 automated-PR publication. V3.1 MIG-016 through MIG-020 remain explicitly pending; live independent-verifier evidence and automated-PR/required-CI/merged-main receipts must exist before M0 can close. Historical V2/V3 source and evidence remain immutable inputs only.
+Commit and push the repository-side Phase 3 verifier checkpoint on the hardening branch, then implement Phase 4 automated-PR publication and its durable crash/recovery contract. V3.1 MIG-016 through MIG-020 remain explicitly pending; live independent-verifier evidence and automated-PR/required-CI/merged-main receipts must exist before M0 can close. Historical V2/V3 source and evidence remain immutable inputs only.
 
 ## Rollback and safe stop
 

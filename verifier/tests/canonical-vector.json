@@ -1,0 +1,12 @@
+{
+  "canonical": "{\"candidateSha\":\"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa\",\"checkName\":\"TrainCapsule / Machine policy\",\"conclusion\":\"success\",\"receiptDigest\":\"sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb\",\"receiptId\":\"RECEIPT:VECTOR:001\",\"schemaVersion\":\"3.1\"}\n",
+  "digest": "sha256:714707590ee71002c45e43411311837c20484386a7e37053a20702e14ed73d9f",
+  "payload": {
+    "candidateSha": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+    "checkName": "TrainCapsule / Machine policy",
+    "conclusion": "success",
+    "receiptDigest": "sha256:bbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbbb",
+    "receiptId": "RECEIPT:VECTOR:001",
+    "schemaVersion": "3.1"
+  }
+}

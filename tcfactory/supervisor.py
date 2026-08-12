@@ -174,7 +174,7 @@ def run_startup_preflight(repo_root: Path) -> dict[str, object]:
     paths = runtime_paths(repo_root, config)
     _verify_source_integrity(repo_root)
     legacy_migration = load_installed_legacy_migration(repo_root)
-    verify_legacy_queue_archive_receipt(repo_root)
+    verify_legacy_queue_archive_receipt(repo_root, require_live=True)
     if paths.stop.exists():
         raise RuntimeError("durable STOP is present")
     if paths.hard_stuck.exists():

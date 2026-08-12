@@ -45,6 +45,7 @@ def test_required_workflows_are_bounded_portable_and_secret_free() -> None:
         assert "permissions:\n  contents: read" in text
         if "upload-artifact" in text:
             assert "retention-days:" in text
+            assert "include-hidden-files: true" in text
         assert "push:\n    branches: [main]" in text
         assert "pull_request:" not in text
         assert "${{ secrets" not in text
@@ -75,7 +76,17 @@ def test_workflow_test_scopes_are_explicit() -> None:
         encoding="utf-8"
     )
     assert "generate_product_schemas.py --check" in product_unit
+    assert "Install product workspace packages" in product_unit
+    assert "-e packages/traincapsule-core" in product_unit
     assert "tests/product/test_identity.py" in product_unit
     assert "tests/product/test_evidence_store.py" in product_unit
     assert "tests/product/test_flight_recorder_importer.py" in product_contract
     assert "tests/product/test_cli.py" in product_contract
+    assert "Install product workspace packages" in product_contract
+    assert "-e packages/traincapsule-cli" in product_contract
+    docs_schemas = (workflow_root / "docs-schemas.yml").read_text(encoding="utf-8")
+    packaging = (workflow_root / "packaging-install.yml").read_text(encoding="utf-8")
+    assert "fetch-depth: 0" in product_contract
+    assert "fetch-depth: 0" in docs_schemas
+    assert "Install product workspace packages" in docs_schemas
+    assert "uv sync --extra dev --frozen" in packaging

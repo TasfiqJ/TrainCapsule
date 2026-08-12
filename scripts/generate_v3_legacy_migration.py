@@ -169,10 +169,13 @@ def _preserved_evidence(item: FeatureItem, root: Path) -> list[str]:
     task_id = item.task_id
     candidates = [
         root / f"docs/evidence/{task_id}",
-        root / f"factory/artifacts/{task_id}",
         root / f"factory/proposals/{task_id}.yaml",
         root / f"specs/tasks/{task_id}.md",
     ]
+    if task_id in {"T001", "T002"}:
+        # These ignored runtime trees were present in the signed migration snapshot.
+        # Keep their preservation references deterministic in clean checkouts.
+        references.add(f"factory/artifacts/{task_id}")
     for candidate in candidates:
         if candidate.exists():
             references.add(candidate.relative_to(root).as_posix())

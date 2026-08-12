@@ -18,10 +18,14 @@ jobs:
     timeout-minutes: 20
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+        with:
+          fetch-depth: 0
       - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
         with:
           python-version: "3.12"
       - run: uv sync --extra dev --frozen
+      - name: Install product workspace packages
+        run: uv pip install --python .venv/bin/python -e packages/traincapsule-core -e packages/traincapsule-ingest-pytorch -e packages/traincapsule-qualify -e packages/traincapsule-cli
       - name: Run product contract and journey scope
         shell: bash
         run: |
@@ -40,5 +44,6 @@ jobs:
         with:
           name: product-contract-${{ github.run_id }}
           path: .ci-artifacts/
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 14

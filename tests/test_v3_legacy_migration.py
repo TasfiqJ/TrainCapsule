@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+import shutil
 from collections import Counter
 from pathlib import Path
 from typing import cast
 
+import pytest
 from typer.testing import CliRunner
 
 from scripts.generate_v3_legacy_migration import (
@@ -142,6 +144,28 @@ def test_non_resuming_queue_archive_receipt_is_fully_verifiable() -> None:
         *(status.value.lower() for status in WorkStatus),
         "waiting_human",  # historical V2 archive namespace; never a V3 runtime state
     }
+
+
+def test_tracked_queue_receipts_verify_in_a_clean_checkout(tmp_path: Path) -> None:
+    clean = tmp_path / "clean"
+    (clean / "docs/migrations").mkdir(parents=True)
+    for name in (
+        "V3_RUNTIME_SNAPSHOT_METADATA.json",
+        "V3_LEGACY_QUEUE_ARCHIVE_METADATA.json",
+    ):
+        shutil.copy2(ROOT / "docs/migrations" / name, clean / "docs/migrations" / name)
+
+    digest, captured_at = verify_stopped_legacy_queue(clean)
+    receipt = verify_legacy_queue_archive_receipt(clean)
+    assert digest == "885df1dd93b8adce0876cd15f74a2921cb92f668fdc9bc24df27d56f638d3283"
+    assert captured_at.isoformat() == "2026-08-11T21:20:24+00:00"
+    assert receipt["archiveManifestDigest"] == (
+        "sha256:c30a6a4b7438649a05802192927ff3c5e5b4501c8a2e5066600eb86ccab1c6d1"
+    )
+    with pytest.raises(ValueError, match="live STOP, PAUSE, and queue evidence"):
+        verify_stopped_legacy_queue(clean, require_live=True)
+    with pytest.raises(ValueError, match="evidence is missing"):
+        verify_legacy_queue_archive_receipt(clean, require_live=True)
 
 
 def test_exact_roadmap_migration_cli_dry_run_is_read_only() -> None:

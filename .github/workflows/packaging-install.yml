@@ -21,6 +21,7 @@ jobs:
       - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
         with:
           python-version: "3.12"
+      - run: uv sync --extra dev --frozen
       - name: Build independent product wheels
         shell: bash
         run: |
@@ -46,5 +47,6 @@ jobs:
         with:
           name: packaging-install-${{ github.run_id }}
           path: .ci-artifacts/
+          include-hidden-files: true
           if-no-files-found: error
           retention-days: 14

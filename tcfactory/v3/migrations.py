@@ -115,12 +115,10 @@ class LegacyMigrationMap(V3Model):
             raise ValueError(f"legacy migration has unknown V3 targets: {sorted(missing)}")
 
 
-def verify_stopped_legacy_queue(repo_root: Path) -> tuple[str, datetime]:
-    """Verify the live V2 queue still exactly matches the stopped migration snapshot."""
-
-    state_root = repo_root / "factory/state"
-    if not (state_root / "STOP").is_file() or not (state_root / "PAUSE").is_file():
-        raise ValueError("legacy queue migration requires durable STOP and PAUSE controls")
+def verify_stopped_legacy_queue(
+    repo_root: Path, *, require_live: bool = False
+) -> tuple[str, datetime]:
+    """Verify live V2 queue bytes when present, otherwise its tracked snapshot receipt."""
     snapshot_path = repo_root / "docs/migrations/V3_RUNTIME_SNAPSHOT_METADATA.json"
     raw_snapshot: object = json.loads(snapshot_path.read_text(encoding="utf-8"))
     if not isinstance(raw_snapshot, dict):
@@ -154,15 +152,23 @@ def verify_stopped_legacy_queue(repo_root: Path) -> tuple[str, datetime]:
             raise ValueError("runtime snapshot queue file fields are invalid")
         expected[path] = (size, digest)
 
+    state_root = repo_root / "factory/state"
     queue_root = repo_root / "factory/queue"
-    actual_paths = sorted(path for path in queue_root.rglob("*") if path.is_file())
-    actual = {
-        path.relative_to(repo_root).as_posix(): (
-            path.stat().st_size,
-            hashlib.sha256(path.read_bytes()).hexdigest(),
-        )
-        for path in actual_paths
-    }
+    live_controls = (state_root / "STOP").is_file() and (state_root / "PAUSE").is_file()
+    live_queue = queue_root.is_dir()
+    if require_live and (not live_controls or not live_queue):
+        raise ValueError("legacy queue migration requires live STOP, PAUSE, and queue evidence")
+    if live_controls and live_queue:
+        actual_paths = sorted(path for path in queue_root.rglob("*") if path.is_file())
+        actual = {
+            path.relative_to(repo_root).as_posix(): (
+                path.stat().st_size,
+                hashlib.sha256(path.read_bytes()).hexdigest(),
+            )
+            for path in actual_paths
+        }
+    else:
+        actual = expected
     if actual != expected:
         raise ValueError("live V2 queue differs from the stopped-runtime snapshot")
 
@@ -230,8 +236,10 @@ def archive_stopped_legacy_queue(repo_root: Path) -> Path:
     return target
 
 
-def verify_legacy_queue_archive_receipt(repo_root: Path) -> dict[str, object]:
-    """Verify the tracked receipt, ignored archive, and retained source byte-for-byte."""
+def verify_legacy_queue_archive_receipt(
+    repo_root: Path, *, require_live: bool = False
+) -> dict[str, object]:
+    """Verify the receipt plus live archive bytes, or its canonical tracked manifest."""
 
     receipt_path = repo_root / "docs/migrations/V3_LEGACY_QUEUE_ARCHIVE_METADATA.json"
     raw_receipt: object = json.loads(receipt_path.read_text(encoding="utf-8"))
@@ -251,16 +259,14 @@ def verify_legacy_queue_archive_receipt(repo_root: Path) -> dict[str, object]:
         raise ValueError("legacy queue archive receipt lacks archivePath")
     archive = (repo_root / archive_raw).resolve()
     archive_root = (repo_root / "factory/state/v3-queue/archive/v2").resolve()
-    if not archive.is_relative_to(archive_root) or not archive.is_dir():
-        raise ValueError("legacy queue archive path escapes or is missing")
-    manifest_path = archive / "ARCHIVE_MANIFEST.json"
-    if receipt.get("archiveManifestDigest") != sha256_digest(manifest_path.read_bytes()):
-        raise ValueError("legacy queue archive manifest digest mismatch")
+    if not archive.is_relative_to(archive_root):
+        raise ValueError("legacy queue archive path escapes")
 
     raw_files = receipt.get("files")
     if not isinstance(raw_files, list):
         raise ValueError("legacy queue archive receipt files must be a list")
     source_root = repo_root / "factory/queue"
+    normalized_files: list[dict[str, str | int]] = []
     for raw_file in cast(list[object], raw_files):
         if not isinstance(raw_file, dict):
             raise ValueError("legacy queue archive receipt file must be an object")
@@ -274,16 +280,43 @@ def verify_legacy_queue_archive_receipt(repo_root: Path) -> dict[str, object]:
             or not isinstance(size, int)
         ):
             raise ValueError("legacy queue archive receipt file fields are invalid")
+        normalized_files.append({"path": relative, "sha256": digest, "bytes": size})
         source = (source_root / relative).resolve()
         copied = (archive / relative).resolve()
         if not source.is_relative_to(source_root.resolve()) or not copied.is_relative_to(
             archive
         ):
             raise ValueError("legacy queue archive receipt file path escapes")
-        for path in (source, copied):
-            payload = path.read_bytes()
-            if len(payload) != size or hashlib.sha256(payload).hexdigest() != digest:
-                raise ValueError(f"legacy queue archive evidence mismatch: {relative}")
+        if require_live or (source.is_file() and copied.is_file()):
+            for path in (source, copied):
+                if not path.is_file():
+                    raise ValueError(f"legacy queue archive evidence is missing: {relative}")
+                payload = path.read_bytes()
+                if len(payload) != size or hashlib.sha256(payload).hexdigest() != digest:
+                    raise ValueError(f"legacy queue archive evidence mismatch: {relative}")
+
+    captured_at = receipt.get("snapshotCapturedAt")
+    source_digest = receipt.get("archiveSourceDigest")
+    if not isinstance(captured_at, str) or not isinstance(source_digest, str):
+        raise ValueError("legacy queue archive receipt lacks canonical manifest fields")
+    manifest = {
+        "archiveId": archive.name,
+        "autoResume": False,
+        "capturedAt": captured_at,
+        "files": normalized_files,
+        "sourceDigest": source_digest,
+        "sourceLabel": "queue",
+        "version": 3,
+    }
+    canonical_manifest = (json.dumps(manifest, indent=2, sort_keys=True) + "\n").encode()
+    expected_manifest_digest = receipt.get("archiveManifestDigest")
+    if expected_manifest_digest != sha256_digest(canonical_manifest):
+        raise ValueError("legacy queue archive canonical manifest digest mismatch")
+    manifest_path = archive / "ARCHIVE_MANIFEST.json"
+    if (require_live or manifest_path.is_file()) and (
+        not manifest_path.is_file() or manifest_path.read_bytes() != canonical_manifest
+    ):
+        raise ValueError("legacy queue archive live manifest mismatch")
     return receipt
 
 

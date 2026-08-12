@@ -30,7 +30,7 @@ def test_required_workflow_files_and_config_names_match() -> None:
     assert config.direct_main_push is True
 
 
-def test_required_workflows_are_bounded_hosted_and_secret_free() -> None:
+def test_required_workflows_are_bounded_portable_and_secret_free() -> None:
     root = Path(__file__).resolve().parents[1]
     workflow_root = root / ".github" / "workflows"
     action = re.compile(r"uses:\s+[^\s@]+@([0-9a-f]{40})(?:\s|$)")
@@ -38,7 +38,8 @@ def test_required_workflows_are_bounded_hosted_and_secret_free() -> None:
     for filename, name in EXPECTED_FILES.items():
         text = (workflow_root / filename).read_text(encoding="utf-8")
         assert f"name: {name}" in text
-        assert "runs-on: ubuntu-latest" in text
+        assert "vars.TRAINCAPSULE_CI_RUNNER" in text
+        assert "'[\"ubuntu-latest\"]'" in text
         assert "timeout-minutes:" in text
         assert "concurrency:" in text
         assert "permissions:\n  contents: read" in text
@@ -50,6 +51,12 @@ def test_required_workflows_are_bounded_hosted_and_secret_free() -> None:
         uses = [line for line in text.splitlines() if "uses:" in line]
         assert uses
         assert all(action.search(line) for line in uses)
+        assert "astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff" not in text
+        if "astral-sh/setup-uv@" in text:
+            assert (
+                "astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e"
+                in text
+            )
 
     gpu = (workflow_root / "gpu-validation.yml").read_text(encoding="utf-8")
     assert "workflow_dispatch:" in gpu

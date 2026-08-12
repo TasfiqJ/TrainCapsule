@@ -14,13 +14,13 @@ concurrency:
 
 jobs:
   source-of-truth-integrity:
-    runs-on: ubuntu-latest
+    runs-on: ${{ fromJSON(vars.TRAINCAPSULE_CI_RUNNER || '["ubuntu-latest"]') }}
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
         with:
           fetch-depth: 0
-      - uses: astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff # v6
+      - uses: astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e # v6
         with:
           python-version: "3.12"
       - run: uv sync --extra dev --frozen

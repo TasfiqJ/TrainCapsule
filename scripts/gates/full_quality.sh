@@ -24,7 +24,10 @@ for executable in ruff pyright python; do
 done
 
 "$SHARED_VENV/bin/python" scripts/gates/active_policy_integrity.py
+"$SHARED_VENV/bin/python" scripts/gates/validate_source_manifest.py
 "$SHARED_VENV/bin/python" scripts/gates/v3_bundle_integrity.py --check-report
+"$SHARED_VENV/bin/python" scripts/gates/v3_1_zh_package_integrity.py
+"$SHARED_VENV/bin/python" scripts/generate_v3_1_zh_source.py --check
 "$SHARED_VENV/bin/python" scripts/gates/source_of_truth_integrity.py
 if [[ $EVIDENCE_MODE == "validate" ]]; then
   "$SHARED_VENV/bin/python" scripts/gates/v3_migration_evidence.py

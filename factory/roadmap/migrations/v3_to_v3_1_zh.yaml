@@ -1,0 +1,28 @@
+schemaVersion: "3.1"
+generationId: traincapsule-v3.1-zh-2026-08-12
+transactionId: V3-TO-V3.1-ZH-20260812
+disposition: IN_PROGRESS
+historicalGeneration:
+  generationId: traincapsule-v3-2026-08-11
+  completedWorkItems:
+  - V3-MIG-016
+  - V3-MIG-017
+  - V3-MIG-018
+  - V3-MIG-019
+  - V3-MIG-020
+  evidenceRoot: docs/migrations/evidence
+  authority: HISTORICAL_ONLY
+activeGeneration:
+  activeMilestone: M0_FACTORY_MIGRATED
+  resetWorkItems:
+    V3-MIG-016: BLOCKED_POLICY
+    V3-MIG-017: PROPOSED
+    V3-MIG-018: PROPOSED
+    V3-MIG-019: PROPOSED
+    V3-MIG-020: PROPOSED
+  requiredEvidenceRoot: docs/migrations/evidence/v3.1-zh
+  phase4PublicationCapability: PENDING
+truthBoundary: >-
+  V3 local simulation and owner-directed main-publication evidence is retained as
+  history, but cannot satisfy V3.1 independent signed authorization, automated
+  pull-request, required-CI, or verified merged-main acceptance.

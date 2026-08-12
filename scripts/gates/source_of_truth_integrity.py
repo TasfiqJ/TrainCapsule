@@ -4,7 +4,6 @@
 from __future__ import annotations
 
 import hashlib
-import json
 import re
 import sys
 from pathlib import Path
@@ -14,15 +13,12 @@ ROOT = Path(__file__).resolve().parents[2]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from scripts.generate_v3_manifest import (  # noqa: E402
-    ACTIVE_FILES,
-    BUNDLE_RELATIVE,
-    MANIFEST_NAME,
-    NORMATIVE_ORDER,
-    build_manifest,
-    canonical_text_bytes,
-)
+from tcfactory.v3.source_authority import validate_active_source_generation  # noqa: E402
 from tcfactory.yamlutil import load_yaml  # noqa: E402
+
+# V3.1-ZH is selected only by config/active_generation.yaml. These compatibility
+# constants keep the additional context/precedence checks generation-scoped.
+BUNDLE_RELATIVE = Path("docs/source-of-truth/v3.1-zh-2026-08-12")
 
 REQUIRED_GROUPS = {
     "product_normative",
@@ -63,76 +59,11 @@ def _list(value: object, label: str) -> list[object]:
     return cast(list[object], value)
 
 
-def _load_json(path: Path) -> dict[str, Any]:
-    try:
-        return _mapping(json.loads(path.read_text(encoding="utf-8")), str(path))
-    except (OSError, json.JSONDecodeError) as exc:
-        raise SourceIntegrityError(f"unreadable JSON {path}: {exc}") from exc
-
-
-def _validate_manifest(repo_root: Path) -> dict[str, Any]:
-    bundle = repo_root / BUNDLE_RELATIVE
-    manifest_path = bundle / MANIFEST_NAME
-    if not manifest_path.is_file():
-        raise SourceIntegrityError(f"missing V3 manifest: {manifest_path}")
-    payload = _load_json(manifest_path)
-    records = _list(payload.get("files"), "manifest files")
-
-    paths: list[str] = []
-    logical_ids: list[str] = []
-    for index, raw in enumerate(records):
-        record = _mapping(raw, f"manifest files[{index}]")
-        path = record.get("path")
-        logical_id = record.get("logicalId")
-        if not isinstance(path, str) or not isinstance(logical_id, str):
-            raise SourceIntegrityError("manifest file records require string path and logicalId")
-        paths.append(path)
-        logical_ids.append(logical_id)
-    if MANIFEST_NAME in paths:
-        raise SourceIntegrityError("manifest self-hash is forbidden")
-    if len(logical_ids) != len(set(logical_ids)):
-        raise SourceIntegrityError("duplicate active logical ID in V3 manifest")
-    if any("(1)" in path for path in paths):
-        raise SourceIntegrityError("active `(1)` duplicate is forbidden")
-
-    actual_names = {path.name for path in bundle.iterdir() if path.is_file()}
-    expected_names = set(ACTIVE_FILES) | {MANIFEST_NAME}
-    if actual_names != expected_names:
-        raise SourceIntegrityError(
-            "active V3 bundle membership mismatch: "
-            f"missing={sorted(expected_names - actual_names)}, "
-            f"extra={sorted(actual_names - expected_names)}"
-        )
-
-    for name in ACTIVE_FILES:
-        path = bundle / name
-        canonical = canonical_text_bytes(path)
-        if path.read_bytes() != canonical:
-            raise SourceIntegrityError(f"active V3 text is not canonical UTF-8 LF: {name}")
-
-    migration_base = payload.get("migrationBaseSha")
-    generated_at = payload.get("generatedAt")
-    if not isinstance(migration_base, str) or not isinstance(generated_at, str):
-        raise SourceIntegrityError("manifest lacks migrationBaseSha or generatedAt")
-    expected = build_manifest(
-        repo_root,
-        migration_base_sha=migration_base,
-        generated_at=generated_at,
-    )
-    if payload != expected:
-        raise SourceIntegrityError("V3 manifest content or canonical hashes do not match")
-    if payload.get("selfHashIncluded") is not False:
-        raise SourceIntegrityError("manifest must explicitly exclude its own hash")
-    if payload.get("normativeOrder") != NORMATIVE_ORDER:
-        raise SourceIntegrityError("V3 normative order is invalid")
-    return payload
-
-
 def _validate_context(repo_root: Path) -> None:
     path = repo_root / "docs/CONTEXT_INDEX.yaml"
     payload = _mapping(load_yaml(path), str(path))
-    if payload.get("version") != 3:
-        raise SourceIntegrityError("context index must be version 3")
+    if payload.get("version") != 4:
+        raise SourceIntegrityError("context index must be V3.1-ZH version 4")
     if payload.get("activeBundle") != BUNDLE_RELATIVE.as_posix():
         raise SourceIntegrityError("context index does not select the V3 bundle")
     groups = _mapping(payload.get("groups"), "context groups")
@@ -222,49 +153,6 @@ def _validate_context(repo_root: Path) -> None:
             raise SourceIntegrityError(f"context group {group_name} violates its character budget")
 
 
-def _validate_precedence(repo_root: Path) -> None:
-    text = (repo_root / "SOURCE_PRECEDENCE.md").read_text(encoding="utf-8")
-    active = BUNDLE_RELATIVE.as_posix() + "/"
-    if active not in text:
-        raise SourceIntegrityError("SOURCE_PRECEDENCE does not identify the active V3 bundle")
-    if "final-2026-08-09/` is immutable historical evidence" not in text:
-        raise SourceIntegrityError("historical bundle is not explicitly classified as archive")
-    if re.search(r"final-2026-08-09/.*active (?:product )?authority", text, re.IGNORECASE):
-        raise SourceIntegrityError("old bundle is treated as active authority")
-    for required in (
-        "config/owner_directives.yaml",
-        "docs/migrations/V3_OWNER_DIRECTIVES.md",
-        "explicitly override",
-        "main-only",
-    ):
-        if required not in text:
-            raise SourceIntegrityError(
-                f"owner-directed authority deviation is undocumented: {required}"
-            )
-
-
-def _validate_owner_directives(repo_root: Path) -> None:
-    path = repo_root / "config/owner_directives.yaml"
-    payload = _mapping(load_yaml(path), str(path))
-    if payload.get("version") != 3:
-        raise SourceIntegrityError("owner directives must be version 3")
-    directives = _mapping(payload.get("directives"), "owner directives")
-    expected = {
-        "unattendedOperation": "REQUIRED",
-        "humanIntervention": "FORBIDDEN",
-        "publicationBranch": "main",
-        "nonMainPushes": "FORBIDDEN",
-        "pullRequestDependency": "FORBIDDEN",
-        "externalEvidencePolicy": "NEVER_FABRICATE",
-        "missingEvidenceResult": "UNKNOWN",
-        "scopedBlockersDoNotStopIndependentLanes": True,
-    }
-    if directives != expected:
-        raise SourceIntegrityError(
-            "owner directives do not match the zero-human/main-only authority"
-        )
-
-
 def _walk_records(value: object) -> list[dict[str, Any]]:
     result: list[dict[str, Any]] = []
     if isinstance(value, dict):
@@ -298,7 +186,6 @@ def _validate_no_synthetic_commercial_completion(repo_root: Path) -> None:
 def _validate_no_local_paths(repo_root: Path) -> None:
     targets = [
         *(repo_root / BUNDLE_RELATIVE).glob("*.md"),
-        repo_root / "SOURCE_PRECEDENCE.md",
         repo_root / "docs/CONTEXT_INDEX.yaml",
     ]
     for path in targets:
@@ -309,10 +196,8 @@ def _validate_no_local_paths(repo_root: Path) -> None:
 
 def validate_repository(repo_root: Path) -> None:
     repo_root = repo_root.resolve()
-    _validate_manifest(repo_root)
+    validate_active_source_generation(repo_root)
     _validate_context(repo_root)
-    _validate_precedence(repo_root)
-    _validate_owner_directives(repo_root)
     _validate_no_synthetic_commercial_completion(repo_root)
     _validate_no_local_paths(repo_root)
 
@@ -326,7 +211,7 @@ def main() -> int:
     except (OSError, ValueError, SourceIntegrityError) as exc:
         print(f"FAIL: {exc}", file=sys.stderr)
         return 1
-    print(f"PASS: TrainCapsule V3 source authority and {len(ACTIVE_FILES)} files verified")
+    print("PASS: TrainCapsule V3.1-ZH active source authority verified")
     return 0
 
 

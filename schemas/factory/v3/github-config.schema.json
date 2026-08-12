@@ -60,11 +60,11 @@
   },
   "additionalProperties": false,
   "properties": {
-    "version": {
-      "const": 3,
-      "default": 3,
-      "title": "Version",
-      "type": "integer"
+    "schemaVersion": {
+      "const": "3.1",
+      "default": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
     },
     "enabled": {
       "default": false,
@@ -83,15 +83,9 @@
       "title": "Basebranch",
       "type": "string"
     },
-    "branch": {
-      "const": "main",
-      "default": "main",
-      "title": "Branch",
-      "type": "string"
-    },
     "visibility": {
-      "const": "private",
-      "default": "private",
+      "const": "public",
+      "default": "public",
       "title": "Visibility",
       "type": "string"
     },
@@ -108,53 +102,58 @@
       "title": "Repository"
     },
     "releaseMode": {
-      "const": "owner_directed_main_only",
-      "default": "owner_directed_main_only",
+      "const": "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE",
+      "default": "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE",
       "title": "Releasemode",
       "type": "string"
     },
     "directMainPush": {
-      "const": true,
-      "default": true,
+      "const": false,
+      "default": false,
       "title": "Directmainpush",
       "type": "boolean"
     },
-    "releaseMetadataPath": {
-      "const": "factory/state/latest-release.json",
-      "default": "factory/state/latest-release.json",
-      "title": "Releasemetadatapath",
+    "candidateBranchPrefix": {
+      "const": "factory/",
+      "default": "factory/",
+      "title": "Candidatebranchprefix",
       "type": "string"
     },
-    "pushAfterVerifiedTasks": {
-      "default": 3,
-      "maximum": 50,
-      "minimum": 1,
-      "title": "Pushafterverifiedtasks",
-      "type": "integer"
+    "pullRequestMetadataPath": {
+      "const": "factory/state/latest-pull-request.json",
+      "default": "factory/state/latest-pull-request.json",
+      "title": "Pullrequestmetadatapath",
+      "type": "string"
     },
-    "pushIntervalSeconds": {
-      "default": 3600,
-      "maximum": 86400,
-      "minimum": 60,
-      "title": "Pushintervalseconds",
-      "type": "integer"
-    },
-    "pushBeforeQuotaPause": {
+    "exactHeadShaChecksRequired": {
+      "const": true,
       "default": true,
-      "title": "Pushbeforequotapause",
+      "title": "Exactheadshachecksrequired",
       "type": "boolean"
     },
-    "pushAtCompletion": {
+    "independentMachinePolicyReceiptRequired": {
+      "const": true,
       "default": true,
-      "title": "Pushatcompletion",
+      "title": "Independentmachinepolicyreceiptrequired",
       "type": "boolean"
     },
-    "immediateRiskTiers": {
-      "items": {
-        "$ref": "#/$defs/RiskTier"
-      },
-      "title": "Immediaterisktiers",
-      "type": "array"
+    "mergeQueueOrAutoMergeRequired": {
+      "const": true,
+      "default": true,
+      "title": "Mergequeueorautomergerequired",
+      "type": "boolean"
+    },
+    "exactMergedMainVerificationRequired": {
+      "const": true,
+      "default": true,
+      "title": "Exactmergedmainverificationrequired",
+      "type": "boolean"
+    },
+    "publisherCapability": {
+      "const": "PENDING_PHASE_4",
+      "default": "PENDING_PHASE_4",
+      "title": "Publishercapability",
+      "type": "string"
     },
     "retryAttempts": {
       "default": 5,

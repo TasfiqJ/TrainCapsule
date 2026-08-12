@@ -1,5 +1,10 @@
 # TrainCapsule V3 test matrix
 
+> **HISTORICAL V3 TEST RECORD — NOT CURRENT V3.1-ZH ACCEPTANCE.** The tables and results below
+> describe the frozen V3 baseline under its superseded release policy. Current V3.1-ZH status is
+> `STOPPED / NOT AUTHORIZED`, M0 is active/pending, and publication capability is
+> `PENDING_PHASE_4`; see `docs/migrations/V3_1_ZH_CODEX_EXECUTION_STATE.md`.
+
 > Historical acceptance at `f1fd8077fee001fa6751aa86b26f341f04d0d150` superseded the
 > phase-by-phase counts below at that SHA only. Its 554-test local result and eight remote workflow
 > runs must not be attributed to a later repair. Current exact-tree evidence and local acceptance
@@ -11,7 +16,7 @@ The exact baseline and results are recorded in `V3_BASELINE_REPORT.md`: 394 test
 
 ## Migration matrix
 
-| Area | Required evidence | Current state |
+| Area | Required evidence | Historical V3 state |
 |---|---|---|
 | Source authority | deterministic manifest; positive and tamper/duplicate/archive negatives | passed |
 | V3 models | strict work items, transitions, milestones, maturity, approvals, receipts, candidate manifest | passed |
@@ -48,7 +53,7 @@ Results: 41 product checks passed; 527 complete-suite checks passed; Ruff passed
 reported 0 errors and 0 warnings; ten product schemas matched; the wheel built. These checks used no
 model session, GitHub mutation, controller start, or paid service.
 
-## Final acceptance exact commands
+## Historical V3 final acceptance exact commands
 
 ```text
 scripts/gates/full_quality.sh
@@ -111,7 +116,7 @@ archive, and publication recovery. The runtime-path follow-up raises the current
 to 555 passing tests. No model was invoked. No GPU check was run; GPU/customer/external evidence
 remains deferred.
 
-## Current exact-tree and exact-SHA finalization
+## Historical V3 exact-tree and exact-SHA finalization
 
 The frozen implementation was finalized with:
 

@@ -40,7 +40,7 @@ class MilestoneCompletionReceipt(V3Model):
     milestone_id: str
     next_milestone_id: str | None
     evidence_digests: dict[str, str]
-    owner_directives_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    source_authority_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     proposals: list[str] = Field(default_factory=list[str], max_length=5)
     decision: MilestoneStatus
     decided_at: datetime
@@ -144,7 +144,7 @@ def advance_milestone_state(
     state_path: Path,
     receipt_path: Path,
     evidence_digests: dict[str, str],
-    owner_directives_digest: str,
+    source_authority_digest: str,
     now: datetime,
 ) -> MilestoneRuntimeState:
     state = initialize_milestone_state(roadmap, state_path, now=now)
@@ -155,7 +155,7 @@ def advance_milestone_state(
         milestone_id=state.active_milestone,
         next_milestone_id=next_milestone,
         evidence_digests=evidence_digests,
-        owner_directives_digest=owner_directives_digest,
+        source_authority_digest=source_authority_digest,
         decision=MilestoneStatus.COMPLETED,
         decided_at=now,
     )

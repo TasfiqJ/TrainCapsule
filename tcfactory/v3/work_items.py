@@ -27,6 +27,7 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
         {
             WorkStatus.READY,
             WorkStatus.WAITING_EXTERNAL,
+            WorkStatus.BLOCKED_POLICY,
             WorkStatus.REJECTED_VALUE,
             WorkStatus.NATIVE_SUFFICIENT,
             WorkStatus.DEFERRED,
@@ -134,6 +135,7 @@ class WorkItem(V3Model):
     packet_path: str | None = None
     evidence_required: list[str]
     external_receipt_required: bool
+    machine_policy_receipt_required: bool = False
     retry_policy: RetryPolicy
     external_evidence_refs: list[str] = Field(default_factory=list[str])
     created_at: datetime | None = None
@@ -158,6 +160,19 @@ class WorkItem(V3Model):
             raise ValueError("external evidence work requires an external receipt")
         if self.kind is WorkKind.COMMERCIAL_EXPERIMENT and not self.external_receipt_required:
             raise ValueError("commercial experiment work requires an external receipt")
+        if self.kind is WorkKind.MACHINE_POLICY_REVIEW:
+            if self.owner_type is not OwnerType.MACHINE_POLICY_AUTHORITY:
+                raise ValueError(
+                    "machine-policy review requires independent machine-policy authority"
+                )
+            if self.automatable:
+                raise ValueError("machine-policy review is not AI-automatable")
+            if not self.machine_policy_receipt_required:
+                raise ValueError("machine-policy review requires an independently signed receipt")
+        if self.owner_type is OwnerType.MACHINE_POLICY_AUTHORITY and (
+            self.kind is not WorkKind.MACHINE_POLICY_REVIEW
+        ):
+            raise ValueError("machine-policy authority may own only machine-policy review work")
         if (
             self.external_receipt_required
             and self.status

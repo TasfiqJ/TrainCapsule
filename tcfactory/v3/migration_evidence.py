@@ -15,6 +15,7 @@ from pydantic import ConfigDict, Field, RootModel, model_validator
 
 from tcfactory.util import sha256_file
 from tcfactory.v3.base import SHA_PATTERN, V3Model
+from tcfactory.v3.source_authority import validate_active_source_generation
 
 DIGEST_HEX_PATTERN = r"^[0-9a-f]{64}$"
 M0_EVIDENCE_IDS = (
@@ -25,14 +26,15 @@ M0_EVIDENCE_IDS = (
     "V3-MIG-020",
 )
 M0_PREREQUISITE_IDS = M0_EVIDENCE_IDS[:-1]
-EVIDENCE_ROOT = Path("docs/migrations/evidence")
+EVIDENCE_ROOT = Path("docs/migrations/evidence/v3.1-zh")
+HISTORICAL_V3_EVIDENCE_ROOT = Path("docs/migrations/evidence")
 TRANSCRIPT_ROOT = EVIDENCE_ROOT / "transcripts"
 
 EXPECTED_EVIDENCE_TYPES: dict[str, str] = {
-    "V3-MIG-016": "OWNER_DIRECTED_MACHINE_POLICY",
+    "V3-MIG-016": "SIGNED_SOURCE_MIGRATION_MACHINE_AUTHORIZATION",
     "V3-MIG-017": "READ_ONLY_ROLLBACK_REHEARSAL",
     "V3-MIG-018": "NON_MUTATING_CONTROLLER_OBSERVATION",
-    "V3-MIG-019": "DISPOSABLE_END_TO_END_CONTROLLER_SIMULATION",
+    "V3-MIG-019": "AUTOMATED_PR_REQUIRED_CI_MERGED_MAIN_ACCEPTANCE",
     "V3-MIG-020": "M0_COMPLETION_RECORD",
 }
 EXPECTED_EXECUTIONS: dict[str, tuple[tuple[str, tuple[str, ...]], ...]] = {
@@ -169,9 +171,8 @@ class AuthorityDigests(V3Model):
     """Exact active authority bytes under which an observation was accepted."""
 
     source_manifest_sha256: str = Field(pattern=DIGEST_HEX_PATTERN)
-    source_precedence_sha256: str = Field(pattern=DIGEST_HEX_PATTERN)
-    owner_directives_sha256: str = Field(pattern=DIGEST_HEX_PATTERN)
-    owner_override_policy_sha256: str = Field(pattern=DIGEST_HEX_PATTERN)
+    active_generation_sha256: str = Field(pattern=DIGEST_HEX_PATTERN)
+    source_generation_sha256: str = Field(pattern=DIGEST_HEX_PATTERN)
 
 
 class EvidenceExecution(V3Model):
@@ -204,6 +205,81 @@ class EvidenceExecution(V3Model):
         return self
 
 
+class IndependentReceiptSignature(V3Model):
+    algorithm: Literal["ed25519"]
+    key_id: str = Field(min_length=1)
+    value: str = Field(min_length=32)
+
+
+class IndependentReceiptAuthority(V3Model):
+    issuer: Literal["INDEPENDENT_MACHINE_VERIFIER"]
+    issued_at: datetime
+    expires_at: datetime
+    nonce: str = Field(min_length=16)
+    revocation_epoch: int = Field(ge=0)
+    signature: IndependentReceiptSignature
+
+    @model_validator(mode="after")
+    def validate_window(self) -> IndependentReceiptAuthority:
+        if self.expires_at <= self.issued_at:
+            raise ValueError("independent receipt expiry must follow issuance")
+        return self
+
+
+class SourceMigrationAuthorization(IndependentReceiptAuthority):
+    receipt_type: Literal["V3_1_SOURCE_MIGRATION_AUTHORIZATION"]
+    candidate_sha: str = Field(pattern=SHA_PATTERN.pattern)
+    active_generation_digest: str = Field(pattern=DIGEST_HEX_PATTERN)
+    source_manifest_digest: str = Field(pattern=DIGEST_HEX_PATTERN)
+    source_generation_digest: str = Field(pattern=DIGEST_HEX_PATTERN)
+
+
+class RequiredCheckReceipt(V3Model):
+    name: Literal[
+        "Factory quality",
+        "Packaging install",
+        "Product CI",
+        "Security",
+        "Docs and schemas",
+        "Source-of-truth integrity",
+        "Source freshness",
+    ]
+    conclusion: Literal["success"]
+    observed_sha: str = Field(pattern=SHA_PATTERN.pattern)
+
+
+class PullRequestAcceptanceReceipt(IndependentReceiptAuthority):
+    receipt_type: Literal["V3_1_PR_PUBLICATION"]
+    task_class: Literal["MECHANICAL", "STANDARD"]
+    candidate_sha: str = Field(pattern=SHA_PATTERN.pattern)
+    pull_request_url: str = Field(pattern=r"^https://github\.com/.+/pull/[0-9]+$")
+    pull_request_head_sha: str = Field(pattern=SHA_PATTERN.pattern)
+    merged_main_sha: str = Field(pattern=SHA_PATTERN.pattern)
+    active_generation_digest: str = Field(pattern=DIGEST_HEX_PATTERN)
+    source_manifest_digest: str = Field(pattern=DIGEST_HEX_PATTERN)
+    required_checks: list[RequiredCheckReceipt] = Field(min_length=7, max_length=7)
+
+    @model_validator(mode="after")
+    def validate_exact_sha_and_checks(self) -> PullRequestAcceptanceReceipt:
+        if not (
+            self.pull_request_head_sha == self.candidate_sha == self.merged_main_sha
+        ):
+            raise ValueError("PR receipt must bind one exact candidate/head/merged-main SHA")
+        names = [check.name for check in self.required_checks]
+        if len(names) != len(set(names)):
+            raise ValueError("PR receipt required checks must be unique")
+        if any(check.observed_sha != self.candidate_sha for check in self.required_checks):
+            raise ValueError("PR receipt check result is not bound to the candidate SHA")
+        return self
+
+
+class RecoveryRehearsalReceipt(IndependentReceiptAuthority):
+    receipt_type: Literal["V3_1_RECOVERY_REHEARSAL"]
+    candidate_sha: str = Field(pattern=SHA_PATTERN.pattern)
+    restored_exact_sha: Literal[True]
+    outcome: Literal["PASSED"]
+
+
 class FinalMigrationEvidence(V3Model):
     """Final M0 record; a PASS is replayable rather than self-attesting."""
 
@@ -222,6 +298,9 @@ class FinalMigrationEvidence(V3Model):
     executions: list[EvidenceExecution] = Field(min_length=1, max_length=8)
     evidence_inputs: dict[str, str] = Field(default_factory=dict[str, str], max_length=8)
     truth_boundary: str = Field(min_length=12)
+    source_migration_authorization: SourceMigrationAuthorization | None
+    pr_acceptance_receipts: list[PullRequestAcceptanceReceipt]
+    recovery_rehearsal_receipt: RecoveryRehearsalReceipt | None
 
     @model_validator(mode="after")
     def validate_completion_and_result(self) -> FinalMigrationEvidence:
@@ -251,6 +330,32 @@ class FinalMigrationEvidence(V3Model):
                 raise ValueError("V3-MIG-020 must bind exactly V3-MIG-016 through V3-MIG-019")
         elif self.evidence_inputs:
             raise ValueError("only V3-MIG-020 may bind prerequisite M0 evidence")
+        if self.work_item_id == "V3-MIG-016":
+            if self.source_migration_authorization is None:
+                raise ValueError("V3-MIG-016 requires an independent signed authorization")
+            if self.pr_acceptance_receipts or self.recovery_rehearsal_receipt is not None:
+                raise ValueError("V3-MIG-016 may contain only source-migration authorization")
+        elif self.work_item_id == "V3-MIG-019":
+            if self.source_migration_authorization is not None:
+                raise ValueError("V3-MIG-019 cannot contain source-migration authorization")
+            if self.recovery_rehearsal_receipt is not None:
+                raise ValueError("V3-MIG-019 cannot contain a recovery rehearsal")
+            if {receipt.task_class for receipt in self.pr_acceptance_receipts} != {
+                "MECHANICAL",
+                "STANDARD",
+            }:
+                raise ValueError("V3-MIG-019 requires mechanical and standard PR receipts")
+        elif self.work_item_id == "V3-MIG-017":
+            if self.recovery_rehearsal_receipt is None:
+                raise ValueError("V3-MIG-017 requires an independent recovery rehearsal receipt")
+            if self.source_migration_authorization is not None or self.pr_acceptance_receipts:
+                raise ValueError("V3-MIG-017 may contain only its rehearsal receipt")
+        elif (
+            self.source_migration_authorization is not None
+            or self.pr_acceptance_receipts
+            or self.recovery_rehearsal_receipt is not None
+        ):
+            raise ValueError("this evidence type cannot contain independent receipt artifacts")
         return self
 
 
@@ -277,17 +382,13 @@ class MigrationEvidenceDocument(RootModel[MigrationEvidence]):
 
 
 def authority_digests(repo_root: Path) -> AuthorityDigests:
-    """Hash all active records that authorize the zero-human deviation."""
+    """Hash the canonical V3.1 generation pointer and its verified source set."""
 
+    active = validate_active_source_generation(repo_root)
     return AuthorityDigests(
-        source_manifest_sha256=sha256_file(
-            repo_root / "docs/source-of-truth/v3-2026-08-11/FINAL_MANIFEST_V3.json"
-        ),
-        source_precedence_sha256=sha256_file(repo_root / "SOURCE_PRECEDENCE.md"),
-        owner_directives_sha256=sha256_file(repo_root / "config/owner_directives.yaml"),
-        owner_override_policy_sha256=sha256_file(
-            repo_root / "factory/policy/ZERO_HUMAN_OPERATION_OVERRIDE.json"
-        ),
+        source_manifest_sha256=active.manifest_digest,
+        active_generation_sha256=active.config_digest,
+        source_generation_sha256=active.source_digest.removeprefix("sha256:"),
     )
 
 

@@ -148,10 +148,9 @@
       "enum": [
         "NOT_EVALUATED",
         "HOLD",
-        "APPROVED_FOR_MAIN_PROMOTION",
-        "MAIN_PROMOTED_PENDING_HOSTED_CHECKS",
-        "MAIN_VERIFIED",
-        "REVERTED_AND_QUARANTINED",
+        "APPROVED_FOR_AUTOMATED_PULL_REQUEST",
+        "PULL_REQUEST_PENDING_REQUIRED_CHECKS",
+        "MERGED_MAIN_VERIFIED",
         "REJECTED"
       ],
       "title": "ReleaseDecision",

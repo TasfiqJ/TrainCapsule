@@ -9,27 +9,21 @@
           "title": "Sourcemanifestsha256",
           "type": "string"
         },
-        "sourcePrecedenceSha256": {
+        "activeGenerationSha256": {
           "pattern": "^[0-9a-f]{64}$",
-          "title": "Sourceprecedencesha256",
+          "title": "Activegenerationsha256",
           "type": "string"
         },
-        "ownerDirectivesSha256": {
+        "sourceGenerationSha256": {
           "pattern": "^[0-9a-f]{64}$",
-          "title": "Ownerdirectivessha256",
-          "type": "string"
-        },
-        "ownerOverridePolicySha256": {
-          "pattern": "^[0-9a-f]{64}$",
-          "title": "Owneroverridepolicysha256",
+          "title": "Sourcegenerationsha256",
           "type": "string"
         }
       },
       "required": [
         "sourceManifestSha256",
-        "sourcePrecedenceSha256",
-        "ownerDirectivesSha256",
-        "ownerOverridePolicySha256"
+        "activeGenerationSha256",
+        "sourceGenerationSha256"
       ],
       "title": "AuthorityDigests",
       "type": "object"
@@ -190,7 +184,7 @@
           "then": {
             "properties": {
               "evidenceType": {
-                "const": "OWNER_DIRECTED_MACHINE_POLICY"
+                "const": "SIGNED_SOURCE_MIGRATION_MACHINE_AUTHORIZATION"
               },
               "executions": {
                 "maxItems": 3,
@@ -324,7 +318,7 @@
           "then": {
             "properties": {
               "evidenceType": {
-                "const": "DISPOSABLE_END_TO_END_CONTROLLER_SIMULATION"
+                "const": "AUTOMATED_PR_REQUIRED_CI_MERGED_MAIN_ACCEPTANCE"
               },
               "executions": {
                 "maxItems": 1,
@@ -449,6 +443,33 @@
           "minLength": 12,
           "title": "Truthboundary",
           "type": "string"
+        },
+        "sourceMigrationAuthorization": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/SourceMigrationAuthorization"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "prAcceptanceReceipts": {
+          "items": {
+            "$ref": "#/$defs/PullRequestAcceptanceReceipt"
+          },
+          "title": "Pracceptancereceipts",
+          "type": "array"
+        },
+        "recoveryRehearsalReceipt": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/RecoveryRehearsalReceipt"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
       },
       "required": [
@@ -459,9 +480,39 @@
         "binding",
         "authorityDigests",
         "executions",
-        "truthBoundary"
+        "truthBoundary",
+        "sourceMigrationAuthorization",
+        "prAcceptanceReceipts",
+        "recoveryRehearsalReceipt"
       ],
       "title": "FinalMigrationEvidence",
+      "type": "object"
+    },
+    "IndependentReceiptSignature": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "ed25519",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "keyId": {
+          "minLength": 1,
+          "title": "Keyid",
+          "type": "string"
+        },
+        "value": {
+          "minLength": 32,
+          "title": "Value",
+          "type": "string"
+        }
+      },
+      "required": [
+        "algorithm",
+        "keyId",
+        "value"
+      ],
+      "title": "IndependentReceiptSignature",
       "type": "object"
     },
     "PendingMigrationEvidence": {
@@ -505,6 +556,285 @@
         "reason"
       ],
       "title": "PendingMigrationEvidence",
+      "type": "object"
+    },
+    "PullRequestAcceptanceReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "issuer": {
+          "const": "INDEPENDENT_MACHINE_VERIFIER",
+          "title": "Issuer",
+          "type": "string"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "title": "Issuedat",
+          "type": "string"
+        },
+        "expiresAt": {
+          "format": "date-time",
+          "title": "Expiresat",
+          "type": "string"
+        },
+        "nonce": {
+          "minLength": 16,
+          "title": "Nonce",
+          "type": "string"
+        },
+        "revocationEpoch": {
+          "minimum": 0,
+          "title": "Revocationepoch",
+          "type": "integer"
+        },
+        "signature": {
+          "$ref": "#/$defs/IndependentReceiptSignature"
+        },
+        "receiptType": {
+          "const": "V3_1_PR_PUBLICATION",
+          "title": "Receipttype",
+          "type": "string"
+        },
+        "taskClass": {
+          "enum": [
+            "MECHANICAL",
+            "STANDARD"
+          ],
+          "title": "Taskclass",
+          "type": "string"
+        },
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "pullRequestUrl": {
+          "pattern": "^https://github\\.com/.+/pull/[0-9]+$",
+          "title": "Pullrequesturl",
+          "type": "string"
+        },
+        "pullRequestHeadSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Pullrequestheadsha",
+          "type": "string"
+        },
+        "mergedMainSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Mergedmainsha",
+          "type": "string"
+        },
+        "activeGenerationDigest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Activegenerationdigest",
+          "type": "string"
+        },
+        "sourceManifestDigest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sourcemanifestdigest",
+          "type": "string"
+        },
+        "requiredChecks": {
+          "items": {
+            "$ref": "#/$defs/RequiredCheckReceipt"
+          },
+          "maxItems": 7,
+          "minItems": 7,
+          "title": "Requiredchecks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "issuer",
+        "issuedAt",
+        "expiresAt",
+        "nonce",
+        "revocationEpoch",
+        "signature",
+        "receiptType",
+        "taskClass",
+        "candidateSha",
+        "pullRequestUrl",
+        "pullRequestHeadSha",
+        "mergedMainSha",
+        "activeGenerationDigest",
+        "sourceManifestDigest",
+        "requiredChecks"
+      ],
+      "title": "PullRequestAcceptanceReceipt",
+      "type": "object"
+    },
+    "RecoveryRehearsalReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "issuer": {
+          "const": "INDEPENDENT_MACHINE_VERIFIER",
+          "title": "Issuer",
+          "type": "string"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "title": "Issuedat",
+          "type": "string"
+        },
+        "expiresAt": {
+          "format": "date-time",
+          "title": "Expiresat",
+          "type": "string"
+        },
+        "nonce": {
+          "minLength": 16,
+          "title": "Nonce",
+          "type": "string"
+        },
+        "revocationEpoch": {
+          "minimum": 0,
+          "title": "Revocationepoch",
+          "type": "integer"
+        },
+        "signature": {
+          "$ref": "#/$defs/IndependentReceiptSignature"
+        },
+        "receiptType": {
+          "const": "V3_1_RECOVERY_REHEARSAL",
+          "title": "Receipttype",
+          "type": "string"
+        },
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "restoredExactSha": {
+          "const": true,
+          "title": "Restoredexactsha",
+          "type": "boolean"
+        },
+        "outcome": {
+          "const": "PASSED",
+          "title": "Outcome",
+          "type": "string"
+        }
+      },
+      "required": [
+        "issuer",
+        "issuedAt",
+        "expiresAt",
+        "nonce",
+        "revocationEpoch",
+        "signature",
+        "receiptType",
+        "candidateSha",
+        "restoredExactSha",
+        "outcome"
+      ],
+      "title": "RecoveryRehearsalReceipt",
+      "type": "object"
+    },
+    "RequiredCheckReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "name": {
+          "enum": [
+            "Factory quality",
+            "Packaging install",
+            "Product CI",
+            "Security",
+            "Docs and schemas",
+            "Source-of-truth integrity",
+            "Source freshness"
+          ],
+          "title": "Name",
+          "type": "string"
+        },
+        "conclusion": {
+          "const": "success",
+          "title": "Conclusion",
+          "type": "string"
+        },
+        "observedSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Observedsha",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "conclusion",
+        "observedSha"
+      ],
+      "title": "RequiredCheckReceipt",
+      "type": "object"
+    },
+    "SourceMigrationAuthorization": {
+      "additionalProperties": false,
+      "properties": {
+        "issuer": {
+          "const": "INDEPENDENT_MACHINE_VERIFIER",
+          "title": "Issuer",
+          "type": "string"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "title": "Issuedat",
+          "type": "string"
+        },
+        "expiresAt": {
+          "format": "date-time",
+          "title": "Expiresat",
+          "type": "string"
+        },
+        "nonce": {
+          "minLength": 16,
+          "title": "Nonce",
+          "type": "string"
+        },
+        "revocationEpoch": {
+          "minimum": 0,
+          "title": "Revocationepoch",
+          "type": "integer"
+        },
+        "signature": {
+          "$ref": "#/$defs/IndependentReceiptSignature"
+        },
+        "receiptType": {
+          "const": "V3_1_SOURCE_MIGRATION_AUTHORIZATION",
+          "title": "Receipttype",
+          "type": "string"
+        },
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "activeGenerationDigest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Activegenerationdigest",
+          "type": "string"
+        },
+        "sourceManifestDigest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sourcemanifestdigest",
+          "type": "string"
+        },
+        "sourceGenerationDigest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sourcegenerationdigest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "issuer",
+        "issuedAt",
+        "expiresAt",
+        "nonce",
+        "revocationEpoch",
+        "signature",
+        "receiptType",
+        "candidateSha",
+        "activeGenerationDigest",
+        "sourceManifestDigest",
+        "sourceGenerationDigest"
+      ],
+      "title": "SourceMigrationAuthorization",
       "type": "object"
     }
   },

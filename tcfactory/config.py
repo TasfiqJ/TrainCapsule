@@ -15,12 +15,17 @@ def _load_yaml(path: Path) -> object:
 
 
 def _is_v3_payload(value: object) -> bool:
-    return isinstance(value, dict) and cast(dict[str, object], value).get("version") == 3
+    if not isinstance(value, dict):
+        return False
+    return cast(dict[str, object], value).get("version") == 3
 
 
 def load_factory_config(path: Path) -> FactoryConfig:
     raw = _load_yaml(path)
-    if _is_v3_payload(raw):
+    is_v31_factory = isinstance(raw, dict) and (
+        cast(dict[str, object], raw).get("schemaVersion") == "3.1"
+    )
+    if is_v31_factory:
         from tcfactory.v3.configuration import FactoryV3Config
 
         v3 = FactoryV3Config.model_validate(raw)
@@ -32,6 +37,11 @@ def load_factory_config(path: Path) -> FactoryConfig:
             max_parallel=v3.execution.max_concurrent_mutating_sessions,
             context_index_path=v3.source_of_truth.context_index,
             autonomy_config_path="config/autonomy.yaml",
+        )
+    elif _is_v3_payload(cast(object, raw)):
+        raise ValueError(
+            "V3 factory configuration is migration input only; "
+            "active runtime requires exact V3.1 authority"
         )
     else:
         config = FactoryConfig.model_validate(raw)

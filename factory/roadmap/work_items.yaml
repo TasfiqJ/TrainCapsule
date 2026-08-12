@@ -1,5 +1,5 @@
 version: 3
-activeMilestone: M1_NATIVE_PREFLIGHT
+activeMilestone: M0_FACTORY_MIGRATED
 workItems:
 - version: 3
   workItemId: V3-MIG-001
@@ -26,6 +26,7 @@ workItems:
   evidenceRequired:
   - baseline SHA, clean status, queue/checkpoint export
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -60,6 +61,7 @@ workItems:
   evidenceRequired:
   - branch/tag refs, rollback drill
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -70,12 +72,12 @@ workItems:
   updatedAt: null
 - version: 3
   workItemId: V3-MIG-003
-  title: Install V3 documents without mutating old bundle
+  title: Install V3.1-ZH documents without mutating old bundle
   lane: TRUST
   kind: MIGRATION
   milestone: M0_FACTORY_MIGRATED
-  decisionContribution: Install V3 documents without mutating old bundle
-  customerOutcome: Install V3 documents without mutating old bundle
+  decisionContribution: Install V3.1-ZH documents without mutating old bundle
+  customerOutcome: Install V3.1-ZH documents without mutating old bundle
   dependsOn:
   - V3-MIG-001
   softDependsOn: []
@@ -94,6 +96,7 @@ workItems:
   evidenceRequired:
   - source tree, authority diff
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -128,6 +131,7 @@ workItems:
   evidenceRequired:
   - integrity tests, normative/current-fact separation
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -162,6 +166,7 @@ workItems:
   evidenceRequired:
   - schemas, model tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -196,6 +201,7 @@ workItems:
   evidenceRequired:
   - scheduler simulation and unit tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -232,6 +238,7 @@ workItems:
   evidenceRequired:
   - retry tests, no-zero-unlimited test
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -242,12 +249,14 @@ workItems:
   updatedAt: null
 - version: 3
   workItemId: V3-MIG-008
-  title: Add signed machine-policy model and trusted-root verification
+  title: Add signed independent machine-policy receipt model and trusted-root verification
   lane: TRUST
   kind: MACHINE_POLICY_REVIEW
   milestone: M0_FACTORY_MIGRATED
-  decisionContribution: Add signed machine-policy model and trusted-root verification
-  customerOutcome: Add signed machine-policy model and trusted-root verification
+  decisionContribution: Add signed independent machine-policy receipt model and trusted-root
+    verification
+  customerOutcome: Add signed independent machine-policy receipt model and trusted-root
+    verification
   dependsOn:
   - V3-MIG-005
   softDependsOn: []
@@ -260,15 +269,16 @@ workItems:
     commercial: NOT_EVALUATED
   disposition: KEEP
   status: COMPLETED
-  ownerType: AI
-  automatable: true
+  ownerType: MACHINE_POLICY_AUTHORITY
+  automatable: false
   packetPath: null
   evidenceRequired:
   - positive/negative/expiry/SHA tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
@@ -300,6 +310,7 @@ workItems:
   evidenceRequired:
   - invalid/synthetic/issuer tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -335,6 +346,7 @@ workItems:
   evidenceRequired:
   - proposal artifact; no ledger mutation
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -369,6 +381,7 @@ workItems:
   evidenceRequired:
   - protocol tests; current Claude flow preserved
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -379,12 +392,12 @@ workItems:
   updatedAt: null
 - version: 3
   workItemId: V3-MIG-012
-  title: enforce exact-SHA main-only release
+  title: Change release path from direct main to draft PR
   lane: FACTORY
   kind: MIGRATION
   milestone: M0_FACTORY_MIGRATED
-  decisionContribution: enforce exact-SHA main-only release
-  customerOutcome: enforce exact-SHA main-only release
+  decisionContribution: Change release path from direct main to draft PR
+  customerOutcome: Change release path from direct main to draft PR
   dependsOn:
   - V3-MIG-005
   softDependsOn: []
@@ -396,13 +409,14 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: COMPLETED
+  status: PROPOSED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
-  - main-only publication recovery rehearsal, exact-SHA checks
+  - PR dry run, exact-SHA checks
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -430,13 +444,14 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: COMPLETED
+  status: PROPOSED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - workflows and local equivalents
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -464,13 +479,14 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: COMPLETED
+  status: PROPOSED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - non-hardcoded config tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -502,13 +518,14 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: COMPLETED
+  status: PROPOSED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
   - migration report and hashes
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -519,12 +536,12 @@ workItems:
   updatedAt: null
 - version: 3
   workItemId: V3-MIG-016
-  title: machine-policy verification of authority, release, and rollback
+  title: Machine-policy evaluation of authority, release, and rollback
   lane: TRUST
   kind: MACHINE_POLICY_REVIEW
   milestone: M0_FACTORY_MIGRATED
-  decisionContribution: machine-policy verification of authority, release, and rollback
-  customerOutcome: machine-policy verification of authority, release, and rollback
+  decisionContribution: Machine-policy evaluation of authority, release, and rollback
+  customerOutcome: Machine-policy evaluation of authority, release, and rollback
   dependsOn:
   - V3-MIG-003
   - V3-MIG-004
@@ -548,16 +565,17 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: COMPLETED
-  ownerType: AI
-  automatable: true
+  status: BLOCKED_POLICY
+  ownerType: MACHINE_POLICY_AUTHORITY
+  automatable: false
   packetPath: null
   evidenceRequired:
-  - docs/migrations/evidence/V3-MIG-016.json
+  - docs/migrations/evidence/v3.1-zh/V3-MIG-016.json
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
@@ -591,13 +609,14 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: COMPLETED
+  status: PROPOSED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
-  - docs/migrations/evidence/V3-MIG-017.json
+  - docs/migrations/evidence/v3.1-zh/V3-MIG-017.json
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -608,12 +627,12 @@ workItems:
   updatedAt: null
 - version: 3
   workItemId: V3-MIG-018
-  title: Enable V3 controller in observation mode
+  title: Enable V3.1-ZH controller in observation mode
   lane: FACTORY
   kind: MIGRATION
   milestone: M0_FACTORY_MIGRATED
-  decisionContribution: Enable V3 controller in observation mode
-  customerOutcome: Enable V3 controller in observation mode
+  decisionContribution: Enable V3.1-ZH controller in observation mode
+  customerOutcome: Enable V3.1-ZH controller in observation mode
   dependsOn:
   - V3-MIG-016
   - V3-MIG-017
@@ -626,13 +645,14 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: COMPLETED
+  status: PROPOSED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
-  - docs/migrations/evidence/V3-MIG-018.json
+  - docs/migrations/evidence/v3.1-zh/V3-MIG-018.json
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -660,13 +680,14 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: COMPLETED
+  status: PROPOSED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
-  - docs/migrations/evidence/V3-MIG-019.json
+  - docs/migrations/evidence/v3.1-zh/V3-MIG-019.json
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -694,13 +715,14 @@ workItems:
     engineering: CONTROLLED_VALIDATED
     commercial: NOT_EVALUATED
   disposition: KEEP
-  status: COMPLETED
+  status: PROPOSED
   ownerType: AI
   automatable: true
   packetPath: null
   evidenceRequired:
-  - docs/migrations/evidence/V3-MIG-020.json
+  - docs/migrations/evidence/v3.1-zh/V3-MIG-020.json
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -734,6 +756,7 @@ workItems:
   evidenceRequired:
   - clean install, package import
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -768,6 +791,7 @@ workItems:
   evidenceRequired:
   - schema round-trip/compatibility
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -802,6 +826,7 @@ workItems:
   evidenceRequired:
   - independent implementation, negative cases
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -836,6 +861,7 @@ workItems:
   evidenceRequired:
   - tamper/mixing tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -871,6 +897,7 @@ workItems:
   evidenceRequired:
   - drift and weak-identity tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -906,6 +933,7 @@ workItems:
   evidenceRequired:
   - material/immaterial drift tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -941,6 +969,7 @@ workItems:
   evidenceRequired:
   - official-format fixtures, malformed inputs
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -974,6 +1003,7 @@ workItems:
   evidenceRequired:
   - official sources, commands, findings
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1009,6 +1039,7 @@ workItems:
   evidenceRequired:
   - source labels and tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1043,6 +1074,7 @@ workItems:
   evidenceRequired:
   - full missing/conflicting state matrix
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1078,6 +1110,7 @@ workItems:
   evidenceRequired:
   - all terminal outcomes
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1113,6 +1146,7 @@ workItems:
   evidenceRequired:
   - install-to-preflight journey
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1147,6 +1181,7 @@ workItems:
   evidenceRequired:
   - security review and tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1181,6 +1216,7 @@ workItems:
   evidenceRequired:
   - secret and policy tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1215,6 +1251,7 @@ workItems:
   evidenceRequired:
   - dated source register
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1250,6 +1287,7 @@ workItems:
   evidenceRequired:
   - commands, artifacts, operator effort
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1285,6 +1323,7 @@ workItems:
   evidenceRequired:
   - decision-level differential
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1318,6 +1357,7 @@ workItems:
   evidenceRequired:
   - attributable account records
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1351,6 +1391,7 @@ workItems:
   evidenceRequired:
   - review-ready packet
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1386,6 +1427,7 @@ workItems:
   evidenceRequired:
   - external receipts/notes
   externalReceiptRequired: true
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
@@ -1420,6 +1462,7 @@ workItems:
   evidenceRequired:
   - sanitized timelines
   externalReceiptRequired: true
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
@@ -1454,6 +1497,7 @@ workItems:
   evidenceRequired:
   - named decision/deadline
   externalReceiptRequired: true
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
@@ -1489,6 +1533,7 @@ workItems:
   evidenceRequired:
   - ICP score and next action
   externalReceiptRequired: true
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
@@ -1523,6 +1568,7 @@ workItems:
   evidenceRequired:
   - access/rights receipt
   externalReceiptRequired: true
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
@@ -1574,15 +1620,16 @@ workItems:
     commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
-  ownerType: AI
-  automatable: true
+  ownerType: MACHINE_POLICY_AUTHORITY
+  automatable: false
   packetPath: null
   evidenceRequired:
   - KEEP/NARROW/REPLACE/STOP decision
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
@@ -1613,6 +1660,7 @@ workItems:
   evidenceRequired:
   - pack spec and negative boundaries
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1647,6 +1695,7 @@ workItems:
   evidenceRequired:
   - positive/ambiguous/missing-rank cases
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1682,6 +1731,7 @@ workItems:
   evidenceRequired:
   - controlled traces
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1716,6 +1766,7 @@ workItems:
   evidenceRequired:
   - falsifier and status tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1750,6 +1801,7 @@ workItems:
   evidenceRequired:
   - precondition and rollback tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1784,6 +1836,7 @@ workItems:
   evidenceRequired:
   - independent negative controls
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1820,6 +1873,7 @@ workItems:
   evidenceRequired:
   - bounded plans, no universal planner
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1855,6 +1909,7 @@ workItems:
   evidenceRequired:
   - tamper, drift, expiry tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1890,6 +1945,7 @@ workItems:
   evidenceRequired:
   - containment/resource tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1924,6 +1980,7 @@ workItems:
   evidenceRequired:
   - escape/network/path tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1958,6 +2015,7 @@ workItems:
   evidenceRequired:
   - identity/tamper tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -1992,6 +2050,7 @@ workItems:
   evidenceRequired:
   - per-property oracle schema
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2026,6 +2085,7 @@ workItems:
   evidenceRequired:
   - fail/unknown/optional tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2063,6 +2123,7 @@ workItems:
   evidenceRequired:
   - decision matrix tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2097,6 +2158,7 @@ workItems:
   evidenceRequired:
   - invalid-oracle and unknown tests
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2131,6 +2193,7 @@ workItems:
   evidenceRequired:
   - create/verify/expire/supersede
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2169,6 +2232,7 @@ workItems:
   evidenceRequired:
   - independent verification
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2204,6 +2268,7 @@ workItems:
   evidenceRequired:
   - report/machine-record consistency
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2238,6 +2303,7 @@ workItems:
   evidenceRequired:
   - labeled controlled corpus
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2273,6 +2339,7 @@ workItems:
   evidenceRequired:
   - end-to-end evidence
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2308,6 +2375,7 @@ workItems:
   evidenceRequired:
   - real GPU artifacts
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2342,6 +2410,7 @@ workItems:
   evidenceRequired:
   - decision differential
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2377,6 +2446,7 @@ workItems:
   evidenceRequired:
   - install/rollback evidence
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2411,6 +2481,7 @@ workItems:
   evidenceRequired:
   - signed operator receipt
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2421,12 +2492,12 @@ workItems:
   updatedAt: null
 - version: 3
   workItemId: V3-TRUST-010
-  title: machine-policy verification of controlled demonstration
+  title: Machine-policy evaluation of controlled demonstration
   lane: TRUST
   kind: MACHINE_POLICY_REVIEW
   milestone: M2_CONTROLLED_QUALIFICATION
-  decisionContribution: machine-policy verification of controlled demonstration
-  customerOutcome: machine-policy verification of controlled demonstration
+  decisionContribution: Machine-policy evaluation of controlled demonstration
+  customerOutcome: Machine-policy evaluation of controlled demonstration
   dependsOn:
   - V3-PROD-011
   - V3-TRUST-004
@@ -2462,15 +2533,16 @@ workItems:
     commercial: NATIVE_ADVANTAGE_DEMONSTRATED
   disposition: KEEP
   status: PROPOSED
-  ownerType: AI
-  automatable: true
+  ownerType: MACHINE_POLICY_AUTHORITY
+  automatable: false
   packetPath: null
   evidenceRequired:
-  - scoped approval
+  - scoped signed receipt
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
@@ -2497,15 +2569,16 @@ workItems:
     commercial: NATIVE_ADVANTAGE_DEMONSTRATED
   disposition: KEEP
   status: PROPOSED
-  ownerType: AI
-  automatable: true
+  ownerType: MACHINE_POLICY_AUTHORITY
+  automatable: false
   packetPath: null
   evidenceRequired:
   - continue/narrow/stop
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
@@ -2536,6 +2609,7 @@ workItems:
   evidenceRequired:
   - offer document
   externalReceiptRequired: true
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
@@ -2569,6 +2643,7 @@ workItems:
   evidenceRequired:
   - pricing ledger
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2602,6 +2677,7 @@ workItems:
   evidenceRequired:
   - security documents
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2635,6 +2711,7 @@ workItems:
   evidenceRequired:
   - external receipt
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2645,12 +2722,12 @@ workItems:
   updatedAt: null
 - version: 3
   workItemId: V3-TRUST-013
-  title: Contract security reviewer
+  title: Contract security private-oracle policy
   lane: TRUST
   kind: SPECIFICATION
   milestone: M3_PAID_PREFLIGHT
-  decisionContribution: Contract security reviewer
-  customerOutcome: Contract security reviewer
+  decisionContribution: Contract security private-oracle policy
+  customerOutcome: Contract security private-oracle policy
   dependsOn: []
   softDependsOn: []
   sourceDependencyExpression: M2
@@ -2668,6 +2745,7 @@ workItems:
   evidenceRequired:
   - external receipt
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2702,6 +2780,7 @@ workItems:
   evidenceRequired:
   - local evidence report
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2736,6 +2815,7 @@ workItems:
   evidenceRequired:
   - exact native result
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2746,12 +2826,13 @@ workItems:
   updatedAt: null
 - version: 3
   workItemId: V3-MKT-010
-  title: Secure customer approval for paid preflight proposal
+  title: Secure attributable customer authorization for paid preflight proposal
   lane: MARKET
   kind: EXTERNAL_EVIDENCE
   milestone: M3_PAID_PREFLIGHT
-  decisionContribution: Secure customer approval for paid preflight proposal
-  customerOutcome: Secure customer approval for paid preflight proposal
+  decisionContribution: Secure attributable customer authorization for paid preflight
+    proposal
+  customerOutcome: Secure attributable customer authorization for paid preflight proposal
   dependsOn:
   - V3-MKT-008
   - V3-MKT-009
@@ -2773,6 +2854,7 @@ workItems:
   evidenceRequired:
   - signed/external receipt
   externalReceiptRequired: true
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
@@ -2804,15 +2886,16 @@ workItems:
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
   status: PROPOSED
-  ownerType: AI
-  automatable: true
+  ownerType: MACHINE_POLICY_AUTHORITY
+  automatable: false
   packetPath: null
   evidenceRequired:
-  - machine-policy decision
+  - independent machine-policy decision
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
@@ -2843,6 +2926,7 @@ workItems:
   evidenceRequired:
   - signed paid receipt
   externalReceiptRequired: true
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
@@ -2877,6 +2961,7 @@ workItems:
   evidenceRequired:
   - customer-local manifest
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2911,6 +2996,7 @@ workItems:
   evidenceRequired:
   - commands/findings/decision
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2946,6 +3032,7 @@ workItems:
   evidenceRequired:
   - preflight
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -2956,13 +3043,14 @@ workItems:
   updatedAt: null
 - version: 3
   workItemId: V3-PILOT-005
-  title: machine policy authorizes case-specific experiment/reduction plan
+  title: Independent machine-policy authorize case-specific experiment/reduction plan
   lane: TRUST
   kind: MACHINE_POLICY_REVIEW
   milestone: M4_PAID_PILOT
-  decisionContribution: machine policy authorizes case-specific experiment/reduction
+  decisionContribution: Independent machine-policy authorize case-specific experiment/reduction
     plan
-  customerOutcome: machine policy authorizes case-specific experiment/reduction plan
+  customerOutcome: Independent machine-policy authorize case-specific experiment/reduction
+    plan
   dependsOn:
   - V3-PILOT-004
   softDependsOn: []
@@ -2975,15 +3063,16 @@ workItems:
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
   status: PROPOSED
-  ownerType: AI
-  automatable: true
+  ownerType: MACHINE_POLICY_AUTHORITY
+  automatable: false
   packetPath: null
   evidenceRequired:
-  - digest-bound machine-policy receipt
+  - signed machine-policy receipt
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
@@ -3015,6 +3104,7 @@ workItems:
   evidenceRequired:
   - faithfulness record
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3049,6 +3139,7 @@ workItems:
   evidenceRequired:
   - execution records
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3083,6 +3174,7 @@ workItems:
   evidenceRequired:
   - property matrix
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3118,6 +3210,7 @@ workItems:
   evidenceRequired:
   - signed result
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3128,12 +3221,12 @@ workItems:
   updatedAt: null
 - version: 3
   workItemId: V3-PILOT-010
-  title: machine policy authorizes customer-facing claims
+  title: Independent machine-policy authorize customer-facing claims
   lane: TRUST
   kind: MACHINE_POLICY_REVIEW
   milestone: M4_PAID_PILOT
-  decisionContribution: machine policy authorizes customer-facing claims
-  customerOutcome: machine policy authorizes customer-facing claims
+  decisionContribution: Independent machine-policy authorize customer-facing claims
+  customerOutcome: Independent machine-policy authorize customer-facing claims
   dependsOn:
   - V3-PILOT-009
   softDependsOn: []
@@ -3146,15 +3239,16 @@ workItems:
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
   status: PROPOSED
-  ownerType: AI
-  automatable: true
+  ownerType: MACHINE_POLICY_AUTHORITY
+  automatable: false
   packetPath: null
   evidenceRequired:
-  - digest-bound machine-policy receipt
+  - signed machine-policy receipt
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
@@ -3187,6 +3281,7 @@ workItems:
   evidenceRequired:
   - attributable receipt
   externalReceiptRequired: true
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
@@ -3221,6 +3316,7 @@ workItems:
   evidenceRequired:
   - independent verification
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3256,6 +3352,7 @@ workItems:
   evidenceRequired:
   - dated commitment
   externalReceiptRequired: true
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
@@ -3286,15 +3383,16 @@ workItems:
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
   status: PROPOSED
-  ownerType: AI
-  automatable: true
+  ownerType: MACHINE_POLICY_AUTHORITY
+  automatable: false
   packetPath: null
   evidenceRequired:
   - continue/narrow/stop
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
@@ -3325,6 +3423,7 @@ workItems:
   evidenceRequired:
   - signed receipt
   externalReceiptRequired: true
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
@@ -3359,6 +3458,7 @@ workItems:
   evidenceRequired:
   - drift report
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3393,6 +3493,7 @@ workItems:
   evidenceRequired:
   - new decision
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3427,6 +3528,7 @@ workItems:
   evidenceRequired:
   - operator receipt
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3461,6 +3563,7 @@ workItems:
   evidenceRequired:
   - customer receipt
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3495,6 +3598,7 @@ workItems:
   evidenceRequired:
   - internal cost record
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3522,15 +3626,16 @@ workItems:
     commercial: EXTERNAL_VALUE_DEMONSTRATED
   disposition: KEEP
   status: PROPOSED
-  ownerType: AI
-  automatable: true
+  ownerType: MACHINE_POLICY_AUTHORITY
+  automatable: false
   packetPath: null
   evidenceRequired:
   - continue/narrow/stop
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []
@@ -3561,6 +3666,7 @@ workItems:
   evidenceRequired:
   - versioned pack
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3595,6 +3701,7 @@ workItems:
   evidenceRequired:
   - case evidence
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3629,6 +3736,7 @@ workItems:
   evidenceRequired:
   - current sources/run
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3665,6 +3773,7 @@ workItems:
   evidenceRequired:
   - independent reports
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3675,12 +3784,12 @@ workItems:
   updatedAt: null
 - version: 3
   workItemId: V3-TRUST-015
-  title: independent machine-policy commercial-pack approval
+  title: Independent machine authority commercial-pack machine authorization
   lane: TRUST
-  kind: MACHINE_POLICY_REVIEW
+  kind: SPECIFICATION
   milestone: M6_COMMERCIALLY_SUPPORTED_PACK
-  decisionContribution: independent machine-policy commercial-pack approval
-  customerOutcome: independent machine-policy commercial-pack approval
+  decisionContribution: Independent machine authority commercial-pack machine authorization
+  customerOutcome: Independent machine authority commercial-pack machine authorization
   dependsOn:
   - V3-TRUST-014
   softDependsOn: []
@@ -3697,8 +3806,9 @@ workItems:
   automatable: true
   packetPath: null
   evidenceRequired:
-  - digest-bound machine-policy receipt
+  - signed machine-policy receipt
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3733,6 +3843,7 @@ workItems:
   evidenceRequired:
   - operator docs
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 2
     maxCandidateRepairCycles: 3
@@ -3766,6 +3877,7 @@ workItems:
   evidenceRequired:
   - customer response
   externalReceiptRequired: true
+  machinePolicyReceiptRequired: false
   retryPolicy:
     maxPlanAttempts: 0
     maxCandidateRepairCycles: 0
@@ -3800,15 +3912,16 @@ workItems:
     commercial: COMMERCIALLY_SUPPORTED
   disposition: KEEP
   status: PROPOSED
-  ownerType: AI
-  automatable: true
+  ownerType: MACHINE_POLICY_AUTHORITY
+  automatable: false
   packetPath: null
   evidenceRequired:
   - maturity decision
   externalReceiptRequired: false
+  machinePolicyReceiptRequired: true
   retryPolicy:
-    maxPlanAttempts: 2
-    maxCandidateRepairCycles: 3
+    maxPlanAttempts: 0
+    maxCandidateRepairCycles: 0
     maxSameFindingRepeats: 2
     maxCandidateRestarts: 1
   externalEvidenceRefs: []

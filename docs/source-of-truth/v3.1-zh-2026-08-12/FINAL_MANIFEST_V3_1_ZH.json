@@ -1,0 +1,2732 @@
+{
+  "authorityModel": {
+    "activationRequiresSignedExactShaReceipt": true,
+    "b004": "CRITICAL_SCOPED_NONBLOCKING_EXTERNAL_WAIT",
+    "externalTruthRequiresAttributableReceipts": true,
+    "humanApprovalRuntimeState": false,
+    "machineAuthorityIndependentOffRepository": true,
+    "operatingDoctrine": "ZERO_FOUNDER_INTERVENTION_AFTER_BOOTSTRAP",
+    "releaseFlow": "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
+  },
+  "coverageEvidence": {
+    "mappedHeadingCount": 504,
+    "path": "docs/source-of-truth/v3.1-zh-2026-08-12/SECTION_COVERAGE_V3_TO_V3_1_ZH.json",
+    "sha256": "69748b10c1192cc7c99efd34e8a08068f1afd876e444205309e2e302be6eb043",
+    "sourceHeadingCount": 504
+  },
+  "documents": [
+    {
+      "authorityClass": "generation_index",
+      "derivedFrom": "TC.V3.GENERATION_INDEX",
+      "generationId": "traincapsule-v3.1-zh-2026-08-12",
+      "logicalId": "TC.V3_1_ZH.GENERATION_INDEX",
+      "path": "docs/source-of-truth/v3.1-zh-2026-08-12/README.md",
+      "required": true,
+      "sections": [
+        {
+          "heading": "TrainCapsule V3.1-ZH source generation",
+          "level": 1,
+          "sectionId": "traincapsule-v3-1-zh-source-generation"
+        },
+        {
+          "heading": "V3.1-ZH controlling amendment",
+          "level": 2,
+          "sectionId": "traincapsule-v3-1-zh-source-generation-v3-1-zh-controlling-amendment"
+        }
+      ],
+      "sha256": "801633926515a037506add0f661b19e20cc6afccc2fcef5818be398b21a25b6f"
+    },
+    {
+      "authorityClass": "root_policy",
+      "derivedFrom": "TC.V3.EXECUTIVE_DECISION",
+      "generationId": "traincapsule-v3.1-zh-2026-08-12",
+      "logicalId": "TC.V3_1_ZH.EXECUTIVE_DECISION",
+      "path": "docs/source-of-truth/v3.1-zh-2026-08-12/00_EXECUTIVE_BUILD_DECISION_V3_1_ZH.md",
+      "required": true,
+      "sections": [
+        {
+          "heading": "00 — Executive Build Decision V3.1-ZH",
+          "level": 1,
+          "sectionId": "00-executive-build-decision-v3-1-zh"
+        },
+        {
+          "heading": "V3.1-ZH controlling amendment",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-v3-1-zh-controlling-amendment"
+        },
+        {
+          "heading": "00.1 Final decision",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-1-final-decision"
+        },
+        {
+          "heading": "00.2 The product being built",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-2-the-product-being-built"
+        },
+        {
+          "heading": "00.3 The first paid offer",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-3-the-first-paid-offer"
+        },
+        {
+          "heading": "Incident-to-Change Qualification Pilot",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-3-the-first-paid-offer-incident-to-change-qualification-pilot"
+        },
+        {
+          "heading": "00.4 Why the change is necessary",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-4-why-the-change-is-necessary"
+        },
+        {
+          "heading": "00.5 Product boundary",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-5-product-boundary"
+        },
+        {
+          "heading": "Stable trust core to retain",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-5-product-boundary-stable-trust-core-to-retain"
+        },
+        {
+          "heading": "V1 commercial slice",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-5-product-boundary-v1-commercial-slice"
+        },
+        {
+          "heading": "Deferred until evidence gates",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-5-product-boundary-deferred-until-evidence-gates"
+        },
+        {
+          "heading": "00.6 Initial customer",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-6-initial-customer"
+        },
+        {
+          "heading": "00.7 Competitive posture",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-7-competitive-posture"
+        },
+        {
+          "heading": "00.8 Complete-substitute gate",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-8-complete-substitute-gate"
+        },
+        {
+          "heading": "00.9 Maturity model",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-9-maturity-model"
+        },
+        {
+          "heading": "00.10 Independent machine authority",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-10-independent-machine-authority"
+        },
+        {
+          "heading": "00.11 Engineering-factory doctrine",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-11-engineering-factory-doctrine"
+        },
+        {
+          "heading": "00.12 Parallel lanes",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-12-parallel-lanes"
+        },
+        {
+          "heading": "Lane A — Product and commercial slice",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-12-parallel-lanes-lane-a-product-and-commercial-slice"
+        },
+        {
+          "heading": "Lane B — Market evidence",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-12-parallel-lanes-lane-b-market-evidence"
+        },
+        {
+          "heading": "Lane C — Native and competitor baseline",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-12-parallel-lanes-lane-c-native-and-competitor-baseline"
+        },
+        {
+          "heading": "Lane D — Trust validation",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-12-parallel-lanes-lane-d-trust-validation"
+        },
+        {
+          "heading": "00.13 Milestone gates",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates"
+        },
+        {
+          "heading": "M0 — Factory migrated",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m0-factory-migrated"
+        },
+        {
+          "heading": "M1 — Native baseline and eligibility",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m1-native-baseline-and-eligibility"
+        },
+        {
+          "heading": "M2 — Controlled qualification slice",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m2-controlled-qualification-slice"
+        },
+        {
+          "heading": "M3 — External preflight readiness",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m3-external-preflight-readiness"
+        },
+        {
+          "heading": "M4 — Paid pilot",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m4-paid-pilot"
+        },
+        {
+          "heading": "M5 — Paid repeat",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m5-paid-repeat"
+        },
+        {
+          "heading": "M6 — Commercially supported pack",
+          "level": 3,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m6-commercially-supported-pack"
+        },
+        {
+          "heading": "00.14 Proof requirements before expansion",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-14-proof-requirements-before-expansion"
+        },
+        {
+          "heading": "00.15 Kill and replacement rules",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-15-kill-and-replacement-rules"
+        },
+        {
+          "heading": "00.16 Commercial hypotheses",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-16-commercial-hypotheses"
+        },
+        {
+          "heading": "00.17 External message",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-17-external-message"
+        },
+        {
+          "heading": "00.18 Final authorization",
+          "level": 2,
+          "sectionId": "00-executive-build-decision-v3-1-zh-00-18-final-authorization"
+        }
+      ],
+      "sha256": "3ba7bba9f99692634eafadc41b6fef3a45d77523fc4fb4cae07ebe8a832fbfa1"
+    },
+    {
+      "authorityClass": "normative_product",
+      "derivedFrom": "TC.V3.PRODUCT_REQUIREMENTS",
+      "generationId": "traincapsule-v3.1-zh-2026-08-12",
+      "logicalId": "TC.V3_1_ZH.PRODUCT_REQUIREMENTS",
+      "path": "docs/source-of-truth/v3.1-zh-2026-08-12/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3_1_ZH.md",
+      "required": true,
+      "sections": [
+        {
+          "heading": "03 — Product Strategy and Requirements V3.1-ZH",
+          "level": 1,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh"
+        },
+        {
+          "heading": "V3.1-ZH controlling amendment",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-v3-1-zh-controlling-amendment"
+        },
+        {
+          "heading": "03.1 Product definition",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-1-product-definition"
+        },
+        {
+          "heading": "03.2 Primary job to be done",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-2-primary-job-to-be-done"
+        },
+        {
+          "heading": "03.3 Buyer, user, and decision owner",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-3-buyer-user-and-decision-owner"
+        },
+        {
+          "heading": "Economic buyer",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-3-buyer-user-and-decision-owner-economic-buyer"
+        },
+        {
+          "heading": "Primary user",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-3-buyer-user-and-decision-owner-primary-user"
+        },
+        {
+          "heading": "Decision owner",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-3-buyer-user-and-decision-owner-decision-owner"
+        },
+        {
+          "heading": "03.4 Ideal customer profile",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-4-ideal-customer-profile"
+        },
+        {
+          "heading": "Required characteristics",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-4-ideal-customer-profile-required-characteristics"
+        },
+        {
+          "heading": "Positive signals",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-4-ideal-customer-profile-positive-signals"
+        },
+        {
+          "heading": "Disqualifiers",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-4-ideal-customer-profile-disqualifiers"
+        },
+        {
+          "heading": "03.5 First commercial offer",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer"
+        },
+        {
+          "heading": "Name",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer-name"
+        },
+        {
+          "heading": "Entry conditions",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer-entry-conditions"
+        },
+        {
+          "heading": "Pilot phases",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer-pilot-phases"
+        },
+        {
+          "heading": "Phase 1 — Paid preflight",
+          "level": 4,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer-pilot-phases-phase-1-paid-preflight"
+        },
+        {
+          "heading": "Phase 2 — Qualification build and execution",
+          "level": 4,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer-pilot-phases-phase-2-qualification-build-and-execution"
+        },
+        {
+          "heading": "Phase 3 — Included or scheduled second execution",
+          "level": 4,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer-pilot-phases-phase-3-included-or-scheduled-second-execution"
+        },
+        {
+          "heading": "03.6 Product workflow",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-6-product-workflow"
+        },
+        {
+          "heading": "03.7 Product outputs",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs"
+        },
+        {
+          "heading": "Incident Intake Record",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-incident-intake-record"
+        },
+        {
+          "heading": "Workload Identity Lock",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-workload-identity-lock"
+        },
+        {
+          "heading": "Evidence Inventory",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-evidence-inventory"
+        },
+        {
+          "heading": "Native Findings Record",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-native-findings-record"
+        },
+        {
+          "heading": "Experiment Specification",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-experiment-specification"
+        },
+        {
+          "heading": "Reduction Faithfulness Record",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-reduction-faithfulness-record"
+        },
+        {
+          "heading": "Recovery Assurance Record",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-recovery-assurance-record"
+        },
+        {
+          "heading": "Qualification Decision",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-qualification-decision"
+        },
+        {
+          "heading": "Workload Incident Contract",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-workload-incident-contract"
+        },
+        {
+          "heading": "03.8 Initial incident pack",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-8-initial-incident-pack"
+        },
+        {
+          "heading": "`PRE_COLLECTIVE_LIFECYCLE_CONTRACT_V1`",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-8-initial-incident-pack-pre-collective-lifecycle-contract-v1"
+        },
+        {
+          "heading": "Native baseline",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-8-initial-incident-pack-native-baseline"
+        },
+        {
+          "heading": "Incremental product requirement",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-8-initial-incident-pack-incremental-product-requirement"
+        },
+        {
+          "heading": "V1 legal-reduction classes",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-8-initial-incident-pack-v1-legal-reduction-classes"
+        },
+        {
+          "heading": "V1 prohibited reductions",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-8-initial-incident-pack-v1-prohibited-reductions"
+        },
+        {
+          "heading": "03.9 Checkpoint pack policy",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-9-checkpoint-pack-policy"
+        },
+        {
+          "heading": "03.10 Open and paid boundary",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-10-open-and-paid-boundary"
+        },
+        {
+          "heading": "Open or freely accessible eligibility layer",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-10-open-and-paid-boundary-open-or-freely-accessible-eligibility-layer"
+        },
+        {
+          "heading": "Paid outcome",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-10-open-and-paid-boundary-paid-outcome"
+        },
+        {
+          "heading": "03.11 Productized service posture",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-11-productized-service-posture"
+        },
+        {
+          "heading": "03.12 Complete-substitute differential benchmark",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-12-complete-substitute-differential-benchmark"
+        },
+        {
+          "heading": "Baseline A — Native only",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-12-complete-substitute-differential-benchmark-baseline-a-native-only"
+        },
+        {
+          "heading": "Baseline B — Native plus provider/vendor",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-12-complete-substitute-differential-benchmark-baseline-b-native-plus-provider-vendor"
+        },
+        {
+          "heading": "Baseline C — Native plus internal engineer and approved agent",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-12-complete-substitute-differential-benchmark-baseline-c-native-plus-internal-engineer-and-approved-agent"
+        },
+        {
+          "heading": "Candidate — TrainCapsule",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-12-complete-substitute-differential-benchmark-candidate-traincapsule"
+        },
+        {
+          "heading": "03.13 Product maturity",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-13-product-maturity"
+        },
+        {
+          "heading": "03.14 Required nonfunctional properties",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-14-required-nonfunctional-properties"
+        },
+        {
+          "heading": "Truth",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-14-required-nonfunctional-properties-truth"
+        },
+        {
+          "heading": "Security",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-14-required-nonfunctional-properties-security"
+        },
+        {
+          "heading": "Reproducibility",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-14-required-nonfunctional-properties-reproducibility"
+        },
+        {
+          "heading": "Usability",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-14-required-nonfunctional-properties-usability"
+        },
+        {
+          "heading": "Performance",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-14-required-nonfunctional-properties-performance"
+        },
+        {
+          "heading": "03.15 Pilot success contract",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-15-pilot-success-contract"
+        },
+        {
+          "heading": "03.16 Product metrics",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-16-product-metrics"
+        },
+        {
+          "heading": "North-star commercial metric",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-16-product-metrics-north-star-commercial-metric"
+        },
+        {
+          "heading": "Supporting metrics",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-16-product-metrics-supporting-metrics"
+        },
+        {
+          "heading": "Anti-metrics",
+          "level": 3,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-16-product-metrics-anti-metrics"
+        },
+        {
+          "heading": "03.17 Discovery requirements",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-17-discovery-requirements"
+        },
+        {
+          "heading": "03.18 Scope dispositions",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-18-scope-dispositions"
+        },
+        {
+          "heading": "03.19 Claims policy",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-19-claims-policy"
+        },
+        {
+          "heading": "03.20 Definition of product success",
+          "level": 2,
+          "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-20-definition-of-product-success"
+        }
+      ],
+      "sha256": "efc721763e42b9e8c664ffc67d64526c56f1365f29ce15b95e5362249580f912"
+    },
+    {
+      "authorityClass": "normative_architecture",
+      "derivedFrom": "TC.V3.TECHNICAL_ARCHITECTURE",
+      "generationId": "traincapsule-v3.1-zh-2026-08-12",
+      "logicalId": "TC.V3_1_ZH.TECHNICAL_ARCHITECTURE",
+      "path": "docs/source-of-truth/v3.1-zh-2026-08-12/04_TECHNICAL_ARCHITECTURE_V3_1_ZH.md",
+      "required": true,
+      "sections": [
+        {
+          "heading": "04 — Technical Architecture V3.1-ZH",
+          "level": 1,
+          "sectionId": "04-technical-architecture-v3-1-zh"
+        },
+        {
+          "heading": "V3.1-ZH controlling amendment",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-v3-1-zh-controlling-amendment"
+        },
+        {
+          "heading": "04.1 Architectural objective",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-1-architectural-objective"
+        },
+        {
+          "heading": "04.2 Architecture doctrine",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-2-architecture-doctrine"
+        },
+        {
+          "heading": "04.3 Initial supported envelope",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-3-initial-supported-envelope"
+        },
+        {
+          "heading": "Supported in the first commercial slice",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-3-initial-supported-envelope-supported-in-the-first-commercial-slice"
+        },
+        {
+          "heading": "Explicitly unsupported until evidence authorizes expansion",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-3-initial-supported-envelope-explicitly-unsupported-until-evidence-authorizes-expansion"
+        },
+        {
+          "heading": "04.4 Repository layout",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-4-repository-layout"
+        },
+        {
+          "heading": "04.5 Bounded V1 component map",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-5-bounded-v1-component-map"
+        },
+        {
+          "heading": "04.6 Core domain objects",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects"
+        },
+        {
+          "heading": "`WorkloadIdentity`",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-workloadidentity"
+        },
+        {
+          "heading": "`EnvironmentIdentity`",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-environmentidentity"
+        },
+        {
+          "heading": "`EvidenceArtifact`",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-evidenceartifact"
+        },
+        {
+          "heading": "`NativeFinding`",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-nativefinding"
+        },
+        {
+          "heading": "`IncidentCase`",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-incidentcase"
+        },
+        {
+          "heading": "`EvidenceCompletenessReport`",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-evidencecompletenessreport"
+        },
+        {
+          "heading": "`ExperimentHypothesis`",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-experimenthypothesis"
+        },
+        {
+          "heading": "`ReductionStep`",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-reductionstep"
+        },
+        {
+          "heading": "`FaithfulnessContract`",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-faithfulnesscontract"
+        },
+        {
+          "heading": "`RecoveryProperty`",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-recoveryproperty"
+        },
+        {
+          "heading": "`ExperimentContract`",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-experimentcontract"
+        },
+        {
+          "heading": "`ExecutionRecord`",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-executionrecord"
+        },
+        {
+          "heading": "`QualificationDecision`",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-qualificationdecision"
+        },
+        {
+          "heading": "04.7 Stable backend interfaces",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-7-stable-backend-interfaces"
+        },
+        {
+          "heading": "04.8 Initial native integration",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-8-initial-native-integration"
+        },
+        {
+          "heading": "04.9 Eligibility engine",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-9-eligibility-engine"
+        },
+        {
+          "heading": "04.10 Pack-specific experiment planner",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-10-pack-specific-experiment-planner"
+        },
+        {
+          "heading": "04.11 Runner architecture",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-11-runner-architecture"
+        },
+        {
+          "heading": "04.12 Baseline/candidate comparison",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-12-baseline-candidate-comparison"
+        },
+        {
+          "heading": "04.13 Recovery Assurance",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-13-recovery-assurance"
+        },
+        {
+          "heading": "04.14 Incident contract registry",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-14-incident-contract-registry"
+        },
+        {
+          "heading": "04.15 Local report viewer",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-15-local-report-viewer"
+        },
+        {
+          "heading": "04.16 Independent machine authorization boundary",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-16-independent-machine-authorization-boundary"
+        },
+        {
+          "heading": "04.17 Security architecture",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-17-security-architecture"
+        },
+        {
+          "heading": "Threats in V1",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-17-security-architecture-threats-in-v1"
+        },
+        {
+          "heading": "Required controls",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-17-security-architecture-required-controls"
+        },
+        {
+          "heading": "04.18 Observability and supportability",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-18-observability-and-supportability"
+        },
+        {
+          "heading": "04.19 Product CLI",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-19-product-cli"
+        },
+        {
+          "heading": "04.20 Exit-code contract",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-20-exit-code-contract"
+        },
+        {
+          "heading": "04.21 Testing architecture",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture"
+        },
+        {
+          "heading": "Unit tests",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture-unit-tests"
+        },
+        {
+          "heading": "Contract tests",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture-contract-tests"
+        },
+        {
+          "heading": "Controlled integration tests",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture-controlled-integration-tests"
+        },
+        {
+          "heading": "Adversarial tests",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture-adversarial-tests"
+        },
+        {
+          "heading": "Journey tests",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture-journey-tests"
+        },
+        {
+          "heading": "External tests",
+          "level": 3,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture-external-tests"
+        },
+        {
+          "heading": "04.22 Performance budgets",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-22-performance-budgets"
+        },
+        {
+          "heading": "04.23 Packaging and deployment",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-23-packaging-and-deployment"
+        },
+        {
+          "heading": "04.24 Maturity controls",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-24-maturity-controls"
+        },
+        {
+          "heading": "04.25 Deferred architecture register",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-25-deferred-architecture-register"
+        },
+        {
+          "heading": "04.26 Migration from the present repository",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-26-migration-from-the-present-repository"
+        },
+        {
+          "heading": "04.27 V1 completion definition",
+          "level": 2,
+          "sectionId": "04-technical-architecture-v3-1-zh-04-27-v1-completion-definition"
+        }
+      ],
+      "sha256": "d66e62e4ef190a96f14108a5fcfb1817f2120095196b6882f6237728dbfb2cd8"
+    },
+    {
+      "authorityClass": "normative_trust",
+      "derivedFrom": "TC.V3.TRUST_SPECIFICATION",
+      "generationId": "traincapsule-v3.1-zh-2026-08-12",
+      "logicalId": "TC.V3_1_ZH.TRUST_SPECIFICATION",
+      "path": "docs/source-of-truth/v3.1-zh-2026-08-12/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3_1_ZH.md",
+      "required": true,
+      "sections": [
+        {
+          "heading": "05 — Trust, Replay, Reduction, Recovery, and Capsule Specification V3.1-ZH",
+          "level": 1,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh"
+        },
+        {
+          "heading": "V3.1-ZH controlling amendment",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-v3-1-zh-controlling-amendment"
+        },
+        {
+          "heading": "05.1 Purpose",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-1-purpose"
+        },
+        {
+          "heading": "05.2 Truth model",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-2-truth-model"
+        },
+        {
+          "heading": "Technical execution state",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-2-truth-model-technical-execution-state"
+        },
+        {
+          "heading": "Epistemic claim class",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-2-truth-model-epistemic-claim-class"
+        },
+        {
+          "heading": "Operational decision",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-2-truth-model-operational-decision"
+        },
+        {
+          "heading": "Commercial maturity",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-2-truth-model-commercial-maturity"
+        },
+        {
+          "heading": "05.3 Evidence provenance",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-3-evidence-provenance"
+        },
+        {
+          "heading": "05.4 Evidence completeness",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-4-evidence-completeness"
+        },
+        {
+          "heading": "05.5 Identity law",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-5-identity-law"
+        },
+        {
+          "heading": "Workload identity",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-5-identity-law-workload-identity"
+        },
+        {
+          "heading": "Environment identity",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-5-identity-law-environment-identity"
+        },
+        {
+          "heading": "Identity strength",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-5-identity-law-identity-strength"
+        },
+        {
+          "heading": "Drift",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-5-identity-law-drift"
+        },
+        {
+          "heading": "05.6 Native baseline law",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-6-native-baseline-law"
+        },
+        {
+          "heading": "05.7 Observed boundary",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-7-observed-boundary"
+        },
+        {
+          "heading": "05.8 Hypothesis discipline",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-8-hypothesis-discipline"
+        },
+        {
+          "heading": "05.9 Experiment plan requirements",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-9-experiment-plan-requirements"
+        },
+        {
+          "heading": "05.10 Reduction law",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-10-reduction-law"
+        },
+        {
+          "heading": "Registered operators",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-10-reduction-law-registered-operators"
+        },
+        {
+          "heading": "Legal reduction states",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-10-reduction-law-legal-reduction-states"
+        },
+        {
+          "heading": "Monotonic truth rule",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-10-reduction-law-monotonic-truth-rule"
+        },
+        {
+          "heading": "Negative controls",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-10-reduction-law-negative-controls"
+        },
+        {
+          "heading": "Economic limit",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-10-reduction-law-economic-limit"
+        },
+        {
+          "heading": "05.11 Faithfulness dimensions",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-11-faithfulness-dimensions"
+        },
+        {
+          "heading": "05.12 Replay and evidence tiers",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers"
+        },
+        {
+          "heading": "Tier E0 — Evidence-only reconstruction",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers-tier-e0-evidence-only-reconstruction"
+        },
+        {
+          "heading": "Tier E1 — Structural execution",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers-tier-e1-structural-execution"
+        },
+        {
+          "heading": "Tier E2 — Source/substitute execution",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers-tier-e2-source-substitute-execution"
+        },
+        {
+          "heading": "Tier E3 — Deterministic bounded replay",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers-tier-e3-deterministic-bounded-replay"
+        },
+        {
+          "heading": "Tier E4 — Statistical reproduction",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers-tier-e4-statistical-reproduction"
+        },
+        {
+          "heading": "Tier E5 — Scale-faithful execution",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers-tier-e5-scale-faithful-execution"
+        },
+        {
+          "heading": "05.13 Oracle specification",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-13-oracle-specification"
+        },
+        {
+          "heading": "05.14 Recovery Assurance specification",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-14-recovery-assurance-specification"
+        },
+        {
+          "heading": "Property contract",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-14-recovery-assurance-specification-property-contract"
+        },
+        {
+          "heading": "Result",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-14-recovery-assurance-specification-result"
+        },
+        {
+          "heading": "Aggregation",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-14-recovery-assurance-specification-aggregation"
+        },
+        {
+          "heading": "Reference acquisition",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-14-recovery-assurance-specification-reference-acquisition"
+        },
+        {
+          "heading": "05.15 Baseline/candidate qualification",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-15-baseline-candidate-qualification"
+        },
+        {
+          "heading": "Valid comparison",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-15-baseline-candidate-qualification-valid-comparison"
+        },
+        {
+          "heading": "Decision matrix",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-15-baseline-candidate-qualification-decision-matrix"
+        },
+        {
+          "heading": "Required report content",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-15-baseline-candidate-qualification-required-report-content"
+        },
+        {
+          "heading": "05.16 Applicability envelope",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-16-applicability-envelope"
+        },
+        {
+          "heading": "05.17 Expiry, revocation, and requalification",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-17-expiry-revocation-and-requalification"
+        },
+        {
+          "heading": "05.18 Native-equivalence and complete-substitute test",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-18-native-equivalence-and-complete-substitute-test"
+        },
+        {
+          "heading": "05.19 Commercial truth specification",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-19-commercial-truth-specification"
+        },
+        {
+          "heading": "05.20 Independent machine authority",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-20-independent-machine-authority"
+        },
+        {
+          "heading": "Qualification of independent verifier policy and private oracles",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-20-independent-machine-authority-qualification-of-independent-verifier-policy-and-private-oracles"
+        },
+        {
+          "heading": "05.21 AI role boundaries",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-21-ai-role-boundaries"
+        },
+        {
+          "heading": "05.22 Claim language policy",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-22-claim-language-policy"
+        },
+        {
+          "heading": "Permitted examples",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-22-claim-language-policy-permitted-examples"
+        },
+        {
+          "heading": "Prohibited examples without broader evidence",
+          "level": 3,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-22-claim-language-policy-prohibited-examples-without-broader-evidence"
+        },
+        {
+          "heading": "05.23 Security and privacy truth",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-23-security-and-privacy-truth"
+        },
+        {
+          "heading": "05.24 Dispute and correction process",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-24-dispute-and-correction-process"
+        },
+        {
+          "heading": "05.25 Pack release requirements",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-25-pack-release-requirements"
+        },
+        {
+          "heading": "05.26 Initial pack: pre-collective lifecycle",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-26-initial-pack-pre-collective-lifecycle"
+        },
+        {
+          "heading": "05.27 Checkpoint/resume reference pack policy",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-27-checkpoint-resume-reference-pack-policy"
+        },
+        {
+          "heading": "05.28 Verification artifacts",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-28-verification-artifacts"
+        },
+        {
+          "heading": "05.29 Minimum external verifier",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-29-minimum-external-verifier"
+        },
+        {
+          "heading": "05.30 Trust stop conditions",
+          "level": 2,
+          "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-30-trust-stop-conditions"
+        }
+      ],
+      "sha256": "1e308439213ed94d6190db975b5a2cd61c2b5784fc39942e4e48a8cb16ae72a5"
+    },
+    {
+      "authorityClass": "normative_commercial",
+      "derivedFrom": "TC.V3.COMMERCIAL_MODEL",
+      "generationId": "traincapsule-v3.1-zh-2026-08-12",
+      "logicalId": "TC.V3_1_ZH.COMMERCIAL_MODEL",
+      "path": "docs/source-of-truth/v3.1-zh-2026-08-12/06_COMMERCIAL_MODEL_AND_GTM_V3_1_ZH.md",
+      "required": true,
+      "sections": [
+        {
+          "heading": "06 — Commercial Model, Go-to-Market, and Validation Plan V3.1-ZH",
+          "level": 1,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh"
+        },
+        {
+          "heading": "V3.1-ZH controlling amendment",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-v3-1-zh-controlling-amendment"
+        },
+        {
+          "heading": "06.1 Commercial objective",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-1-commercial-objective"
+        },
+        {
+          "heading": "06.2 Initial positioning",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-2-initial-positioning"
+        },
+        {
+          "heading": "Category",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-2-initial-positioning-category"
+        },
+        {
+          "heading": "Primary message",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-2-initial-positioning-primary-message"
+        },
+        {
+          "heading": "Supporting message",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-2-initial-positioning-supporting-message"
+        },
+        {
+          "heading": "Do not lead with",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-2-initial-positioning-do-not-lead-with"
+        },
+        {
+          "heading": "06.3 Initial buyer and user",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-3-initial-buyer-and-user"
+        },
+        {
+          "heading": "Economic buyer",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-3-initial-buyer-and-user-economic-buyer"
+        },
+        {
+          "heading": "Primary user",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-3-initial-buyer-and-user-primary-user"
+        },
+        {
+          "heading": "Supporting users",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-3-initial-buyer-and-user-supporting-users"
+        },
+        {
+          "heading": "06.4 Ideal customer profile",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-4-ideal-customer-profile"
+        },
+        {
+          "heading": "Strong entry situations",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-4-ideal-customer-profile-strong-entry-situations"
+        },
+        {
+          "heading": "Poor first customers",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-4-ideal-customer-profile-poor-first-customers"
+        },
+        {
+          "heading": "06.5 Account qualification score",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-5-account-qualification-score"
+        },
+        {
+          "heading": "06.6 Offer ladder",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-6-offer-ladder"
+        },
+        {
+          "heading": "Offer 1 — Paid Qualification Preflight",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-6-offer-ladder-offer-1-paid-qualification-preflight"
+        },
+        {
+          "heading": "Offer 2 — Incident-to-Change Qualification Pilot",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-6-offer-ladder-offer-2-incident-to-change-qualification-pilot"
+        },
+        {
+          "heading": "Offer 3 — Additional Qualification Event",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-6-offer-ladder-offer-3-additional-qualification-event"
+        },
+        {
+          "heading": "Offer 4 — Protected Workload Agreement",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-6-offer-ladder-offer-4-protected-workload-agreement"
+        },
+        {
+          "heading": "Offer 5 — Provider or Platform Integration",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-6-offer-ladder-offer-5-provider-or-platform-integration"
+        },
+        {
+          "heading": "06.7 Initial engagement contract",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-7-initial-engagement-contract"
+        },
+        {
+          "heading": "06.8 Productized expert service",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-8-productized-expert-service"
+        },
+        {
+          "heading": "Productization test",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-8-productized-expert-service-productization-test"
+        },
+        {
+          "heading": "06.9 Open-source and free entry surface",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-9-open-source-and-free-entry-surface"
+        },
+        {
+          "heading": "06.10 Complete-substitute benchmark",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-10-complete-substitute-benchmark"
+        },
+        {
+          "heading": "Commercially weak outcomes",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-10-complete-substitute-benchmark-commercially-weak-outcomes"
+        },
+        {
+          "heading": "Commercially promising outcome",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-10-complete-substitute-benchmark-commercially-promising-outcome"
+        },
+        {
+          "heading": "06.11 Discovery program",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-11-discovery-program"
+        },
+        {
+          "heading": "Initial evidence targets",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-11-discovery-program-initial-evidence-targets"
+        },
+        {
+          "heading": "Conversation requirements",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-11-discovery-program-conversation-requirements"
+        },
+        {
+          "heading": "Interview questions",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-11-discovery-program-interview-questions"
+        },
+        {
+          "heading": "06.12 Reachable-account map",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-12-reachable-account-map"
+        },
+        {
+          "heading": "06.13 Design partner structure",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-13-design-partner-structure"
+        },
+        {
+          "heading": "06.14 Sales sequence",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-14-sales-sequence"
+        },
+        {
+          "heading": "Initial outreach message",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-14-sales-sequence-initial-outreach-message"
+        },
+        {
+          "heading": "06.15 Proof hierarchy",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-15-proof-hierarchy"
+        },
+        {
+          "heading": "06.16 Validation gates",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates"
+        },
+        {
+          "heading": "Gate C0 — Problem access",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c0-problem-access"
+        },
+        {
+          "heading": "Gate C1 — Native gap",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c1-native-gap"
+        },
+        {
+          "heading": "Gate C2 — Paid pilot",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c2-paid-pilot"
+        },
+        {
+          "heading": "Gate C3 — External value",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c3-external-value"
+        },
+        {
+          "heading": "Gate C4 — Repeat",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c4-repeat"
+        },
+        {
+          "heading": "Gate C5 — Productization",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c5-productization"
+        },
+        {
+          "heading": "Gate C6 — Annual product",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c6-annual-product"
+        },
+        {
+          "heading": "06.17 Stop and pivot rules",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-17-stop-and-pivot-rules"
+        },
+        {
+          "heading": "06.18 Pricing experiments",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-18-pricing-experiments"
+        },
+        {
+          "heading": "06.19 Internal revenue hypothesis",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-19-internal-revenue-hypothesis"
+        },
+        {
+          "heading": "06.20 Unit economics",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-20-unit-economics"
+        },
+        {
+          "heading": "06.21 Commercial data model",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-21-commercial-data-model"
+        },
+        {
+          "heading": "06.22 Case-study strategy",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-22-case-study-strategy"
+        },
+        {
+          "heading": "06.23 Competitive strategy",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-23-competitive-strategy"
+        },
+        {
+          "heading": "Against native framework tools",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-23-competitive-strategy-against-native-framework-tools"
+        },
+        {
+          "heading": "Against cloud/platform bundles",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-23-competitive-strategy-against-cloud-platform-bundles"
+        },
+        {
+          "heading": "Against diagnosis/remediation vendors",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-23-competitive-strategy-against-diagnosis-remediation-vendors"
+        },
+        {
+          "heading": "Against deterministic replay systems",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-23-competitive-strategy-against-deterministic-replay-systems"
+        },
+        {
+          "heading": "Against internal scripts plus agents",
+          "level": 3,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-23-competitive-strategy-against-internal-scripts-plus-agents"
+        },
+        {
+          "heading": "06.24 Trust as a sales asset",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-24-trust-as-a-sales-asset"
+        },
+        {
+          "heading": "06.25 Procurement and security package",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-25-procurement-and-security-package"
+        },
+        {
+          "heading": "06.26 Team plan",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-26-team-plan"
+        },
+        {
+          "heading": "06.27 Autonomous operating cadence",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-27-autonomous-operating-cadence"
+        },
+        {
+          "heading": "06.28 Company dashboard",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-28-company-dashboard"
+        },
+        {
+          "heading": "06.29 Success definition",
+          "level": 2,
+          "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-29-success-definition"
+        }
+      ],
+      "sha256": "485c38a199b6317f9720bc1bb4eb43bf189e44b89f276c287d841da1b27a51a6"
+    },
+    {
+      "authorityClass": "normative_roadmap",
+      "derivedFrom": "TC.V3.ROADMAP",
+      "generationId": "traincapsule-v3.1-zh-2026-08-12",
+      "logicalId": "TC.V3_1_ZH.ROADMAP",
+      "path": "docs/source-of-truth/v3.1-zh-2026-08-12/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3_1_ZH.md",
+      "required": true,
+      "sections": [
+        {
+          "heading": "12 — Gate-Based Roadmap and Backlog V3.1-ZH",
+          "level": 1,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh"
+        },
+        {
+          "heading": "V3.1-ZH controlling amendment",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-v3-1-zh-controlling-amendment"
+        },
+        {
+          "heading": "12.1 Roadmap principle",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-1-roadmap-principle"
+        },
+        {
+          "heading": "12.2 Milestone map",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-2-milestone-map"
+        },
+        {
+          "heading": "12.3 M0 — Factory and source-of-truth migration",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-3-m0-factory-and-source-of-truth-migration"
+        },
+        {
+          "heading": "Exit criteria",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-3-m0-factory-and-source-of-truth-migration-exit-criteria"
+        },
+        {
+          "heading": "Work items",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-3-m0-factory-and-source-of-truth-migration-work-items"
+        },
+        {
+          "heading": "M0 stop conditions",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-3-m0-factory-and-source-of-truth-migration-m0-stop-conditions"
+        },
+        {
+          "heading": "12.4 M1 — Native preflight and problem access",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access"
+        },
+        {
+          "heading": "M1 product exit criteria",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access-m1-product-exit-criteria"
+        },
+        {
+          "heading": "M1 market exit criteria",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access-m1-market-exit-criteria"
+        },
+        {
+          "heading": "M1 competitor exit criteria",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access-m1-competitor-exit-criteria"
+        },
+        {
+          "heading": "M1 trust exit criteria",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access-m1-trust-exit-criteria"
+        },
+        {
+          "heading": "Work items",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access-work-items"
+        },
+        {
+          "heading": "M1 decision",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access-m1-decision"
+        },
+        {
+          "heading": "12.5 M2 — Controlled end-to-end qualification",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-5-m2-controlled-end-to-end-qualification"
+        },
+        {
+          "heading": "Exit criteria",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-5-m2-controlled-end-to-end-qualification-exit-criteria"
+        },
+        {
+          "heading": "Work items",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-5-m2-controlled-end-to-end-qualification-work-items"
+        },
+        {
+          "heading": "M2 stop conditions",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-5-m2-controlled-end-to-end-qualification-m2-stop-conditions"
+        },
+        {
+          "heading": "12.6 M3 — External paid-preflight readiness",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-6-m3-external-paid-preflight-readiness"
+        },
+        {
+          "heading": "Exit criteria",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-6-m3-external-paid-preflight-readiness-exit-criteria"
+        },
+        {
+          "heading": "Work items",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-6-m3-external-paid-preflight-readiness-work-items"
+        },
+        {
+          "heading": "12.7 M4 — Paid Incident-to-Change Qualification Pilot",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-7-m4-paid-incident-to-change-qualification-pilot"
+        },
+        {
+          "heading": "Entry criteria",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-7-m4-paid-incident-to-change-qualification-pilot-entry-criteria"
+        },
+        {
+          "heading": "Work items",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-7-m4-paid-incident-to-change-qualification-pilot-work-items"
+        },
+        {
+          "heading": "M4 successful outcome",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-7-m4-paid-incident-to-change-qualification-pilot-m4-successful-outcome"
+        },
+        {
+          "heading": "12.8 M5 — Paid repeat",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-8-m5-paid-repeat"
+        },
+        {
+          "heading": "Exit criteria",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-8-m5-paid-repeat-exit-criteria"
+        },
+        {
+          "heading": "Work items",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-8-m5-paid-repeat-work-items"
+        },
+        {
+          "heading": "12.9 M6 — Commercially supported initial pack",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-9-m6-commercially-supported-initial-pack"
+        },
+        {
+          "heading": "Exit criteria",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-9-m6-commercially-supported-initial-pack-exit-criteria"
+        },
+        {
+          "heading": "Work items",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-9-m6-commercially-supported-initial-pack-work-items"
+        },
+        {
+          "heading": "12.10 Checkpoint pack roadmap",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-10-checkpoint-pack-roadmap"
+        },
+        {
+          "heading": "12.11 Deferred platform backlog",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-11-deferred-platform-backlog"
+        },
+        {
+          "heading": "12.12 Legacy 124-task ledger disposition",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-12-legacy-124-task-ledger-disposition"
+        },
+        {
+          "heading": "12.13 Operating cadence",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-13-operating-cadence"
+        },
+        {
+          "heading": "Daily automated",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-13-operating-cadence-daily-automated"
+        },
+        {
+          "heading": "Weekly autonomous evidence review",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-13-operating-cadence-weekly-autonomous-evidence-review"
+        },
+        {
+          "heading": "Monthly wedge review",
+          "level": 3,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-13-operating-cadence-monthly-wedge-review"
+        },
+        {
+          "heading": "12.14 Roadmap success criteria",
+          "level": 2,
+          "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-14-roadmap-success-criteria"
+        }
+      ],
+      "sha256": "cc4b73358c85d80249999ffbf96c0fe723e6318e42d89e8a211e989eaef2729d"
+    },
+    {
+      "authorityClass": "current_fact_register",
+      "derivedFrom": "TC.V3.SOURCE_REGISTER",
+      "generationId": "traincapsule-v3.1-zh-2026-08-12",
+      "logicalId": "TC.V3_1_ZH.SOURCE_REGISTER",
+      "path": "docs/source-of-truth/v3.1-zh-2026-08-12/13_SOURCE_REGISTER_V3_1_ZH.md",
+      "required": true,
+      "sections": [
+        {
+          "heading": "13 — Current Source and Competitive Register V3.1-ZH",
+          "level": 1,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh"
+        },
+        {
+          "heading": "V3.1-ZH controlling amendment",
+          "level": 2,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-v3-1-zh-controlling-amendment"
+        },
+        {
+          "heading": "13.1 Source classes",
+          "level": 2,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-1-source-classes"
+        },
+        {
+          "heading": "13.2 Current native and platform baselines",
+          "level": 2,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-2-current-native-and-platform-baselines"
+        },
+        {
+          "heading": "S-PYTORCH-FR — PyTorch Flight Recorder",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-2-current-native-and-platform-baselines-s-pytorch-fr-pytorch-flight-recorder"
+        },
+        {
+          "heading": "S-NVIDIA-AJR — NVIDIA Mission Control / Autonomous Job Recovery",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-2-current-native-and-platform-baselines-s-nvidia-ajr-nvidia-mission-control-autonomous-job-recovery"
+        },
+        {
+          "heading": "S-AWS-HYPERPOD-RECOVERY — SageMaker HyperPod checkpointless in-process recovery",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-2-current-native-and-platform-baselines-s-aws-hyperpod-recovery-sagemaker-hyperpod-checkpointless-in-process-recovery"
+        },
+        {
+          "heading": "S-COREWEAVE-MISSION-CONTROL — CoreWeave Mission Control",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-2-current-native-and-platform-baselines-s-coreweave-mission-control-coreweave-mission-control"
+        },
+        {
+          "heading": "13.3 Direct and adjacent commercial competitors",
+          "level": 2,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-3-direct-and-adjacent-commercial-competitors"
+        },
+        {
+          "heading": "S-CHAMBER — Chamber",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-3-direct-and-adjacent-commercial-competitors-s-chamber-chamber"
+        },
+        {
+          "heading": "S-TEYON — Teyon",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-3-direct-and-adjacent-commercial-competitors-s-teyon-teyon"
+        },
+        {
+          "heading": "S-HARBOR — Harbor",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-3-direct-and-adjacent-commercial-competitors-s-harbor-harbor"
+        },
+        {
+          "heading": "S-CALADRIUS — Caladrius",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-3-direct-and-adjacent-commercial-competitors-s-caladrius-caladrius"
+        },
+        {
+          "heading": "13.4 Research and open systems that absorb technical primitives",
+          "level": 2,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives"
+        },
+        {
+          "heading": "S-TRAINCHECK — TrainCheck",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-traincheck-traincheck"
+        },
+        {
+          "heading": "S-TRAINVERIFY — TrainVerify",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-trainverify-trainverify"
+        },
+        {
+          "heading": "S-TTRACE — TTrace",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-ttrace-ttrace"
+        },
+        {
+          "heading": "S-OPGUARD — OpGuard",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-opguard-opguard"
+        },
+        {
+          "heading": "S-PRISMLLM — PrismLLM",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-prismllm-prismllm"
+        },
+        {
+          "heading": "S-ARGUS — ARGUS",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-argus-argus"
+        },
+        {
+          "heading": "S-PERFTRACKER — PerfTracker",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-perftracker-perftracker"
+        },
+        {
+          "heading": "S-XPUTIMER — XPUTimer",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-xputimer-xputimer"
+        },
+        {
+          "heading": "S-MEGASCALE — MegaScale",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-megascale-megascale"
+        },
+        {
+          "heading": "13.5 Engineering-factory sources",
+          "level": 2,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-5-engineering-factory-sources"
+        },
+        {
+          "heading": "S-ANTHROPIC-MAX — Claude Code with Pro/Max",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-5-engineering-factory-sources-s-anthropic-max-claude-code-with-pro-max"
+        },
+        {
+          "heading": "S-ANTHROPIC-CLAUDE-CODE — Claude Code documentation",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-5-engineering-factory-sources-s-anthropic-claude-code-claude-code-documentation"
+        },
+        {
+          "heading": "S-GITHUB-ACTIONS — GitHub Actions documentation",
+          "level": 3,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-5-engineering-factory-sources-s-github-actions-github-actions-documentation"
+        },
+        {
+          "heading": "13.6 Capability matrix",
+          "level": 2,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-6-capability-matrix"
+        },
+        {
+          "heading": "13.7 Remaining public gap",
+          "level": 2,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-7-remaining-public-gap"
+        },
+        {
+          "heading": "13.8 Monthly update procedure",
+          "level": 2,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-8-monthly-update-procedure"
+        },
+        {
+          "heading": "13.9 Claim rules",
+          "level": 2,
+          "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-9-claim-rules"
+        }
+      ],
+      "sha256": "0fa8699ad2070cfd2093899e4b3eec17ed543a15c99f081bc5363c9a2e79280c"
+    },
+    {
+      "authorityClass": "normative_build",
+      "derivedFrom": "TC.V3.MASTER_BUILD_PROMPT",
+      "generationId": "traincapsule-v3.1-zh-2026-08-12",
+      "logicalId": "TC.V3_1_ZH.MASTER_BUILD_PROMPT",
+      "path": "docs/source-of-truth/v3.1-zh-2026-08-12/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3_1_ZH.md",
+      "required": true,
+      "sections": [
+        {
+          "heading": "14 — Claude Code Master Build Prompt V3.1-ZH",
+          "level": 1,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh"
+        },
+        {
+          "heading": "V3.1-ZH controlling amendment",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-v3-1-zh-controlling-amendment"
+        },
+        {
+          "heading": "Mission",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-mission"
+        },
+        {
+          "heading": "Authority",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-authority"
+        },
+        {
+          "heading": "Product boundary",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-boundary"
+        },
+        {
+          "heading": "Build now",
+          "level": 3,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-boundary-build-now"
+        },
+        {
+          "heading": "Do not build without a promoted work item",
+          "level": 3,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-boundary-do-not-build-without-a-promoted-work-item"
+        },
+        {
+          "heading": "Native-first rule",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-native-first-rule"
+        },
+        {
+          "heading": "Truth rules",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-truth-rules"
+        },
+        {
+          "heading": "Independent machine authority",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-independent-machine-authority"
+        },
+        {
+          "heading": "Work-item protocol",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-work-item-protocol"
+        },
+        {
+          "heading": "Planning",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-planning"
+        },
+        {
+          "heading": "Implementation",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-implementation"
+        },
+        {
+          "heading": "Testing",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-testing"
+        },
+        {
+          "heading": "Product-specific implementation rules",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules"
+        },
+        {
+          "heading": "Identity",
+          "level": 3,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-identity"
+        },
+        {
+          "heading": "Evidence",
+          "level": 3,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-evidence"
+        },
+        {
+          "heading": "Native findings",
+          "level": 3,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-native-findings"
+        },
+        {
+          "heading": "Observed boundary",
+          "level": 3,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-observed-boundary"
+        },
+        {
+          "heading": "Reduction",
+          "level": 3,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-reduction"
+        },
+        {
+          "heading": "Runner",
+          "level": 3,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-runner"
+        },
+        {
+          "heading": "Recovery Assurance",
+          "level": 3,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-recovery-assurance"
+        },
+        {
+          "heading": "Qualification",
+          "level": 3,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-qualification"
+        },
+        {
+          "heading": "Factory-specific implementation rules",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-factory-specific-implementation-rules"
+        },
+        {
+          "heading": "Finding format",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-finding-format"
+        },
+        {
+          "heading": "Research rules",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-research-rules"
+        },
+        {
+          "heading": "Security rules",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-security-rules"
+        },
+        {
+          "heading": "Git rules",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-git-rules"
+        },
+        {
+          "heading": "Completion output",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-completion-output"
+        },
+        {
+          "heading": "Stop conditions",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-stop-conditions"
+        },
+        {
+          "heading": "Current build order after V3 migration",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-current-build-order-after-v3-migration"
+        },
+        {
+          "heading": "Final operating principle",
+          "level": 2,
+          "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-final-operating-principle"
+        }
+      ],
+      "sha256": "ea2df9cc6e41c0e679c208ed8c2615c938f644711c25cea35052ee2cd865606d"
+    },
+    {
+      "authorityClass": "normative_factory",
+      "derivedFrom": "TC.V3.FACTORY_LOOP",
+      "generationId": "traincapsule-v3.1-zh-2026-08-12",
+      "logicalId": "TC.V3_1_ZH.FACTORY_LOOP",
+      "path": "docs/source-of-truth/v3.1-zh-2026-08-12/FACTORY_LOOP_REDESIGN_SPEC_V3_1_ZH.md",
+      "required": true,
+      "sections": [
+        {
+          "heading": "TrainCapsule Autonomous Factory and Business Loop Redesign Specification V3.1-ZH",
+          "level": 1,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh"
+        },
+        {
+          "heading": "V3.1-ZH controlling amendment",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-v3-1-zh-controlling-amendment"
+        },
+        {
+          "heading": "1. Objective",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-1-objective"
+        },
+        {
+          "heading": "2. Current-system diagnosis",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-2-current-system-diagnosis"
+        },
+        {
+          "heading": "3. New separation of systems",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-3-new-separation-of-systems"
+        },
+        {
+          "heading": "4. New source layout",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-4-new-source-layout"
+        },
+        {
+          "heading": "5. Work-item model",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-5-work-item-model"
+        },
+        {
+          "heading": "Status vocabulary",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-5-work-item-model-status-vocabulary"
+        },
+        {
+          "heading": "Disposition vocabulary",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-5-work-item-model-disposition-vocabulary"
+        },
+        {
+          "heading": "6. Milestone model",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-6-milestone-model"
+        },
+        {
+          "heading": "7. Four-lane scheduler",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler"
+        },
+        {
+          "heading": "Lanes",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-lanes"
+        },
+        {
+          "heading": "PRODUCT",
+          "level": 4,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-lanes-product"
+        },
+        {
+          "heading": "MARKET",
+          "level": 4,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-lanes-market"
+        },
+        {
+          "heading": "COMPETITOR",
+          "level": 4,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-lanes-competitor"
+        },
+        {
+          "heading": "TRUST",
+          "level": 4,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-lanes-trust"
+        },
+        {
+          "heading": "Lane independence",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-lane-independence"
+        },
+        {
+          "heading": "Initial WIP policy",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-initial-wip-policy"
+        },
+        {
+          "heading": "8. Scheduler score",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-8-scheduler-score"
+        },
+        {
+          "heading": "9. Commercial gate behavior",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-9-commercial-gate-behavior"
+        },
+        {
+          "heading": "Value outcomes",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-9-commercial-gate-behavior-value-outcomes"
+        },
+        {
+          "heading": "10. Retry and recovery policy",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-10-retry-and-recovery-policy"
+        },
+        {
+          "heading": "Planning",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-10-retry-and-recovery-policy-planning"
+        },
+        {
+          "heading": "Implementation",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-10-retry-and-recovery-policy-implementation"
+        },
+        {
+          "heading": "Infrastructure recovery",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-10-retry-and-recovery-policy-infrastructure-recovery"
+        },
+        {
+          "heading": "Value redesign",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-10-retry-and-recovery-policy-value-redesign"
+        },
+        {
+          "heading": "Completion expansion",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-10-retry-and-recovery-policy-completion-expansion"
+        },
+        {
+          "heading": "11. Task sizing",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-11-task-sizing"
+        },
+        {
+          "heading": "Mechanical",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-11-task-sizing-mechanical"
+        },
+        {
+          "heading": "Standard product",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-11-task-sizing-standard-product"
+        },
+        {
+          "heading": "Integration/trust",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-11-task-sizing-integration-trust"
+        },
+        {
+          "heading": "12. Planner redesign",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-12-planner-redesign"
+        },
+        {
+          "heading": "Current failure mode",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-12-planner-redesign-current-failure-mode"
+        },
+        {
+          "heading": "Replacement",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-12-planner-redesign-replacement"
+        },
+        {
+          "heading": "Planner validation",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-12-planner-redesign-planner-validation"
+        },
+        {
+          "heading": "Plan reuse",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-12-planner-redesign-plan-reuse"
+        },
+        {
+          "heading": "13. Pipeline redesign",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-13-pipeline-redesign"
+        },
+        {
+          "heading": "Candidate lifecycle",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-13-pipeline-redesign-candidate-lifecycle"
+        },
+        {
+          "heading": "Finding routing",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-13-pipeline-redesign-finding-routing"
+        },
+        {
+          "heading": "Candidate preservation",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-13-pipeline-redesign-candidate-preservation"
+        },
+        {
+          "heading": "14. Completion redesign",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-14-completion-redesign"
+        },
+        {
+          "heading": "Deterministic completion",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-14-completion-redesign-deterministic-completion"
+        },
+        {
+          "heading": "Review behavior",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-14-completion-redesign-review-behavior"
+        },
+        {
+          "heading": "Expansion behavior",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-14-completion-redesign-expansion-behavior"
+        },
+        {
+          "heading": "15. Machine-policy authorization state",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-15-machine-policy-authorization-state"
+        },
+        {
+          "heading": "Work-item state",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-15-machine-policy-authorization-state-work-item-state"
+        },
+        {
+          "heading": "Machine-policy authorization scopes",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-15-machine-policy-authorization-state-machine-policy-authorization-scopes"
+        },
+        {
+          "heading": "Verification",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-15-machine-policy-authorization-state-verification"
+        },
+        {
+          "heading": "16. External evidence state",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-16-external-evidence-state"
+        },
+        {
+          "heading": "17. Agent backend abstraction",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-17-agent-backend-abstraction"
+        },
+        {
+          "heading": "18. Model and quota policy",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-18-model-and-quota-policy"
+        },
+        {
+          "heading": "19. Context redesign",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-19-context-redesign"
+        },
+        {
+          "heading": "Context groups",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-19-context-redesign-context-groups"
+        },
+        {
+          "heading": "20. Prompt redesign",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign"
+        },
+        {
+          "heading": "`prompts/global.md`",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign-prompts-global-md"
+        },
+        {
+          "heading": "`prompts/autonomous_planner.md`",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign-prompts-autonomous-planner-md"
+        },
+        {
+          "heading": "`prompts/research.md`",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign-prompts-research-md"
+        },
+        {
+          "heading": "`prompts/builder.md`",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign-prompts-builder-md"
+        },
+        {
+          "heading": "`prompts/adversary.md`",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign-prompts-adversary-md"
+        },
+        {
+          "heading": "New prompts",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign-new-prompts"
+        },
+        {
+          "heading": "21. Research-policy redesign",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-21-research-policy-redesign"
+        },
+        {
+          "heading": "R0 — Stable repository fact",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-21-research-policy-redesign-r0-stable-repository-fact"
+        },
+        {
+          "heading": "R1 — Current official product fact",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-21-research-policy-redesign-r1-current-official-product-fact"
+        },
+        {
+          "heading": "R2 — Technical design claim",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-21-research-policy-redesign-r2-technical-design-claim"
+        },
+        {
+          "heading": "R3 — Commercial/market claim",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-21-research-policy-redesign-r3-commercial-market-claim"
+        },
+        {
+          "heading": "22. Value-gate redesign",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-22-value-gate-redesign"
+        },
+        {
+          "heading": "Apply value gates to",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-22-value-gate-redesign-apply-value-gates-to"
+        },
+        {
+          "heading": "Do not apply commercial value gates to",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-22-value-gate-redesign-do-not-apply-commercial-value-gates-to"
+        },
+        {
+          "heading": "Parent-milestone value",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-22-value-gate-redesign-parent-milestone-value"
+        },
+        {
+          "heading": "23. Quality-policy redesign",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-23-quality-policy-redesign"
+        },
+        {
+          "heading": "24. Self-repair redesign",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-24-self-repair-redesign"
+        },
+        {
+          "heading": "25. Startup and restart redesign",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-25-startup-and-restart-redesign"
+        },
+        {
+          "heading": "Current behavior to remove",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-25-startup-and-restart-redesign-current-behavior-to-remove"
+        },
+        {
+          "heading": "Replacement",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-25-startup-and-restart-redesign-replacement"
+        },
+        {
+          "heading": "26. Git and GitHub release redesign",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-26-git-and-github-release-redesign"
+        },
+        {
+          "heading": "Current risk",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-26-git-and-github-release-redesign-current-risk"
+        },
+        {
+          "heading": "Replacement",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-26-git-and-github-release-redesign-replacement"
+        },
+        {
+          "heading": "27. CI redesign",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-27-ci-redesign"
+        },
+        {
+          "heading": "28. CLI and operator control",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-28-cli-and-operator-control"
+        },
+        {
+          "heading": "29. Configuration V3",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-29-configuration-v3"
+        },
+        {
+          "heading": "`config/factory.yaml`",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-29-configuration-v3-config-factory-yaml"
+        },
+        {
+          "heading": "`config/autonomy.yaml`",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-29-configuration-v3-config-autonomy-yaml"
+        },
+        {
+          "heading": "New configuration",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-29-configuration-v3-new-configuration"
+        },
+        {
+          "heading": "30. Data migrations",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-30-data-migrations"
+        },
+        {
+          "heading": "V1/V2 feature ledger to V3",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-30-data-migrations-v1-v2-feature-ledger-to-v3"
+        },
+        {
+          "heading": "Queue",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-30-data-migrations-queue"
+        },
+        {
+          "heading": "Pipeline checkpoints",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-30-data-migrations-pipeline-checkpoints"
+        },
+        {
+          "heading": "31. Required regression tests",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests"
+        },
+        {
+          "heading": "Scheduler",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-scheduler"
+        },
+        {
+          "heading": "Retry",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-retry"
+        },
+        {
+          "heading": "External truth",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-external-truth"
+        },
+        {
+          "heading": "Independent machine-policy authorization",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-independent-machine-policy-authorization"
+        },
+        {
+          "heading": "Release",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-release"
+        },
+        {
+          "heading": "Context",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-context"
+        },
+        {
+          "heading": "Completion",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-completion"
+        },
+        {
+          "heading": "32. Migration execution order",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order"
+        },
+        {
+          "heading": "Step 0 — Pause",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-0-pause"
+        },
+        {
+          "heading": "Step 1 — Install V3.1-ZH authority",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-1-install-v3-1-zh-authority"
+        },
+        {
+          "heading": "Step 2 — Add V3 schemas/models",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-2-add-v3-schemas-models"
+        },
+        {
+          "heading": "Step 3 — Implement scheduler and finite limits",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-3-implement-scheduler-and-finite-limits"
+        },
+        {
+          "heading": "Step 4 — Release and CI",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-4-release-and-ci"
+        },
+        {
+          "heading": "Step 5 — Product skeleton",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-5-product-skeleton"
+        },
+        {
+          "heading": "Step 6 — Migrate roadmap",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-6-migrate-roadmap"
+        },
+        {
+          "heading": "Step 7 — Controlled validation",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-7-controlled-validation"
+        },
+        {
+          "heading": "Step 8 — Machine authorization and activation",
+          "level": 3,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-8-machine-authorization-and-activation"
+        },
+        {
+          "heading": "33. Definition of a healthy factory",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-33-definition-of-a-healthy-factory"
+        },
+        {
+          "heading": "34. Factory success metric",
+          "level": 2,
+          "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-34-factory-success-metric"
+        }
+      ],
+      "sha256": "7654d080165084aa7111712d8c655264458235202af2142ca0e7d495f3688bae"
+    },
+    {
+      "authorityClass": "normative_migration",
+      "derivedFrom": "TC.V3.SOURCE_MIGRATION_PLAN",
+      "generationId": "traincapsule-v3.1-zh-2026-08-12",
+      "logicalId": "TC.V3_1_ZH.MIGRATION_PLAN",
+      "path": "docs/source-of-truth/v3.1-zh-2026-08-12/SOURCE_OF_TRUTH_MIGRATION_PLAN_V3_1_ZH.md",
+      "required": true,
+      "sections": [
+        {
+          "heading": "Source-of-Truth Migration Plan V3.1-ZH",
+          "level": 1,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh"
+        },
+        {
+          "heading": "V3.1-ZH controlling amendment",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-v3-1-zh-controlling-amendment"
+        },
+        {
+          "heading": "1. Purpose",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-1-purpose"
+        },
+        {
+          "heading": "2. Baseline",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-2-baseline"
+        },
+        {
+          "heading": "3. Migration safety rules",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-3-migration-safety-rules"
+        },
+        {
+          "heading": "4. New document bundle",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-4-new-document-bundle"
+        },
+        {
+          "heading": "5. New authority model",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-5-new-authority-model"
+        },
+        {
+          "heading": "5.1 Normative product authority",
+          "level": 3,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-5-new-authority-model-5-1-normative-product-authority"
+        },
+        {
+          "heading": "5.2 Current factual authority",
+          "level": 3,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-5-new-authority-model-5-2-current-factual-authority"
+        },
+        {
+          "heading": "5.3 Advisory documents",
+          "level": 3,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-5-new-authority-model-5-3-advisory-documents"
+        },
+        {
+          "heading": "6. `SOURCE_PRECEDENCE.md` replacement",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-6-source-precedence-md-replacement"
+        },
+        {
+          "heading": "7. `docs/CONTEXT_INDEX.yaml` replacement",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-7-docs-context-index-yaml-replacement"
+        },
+        {
+          "heading": "8. Duplicate and manifest cleanup",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-8-duplicate-and-manifest-cleanup"
+        },
+        {
+          "heading": "9. Canonical hashing",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-9-canonical-hashing"
+        },
+        {
+          "heading": "10. Integrity gate",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-10-integrity-gate"
+        },
+        {
+          "heading": "11. Product/factory package separation",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-11-product-factory-package-separation"
+        },
+        {
+          "heading": "12. Legacy roadmap migration",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-12-legacy-roadmap-migration"
+        },
+        {
+          "heading": "13. Queue and checkpoint migration",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-13-queue-and-checkpoint-migration"
+        },
+        {
+          "heading": "14. Configuration migration",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-14-configuration-migration"
+        },
+        {
+          "heading": "15. Runtime state migration",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-15-runtime-state-migration"
+        },
+        {
+          "heading": "16. GitHub migration",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-16-github-migration"
+        },
+        {
+          "heading": "17. CI migration",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-17-ci-migration"
+        },
+        {
+          "heading": "18. Prompt migration",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-18-prompt-migration"
+        },
+        {
+          "heading": "19. Verification plan",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-19-verification-plan"
+        },
+        {
+          "heading": "Static",
+          "level": 3,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-19-verification-plan-static"
+        },
+        {
+          "heading": "Dynamic",
+          "level": 3,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-19-verification-plan-dynamic"
+        },
+        {
+          "heading": "Adversarial",
+          "level": 3,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-19-verification-plan-adversarial"
+        },
+        {
+          "heading": "20. Rollback",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-20-rollback"
+        },
+        {
+          "heading": "21. Final migration acceptance",
+          "level": 2,
+          "sectionId": "source-of-truth-migration-plan-v3-1-zh-21-final-migration-acceptance"
+        }
+      ],
+      "sha256": "f07bc12885e1fdcca6251c17a4badc2439a921cbcdc23b39784ce17d5eb5266a"
+    }
+  ],
+  "generatedAt": "2026-08-12T00:00:00Z",
+  "generationId": "traincapsule-v3.1-zh-2026-08-12",
+  "integrity": {
+    "algorithm": "sha256",
+    "documentCount": 11,
+    "generatorPath": "scripts/generate_v3_1_zh_source.py",
+    "manifestSelfIncluded": false
+  },
+  "schemaVersion": 1,
+  "supersession": {
+    "disposition": "ACTIVE_OPERATIONAL_AMENDMENT_WHEN_POINTER_SELECTED",
+    "doesNotClaimExactV3Conformance": true,
+    "preservesHistoricalGeneration": true,
+    "rationale": "Replace runtime person-dependent approval with independent machine authority while preserving V3 product and truth laws.",
+    "residualRisk": "Encoded machine policy may miss novel contextual ambiguity that qualified-person review could detect.",
+    "supersedesGenerationId": "traincapsule-v3-2026-08-11"
+  }
+}

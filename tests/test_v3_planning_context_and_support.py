@@ -178,24 +178,24 @@ def test_v3_context_is_scoped_digest_bound_and_freshness_aware() -> None:
         work_item=item,
         role="planner",
         requested_groups=["factory_control"],
-        max_context_chars=100_000,
+        max_context_chars=200_000,
     )
     assert manifest.entries
     assert all(entry.authority_class for entry in manifest.entries)
     authority_paths = [entry.path for entry in manifest.entries[:2]]
-    assert authority_paths == ["config/owner_directives.yaml", "SOURCE_PRECEDENCE.md"]
+    assert authority_paths == [
+        "config/active_generation.yaml",
+        "docs/source-of-truth/v3.1-zh-2026-08-12/FINAL_MANIFEST_V3_1_ZH.json",
+    ]
     assert manifest.entries[0].authority_sections == [
-        "directives.unattendedOperation",
-        "directives.humanIntervention",
-        "directives.publicationBranch",
-        "directives.nonMainPushes",
-        "directives.pullRequestDependency",
-        "deviationsFromBundle",
+        "§generationId",
+        "§manifestPath",
+        "§mixedNormativeGenerationPolicy",
     ]
     assert manifest.entries[1].authority_sections == [
-        "§Normative authority",
-        "§Conflict handling",
-        "§Product and commercial truth",
+        "§documents",
+        "§supersession",
+        "§integrity",
     ]
     assert all((ROOT / entry.path).is_file() for entry in manifest.entries)
     assert "advisory_career" in manifest.excluded_groups
@@ -207,14 +207,14 @@ def test_v3_context_is_scoped_digest_bound_and_freshness_aware() -> None:
             work_item=item,
             role="planner",
             requested_groups=["current_facts"],
-            max_context_chars=100_000,
+            max_context_chars=200_000,
         )
     fresh = build_v3_context_manifest(
         repo_root=ROOT,
         work_item=item,
         role="planner",
         requested_groups=["current_facts"],
-        max_context_chars=100_000,
+        max_context_chars=200_000,
         freshness_receipts={"current_facts": datetime.now(UTC)},
     )
     current_fact_entries = [
@@ -405,7 +405,7 @@ def test_v3_operator_cli_is_read_only_and_explains_provenance(
         ["config", "explain", "factory.repository.releaseMode", "--repo", str(ROOT)],
     )
     assert explain.exit_code == 0
-    assert "owner_directed_main_only" in explain.stdout
+    assert "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE" in explain.stdout
     assert runner.invoke(app, ["migrate", "--repo", str(ROOT)]).exit_code == 2
     dry = runner.invoke(app, ["migrate", "--dry-run", "--repo", str(ROOT)])
     assert dry.exit_code == 0

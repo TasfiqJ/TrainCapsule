@@ -20,7 +20,11 @@ from pydantic import Field
 from tcfactory.backends.base import AgentTaskRequest, EngineeringAgentBackend, SessionState
 from tcfactory.checkpoints import CheckpointBudget, CheckpointStore, V3Checkpoint
 from tcfactory.config import load_roles
-from tcfactory.context import V3ContextManifest, build_v3_context_manifest
+from tcfactory.context import (
+    StaleCurrentFactError,
+    V3ContextManifest,
+    build_v3_context_manifest,
+)
 from tcfactory.gitops import create_worktree, current_sha
 from tcfactory.handoffs import write_v3_handoff
 from tcfactory.models import RoleName
@@ -42,7 +46,6 @@ from tcfactory.v3.configuration import (
 )
 from tcfactory.v3.enums import (
     Lane,
-    PolicyScope,
     ReleaseDecision,
     RiskTier,
     WorkKind,
@@ -60,15 +63,15 @@ from tcfactory.v3.milestone_runtime import (
     write_work_item_completion_evidence,
 )
 from tcfactory.v3.milestones import MilestoneRoadmap
-from tcfactory.v3.pipeline_services import (
-    MachinePolicyGateReceipt,
-    assert_candidate_scope,
-    evaluate_machine_policy_gate,
-)
+from tcfactory.v3.pipeline_services import assert_candidate_scope
 from tcfactory.v3.planning import V3TaskPacket, compile_work_item_packet, write_packet
 from tcfactory.v3.queue import V3Queue
 from tcfactory.v3.runtime_paths import resolve_v3_runtime_paths
 from tcfactory.v3.scheduler import ActiveWork, SchedulerDecisionArtifact, schedule_cycle
+from tcfactory.v3.source_authority import (
+    emit_stale_source_proposal,
+    validate_active_source_generation,
+)
 from tcfactory.v3.work_items import WorkItem, WorkItemCollection
 from tcfactory.yamlutil import load_yaml
 
@@ -139,16 +142,15 @@ def _packet_for(
     context_manifest_path: Path,
 ) -> V3TaskPacket:
     allowed, forbidden = _lane_paths(item)
-    manifest = repo_root / "docs/source-of-truth/v3-2026-08-11/FINAL_MANIFEST_V3.json"
+    active_source = validate_active_source_generation(repo_root)
     criteria = item.evidence_required or [
         "The bounded work-item outcome is executable and deterministically verified."
     ]
     packet = compile_work_item_packet(
         item,
         source_documents=[
-            "config/owner_directives.yaml",
-            "SOURCE_PRECEDENCE.md",
-            "docs/source-of-truth/v3-2026-08-11/FINAL_MANIFEST_V3.json",
+            active_source.config_path,
+            active_source.manifest_path,
             "docs/CONTEXT_INDEX.yaml",
             str(context_manifest_path),
         ],
@@ -163,7 +165,7 @@ def _packet_for(
             "or UNKNOWN external truth."
         ],
         stop_disposition="BLOCKED_TECHNICAL or WAITING_EXTERNAL for this work item only.",
-        source_digest=_digest_file(manifest),
+        source_digest=active_source.source_digest,
         context_digest=context_digest,
         compiler_digest=_digest_file(Path(__file__).with_name("planning.py")),
         base_sha=base_sha,
@@ -227,6 +229,7 @@ class V3Controller:
         self.backend = backend
         self.publisher = publisher
         self.owner_id = owner_id
+        self.active_source = validate_active_source_generation(self.repo_root)
         self.factory: FactoryV3Config = load_factory_v3(self.repo_root / "config/factory.yaml")
         self.runtime_paths = resolve_v3_runtime_paths(self.repo_root, self.factory)
         self.runtime_root = self.runtime_paths.state_root
@@ -282,6 +285,7 @@ class V3Controller:
         )
 
     def _advance_completed_milestone(self, collection: WorkItemCollection) -> str | None:
+        validate_active_source_generation(self.repo_root)
         active = [
             item
             for item in collection.work_items
@@ -326,9 +330,7 @@ class V3Controller:
             state_path=self.runtime_paths.milestone_state,
             receipt_path=receipt_path,
             evidence_digests=evidence_digests,
-            owner_directives_digest=_digest_file(
-                self.repo_root / "config/owner_directives.yaml"
-            ),
+            source_authority_digest=self.active_source.canonical_digest(),
             now=datetime.now(UTC),
         )
         return state.active_milestone
@@ -495,6 +497,20 @@ class V3Controller:
         return verified
 
     async def _execute(self, item: WorkItem, now: datetime) -> dict[str, object]:
+        if item.machine_policy_receipt_required or item.kind is WorkKind.MACHINE_POLICY_REVIEW:
+            self.queue.transition(
+                item.work_item_id,
+                WorkStatus.BLOCKED_POLICY,
+                updated_at=datetime.now(UTC),
+            )
+            return {
+                "status": WorkStatus.BLOCKED_POLICY.value,
+                "workItemId": item.work_item_id,
+                "reason": (
+                    "independently signed Phase 3 machine-policy receipt is required; "
+                    "the controller cannot issue or verify its own authorization"
+                ),
+            }
         if item.external_receipt_required:
             raise RuntimeError(
                 "outside-fact work cannot execute; it advances only through a "
@@ -503,6 +519,14 @@ class V3Controller:
         try:
             freshness_receipts = self._freshness_receipts(item)
         except ExternalEvidenceVerificationError:
+            group = "current_facts"
+            proposal, proposal_path = emit_stale_source_proposal(
+                proposal_root=self.runtime_paths.source_proposals,
+                work_item_id=item.work_item_id,
+                group=group,
+                freshness_status="RECHECK_REQUIRED",
+                now=datetime.now(UTC),
+            )
             self.queue.transition(
                 item.work_item_id,
                 WorkStatus.WAITING_EXTERNAL,
@@ -512,6 +536,8 @@ class V3Controller:
                 "status": "WAITING_EXTERNAL",
                 "workItemId": item.work_item_id,
                 "reason": "signed current-fact freshness receipts are unavailable",
+                "sourceProposal": str(proposal_path),
+                "proposalId": proposal.proposal_id,
             }
         run_id = f"{item.work_item_id.lower()}-{now.strftime('%Y%m%dT%H%M%S%fZ')}"
         base_sha = current_sha(self.repo_root, "main")
@@ -579,10 +605,7 @@ class V3Controller:
             milestone=item.milestone,
             budget=budget,
             context_digest=sha256_digest(b"PLANNING_CONTEXT_PENDING\n"),
-            source_digest=_digest_file(
-                self.repo_root
-                / "docs/source-of-truth/v3-2026-08-11/FINAL_MANIFEST_V3.json"
-            ),
+            source_digest=self.active_source.source_digest,
             candidate_sha=worktree_base,
             approval_state="MACHINE_POLICY_REQUIRED",
             finding_fingerprints=(
@@ -596,14 +619,32 @@ class V3Controller:
         )
         self.checkpoints.save_v3(checkpoint)
         planning_role = "factory_repair" if item.lane is Lane.FACTORY else "planner"
-        planning_context = build_v3_context_manifest(
-            repo_root=self.repo_root,
-            work_item=item,
-            role=planning_role,
-            requested_groups=_context_groups(item, planning_role),
-            max_context_chars=200_000,
-            freshness_receipts=freshness_receipts,
-        )
+        try:
+            planning_context = build_v3_context_manifest(
+                repo_root=self.repo_root,
+                work_item=item,
+                role=planning_role,
+                requested_groups=_context_groups(item, planning_role),
+                max_context_chars=200_000,
+                freshness_receipts=freshness_receipts,
+                stale_proposal_root=self.runtime_paths.source_proposals,
+            )
+        except StaleCurrentFactError as exc:
+            checkpoint.active = False
+            checkpoint.circuit_breaker_reason = str(exc)
+            checkpoint.updated_at = datetime.now(UTC)
+            self.checkpoints.save_v3(checkpoint)
+            self.queue.transition(
+                item.work_item_id,
+                WorkStatus.WAITING_EXTERNAL,
+                updated_at=datetime.now(UTC),
+            )
+            return {
+                "status": WorkStatus.WAITING_EXTERNAL.value,
+                "workItemId": item.work_item_id,
+                "reason": str(exc),
+                "sourceProposal": str(exc.proposal_path) if exc.proposal_path else None,
+            }
         planning_context_path = root / "context-planning.json"
         write_json(
             planning_context_path,
@@ -637,6 +678,7 @@ class V3Controller:
                 requested_groups=_context_groups(item, role),
                 max_context_chars=200_000,
                 freshness_receipts=freshness_receipts,
+                stale_proposal_root=self.runtime_paths.source_proposals,
             )
             role_context_path = root / f"context-{index:02d}-{role}.json"
             write_json(role_context_path, role_context.model_dump(mode="json", by_alias=True))
@@ -804,41 +846,12 @@ class V3Controller:
                 WorkStatus.PASSED_ENGINEERING,
                 updated_at=datetime.now(UTC),
             )
-            machine_policy_digest: str | None = None
-            if item.kind is WorkKind.MACHINE_POLICY_REVIEW:
-                artifact_digests = {
-                    name: sha256_digest(value) for name, value in sorted(bound_artifacts.items())
-                }
-                owner_digest = _digest_file(self.repo_root / "config/owner_directives.yaml")
-                policy_receipt = MachinePolicyGateReceipt(
-                    candidate_sha=candidate_sha,
-                    artifact_digests=artifact_digests,
-                    owner_directives_digest=owner_digest,
-                )
-                decision = evaluate_machine_policy_gate(
-                    policy_receipt,
-                    scope=PolicyScope.ROADMAP_EXPANSION,
-                    candidate_sha=candidate_sha,
-                    artifact_digests=artifact_digests,
-                    owner_directives_digest=owner_digest,
-                )
-                if not decision.passed:
-                    raise RuntimeError("deterministic machine-policy review failed")
-                policy_path = (
-                    self.runtime_paths.machine_policy_receipts
-                    / f"{item.work_item_id}-{candidate_sha[:12]}-review.json"
-                )
-                write_json(
-                    policy_path,
-                    policy_receipt.model_dump(mode="json", by_alias=True),
-                )
-                machine_policy_digest = _digest_file(policy_path)
             self._record_completion_evidence(
                 item=item,
                 candidate_sha=candidate_sha,
                 checkpoint_digest=_digest_file(self.checkpoints.path_for(item.work_item_id)),
                 manifest_digest=None,
-                machine_policy_receipt_digest=machine_policy_digest,
+                machine_policy_receipt_digest=None,
                 independent_reviewed=any(
                     role in {"audit", "adversary", "security"} for role in self._roles(item)
                 ),
@@ -856,6 +869,12 @@ class V3Controller:
         )
         if ancestor.returncode != 0 or candidate_sha == base_sha:
             raise RuntimeError("candidate must be a non-empty descendant of its exact base")
+        active_now = validate_active_source_generation(self.repo_root)
+        candidate_source = validate_active_source_generation(worktree.path)
+        if active_now.canonical_digest() != self.active_source.canonical_digest() or (
+            candidate_source.canonical_digest() != active_now.canonical_digest()
+        ):
+            raise RuntimeError("candidate gate rejected changed or mixed source authority")
         gate_paths = dict(
             self.publisher.prepare_candidate(
                 item=item,
@@ -874,6 +893,11 @@ class V3Controller:
         ]
         if not gate_bindings:
             raise RuntimeError("release candidate has no deterministic gate evidence")
+        if (
+            validate_active_source_generation(worktree.path).canonical_digest()
+            != active_now.canonical_digest()
+        ):
+            raise RuntimeError("pre-publication gate mutated active source authority")
         bound_artifacts["checkpoint"] = checkpoint_snapshot.read_bytes()
         for binding in gate_bindings:
             bound_artifacts[f"gate:{binding.name}"] = gate_paths[binding.name].read_bytes()
@@ -894,7 +918,7 @@ class V3Controller:
             findings=[],
             external_evidence=[],
             checkpoint_digest=checkpoint_digest,
-            release_decision=ReleaseDecision.APPROVED_FOR_MAIN_PROMOTION,
+            release_decision=ReleaseDecision.APPROVED_FOR_AUTOMATED_PULL_REQUEST,
             created_at=datetime.now(UTC),
         )
         manifest.verify_artifacts(bound_artifacts)
@@ -909,7 +933,7 @@ class V3Controller:
             attempts_remaining=checkpoint.budget.repair_cycles_remaining,
             base_sha=base_sha,
             candidate_sha=candidate_sha,
-            next_action="PUBLISH_MAIN_ONLY",
+            next_action="OPEN_AUTOMATED_PULL_REQUEST",
             findings=[],
             artifacts={"candidateManifest": manifest_path},
             source_digest=packet.source_digest,
@@ -918,6 +942,8 @@ class V3Controller:
             backend_session_ref=backend_session_ref,
         )
         release = dict(
+            # The source authority comparison above is the last fail-closed
+            # publication boundary before the publisher receives the candidate.
             self.publisher.publish(
                 item=item,
                 candidate_ref=worktree.branch,
@@ -931,7 +957,7 @@ class V3Controller:
                 gate_digests={binding.name: binding.evidence_digest for binding in gate_bindings},
             )
         )
-        if release.get("status") != "PUBLISHED_MAIN_VERIFIED":
+        if release.get("status") != "MERGED_MAIN_VERIFIED":
             checkpoint.active = False
             checkpoint.circuit_breaker_reason = "main publication failed hosted verification"
             self.checkpoints.save_v3(checkpoint)
@@ -946,7 +972,7 @@ class V3Controller:
                 "release": release,
             }
         checkpoint.active = False
-        checkpoint.approval_state = "OWNER_MACHINE_POLICY_SATISFIED"
+        checkpoint.approval_state = "INDEPENDENT_RELEASE_VERIFIED"
         self.checkpoints.save_v3(checkpoint)
         target = (
             WorkStatus.WAITING_EXTERNAL
@@ -955,27 +981,12 @@ class V3Controller:
         )
         self.queue.transition(item.work_item_id, target, updated_at=datetime.now(UTC))
         if target is WorkStatus.PASSED_ENGINEERING:
-            machine_policy_digest: str | None = None
-            if item.kind is WorkKind.MACHINE_POLICY_REVIEW:
-                raw_receipt = release.get("machinePolicyReceipt")
-                if not isinstance(raw_receipt, str):
-                    raise RuntimeError("machine-policy work lacks publication receipt")
-                receipt_path = Path(raw_receipt).resolve()
-                try:
-                    receipt_path.relative_to(
-                        self.runtime_paths.machine_policy_receipts.resolve()
-                    )
-                except ValueError as exc:
-                    raise RuntimeError("machine-policy receipt escaped its runtime root") from exc
-                if not receipt_path.is_file():
-                    raise RuntimeError("machine-policy publication receipt is missing")
-                machine_policy_digest = _digest_file(receipt_path)
             self._record_completion_evidence(
                 item=item,
                 candidate_sha=candidate_sha,
                 checkpoint_digest=checkpoint_digest,
                 manifest_digest=_digest_file(manifest_path),
-                machine_policy_receipt_digest=machine_policy_digest,
+                machine_policy_receipt_digest=None,
                 independent_reviewed=any(
                     role in {"audit", "adversary", "security"} for role in self._roles(item)
                 ),

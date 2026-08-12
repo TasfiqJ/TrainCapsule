@@ -7,7 +7,6 @@ required=(
   docs/source-of-truth/v3-2026-08-11/FINAL_MANIFEST_V3.json
   docs/source-of-truth/v3-2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3.md
   docs/CONTEXT_INDEX.yaml
-  config/human_approval.yaml
   config/scheduler.yaml
   config/milestones.yaml
   config/external_evidence.yaml

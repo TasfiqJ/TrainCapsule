@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 2,
+  "workItemId": "V3-MIG-020",
+  "status": "PENDING_FINALIZATION",
+  "finalizationCommand": [
+    ".venv/bin/python",
+    "scripts/finalize_v3_1_zh_m0_evidence.py"
+  ],
+  "reason": "V3.1 M0 prerequisites are incomplete and cannot be finalized from historical V3 simulation evidence."
+}

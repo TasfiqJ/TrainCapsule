@@ -37,9 +37,9 @@
       "title": "Evidencedigests",
       "type": "object"
     },
-    "ownerDirectivesDigest": {
+    "sourceAuthorityDigest": {
       "pattern": "^sha256:[0-9a-f]{64}$",
-      "title": "Ownerdirectivesdigest",
+      "title": "Sourceauthoritydigest",
       "type": "string"
     },
     "proposals": {
@@ -63,7 +63,7 @@
     "milestoneId",
     "nextMilestoneId",
     "evidenceDigests",
-    "ownerDirectivesDigest",
+    "sourceAuthorityDigest",
     "decision",
     "decidedAt"
   ],

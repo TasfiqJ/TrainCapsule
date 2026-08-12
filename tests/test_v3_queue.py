@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
+import yaml
 
 from tcfactory.v3.controller_lock import ControllerLockError, controller_process_lock
 from tcfactory.v3.enums import Lane, WorkStatus
@@ -102,6 +103,45 @@ def test_queue_moves_atomically_and_recovery_never_auto_resumes(tmp_path: Path) 
     item = queue.load("V3-PROD-001")
     assert item.status is WorkStatus.BLOCKED_TECHNICAL
     assert queue.locate(item.work_item_id).parent.name == "blocked_technical"
+
+
+def test_stopped_queue_policy_compatibility_is_read_only_and_digest_bound(
+    tmp_path: Path,
+) -> None:
+    queue = V3Queue(tmp_path / "v3-queue")
+    authoritative_payload = _item().model_dump(mode="python", by_alias=False)
+    authoritative_payload.update(
+        {
+            "kind": "MACHINE_POLICY_REVIEW",
+            "owner_type": "MACHINE_POLICY_AUTHORITY",
+            "automatable": False,
+            "machine_policy_receipt_required": True,
+        }
+    )
+    authoritative = WorkItem.model_validate(authoritative_payload)
+    queue.initialize()
+    path = queue.root / "ready/V3-PROD-001.yaml"
+    stale = authoritative.model_dump(mode="json", by_alias=True)
+    stale.update(
+        {
+            "kind": "MACHINE_POLICY_REVIEW",
+            "ownerType": "AI",
+            "automatable": True,
+            "machinePolicyReceiptRequired": False,
+        }
+    )
+    path.write_text(yaml.safe_dump(stale, sort_keys=False), encoding="utf-8")
+    before = path.read_bytes()
+
+    items, receipt = queue.compatible_items({authoritative.work_item_id: authoritative})
+
+    assert len(items) == len(receipt) == 1
+    assert items[0].owner_type.value == "MACHINE_POLICY_AUTHORITY"
+    assert items[0].status is WorkStatus.READY
+    assert receipt[0].status_preserved is True
+    assert receipt[0].applied is False
+    assert receipt[0].observed_digest != receipt[0].compatible_digest
+    assert path.read_bytes() == before
 
 
 def test_cross_process_claim_has_exactly_one_owner(tmp_path: Path) -> None:

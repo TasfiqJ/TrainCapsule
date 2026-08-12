@@ -1,0 +1,64 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "3.1",
+      "default": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "generationId": {
+      "title": "Generationid",
+      "type": "string"
+    },
+    "configPath": {
+      "title": "Configpath",
+      "type": "string"
+    },
+    "configDigest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Configdigest",
+      "type": "string"
+    },
+    "sourceRoot": {
+      "title": "Sourceroot",
+      "type": "string"
+    },
+    "manifestPath": {
+      "title": "Manifestpath",
+      "type": "string"
+    },
+    "manifestDigest": {
+      "pattern": "^[0-9a-f]{64}$",
+      "title": "Manifestdigest",
+      "type": "string"
+    },
+    "sourceDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourcedigest",
+      "type": "string"
+    },
+    "normativeDocuments": {
+      "items": {
+        "type": "string"
+      },
+      "minItems": 1,
+      "title": "Normativedocuments",
+      "type": "array"
+    }
+  },
+  "required": [
+    "generationId",
+    "configPath",
+    "configDigest",
+    "sourceRoot",
+    "manifestPath",
+    "manifestDigest",
+    "sourceDigest",
+    "normativeDocuments"
+  ],
+  "title": "ActiveSourceGeneration",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/active-source-generation.schema.json"
+}

@@ -155,6 +155,24 @@ def _verify_detached_ed25519_signature(
         )
 
 
+def assert_privileged_read_only(path: Path) -> None:
+    """Public trust-boundary check shared by independent receipt validators."""
+
+    _assert_privileged_read_only(path)
+
+
+def verify_detached_ed25519_signature(
+    *, receipt: Path, signature: Path, public_key: Path
+) -> None:
+    """Public exact-byte Ed25519 verifier for independent receipt validators."""
+
+    _verify_detached_ed25519_signature(
+        receipt=receipt,
+        signature=signature,
+        public_key=public_key,
+    )
+
+
 def load_verified_external_evidence(
     *,
     repo_root: Path,

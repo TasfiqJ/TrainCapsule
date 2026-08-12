@@ -1,5 +1,11 @@
 # TrainCapsule V3 migration report
 
+> **HISTORICAL V3 RECORD — SUPERSEDED FOR ACTIVE OPERATION.** This report preserves the
+> completed V3 migration and its then-current main-publication evidence. It is not V3.1-ZH
+> acceptance. Current authority, M0 status, and blockers are recorded in
+> `docs/migrations/V3_1_ZH_CODEX_EXECUTION_STATE.md`; V3.1 M0 is active and pending independent
+> signed authorization plus real automated-PR/required-CI/verified-merged-main receipts.
+
 ## Decision and authority
 
 The authoritative 2026-08-11 V3 bundle was verified before implementation: all 30 declared files,
@@ -101,7 +107,7 @@ Those publication and preflight facts are historical observations for the SHA na
 ignored migration marker is mutable runtime state and cannot substitute for tracked, replayable
 evidence for a later implementation tree.
 
-## Current handoff
+## Historical V3 handoff
 
 The current implementation tree has strict local M0 evidence and complete local acceptance. It is
 not yet hosted-release accepted: the resulting commit must be published to `main` only, pass the

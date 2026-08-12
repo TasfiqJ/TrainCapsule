@@ -86,6 +86,12 @@ class LegacyMapRecord(V3Model):
         return self
 
 
+class LegacyEvidenceFile(V3Model):
+    path: str = Field(min_length=1)
+    mode: str = Field(pattern=r"^[0-7]{4}$")
+    sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
 class LegacyMigrationMap(V3Model):
     version: int = Field(default=3, ge=3, le=3)
     source_version: int = Field(default=2, ge=2, le=2)
@@ -93,6 +99,8 @@ class LegacyMigrationMap(V3Model):
     source_ledger_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     source_policy_ref: str = Field(min_length=1)
     records: list[LegacyMapRecord]
+    preserved_evidence_inventory: list[LegacyEvidenceFile] = Field(min_length=1)
+    preserved_evidence_inventory_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
 
     @model_validator(mode="after")
     def unique_mapping(self) -> LegacyMigrationMap:
@@ -102,6 +110,15 @@ class LegacyMigrationMap(V3Model):
         expected = [f"T{index:03d}" for index in range(1, 125)]
         if legacy_ids != expected:
             raise ValueError("legacy migration must contain ordered T001 through T124")
+        paths = [item.path for item in self.preserved_evidence_inventory]
+        if paths != sorted(set(paths)):
+            raise ValueError("legacy evidence inventory paths must be unique and sorted")
+        payload = b"".join(
+            f"{item.mode}\0{item.path}\0{item.sha256}\n".encode()
+            for item in self.preserved_evidence_inventory
+        )
+        if sha256_digest(payload) != self.preserved_evidence_inventory_digest:
+            raise ValueError("legacy evidence inventory digest mismatch")
         return self
 
     def validate_v3_targets(self, known_work_items: set[str]) -> None:

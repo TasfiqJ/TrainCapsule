@@ -26,12 +26,7 @@ from tcfactory.backends.base import (
 from tcfactory.checkpoints import V3Checkpoint
 from tcfactory.completion import MilestoneCompletionDecision
 from tcfactory.context import V3ContextManifest
-from tcfactory.github_sync import (
-    GitHubConfig,
-    GitHubReleaseMetadata,
-    MainOnlyMachineReceipt,
-    MainPublicationTransaction,
-)
+from tcfactory.github_sync import GitHubConfig
 from tcfactory.handoffs import V3Handoff
 from tcfactory.supervisor import MigrationCompleteMarker, SupervisorState
 from tcfactory.v3.base import json_schema_for
@@ -40,13 +35,10 @@ from tcfactory.v3.configuration import (
     AutonomyV3Config,
     CommercialMaturityConfig,
     ContextRoutingConfig,
-    DisabledHumanApprovalConfig,
     ExecutorConfig,
     ExternalEvidenceConfig,
     FactoryV3Config,
     MilestonePolicyConfig,
-    OwnerDirectives,
-    OwnerOverridePolicy,
 )
 from tcfactory.v3.dispositions import DispositionLedger
 from tcfactory.v3.external_evidence import ExternalEvidenceReceipt
@@ -65,11 +57,19 @@ from tcfactory.v3.private_gate import PrivateGateReceipt
 from tcfactory.v3.recovery import FindingCounter, HardStuckRecord
 from tcfactory.v3.retry_policy import RetryPolicy
 from tcfactory.v3.scheduler import SchedulerConfig
+from tcfactory.v3.source_authority import (
+    ActiveGenerationConfig,
+    ActiveSourceGeneration,
+    SourceGenerationManifest,
+    StaleSourceProposal,
+)
 from tcfactory.v3.work_items import WorkItem, WorkItemCollection
 from tcfactory.value import DecisionValueResult
 
 SCHEMA_ROOT: Final = ROOT / "schemas/factory/v3"
 SCHEMAS: Final[dict[str, type[BaseModel]]] = {
+    "active-generation.schema.json": ActiveGenerationConfig,
+    "active-source-generation.schema.json": ActiveSourceGeneration,
     "agent-capabilities.schema.json": AgentCapabilityReport,
     "agent-run-result.schema.json": AgentRunResult,
     "agent-task-request.schema.json": AgentTaskRequest,
@@ -86,13 +86,7 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "finding.schema.json": V3Finding,
     "finding-counter.schema.json": FindingCounter,
     "hard-stuck.schema.json": HardStuckRecord,
-    "human-approval-disabled-config.schema.json": DisabledHumanApprovalConfig,
-    "owner-directives.schema.json": OwnerDirectives,
-    "owner-override-policy.schema.json": OwnerOverridePolicy,
     "github-config.schema.json": GitHubConfig,
-    "main-publication.schema.json": GitHubReleaseMetadata,
-    "main-policy-receipt.schema.json": MainOnlyMachineReceipt,
-    "main-publication-transaction.schema.json": MainPublicationTransaction,
     "handoff.schema.json": V3Handoff,
     "legacy-migration.schema.json": LegacyMigrationMap,
     "milestones.schema.json": MilestoneRoadmap,
@@ -109,6 +103,8 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "release-candidate.schema.json": ReleaseCandidate,
     "scheduler.schema.json": SchedulerConfig,
     "supervisor-state.schema.json": SupervisorState,
+    "source-generation-manifest.schema.json": SourceGenerationManifest,
+    "source-wedge-proposal.schema.json": StaleSourceProposal,
     "work-item-v3.schema.json": WorkItem,
     "work-items.schema.json": WorkItemCollection,
     "task-packet.schema.json": V3TaskPacket,

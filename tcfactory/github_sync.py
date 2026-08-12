@@ -24,6 +24,7 @@ from .v3.private_gate import (
     validate_private_gate_installation,
     verify_private_gate_receipt,
 )
+from .v3.source_authority import validate_active_source_generation
 from .yamlutil import load_yaml
 
 _BRANCH_PATTERN = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9._/-]{0,126}[A-Za-z0-9])?$")
@@ -60,25 +61,25 @@ class RemoteCIConfig(V3Model):
 
 
 class GitHubConfig(V3Model):
-    version: Literal[3] = 3
+    schema_version: Literal["3.1"] = "3.1"
     enabled: bool = False
     remote: Literal["origin"] = "origin"
     base_branch: Literal["main"] = "main"
-    branch: Literal["main"] = "main"
-    visibility: Literal["private"] = "private"
+    visibility: Literal["public"] = "public"
     repository: str | None = None
-    release_mode: Literal["owner_directed_main_only"] = "owner_directed_main_only"
-    direct_main_push: Literal[True] = True
-    release_metadata_path: Literal["factory/state/latest-release.json"] = (
-        "factory/state/latest-release.json"
+    release_mode: Literal[
+        "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
+    ] = "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
+    direct_main_push: Literal[False] = False
+    candidate_branch_prefix: Literal["factory/"] = "factory/"
+    pull_request_metadata_path: Literal["factory/state/latest-pull-request.json"] = (
+        "factory/state/latest-pull-request.json"
     )
-    push_after_verified_tasks: int = Field(default=3, ge=1, le=50)
-    push_interval_seconds: int = Field(default=3600, ge=60, le=86_400)
-    push_before_quota_pause: bool = True
-    push_at_completion: bool = True
-    immediate_risk_tiers: list[RiskTier] = Field(
-        default_factory=lambda: [RiskTier.INTEGRATION, RiskTier.TRUST_CORE]
-    )
+    exact_head_sha_checks_required: Literal[True] = True
+    independent_machine_policy_receipt_required: Literal[True] = True
+    merge_queue_or_auto_merge_required: Literal[True] = True
+    exact_merged_main_verification_required: Literal[True] = True
+    publisher_capability: Literal["PENDING_PHASE_4"] = "PENDING_PHASE_4"
     retry_attempts: int = Field(default=5, ge=1, le=10)
     retry_backoff_seconds: int = Field(default=30, ge=1, le=3600)
     verify_remote_sha: Literal[True] = True
@@ -123,7 +124,9 @@ class RequiredWorkflowStatus(V3Model):
 
 class GitHubReleaseMetadata(V3Model):
     version: Literal[3] = 3
-    release_mode: Literal["owner_directed_main_only"] = "owner_directed_main_only"
+    release_mode: Literal["HISTORICAL_V3_MAIN_PUBLICATION"] = (
+        "HISTORICAL_V3_MAIN_PUBLICATION"
+    )
     candidate_sha: str = Field(pattern=SHA_PATTERN.pattern)
     publication_branch: Literal["main"] = "main"
     remote_main_sha: str = Field(pattern=SHA_PATTERN.pattern)
@@ -148,7 +151,7 @@ class RemoteCIFailure(GitHubSyncError):
 
 class MainOnlyMachineReceipt(V3Model):
     version: Literal[3] = 3
-    policy: Literal["OWNER_DIRECTED_MAIN_ONLY"] = "OWNER_DIRECTED_MAIN_ONLY"
+    policy: Literal["V3_1_ZH_MAIN_ONLY"] = "V3_1_ZH_MAIN_ONLY"
     work_item_id: str
     base_sha: str = Field(pattern=SHA_PATTERN.pattern)
     candidate_sha: str = Field(pattern=SHA_PATTERN.pattern)
@@ -158,7 +161,7 @@ class MainOnlyMachineReceipt(V3Model):
     context_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     checkpoint_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     gate_digests: dict[str, str] = Field(min_length=1)
-    owner_directives_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    authority_manifest_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     local_gate_evidence: dict[str, str] = Field(min_length=1)
     private_gate_evidence: dict[str, str]
     created_at: datetime
@@ -220,8 +223,8 @@ class MainPublicationTransaction(V3Model):
         return None
 
 
-class MainOnlyPublisher:
-    """Exact-SHA main-only publication with automatic quarantine and revert."""
+class HistoricalV3MainPublisher:
+    """Disabled V3 compatibility shell; V3.1 publication is PR-only."""
 
     def __init__(
         self,
@@ -240,6 +243,11 @@ class MainOnlyPublisher:
             raise ValueError("at least one deterministic local gate command is required")
         self.local_gate_command = local_gate_command
         self._prepared: dict[str, tuple[dict[str, str], dict[str, str]]] = {}
+        raise RuntimeError(
+            "legacy V3 publication adapter is disabled; "
+            "V3.1 automated PR publisher capability is pending Phase 4"
+        )
+
 
     def _transaction_root(self) -> Path:
         return self.receipt_root / "publication-transactions"
@@ -285,12 +293,11 @@ class MainOnlyPublisher:
         allowed = {transaction.base_sha, transaction.candidate_sha, final_sha}
         if current not in allowed:
             self._hard_stop("migration marker SHA is ambiguous during publication recovery")
-        manifest = self.repo_root / "docs/source-of-truth/v3-2026-08-11/FINAL_MANIFEST_V3.json"
-        directives = self.repo_root / "config/owner_directives.yaml"
-        if marker.get("sourceManifestSha256") != sha256_file(manifest):
+        active = validate_active_source_generation(self.repo_root)
+        if marker.get("sourceManifestSha256") != active.manifest_digest:
             self._hard_stop("migration marker source digest changed during publication")
-        if marker.get("ownerDirectivesSha256") != sha256_file(directives):
-            self._hard_stop("migration marker owner-directive digest changed during publication")
+        if marker.get("activeGenerationSha256") != active.config_digest:
+            self._hard_stop("migration marker active-generation digest changed during publication")
         marker["completedSha"] = final_sha
         write_json(marker_path, marker)
 
@@ -302,7 +309,8 @@ class MainOnlyPublisher:
             self._hard_stop("automatic revert tree does not match the pre-promotion base")
 
     def _metadata_path(self) -> Path:
-        path = Path(self.config.release_metadata_path)
+        historical = cast(Any, self.config)
+        path = Path(historical.release_metadata_path)
         return path if path.is_absolute() else self.repo_root / path
 
     def _write_metadata(
@@ -418,7 +426,7 @@ class MainOnlyPublisher:
             if result.returncode == 0:
                 return
             if attempt == self.config.retry_attempts:
-                raise GitHubSyncError("finite main-only push retry budget exhausted")
+                raise GitHubSyncError("historical V3 publication retry budget exhausted")
             time.sleep(self.config.retry_backoff_seconds * attempt)
 
     def _create_local_revert(self, transaction: MainPublicationTransaction) -> str:
@@ -727,7 +735,7 @@ class MainOnlyPublisher:
             },
         )
         (state_root / "STOP").write_text(
-            "main-only publication recovery failed\n", encoding="utf-8"
+            "historical V3 publication recovery failed\n", encoding="utf-8"
         )
         raise RemoteCIFailure(reason)
 
@@ -746,9 +754,9 @@ class MainOnlyPublisher:
         gate_digests: dict[str, str],
     ) -> dict[str, object]:
         if current_branch(self.repo_root) != "main":
-            raise GitHubSyncError("main-only publisher must run from main")
+            raise GitHubSyncError("historical V3 publisher must run from main")
         if not self.config.enabled:
-            raise GitHubSyncError("main-only publication is disabled")
+            raise GitHubSyncError("historical V3 publication is disabled")
         transaction_path = self._transaction_path(candidate_sha)
         if transaction_path.exists():
             existing = MainPublicationTransaction.model_validate(read_json(transaction_path, {}))
@@ -788,7 +796,7 @@ class MainOnlyPublisher:
         if prepared is None:
             raise GitHubSyncError("candidate lacks exact-SHA pre-promotion gate evidence")
         local_evidence, private_evidence = prepared
-        owner_directives = self.repo_root / "config/owner_directives.yaml"
+        active_source = validate_active_source_generation(self.repo_root)
         receipt = MainOnlyMachineReceipt(
             work_item_id=str(item.work_item_id),
             base_sha=base_sha,
@@ -799,7 +807,7 @@ class MainOnlyPublisher:
             context_digest=context_digest,
             checkpoint_digest=checkpoint_digest,
             gate_digests=gate_digests,
-            owner_directives_digest=f"sha256:{sha256_file(owner_directives)}",
+            authority_manifest_digest=f"sha256:{active_source.manifest_digest}",
             local_gate_evidence=local_evidence,
             private_gate_evidence=private_evidence,
             created_at=datetime.now(UTC),
@@ -824,6 +832,9 @@ class MainOnlyPublisher:
         completed = self.reconcile_transaction(transaction)
         return self._transaction_result(completed)
 
+
+# Historical import compatibility only. Construction always fails in __init__.
+MainOnlyPublisher = HistoricalV3MainPublisher
 
 # Backward-compatible spelling retained for older pipeline imports.
 GithubSyncError = GitHubSyncError
@@ -1012,7 +1023,7 @@ def push_main_with_retry(repo_root: Path, config: GitHubConfig, refspec: str) ->
         if attempt < config.retry_attempts:
             time.sleep(config.retry_backoff_seconds * attempt)
     raise GitHubSyncError(
-        f"main-only push failed after {config.retry_attempts} attempts: {last_error}"
+        f"historical V3 push failed after {config.retry_attempts} attempts: {last_error}"
     )
 
 
@@ -1133,16 +1144,8 @@ def should_push(
     force: bool,
     now: datetime,
 ) -> bool:
-    if not config.enabled or state.tasks_since_push <= 0:
-        return False
-    if force:
-        return True
-    if task is not None and task.risk_tier in config.immediate_risk_tiers:
-        return True
-    if state.tasks_since_push >= config.push_after_verified_tasks:
-        return True
-    if state.pending and state.last_push_at is not None:
-        return (now - state.last_push_at).total_seconds() >= config.push_interval_seconds
+    del config, state, task, force, now
+    # Historical V2/V3 batching has no active V3.1 publication authority.
     return False
 
 
@@ -1178,9 +1181,9 @@ def sync_github(
     state.pending = True
     save_github_state(state_path, state)
     return {
-        "status": "main-only-controller-required",
+        "status": "historical-v3-controller-disabled",
         "candidate_sha": candidate_sha,
         "release_mode": config.release_mode,
         "direct_main_push": config.direct_main_push,
-        "message": "use V3Controller and MainOnlyPublisher for exact-SHA main publication",
+        "message": "historical V3 publication is unavailable under active V3.1 policy",
     }

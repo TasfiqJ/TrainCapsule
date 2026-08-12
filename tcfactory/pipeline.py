@@ -1497,7 +1497,8 @@ async def run_pipeline(
     repo_root = repo_root.resolve()
     if config.version >= 3:
         raise PipelineFailure(
-            "legacy V2 pipeline is disabled for V3; use V3Controller and its main-only publisher"
+            "legacy V2 pipeline is disabled; active V3.1 startup remains fail-closed "
+            "until its automated PR publisher/verifier is installed"
         )
     if config.execution_mode == "claude_led_nodes":
         task = normalize_claude_led_nodes(task)

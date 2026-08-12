@@ -3,9 +3,7 @@
 from __future__ import annotations
 
 import subprocess
-from datetime import UTC, datetime
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
 
@@ -14,34 +12,11 @@ from tcfactory.github_sync import (
     GitHubConfig,
     GitHubSyncError,
     MainOnlyPublisher,
-    RequiredWorkflow,
-    RequiredWorkflowStatus,
     push_main_with_retry,
 )
-from tcfactory.util import sha256_file, write_json
-from tcfactory.v3.candidate_manifest import (
-    CandidateManifest,
-    ExecutorIdentity,
-    GateBinding,
-)
-from tcfactory.v3.enums import ReleaseDecision
-from tcfactory.v3.private_gate import PrivateGateVerificationError
 
 BASE = "a" * 40
 CANDIDATE = "b" * 40
-DIGEST = "sha256:" + "c" * 64
-
-
-def _passed_status() -> RequiredWorkflowStatus:
-    config = GitHubConfig(enabled=True)
-    return RequiredWorkflowStatus(
-        candidate_sha=CANDIDATE,
-        status="pass",
-        workflows=[
-            RequiredWorkflow(name=name, status="completed", conclusion="success")
-            for name in config.remote_ci.required_workflows
-        ],
-    )
 
 
 def test_non_main_push_and_pr_surfaces_do_not_exist() -> None:
@@ -78,165 +53,28 @@ def test_push_helper_accepts_only_exact_sha_to_main(monkeypatch: pytest.MonkeyPa
     ]
 
 
-def test_candidate_preparation_fails_closed_without_private_gate(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_historical_v3_publisher_is_unreachable_under_v31(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
-    candidate = tmp_path / "candidate"
     repo.mkdir()
-    candidate.mkdir()
-    publisher = MainOnlyPublisher(
-        repo_root=repo,
-        config=GitHubConfig(enabled=True),
-        receipt_root=tmp_path / "receipts",
-        quarantine_root=tmp_path / "quarantine",
-        local_gate_command=("true",),
-    )
-    monkeypatch.setattr(github_sync, "current_sha", lambda *_args, **_kwargs: CANDIDATE)
-    monkeypatch.setattr(
-        github_sync,
-        "run_command",
-        lambda args, **_kwargs: subprocess.CompletedProcess(args, 0, "pass", ""),
-    )
-
-    def missing(*_args: object, **_kwargs: object) -> tuple[Path, Path]:
-        raise PrivateGateVerificationError("missing trusted runner")
-
-    monkeypatch.setattr(github_sync, "validate_private_gate_installation", missing)
-    with pytest.raises(GitHubSyncError, match="mandatory private"):
-        publisher.prepare_candidate(
-            item=SimpleNamespace(work_item_id="V3-NEG-001"),
-            candidate_sha=CANDIDATE,
-            candidate_worktree=candidate,
+    with pytest.raises(RuntimeError, match="disabled.*pending Phase 4"):
+        MainOnlyPublisher(
+            repo_root=repo,
+            config=GitHubConfig(enabled=True),
+            receipt_root=tmp_path / "receipts",
+            quarantine_root=tmp_path / "quarantine",
+            local_gate_command=("true",),
         )
 
 
-def test_main_only_publisher_binds_gates_and_publishes_exact_sha(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
+def test_disabled_historical_publisher_creates_no_receipt_or_ref(tmp_path: Path) -> None:
     repo = tmp_path / "repo"
-    candidate_tree = tmp_path / "candidate"
     repo.mkdir()
-    candidate_tree.mkdir()
-    (repo / "config").mkdir()
-    (repo / "factory/state").mkdir(parents=True)
-    (repo / "config/owner_directives.yaml").write_text("version: 3\n", encoding="utf-8")
-    gate = candidate_tree / "gate.sh"
-    gate.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
-    gate.chmod(0o755)
-    config = GitHubConfig(enabled=True, retry_attempts=1, retry_backoff_seconds=1)
-    publisher = MainOnlyPublisher(
-        repo_root=repo,
-        config=config,
-        receipt_root=repo / "factory/state/receipts",
-        quarantine_root=repo / "factory/state/quarantine",
-        local_gate_command=("bash", "gate.sh"),
-    )
-    trusted_runner = tmp_path / "trusted-private-gate"
-    trusted_key = tmp_path / "trusted-public-key.pem"
-    trusted_runner.write_text("private runner\n", encoding="utf-8")
-    trusted_key.write_text("public key\n", encoding="utf-8")
-    monkeypatch.setattr(github_sync, "CONTROLLER_PRIVATE_GATE", trusted_runner)
-    monkeypatch.setattr(github_sync, "CONTROLLER_PRIVATE_GATE_KEY", trusted_key)
-    monkeypatch.setattr(
-        github_sync,
-        "validate_private_gate_installation",
-        lambda *_args, **_kwargs: (trusted_runner, trusted_key),
-    )
-    item = SimpleNamespace(work_item_id="V3-MIG-019")
-    monkeypatch.setattr(github_sync, "current_branch", lambda _: "main")
-
-    state = {"local": BASE, "remote": BASE}
-
-    def fake_sha(path: Path, ref: str | None = None) -> str:
-        if path.resolve() == candidate_tree.resolve() or ref not in {None, "main"}:
-            return CANDIDATE
-        return state["local"]
-
-    monkeypatch.setattr(github_sync, "current_sha", fake_sha)
-    monkeypatch.setattr(github_sync, "validate_github_ready", lambda *_: {})
-    monkeypatch.setattr(github_sync, "_pre_push_checks", lambda *_: None)
-    monkeypatch.setattr(github_sync, "_ensure_no_divergence", lambda *_: None)
-    monkeypatch.setattr(
-        github_sync,
-        "fast_forward_main",
-        lambda *_args, **_kwargs: state.update(local=CANDIDATE),
-    )
-    monkeypatch.setattr(
-        github_sync, "_remote_branch_sha", lambda *_args, **_kwargs: state["remote"]
-    )
-    monkeypatch.setattr(github_sync, "required_workflow_status", lambda *_args: _passed_status())
-    monkeypatch.setattr(
-        github_sync,
-        "wait_for_remote_ci",
-        lambda *_args, **_kwargs: _passed_status().model_dump(mode="json", by_alias=True),
-    )
-    pushes: list[list[str]] = []
-
-    def fake_run(args: list[str], **_: object) -> subprocess.CompletedProcess[str]:
-        if args[:2] == ["git", "push"]:
-            pushes.append(args)
-            state["remote"] = args[-1].split(":", 1)[0]
-        return subprocess.CompletedProcess(args, 0, "gate-output", "")
-
-    monkeypatch.setattr(github_sync, "run_command", fake_run)
-
-    def fake_private_gate(**arguments: object) -> SimpleNamespace:
-        receipt_path = Path(str(arguments["receipt_path"]))
-        signature_path = Path(str(arguments["signature_path"]))
-        receipt_path.write_text('{"signed":true}\n', encoding="utf-8")
-        signature_path.write_bytes(b"signed")
-        stdout_path = receipt_path.with_name("private-result.txt")
-        stdout_path.write_text("private gate passed\n", encoding="utf-8")
-        return SimpleNamespace(passed=True, stdout_path=str(stdout_path))
-
-    monkeypatch.setattr(github_sync, "run_private_gate", fake_private_gate)
-    monkeypatch.setattr(
-        github_sync,
-        "verify_private_gate_receipt",
-        lambda **_kwargs: SimpleNamespace(
-            runner_digest="sha256:" + "d" * 64,
-            runner_version="3.0.0",
-        ),
-    )
-    gate_paths = publisher.prepare_candidate(
-        item=item, candidate_sha=CANDIDATE, candidate_worktree=candidate_tree
-    )
-    gate_digests = {
-        name: f"sha256:{sha256_file(path)}" for name, path in gate_paths.items()
-    }
-    manifest = CandidateManifest(
-        base_sha=BASE,
-        candidate_sha=CANDIDATE,
-        work_item_id=item.work_item_id,
-        packet_digest=DIGEST,
-        context_digest=DIGEST,
-        executor=ExecutorIdentity(backend="fake", adapter="test"),
-        stage_outputs=[],
-        gates=[
-            GateBinding(name=name, version="3", result="PASS", evidence_digest=digest)
-            for name, digest in gate_digests.items()
-        ],
-        findings=[],
-        external_evidence=[],
-        checkpoint_digest=DIGEST,
-        release_decision=ReleaseDecision.APPROVED_FOR_MAIN_PROMOTION,
-        created_at=datetime.now(UTC),
-    )
-    manifest_path = repo / "manifest.json"
-    write_json(manifest_path, manifest.model_dump(mode="json", by_alias=True))
-    result = publisher.publish(
-        item=item,
-        candidate_ref="candidate-ref",
-        candidate_sha=CANDIDATE,
-        candidate_worktree=candidate_tree,
-        candidate_manifest_path=manifest_path,
-        packet_digest=DIGEST,
-        source_digest=DIGEST,
-        context_digest=DIGEST,
-        checkpoint_digest=DIGEST,
-        gate_digests=gate_digests,
-    )
-    assert result["status"] == "PUBLISHED_MAIN_VERIFIED"
-    assert pushes == [["git", "push", "origin", f"{CANDIDATE}:refs/heads/main"]]
-    assert all("refs/heads/main" in " ".join(command) for command in pushes)
+    receipt_root = tmp_path / "receipts"
+    with pytest.raises(RuntimeError):
+        MainOnlyPublisher(
+            repo_root=repo,
+            config=GitHubConfig(enabled=True),
+            receipt_root=receipt_root,
+            quarantine_root=tmp_path / "quarantine",
+        )
+    assert not receipt_root.exists()

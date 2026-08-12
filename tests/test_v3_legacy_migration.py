@@ -84,6 +84,23 @@ def test_mapping_is_explicit_bounded_and_never_resumes_t002() -> None:
         "factory/feature_ledger.yaml" in record.evidence_preserved
         for record in migration.records
     )
+    inventory = {item.path: item for item in migration.preserved_evidence_inventory}
+    for relative in (
+        "tasks/T002.yaml",
+        "specs/tasks/T002.md",
+        "factory/recovery/task-packets/T002-r1.yaml",
+    ):
+        if (ROOT / relative).is_file():
+            assert inventory[relative].sha256 == sha256_file(ROOT / relative)
+
+
+def test_preserved_evidence_inventory_detects_byte_tamper(tmp_path: Path) -> None:
+    copied = tmp_path / "repo"
+    shutil.copytree(ROOT, copied, ignore=shutil.ignore_patterns(".git", ".venv", "worktrees"))
+    target = copied / "specs/tasks/T002.md"
+    target.write_bytes(target.read_bytes() + b"\ntampered\n")
+    with pytest.raises(ValueError, match="stopped-runtime snapshot|stale"):
+        verify_installed(copied)
 
 
 def test_mapping_targets_only_existing_v3_work_and_legacy_ids_never_enter_graph() -> None:

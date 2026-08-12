@@ -1,11 +1,11 @@
 version: 3
-activeMilestone: M1_NATIVE_PREFLIGHT
+activeMilestone: M0_FACTORY_MIGRATED
 wip:
   PRODUCT: {mutating: 1, readOnly: 1}
   MARKET: {mutating: 0, readOnly: 1}
   COMPETITOR: {mutating: 0, readOnly: 1}
   TRUST: {mutating: 1, readOnly: 1}
-  FACTORY: {mutating: 0, readOnly: 0}
+  FACTORY: {mutating: 0, readOnly: 1}
 factoryMaintenance:
   allowMutatingOnlyOnControllerFailure: true
 weights:

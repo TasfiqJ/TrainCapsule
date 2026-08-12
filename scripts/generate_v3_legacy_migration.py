@@ -20,11 +20,13 @@ if str(ROOT) not in sys.path:
 from tcfactory.feature_ledger import FeatureItem, load_feature_ledger
 from tcfactory.util import atomic_write_text
 from tcfactory.v3.migrations import (
+    LegacyEvidenceFile,
     LegacyDisposition,
     LegacyMapRecord,
     LegacyMigrationMap,
     LegacyStatus,
 )
+from tcfactory.v3.base import sha256_digest
 from tcfactory.v3.work_items import WorkItemCollection
 from tcfactory.yamlutil import load_yaml
 
@@ -191,6 +193,35 @@ def _preserved_evidence(item: FeatureItem, root: Path) -> list[str]:
     return sorted(references)
 
 
+def _evidence_inventory(
+    root: Path, records: list[LegacyMapRecord]
+) -> tuple[list[LegacyEvidenceFile], str]:
+    files: set[Path] = set()
+    for record in records:
+        for relative in record.evidence_preserved:
+            candidate = root / relative
+            if candidate.is_symlink():
+                raise ValueError(f"legacy evidence cannot be a symlink: {relative}")
+            if candidate.is_dir():
+                files.update(path for path in candidate.rglob("*") if path.is_file())
+            elif candidate.is_file():
+                files.add(candidate)
+            else:
+                raise ValueError(f"legacy evidence is missing: {relative}")
+    inventory = [
+        LegacyEvidenceFile(
+            path=path.relative_to(root).as_posix(),
+            mode=format(path.stat().st_mode & 0o7777, "04o"),
+            sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+        )
+        for path in sorted(files)
+    ]
+    payload = b"".join(
+        f"{item.mode}\0{item.path}\0{item.sha256}\n".encode() for item in inventory
+    )
+    return inventory, sha256_digest(payload)
+
+
 def build_mapping(root: Path = ROOT) -> LegacyMigrationMap:
     legacy_source = root / "factory/feature_ledger.yaml"
     roadmap_source = root / "factory/roadmap/work_items.yaml"
@@ -247,11 +278,14 @@ def build_mapping(root: Path = ROOT) -> LegacyMigrationMap:
             )
         )
 
+    inventory, inventory_digest = _evidence_inventory(root, records)
     migration = LegacyMigrationMap(
         migration_base_sha=base_sha,
         source_ledger_digest=digest,
         source_policy_ref=ledger.source_of_truth,
         records=records,
+        preserved_evidence_inventory=inventory,
+        preserved_evidence_inventory_digest=inventory_digest,
     )
     roadmap = WorkItemCollection.model_validate(load_yaml(roadmap_source))
     migration.validate_v3_targets({item.work_item_id for item in roadmap.work_items})

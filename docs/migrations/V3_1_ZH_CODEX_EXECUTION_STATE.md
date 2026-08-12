@@ -33,7 +33,7 @@ Durable Phase-0 evidence:
 
 ## Current phase
 
-Phase 0 — safety, inventory, baseline proof, and hostile cross-reference — is complete and awaiting its isolated baseline commit.
+Phase 0 — safety, inventory, baseline proof, and hostile cross-reference — is complete. Phase 1 — coherent V3.1-ZH authority and fail-closed runtime migration — has passed local acceptance and is being frozen in the containing phase commit. Phase 2 strict V3.1 contracts and the repository-side Phase 3 independent verifier are implemented and tested but remain staged for their own commits. Phase 4 automated-PR publication is not implemented and remains fail-closed.
 
 Completed Phase 0 actions:
 
@@ -48,7 +48,23 @@ Completed Phase 0 actions:
 - recorded the extracted-package source-tree defect without losing the independently matching historical files;
 - recorded all 32 existing worktrees, V2/V3 queue state, checkpoints, runtime controls, scheduled tasks, GitHub state, and exact hosted baseline runs.
 
-No V3.1 implementation commit exists yet. No draft PR exists yet. The first commit contains only the Phase-0 durable evidence listed above.
+Completed phase commits:
+
+- Phase 0: `1f05faa` — `chore: record v3.1 zh hardening baseline`.
+
+The containing commit is the Phase 1 authority checkpoint, with subject `spec: add coherent v3.1 zh authority`. Its exact SHA is recorded by Git and will be copied into this table by the next phase checkpoint. No draft PR exists yet.
+
+Phase 1 acceptance evidence at freeze:
+
+- active manifest SHA-256 `06b0e62f960bf4fe2e87d457d92bafda392e7369ee6a576d9ca36530b9f4263c`;
+- coverage SHA-256 `69748b10c1192cc7c99efd34e8a08068f1afd876e444205309e2e302be6eb043`;
+- generator SHA-256 `a2741fdb709b4dfccf1ca4e47e20f95fbaa56e71e6a87d4ec953d7401a560830`;
+- 11 generated documents and 504/504 historical headings mapped;
+- V2 20-file, V3 30-payload, and V3.1 43-payload integrity gates passing;
+- 109/109 V3.1 roadmap rows and 43 active factory schemas exact;
+- 140 focused authority, migration, factory, contract, and verifier tests passing in the root aggregate replay;
+- repository-wide Ruff and strict Pyright passing in the factory acceptance replay;
+- five V3.1 M0 records intentionally `PENDING_FINALIZATION`; the evidence gate fails closed until real independent authorization and automated-PR evidence exist.
 
 ## Exact baseline evidence
 
@@ -71,7 +87,7 @@ These facts prove only the completed V3 baseline. They do not prove V3.1-ZH acce
 - Product controller: stopped.
 - Durable STOP marker: present.
 - Windows `TrainCapsule Lights-Out Autopilot` task: disabled.
-- Current active milestone: `M1_NATIVE_PREFLIGHT`.
+- Current active milestone: `M0_FACTORY_MIGRATED`; V3 completion remains historical only.
 - Current queue: 61 `PROPOSED`, 1 `READY`, 12 `WAITING_EXTERNAL`, 2 `BLOCKED_TECHNICAL`, 13 `PASSED_ENGINEERING`.
 - Current external blockers: `V3-MKT-003` through `V3-MKT-007` remain receipt-bound.
 - Current controller claims/leases: none.
@@ -88,11 +104,11 @@ These facts prove only the completed V3 baseline. They do not prove V3.1-ZH acce
 All package findings are presumed unresolved until the cross-reference records exact current-SHA proof. At minimum:
 
 1. GitHub ruleset and `main` protection are absent.
-2. The current repository release configuration implements the superseded direct-main policy, not V3.1 automated PR-only release.
+2. V3.1 automated PR publication is configured as the required target, but `publisherCapability=PENDING_PHASE_4`; controller startup fails closed and no PR/merge/revert capability is claimed.
 3. The separately owned and independently operated V3.1 verifier service is absent.
 4. Exact-SHA machine receipts for PR merge and activation are absent.
 5. Mandatory negative controls and live canaries have not been executed against a V3.1 candidate.
-6. The exact `milestone-status` operator command required by the package is absent.
+6. Final operator and activation acceptance remains pending exact-candidate replay.
 7. Enabled legacy/automatic Windows tasks have not been reconciled with the new activation contract.
 8. Current blocked work items and retained checkpoints require explicit recovery/disposition proof.
 9. The 75 open Phase-0 findings need implementation and exact-candidate closure evidence; the other 83 rows still require final V3.1 replay or authorized external/deferred disposition.
@@ -105,7 +121,7 @@ Critical open findings:
 
 `A006 A007 A008 B001 B005 B006 B008 C013 D005 D009 D010 E003 E004 E005 E007 F003 F004 F006 F008 F011 F012 F015 F016 G005 G006 G007 G009 G010 G012 G013 G014 G018 H001 H002 H003 H004 H005 H008 H015 J011`
 
-Critical contract defect: matrix row `B004` is critical but absent from the acceptance contract's critical-ID list. It remains an honest, nonblocking external wait and must be added explicitly during Phase 1.
+Matrix row `B004` remains an honest, nonblocking external wait and is now represented in the V3.1 authority; its external fact still requires a trusted receipt.
 
 ## Mandatory canaries still pending
 
@@ -138,7 +154,7 @@ The STOP marker and disabled product-controller task must remain unchanged until
 
 ## Next exact action
 
-Validate the four Phase-0 durable artifacts, record their final hashes, commit only those intended files as `chore: record v3.1 zh hardening baseline`, and push the hardening branch. Then begin Phase 1 by installing a coherent V3.1-ZH authority without changing either historical source generation.
+Commit and push the accepted Phase 1 checkpoint on the hardening branch, then integrate the staged strict contracts and independent verifier before implementing Phase 4 automated-PR publication. V3.1 MIG-016 through MIG-020 remain explicitly pending; live independent-verifier evidence and automated-PR/required-CI/merged-main receipts must exist before M0 can close. Historical V2/V3 source and evidence remain immutable inputs only.
 
 ## Rollback and safe stop
 

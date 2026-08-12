@@ -19,6 +19,7 @@ class V3RuntimePaths(V3Model):
     milestone_evidence: Path
     milestone_decisions: Path
     machine_policy_receipts: Path
+    source_proposals: Path
     quarantine: Path
     migration_marker: Path
     supervisor_state: Path
@@ -54,6 +55,7 @@ def resolve_v3_runtime_paths(
         milestone_evidence=state_root / "milestone-evidence",
         milestone_decisions=state_root / "milestone-decisions",
         machine_policy_receipts=state_root / "machine-policy-receipts",
+        source_proposals=state_root / "source-proposals",
         quarantine=state_root / "quarantine",
         migration_marker=state_root / factory.runtime.migration_complete_marker,
         supervisor_state=state_root / factory.runtime.supervisor_state_file,

@@ -23,10 +23,10 @@ def test_milestone_advance_transaction_replays_after_state_write_crash(
         load_yaml(ROOT / "factory/roadmap/milestones.yaml")
     )
     state_path = tmp_path / "milestone-state.json"
-    receipt_path = tmp_path / "milestone-decisions/M1_NATIVE_PREFLIGHT.json"
+    receipt_path = tmp_path / "milestone-decisions/M0_FACTORY_MIGRATED.json"
     now = datetime(2026, 8, 12, 12, 0, tzinfo=UTC)
     initial = initialize_milestone_state(roadmap, state_path, now=now)
-    assert initial.active_milestone == "M1_NATIVE_PREFLIGHT"
+    assert initial.active_milestone == "M0_FACTORY_MIGRATED"
     original_write_json = milestone_runtime.write_json
     failed = False
 
@@ -45,13 +45,13 @@ def test_milestone_advance_transaction_replays_after_state_write_crash(
             state_path=state_path,
             receipt_path=receipt_path,
             evidence_digests={"V3-SIM-001": "sha256:" + "a" * 64},
-            owner_directives_digest="sha256:" + "b" * 64,
+            source_authority_digest="sha256:" + "c" * 64,
             now=now,
         )
     monkeypatch.setattr(milestone_runtime, "write_json", original_write_json)
 
     recovered = initialize_milestone_state(roadmap, state_path, now=now)
-    assert recovered.active_milestone == "M2_CONTROLLED_QUALIFICATION"
+    assert recovered.active_milestone == "M1_NATIVE_PREFLIGHT"
     assert receipt_path.is_file()
     assert not state_path.with_name(
         f".{state_path.name}.advance-transaction.json"

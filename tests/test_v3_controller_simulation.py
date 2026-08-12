@@ -36,6 +36,7 @@ def _item(
     lane: str = "PRODUCT",
     automatable: bool = True,
     external: bool = False,
+    milestone: str = "M1_NATIVE_PREFLIGHT",
 ) -> WorkItem:
     return WorkItem.model_validate(
         {
@@ -44,7 +45,7 @@ def _item(
             "title": f"Simulation {identifier}",
             "lane": lane,
             "kind": kind,
-            "milestone": "M1_NATIVE_PREFLIGHT",
+            "milestone": milestone,
             "decisionContribution": "Prove one bounded unattended controller transition.",
             "customerOutcome": "No customer claim; deterministic controller evidence only.",
             "dependsOn": depends or [],
@@ -58,10 +59,17 @@ def _item(
             },
             "disposition": "KEEP",
             "status": "PROPOSED",
-            "ownerType": "EXTERNAL_PARTY" if external else "AI",
+            "ownerType": (
+                "EXTERNAL_PARTY"
+                if external
+                else "MACHINE_POLICY_AUTHORITY"
+                if kind == "MACHINE_POLICY_REVIEW"
+                else "AI"
+            ),
             "automatable": automatable,
             "evidenceRequired": ["deterministic disposable-repository simulation"],
             "externalReceiptRequired": external,
+            "machinePolicyReceiptRequired": kind == "MACHINE_POLICY_REVIEW",
             "retryPolicy": {
                 "maxPlanAttempts": 2,
                 "maxCandidateRepairCycles": 2,
@@ -77,9 +85,18 @@ def _simulation_repo(tmp_path: Path) -> Path:
     repo.mkdir()
     shutil.copytree(ROOT / "config", repo / "config")
     shutil.copytree(ROOT / "prompts", repo / "prompts")
+    (repo / "scripts").mkdir()
+    shutil.copy2(
+        ROOT / "scripts/generate_v3_1_zh_source.py",
+        repo / "scripts/generate_v3_1_zh_source.py",
+    )
     shutil.copytree(
-        ROOT / "docs/source-of-truth/v3-2026-08-11",
-        repo / "docs/source-of-truth/v3-2026-08-11",
+        ROOT / "docs/source-of-truth",
+        repo / "docs/source-of-truth",
+    )
+    shutil.copytree(
+        ROOT / "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11",
+        repo / "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11",
     )
     (repo / "docs").mkdir(exist_ok=True)
     shutil.copy2(ROOT / "docs/CONTEXT_INDEX.yaml", repo / "docs/CONTEXT_INDEX.yaml")
@@ -96,10 +113,15 @@ def _simulation_repo(tmp_path: Path) -> Path:
         "version: 2\nlegacy: immutable\n", encoding="utf-8"
     )
     collection = WorkItemCollection(
-        active_milestone="M1_NATIVE_PREFLIGHT",
+        active_milestone="M0_FACTORY_MIGRATED",
         work_items=[
-            _item("V3-SIM-001", risk="MECHANICAL"),
-            _item("V3-SIM-002", risk="STANDARD", depends=["V3-SIM-001"]),
+            _item("V3-SIM-001", risk="MECHANICAL", milestone="M0_FACTORY_MIGRATED"),
+            _item(
+                "V3-SIM-002",
+                risk="STANDARD",
+                depends=["V3-SIM-001"],
+                milestone="M0_FACTORY_MIGRATED",
+            ),
             _item(
                 "V3-SIM-003",
                 risk="EXTERNAL",
@@ -107,6 +129,7 @@ def _simulation_repo(tmp_path: Path) -> Path:
                 lane="MARKET",
                 automatable=False,
                 external=True,
+                milestone="M0_FACTORY_MIGRATED",
             ),
         ],
     )
@@ -179,11 +202,45 @@ class _LocalMainPublisher:
         candidate_sha = str(arguments["candidate_sha"])
         _git(self.repo, "merge", "--ff-only", candidate_sha)
         return {
-            "status": "PUBLISHED_MAIN_VERIFIED",
+            "status": "MERGED_MAIN_VERIFIED",
             "candidateSha": candidate_sha,
             "branch": "main",
             "hostedChecks": {"mode": "DETERMINISTIC_FAKE_NO_NETWORK"},
         }
+
+
+def test_controller_cannot_self_issue_machine_policy_authorization(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _simulation_repo(tmp_path)
+    monkeypatch.delenv("TCF_RUNTIME_ROOT", raising=False)
+    review = _item(
+        "V3-DEC-001",
+        risk="TRUST_CORE",
+        kind="MACHINE_POLICY_REVIEW",
+        lane="FACTORY",
+        automatable=False,
+        milestone="M0_FACTORY_MIGRATED",
+    )
+    collection = WorkItemCollection(
+        active_milestone="M0_FACTORY_MIGRATED",
+        work_items=[review],
+    )
+    (repo / "factory/roadmap/work_items.yaml").write_text(
+        yaml.safe_dump(collection.model_dump(mode="json", by_alias=True), sort_keys=False),
+        encoding="utf-8",
+    )
+    controller = V3Controller(
+        repo_root=repo,
+        backend=FakeBackend(),
+        publisher=_LocalMainPublisher(repo, tmp_path / "gates"),
+    )
+
+    result = asyncio.run(controller.run_cycle())
+
+    assert result["status"] == "IDLE"
+    assert controller.queue.load("V3-DEC-001").status.value == "BLOCKED_POLICY"
+    assert not controller.runtime_paths.machine_policy_receipts.exists()
 
 
 def test_disposable_controller_progresses_mechanical_and_standard_without_humans(
@@ -213,7 +270,10 @@ def test_disposable_controller_progresses_mechanical_and_standard_without_humans
     packet_path = next((repo / "factory/artifacts/v3/V3-SIM-001").glob("*/task-packet.yaml"))
     packet = yaml.safe_load(packet_path.read_text(encoding="utf-8"))
     sources = cast(list[str], packet["sourceDocuments"])
-    assert sources[:2] == ["config/owner_directives.yaml", "SOURCE_PRECEDENCE.md"]
+    assert sources[:2] == [
+        "config/active_generation.yaml",
+        "docs/source-of-truth/v3.1-zh-2026-08-12/FINAL_MANIFEST_V3_1_ZH.json",
+    ]
     assert not any("CODEX_MASTER_MIGRATION_PROMPT" in source for source in sources)
     assert all(
         (Path(source).is_file() if Path(source).is_absolute() else (repo / source).is_file())
@@ -322,8 +382,14 @@ def test_controller_records_digest_bound_evidence_and_atomically_advances_runtim
 ) -> None:
     repo = _simulation_repo(tmp_path)
     collection = WorkItemCollection(
-        active_milestone="M1_NATIVE_PREFLIGHT",
-        work_items=[_item("V3-SIM-001", risk="MECHANICAL")],
+        active_milestone="M0_FACTORY_MIGRATED",
+        work_items=[
+            _item(
+                "V3-SIM-001",
+                risk="MECHANICAL",
+                milestone="M0_FACTORY_MIGRATED",
+            )
+        ],
     )
     roadmap_path = repo / "factory/roadmap/work_items.yaml"
     roadmap_path.write_text(
@@ -343,13 +409,13 @@ def test_controller_records_digest_bound_evidence_and_atomically_advances_runtim
 
     result = asyncio.run(controller.run_cycle())
 
-    assert result["activeMilestone"] == "M2_CONTROLLED_QUALIFICATION"
+    assert result["activeMilestone"] == "M1_NATIVE_PREFLIGHT"
     state = load_milestone_state(controller.runtime_paths.milestone_state)
     assert state is not None
-    assert state.active_milestone == "M2_CONTROLLED_QUALIFICATION"
+    assert state.active_milestone == "M1_NATIVE_PREFLIGHT"
     decision = json.loads(
         (
-            controller.runtime_paths.milestone_decisions / "M1_NATIVE_PREFLIGHT.json"
+            controller.runtime_paths.milestone_decisions / "M0_FACTORY_MIGRATED.json"
         ).read_text(encoding="utf-8")
     )
     assert decision["record"]["proposals"] == []
@@ -369,9 +435,10 @@ def test_controller_binds_verified_outside_fact_receipt_before_pass(
         lane="MARKET",
         automatable=False,
         external=True,
+        milestone="M0_FACTORY_MIGRATED",
     )
     collection = WorkItemCollection(
-        active_milestone="M1_NATIVE_PREFLIGHT",
+        active_milestone="M0_FACTORY_MIGRATED",
         work_items=[outside_fact],
     )
     (repo / "factory/roadmap/work_items.yaml").write_text(

@@ -9,10 +9,11 @@ import os
 import re
 import shutil
 from collections import defaultdict
-from collections.abc import Generator
+from collections.abc import Generator, Mapping
 from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import Any, cast
 from uuid import uuid4
 
 import yaml
@@ -46,6 +47,17 @@ class TransitionIntent(V3Model):
     source: WorkStatus
     target: WorkStatus
     updated_at: datetime
+
+
+class QueuePolicyCompatibility(V3Model):
+    """Read-only proof that a stopped queue entry needs explicit policy migration."""
+
+    work_item_id: str
+    path: str
+    observed_digest: str
+    compatible_digest: str
+    status_preserved: bool
+    applied: bool = False
 
 
 class V3Queue:
@@ -251,6 +263,65 @@ class V3Queue:
         if len(identifiers) != len(set(identifiers)):
             raise ValueError("duplicate active V3 queue work item")
         return result
+
+    def compatible_items(
+        self,
+        authoritative: Mapping[str, WorkItem],
+        *states: WorkStatus,
+    ) -> tuple[list[WorkItem], list[QueuePolicyCompatibility]]:
+        """Read stopped legacy queue state without rewriting it or trusting stale policy."""
+
+        selected = states or tuple(WorkStatus)
+        result: list[WorkItem] = []
+        compatibility: list[QueuePolicyCompatibility] = []
+        for state in selected:
+            directory = self._state_dir(state)
+            if not directory.is_dir():
+                continue
+            for path in sorted(directory.glob("V3-*.yaml")):
+                raw = load_yaml(path)
+                try:
+                    result.append(WorkItem.model_validate(raw))
+                    continue
+                except ValueError:
+                    if not isinstance(raw, dict):
+                        raise
+                typed_raw = cast(dict[str, Any], raw)
+                identifier = typed_raw.get("workItemId")
+                if not isinstance(identifier, str) or identifier not in authoritative:
+                    raise ValueError(f"queue policy migration has no authority for {path}")
+                canonical = authoritative[identifier]
+                payload = canonical.model_dump(mode="python", by_alias=False)
+                for raw_name, model_name in (
+                    ("status", "status"),
+                    ("packetPath", "packet_path"),
+                    ("externalEvidenceRefs", "external_evidence_refs"),
+                    ("createdAt", "created_at"),
+                    ("updatedAt", "updated_at"),
+                ):
+                    if raw_name in typed_raw:
+                        payload[model_name] = typed_raw[raw_name]
+                compatible = WorkItem.model_validate(payload)
+                result.append(compatible)
+                observed_bytes = path.read_bytes()
+                compatible_bytes = compatible.canonical_json_bytes()
+                compatibility.append(
+                    QueuePolicyCompatibility(
+                        work_item_id=identifier,
+                        path=str(path),
+                        observed_digest="sha256:" + hashlib.sha256(observed_bytes).hexdigest(),
+                        compatible_digest=(
+                            "sha256:" + hashlib.sha256(compatible_bytes).hexdigest()
+                        ),
+                        status_preserved=(
+                            compatible.status.value == typed_raw.get("status")
+                        ),
+                    )
+                )
+        identifiers = [item.work_item_id for item in result]
+        if len(identifiers) != len(set(identifiers)):
+            raise ValueError("duplicate active V3 queue work item")
+        return result, compatibility
 
     def claim(
         self,

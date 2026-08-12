@@ -47,7 +47,6 @@ from .peer_messaging import peer_status as read_peer_status
 from .pipeline import run_pipeline
 from .queue import enqueue_task, promote_due_paused, reconcile_running, worker_loop
 from .runtime_status import build_runtime_status
-from .supervisor import run_startup_preflight
 from .usage import usage_health
 from .util import atomic_write_text, read_json, write_json
 from .v3.configuration import (
@@ -55,7 +54,6 @@ from .v3.configuration import (
     load_factory_v3,
     validate_v3_configuration,
 )
-from .v3.controller_lock import controller_process_lock
 from .v3.doctor import collect_doctor_report
 from .v3.enums import Lane
 from .v3.external_evidence import TrustedEvidenceRecord
@@ -103,10 +101,11 @@ def _reject_legacy_v2_surface(repo_root: Path, config_path: Path, command: str) 
     """Prevent callable V2 queue/ledger commands from mutating a V3 repository."""
 
     raw = load_yaml(repo_root / config_path)
-    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+    active_factory = cast(dict[str, object], raw) if isinstance(raw, dict) else {}
+    if active_factory.get("version") == 3 or active_factory.get("schemaVersion") == "3.1":
         raise typer.BadParameter(
-            f"{command} is a disabled V2 compatibility surface; use the V3 controller, "
-            "typed roadmap, or V3 status commands"
+            f"{command} is a disabled V2 compatibility surface; use V3.1 typed "
+            "roadmap/status commands while controller startup is fail-closed"
         )
 
 
@@ -867,42 +866,18 @@ def v3_controller(
     repo: Annotated[Path, typer.Option("--repo")] = Path("."),
     once: Annotated[bool, typer.Option("--once")] = False,
 ) -> None:
-    """Run the V3 work-item scheduler and exact-SHA main-only release controller."""
-
-    from .backends.claude import ClaudeBackend
-    from .github_sync import MainOnlyPublisher
-    from .v3.controller import V3Controller
+    """Fail closed until the V3.1 automated PR publisher is installed."""
 
     root = _resolve_repo(repo)
     validate_v3_configuration(root)
-    factory = load_factory_v3(root / "config/factory.yaml")
-    paths = resolve_v3_runtime_paths(root, factory)
     github = load_github_config(root / "config/github.yaml")
-    publisher = MainOnlyPublisher(
-        repo_root=root,
-        config=github,
-        receipt_root=paths.machine_policy_receipts,
-        quarantine_root=paths.quarantine,
-    )
-    controller = V3Controller(
-        repo_root=root,
-        backend=ClaudeBackend(),
-        publisher=publisher,
-    )
-
-    async def execute() -> None:
-        while True:
-            result = await controller.run_cycle()
-            console.print_json(data=result)
-            if once:
-                return
-            if paths.stop.exists() or paths.pause.exists():
-                return
-            await asyncio.sleep(30 if result.get("status") == "IDLE" else 2)
-
-    with controller_process_lock(paths.controller_lock):
-        run_startup_preflight(root)
-        asyncio.run(execute())
+    del once
+    if github.publisher_capability == "PENDING_PHASE_4":
+        raise typer.BadParameter(
+            "V3.1 automated PR publisher/verifier capability is pending; "
+            "controller startup is fail-closed"
+        )
+    raise typer.BadParameter("no validated V3.1 publisher capability is installed")
 
 
 @app.command("autonomy-enable")

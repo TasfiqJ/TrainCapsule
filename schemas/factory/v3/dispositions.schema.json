@@ -70,7 +70,7 @@
     "OwnerType": {
       "enum": [
         "AI",
-        "FOUNDER",
+        "MACHINE_POLICY_AUTHORITY",
         "CUSTOMER",
         "EXTERNAL_PARTY"
       ],

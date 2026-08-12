@@ -8,7 +8,6 @@ from typing import Any, Literal, cast
 from .checkpoints import CheckpointError, CheckpointStore, V3Checkpoint
 from .github_sync import GitHubReleaseMetadata, load_github_config
 from .supervisor import supervisor_status
-from .util import read_json
 from .v3.configuration import load_factory_v3
 from .v3.milestone_runtime import load_milestone_state
 from .v3.queue import V3Queue
@@ -40,15 +39,9 @@ def _checkpoint(paths: V3RuntimePaths, work_item_id: str) -> V3Checkpoint | None
 
 def _release_metadata(repo_root: Path) -> GitHubReleaseMetadata | None:
     config = load_github_config(repo_root / "config" / "github.yaml")
-    path = Path(config.release_metadata_path)
-    if not path.is_absolute():
-        path = repo_root / path
-    if not path.is_file():
+    if config.publisher_capability == "PENDING_PHASE_4":
         return None
-    try:
-        return GitHubReleaseMetadata.model_validate(read_json(path, {}))
-    except ValueError:
-        return None
+    raise RuntimeError("unknown V3.1 publication capability")
 
 
 def _ci_rollup(
@@ -80,9 +73,17 @@ def build_runtime_status(repo_root: Path) -> dict[str, Any]:
             update={"active_milestone": milestone_state.active_milestone}
         )
     queue = V3Queue(paths.queue)
-    runtime_items = (
-        {item.work_item_id: item for item in queue.items()} if paths.queue.exists() else {}
-    )
+    compatibility: list[dict[str, object]] = []
+    if paths.queue.exists():
+        authoritative = {item.work_item_id: item for item in roadmap.work_items}
+        queue_items, migrations = queue.compatible_items(authoritative)
+        runtime_items = {item.work_item_id: item for item in queue_items}
+        compatibility = [
+            cast(dict[str, object], item.model_dump(mode="json", by_alias=True))
+            for item in migrations
+        ]
+    else:
+        runtime_items = {}
     runtime_roadmap = roadmap.model_copy(
         update={
             "work_items": [
@@ -125,6 +126,7 @@ def build_runtime_status(repo_root: Path) -> dict[str, Any]:
         dict[str, Any],
         {
             "activeMilestone": runtime_roadmap.active_milestone,
+            "queuePolicyCompatibility": compatibility,
             "currentWorkItem": {
                 "workItemId": current.work_item_id,
                 "lane": current.lane.value,

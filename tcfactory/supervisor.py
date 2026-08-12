@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import sys
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Literal
@@ -13,9 +12,9 @@ from pydantic import Field
 
 from .backends.base import BackendRouteState
 from .backends.claude import ClaudeCredentialProvider
-from .github_sync import MainOnlyPublisher, load_github_config
+from .github_sync import load_github_config
 from .gitops import current_sha
-from .util import read_json, resolve_within, run_command, sha256_file, write_json
+from .util import read_json, resolve_within, sha256_file, write_json
 from .v3.base import SHA_PATTERN, V3Model, sha256_digest
 from .v3.configuration import (
     AutonomyV3Config,
@@ -36,6 +35,7 @@ from .v3.private_gate import (
 from .v3.queue import V3Queue
 from .v3.recovery import enforce_controller_restart_budget
 from .v3.runtime_paths import V3RuntimePaths, resolve_v3_runtime_paths
+from .v3.source_authority import validate_active_source_generation
 from .v3.work_items import WorkItemCollection
 from .yamlutil import load_yaml
 
@@ -45,7 +45,7 @@ class MigrationCompleteMarker(V3Model):
     status: Literal["COMPLETE"] = "COMPLETE"
     completed_sha: str = Field(pattern=SHA_PATTERN.pattern)
     source_manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
-    owner_directives_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    active_generation_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     milestone: Literal["M0_FACTORY_MIGRATED"] = "M0_FACTORY_MIGRATED"
     acceptance_work_items: dict[str, str]
     acceptance_evidence_digests: dict[str, str]
@@ -119,14 +119,7 @@ def save_supervisor_state(path: Path, state: SupervisorState) -> None:
 
 
 def _verify_source_integrity(repo_root: Path) -> None:
-    result = run_command(
-        [sys.executable, str(repo_root / "scripts" / "gates" / "source_of_truth_integrity.py")],
-        cwd=repo_root,
-        check=False,
-        timeout=120,
-    )
-    if result.returncode != 0:
-        raise RuntimeError("source-of-truth integrity preflight failed")
+    validate_active_source_generation(repo_root)
 
 
 def _verify_migration_marker(
@@ -135,12 +128,12 @@ def _verify_migration_marker(
     if not marker_path.is_file():
         raise RuntimeError("V3 migration-complete marker is missing")
     marker = MigrationCompleteMarker.model_validate(read_json(marker_path, {}))
-    manifest = repo_root / config.source_of_truth.manifest
+    active_source = validate_active_source_generation(repo_root)
+    manifest = repo_root / active_source.manifest_path
     if sha256_file(manifest) != marker.source_manifest_sha256:
         raise RuntimeError("migration marker source-manifest digest is stale")
-    directives = repo_root / "config/owner_directives.yaml"
-    if sha256_file(directives) != marker.owner_directives_sha256:
-        raise RuntimeError("migration marker owner-directive digest is stale")
+    if active_source.config_digest != marker.active_generation_sha256:
+        raise RuntimeError("migration marker active-generation digest is stale")
     head = current_sha(repo_root)
     if marker.completed_sha != head:
         raise RuntimeError("migration marker must match the exact current checkout SHA")
@@ -191,15 +184,12 @@ def run_startup_preflight(repo_root: Path) -> dict[str, object]:
     validate_private_gate_installation(repo_root)
     private_gate_health = validate_private_gate_runtime_health(repo_root, paths.state_root)
     github = load_github_config(repo_root / "config/github.yaml")
-    publication_recovery: dict[str, object] = {"status": "GITHUB_DISABLED"}
-    if github.enabled:
-        publisher = MainOnlyPublisher(
-            repo_root=repo_root,
-            config=github,
-            receipt_root=paths.state_root / "machine-policy-receipts",
-            quarantine_root=paths.state_root / "quarantine",
+    if github.publisher_capability == "PENDING_PHASE_4":
+        raise RuntimeError(
+            "V3.1 automated PR publisher/verifier capability is pending; "
+            "startup is fail-closed"
         )
-        publication_recovery = publisher.reconcile_pending()
+    publication_recovery: dict[str, object] = {"status": "GITHUB_DISABLED"}
     marker = _verify_migration_marker(repo_root, config, paths.migration_marker)
     queue = V3Queue(paths.queue)
     queue.initialize()
@@ -353,8 +343,8 @@ def create_migration_complete_marker(
         )
     marker = MigrationCompleteMarker(
         completed_sha=current_sha(repo_root),
-        source_manifest_sha256=sha256_file(repo_root / config.source_of_truth.manifest),
-        owner_directives_sha256=sha256_file(repo_root / "config/owner_directives.yaml"),
+        source_manifest_sha256=validate_active_source_generation(repo_root).manifest_digest,
+        active_generation_sha256=validate_active_source_generation(repo_root).config_digest,
         acceptance_work_items={identifier: "COMPLETED" for identifier in required},
         acceptance_evidence_digests=evidence,
         completed_at=datetime.now(UTC),

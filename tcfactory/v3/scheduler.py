@@ -109,7 +109,7 @@ class SchedulerOverride(V3Model):
     decision_id: str = Field(pattern=r"^SOVR-[A-Z0-9_-]+$")
     work_item_id: str = Field(pattern=r"^V3-[A-Z]+-[0-9]{3}$")
     reason: str = Field(min_length=1)
-    issued_by: Literal[OwnerType.FOUNDER]
+    issued_by: Literal[OwnerType.MACHINE_POLICY_AUTHORITY]
     issued_at: datetime
     signature: EvidenceSignature
 
@@ -279,6 +279,10 @@ def schedule_cycle(
         if item.external_receipt_required:
             reasons.append(
                 "outside-fact work advances only through the trusted external receipt gate"
+            )
+        if item.machine_policy_receipt_required:
+            reasons.append(
+                "machine-policy review advances only through an independently signed receipt"
             )
         if identifier in active_ids:
             reasons.append("work item is already active")

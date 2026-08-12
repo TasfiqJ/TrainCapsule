@@ -23,6 +23,38 @@ Runtime files remain in place and are not part of the Git rollback. Their baseli
 8. Keep V2 queued work stopped; do not automatically resume T002.
 9. Document the rollback cause before another migration attempt.
 
+## Exact review and published-history commands
+
+Review the complete migration delta without changing state:
+
+```bash
+git diff --stat safety/traincapsule-v3-pre-migration-20260811T212024Z..main
+git log --oneline safety/traincapsule-v3-pre-migration-20260811T212024Z..main
+tcfactory migrate-roadmap --from-v2 --dry-run
+```
+
+If the migration has been published, preserve later operator work and create ordinary revert commits
+on `main`; never reset or force-push published history:
+
+```bash
+git switch main
+git revert --no-commit safety/traincapsule-v3-pre-migration-20260811T212024Z..main
+git status --short
+# Review and test the exact revert, then commit and push main normally.
+```
+
+Before a tracked rollback, copy `factory/state/MIGRATION_COMPLETE_V3.json` and any new runtime logs or
+artifacts to an operator-selected evidence directory. Keep `factory/state/STOP` present. The ignored
+V2 queue archive is a non-resuming copy; the original T001/T002 queue files remain the recovery
+authority.
+
+## Disposable rehearsal
+
+The final acceptance rehearsal uses a detached disposable worktree at the fixed safety ref, verifies
+the historical authority and baseline suite there, and then removes only that explicitly created
+worktree. The exact result is recorded in `V3_TEST_MATRIX.md`; it does not alter `main` or runtime
+state.
+
 ## Rollback acceptance
 
 - Source files match the intended baseline.

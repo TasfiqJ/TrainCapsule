@@ -56,3 +56,14 @@ def test_product_packages_do_not_import_factory_domain_types() -> None:
     assert product_sources
     for source in product_sources:
         assert "tcfactory" not in source.read_text(encoding="utf-8"), source
+
+
+def test_migration_report_file_inventory_is_current() -> None:
+    completed = subprocess.run(
+        [sys.executable, "scripts/update_v3_migration_inventory.py", "--check"],
+        cwd=ROOT,
+        check=False,
+        capture_output=True,
+        text=True,
+    )
+    assert completed.returncode == 0

@@ -205,4 +205,300 @@ Migrate the V2 factory/bootstrap repository to the bounded V3 product and factor
 
 ## Pending
 
-Product code, release rehearsal, and final acceptance remain to be implemented and verified in later phases.
+Qualified human review, external/customer evidence, real GPU evidence, controller observation, and
+future M1/M2 roadmap work remain outstanding. These are intentionally not converted into
+engineering or commercial passes.
+
+## Phase J implementation
+
+- Added separate core, PyTorch ingest, qualification, and CLI product packages. Product records do
+  not import factory enums or factory state.
+- Added strict version-1 workload/environment identities, evidence artifacts, native findings,
+  incident cases, completeness reports, and eligibility decisions. Technical result and
+  operational recommendation remain separate dimensions.
+- Added canonical UTF-8/LF JSON and SHA-256 identity plus an independent stdlib reference oracle.
+  Explicit `createdAt` is retained in records but excluded from identity material; no clock is read
+  while computing identity.
+- Added deterministic environment-variable redaction and explicit weak/customer-attested identity
+  behavior.
+- Added a case-isolated customer-local CAS with raw hash verification, bounded files/counts,
+  duplicate/collision checks, atomic metadata, and traversal/symlink/cross-case protections.
+- Added the bounded PyTorch Flight Recorder `1.0` adapter and controlled fixtures. Unsupported
+  versions fail explicitly, raw evidence is hashed before parsing, unknown fields/digests remain
+  available, missing ranks remain missing, and native observations do not become inferred root
+  causes.
+- Added exact evidence-completeness states, machine-readable native baseline, and deterministic
+  eligibility/economic preflight. Unknown costs stay unknown and native sufficiency is a valid stop.
+- Added the exact offline-first CLI through preflight with canonical `--json`, explicit local paths,
+  useful errors, and stable exit codes 0/2/3/4/5.
+- Added a controlled case-init-to-preflight journey and adversarial cases for missing/corrupted
+  evidence, native sufficiency, unsupported versions, policy blocks, unknowns, expiry, and malicious
+  symlinks/paths.
+- Replaced product workflow placeholders with exact product unit, schema, contract, CLI, and journey
+  scopes.
+
+## Phase J verification
+
+- Product scope: 41 passed
+- Complete repository suite: 527 passed
+- Ruff: pass
+- Strict Pyright: 0 errors, 0 warnings
+- Ten product schemas: generated and exact
+- Wheel build: pass; factory and all four product packages plus both entry points are present
+- Network/model/GitHub/runtime/paid use: none
+
+## Legacy mapping summary
+
+The complete ordered mapping is `factory/roadmap/migrations/v2_to_v3.yaml`: 124 records preserving
+1 passed, 1 paused, 2 external-wait, and 120 blocked states. Dispositions are 88 mapped to bounded
+V3 work, 29 deferred designs, and 7 factory-history records. T002 remains paused factory history,
+has no V3 dependency edge, and cannot auto-resume. The original V2 ledger and queue evidence remain
+byte-for-byte available.
+
+## Unresolved limitations and deferred scope
+
+- No real GPU test, private customer trace, customer archive, independent operator run, or paid
+  engagement occurred.
+- No baseline/candidate runner, reduction engine, scale-emulation claim, qualification execution,
+  customer report viewer, or commercial pack release is implemented.
+- The controlled fixture proves software behavior only. It does not prove customer value, product
+  advantage, incident root cause, or economic ROI.
+- V3-MIG-016 human review remains `WAITING_HUMAN`; external and commercial maturity are unchanged.
+- The operator requires publishing this migration to `main`, so no draft migration PR is opened.
+  Future autonomous release policy remains draft-PR-first and direct-main-disabled.
+
+<!-- BEGIN GENERATED FILE INVENTORY -->
+## Complete tracked file inventory
+
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **227 paths**.
+
+| Change | Path |
+|---|---|
+| `A` | `.github/workflows/factory-quality.yml` |
+| `D` | `.github/workflows/factory-smoke.yml` |
+| `A` | `.github/workflows/product-contract.yml` |
+| `A` | `.github/workflows/product-unit.yml` |
+| `A` | `.github/workflows/security.yml` |
+| `A` | `.github/workflows/source-of-truth-integrity.yml` |
+| `M` | `Control-TrainCapsuleBuilder.ps1` |
+| `M` | `README.md` |
+| `M` | `SOURCE_PRECEDENCE.md` |
+| `M` | `config/autonomy.yaml` |
+| `A` | `config/commercial_maturity.yaml` |
+| `A` | `config/executors.yaml` |
+| `A` | `config/external_evidence.yaml` |
+| `M` | `config/factory.yaml` |
+| `M` | `config/github.yaml` |
+| `A` | `config/human_approval.yaml` |
+| `A` | `config/milestones.yaml` |
+| `M` | `config/roles.yaml` |
+| `A` | `config/scheduler.yaml` |
+| `M` | `docs/CONTEXT_INDEX.yaml` |
+| `A` | `docs/migrations/V3_BASELINE_REPORT.md` |
+| `A` | `docs/migrations/V3_CODEX_EXECUTION_STATE.md` |
+| `A` | `docs/migrations/V3_LEGACY_QUEUE_ARCHIVE_METADATA.json` |
+| `A` | `docs/migrations/V3_MIGRATION_REPORT.md` |
+| `A` | `docs/migrations/V3_ROLLBACK.md` |
+| `A` | `docs/migrations/V3_RUNTIME_SNAPSHOT_METADATA.json` |
+| `A` | `docs/migrations/V3_TEST_MATRIX.md` |
+| `A` | `docs/product/PREFLIGHT_QUICKSTART.md` |
+| `A` | `docs/source-of-truth/v3-2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3.md` |
+| `A` | `docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md` |
+| `A` | `docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md` |
+| `A` | `docs/source-of-truth/v3-2026-08-11/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md` |
+| `A` | `docs/source-of-truth/v3-2026-08-11/06_COMMERCIAL_MODEL_AND_GTM_V3.md` |
+| `A` | `docs/source-of-truth/v3-2026-08-11/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md` |
+| `A` | `docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md` |
+| `A` | `docs/source-of-truth/v3-2026-08-11/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md` |
+| `A` | `docs/source-of-truth/v3-2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md` |
+| `A` | `docs/source-of-truth/v3-2026-08-11/FINAL_MANIFEST_V3.json` |
+| `A` | `docs/source-of-truth/v3-2026-08-11/README.md` |
+| `A` | `docs/source-of-truth/v3-2026-08-11/REPOSITORY_AUDIT_AND_FILE_CHANGE_MATRIX.md` |
+| `A` | `examples/product/README.md` |
+| `A` | `examples/product/environment-identity-input.json` |
+| `A` | `examples/product/flight-recorder/supported/metadata.json` |
+| `A` | `examples/product/flight-recorder/supported/rank-0.json` |
+| `A` | `examples/product/flight-recorder/supported/rank-1.json` |
+| `A` | `examples/product/flight-recorder/unsupported/metadata.json` |
+| `A` | `examples/product/flight-recorder/unsupported/rank-0.json` |
+| `A` | `examples/product/workload-identity-input.json` |
+| `A` | `factory/roadmap/dispositions.yaml` |
+| `A` | `factory/roadmap/legacy_feature_ledger.yaml` |
+| `A` | `factory/roadmap/migrations/v2_to_v3.yaml` |
+| `A` | `factory/roadmap/milestones.yaml` |
+| `A` | `factory/roadmap/work_items.yaml` |
+| `A` | `packages/traincapsule-cli/src/traincapsule_cli/__init__.py` |
+| `A` | `packages/traincapsule-cli/src/traincapsule_cli/cli.py` |
+| `A` | `packages/traincapsule-core/src/traincapsule_core/__init__.py` |
+| `A` | `packages/traincapsule-core/src/traincapsule_core/base.py` |
+| `A` | `packages/traincapsule-core/src/traincapsule_core/evidence.py` |
+| `A` | `packages/traincapsule-core/src/traincapsule_core/identity.py` |
+| `A` | `packages/traincapsule-core/src/traincapsule_core/models.py` |
+| `A` | `packages/traincapsule-ingest-pytorch/src/traincapsule_ingest_pytorch/__init__.py` |
+| `A` | `packages/traincapsule-ingest-pytorch/src/traincapsule_ingest_pytorch/importer.py` |
+| `A` | `packages/traincapsule-qualify/src/traincapsule_qualify/__init__.py` |
+| `A` | `packages/traincapsule-qualify/src/traincapsule_qualify/models.py` |
+| `A` | `packages/traincapsule-qualify/src/traincapsule_qualify/qualify.py` |
+| `M` | `prompts/adversary.md` |
+| `M` | `prompts/audit.md` |
+| `M` | `prompts/autonomous_planner.md` |
+| `M` | `prompts/bootstrap_integrator_windows11.md` |
+| `M` | `prompts/builder.md` |
+| `A` | `prompts/commercial_experiment.md` |
+| `M` | `prompts/factory_repair.md` |
+| `M` | `prompts/global.md` |
+| `A` | `prompts/human_approval_packet.md` |
+| `M` | `prompts/integration_scout.md` |
+| `A` | `prompts/milestone_auditor.md` |
+| `A` | `prompts/native_substitute_reviewer.md` |
+| `M` | `prompts/negative_control_engineer.md` |
+| `M` | `prompts/performance.md` |
+| `M` | `prompts/private_gate_author.md` |
+| `M` | `prompts/recovery.md` |
+| `M` | `prompts/release.md` |
+| `M` | `prompts/research.md` |
+| `M` | `prompts/security.md` |
+| `M` | `prompts/specification.md` |
+| `M` | `prompts/task_packet_planner.md` |
+| `M` | `prompts/value_adversary.md` |
+| `M` | `prompts/value_validator.md` |
+| `A` | `prompts/wedge_reviewer.md` |
+| `M` | `pyproject.toml` |
+| `A` | `schemas/factory/v3/agent-capabilities.schema.json` |
+| `A` | `schemas/factory/v3/agent-run-result.schema.json` |
+| `A` | `schemas/factory/v3/agent-task-request.schema.json` |
+| `A` | `schemas/factory/v3/autonomy-config.schema.json` |
+| `A` | `schemas/factory/v3/candidate-manifest.schema.json` |
+| `A` | `schemas/factory/v3/checkpoint.schema.json` |
+| `A` | `schemas/factory/v3/commercial-maturity-config.schema.json` |
+| `A` | `schemas/factory/v3/context-manifest.schema.json` |
+| `A` | `schemas/factory/v3/decision-value.schema.json` |
+| `A` | `schemas/factory/v3/dispositions.schema.json` |
+| `A` | `schemas/factory/v3/executors-config.schema.json` |
+| `A` | `schemas/factory/v3/external-evidence-config.schema.json` |
+| `A` | `schemas/factory/v3/external-evidence-receipt.schema.json` |
+| `A` | `schemas/factory/v3/factory-config.schema.json` |
+| `A` | `schemas/factory/v3/finding-counter.schema.json` |
+| `A` | `schemas/factory/v3/finding.schema.json` |
+| `A` | `schemas/factory/v3/handoff.schema.json` |
+| `A` | `schemas/factory/v3/hard-stuck.schema.json` |
+| `A` | `schemas/factory/v3/human-approval.schema.json` |
+| `A` | `schemas/factory/v3/legacy-migration.schema.json` |
+| `A` | `schemas/factory/v3/migration-complete-marker.schema.json` |
+| `A` | `schemas/factory/v3/milestone-completion.schema.json` |
+| `A` | `schemas/factory/v3/milestone-policy-config.schema.json` |
+| `A` | `schemas/factory/v3/milestones.schema.json` |
+| `A` | `schemas/factory/v3/release-candidate.schema.json` |
+| `A` | `schemas/factory/v3/retry-policy.schema.json` |
+| `A` | `schemas/factory/v3/scheduler.schema.json` |
+| `A` | `schemas/factory/v3/supervisor-state.schema.json` |
+| `A` | `schemas/factory/v3/task-packet.schema.json` |
+| `A` | `schemas/factory/v3/usage-state.schema.json` |
+| `A` | `schemas/factory/v3/work-item-v3.schema.json` |
+| `A` | `schemas/factory/v3/work-items.schema.json` |
+| `A` | `schemas/product/eligibility-decision.schema.json` |
+| `A` | `schemas/product/environment-identity.schema.json` |
+| `A` | `schemas/product/evidence-artifact.schema.json` |
+| `A` | `schemas/product/evidence-completeness-report.schema.json` |
+| `A` | `schemas/product/flight-recorder-import.schema.json` |
+| `A` | `schemas/product/incident-case.schema.json` |
+| `A` | `schemas/product/native-baseline.schema.json` |
+| `A` | `schemas/product/native-finding.schema.json` |
+| `A` | `schemas/product/preflight-inputs.schema.json` |
+| `A` | `schemas/product/workload-identity.schema.json` |
+| `M` | `scripts/configure_github.sh` |
+| `M` | `scripts/factory_control.sh` |
+| `M` | `scripts/factory_status.sh` |
+| `M` | `scripts/gates/no_paid_usage.py` |
+| `A` | `scripts/gates/source_of_truth_integrity.py` |
+| `A` | `scripts/generate_product_schemas.py` |
+| `A` | `scripts/generate_v3_legacy_migration.py` |
+| `A` | `scripts/generate_v3_manifest.py` |
+| `A` | `scripts/generate_v3_roadmap.py` |
+| `A` | `scripts/generate_v3_schemas.py` |
+| `M` | `scripts/register_windows_autostart.ps1` |
+| `M` | `scripts/systemd_entrypoint.sh` |
+| `A` | `scripts/update_v3_migration_inventory.py` |
+| `M` | `scripts/verify_factory_authority.sh` |
+| `M` | `scripts/windows_task_entrypoint.sh` |
+| `M` | `tcfactory/autopilot.py` |
+| `A` | `tcfactory/backends/__init__.py` |
+| `A` | `tcfactory/backends/base.py` |
+| `A` | `tcfactory/backends/claude.py` |
+| `A` | `tcfactory/backends/fake.py` |
+| `M` | `tcfactory/catalog.py` |
+| `M` | `tcfactory/checkpoints.py` |
+| `M` | `tcfactory/claude_features.py` |
+| `M` | `tcfactory/cli.py` |
+| `M` | `tcfactory/completion.py` |
+| `M` | `tcfactory/config.py` |
+| `M` | `tcfactory/context.py` |
+| `M` | `tcfactory/github_sync.py` |
+| `M` | `tcfactory/handoffs.py` |
+| `M` | `tcfactory/ledger.py` |
+| `M` | `tcfactory/models.py` |
+| `M` | `tcfactory/observability.py` |
+| `M` | `tcfactory/peer_messaging.py` |
+| `M` | `tcfactory/pipeline.py` |
+| `M` | `tcfactory/planner.py` |
+| `M` | `tcfactory/prompts.py` |
+| `M` | `tcfactory/provenance.py` |
+| `M` | `tcfactory/quota.py` |
+| `M` | `tcfactory/risk.py` |
+| `A` | `tcfactory/runtime_status.py` |
+| `M` | `tcfactory/structured_runner.py` |
+| `A` | `tcfactory/supervisor.py` |
+| `M` | `tcfactory/usage.py` |
+| `M` | `tcfactory/util.py` |
+| `A` | `tcfactory/v3/__init__.py` |
+| `A` | `tcfactory/v3/approvals.py` |
+| `A` | `tcfactory/v3/base.py` |
+| `A` | `tcfactory/v3/candidate_manifest.py` |
+| `A` | `tcfactory/v3/configuration.py` |
+| `A` | `tcfactory/v3/dispositions.py` |
+| `A` | `tcfactory/v3/enums.py` |
+| `A` | `tcfactory/v3/external_evidence.py` |
+| `A` | `tcfactory/v3/maturity.py` |
+| `A` | `tcfactory/v3/migrations.py` |
+| `A` | `tcfactory/v3/milestones.py` |
+| `A` | `tcfactory/v3/pipeline_services.py` |
+| `A` | `tcfactory/v3/planning.py` |
+| `A` | `tcfactory/v3/queue.py` |
+| `A` | `tcfactory/v3/recovery.py` |
+| `A` | `tcfactory/v3/retry_policy.py` |
+| `A` | `tcfactory/v3/scheduler.py` |
+| `A` | `tcfactory/v3/work_items.py` |
+| `M` | `tcfactory/value.py` |
+| `A` | `tests/product/__init__.py` |
+| `A` | `tests/product/reference_identity.py` |
+| `A` | `tests/product/test_cli.py` |
+| `A` | `tests/product/test_evidence_store.py` |
+| `A` | `tests/product/test_flight_recorder_importer.py` |
+| `A` | `tests/product/test_identity.py` |
+| `A` | `tests/product/test_install_to_preflight_journey.py` |
+| `A` | `tests/product/test_product_schemas.py` |
+| `A` | `tests/product/test_qualification.py` |
+| `M` | `tests/test_autonomy_freedom_policy.py` |
+| `M` | `tests/test_autopilot_respec_evidence.py` |
+| `M` | `tests/test_catalog.py` |
+| `M` | `tests/test_claude_features.py` |
+| `M` | `tests/test_claude_led_nodes.py` |
+| `M` | `tests/test_claude_only_policy.py` |
+| `M` | `tests/test_completion.py` |
+| `M` | `tests/test_control_scripts.py` |
+| `M` | `tests/test_github_policy.py` |
+| `M` | `tests/test_github_setup_script.py` |
+| `M` | `tests/test_risk_routing.py` |
+| `A` | `tests/test_source_of_truth_integrity.py` |
+| `A` | `tests/test_v3_backends_and_checkpoints.py` |
+| `A` | `tests/test_v3_config_and_roadmap.py` |
+| `A` | `tests/test_v3_domain_models.py` |
+| `A` | `tests/test_v3_github_workflows.py` |
+| `A` | `tests/test_v3_legacy_migration.py` |
+| `A` | `tests/test_v3_planning_context_and_support.py` |
+| `A` | `tests/test_v3_prompt_contracts.py` |
+| `A` | `tests/test_v3_queue.py` |
+| `A` | `tests/test_v3_scheduler_and_recovery.py` |
+| `A` | `tests/test_v3_supervisor_and_status.py` |
+| `M` | `tests/test_windows_autostart_scripts.py` |
+<!-- END GENERATED FILE INVENTORY -->

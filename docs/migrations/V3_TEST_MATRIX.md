@@ -17,10 +17,24 @@ The exact baseline and results are recorded in `V3_BASELINE_REPORT.md`: 394 test
 | Startup/status | finite 15/60/300 restart, healthy reset, preflight, portable controls, durable stop/hard-stuck, complete status | passed; focused checks and 471-test full-suite regression; stopped launcher exercised without model use |
 | Prompts | finite packet/session, native-first, exact truth states, bounded findings, external/human stop, specialist contracts | passed; focused checks and 478-test full-suite regression; no model use |
 | Legacy migration | 124-entry mapping, exact ledger archive, dry/apply, non-resuming queue archive, deterministic migration | passed; 1 passed/1 paused/2 external-wait/120 blocked preserved; 88 mapped, 29 deferred, 7 factory history; original queue retained |
-| Product preflight | identity golden vectors, CAS, importer, native baseline, completeness, eligibility, CLI | pending |
-| Product journey | install through preflight; missing/native-sufficient/unsupported/policy/unknown/malicious cases | pending |
-| Security | secrets, paths, symlinks, malicious input, synthetic evidence, forged/expired approval | pending |
+| Product preflight | identity golden vectors, CAS, importer, native baseline, completeness, eligibility, CLI | passed; 41 product checks and 527-test full-suite regression |
+| Product journey | install through preflight; missing/native-sufficient/unsupported/policy/unknown/malicious cases | passed on controlled local fixtures; no GPU/customer claim |
+| Security | secrets, paths, symlinks, malicious input, synthetic evidence, forged/expired approval | product adversarial coverage passed; final repository secret gate is recorded below |
 | Rollback | disposable-clone/worktree rehearsal and restored baseline | pending |
 | GPU/external | real GPU, customer archive, independent operator, human approval | external/deferred; never simulated as complete |
 
 Every final result records the exact command, SHA, pass/fail count, and whether a failure was pre-existing or introduced.
+
+## Phase J exact commands
+
+```text
+scripts/gates/fast_quality.sh
+uv run --active --no-sync pytest -q tests/product
+uv run --active --no-sync pyright packages scripts/generate_product_schemas.py tests/product
+uv run --active --no-sync python scripts/generate_product_schemas.py --check
+uv build --offline --wheel
+```
+
+Results: 41 product checks passed; 527 complete-suite checks passed; Ruff passed; strict Pyright
+reported 0 errors and 0 warnings; ten product schemas matched; the wheel built. These checks used no
+model session, GitHub mutation, controller start, or paid service.

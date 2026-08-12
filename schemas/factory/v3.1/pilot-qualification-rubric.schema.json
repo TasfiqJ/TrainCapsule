@@ -1,0 +1,61 @@
+{
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/pilot-qualification-rubric.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "minimumScore": {
+      "maximum": 30,
+      "minimum": 1,
+      "title": "Minimumscore",
+      "type": "integer"
+    },
+    "permitsResearchMapAsPilotProof": {
+      "default": false,
+      "title": "Permitsresearchmapaspilotproof",
+      "type": "boolean"
+    },
+    "requiredDimensions": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 10,
+      "minItems": 10,
+      "title": "Requireddimensions",
+      "type": "array"
+    },
+    "requiresRealTraceAuthorization": {
+      "default": true,
+      "title": "Requiresrealtraceauthorization",
+      "type": "boolean"
+    },
+    "requiresSignedExternalReceipt": {
+      "default": true,
+      "title": "Requiressignedexternalreceipt",
+      "type": "boolean"
+    },
+    "rubricId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Rubricid",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "sourceGenerationDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourcegenerationdigest",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "rubricId",
+    "sourceGenerationDigest",
+    "minimumScore",
+    "requiredDimensions"
+  ],
+  "title": "PilotQualificationRubric",
+  "type": "object"
+}

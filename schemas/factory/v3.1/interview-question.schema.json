@@ -1,0 +1,44 @@
+{
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/interview-question.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "disallowedInference": {
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Disallowedinference",
+      "type": "string"
+    },
+    "evidenceTarget": {
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Evidencetarget",
+      "type": "string"
+    },
+    "prompt": {
+      "maxLength": 1000,
+      "minLength": 1,
+      "title": "Prompt",
+      "type": "string"
+    },
+    "questionId": {
+      "pattern": "^Q-[0-9]{3}$",
+      "title": "Questionid",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "questionId",
+    "prompt",
+    "evidenceTarget",
+    "disallowedInference"
+  ],
+  "title": "InterviewQuestion",
+  "type": "object"
+}

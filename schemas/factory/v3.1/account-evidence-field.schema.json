@@ -1,0 +1,59 @@
+{
+  "$defs": {
+    "ResearchVerdict": {
+      "enum": [
+        "CLEAR",
+        "CONFLICT",
+        "UNKNOWN"
+      ],
+      "title": "ResearchVerdict",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/account-evidence-field.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "claimId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Claimid",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "sourceArtifactDigests": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 32,
+      "title": "Sourceartifactdigests",
+      "type": "array"
+    },
+    "value": {
+      "anyOf": [
+        {
+          "maxLength": 1000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Value"
+    },
+    "verdict": {
+      "$ref": "#/$defs/ResearchVerdict"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "verdict",
+    "claimId"
+  ],
+  "title": "AccountEvidenceField",
+  "type": "object"
+}

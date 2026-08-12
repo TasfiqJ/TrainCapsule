@@ -20,6 +20,7 @@ from tcfactory.v3.contracts_v31 import (  # noqa: E402
     REUSABLE_V3_MIGRATIONS,
     V31_NATIVE_CONTRACTS,
 )
+from tcfactory.v3.market_artifacts import MARKET_ARTIFACT_CONTRACTS  # noqa: E402
 from tcfactory.v3.native_value_gate import NATIVE_VALUE_CONTRACTS  # noqa: E402
 from tcfactory.v3.source_acquisition import SOURCE_ACQUISITION_CONTRACTS  # noqa: E402
 
@@ -29,6 +30,7 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     **{f"migrated-{name}.schema.json": model for name, model in REUSABLE_V3_MIGRATIONS.items()},
     **{f"{name}.schema.json": model for name, model in SOURCE_ACQUISITION_CONTRACTS.items()},
     **{f"{name}.schema.json": model for name, model in NATIVE_VALUE_CONTRACTS.items()},
+    **{f"{name}.schema.json": model for name, model in MARKET_ARTIFACT_CONTRACTS.items()},
 }
 
 

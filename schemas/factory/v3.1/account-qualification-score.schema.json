@@ -1,0 +1,94 @@
+{
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/account-qualification-score.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "budgetOwner": {
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Budgetowner",
+      "type": "integer"
+    },
+    "deliveryFit": {
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Deliveryfit",
+      "type": "integer"
+    },
+    "evidenceAccess": {
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Evidenceaccess",
+      "type": "integer"
+    },
+    "experimentAuthority": {
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Experimentauthority",
+      "type": "integer"
+    },
+    "incidentCost": {
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Incidentcost",
+      "type": "integer"
+    },
+    "nativeGap": {
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Nativegap",
+      "type": "integer"
+    },
+    "privacyNeed": {
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Privacyneed",
+      "type": "integer"
+    },
+    "repeatTrigger": {
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Repeattrigger",
+      "type": "integer"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "secondUsePath": {
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Secondusepath",
+      "type": "integer"
+    },
+    "total": {
+      "maximum": 30,
+      "minimum": 0,
+      "title": "Total",
+      "type": "integer"
+    },
+    "upcomingChange": {
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Upcomingchange",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "incidentCost",
+    "upcomingChange",
+    "evidenceAccess",
+    "experimentAuthority",
+    "nativeGap",
+    "privacyNeed",
+    "repeatTrigger",
+    "budgetOwner",
+    "secondUsePath",
+    "deliveryFit",
+    "total"
+  ],
+  "title": "AccountQualificationScore",
+  "type": "object"
+}

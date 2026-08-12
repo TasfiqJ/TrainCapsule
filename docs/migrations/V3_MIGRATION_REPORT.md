@@ -43,23 +43,35 @@ ceilings, source integrity, exact-SHA binding, finite recovery, or commercial no
 
 ## M0 acceptance
 
-`M0_FACTORY_MIGRATED` is completed. Its final five acceptance records are tracked and digest-bound:
+The roadmap records `M0_FACTORY_MIGRATED` as completed historically, but the earlier five JSON files
+were self-declared summaries rather than independently auditable execution receipts. They have been
+replaced with five schema-valid `FINAL`/`PASS` records after the repaired implementation tree was
+frozen.
 
-- `docs/migrations/evidence/V3-MIG-016.json`: owner-directed machine-policy authority.
-- `docs/migrations/evidence/V3-MIG-017.json`: disposable rollback rehearsal to exact safety SHA.
-- `docs/migrations/evidence/V3-MIG-018.json`: non-mutating controller observation contracts.
-- `docs/migrations/evidence/V3-MIG-019.json`: disposable mechanical and standard V3 execution.
-- `docs/migrations/evidence/V3-MIG-020.json`: bounded M0 completion record.
+Final M0 acceptance requires `scripts/finalize_v3_m0_evidence.py` to generate schema-valid records
+containing exact command argv, exit/result/count, failure attribution, transcript path/digest, active
+authority digests, and one clean exact subject SHA or mode-aware nonrecursive implementation-tree
+digest. Per-ID evidence types and argv are allowlisted, and result counts are derived from the bound
+transcript. The final
+completion record binds only `V3-MIG-016` through `V3-MIG-019` by their exact file digests; it cannot
+cite itself. `scripts/gates/v3_migration_evidence.py` fails closed on pending, missing, altered,
+authority-mismatched, transcript-mismatched, tree-mismatched, or recursive evidence.
 
-The fixed rollback point is `safety/traincapsule-v3-pre-migration-20260811T212024Z` at
-`6b480232fa92b069103da44c475bd17bcb3e6bd1`. The rehearsal restored that exact SHA, found a clean
-tree, verified the preserved ledger digest
-`ab5d10c6718d3a9fdf53dd78cf0c387e995cd1723cf10b76fb53e14af559c994`, and removed only the
-disposable worktree.
+`V3-MIG-020` runs `scripts/gates/full_quality.sh --pre-evidence` before it is written. That phase runs
+complete local acceptance while deliberately skipping only the final evidence gate that cannot pass
+until the receipts exist. Normal `full_quality.sh` then validates the final evidence and reruns the
+same complete acceptance, avoiding both circularity and premature M0 completion.
 
-The controller simulation completed one mechanical and one standard item, left the outside-fact item
-at `WAITING_EXTERNAL`, reported `interventionMode: NONE`, preserved the V2 ledger byte-for-byte, and
-used neither a model nor network access.
+The final records bind 663 active implementation files at mode-aware implementation-tree SHA-256
+`8a2f80ae17cfe2dbcf45ea296bc7c984901ca2a744809ee4151569203e66db6b`; the finalizer reported evidence
+set digest `7fda41fc90b708bb21cf09d3e3d9fe36f3b3d954b69d7d9547dfe9936c9d06f1`.
+Normal full quality then passed, followed by an independent 599-test run. Ruff, strict Pyright, all
+schema/roadmap/migration generators, configuration validation, migration dry-run, no-paid-usage
+policy, bundle/source integrity, and offline wheel build all passed.
+
+The fixed rollback point remains `safety/traincapsule-v3-pre-migration-20260811T212024Z` at
+`6b480232fa92b069103da44c475bd17bcb3e6bd1`. Finalization replays it through a read-only `git archive`
+and verifies every snapshot-bound tracked input without changing Git or runtime.
 
 ## Truthful unresolved scope
 
@@ -71,7 +83,7 @@ M1 is the active engineering milestone. Product/trust items already implemented 
 repeat them. Competitor/current-fact research and all outside/commercial work retain their bounded
 roadmap states.
 
-## Runtime and publication handoff
+## Historical runtime and publication record
 
 The implementation acceptance commit is
 `f1fd8077fee001fa6751aa86b26f341f04d0d150`. It was pushed only to `refs/heads/main` without
@@ -85,28 +97,26 @@ assignment. Final verification used the already-provisioned `traincapsule-wsl-lo
 the bounded `TRAINCAPSULE_CI_RUNNER` repository variable, with `ubuntu-latest` retained as the
 workflow fallback. No new paid runner usage was created.
 
-The ignored migration marker is valid and bound to the published commit, source manifest, owner
-directives, and five M0 evidence files. A direct preflight probe initially misclassified the
-credential as `AUTH_EXPIRED` because it did not load the launcher PATH. The installed Claude CLI
-actually reports first-party `claude.ai` Max authentication. Loading the real launcher environment
-then exposed two forbidden V2-only overrides; those were removed, and private-gate discovery now
-uses its fixed controller-owned path outside the repository. The corrected preflight returned
-`ready: true`, `credentials: AUTHENTICATED`, `runtimeState: CLEAN`, and validated all 16 V3 config
-sets plus source, marker, live archive, and publication recovery. No model was invoked during these
-probes.
+Those publication and preflight facts are historical observations for the SHA named above. The
+ignored migration marker is mutable runtime state and cannot substitute for tracked, replayable
+evidence for a later implementation tree.
 
-After the runtime-path repair is exact-SHA hosted-green, the durable stops may be removed and the
-verified launcher enabled for a bounded observation. If any later publication or hosted verification
-fails, retain the stopped state and follow `docs/migrations/V3_ROLLBACK.md`; never reset or rewrite
-published history.
+## Current handoff
+
+The current implementation tree has strict local M0 evidence and complete local acceptance. It is
+not yet hosted-release accepted: the resulting commit must be published to `main` only, pass the
+actual clean-candidate private gate, and pass every required hosted workflow at its own exact SHA.
+No future SHA or run ID is invented in this report. Until those checks complete, retain the stopped
+state and follow `docs/migrations/V3_ROLLBACK.md`; never reset or rewrite published history.
 
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **270 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **315 paths**.
 
 | Change | Path |
 |---|---|
+| `M` | `.factory/README.md` |
 | `A` | `.github/workflows/docs-schemas.yml` |
 | `A` | `.github/workflows/factory-quality.yml` |
 | `D` | `.github/workflows/factory-smoke.yml` |
@@ -136,6 +146,7 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **270 paths**.
 | `A` | `config/scheduler.yaml` |
 | `M` | `docs/CONTEXT_INDEX.yaml` |
 | `A` | `docs/migrations/V3_BASELINE_REPORT.md` |
+| `A` | `docs/migrations/V3_BUNDLE_INTEGRITY_REPORT.json` |
 | `A` | `docs/migrations/V3_CODEX_EXECUTION_STATE.md` |
 | `A` | `docs/migrations/V3_LEGACY_QUEUE_ARCHIVE_METADATA.json` |
 | `A` | `docs/migrations/V3_MIGRATION_REPORT.md` |
@@ -148,6 +159,13 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **270 paths**.
 | `A` | `docs/migrations/evidence/V3-MIG-018.json` |
 | `A` | `docs/migrations/evidence/V3-MIG-019.json` |
 | `A` | `docs/migrations/evidence/V3-MIG-020.json` |
+| `A` | `docs/migrations/evidence/transcripts/V3-MIG-016-01-source-authority-integrity.json` |
+| `A` | `docs/migrations/evidence/transcripts/V3-MIG-016-02-active-policy-integrity.json` |
+| `A` | `docs/migrations/evidence/transcripts/V3-MIG-016-03-authoritative-bundle-integrity.json` |
+| `A` | `docs/migrations/evidence/transcripts/V3-MIG-017-01-rollback-archive-rehearsal.json` |
+| `A` | `docs/migrations/evidence/transcripts/V3-MIG-018-01-controller-observation-contracts.json` |
+| `A` | `docs/migrations/evidence/transcripts/V3-MIG-019-01-controller-simulation.json` |
+| `A` | `docs/migrations/evidence/transcripts/V3-MIG-020-01-complete-pre-evidence-acceptance.json` |
 | `A` | `docs/product/PREFLIGHT_QUICKSTART.md` |
 | `A` | `docs/source-of-truth/v3-2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3.md` |
 | `A` | `docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md` |
@@ -187,6 +205,7 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **270 paths**.
 | `A` | `packages/traincapsule-core/src/traincapsule_core/evidence.py` |
 | `A` | `packages/traincapsule-core/src/traincapsule_core/identity.py` |
 | `A` | `packages/traincapsule-core/src/traincapsule_core/models.py` |
+| `A` | `packages/traincapsule-core/src/traincapsule_core/secure_fs.py` |
 | `A` | `packages/traincapsule-ingest-pytorch/pyproject.toml` |
 | `A` | `packages/traincapsule-ingest-pytorch/src/traincapsule_ingest_pytorch/__init__.py` |
 | `A` | `packages/traincapsule-ingest-pytorch/src/traincapsule_ingest_pytorch/importer.py` |
@@ -194,6 +213,7 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **270 paths**.
 | `A` | `packages/traincapsule-qualify/src/traincapsule_qualify/__init__.py` |
 | `A` | `packages/traincapsule-qualify/src/traincapsule_qualify/models.py` |
 | `A` | `packages/traincapsule-qualify/src/traincapsule_qualify/qualify.py` |
+| `M` | `private-gates-reference/README.md` |
 | `M` | `prompts/adversary.md` |
 | `M` | `prompts/audit.md` |
 | `M` | `prompts/autonomous_planner.md` |
@@ -245,17 +265,23 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **270 paths**.
 | `A` | `schemas/factory/v3/main-publication-transaction.schema.json` |
 | `A` | `schemas/factory/v3/main-publication.schema.json` |
 | `A` | `schemas/factory/v3/migration-complete-marker.schema.json` |
+| `A` | `schemas/factory/v3/migration-evidence.schema.json` |
+| `A` | `schemas/factory/v3/milestone-advance-transaction.schema.json` |
+| `A` | `schemas/factory/v3/milestone-completion-receipt.schema.json` |
 | `A` | `schemas/factory/v3/milestone-completion.schema.json` |
 | `A` | `schemas/factory/v3/milestone-policy-config.schema.json` |
+| `A` | `schemas/factory/v3/milestone-runtime-state.schema.json` |
 | `A` | `schemas/factory/v3/milestones.schema.json` |
 | `A` | `schemas/factory/v3/owner-directives.schema.json` |
 | `A` | `schemas/factory/v3/owner-override-policy.schema.json` |
+| `A` | `schemas/factory/v3/private-gate-receipt.schema.json` |
 | `A` | `schemas/factory/v3/release-candidate.schema.json` |
 | `A` | `schemas/factory/v3/retry-policy.schema.json` |
 | `A` | `schemas/factory/v3/scheduler.schema.json` |
 | `A` | `schemas/factory/v3/supervisor-state.schema.json` |
 | `A` | `schemas/factory/v3/task-packet.schema.json` |
 | `A` | `schemas/factory/v3/usage-state.schema.json` |
+| `A` | `schemas/factory/v3/work-item-completion-evidence.schema.json` |
 | `A` | `schemas/factory/v3/work-item-v3.schema.json` |
 | `A` | `schemas/factory/v3/work-items.schema.json` |
 | `A` | `schemas/product/eligibility-decision.schema.json` |
@@ -269,23 +295,40 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **270 paths**.
 | `A` | `schemas/product/preflight-inputs.schema.json` |
 | `A` | `schemas/product/workload-identity.schema.json` |
 | `M` | `scripts/configure_github.sh` |
+| `M` | `scripts/configure_max5_token.sh` |
+| `M` | `scripts/enable_lights_out.sh` |
 | `M` | `scripts/factory_control.sh` |
 | `M` | `scripts/factory_status.sh` |
+| `A` | `scripts/finalize_v3_m0_evidence.py` |
+| `A` | `scripts/gates/active_policy_integrity.py` |
+| `M` | `scripts/gates/full_quality.sh` |
 | `A` | `scripts/gates/generate_sbom.py` |
 | `M` | `scripts/gates/no_paid_usage.py` |
 | `A` | `scripts/gates/source_of_truth_integrity.py` |
+| `A` | `scripts/gates/v3_bundle_integrity.py` |
+| `A` | `scripts/gates/v3_migration_evidence.py` |
+| `A` | `scripts/gates/v3_rollback_rehearsal.py` |
 | `A` | `scripts/generate_product_schemas.py` |
 | `A` | `scripts/generate_v3_legacy_migration.py` |
 | `A` | `scripts/generate_v3_manifest.py` |
 | `A` | `scripts/generate_v3_roadmap.py` |
 | `A` | `scripts/generate_v3_schemas.py` |
+| `M` | `scripts/install_private_gate.sh` |
+| `M` | `scripts/load_factory_env.sh` |
+| `M` | `scripts/one_time_setup.sh` |
+| `M` | `scripts/pause_factory.sh` |
 | `M` | `scripts/recover_factory.sh` |
 | `M` | `scripts/register_windows_autostart.ps1` |
 | `M` | `scripts/resume_factory.sh` |
+| `M` | `scripts/run_one_time_calibration.sh` |
+| `M` | `scripts/stop_factory.sh` |
 | `M` | `scripts/systemd_entrypoint.sh` |
 | `A` | `scripts/update_v3_migration_inventory.py` |
+| `M` | `scripts/verify_autonomous_loop.sh` |
+| `M` | `scripts/verify_claude_features.sh` |
 | `M` | `scripts/verify_factory_authority.sh` |
 | `M` | `scripts/windows_task_entrypoint.sh` |
+| `M` | `scripts/windows_wsl_prepare.sh` |
 | `M` | `tcfactory/autopilot.py` |
 | `A` | `tcfactory/backends/__init__.py` |
 | `A` | `tcfactory/backends/base.py` |
@@ -299,6 +342,7 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **270 paths**.
 | `M` | `tcfactory/completion.py` |
 | `M` | `tcfactory/config.py` |
 | `M` | `tcfactory/context.py` |
+| `M` | `tcfactory/gates.py` |
 | `M` | `tcfactory/github_sync.py` |
 | `M` | `tcfactory/handoffs.py` |
 | `M` | `tcfactory/ledger.py` |
@@ -321,19 +365,24 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **270 paths**.
 | `A` | `tcfactory/v3/candidate_manifest.py` |
 | `A` | `tcfactory/v3/configuration.py` |
 | `A` | `tcfactory/v3/controller.py` |
+| `A` | `tcfactory/v3/controller_lock.py` |
 | `A` | `tcfactory/v3/dispositions.py` |
 | `A` | `tcfactory/v3/doctor.py` |
 | `A` | `tcfactory/v3/enums.py` |
 | `A` | `tcfactory/v3/external_evidence.py` |
 | `A` | `tcfactory/v3/maturity.py` |
+| `A` | `tcfactory/v3/migration_evidence.py` |
 | `A` | `tcfactory/v3/migrations.py` |
+| `A` | `tcfactory/v3/milestone_runtime.py` |
 | `A` | `tcfactory/v3/milestones.py` |
 | `A` | `tcfactory/v3/pilot.py` |
 | `A` | `tcfactory/v3/pipeline_services.py` |
 | `A` | `tcfactory/v3/planning.py` |
+| `A` | `tcfactory/v3/private_gate.py` |
 | `A` | `tcfactory/v3/queue.py` |
 | `A` | `tcfactory/v3/recovery.py` |
 | `A` | `tcfactory/v3/retry_policy.py` |
+| `A` | `tcfactory/v3/runtime_paths.py` |
 | `A` | `tcfactory/v3/scheduler.py` |
 | `A` | `tcfactory/v3/work_items.py` |
 | `M` | `tcfactory/value.py` |
@@ -348,6 +397,7 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **270 paths**.
 | `A` | `tests/product/test_qualification.py` |
 | `M` | `tests/test_autonomy_freedom_policy.py` |
 | `M` | `tests/test_autopilot_respec_evidence.py` |
+| `M` | `tests/test_calibration_evidence.py` |
 | `M` | `tests/test_catalog.py` |
 | `M` | `tests/test_claude_features.py` |
 | `M` | `tests/test_claude_led_nodes.py` |
@@ -369,7 +419,11 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **270 paths**.
 | `A` | `tests/test_v3_domain_models.py` |
 | `A` | `tests/test_v3_github_workflows.py` |
 | `A` | `tests/test_v3_legacy_migration.py` |
+| `A` | `tests/test_v3_migration_evidence_and_policy.py` |
+| `A` | `tests/test_v3_milestone_runtime.py` |
+| `A` | `tests/test_v3_operator_runtime_paths.py` |
 | `A` | `tests/test_v3_planning_context_and_support.py` |
+| `A` | `tests/test_v3_private_gate.py` |
 | `A` | `tests/test_v3_prompt_contracts.py` |
 | `A` | `tests/test_v3_publication_recovery.py` |
 | `A` | `tests/test_v3_queue.py` |

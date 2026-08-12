@@ -18,7 +18,7 @@ from .reference_identity import canonical_reference, identity_reference
 
 ROOT = Path(__file__).resolve().parents[2]
 WORKLOAD_VECTOR = "sha256:c84088d6ab6a489c01b070a10a30adad682fe6b6f78fd2b85b4e674865e035ab"
-ENVIRONMENT_VECTOR = "sha256:b32591c48f2141d448fdfcf0d0dbeb6edbdf2924577f46aaf24d3c7d114651f8"
+ENVIRONMENT_VECTOR = "sha256:30fbb83d6cb1c44d106ea48bd9527976da4e7edb0c5016f8f9b379550f6c18ea"
 
 
 def workload_material() -> dict[str, object]:

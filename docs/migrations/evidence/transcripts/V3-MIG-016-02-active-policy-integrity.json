@@ -1,0 +1,13 @@
+{
+  "transcriptVersion": 1,
+  "command": [
+    ".venv/bin/python",
+    "scripts/gates/active_policy_integrity.py"
+  ],
+  "workingDirectory": ".",
+  "exitCode": 0,
+  "passedCount": 1,
+  "failedCount": 0,
+  "stdout": "PASS: 231 active policy files contain no human/PR release dependency\n",
+  "stderr": ""
+}

@@ -135,6 +135,31 @@ def test_public_real_format_shape_is_parsed_without_laundering_unknowns(
     assert result.entries[0].unknown_fields == {"record_id": 1001}
 
 
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [("version", "99.0"), ("pytorch_version", "99.0.0"), ("world_size", 999)],
+)
+def test_real_format_rank_root_metadata_must_agree(
+    tmp_path: Path, field: str, value: object
+) -> None:
+    trace = tmp_path / "trace"
+    trace.mkdir()
+    for name in ("rank-0.json", "rank-1.json"):
+        document = json.loads((FIXTURES / "real-format" / name).read_bytes())
+        if name == "rank-1.json":
+            document[field] = value
+        (trace / name).write_text(json.dumps(document), encoding="utf-8")
+    with pytest.raises(FlightRecorderImportError) as raised:
+        PyTorchFlightRecorderImporter().import_trace(
+            trace_dir=trace,
+            case_id="CASE-CONFLICTING-ROOT",
+            store=LocalEvidenceStore(tmp_path / "store"),
+            captured_at=CAPTURED_AT,
+        )
+    assert raised.value.code is ImportErrorCode.MALFORMED_EVIDENCE
+    assert "conflicts with the trace" in str(raised.value)
+
+
 def test_symlinked_trace_content_is_policy_blocked(tmp_path: Path) -> None:
     trace = tmp_path / "trace"
     trace.mkdir()
@@ -149,3 +174,20 @@ def test_symlinked_trace_content_is_policy_blocked(tmp_path: Path) -> None:
             captured_at=CAPTURED_AT,
         )
     assert raised.value.code is ImportErrorCode.POLICY_BLOCKED
+
+
+def test_excessive_json_nesting_is_normalized_to_policy_error(tmp_path: Path) -> None:
+    trace = tmp_path / "trace"
+    trace.mkdir()
+    nested = b"[" * 65 + b"0" + b"]" * 65
+    (trace / "metadata.json").write_bytes(b'{"nested":' + nested + b"}")
+
+    with pytest.raises(FlightRecorderImportError) as raised:
+        PyTorchFlightRecorderImporter().import_trace(
+            trace_dir=trace,
+            case_id="CASE-DEEP",
+            store=LocalEvidenceStore(tmp_path / "store"),
+            captured_at=CAPTURED_AT,
+        )
+    assert raised.value.code is ImportErrorCode.POLICY_BLOCKED
+    assert "nesting policy" in str(raised.value)

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import json
 import os
+import tempfile
 from collections import Counter
 from collections.abc import Callable
 from datetime import datetime
@@ -56,6 +57,7 @@ class FlightRecorderImport(ProductModel):
     pytorch_version: str
     world_size: int | None = Field(default=None, ge=1)
     artifacts: list[EvidenceArtifact] = Field(min_length=1)
+    binding_artifacts: list[EvidenceArtifact] = []
     entries: list[FlightRecorderEntry]
     native_findings: list[NativeFinding]
     warnings: list[str]
@@ -67,11 +69,63 @@ class FlightRecorderImport(ProductModel):
 
 class EvidenceImporter(Protocol):
     def import_trace(
-        self, *, trace_dir: Path, case_id: str, store: LocalEvidenceStore, captured_at: datetime
+        self,
+        *,
+        trace_dir: Path,
+        case_id: str,
+        store: LocalEvidenceStore,
+        captured_at: datetime,
+        workload_id: str | None = None,
+        baseline_environment_id: str | None = None,
+        candidate_environment_id: str | None = None,
     ) -> FlightRecorderImport: ...
 
 
 LifecycleEntry = tuple[int, str, int, str, str]
+
+
+def _bounded_json_object(
+    payload: bytes, label: str, digests: dict[str, str], *, max_depth: int = 64
+) -> dict[str, object]:
+    depth = 0
+    in_string = False
+    escaped = False
+    for value in payload:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif value == 0x5C:
+                escaped = True
+            elif value == 0x22:
+                in_string = False
+            continue
+        if value == 0x22:
+            in_string = True
+        elif value in (0x5B, 0x7B):
+            depth += 1
+            if depth > max_depth:
+                raise FlightRecorderImportError(
+                    ImportErrorCode.POLICY_BLOCKED,
+                    f"{label} exceeds JSON nesting policy",
+                    raw_digests=digests,
+                )
+        elif value in (0x5D, 0x7D):
+            depth -= 1
+    try:
+        raw: object = json.loads(payload)
+    except (UnicodeDecodeError, json.JSONDecodeError, RecursionError) as error:
+        raise FlightRecorderImportError(
+            ImportErrorCode.MALFORMED_EVIDENCE,
+            f"{label} is not valid bounded UTF-8 JSON",
+            raw_digests=digests,
+        ) from error
+    if not isinstance(raw, dict):
+        raise FlightRecorderImportError(
+            ImportErrorCode.MALFORMED_EVIDENCE,
+            f"{label} must be a JSON object",
+            raw_digests=digests,
+        )
+    return cast(dict[str, object], raw)
 
 
 def verified_lifecycle_entries(
@@ -97,21 +151,11 @@ def verified_lifecycle_entries(
                 "raw lifecycle artifact digest mismatch",
                 raw_digests={artifact.artifact_id: sha256_digest(payload)},
             )
-        try:
-            value: object = json.loads(payload)
-        except (UnicodeDecodeError, json.JSONDecodeError) as error:
-            raise FlightRecorderImportError(
-                ImportErrorCode.MALFORMED_EVIDENCE,
-                "raw lifecycle artifact is not UTF-8 JSON",
-                raw_digests={artifact.artifact_id: artifact.content_digest},
-            ) from error
-        if not isinstance(value, dict):
-            raise FlightRecorderImportError(
-                ImportErrorCode.MALFORMED_EVIDENCE,
-                "raw lifecycle artifact must be a JSON object",
-                raw_digests={artifact.artifact_id: artifact.content_digest},
-            )
-        document = cast(dict[str, object], value)
+        document = _bounded_json_object(
+            payload,
+            "raw lifecycle artifact",
+            {artifact.artifact_id: artifact.content_digest},
+        )
         raw_entries = document.get("entries")
         if raw_entries is None:
             continue
@@ -174,12 +218,24 @@ def lifecycle_disagreement_from_raw(
     artifacts: list[EvidenceArtifact],
     artifact_reader: Callable[[EvidenceArtifact], bytes],
 ) -> bool:
-    states: dict[tuple[str, int, str], set[str]] = {}
-    for _rank, process_group, sequence, collective, state in verified_lifecycle_entries(
-        artifacts, artifact_reader
-    ):
-        states.setdefault((process_group, sequence, collective), set()).add(state.casefold())
-    return any(len(values) > 1 for values in states.values())
+    entries = verified_lifecycle_entries(artifacts, artifact_reader)
+    observed_ranks: set[int] = set()
+    for artifact in artifacts:
+        payload = artifact_reader(artifact)
+        document = _bounded_json_object(
+            payload, "raw lifecycle artifact", {artifact.artifact_id: artifact.content_digest}
+        )
+        if document.get("entries") is not None:
+            rank = document.get("rank")
+            if isinstance(rank, int) and not isinstance(rank, bool) and rank >= 0:
+                observed_ranks.add(rank)
+    states: dict[tuple[str, int, str], dict[int, str]] = {}
+    for rank, process_group, sequence, collective, state in entries:
+        states.setdefault((process_group, sequence, collective), {})[rank] = state.casefold()
+    return any(
+        len(set(rank_states.values())) > 1 or set(rank_states) != observed_ranks
+        for rank_states in states.values()
+    )
 
 
 def verify_import_against_raw(
@@ -231,21 +287,7 @@ class PyTorchFlightRecorderImporter:
 
     @staticmethod
     def _object(payload: bytes, label: str, digests: dict[str, str]) -> dict[str, object]:
-        try:
-            raw: object = json.loads(payload)
-        except (UnicodeDecodeError, json.JSONDecodeError) as error:
-            raise FlightRecorderImportError(
-                ImportErrorCode.MALFORMED_EVIDENCE,
-                f"{label} is not valid UTF-8 JSON",
-                raw_digests=digests,
-            ) from error
-        if not isinstance(raw, dict):
-            raise FlightRecorderImportError(
-                ImportErrorCode.MALFORMED_EVIDENCE,
-                f"{label} must be a JSON object",
-                raw_digests=digests,
-            )
-        return cast(dict[str, object], raw)
+        return _bounded_json_object(payload, label, digests)
 
     @staticmethod
     def _integer(value: object, label: str, digests: dict[str, str]) -> int:
@@ -292,7 +334,15 @@ class PyTorchFlightRecorderImporter:
             os.close(fd)
 
     def import_trace(
-        self, *, trace_dir: Path, case_id: str, store: LocalEvidenceStore, captured_at: datetime
+        self,
+        *,
+        trace_dir: Path,
+        case_id: str,
+        store: LocalEvidenceStore,
+        captured_at: datetime,
+        workload_id: str | None = None,
+        baseline_environment_id: str | None = None,
+        candidate_environment_id: str | None = None,
     ) -> FlightRecorderImport:
         if trace_dir.is_symlink():
             raise FlightRecorderImportError(
@@ -328,6 +378,9 @@ class PyTorchFlightRecorderImporter:
                 source_version="RAW_UNPARSED",
                 captured_at=captured_at,
                 provenance={"sourceRelativePath": relative},
+                workload_id=workload_id,
+                baseline_environment_id=baseline_environment_id,
+                candidate_environment_id=candidate_environment_id,
             )
             artifacts.append(artifact)
             payloads[relative] = payload
@@ -403,6 +456,29 @@ class PyTorchFlightRecorderImporter:
         warnings: list[str] = []
         for name in document_names:
             document = self._object(payloads[name], name, digests)
+            if source_format == self.REAL_FORMAT:
+                document_version = self._string(
+                    document.get("version"), f"{name}.version", digests
+                )
+                document_pytorch = self._string(
+                    document.get("pytorch_version"), f"{name}.pytorch_version", digests
+                )
+                raw_document_world = document.get("world_size")
+                document_world = (
+                    self._integer(raw_document_world, f"{name}.world_size", digests)
+                    if raw_document_world is not None
+                    else None
+                )
+                if (
+                    document_version != version
+                    or document_pytorch != pytorch_version
+                    or document_world != world_size
+                ):
+                    raise FlightRecorderImportError(
+                        ImportErrorCode.MALFORMED_EVIDENCE,
+                        f"{name} conflicts with the trace version/runtime/world-size identity",
+                        raw_digests=digests,
+                    )
             rank = self._integer(document.get("rank"), f"{name}.rank", digests)
             if world_size is not None and rank >= world_size:
                 raise FlightRecorderImportError(
@@ -515,26 +591,21 @@ class PyTorchFlightRecorderImporter:
             limitations.append(
                 "Completeness across ranks is unknown without a declared world size."
             )
-        finding = NativeFinding(
-            finding_id=digest_json(
-                {
-                    "nativeSystem": "PyTorch Flight Recorder",
-                    "nativeVersion": pytorch_version,
-                    "observation": observation,
-                    "evidenceRefs": sorted(digests.values()),
-                }
-            ),
-            attribution=FindingAttribution.NATIVE_TOOL_FOUND,
-            native_system="PyTorch Flight Recorder",
-            native_version=pytorch_version,
-            observation=observation,
-            evidence_refs=sorted(digests.values()),
-            confidence_class=NativeConfidence.DIRECT_OBSERVATION,
-            limitations=limitations,
-            customer_decision_contribution=(
+        finding_payload: dict[str, object] = {
+            "schemaVersion": 1,
+            "attribution": FindingAttribution.NATIVE_TOOL_FOUND.value,
+            "nativeSystem": "PyTorch Flight Recorder",
+            "nativeVersion": pytorch_version,
+            "observation": observation,
+            "evidenceRefs": sorted(digests.values()),
+            "confidenceClass": NativeConfidence.DIRECT_OBSERVATION.value,
+            "limitations": limitations,
+            "customerDecisionContribution": (
                 "Preserves native observations and explicit evidence limits."
             ),
-        )
+        }
+        finding_payload["findingId"] = digest_json(finding_payload)
+        finding = NativeFinding.model_validate(finding_payload)
         return FlightRecorderImport(
             case_id=case_id,
             source_format=source_format,
@@ -550,3 +621,65 @@ class PyTorchFlightRecorderImporter:
             metadata_unknown_fields=metadata_unknown,
             document_unknown_fields=document_unknown,
         )
+
+
+def reimport_from_raw_artifacts(
+    artifacts: list[EvidenceArtifact],
+    artifact_reader: Callable[[EvidenceArtifact], bytes],
+    *,
+    binding_artifacts: list[EvidenceArtifact] | None = None,
+) -> FlightRecorderImport:
+    """Reconstruct the complete importer record from authenticated raw artifacts."""
+    if not artifacts:
+        raise FlightRecorderImportError(
+            ImportErrorCode.MALFORMED_EVIDENCE, "native import has no raw artifacts"
+        )
+    first = artifacts[0]
+    bindings = (
+        first.case_id,
+        first.workload_id,
+        first.baseline_environment_id,
+        first.candidate_environment_id,
+        first.captured_at,
+    )
+    if any(
+        (
+            item.case_id,
+            item.workload_id,
+            item.baseline_environment_id,
+            item.candidate_environment_id,
+            item.captured_at,
+        )
+        != bindings
+        for item in artifacts
+    ):
+        raise FlightRecorderImportError(
+            ImportErrorCode.MALFORMED_EVIDENCE,
+            "raw artifacts do not share exact case, identity, and capture bindings",
+        )
+    with tempfile.TemporaryDirectory(prefix="traincapsule-reimport-") as temporary:
+        root = Path(temporary)
+        trace = root / "trace"
+        trace.mkdir()
+        for artifact in artifacts:
+            relative = artifact.provenance.get("sourceRelativePath")
+            if relative is None or Path(relative).name != relative or relative in {".", ".."}:
+                raise FlightRecorderImportError(
+                    ImportErrorCode.POLICY_BLOCKED,
+                    "raw artifact sourceRelativePath is unsafe",
+                )
+            path = trace / relative
+            flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
+            descriptor = os.open(path, flags, 0o600)
+            with os.fdopen(descriptor, "wb") as handle:
+                handle.write(artifact_reader(artifact))
+        imported = PyTorchFlightRecorderImporter().import_trace(
+            trace_dir=trace,
+            case_id=first.case_id,
+            store=LocalEvidenceStore(root / "store"),
+            captured_at=first.captured_at,
+            workload_id=first.workload_id,
+            baseline_environment_id=first.baseline_environment_id,
+            candidate_environment_id=first.candidate_environment_id,
+        )
+        return imported.model_copy(update={"binding_artifacts": binding_artifacts or []})

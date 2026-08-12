@@ -1,10 +1,15 @@
 from __future__ import annotations
 
+import os
+import threading
+from contextlib import suppress
 from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
+from traincapsule_core import digest_json
 from traincapsule_core.evidence import EvidenceStoreError, LocalEvidenceStore
+from traincapsule_core.models import EvidenceArtifact
 
 CAPTURED_AT = datetime(2026, 8, 11, 20, 0, tzinfo=UTC)
 
@@ -101,8 +106,58 @@ def test_duplicate_metadata_conflict_and_object_substitution_are_detected(
         store.get_bytes(case_id="CASE-1", artifact=artifact)
 
 
+def test_caller_cannot_replace_persisted_artifact_metadata(tmp_path: Path) -> None:
+    store = LocalEvidenceStore(tmp_path / "store")
+    artifact = put(store)
+    forged_payload = artifact.model_dump(mode="json", by_alias=True)
+    forged_payload["kind"] = "CALLER_RELABELED"
+    forged_payload.pop("metadataDigest")
+    forged_payload["metadataDigest"] = digest_json(forged_payload)
+    forged = EvidenceArtifact.model_validate(forged_payload)
+
+    with pytest.raises(EvidenceStoreError, match="persisted metadata"):
+        store.get_bytes(case_id="CASE-1", artifact=forged)
+
+    assert store.get_artifact(case_id="CASE-1", artifact_id=artifact.artifact_id) == artifact
+
+
 def test_case_artifact_count_is_bounded(tmp_path: Path) -> None:
     store = LocalEvidenceStore(tmp_path / "store", max_case_artifacts=1)
     put(store, payload=b"one")
     with pytest.raises(EvidenceStoreError, match="count"):
         put(store, payload=b"two")
+
+
+def test_cas_parent_symlink_swap_cannot_escape_store(tmp_path: Path) -> None:
+    store = LocalEvidenceStore(tmp_path / "store")
+    object_root = tmp_path / "store/cases/CASE-RACE/objects/sha256"
+    object_root.mkdir(parents=True)
+    parked = object_root.parent / "parked"
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    stop = threading.Event()
+
+    def swap_parent() -> None:
+        while not stop.is_set():
+            try:
+                os.rename(object_root, parked)
+                os.symlink(outside, object_root, target_is_directory=True)
+                os.unlink(object_root)
+                os.rename(parked, object_root)
+            except OSError:
+                continue
+
+    worker = threading.Thread(target=swap_parent, daemon=True)
+    worker.start()
+    try:
+        for attempt in range(200):
+            with suppress(EvidenceStoreError):
+                put(store, case_id="CASE-RACE", payload=f"race-{attempt}".encode())
+        assert list(outside.iterdir()) == []
+    finally:
+        stop.set()
+        worker.join(timeout=2)
+        if object_root.is_symlink():
+            object_root.unlink()
+        if parked.exists() and not object_root.exists():
+            os.rename(parked, object_root)

@@ -2,12 +2,15 @@
 
 from __future__ import annotations
 
+import fcntl
 import hashlib
 import json
 import os
 import re
 import shutil
 from collections import defaultdict
+from collections.abc import Generator
+from contextlib import contextmanager
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from uuid import uuid4
@@ -28,6 +31,7 @@ class QueueLease(V3Model):
     version: int = Field(default=3, ge=3, le=3)
     work_item_id: str = Field(pattern=r"^V3-[A-Z]+-[0-9]{3}$")
     owner_id: str = Field(min_length=1, max_length=128)
+    owner_process_identity: str | None = Field(default=None, min_length=1, max_length=160)
     lease_id: str = Field(pattern=r"^LEASE-[A-F0-9]{32}$")
     claimed_at: datetime
     expires_at: datetime
@@ -52,6 +56,7 @@ class V3Queue:
         self.archive_root = self.root / "archive/v2"
         self.lease_root = self.root / ".leases"
         self.transaction_root = self.root / ".transactions"
+        self.lock_root = self.root / ".locks"
 
     def _state_dir(self, state: WorkStatus) -> Path:
         return self.root / state.value.lower()
@@ -69,12 +74,48 @@ class V3Queue:
         self._ensure_directory(self.archive_root)
         self._ensure_directory(self.lease_root)
         self._ensure_directory(self.transaction_root)
+        self._ensure_directory(self.lock_root)
 
     def _lease_path(self, work_item_id: str) -> Path:
         return self.lease_root / f"{work_item_id}.json"
 
+    @staticmethod
+    def _process_identity(pid: int) -> str | None:
+        """Return a PID-reuse-safe Linux process identity when procfs is available."""
+
+        try:
+            raw = Path(f"/proc/{pid}/stat").read_text(encoding="utf-8")
+            fields = raw.rpartition(")")[2].split()
+            start_ticks = fields[19]
+        except (IndexError, OSError):
+            return None
+        return f"linux-proc:{pid}:{start_ticks}"
+
+    @classmethod
+    def _lease_owner_is_alive(cls, lease: QueueLease) -> bool | None:
+        identity = lease.owner_process_identity
+        if identity is None:
+            return None
+        parts = identity.split(":")
+        if len(parts) != 3 or parts[0] != "linux-proc" or not parts[1].isdigit():
+            return False
+        return cls._process_identity(int(parts[1])) == identity
+
     def _transaction_path(self, work_item_id: str) -> Path:
         return self.transaction_root / f"{work_item_id}.json"
+
+    @contextmanager
+    def _claim_lock(self, work_item_id: str) -> Generator[None]:
+        """Serialize claim/lease CAS across controller processes; OS releases on crash."""
+
+        self._ensure_directory(self.lock_root)
+        lock_path = self.lock_root / f"{work_item_id}.lock"
+        with lock_path.open("a+b") as stream:
+            fcntl.flock(stream.fileno(), fcntl.LOCK_EX)
+            try:
+                yield
+            finally:
+                fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
 
     def _paths(self, work_item_id: str) -> list[Path]:
         name = f"{work_item_id}.yaml"
@@ -223,30 +264,34 @@ class V3Queue:
 
         if lease_seconds < 30 or lease_seconds > 14_400:
             raise ValueError("lease_seconds must be between 30 and 14400")
-        item = self.load(work_item_id)
-        if item.status is not WorkStatus.QUEUED:
-            raise ValueError("only QUEUED work may be claimed")
-        lease_path = self._lease_path(work_item_id)
-        if lease_path.exists():
-            existing = QueueLease.model_validate(read_json(lease_path, {}))
-            if existing.expires_at > now:
-                raise ValueError("work item already has an active lease")
-            lease_path.unlink()
-        lease = QueueLease(
-            work_item_id=work_item_id,
-            owner_id=owner_id,
-            lease_id=f"LEASE-{uuid4().hex.upper()}",
-            claimed_at=now,
-            expires_at=now + timedelta(seconds=lease_seconds),
-        )
-        write_json(lease_path, lease.model_dump(mode="json", by_alias=True))
-        try:
-            self.transition(work_item_id, WorkStatus.RUNNING, updated_at=now)
-            # transition deliberately clears non-RUNNING leases only.
-        except Exception:
-            lease_path.unlink(missing_ok=True)
-            raise
-        return lease
+        with self._claim_lock(work_item_id):
+            item = self.load(work_item_id)
+            if item.status is not WorkStatus.QUEUED:
+                raise ValueError("only QUEUED work may be claimed")
+            lease_path = self._lease_path(work_item_id)
+            if lease_path.exists():
+                existing = QueueLease.model_validate(read_json(lease_path, {}))
+                if existing.expires_at > now:
+                    raise ValueError("work item already has an active lease")
+                lease_path.unlink()
+            lease = QueueLease(
+                work_item_id=work_item_id,
+                owner_id=owner_id,
+                owner_process_identity=self._process_identity(os.getpid()),
+                lease_id=f"LEASE-{uuid4().hex.upper()}",
+                claimed_at=now,
+                expires_at=now + timedelta(seconds=lease_seconds),
+            )
+            write_json(lease_path, lease.model_dump(mode="json", by_alias=True))
+            try:
+                self.transition(work_item_id, WorkStatus.RUNNING, updated_at=now)
+                # transition deliberately clears non-RUNNING leases only.
+            except Exception:
+                observed = read_json(lease_path, {})
+                if observed.get("leaseId") == lease.lease_id:
+                    lease_path.unlink(missing_ok=True)
+                raise
+            return lease
 
     def renew(
         self,
@@ -256,37 +301,43 @@ class V3Queue:
         now: datetime,
         lease_seconds: int = 900,
     ) -> QueueLease:
-        lease_path = self._lease_path(work_item_id)
-        lease = QueueLease.model_validate(read_json(lease_path, {}))
-        if lease.lease_id != lease_id or lease.expires_at <= now:
-            raise ValueError("lease is missing, expired, or owned by another controller")
-        renewed = lease.model_copy(
-            update={
-                "expires_at": now + timedelta(seconds=lease_seconds),
-                "generation": lease.generation + 1,
-            }
-        )
-        write_json(lease_path, renewed.model_dump(mode="json", by_alias=True))
-        return renewed
+        with self._claim_lock(work_item_id):
+            lease_path = self._lease_path(work_item_id)
+            lease = QueueLease.model_validate(read_json(lease_path, {}))
+            if lease.lease_id != lease_id or lease.expires_at <= now:
+                raise ValueError("lease is missing, expired, or owned by another controller")
+            renewed = lease.model_copy(
+                update={
+                    "expires_at": now + timedelta(seconds=lease_seconds),
+                    "generation": lease.generation + 1,
+                }
+            )
+            write_json(lease_path, renewed.model_dump(mode="json", by_alias=True))
+            return renewed
 
     def recover_expired_claims(self, *, now: datetime) -> list[str]:
         """Move abandoned RUNNING work to an explicit scoped technical block."""
 
         recovered: list[str] = []
         for item in self.items(WorkStatus.RUNNING):
-            lease_path = self._lease_path(item.work_item_id)
-            if not lease_path.is_file():
-                expired = True
-            else:
-                lease = QueueLease.model_validate(read_json(lease_path, {}))
-                expired = lease.expires_at <= now
-            if expired:
-                self.transition(
-                    item.work_item_id,
-                    WorkStatus.BLOCKED_TECHNICAL,
-                    updated_at=now,
-                )
-                recovered.append(item.work_item_id)
+            with self._claim_lock(item.work_item_id):
+                observed = self.load(item.work_item_id)
+                if observed.status is not WorkStatus.RUNNING:
+                    continue
+                lease_path = self._lease_path(item.work_item_id)
+                if not lease_path.is_file():
+                    abandoned = True
+                else:
+                    lease = QueueLease.model_validate(read_json(lease_path, {}))
+                    owner_alive = self._lease_owner_is_alive(lease)
+                    abandoned = lease.expires_at <= now or owner_alive is False
+                if abandoned:
+                    self.transition(
+                        item.work_item_id,
+                        WorkStatus.BLOCKED_TECHNICAL,
+                        updated_at=now,
+                    )
+                    recovered.append(item.work_item_id)
         return recovered
 
     def by_lane(self) -> dict[Lane, list[WorkItem]]:
@@ -304,7 +355,7 @@ class V3Queue:
         }
 
     def recover_interrupted(self, *, updated_at: datetime) -> list[str]:
-        """Move interrupted running items to an explicit technical block, never READY."""
+        """Recover only expired or provably dead claims; preserve every live lease."""
 
         return self.recover_expired_claims(now=updated_at)
 

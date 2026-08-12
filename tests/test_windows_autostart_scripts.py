@@ -47,20 +47,21 @@ def test_private_github_runner_has_limited_recovery_task() -> None:
     assert "-Force" not in script
 
 
-def test_max_token_configuration_uses_protected_reloadable_file() -> None:
+def test_legacy_max_token_configuration_is_disabled_and_loader_stays_read_only() -> None:
     root = Path(__file__).resolve().parents[1]
     configure = (root / "scripts" / "configure_max5_token.sh").read_text(encoding="utf-8")
     loader = (root / "scripts" / "load_factory_env.sh").read_text(encoding="utf-8")
-    assert "claude setup-token" in configure
-    assert "claude-oauth-token" in configure
-    assert "TCF_CLAUDE_OAUTH_TOKEN_FILE" in configure
+    assert "permanently disabled" in configure
+    assert "exit 64" in configure
+    assert "setup-token" not in configure
     assert "export CLAUDE_CODE_OAUTH_TOKEN=%q" not in configure
     assert "TCF_CLAUDE_OAUTH_TOKEN_FILE" in loader
     assert "export CLAUDE_CODE_OAUTH_TOKEN" in loader
 
 
-def test_max_token_setup_requires_usage_credit_acknowledgement() -> None:
+def test_legacy_max_token_setup_cannot_self_assert_usage_credit_state() -> None:
     root = Path(__file__).resolve().parents[1]
     text = (root / "scripts" / "configure_max5_token.sh").read_text(encoding="utf-8")
-    assert "usage-credits-disabled.ack" in text
-    assert "export TCF_USAGE_CREDITS_DISABLED_ACK=1" in text
+    assert "permanently disabled" in text
+    assert "usage-credits-disabled.ack" not in text
+    assert "TCF_USAGE_CREDITS_DISABLED_ACK" not in text

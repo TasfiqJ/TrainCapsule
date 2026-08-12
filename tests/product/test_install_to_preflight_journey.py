@@ -9,7 +9,7 @@ import zipfile
 from pathlib import Path
 
 import pytest
-from traincapsule_core import build_workload_identity
+from traincapsule_core import build_workload_identity, sha256_digest
 from traincapsule_core.evidence import LocalEvidenceStore
 from traincapsule_core.models import (
     CompletenessState,
@@ -26,7 +26,7 @@ from traincapsule_ingest_pytorch import (
 from traincapsule_qualify import PreflightInputs, assess_completeness, evaluate_preflight
 
 from .test_identity import workload_material
-from .test_qualification import RAW, RAW_STARTED, artifact, make_inputs, native_baseline
+from .test_qualification import PAYLOADS, artifact, make_inputs, native_baseline
 
 ROOT = Path(__file__).resolve().parents[2]
 TRACE = ROOT / "examples/product/flight-recorder"
@@ -34,11 +34,7 @@ UV = Path.home() / ".local/bin/uv"
 
 
 def evaluate(inputs: PreflightInputs) -> EligibilityDecision:
-    payloads = {
-        artifact().content_digest: RAW,
-        artifact(payload=RAW_STARTED).content_digest: RAW_STARTED,
-    }
-    return evaluate_preflight(inputs, artifact_reader=lambda item: payloads[item.content_digest])
+    return evaluate_preflight(inputs, artifact_reader=lambda item: PAYLOADS[item.content_digest])
 
 
 def _run_installed_journey(cli: Path, python: Path, tmp_path: Path) -> None:
@@ -115,10 +111,26 @@ def _run_installed_journey(cli: Path, python: Path, tmp_path: Path) -> None:
     shutil.copy2(ROOT / "examples/product/workload-identity-input.json", fixture_root)
     shutil.copy2(ROOT / "examples/product/environment-identity-input.json", fixture_root)
     shutil.copytree(TRACE, fixture_root / "flight-recorder")
+    baseline_recipe = tmp_path / "baseline.recipe"
+    candidate_recipe = tmp_path / "candidate.recipe"
+    baseline_recipe.write_bytes(b"installed-baseline-materialization-v1")
+    candidate_recipe.write_bytes(b"installed-candidate-materialization-v1")
+    baseline_material = json.loads(
+        (fixture_root / "environment-identity-input.json").read_text(encoding="utf-8")
+    )
+    baseline_material["materializationRecipeDigest"] = sha256_digest(
+        baseline_recipe.read_bytes()
+    )
+    (fixture_root / "environment-identity-input.json").write_text(
+        json.dumps(baseline_material), encoding="utf-8"
+    )
     candidate_material = json.loads(
         (fixture_root / "environment-identity-input.json").read_text(encoding="utf-8")
     )
     candidate_material["scheduler"] = "local"
+    candidate_material["materializationRecipeDigest"] = sha256_digest(
+        candidate_recipe.read_bytes()
+    )
     candidate_input.write_text(json.dumps(candidate_material), encoding="utf-8")
     run(
         "identity",
@@ -163,6 +175,16 @@ def _run_installed_journey(cli: Path, python: Path, tmp_path: Path) -> None:
         str(store),
         "--captured-at",
         "2026-08-11T20:00:00Z",
+        "--workload-id",
+        json.loads(workload_path.read_text())["workloadId"],
+        "--baseline-environment-id",
+        json.loads(baseline_environment_path.read_text())["environmentId"],
+        "--candidate-environment-id",
+        json.loads(candidate_environment_path.read_text())["environmentId"],
+        "--baseline-recipe",
+        str(baseline_recipe),
+        "--candidate-recipe",
+        str(candidate_recipe),
         "--output",
         str(imported_path),
         "--json",
@@ -201,9 +223,12 @@ workload=WorkloadIdentity.model_validate_json(Path(sys.argv[2]).read_text())
 baseline=EnvironmentIdentity.model_validate_json(Path(sys.argv[3]).read_text())
 candidate=EnvironmentIdentity.model_validate_json(Path(sys.argv[4]).read_text())
 native=NativeBaseline.model_validate_json(Path(sys.argv[5]).read_text())
-artifacts=native.artifacts
+artifacts=[*native.artifacts,*native.binding_artifacts]
 case=case.model_copy(update={'workload_id':workload.workload_id,'baseline_environment_id':baseline.environment_id,'candidate_environment_id':candidate.environment_id,'evidence_refs':[a.artifact_id for a in artifacts],'native_findings':native.findings,'status':'PREFLIGHT'})
-completeness=assess_completeness(case_id=case.case_id,requirements={'flight_recorder':CompletenessState.PRESENT_VALID},roles={'flight_recorder':EvidenceRole.MANDATORY_FOR_ELIGIBILITY},verified_artifacts=artifacts,artifact_refs={'flight_recorder':[a.artifact_id for a in artifacts]})
+requirements={name:CompletenessState.PRESENT_VALID for name in ('flight_recorder_raw','collective_lifecycle','rank_process_group_inventory','workload_identity','environment_identity')}
+roles={name:EvidenceRole.MANDATORY_FOR_ELIGIBILITY for name in requirements}
+refs={name:[a.artifact_id for a in artifacts] for name in requirements}
+completeness=assess_completeness(case_id=case.case_id,requirements=requirements,roles=roles,verified_artifacts=artifacts,artifact_refs=refs,details={'rank_process_group_inventory':'rank/process-group inventory captured'})
 inputs=PreflightInputs(evaluated_at='2026-08-11T20:02:00Z',incident_case=case,workload_identity=workload,baseline_environment=baseline,candidate_environment=candidate,verified_artifacts=artifacts,completeness_report=completeness,native_baseline=native,original_experiment_economics=ExperimentEconomics(estimated_cost=100,currency='CAD',basis='measured'),proposed_experiment_economics=ExperimentEconomics(estimated_cost=10,currency='CAD',basis='bounded'))
 Path(sys.argv[6]).write_text(inputs.model_dump_json(by_alias=True))
 """
@@ -226,7 +251,9 @@ Path(sys.argv[6]).write_text(inputs.model_dump_json(by_alias=True))
         text=True,
     )
     decision = json.loads(
-        run("preflight", str(preflight_path), "--store", str(store), "--json").stdout
+        run(
+            "preflight", str(preflight_path), "--store", str(store), "--json", expected=20
+        ).stdout
     )
     assert decision["outcome"] == "ELIGIBLE_FOR_QUALIFICATION"
 
@@ -258,12 +285,27 @@ write('expired',base.model_copy(update={'evaluated_at':'2026-08-13T20:02:00Z'}))
         "policy": "POLICY_BLOCKED",
         "unknown": "UNKNOWN",
         "uneconomic": "TECHNICALLY_POSSIBLE_BUT_UNECONOMIC",
-        "unsupported-source": "OUTSIDE_SUPPORTED_ENVELOPE",
+        "unsupported-source": "NEEDS_MORE_EVIDENCE",
         "expired": "UNKNOWN",
+    }
+    expected_codes = {
+        "missing": 11,
+        "policy": 13,
+        "unknown": 22,
+        "uneconomic": 21,
+        "unsupported-source": 11,
+        "expired": 24,
     }
     for name, outcome in expected_outcomes.items():
         payload = json.loads(
-            run("preflight", str(tmp_path / f"{name}.json"), "--store", str(store), "--json").stdout
+            run(
+                "preflight",
+                str(tmp_path / f"{name}.json"),
+                "--store",
+                str(store),
+                "--json",
+                expected=expected_codes[name],
+            ).stdout
         )
         assert payload["outcome"] == outcome
 
@@ -279,6 +321,16 @@ write('expired',base.model_copy(update={'evaluated_at':'2026-08-13T20:02:00Z'}))
         str(native_store),
         "--captured-at",
         "2026-08-11T20:00:00Z",
+        "--workload-id",
+        json.loads(workload_path.read_text())["workloadId"],
+        "--baseline-environment-id",
+        json.loads(baseline_environment_path.read_text())["environmentId"],
+        "--candidate-environment-id",
+        json.loads(candidate_environment_path.read_text())["environmentId"],
+        "--baseline-recipe",
+        str(baseline_recipe),
+        "--candidate-recipe",
+        str(candidate_recipe),
         "--output",
         str(native_import),
         "--json",
@@ -325,6 +377,7 @@ write('expired',base.model_copy(update={'evaluated_at':'2026-08-13T20:02:00Z'}))
             "--store",
             str(native_store),
             "--json",
+            expected=20,
         ).stdout
     )
     assert native_decision["outcome"] == "NATIVE_WORKFLOW_SUFFICIENT"
@@ -339,8 +392,18 @@ write('expired',base.model_copy(update={'evaluated_at':'2026-08-13T20:02:00Z'}))
         str(tmp_path / "unsupported-store"),
         "--captured-at",
         "2026-08-11T20:00:00Z",
+        "--workload-id",
+        json.loads(workload_path.read_text())["workloadId"],
+        "--baseline-environment-id",
+        json.loads(baseline_environment_path.read_text())["environmentId"],
+        "--candidate-environment-id",
+        json.loads(candidate_environment_path.read_text())["environmentId"],
+        "--baseline-recipe",
+        str(baseline_recipe),
+        "--candidate-recipe",
+        str(candidate_recipe),
         "--json",
-        expected=3,
+        expected=10,
     )
     assert json.loads(unsupported.stderr)["code"] == "UNSUPPORTED_VERSION"
 
@@ -504,7 +567,10 @@ def test_bound_case_to_preflight_required_outcome_matrix() -> None:
     sufficient = native_baseline(decision_reached=True)
     assert (
         evaluate(
-            make_inputs(native_baseline=sufficient, verified_artifacts=sufficient.artifacts)
+            make_inputs(
+                native_baseline=sufficient,
+                verified_artifacts=[*sufficient.artifacts, *sufficient.binding_artifacts],
+            )
         ).outcome
         is EligibilityOutcome.NATIVE_WORKFLOW_SUFFICIENT
     )
@@ -532,7 +598,7 @@ def test_bound_case_to_preflight_required_outcome_matrix() -> None:
                 native_baseline=native_baseline().model_copy(update={"tool_version": "9.0"})
             )
         ).outcome
-        is EligibilityOutcome.OUTSIDE_SUPPORTED_ENVELOPE
+        is EligibilityOutcome.NEEDS_MORE_EVIDENCE
     )
 
     weak_material = workload_material()
@@ -543,8 +609,8 @@ def test_bound_case_to_preflight_required_outcome_matrix() -> None:
     weak_result = evaluate(
         inputs.model_copy(update={"workload_identity": weak, "incident_case": case})
     )
-    assert weak_result.outcome is EligibilityOutcome.UNKNOWN
-    assert weak_result.operational_decision.value == "NO_DECISION"
+    assert weak_result.outcome is EligibilityOutcome.NEEDS_MORE_EVIDENCE
+    assert weak_result.operational_decision.value == "REQUIRE_MORE_EVIDENCE"
 
 
 def test_unsupported_version_and_malicious_archive_path_are_fail_closed(

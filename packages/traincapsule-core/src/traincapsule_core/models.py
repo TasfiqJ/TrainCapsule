@@ -9,7 +9,7 @@ from typing import Annotated, Literal
 
 from pydantic import Field, model_validator
 
-from .base import ProductModel
+from .base import ProductModel, digest_json
 
 Digest = Annotated[str, Field(pattern=r"^sha256:[0-9a-f]{64}$")]
 Identifier = Annotated[str, Field(pattern=r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")]
@@ -158,6 +158,7 @@ class WorkloadIdentity(ProductModel):
     schema_version: int = Field(default=1, ge=1, le=1)
     workload_id: Digest
     identity_strength: IdentityStrength
+    identity_conflict: bool = False
     source_identity: SourceIdentity
     entrypoint: str = Field(min_length=1)
     arguments_digest: Digest
@@ -174,6 +175,29 @@ class WorkloadIdentity(ProductModel):
     privacy_class: PrivacyClass
     created_at: datetime
 
+    @model_validator(mode="after")
+    def canonical_identity_is_self_authenticating(self) -> WorkloadIdentity:
+        expected_strength = (
+            IdentityStrength.CONFLICTING
+            if self.identity_conflict
+            else {
+                DataIdentityPolicy.FULL_DIGEST: IdentityStrength.FULLY_VERIFIED,
+                DataIdentityPolicy.MANIFEST_DIGEST: IdentityStrength.PARTIALLY_VERIFIED,
+                DataIdentityPolicy.CUSTOMER_ATTESTED: IdentityStrength.CUSTOMER_ATTESTED,
+                DataIdentityPolicy.UNAVAILABLE: IdentityStrength.UNVERIFIED,
+            }[self.data_identity.policy]
+        )
+        if self.identity_strength is not expected_strength:
+            raise ValueError("identityStrength does not match workload identity evidence policy")
+        material = self.model_dump(mode="json", by_alias=True)
+        material.pop("workloadId", None)
+        material.pop("createdAt", None)
+        if not self.identity_conflict:
+            material.pop("identityConflict", None)
+        if self.workload_id != digest_json(material):
+            raise ValueError("workloadId does not match canonical workload identity material")
+        return self
+
 
 class GpuIdentity(ProductModel):
     model: str | None = None
@@ -185,6 +209,7 @@ class EnvironmentIdentity(ProductModel):
     schema_version: int = Field(default=1, ge=1, le=1)
     environment_id: Digest
     identity_strength: IdentityStrength
+    identity_conflict: bool = False
     identity_policy: DataIdentityPolicy
     identity_evidence_digest: Digest | None = None
     host_kernel: str = Field(min_length=1)
@@ -204,6 +229,7 @@ class EnvironmentIdentity(ProductModel):
     environment_variables_digest: Digest
     redaction_policy_version: str = Field(min_length=1)
     materialization_recipe_digest: Digest | None = None
+    materialization_recipe_artifact_id: Digest | None = None
     created_at: datetime
 
     @model_validator(mode="after")
@@ -216,6 +242,31 @@ class EnvironmentIdentity(ProductModel):
                 raise ValueError("verified environment identity requires identityEvidenceDigest")
         elif self.identity_evidence_digest is not None:
             raise ValueError("attested/unavailable environment identity cannot carry evidence")
+        if (self.materialization_recipe_digest is None) != (
+            self.materialization_recipe_artifact_id is None
+        ):
+            raise ValueError(
+                "materialization recipe digest and artifact identity must be declared together"
+            )
+        expected_strength = (
+            IdentityStrength.CONFLICTING
+            if self.identity_conflict
+            else {
+                DataIdentityPolicy.FULL_DIGEST: IdentityStrength.FULLY_VERIFIED,
+                DataIdentityPolicy.MANIFEST_DIGEST: IdentityStrength.PARTIALLY_VERIFIED,
+                DataIdentityPolicy.CUSTOMER_ATTESTED: IdentityStrength.CUSTOMER_ATTESTED,
+                DataIdentityPolicy.UNAVAILABLE: IdentityStrength.UNVERIFIED,
+            }[self.identity_policy]
+        )
+        if self.identity_strength is not expected_strength:
+            raise ValueError("identityStrength does not match environment identity evidence policy")
+        material = self.model_dump(mode="json", by_alias=True)
+        material.pop("environmentId", None)
+        material.pop("createdAt", None)
+        if not self.identity_conflict:
+            material.pop("identityConflict", None)
+        if self.environment_id != digest_json(material):
+            raise ValueError("environmentId does not match canonical environment identity material")
         return self
 
 
@@ -223,6 +274,9 @@ class EvidenceArtifact(ProductModel):
     schema_version: int = Field(default=1, ge=1, le=1)
     artifact_id: Digest
     case_id: Identifier
+    workload_id: Digest | None = None
+    baseline_environment_id: Digest | None = None
+    candidate_environment_id: Digest | None = None
     kind: str = Field(min_length=1)
     source_adapter: str = Field(min_length=1)
     source_version: str = Field(min_length=1)
@@ -236,6 +290,7 @@ class EvidenceArtifact(ProductModel):
     export_policy: str = Field(min_length=1)
     provenance: dict[str, str]
     integrity_status: EvidenceIntegrity
+    metadata_digest: Digest
 
     @model_validator(mode="after")
     def content_address_is_identity(self) -> EvidenceArtifact:
@@ -245,6 +300,10 @@ class EvidenceArtifact(ProductModel):
         expected_uri = f"cas://{self.case_id}/sha256/{digest_hex}"
         if self.customer_local_uri != expected_uri:
             raise ValueError("customerLocalUri must be the case-bound URI for contentDigest")
+        material = self.model_dump(mode="json", by_alias=True)
+        material.pop("metadataDigest", None)
+        if self.metadata_digest != digest_json(material):
+            raise ValueError("metadataDigest does not authenticate artifact metadata")
         return self
 
 
@@ -259,6 +318,14 @@ class NativeFinding(ProductModel):
     confidence_class: NativeConfidence
     limitations: list[str] = Field(min_length=1)
     customer_decision_contribution: str = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def finding_id_authenticates_the_entire_finding(self) -> NativeFinding:
+        material = self.model_dump(mode="json", by_alias=True)
+        material.pop("findingId", None)
+        if self.finding_id != digest_json(material):
+            raise ValueError("findingId does not authenticate the native finding")
+        return self
 
 
 class ExperimentEconomics(ProductModel):

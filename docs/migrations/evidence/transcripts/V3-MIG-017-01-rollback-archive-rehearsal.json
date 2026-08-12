@@ -1,0 +1,13 @@
+{
+  "transcriptVersion": 1,
+  "command": [
+    ".venv/bin/python",
+    "scripts/gates/v3_rollback_rehearsal.py"
+  ],
+  "workingDirectory": ".",
+  "exitCode": 0,
+  "passedCount": 1,
+  "failedCount": 0,
+  "stdout": "PASS: read-only rollback archive matched 8 exact checks\n",
+  "stderr": ""
+}

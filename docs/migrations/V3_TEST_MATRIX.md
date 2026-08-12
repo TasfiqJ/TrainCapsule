@@ -1,9 +1,9 @@
 # TrainCapsule V3 test matrix
 
-> Final V3 acceptance supersedes the phase-by-phase counts below. The accepted implementation at
-> `f1fd8077fee001fa6751aa86b26f341f04d0d150` has 554 passing local tests, clean Ruff, strict
-> Pyright at 0 errors/0 warnings, a passing clean-wheel journey, and eight passing exact-SHA remote
-> workflows. No model, GPU run, paid API, customer action, or commercial claim was used.
+> Historical acceptance at `f1fd8077fee001fa6751aa86b26f341f04d0d150` superseded the
+> phase-by-phase counts below at that SHA only. Its 554-test local result and eight remote workflow
+> runs must not be attributed to a later repair. Current exact-tree evidence and local acceptance
+> are recorded below; exact-SHA hosted acceptance remains pending publication.
 
 ## Baseline
 
@@ -21,14 +21,18 @@ The exact baseline and results are recorded in `V3_BASELINE_REPORT.md`: 394 test
 | Release | main-only exact-SHA policy, no non-main ref, no force, divergence, durable recovery, required hosted CI, automatic ordinary revert | passed locally and all eight required workflows passed at exact implementation SHA `f1fd8077…` |
 | Startup/status | finite 15/60/300 restart, healthy reset, preflight, portable controls, durable stop/hard-stuck, complete status | passed; focused checks and 471-test full-suite regression; stopped launcher exercised without model use |
 | Prompts | finite packet/session, native-first, exact truth states, bounded findings, external/policy stop, specialist contracts | passed; focused adversarial coverage; no model use |
-| Legacy migration | 124-entry mapping, exact ledger archive, dry/apply, non-resuming queue archive, deterministic migration | passed; 1 passed/1 paused/2 external-wait/120 blocked preserved; 88 mapped, 29 deferred, 7 factory history; original queue retained |
+| Legacy migration | 124-entry mapping, exact ledger archive, dry/apply, non-resuming queue archive, deterministic migration | passed historically; 1 passed/1 paused/2 external-wait/120 blocked preserved; 88 mapped, 29 deferred-design, 6 factory, 1 deferred-non-blocking; original queue retained |
 | Product preflight | identity golden vectors, CAS, importer, native baseline, completeness, eligibility, CLI | passed; 41 product checks and 527-test full-suite regression |
 | Product journey | install through preflight; missing/native-sufficient/unsupported/policy/unknown/malicious cases | passed on controlled local fixtures; no GPU/customer claim |
 | Security | secrets, paths, symlinks, malicious input, synthetic evidence, forged/expired approval | product adversarial coverage passed; final repository secret gate is recorded below |
 | Rollback | detached disposable worktree at safety ref; authority and baseline suite | passed; exact base SHA, 394 baseline tests, worktree removed |
 | GPU/external | real GPU, customer archive, independent operator, customer/payment facts | external/deferred; never simulated as complete |
 
-Every final result records the exact command, SHA, pass/fail count, and whether a failure was pre-existing or introduced.
+Every final M0 evidence result is now required to record an exact subject SHA or nonrecursive
+mode-aware implementation-tree digest, per-ID allowlisted argv, transcript-derived exit/result/count,
+failure attribution, transcript path and
+SHA-256, and the active source/precedence/owner-policy digests. Pending records cannot satisfy the M0
+evidence gate.
 
 ## Phase J exact commands
 
@@ -76,7 +80,7 @@ The independent four-wheel install and complete installed-CLI journey passed loc
 workflow `31563636469`. Remote Factory quality reported 497 non-product tests passing, with product
 tests enforced separately by Product unit and Product contract.
 
-## Exact-SHA publication acceptance
+## Historical exact-SHA publication acceptance
 
 All required workflows completed successfully at
 `f1fd8077fee001fa6751aa86b26f341f04d0d150`:
@@ -106,3 +110,28 @@ The corrected launcher-environment preflight returned `ready: true`, `credential
 archive, and publication recovery. The runtime-path follow-up raises the current complete-suite proof
 to 555 passing tests. No model was invoked. No GPU check was run; GPU/customer/external evidence
 remains deferred.
+
+## Current exact-tree and exact-SHA finalization
+
+The frozen implementation was finalized with:
+
+```text
+.venv/bin/python scripts/finalize_v3_m0_evidence.py
+scripts/gates/full_quality.sh
+.venv/bin/python -m pytest
+```
+
+The finalizer's `V3-MIG-020` phase first runs `full_quality.sh --pre-evidence`, which performs complete
+acceptance without circularly requiring the still-pending final receipts. The normal invocation then
+validates those final receipts and repeats complete acceptance.
+
+Results: five exact M0 records passed; implementation-tree digest
+`8a2f80ae17cfe2dbcf45ea296bc7c984901ca2a744809ee4151569203e66db6b` covered 663 files; the independent
+full suite passed 599 tests; Ruff and strict Pyright were clean; 45 factory schemas, product schemas,
+109 roadmap items, 124 legacy mappings, inventory, source/bundle/policy gates, configuration,
+migration dry-run, no-paid-usage, and offline wheel build passed. The real root-owned private-gate
+health probe passed without creating a receipt or signature.
+
+Next, publish the resulting commit to `main` only and record the clean-candidate private-gate receipt
+and required hosted runs at that exact SHA. A historical run ID, an unbound PASS JSON object, or a
+digest of a self-declared claim is not acceptable current evidence.

@@ -1,0 +1,78 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "workItemId": {
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "milestoneId": {
+      "title": "Milestoneid",
+      "type": "string"
+    },
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "checkpointDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Checkpointdigest",
+      "type": "string"
+    },
+    "candidateManifestDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Candidatemanifestdigest"
+    },
+    "independentReviewed": {
+      "title": "Independentreviewed",
+      "type": "boolean"
+    },
+    "machinePolicyReceiptDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Machinepolicyreceiptdigest"
+    },
+    "externalReceiptRefs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Externalreceiptrefs",
+      "type": "array"
+    },
+    "createdAt": {
+      "format": "date-time",
+      "title": "Createdat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "workItemId",
+    "milestoneId",
+    "candidateSha",
+    "checkpointDigest",
+    "independentReviewed",
+    "externalReceiptRefs",
+    "createdAt"
+  ],
+  "title": "WorkItemCompletionEvidence",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/work-item-completion-evidence.schema.json"
+}

@@ -1,0 +1,531 @@
+{
+  "$defs": {
+    "AuthorityDigests": {
+      "additionalProperties": false,
+      "description": "Exact active authority bytes under which an observation was accepted.",
+      "properties": {
+        "sourceManifestSha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sourcemanifestsha256",
+          "type": "string"
+        },
+        "sourcePrecedenceSha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sourceprecedencesha256",
+          "type": "string"
+        },
+        "ownerDirectivesSha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Ownerdirectivessha256",
+          "type": "string"
+        },
+        "ownerOverridePolicySha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Owneroverridepolicysha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sourceManifestSha256",
+        "sourcePrecedenceSha256",
+        "ownerDirectivesSha256",
+        "ownerOverridePolicySha256"
+      ],
+      "title": "AuthorityDigests",
+      "type": "object"
+    },
+    "EvidenceBinding": {
+      "additionalProperties": false,
+      "description": "Bind evidence without recursively hashing the evidence files themselves.",
+      "properties": {
+        "subjectSha": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{40}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Subjectsha"
+        },
+        "implementationTreeSha256": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Implementationtreesha256"
+        },
+        "implementationTreeFileCount": {
+          "anyOf": [
+            {
+              "minimum": 1,
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Implementationtreefilecount"
+        },
+        "algorithm": {
+          "enum": [
+            "git-commit-sha1",
+            "sha256-mode-path-blob-manifest"
+          ],
+          "title": "Algorithm",
+          "type": "string"
+        }
+      },
+      "required": [
+        "algorithm"
+      ],
+      "title": "EvidenceBinding",
+      "type": "object"
+    },
+    "EvidenceExecution": {
+      "additionalProperties": false,
+      "description": "One replayable command and its immutable output transcript.",
+      "properties": {
+        "commandId": {
+          "pattern": "^[a-z0-9][a-z0-9-]{2,63}$",
+          "title": "Commandid",
+          "type": "string"
+        },
+        "command": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 32,
+          "minItems": 2,
+          "title": "Command",
+          "type": "array"
+        },
+        "workingDirectory": {
+          "const": ".",
+          "default": ".",
+          "title": "Workingdirectory",
+          "type": "string"
+        },
+        "exitCode": {
+          "maximum": 255,
+          "minimum": 0,
+          "title": "Exitcode",
+          "type": "integer"
+        },
+        "result": {
+          "enum": [
+            "PASS",
+            "FAIL"
+          ],
+          "title": "Result",
+          "type": "string"
+        },
+        "passedCount": {
+          "minimum": 0,
+          "title": "Passedcount",
+          "type": "integer"
+        },
+        "failedCount": {
+          "minimum": 0,
+          "title": "Failedcount",
+          "type": "integer"
+        },
+        "failureAttribution": {
+          "enum": [
+            "NONE",
+            "PRE_EXISTING",
+            "INTRODUCED",
+            "INFRASTRUCTURE",
+            "UNKNOWN"
+          ],
+          "title": "Failureattribution",
+          "type": "string"
+        },
+        "transcriptPath": {
+          "minLength": 1,
+          "title": "Transcriptpath",
+          "type": "string"
+        },
+        "transcriptSha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Transcriptsha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "commandId",
+        "command",
+        "exitCode",
+        "result",
+        "passedCount",
+        "failedCount",
+        "failureAttribution",
+        "transcriptPath",
+        "transcriptSha256"
+      ],
+      "title": "EvidenceExecution",
+      "type": "object"
+    },
+    "FinalMigrationEvidence": {
+      "additionalProperties": false,
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "workItemId": {
+                "const": "V3-MIG-016"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidenceType": {
+                "const": "OWNER_DIRECTED_MACHINE_POLICY"
+              },
+              "executions": {
+                "maxItems": 3,
+                "minItems": 3,
+                "prefixItems": [
+                  {
+                    "properties": {
+                      "commandId": {
+                        "const": "source-authority-integrity"
+                      },
+                      "command": {
+                        "const": [
+                          ".venv/bin/python",
+                          "scripts/gates/source_of_truth_integrity.py"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "commandId": {
+                        "const": "active-policy-integrity"
+                      },
+                      "command": {
+                        "const": [
+                          ".venv/bin/python",
+                          "scripts/gates/active_policy_integrity.py"
+                        ]
+                      }
+                    }
+                  },
+                  {
+                    "properties": {
+                      "commandId": {
+                        "const": "authoritative-bundle-integrity"
+                      },
+                      "command": {
+                        "const": [
+                          ".venv/bin/python",
+                          "scripts/gates/v3_bundle_integrity.py",
+                          "--check-report"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "workItemId": {
+                "const": "V3-MIG-017"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidenceType": {
+                "const": "READ_ONLY_ROLLBACK_REHEARSAL"
+              },
+              "executions": {
+                "maxItems": 1,
+                "minItems": 1,
+                "prefixItems": [
+                  {
+                    "properties": {
+                      "commandId": {
+                        "const": "rollback-archive-rehearsal"
+                      },
+                      "command": {
+                        "const": [
+                          ".venv/bin/python",
+                          "scripts/gates/v3_rollback_rehearsal.py"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "workItemId": {
+                "const": "V3-MIG-018"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidenceType": {
+                "const": "NON_MUTATING_CONTROLLER_OBSERVATION"
+              },
+              "executions": {
+                "maxItems": 1,
+                "minItems": 1,
+                "prefixItems": [
+                  {
+                    "properties": {
+                      "commandId": {
+                        "const": "controller-observation-contracts"
+                      },
+                      "command": {
+                        "const": [
+                          ".venv/bin/pytest",
+                          "tests/test_v3_config_and_roadmap.py",
+                          "tests/test_v3_scheduler_and_recovery.py",
+                          "tests/test_v3_supervisor_and_status.py"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "workItemId": {
+                "const": "V3-MIG-019"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidenceType": {
+                "const": "DISPOSABLE_END_TO_END_CONTROLLER_SIMULATION"
+              },
+              "executions": {
+                "maxItems": 1,
+                "minItems": 1,
+                "prefixItems": [
+                  {
+                    "properties": {
+                      "commandId": {
+                        "const": "controller-simulation"
+                      },
+                      "command": {
+                        "const": [
+                          ".venv/bin/pytest",
+                          "tests/test_v3_controller_simulation.py"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "workItemId": {
+                "const": "V3-MIG-020"
+              }
+            }
+          },
+          "then": {
+            "properties": {
+              "evidenceType": {
+                "const": "M0_COMPLETION_RECORD"
+              },
+              "executions": {
+                "maxItems": 1,
+                "minItems": 1,
+                "prefixItems": [
+                  {
+                    "properties": {
+                      "commandId": {
+                        "const": "complete-pre-evidence-acceptance"
+                      },
+                      "command": {
+                        "const": [
+                          "bash",
+                          "scripts/gates/full_quality.sh",
+                          "--pre-evidence"
+                        ]
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        }
+      ],
+      "description": "Final M0 record; a PASS is replayable rather than self-attesting.",
+      "properties": {
+        "schemaVersion": {
+          "const": 2,
+          "default": 2,
+          "title": "Schemaversion",
+          "type": "integer"
+        },
+        "workItemId": {
+          "pattern": "^V3-MIG-0(?:1[6-9]|20)$",
+          "title": "Workitemid",
+          "type": "string"
+        },
+        "status": {
+          "const": "FINAL",
+          "default": "FINAL",
+          "title": "Status",
+          "type": "string"
+        },
+        "result": {
+          "enum": [
+            "PASS",
+            "FAIL"
+          ],
+          "title": "Result",
+          "type": "string"
+        },
+        "evidenceType": {
+          "minLength": 3,
+          "title": "Evidencetype",
+          "type": "string"
+        },
+        "recordedAt": {
+          "format": "date-time",
+          "title": "Recordedat",
+          "type": "string"
+        },
+        "binding": {
+          "$ref": "#/$defs/EvidenceBinding"
+        },
+        "authorityDigests": {
+          "$ref": "#/$defs/AuthorityDigests"
+        },
+        "executions": {
+          "items": {
+            "$ref": "#/$defs/EvidenceExecution"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Executions",
+          "type": "array"
+        },
+        "evidenceInputs": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "maxProperties": 8,
+          "title": "Evidenceinputs",
+          "type": "object"
+        },
+        "truthBoundary": {
+          "minLength": 12,
+          "title": "Truthboundary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workItemId",
+        "result",
+        "evidenceType",
+        "recordedAt",
+        "binding",
+        "authorityDigests",
+        "executions",
+        "truthBoundary"
+      ],
+      "title": "FinalMigrationEvidence",
+      "type": "object"
+    },
+    "PendingMigrationEvidence": {
+      "additionalProperties": false,
+      "description": "Explicitly incomplete record used while a final implementation tree is changing.",
+      "properties": {
+        "schemaVersion": {
+          "const": 2,
+          "default": 2,
+          "title": "Schemaversion",
+          "type": "integer"
+        },
+        "workItemId": {
+          "pattern": "^V3-MIG-0(?:1[6-9]|20)$",
+          "title": "Workitemid",
+          "type": "string"
+        },
+        "status": {
+          "const": "PENDING_FINALIZATION",
+          "default": "PENDING_FINALIZATION",
+          "title": "Status",
+          "type": "string"
+        },
+        "finalizationCommand": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 2,
+          "title": "Finalizationcommand",
+          "type": "array"
+        },
+        "reason": {
+          "minLength": 12,
+          "title": "Reason",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workItemId",
+        "finalizationCommand",
+        "reason"
+      ],
+      "title": "PendingMigrationEvidence",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Generated JSON Schema entry point for final and fail-closed pending records.",
+  "discriminator": {
+    "mapping": {
+      "FINAL": "#/$defs/FinalMigrationEvidence",
+      "PENDING_FINALIZATION": "#/$defs/PendingMigrationEvidence"
+    },
+    "propertyName": "status"
+  },
+  "oneOf": [
+    {
+      "$ref": "#/$defs/FinalMigrationEvidence"
+    },
+    {
+      "$ref": "#/$defs/PendingMigrationEvidence"
+    }
+  ],
+  "title": "MigrationEvidenceDocument",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/migration-evidence.schema.json"
+}

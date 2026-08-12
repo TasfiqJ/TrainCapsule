@@ -5,6 +5,7 @@ from .evidence import EvidenceStoreError, LocalEvidenceStore
 from .identity import (
     build_environment_identity,
     build_workload_identity,
+    redact_sensitive_value,
     redacted_environment_digest,
 )
 from .models import (
@@ -56,5 +57,6 @@ __all__ = [
     "canonical_json_bytes",
     "digest_json",
     "redacted_environment_digest",
+    "redact_sensitive_value",
     "sha256_digest",
 ]

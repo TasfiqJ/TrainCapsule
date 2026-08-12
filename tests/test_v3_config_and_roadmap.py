@@ -148,7 +148,14 @@ def test_m0_through_m6_are_bounded_and_external_milestones_remain_waiting() -> N
 
 
 def test_every_generated_schema_rejects_unknown_top_level_fields() -> None:
-    assert len(SCHEMAS) == 39
+    assert len(SCHEMAS) == 45
+    assert {
+        "private-gate-receipt.schema.json",
+        "milestone-runtime-state.schema.json",
+        "milestone-completion-receipt.schema.json",
+        "milestone-advance-transaction.schema.json",
+        "work-item-completion-evidence.schema.json",
+    } <= set(SCHEMAS)
     for model in SCHEMAS.values():
         schema = cast(dict[str, object], model.model_json_schema(by_alias=True))
         assert schema.get("additionalProperties") is False

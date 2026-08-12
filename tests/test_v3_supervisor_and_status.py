@@ -18,6 +18,7 @@ from tcfactory.supervisor import (
 )
 from tcfactory.util import sha256_file, write_json
 from tcfactory.v3.configuration import load_autonomy_v3, load_factory_v3
+from tcfactory.v3.private_gate import PrivateGateHealthCheck, PrivateGateVerificationError
 
 
 def _runtime_paths(root: Path) -> RuntimePaths:
@@ -43,6 +44,14 @@ def _patch_policy(
         lambda _: {"factory": config, "autonomy": autonomy},
     )
     monkeypatch.setattr("tcfactory.supervisor.runtime_paths", lambda *_: paths)
+    monkeypatch.setattr(
+        "tcfactory.supervisor.validate_private_gate_installation",
+        lambda *_args, **_kwargs: (Path("/trusted/runner"), Path("/trusted/key")),
+    )
+    monkeypatch.setattr(
+        "tcfactory.supervisor.validate_private_gate_runtime_health",
+        lambda *_args, **_kwargs: PrivateGateHealthCheck(),
+    )
     return paths
 
 
@@ -127,6 +136,19 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
     assert result["ready"] is True
     assert result["credentials"] == "AUTHENTICATED"
     assert result["legacyMigrationRecords"] == 124
+
+    def reject_private_gate(*_args: object, **_kwargs: object) -> tuple[Path, Path]:
+        raise PrivateGateVerificationError("mandatory gate missing")
+
+    monkeypatch.setattr(
+        "tcfactory.supervisor.validate_private_gate_installation", reject_private_gate
+    )
+    with pytest.raises(PrivateGateVerificationError, match="mandatory gate missing"):
+        run_startup_preflight(repo_root)
+    monkeypatch.setattr(
+        "tcfactory.supervisor.validate_private_gate_installation",
+        lambda *_args, **_kwargs: (Path("/trusted/runner"), Path("/trusted/key")),
+    )
 
     paths.stop.write_text("stop\n", encoding="utf-8")
     with pytest.raises(RuntimeError, match="durable STOP"):

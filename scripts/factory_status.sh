@@ -3,11 +3,12 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT"
 # shellcheck disable=SC1091
+export TCF_REQUIRE_MODEL_CREDENTIALS=0
 source "$ROOT/scripts/load_factory_env.sh"
 printf '\n== V3 runtime status ==\n'
 uv run tcfactory status
 printf '\n== TrainCapsule factory health ==\n'
-uv run tcfactory verify || true
+uv run tcfactory verify
 printf '\n== Roadmap ==\n'
 uv run tcfactory roadmap
 printf '\n== Queue ==\n'

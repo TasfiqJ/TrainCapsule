@@ -1,0 +1,74 @@
+{
+  "$defs": {
+    "MilestoneStatus": {
+      "enum": [
+        "PROPOSED",
+        "ACTIVE",
+        "WAITING_EXTERNAL",
+        "PAUSED",
+        "COMPLETED",
+        "CANCELLED"
+      ],
+      "title": "MilestoneStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "milestoneId": {
+      "title": "Milestoneid",
+      "type": "string"
+    },
+    "nextMilestoneId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Nextmilestoneid"
+    },
+    "evidenceDigests": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Evidencedigests",
+      "type": "object"
+    },
+    "ownerDirectivesDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Ownerdirectivesdigest",
+      "type": "string"
+    },
+    "proposals": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 5,
+      "title": "Proposals",
+      "type": "array"
+    },
+    "decision": {
+      "$ref": "#/$defs/MilestoneStatus"
+    },
+    "decidedAt": {
+      "format": "date-time",
+      "title": "Decidedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "milestoneId",
+    "nextMilestoneId",
+    "evidenceDigests",
+    "ownerDirectivesDigest",
+    "decision",
+    "decidedAt"
+  ],
+  "title": "MilestoneCompletionReceipt",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/milestone-completion-receipt.schema.json"
+}

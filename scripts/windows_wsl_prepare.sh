@@ -59,5 +59,5 @@ claude doctor
 bash scripts/verify_claude_features.sh
 
 printf '\n%s\n' "WSL host and repository dependencies are ready."
-printf '%s\n' "Next: run scripts/configure_max5_token.sh, then source"
-printf '%s\n' "scripts/load_factory_env.sh and run scripts/verify_max_subscription.sh."
+printf '%s\n' "Legacy interactive credential/setup scripts are disabled under V3."
+printf '%s\n' "Use scripts/factory_control.sh verify for the read-only readiness check."

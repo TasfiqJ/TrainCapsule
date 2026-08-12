@@ -33,11 +33,18 @@ The product dependency graph contains neither `tcfactory` nor the Claude SDK.
 
 ```bash
 .venv-product/bin/traincapsule identity workload \
-  examples/product/workload-identity-input.json --json
+  examples/product/workload-identity-input.json \
+  --output /tmp/traincapsule-quickstart/workload.json --json
 
 .venv-product/bin/traincapsule identity environment \
-  examples/product/environment-identity-input.json --json
+  examples/product/environment-identity-input.json \
+  --output /tmp/traincapsule-quickstart/baseline-environment.json --json
 ```
+
+Create the candidate environment record the same way after changing only its explicit candidate
+material. The identity input's `materializationRecipeDigest` must be the SHA-256 digest of the
+corresponding local recipe file. Use the generated `workloadId` and the two generated
+`environmentId` values below; placeholders are shown only to make the binding explicit.
 
 Environment variables are accepted as explicit decision-relevant inputs. Secret-named variables,
 embedded URL credentials, bearer/basic authorization values, private keys, and secret assignments
@@ -55,6 +62,11 @@ can never produce
   --case-id CASE-QUICKSTART \
   --store /tmp/traincapsule-quickstart/evidence \
   --captured-at 2026-08-11T20:00:00Z \
+  --workload-id 'sha256:<generated-workload-id>' \
+  --baseline-environment-id 'sha256:<generated-baseline-environment-id>' \
+  --candidate-environment-id 'sha256:<generated-candidate-environment-id>' \
+  --baseline-recipe /customer-local/baseline.recipe \
+  --candidate-recipe /customer-local/candidate.recipe \
   --output /tmp/traincapsule-quickstart/import.json --json
 
 .venv-product/bin/traincapsule native-baseline /tmp/traincapsule-quickstart/import.json \
@@ -71,9 +83,15 @@ The importer hashes raw bytes before parsing, preserves raw digests and unknown 
 no-follow bounded reads, and records missing/unknown evidence without inference. `native-baseline`
 generates both a strict machine record and a readable report from importer output. Native
 sufficiency is derived only after reopening raw artifacts from the case-local CAS and proving that
-the import entries match those bytes. The versioned lifecycle-disagreement policy carries its
+the source format/version, import digest, entries, unknowns, missing-rank record, and native
+findings match those bytes. Both materialization recipes are stored as content-addressed,
+identity-bound evidence and re-opened during preflight. The versioned lifecycle-disagreement
+policy carries its
 evidence references and provenance digest; the CLI has no caller-authored decision option, and
 preflight independently recomputes the same raw-evidence result.
+
+Only a directory containing supported JSON shapes is accepted. Archives are not extracted or
+interpreted, so traversal links and archive-bomb payloads cannot enter this ingestion path.
 
 ## Bound preflight
 
@@ -89,7 +107,9 @@ export, source-version, and economics verification records from those bound inpu
 cannot supply verdicts. Unknown or incomparable economics produce `UNKNOWN`, while a proposed cost
 above the original returns `TECHNICALLY_POSSIBLE_BUT_UNECONOMIC`. Before making a
 decision, the CLI reopens every referenced object from the case-local CAS with no-follow reads and
-verifies its SHA-256 digest. There is no
+verifies its SHA-256 digest. Security-sensitive CAS and report writes pin every directory component
+with no-follow directory descriptors and publish relative to those descriptors, so a concurrent
+directory rename cannot redirect content between validation and publication. There is no
 human-availability input or human runtime gate. An input that cannot be verified produces `UNKNOWN`;
 a deterministic denial produces `POLICY_BLOCKED` or `OUTSIDE_SUPPORTED_ENVELOPE`.
 
@@ -104,9 +124,22 @@ self-asserts an approval.
 |---:|---|
 | 0 | command completed and wrote/returned a truth record |
 | 2 | invalid CLI use or malformed input |
-| 3 | unsupported evidence version |
-| 4 | local policy blocked the operation |
-| 5 | local storage/output failure |
+| 10 | unsupported evidence version or outside the supported envelope |
+| 11 | required evidence is incomplete |
+| 12 | identity mismatch |
+| 13 | deterministic policy block |
+| 20 | qualification passed or native workflow is sufficient |
+| 21 | technical result failed or proposed experiment is uneconomic |
+| 22 | unknown / no safe decision |
+| 23 | invalid oracle |
+| 24 | decision deadline expired |
+| 30 | local storage/output failure |
+| 40 | security-policy failure |
 
 With `--json`, command-body and CLI-parser errors are deterministic JSON. Commands are local-only;
 there is no SaaS or network path.
+
+For the current initial pack, the source policy accepts the exact tested PyTorch `2.5.1` runtime.
+Every real-format rank file must declare the same Flight Recorder format, PyTorch runtime, and world
+size; conflicting declarations fail closed. Human native reports flatten and HTML-escape
+user-derived multiline text so it cannot create forged Markdown sections or decision headings.

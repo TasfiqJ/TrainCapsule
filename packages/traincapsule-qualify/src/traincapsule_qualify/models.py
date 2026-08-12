@@ -30,14 +30,23 @@ NATIVE_SUFFICIENT_DECISION = (
 class NativeBaseline(ProductModel):
     schema_version: int = Field(default=1, ge=1, le=1)
     case_id: Identifier
+    workload_id: Digest
+    baseline_environment_id: Digest
+    candidate_environment_id: Digest
     generation_policy_version: Literal["traincapsule-native-baseline-v1"] = NATIVE_BASELINE_POLICY
     tool_name: str = Field(min_length=1)
     tool_version: str = Field(min_length=1)
+    source_format: str = Field(min_length=1)
+    source_format_version: str = Field(min_length=1)
+    import_digest: Digest
     command: list[str] = Field(min_length=1)
     configuration: dict[str, object]
     artifacts: list[EvidenceArtifact] = Field(min_length=1)
+    binding_artifacts: list[EvidenceArtifact] = Field(min_length=2)
     findings: list[NativeFinding] = Field(min_length=1)
     limitations: list[str] = Field(min_length=1)
+    import_warnings: list[str]
+    missing_ranks: list[int]
     elapsed_seconds: int = Field(ge=0)
     operator_effort_seconds: int = Field(ge=0)
     decision_reached: str | None = None
@@ -52,6 +61,32 @@ class NativeBaseline(ProductModel):
         artifact_ids = {artifact.artifact_id for artifact in self.artifacts}
         if any(artifact.case_id != self.case_id for artifact in self.artifacts):
             raise ValueError("native baseline contains cross-case artifacts")
+        expected_binding = (
+            self.workload_id,
+            self.baseline_environment_id,
+            self.candidate_environment_id,
+        )
+        if any(
+            (
+                artifact.workload_id,
+                artifact.baseline_environment_id,
+                artifact.candidate_environment_id,
+            )
+            != expected_binding
+            for artifact in self.artifacts
+        ):
+            raise ValueError("native baseline artifacts are not identity-bound")
+        if any(
+            artifact.case_id != self.case_id
+            or (
+                artifact.workload_id,
+                artifact.baseline_environment_id,
+                artifact.candidate_environment_id,
+            )
+            != expected_binding
+            for artifact in self.binding_artifacts
+        ):
+            raise ValueError("native binding artifacts are not identity-bound")
         for finding in self.findings:
             if finding.attribution is not FindingAttribution.NATIVE_TOOL_FOUND:
                 raise ValueError("native baseline findings must be attributed NATIVE_TOOL_FOUND")
@@ -111,9 +146,30 @@ class PreflightInputs(ProductModel):
             raise ValueError("completeness report belongs to a different case")
         if self.native_baseline.case_id != case.case_id:
             raise ValueError("native baseline belongs to a different case")
+        expected_binding = (
+            self.workload_identity.workload_id,
+            self.baseline_environment.environment_id,
+            self.candidate_environment.environment_id,
+        )
+        if (
+            self.native_baseline.workload_id,
+            self.native_baseline.baseline_environment_id,
+            self.native_baseline.candidate_environment_id,
+        ) != expected_binding:
+            raise ValueError("native baseline does not match preflight identities")
         artifacts = {artifact.artifact_id: artifact for artifact in self.verified_artifacts}
         if any(artifact.case_id != case.case_id for artifact in artifacts.values()):
             raise ValueError("verifiedArtifacts contains cross-case evidence")
+        if any(
+            (
+                artifact.workload_id,
+                artifact.baseline_environment_id,
+                artifact.candidate_environment_id,
+            )
+            != expected_binding
+            for artifact in artifacts.values()
+        ):
+            raise ValueError("verifiedArtifacts are not bound to preflight identities")
         if not set(case.evidence_refs) <= artifacts.keys():
             raise ValueError("case evidenceRefs are not all verified")
         for requirement in self.completeness_report.requirements:
@@ -124,4 +180,9 @@ class PreflightInputs(ProductModel):
             <= artifacts.keys()
         ):
             raise ValueError("native baseline artifacts are not all verified")
+        if (
+            not {artifact.artifact_id for artifact in self.native_baseline.binding_artifacts}
+            <= artifacts.keys()
+        ):
+            raise ValueError("native binding artifacts are not all verified")
         return self

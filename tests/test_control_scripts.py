@@ -1,3 +1,4 @@
+import subprocess
 from pathlib import Path
 
 
@@ -49,3 +50,39 @@ def test_unified_control_scripts_exist_and_cover_qol_actions() -> None:
     assert "cd '$repository' && uv run" not in powershell
     assert "--force" not in bash
     assert "push --force" not in bash
+
+
+def test_legacy_setup_and_private_gate_scripts_fail_closed_without_mutation() -> None:
+    root = Path(__file__).resolve().parents[1]
+    legacy_scripts = (
+        "install_private_gate.sh",
+        "one_time_setup.sh",
+        "enable_lights_out.sh",
+        "run_one_time_calibration.sh",
+        "configure_max5_token.sh",
+        "configure_github.sh",
+    )
+    forbidden = (
+        "$HOME",
+        "TCF_PRIVATE_GATE_RUNNER",
+        "factory/state",
+        "git add",
+        "git commit",
+        "read -r -p",
+        "uv run tcfactory autonomy-",
+        "rm -rf",
+    )
+    for name in legacy_scripts:
+        path = root / "scripts" / name
+        content = path.read_text(encoding="utf-8")
+        assert all(token not in content for token in forbidden), name
+        result = subprocess.run(
+            ["bash", str(path)],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            check=False,
+        )
+        assert result.returncode == 64, (name, result.stdout, result.stderr)
+        assert result.stdout == ""
+        assert "No " in result.stderr or "No files" in result.stderr

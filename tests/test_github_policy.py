@@ -25,6 +25,7 @@ from tcfactory.v3.candidate_manifest import (
     GateBinding,
 )
 from tcfactory.v3.enums import ReleaseDecision
+from tcfactory.v3.private_gate import PrivateGateVerificationError
 
 BASE = "a" * 40
 CANDIDATE = "b" * 40
@@ -53,10 +54,9 @@ def test_private_gate_uses_fixed_controller_owned_path(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     monkeypatch.setenv("TCF_PRIVATE_GATE_RUNNER", "/attacker/controlled")
-    assert (
-        Path.home()
-        / ".local/share/traincapsule-factory/private-gates/run_private_gate.sh"
-    ) == github_sync.CONTROLLER_PRIVATE_GATE
+    assert Path("/var/lib/traincapsule-factory/private-gates/run_private_gate.sh") == (
+        github_sync.CONTROLLER_PRIVATE_GATE
+    )
     assert "TCF_PRIVATE_GATE_RUNNER" not in github_sync.CONTROLLER_PRIVATE_GATE.as_posix()
 
 
@@ -76,6 +76,39 @@ def test_push_helper_accepts_only_exact_sha_to_main(monkeypatch: pytest.MonkeyPa
     assert observed == [
         ["git", "push", "--porcelain", "origin", f"{CANDIDATE}:refs/heads/main"]
     ]
+
+
+def test_candidate_preparation_fails_closed_without_private_gate(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "repo"
+    candidate = tmp_path / "candidate"
+    repo.mkdir()
+    candidate.mkdir()
+    publisher = MainOnlyPublisher(
+        repo_root=repo,
+        config=GitHubConfig(enabled=True),
+        receipt_root=tmp_path / "receipts",
+        quarantine_root=tmp_path / "quarantine",
+        local_gate_command=("true",),
+    )
+    monkeypatch.setattr(github_sync, "current_sha", lambda *_args, **_kwargs: CANDIDATE)
+    monkeypatch.setattr(
+        github_sync,
+        "run_command",
+        lambda args, **_kwargs: subprocess.CompletedProcess(args, 0, "pass", ""),
+    )
+
+    def missing(*_args: object, **_kwargs: object) -> tuple[Path, Path]:
+        raise PrivateGateVerificationError("missing trusted runner")
+
+    monkeypatch.setattr(github_sync, "validate_private_gate_installation", missing)
+    with pytest.raises(GitHubSyncError, match="mandatory private"):
+        publisher.prepare_candidate(
+            item=SimpleNamespace(work_item_id="V3-NEG-001"),
+            candidate_sha=CANDIDATE,
+            candidate_worktree=candidate,
+        )
 
 
 def test_main_only_publisher_binds_gates_and_publishes_exact_sha(
@@ -99,7 +132,17 @@ def test_main_only_publisher_binds_gates_and_publishes_exact_sha(
         quarantine_root=repo / "factory/state/quarantine",
         local_gate_command=("bash", "gate.sh"),
     )
-    monkeypatch.setattr(github_sync, "CONTROLLER_PRIVATE_GATE", tmp_path / "missing-private-gate")
+    trusted_runner = tmp_path / "trusted-private-gate"
+    trusted_key = tmp_path / "trusted-public-key.pem"
+    trusted_runner.write_text("private runner\n", encoding="utf-8")
+    trusted_key.write_text("public key\n", encoding="utf-8")
+    monkeypatch.setattr(github_sync, "CONTROLLER_PRIVATE_GATE", trusted_runner)
+    monkeypatch.setattr(github_sync, "CONTROLLER_PRIVATE_GATE_KEY", trusted_key)
+    monkeypatch.setattr(
+        github_sync,
+        "validate_private_gate_installation",
+        lambda *_args, **_kwargs: (trusted_runner, trusted_key),
+    )
     item = SimpleNamespace(work_item_id="V3-MIG-019")
     monkeypatch.setattr(github_sync, "current_branch", lambda _: "main")
 
@@ -137,6 +180,25 @@ def test_main_only_publisher_binds_gates_and_publishes_exact_sha(
         return subprocess.CompletedProcess(args, 0, "gate-output", "")
 
     monkeypatch.setattr(github_sync, "run_command", fake_run)
+
+    def fake_private_gate(**arguments: object) -> SimpleNamespace:
+        receipt_path = Path(str(arguments["receipt_path"]))
+        signature_path = Path(str(arguments["signature_path"]))
+        receipt_path.write_text('{"signed":true}\n', encoding="utf-8")
+        signature_path.write_bytes(b"signed")
+        stdout_path = receipt_path.with_name("private-result.txt")
+        stdout_path.write_text("private gate passed\n", encoding="utf-8")
+        return SimpleNamespace(passed=True, stdout_path=str(stdout_path))
+
+    monkeypatch.setattr(github_sync, "run_private_gate", fake_private_gate)
+    monkeypatch.setattr(
+        github_sync,
+        "verify_private_gate_receipt",
+        lambda **_kwargs: SimpleNamespace(
+            runner_digest="sha256:" + "d" * 64,
+            runner_version="3.0.0",
+        ),
+    )
     gate_paths = publisher.prepare_candidate(
         item=item, candidate_sha=CANDIDATE, candidate_worktree=candidate_tree
     )

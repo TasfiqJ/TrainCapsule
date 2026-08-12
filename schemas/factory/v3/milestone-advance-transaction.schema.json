@@ -1,0 +1,41 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "statePath": {
+      "format": "path",
+      "title": "Statepath",
+      "type": "string"
+    },
+    "receiptPath": {
+      "format": "path",
+      "title": "Receiptpath",
+      "type": "string"
+    },
+    "stateEnvelope": {
+      "additionalProperties": true,
+      "title": "Stateenvelope",
+      "type": "object"
+    },
+    "receiptEnvelope": {
+      "additionalProperties": true,
+      "title": "Receiptenvelope",
+      "type": "object"
+    },
+    "createdAt": {
+      "format": "date-time",
+      "title": "Createdat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "statePath",
+    "receiptPath",
+    "stateEnvelope",
+    "receiptEnvelope",
+    "createdAt"
+  ],
+  "title": "MilestoneAdvanceTransaction",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/milestone-advance-transaction.schema.json"
+}

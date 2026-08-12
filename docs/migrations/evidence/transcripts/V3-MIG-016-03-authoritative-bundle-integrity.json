@@ -1,0 +1,14 @@
+{
+  "transcriptVersion": 1,
+  "command": [
+    ".venv/bin/python",
+    "scripts/gates/v3_bundle_integrity.py",
+    "--check-report"
+  ],
+  "workingDirectory": ".",
+  "exitCode": 0,
+  "passedCount": 1,
+  "failedCount": 0,
+  "stdout": "PASS: authoritative V3 bundle covers and matches all 30 payload files\n",
+  "stderr": ""
+}

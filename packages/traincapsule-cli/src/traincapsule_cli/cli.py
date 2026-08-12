@@ -21,6 +21,7 @@ from traincapsule_core import (
 )
 from traincapsule_core.evidence import EvidenceStoreError, LocalEvidenceStore
 from traincapsule_core.models import CaseEconomics
+from traincapsule_core.secure_fs import open_directory_fd
 from traincapsule_ingest_pytorch import (
     FlightRecorderImport,
     FlightRecorderImportError,
@@ -44,14 +45,23 @@ app.add_typer(ingest_app, name="ingest")
 app.add_typer(identity_app, name="identity")
 
 _MAX_CONTROL_FILE_BYTES = 4 * 1024 * 1024
+_MAX_JSON_DEPTH = 64
 
 
 class ExitCode(IntEnum):
     OK = 0
     INVALID_INPUT = 2
-    UNSUPPORTED_VERSION = 3
-    POLICY_BLOCKED = 4
-    LOCAL_IO_ERROR = 5
+    UNSUPPORTED_VERSION = 10
+    EVIDENCE_INCOMPLETE = 11
+    IDENTITY_MISMATCH = 12
+    POLICY_BLOCKED = 13
+    QUALIFICATION_PASS = 20
+    QUALIFICATION_FAIL = 21
+    QUALIFICATION_UNKNOWN = 22
+    INVALID_ORACLE = 23
+    EXPIRED = 24
+    LOCAL_IO_ERROR = 30
+    SECURITY_VIOLATION = 40
 
 
 def _parse_datetime(value: str) -> datetime:
@@ -88,7 +98,30 @@ def _read_object(path: Path) -> dict[str, object]:
                 raise ValueError("input exceeds the local control-file limit")
     finally:
         os.close(descriptor)
-    raw: object = json.loads(bytes(payload))
+    depth = 0
+    in_string = False
+    escaped = False
+    for value in payload:
+        if in_string:
+            if escaped:
+                escaped = False
+            elif value == 0x5C:
+                escaped = True
+            elif value == 0x22:
+                in_string = False
+            continue
+        if value == 0x22:
+            in_string = True
+        elif value in (0x5B, 0x7B):
+            depth += 1
+            if depth > _MAX_JSON_DEPTH:
+                raise ValueError("input exceeds the JSON nesting limit")
+        elif value in (0x5D, 0x7D):
+            depth -= 1
+    try:
+        raw: object = json.loads(bytes(payload))
+    except (UnicodeDecodeError, json.JSONDecodeError, RecursionError) as error:
+        raise ValueError("input must be valid bounded UTF-8 JSON") from error
     if not isinstance(raw, dict):
         raise ValueError("input JSON must be an object")
     return cast(dict[str, object], raw)
@@ -131,7 +164,7 @@ def _write_result(
         typer.echo(rendered.decode("utf-8"), nl=False)
         return
     try:
-        _write_payloads_exclusive({output: rendered})
+        write_payloads_exclusive({output: rendered})
     except (OSError, ValueError) as error:
         _fail(str(error), code=ExitCode.LOCAL_IO_ERROR, machine=machine)
     if machine:
@@ -152,20 +185,21 @@ def _render_result(value: BaseModel | dict[str, object]) -> bytes:
     return canonical_json_bytes(payload)
 
 
-def _write_payloads_exclusive(payloads: dict[Path, bytes]) -> None:
-    if len({path.resolve(strict=False) for path in payloads}) != len(payloads):
+def write_payloads_exclusive(payloads: dict[Path, bytes]) -> None:
+    if len({path.absolute() for path in payloads}) != len(payloads):
         raise ValueError("output paths must be distinct")
     descriptors: dict[Path, int] = {}
+    parents: dict[Path, int] = {}
     created: list[Path] = []
     try:
         for path in payloads:
-            path.parent.mkdir(parents=True, exist_ok=True)
-            if any(parent.is_symlink() for parent in (path.parent, *path.parent.parents)):
-                raise ValueError("output path contains a symlink")
+            parent_descriptor = open_directory_fd(path.parent, create=True)
+            parents[path] = parent_descriptor
             descriptor = os.open(
-                path,
+                path.name,
                 os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
                 0o600,
+                dir_fd=parent_descriptor,
             )
             descriptors[path] = descriptor
             created.append(path)
@@ -174,12 +208,20 @@ def _write_payloads_exclusive(payloads: dict[Path, bytes]) -> None:
                 handle.write(payload)
                 handle.flush()
                 os.fsync(handle.fileno())
+            os.fsync(parents[path])
     except Exception:
         for descriptor in descriptors.values():
             os.close(descriptor)
         for path in created:
-            path.unlink(missing_ok=True)
+            try:
+                os.unlink(path.name, dir_fd=parents[path])
+                os.fsync(parents[path])
+            except FileNotFoundError:
+                pass
         raise
+    finally:
+        for descriptor in parents.values():
+            os.close(descriptor)
 
 
 @app.command("doctor")
@@ -275,16 +317,44 @@ def ingest_pytorch_flight_recorder(
     case_id: Annotated[str, typer.Option("--case-id")],
     store_root: Annotated[Path, typer.Option("--store")],
     captured_at: Annotated[str, typer.Option("--captured-at")],
+    workload_id: Annotated[str, typer.Option("--workload-id")],
+    baseline_environment_id: Annotated[str, typer.Option("--baseline-environment-id")],
+    candidate_environment_id: Annotated[str, typer.Option("--candidate-environment-id")],
+    baseline_recipe: Annotated[Path, typer.Option("--baseline-recipe")],
+    candidate_recipe: Annotated[Path, typer.Option("--candidate-recipe")],
     output: Annotated[Path | None, typer.Option("--output")] = None,
     machine: Annotated[bool, typer.Option("--json")] = False,
 ) -> None:
     try:
+        captured = _parse_datetime(captured_at)
+        store = LocalEvidenceStore(store_root)
         imported = PyTorchFlightRecorderImporter().import_trace(
             trace_dir=trace_dir,
             case_id=case_id,
-            store=LocalEvidenceStore(store_root),
-            captured_at=_parse_datetime(captured_at),
+            store=store,
+            captured_at=captured,
+            workload_id=workload_id,
+            baseline_environment_id=baseline_environment_id,
+            candidate_environment_id=candidate_environment_id,
         )
+        binding_artifacts = [
+            store.put_file(
+                source=path,
+                case_id=case_id,
+                kind=kind,
+                source_adapter="traincapsule-materialization-recipe",
+                source_version="1",
+                captured_at=captured,
+                workload_id=workload_id,
+                baseline_environment_id=baseline_environment_id,
+                candidate_environment_id=candidate_environment_id,
+            )
+            for path, kind in (
+                (baseline_recipe, "BASELINE_MATERIALIZATION_RECIPE"),
+                (candidate_recipe, "CANDIDATE_MATERIALIZATION_RECIPE"),
+            )
+        ]
+        imported = imported.model_copy(update={"binding_artifacts": binding_artifacts})
         _write_result(imported, output=output, machine=machine)
     except FlightRecorderImportError as error:
         exit_code = (
@@ -329,7 +399,7 @@ def native_baseline(
         report = render_native_baseline_human(baseline)
         report_path = human_output or (output.with_suffix(".md") if output else None)
         if report_path is not None and output is not None:
-            _write_payloads_exclusive(
+            write_payloads_exclusive(
                 {output: _render_result(baseline), report_path: report.encode("utf-8")}
             )
             if machine:
@@ -343,7 +413,7 @@ def native_baseline(
                 typer.echo(f"Wrote {output.resolve()} and {report_path.resolve()}")
             return
         if report_path is not None:
-            _write_payloads_exclusive({report_path: report.encode("utf-8")})
+            write_payloads_exclusive({report_path: report.encode("utf-8")})
         if output is None and not machine:
             typer.echo(report, nl=False)
             return
@@ -362,17 +432,28 @@ def preflight(
     try:
         inputs = PreflightInputs.model_validate(_read_object(input_path))
         store = LocalEvidenceStore(store_root)
-        _write_result(
-            evaluate_preflight(
-                inputs,
-                artifact_reader=lambda artifact: store.get_bytes(
-                    case_id=inputs.incident_case.case_id,
-                    artifact=artifact,
-                ),
+        decision = evaluate_preflight(
+            inputs,
+            artifact_reader=lambda artifact: store.get_bytes(
+                case_id=inputs.incident_case.case_id,
+                artifact=artifact,
             ),
-            output=output,
-            machine=machine,
         )
+        _write_result(decision, output=output, machine=machine)
+        codes = {
+            "ELIGIBLE_FOR_QUALIFICATION": ExitCode.QUALIFICATION_PASS,
+            "NATIVE_WORKFLOW_SUFFICIENT": ExitCode.QUALIFICATION_PASS,
+            "NEEDS_MORE_EVIDENCE": ExitCode.EVIDENCE_INCOMPLETE,
+            "POLICY_BLOCKED": ExitCode.POLICY_BLOCKED,
+            "OUTSIDE_SUPPORTED_ENVELOPE": ExitCode.UNSUPPORTED_VERSION,
+            "TECHNICALLY_POSSIBLE_BUT_UNECONOMIC": ExitCode.QUALIFICATION_FAIL,
+            "UNKNOWN": (
+                ExitCode.EXPIRED
+                if decision.technical_result.value == "EXPIRED"
+                else ExitCode.QUALIFICATION_UNKNOWN
+            ),
+        }
+        raise typer.Exit(codes[decision.outcome.value])
     except (OSError, ValueError, ValidationError, json.JSONDecodeError) as error:
         _fail(str(error), code=ExitCode.INVALID_INPUT, machine=machine)
 

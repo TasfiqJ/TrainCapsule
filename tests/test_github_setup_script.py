@@ -3,20 +3,20 @@ from __future__ import annotations
 from pathlib import Path
 
 
-def test_github_setup_is_private_noninteractive_main_only_and_never_pushes() -> None:
+def test_legacy_github_setup_fails_closed_without_mutation() -> None:
     root = Path(__file__).resolve().parents[1]
     text = (root / "scripts" / "configure_github.sh").read_text(encoding="utf-8")
-    assert "gh auth login" not in text
-    assert "read -r" not in text
-    assert "--private" in text
-    assert 'visibility" != "private"' in text
-    assert 'data["releaseMode"] = "owner_directed_main_only"' in text
-    assert 'data["directMainPush"] = True' in text
-    assert "git push" not in text
-    assert "Setup never publishes" in text
-    assert "git push --force" not in text
-    assert "never force-push" in text
-    assert "draft pull request" not in text.lower()
+    assert "exit 64" in text
+    for forbidden in (
+        "gh auth",
+        "gh repo",
+        "gh api",
+        "git fetch",
+        "git push",
+        "config/github.yaml",
+        "read -r",
+    ):
+        assert forbidden not in text
 
 
 def test_factory_commit_messages_are_short_and_simple() -> None:

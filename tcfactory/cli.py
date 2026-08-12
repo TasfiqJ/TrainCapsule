@@ -18,7 +18,7 @@ from rich.console import Console
 from rich.table import Table
 
 from .auth import assert_max_oauth_only, subscription_credentials_path
-from .autopilot import load_state, run_autopilot, save_state
+from .autopilot import load_state, save_state
 from .claude_features import (
     assert_minimum_version,
     installed_claude_version,
@@ -47,6 +47,7 @@ from .peer_messaging import peer_status as read_peer_status
 from .pipeline import run_pipeline
 from .queue import enqueue_task, promote_due_paused, reconcile_running, worker_loop
 from .runtime_status import build_runtime_status
+from .supervisor import run_startup_preflight
 from .usage import usage_health
 from .util import atomic_write_text, read_json, write_json
 from .v3.configuration import (
@@ -54,11 +55,14 @@ from .v3.configuration import (
     load_factory_v3,
     validate_v3_configuration,
 )
+from .v3.controller_lock import controller_process_lock
 from .v3.doctor import collect_doctor_report
 from .v3.enums import Lane
 from .v3.external_evidence import TrustedEvidenceRecord
 from .v3.milestones import MilestoneRoadmap
 from .v3.pilot import create_pilot_metadata, list_pilot_metadata, load_pilot_metadata
+from .v3.queue import V3Queue
+from .v3.runtime_paths import resolve_v3_runtime_paths
 from .v3.work_items import WorkItemCollection
 from .value_policy import contract_for_task, load_value_policy
 from .yamlutil import load_yaml
@@ -656,11 +660,14 @@ def queue_status(
     if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
         from .v3.queue import V3Queue
 
-        queue = V3Queue(repo_root / "factory/queue/v3")
+        paths = resolve_v3_runtime_paths(repo_root)
+        queue = V3Queue(paths.queue)
         counts: dict[str, int] = {}
         for item in queue.items():
             counts[item.status.value] = counts.get(item.status.value, 0) + 1
-        console.print_json(data={"version": 3, "queue": counts, "mutation": False})
+        console.print_json(
+            data={"version": 3, "queueRoot": str(paths.queue), "queue": counts, "mutation": False}
+        )
         return
     config = load_factory_config(repo_root / config_path)
     queue_root = config.resolve(repo_root, config.queue_dir)
@@ -868,18 +875,14 @@ def v3_controller(
 
     root = _resolve_repo(repo)
     validate_v3_configuration(root)
+    factory = load_factory_v3(root / "config/factory.yaml")
+    paths = resolve_v3_runtime_paths(root, factory)
     github = load_github_config(root / "config/github.yaml")
-    runtime_root_value = os.getenv("TCF_RUNTIME_ROOT")
-    runtime_root = (
-        Path(runtime_root_value).expanduser().resolve()
-        if runtime_root_value
-        else (root / "factory/state").resolve()
-    )
     publisher = MainOnlyPublisher(
         repo_root=root,
         config=github,
-        receipt_root=runtime_root / "machine-policy-receipts",
-        quarantine_root=runtime_root / "quarantine",
+        receipt_root=paths.machine_policy_receipts,
+        quarantine_root=paths.quarantine,
     )
     controller = V3Controller(
         repo_root=root,
@@ -893,11 +896,13 @@ def v3_controller(
             console.print_json(data=result)
             if once:
                 return
-            if (runtime_root / "STOP").exists() or (runtime_root / "PAUSE").exists():
+            if paths.stop.exists() or paths.pause.exists():
                 return
             await asyncio.sleep(30 if result.get("status") == "IDLE" else 2)
 
-    asyncio.run(execute())
+    with controller_process_lock(paths.controller_lock):
+        run_startup_preflight(root)
+        asyncio.run(execute())
 
 
 @app.command("autonomy-enable")
@@ -1190,8 +1195,12 @@ def autonomy_pause(
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
 ) -> None:
     repo_root = _resolve_repo(repo)
-    factory = load_factory_config(repo_root / config_path)
-    path = _control_file(repo_root, factory, "pause")
+    raw = load_yaml(repo_root / config_path)
+    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+        path = resolve_v3_runtime_paths(repo_root).pause
+    else:
+        factory = load_factory_config(repo_root / config_path)
+        path = _control_file(repo_root, factory, "pause")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("pause requested\n", encoding="utf-8")
     console.print(f"[yellow]Autopilot pause requested.[/yellow] {path}")
@@ -1203,6 +1212,15 @@ def autonomy_resume(
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
 ) -> None:
     repo_root = _resolve_repo(repo)
+    raw = load_yaml(repo_root / config_path)
+    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+        paths = resolve_v3_runtime_paths(repo_root)
+        if paths.stop.exists() or paths.hard_stuck.exists():
+            console.print("[red]Refused.[/red] Generic resume cannot clear STOP/HARD_STUCK.")
+            raise typer.Exit(2)
+        paths.pause.unlink(missing_ok=True)
+        console.print("[green]V3 operator pause cleared; service may resume.[/green]")
+        return
     factory = load_factory_config(repo_root / config_path)
     autonomy = load_autonomy_config(factory.resolve(repo_root, factory.autonomy_config_path))
     stop_path = _control_file(repo_root, factory, "stop")
@@ -1245,8 +1263,12 @@ def autonomy_stop(
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
 ) -> None:
     repo_root = _resolve_repo(repo)
-    factory = load_factory_config(repo_root / config_path)
-    path = _control_file(repo_root, factory, "stop")
+    raw = load_yaml(repo_root / config_path)
+    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+        path = resolve_v3_runtime_paths(repo_root).stop
+    else:
+        factory = load_factory_config(repo_root / config_path)
+        path = _control_file(repo_root, factory, "stop")
     path.parent.mkdir(parents=True, exist_ok=True)
     path.write_text("stop requested\n", encoding="utf-8")
     console.print(f"[red]Autopilot stop requested.[/red] {path}")
@@ -1315,24 +1337,31 @@ def start(
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
     once: Annotated[bool, typer.Option("--once")] = False,
 ) -> None:
-    """Clear pause/stop controls and run the autonomous loop in the foreground."""
+    """Run only the V3 controller in the foreground without clearing controls."""
     repo_root = _resolve_repo(repo)
-    factory = load_factory_config(repo_root / config_path)
-    if _control_file(repo_root, factory, "stop").exists():
+    raw = load_yaml(repo_root / config_path)
+    if not isinstance(raw, dict) or cast(dict[str, object], raw).get("version") != 3:
         console.print(
-            "[red]Refused.[/red] Generic start cannot clear STOP; use an explicit recovery "
-            "decision with an immutable override record."
+            "[red]Refused.[/red] tcfactory start is V3-only; legacy V2 dispatch is disabled."
         )
         raise typer.Exit(2)
-    _control_file(repo_root, factory, "pause").unlink(missing_ok=True)
-    asyncio.run(
-        run_autopilot(
-            repo_root=repo_root,
-            factory_config_path=config_path,
-            autonomy_config_path=None,
-            once=once,
+    paths = resolve_v3_runtime_paths(repo_root)
+    controls = [
+        name
+        for name, path in (
+            ("STOP", paths.stop),
+            ("PAUSE", paths.pause),
+            ("HARD_STUCK", paths.hard_stuck),
         )
-    )
+        if path.exists()
+    ]
+    if controls:
+        console.print(
+            "[red]Refused.[/red] V3 start cannot clear durable controls: "
+            + ", ".join(controls)
+        )
+        raise typer.Exit(2)
+    v3_controller(repo=repo, once=once)
 
 
 @app.command("pause")
@@ -1369,6 +1398,17 @@ def verify_factory(
 ) -> None:
     """Show one machine-readable health snapshot without changing factory state."""
     repo_root = _resolve_repo(repo)
+    raw = load_yaml(repo_root / config_path)
+    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+        payload = build_runtime_status(repo_root)
+        payload["version"] = 3
+        payload["healthy"] = not (
+            resolve_v3_runtime_paths(repo_root).hard_stuck.exists()
+        )
+        console.print_json(data=payload)
+        if not payload["healthy"]:
+            raise typer.Exit(1)
+        return
     factory = load_factory_config(repo_root / config_path)
     autonomy = load_autonomy_config(factory.resolve(repo_root, factory.autonomy_config_path))
     state = load_state(repo_root, factory)
@@ -1587,6 +1627,22 @@ def recover(
 ) -> None:
     """Reconcile interrupted queue state and promote quota pauses whose reset has passed."""
     repo_root = _resolve_repo(repo)
+    raw = load_yaml(repo_root / config_path)
+    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+        paths = resolve_v3_runtime_paths(repo_root)
+        queue = V3Queue(paths.queue)
+        transactions = queue.reconcile_transactions()
+        expired = queue.recover_expired_claims(now=datetime.now(UTC))
+        console.print_json(
+            data={
+                "version": 3,
+                "queueRoot": str(paths.queue),
+                "reconciledTransitions": transactions,
+                "expiredClaims": expired,
+                "stopped": paths.stop.exists(),
+            }
+        )
+        return
     _reject_legacy_v2_surface(repo_root, config_path, "recover")
     factory = load_factory_config(repo_root / config_path)
     recovered = reconcile_running(repo_root, factory)

@@ -7,6 +7,7 @@ inputs and are never loaded, scheduled, mutated, or resumed here.
 from __future__ import annotations
 
 import asyncio
+import hashlib
 import json
 import os
 from collections.abc import Mapping
@@ -41,6 +42,7 @@ from tcfactory.v3.configuration import (
 )
 from tcfactory.v3.enums import (
     Lane,
+    PolicyScope,
     ReleaseDecision,
     RiskTier,
     WorkKind,
@@ -50,9 +52,22 @@ from tcfactory.v3.external_evidence import (
     ExternalEvidenceVerificationError,
     load_verified_external_evidence,
 )
-from tcfactory.v3.pipeline_services import assert_candidate_scope
+from tcfactory.v3.milestone_runtime import (
+    WorkItemCompletionEvidence,
+    advance_milestone_state,
+    initialize_milestone_state,
+    load_work_item_completion_evidence,
+    write_work_item_completion_evidence,
+)
+from tcfactory.v3.milestones import MilestoneRoadmap
+from tcfactory.v3.pipeline_services import (
+    MachinePolicyGateReceipt,
+    assert_candidate_scope,
+    evaluate_machine_policy_gate,
+)
 from tcfactory.v3.planning import V3TaskPacket, compile_work_item_packet, write_packet
 from tcfactory.v3.queue import V3Queue
+from tcfactory.v3.runtime_paths import resolve_v3_runtime_paths
 from tcfactory.v3.scheduler import ActiveWork, SchedulerDecisionArtifact, schedule_cycle
 from tcfactory.v3.work_items import WorkItem, WorkItemCollection
 from tcfactory.yamlutil import load_yaml
@@ -131,7 +146,9 @@ def _packet_for(
     packet = compile_work_item_packet(
         item,
         source_documents=[
-            "docs/source-of-truth/v3-2026-08-11/CODEX_MASTER_MIGRATION_PROMPT.md",
+            "config/owner_directives.yaml",
+            "SOURCE_PRECEDENCE.md",
+            "docs/source-of-truth/v3-2026-08-11/FINAL_MANIFEST_V3.json",
             "docs/CONTEXT_INDEX.yaml",
             str(context_manifest_path),
         ],
@@ -163,7 +180,9 @@ def _context_groups(item: WorkItem, role: str) -> list[str]:
     if item.lane is Lane.FACTORY:
         return ["factory_control", "roadmap"]
     if item.lane in {Lane.MARKET, Lane.COMPETITOR}:
-        return ["commercial"]
+        if role in {"planner", "research", "value_validator", "value_adversary"}:
+            return ["commercial", "current_facts", "market_evidence"]
+        return ["current_facts"]
     if role in {"security"}:
         return ["technical_architecture", "trust_core"]
     if role in {"integration_scout", "performance"}:
@@ -209,16 +228,12 @@ class V3Controller:
         self.publisher = publisher
         self.owner_id = owner_id
         self.factory: FactoryV3Config = load_factory_v3(self.repo_root / "config/factory.yaml")
-        runtime_root_value = os.getenv(self.factory.runtime.local_state_root_environment_variable)
-        self.runtime_root = (
-            Path(runtime_root_value).expanduser().resolve()
-            if runtime_root_value
-            else (self.repo_root / "factory/state").resolve()
-        )
-        self.queue = V3Queue(self.runtime_root / "v3-queue")
-        self.checkpoints = CheckpointStore(self.runtime_root / "pipelines")
+        self.runtime_paths = resolve_v3_runtime_paths(self.repo_root, self.factory)
+        self.runtime_root = self.runtime_paths.state_root
+        self.queue = V3Queue(self.runtime_paths.queue)
+        self.checkpoints = CheckpointStore(self.runtime_paths.checkpoints)
         self.artifact_root = self.repo_root / "factory/artifacts/v3"
-        self.state_path = self.runtime_root / "v3-controller.json"
+        self.state_path = self.runtime_paths.controller_state
 
     def _load_state(self) -> ControllerState:
         if not self.state_path.exists():
@@ -229,15 +244,138 @@ class V3Controller:
         write_json(self.state_path, state.model_dump(mode="json", by_alias=True))
 
     def _roadmap(self) -> WorkItemCollection:
-        return WorkItemCollection.model_validate(
+        roadmap = WorkItemCollection.model_validate(
             load_yaml(self.repo_root / self.factory.roadmap.work_items)
         )
+        milestones = MilestoneRoadmap.model_validate(
+            load_yaml(self.repo_root / self.factory.roadmap.milestones)
+        )
+        state = initialize_milestone_state(
+            milestones, self.runtime_paths.milestone_state, now=datetime.now(UTC)
+        )
+        return roadmap.model_copy(update={"active_milestone": state.active_milestone})
+
+    def _record_completion_evidence(
+        self,
+        *,
+        item: WorkItem,
+        candidate_sha: str,
+        checkpoint_digest: str,
+        manifest_digest: str | None,
+        machine_policy_receipt_digest: str | None,
+        independent_reviewed: bool,
+        now: datetime,
+    ) -> Path:
+        evidence = WorkItemCompletionEvidence(
+            work_item_id=item.work_item_id,
+            milestone_id=item.milestone,
+            candidate_sha=candidate_sha,
+            checkpoint_digest=checkpoint_digest,
+            candidate_manifest_digest=manifest_digest,
+            independent_reviewed=independent_reviewed,
+            machine_policy_receipt_digest=machine_policy_receipt_digest,
+            external_receipt_refs=item.external_evidence_refs,
+            created_at=now,
+        )
+        return write_work_item_completion_evidence(
+            self.runtime_paths.milestone_evidence, evidence
+        )
+
+    def _advance_completed_milestone(self, collection: WorkItemCollection) -> str | None:
+        active = [
+            item
+            for item in collection.work_items
+            if item.milestone == collection.active_milestone
+        ]
+        if not active or any(
+            item.status not in {WorkStatus.PASSED_ENGINEERING, WorkStatus.COMPLETED}
+            for item in active
+        ):
+            return None
+        evidence_digests: dict[str, str] = {}
+        for item in active:
+            loaded = load_work_item_completion_evidence(
+                self.runtime_paths.milestone_evidence, item.work_item_id
+            )
+            if loaded is None:
+                return None
+            evidence, digest = loaded
+            if evidence.milestone_id != collection.active_milestone:
+                return None
+            if item.risk_tier in {RiskTier.INTEGRATION, RiskTier.TRUST_CORE} and not (
+                evidence.independent_reviewed
+            ):
+                return None
+            if (
+                item.kind is WorkKind.MACHINE_POLICY_REVIEW
+                and evidence.machine_policy_receipt_digest is None
+            ):
+                return None
+            if item.external_receipt_required and not evidence.external_receipt_refs:
+                return None
+            evidence_digests[item.work_item_id] = digest
+        milestones = MilestoneRoadmap.model_validate(
+            load_yaml(self.repo_root / self.factory.roadmap.milestones)
+        )
+        receipt_path = (
+            self.runtime_paths.milestone_decisions
+            / f"{collection.active_milestone}.json"
+        )
+        state = advance_milestone_state(
+            roadmap=milestones,
+            state_path=self.runtime_paths.milestone_state,
+            receipt_path=receipt_path,
+            evidence_digests=evidence_digests,
+            owner_directives_digest=_digest_file(
+                self.repo_root / "config/owner_directives.yaml"
+            ),
+            now=datetime.now(UTC),
+        )
+        return state.active_milestone
 
     def initialize(self) -> None:
         validate_v3_configuration(self.repo_root)
         self.queue.initialize()
         self.queue.reconcile_transactions()
-        self.queue.recover_expired_claims(now=datetime.now(UTC))
+        now = datetime.now(UTC)
+        interrupted = self.queue.recover_interrupted(updated_at=now)
+        for identifier in interrupted:
+            checkpoint = self.checkpoints.load_v3(identifier)
+            if checkpoint is None or not checkpoint.active:
+                continue
+            if checkpoint.budget.restarts_remaining <= 0:
+                checkpoint.active = False
+                checkpoint.circuit_breaker_reason = "candidate restart budget exhausted after crash"
+                self.checkpoints.save_v3(checkpoint)
+                continue
+            checkpoint.generation += 1
+            checkpoint.budget.restarts_remaining -= 1
+            checkpoint.circuit_breaker_reason = "interrupted controller session recovered"
+            checkpoint.updated_at = now
+            self.checkpoints.save_v3(checkpoint)
+            item = self.queue.load(identifier)
+            recovery_root = (
+                self.artifact_root / identifier / f"recovery-{checkpoint.generation:04d}"
+            )
+            write_v3_handoff(
+                artifact_root=recovery_root,
+                relative_path="handoff.json",
+                work_item=item,
+                disposition=item.disposition,
+                attempt=checkpoint.generation,
+                attempts_remaining=checkpoint.budget.restarts_remaining,
+                base_sha=current_sha(self.repo_root, "main"),
+                candidate_sha=checkpoint.candidate_sha,
+                next_action="RESTART_FROM_BOUND_CHECKPOINT",
+                findings=[{"summary": "controller session interrupted"}],
+                artifacts={},
+                source_digest=checkpoint.source_digest,
+                context_digest=checkpoint.context_digest,
+                circuit_breaker_state="RECOVERED_INTERRUPTION",
+                backend_session_ref=checkpoint.backend_session_ref,
+            )
+            self.queue.transition(identifier, WorkStatus.READY, updated_at=now)
+        self.queue.recover_expired_claims(now=now)
         roadmap = self._roadmap()
         existing = {item.work_item_id for item in self.queue.items()}
         for item in roadmap.work_items:
@@ -306,6 +444,16 @@ class V3Controller:
                         WorkStatus.PASSED_ENGINEERING,
                         updated_at=now,
                     )
+                    verified_item = self.queue.load(item.work_item_id)
+                    self._record_completion_evidence(
+                        item=verified_item,
+                        candidate_sha=current_sha(self.repo_root, "main"),
+                        checkpoint_digest=sha256_digest(receipt.canonical_json_bytes()),
+                        manifest_digest=None,
+                        machine_policy_receipt_digest=None,
+                        independent_reviewed=False,
+                        now=now,
+                    )
                     continue
                 target = (
                     WorkStatus.READY
@@ -324,14 +472,95 @@ class V3Controller:
             return tuple("specification" if role == "builder" else role for role in roles)
         return roles
 
+    def _freshness_receipts(self, item: WorkItem) -> dict[str, datetime]:
+        if item.lane not in {Lane.MARKET, Lane.COMPETITOR}:
+            return {}
+        external = ExternalEvidenceConfig.model_validate(
+            load_yaml(self.repo_root / "config/external_evidence.yaml")
+        )
+        verified: dict[str, datetime] = {}
+        for group in ("current_facts", "market_evidence"):
+            subject_id = f"CONTEXT-{group.replace('_', '-').upper()}"
+            record = load_verified_external_evidence(
+                repo_root=self.repo_root,
+                subject_id=subject_id,
+                trusted_root_environment_variable=(
+                    external.trusted_root_environment_variable
+                ),
+                trusted_public_key_environment_variable=(
+                    external.trusted_public_key_environment_variable
+                ),
+            )
+            verified[group] = record.require_commercial_trust().observed_at
+        return verified
+
     async def _execute(self, item: WorkItem, now: datetime) -> dict[str, object]:
         if item.external_receipt_required:
             raise RuntimeError(
                 "outside-fact work cannot execute; it advances only through a "
                 "cryptographically verified external receipt"
             )
-        run_id = f"{item.work_item_id.lower()}-{now.strftime('%Y%m%dT%H%M%SZ')}"
+        try:
+            freshness_receipts = self._freshness_receipts(item)
+        except ExternalEvidenceVerificationError:
+            self.queue.transition(
+                item.work_item_id,
+                WorkStatus.WAITING_EXTERNAL,
+                updated_at=datetime.now(UTC),
+            )
+            return {
+                "status": "WAITING_EXTERNAL",
+                "workItemId": item.work_item_id,
+                "reason": "signed current-fact freshness receipts are unavailable",
+            }
+        run_id = f"{item.work_item_id.lower()}-{now.strftime('%Y%m%dT%H%M%S%fZ')}"
         base_sha = current_sha(self.repo_root, "main")
+        recovered_checkpoint = self.checkpoints.load_v3(item.work_item_id)
+        worktree_base = base_sha
+        if recovered_checkpoint is not None and recovered_checkpoint.active:
+            ancestor = run_command(
+                [
+                    "git",
+                    "merge-base",
+                    "--is-ancestor",
+                    base_sha,
+                    recovered_checkpoint.candidate_sha,
+                ],
+                cwd=self.repo_root,
+                check=False,
+            )
+            if ancestor.returncode != 0:
+                raise RuntimeError("recovery checkpoint candidate is not based on current main")
+            worktree_base = recovered_checkpoint.candidate_sha
+        budget = (
+            recovered_checkpoint.budget
+            if recovered_checkpoint is not None
+            else CheckpointBudget(
+                max_turns=64,
+                max_wall_time_seconds=14_400,
+                plan_attempts_remaining=item.retry_policy.max_plan_attempts,
+                repair_cycles_remaining=item.retry_policy.max_candidate_repair_cycles,
+                restarts_remaining=item.retry_policy.max_candidate_restarts,
+            )
+        )
+        if budget.plan_attempts_remaining <= 0:
+            if recovered_checkpoint is not None:
+                recovered_checkpoint.active = False
+                recovered_checkpoint.circuit_breaker_reason = "planning attempt budget exhausted"
+                recovered_checkpoint.updated_at = datetime.now(UTC)
+                self.checkpoints.save_v3(recovered_checkpoint)
+            self.queue.transition(
+                item.work_item_id,
+                WorkStatus.BLOCKED_TECHNICAL,
+                updated_at=datetime.now(UTC),
+            )
+            return {
+                "status": "BLOCKED_TECHNICAL",
+                "workItemId": item.work_item_id,
+                "redesignProposed": True,
+                "reason": "planning attempt budget exhausted",
+            }
+        budget.plan_attempts_remaining -= 1
         worktree = create_worktree(
             self.repo_root,
             self.repo_root / "factory/worktrees",
@@ -339,10 +568,33 @@ class V3Controller:
             run_id=run_id,
             role="owner",
             attempt=1,
-            base_sha=base_sha,
+            base_sha=worktree_base,
         )
         root = self.artifact_root / item.work_item_id / run_id
         root.mkdir(parents=True, exist_ok=True)
+        checkpoint = V3Checkpoint(
+            generation=(recovered_checkpoint.generation + 1 if recovered_checkpoint else 1),
+            work_item_id=item.work_item_id,
+            lane=item.lane,
+            milestone=item.milestone,
+            budget=budget,
+            context_digest=sha256_digest(b"PLANNING_CONTEXT_PENDING\n"),
+            source_digest=_digest_file(
+                self.repo_root
+                / "docs/source-of-truth/v3-2026-08-11/FINAL_MANIFEST_V3.json"
+            ),
+            candidate_sha=worktree_base,
+            approval_state="MACHINE_POLICY_REQUIRED",
+            finding_fingerprints=(
+                dict(recovered_checkpoint.finding_fingerprints)
+                if recovered_checkpoint is not None
+                else {}
+            ),
+            active=True,
+            created_at=(recovered_checkpoint.created_at if recovered_checkpoint else now),
+            updated_at=now,
+        )
+        self.checkpoints.save_v3(checkpoint)
         planning_role = "factory_repair" if item.lane is Lane.FACTORY else "planner"
         planning_context = build_v3_context_manifest(
             repo_root=self.repo_root,
@@ -350,6 +602,7 @@ class V3Controller:
             role=planning_role,
             requested_groups=_context_groups(item, planning_role),
             max_context_chars=200_000,
+            freshness_receipts=freshness_receipts,
         )
         planning_context_path = root / "context-planning.json"
         write_json(
@@ -364,26 +617,10 @@ class V3Controller:
             context_digest=planning_context.canonical_digest(),
             context_manifest_path=planning_context_path,
         )
-        checkpoint = V3Checkpoint(
-            generation=1,
-            work_item_id=item.work_item_id,
-            lane=item.lane,
-            milestone=item.milestone,
-            budget=CheckpointBudget(
-                max_turns=64,
-                max_wall_time_seconds=14_400,
-                plan_attempts_remaining=item.retry_policy.max_plan_attempts,
-                repair_cycles_remaining=item.retry_policy.max_candidate_repair_cycles,
-                restarts_remaining=item.retry_policy.max_candidate_restarts,
-            ),
-            context_digest=packet.context_digest,
-            source_digest=packet.source_digest,
-            candidate_sha=base_sha,
-            approval_state="MACHINE_POLICY_REQUIRED",
-            active=True,
-            created_at=now,
-            updated_at=now,
-        )
+        checkpoint.context_digest = packet.context_digest
+        checkpoint.source_digest = packet.source_digest
+        checkpoint.candidate_sha = worktree_base
+        checkpoint.updated_at = datetime.now(UTC)
         self.checkpoints.save_v3(checkpoint)
         stage_bindings: list[StageArtifactBinding] = []
         bound_artifacts: dict[str, bytes] = {
@@ -399,6 +636,7 @@ class V3Controller:
                 role=role,
                 requested_groups=_context_groups(item, role),
                 max_context_chars=200_000,
+                freshness_receipts=freshness_receipts,
             )
             role_context_path = root / f"context-{index:02d}-{role}.json"
             write_json(role_context_path, role_context.model_dump(mode="json", by_alias=True))
@@ -461,19 +699,69 @@ class V3Controller:
                 bash_allowlist=[],
                 network_allowed=False,
             )
-            result = await self.backend.execute(request)
-            backend_session_ref = result.session.session_ref
-            if result.state is not SessionState.COMPLETED or result.verdict.lower() != "pass":
-                checkpoint.active = False
-                checkpoint.circuit_breaker_reason = f"stage {role} did not pass"
+            stage_attempt = 0
+            while True:
+                stage_attempt += 1
+                request = request.model_copy(
+                    update={"request_id": f"{request.request_id}-A{stage_attempt:02d}"}
+                )
+                result = await self.backend.execute(request)
+                backend_session_ref = result.session.session_ref
+                if result.state is SessionState.COMPLETED and result.verdict.lower() == "pass":
+                    break
+                fingerprint = hashlib.sha256(
+                    f"{role}\n{result.verdict}\n{result.redacted_summary}\n"
+                    f"{result.error_state or ''}".encode()
+                ).hexdigest()
+                finding_key = f"{role}:{fingerprint}"
+                repeats = checkpoint.finding_fingerprints.get(finding_key, 0) + 1
+                checkpoint.finding_fingerprints[finding_key] = repeats
                 checkpoint.budget.repair_cycles_remaining = max(
                     0, checkpoint.budget.repair_cycles_remaining - 1
                 )
-                self.checkpoints.save_v3(checkpoint)
-                self.queue.transition(
-                    item.work_item_id, WorkStatus.BLOCKED_TECHNICAL, updated_at=datetime.now(UTC)
+                repeated = repeats >= item.retry_policy.max_same_finding_repeats
+                exhausted = checkpoint.budget.repair_cycles_remaining <= 0
+                checkpoint.circuit_breaker_reason = (
+                    f"stage {role} finding {fingerprint[:16]} repeated {repeats} time(s)"
                 )
-                return {"status": "BLOCKED_TECHNICAL", "workItemId": item.work_item_id}
+                checkpoint.updated_at = datetime.now(UTC)
+                checkpoint.backend_session_ref = backend_session_ref
+                self.checkpoints.save_v3(checkpoint)
+                write_v3_handoff(
+                    artifact_root=root,
+                    relative_path=f"recovery-handoff-{role}-{stage_attempt:02d}.json",
+                    work_item=item,
+                    disposition=item.disposition,
+                    attempt=stage_attempt,
+                    attempts_remaining=checkpoint.budget.repair_cycles_remaining,
+                    base_sha=base_sha,
+                    candidate_sha=current_sha(worktree.path),
+                    next_action=(
+                        "BOUNDED_REDESIGN_DECISION" if repeated or exhausted else "REPAIR_CANDIDATE"
+                    ),
+                    findings=[{"fingerprint": fingerprint, "summary": result.redacted_summary}],
+                    artifacts={},
+                    source_digest=checkpoint.source_digest,
+                    context_digest=checkpoint.context_digest,
+                    circuit_breaker_state=(
+                        "OPEN" if repeated or exhausted else "RETRYING"
+                    ),
+                    backend_session_ref=backend_session_ref,
+                )
+                if repeated or exhausted:
+                    checkpoint.active = False
+                    self.checkpoints.save_v3(checkpoint)
+                    self.queue.transition(
+                        item.work_item_id,
+                        WorkStatus.BLOCKED_TECHNICAL,
+                        updated_at=datetime.now(UTC),
+                    )
+                    return {
+                        "status": "BLOCKED_TECHNICAL",
+                        "workItemId": item.work_item_id,
+                        "findingFingerprint": fingerprint,
+                        "redesignProposed": True,
+                    }
             candidate_sha = current_sha(worktree.path)
             assert_candidate_scope(
                 _changed_paths(self.repo_root, base_sha, candidate_sha),
@@ -515,6 +803,46 @@ class V3Controller:
                 item.work_item_id,
                 WorkStatus.PASSED_ENGINEERING,
                 updated_at=datetime.now(UTC),
+            )
+            machine_policy_digest: str | None = None
+            if item.kind is WorkKind.MACHINE_POLICY_REVIEW:
+                artifact_digests = {
+                    name: sha256_digest(value) for name, value in sorted(bound_artifacts.items())
+                }
+                owner_digest = _digest_file(self.repo_root / "config/owner_directives.yaml")
+                policy_receipt = MachinePolicyGateReceipt(
+                    candidate_sha=candidate_sha,
+                    artifact_digests=artifact_digests,
+                    owner_directives_digest=owner_digest,
+                )
+                decision = evaluate_machine_policy_gate(
+                    policy_receipt,
+                    scope=PolicyScope.ROADMAP_EXPANSION,
+                    candidate_sha=candidate_sha,
+                    artifact_digests=artifact_digests,
+                    owner_directives_digest=owner_digest,
+                )
+                if not decision.passed:
+                    raise RuntimeError("deterministic machine-policy review failed")
+                policy_path = (
+                    self.runtime_paths.machine_policy_receipts
+                    / f"{item.work_item_id}-{candidate_sha[:12]}-review.json"
+                )
+                write_json(
+                    policy_path,
+                    policy_receipt.model_dump(mode="json", by_alias=True),
+                )
+                machine_policy_digest = _digest_file(policy_path)
+            self._record_completion_evidence(
+                item=item,
+                candidate_sha=candidate_sha,
+                checkpoint_digest=_digest_file(self.checkpoints.path_for(item.work_item_id)),
+                manifest_digest=None,
+                machine_policy_receipt_digest=machine_policy_digest,
+                independent_reviewed=any(
+                    role in {"audit", "adversary", "security"} for role in self._roles(item)
+                ),
+                now=datetime.now(UTC),
             )
             return {
                 "status": WorkStatus.PASSED_ENGINEERING.value,
@@ -626,6 +954,33 @@ class V3Controller:
             else WorkStatus.PASSED_ENGINEERING
         )
         self.queue.transition(item.work_item_id, target, updated_at=datetime.now(UTC))
+        if target is WorkStatus.PASSED_ENGINEERING:
+            machine_policy_digest: str | None = None
+            if item.kind is WorkKind.MACHINE_POLICY_REVIEW:
+                raw_receipt = release.get("machinePolicyReceipt")
+                if not isinstance(raw_receipt, str):
+                    raise RuntimeError("machine-policy work lacks publication receipt")
+                receipt_path = Path(raw_receipt).resolve()
+                try:
+                    receipt_path.relative_to(
+                        self.runtime_paths.machine_policy_receipts.resolve()
+                    )
+                except ValueError as exc:
+                    raise RuntimeError("machine-policy receipt escaped its runtime root") from exc
+                if not receipt_path.is_file():
+                    raise RuntimeError("machine-policy publication receipt is missing")
+                machine_policy_digest = _digest_file(receipt_path)
+            self._record_completion_evidence(
+                item=item,
+                candidate_sha=candidate_sha,
+                checkpoint_digest=checkpoint_digest,
+                manifest_digest=_digest_file(manifest_path),
+                machine_policy_receipt_digest=machine_policy_digest,
+                independent_reviewed=any(
+                    role in {"audit", "adversary", "security"} for role in self._roles(item)
+                ),
+                now=datetime.now(UTC),
+            )
         return {"status": target.value, "workItemId": item.work_item_id, "release": release}
 
     async def run_cycle(self) -> dict[str, object]:
@@ -634,8 +989,14 @@ class V3Controller:
         collection = self._runtime_collection()
         self._promote_ready(collection, now)
         collection = self._runtime_collection()
+        advanced = self._advance_completed_milestone(collection)
+        if advanced is not None:
+            collection = self._runtime_collection()
+            self._promote_ready(collection, now)
+            collection = self._runtime_collection()
         state = self._load_state()
         config = load_scheduler_v3(self.repo_root / "config/scheduler.yaml")
+        config = config.model_copy(update={"active_milestone": collection.active_milestone})
         if collection.active_milestone != config.active_milestone:
             raise RuntimeError(
                 "roadmap and scheduler active milestone mismatch: "
@@ -661,7 +1022,7 @@ class V3Controller:
             migration_bootstrap=collection.active_milestone == "M0_FACTORY_MIGRATED",
             lane_cursor=state.lane_cursor,
         )
-        decision_path = self.runtime_root / "scheduler-decisions" / f"{decision.cycle_id}.json"
+        decision_path = self.runtime_paths.scheduler_decisions / f"{decision.cycle_id}.json"
         write_json(decision_path, decision.model_dump(mode="json", by_alias=True))
         waiting_external = [
             item.work_item_id
@@ -690,6 +1051,9 @@ class V3Controller:
         results = await asyncio.gather(
             *(execute_selected(identifier) for identifier in decision.selected_work_item_ids)
         )
+        advanced = self._advance_completed_milestone(self._runtime_collection())
+        if advanced is not None:
+            self._promote_ready(self._runtime_collection(), datetime.now(UTC))
         state.last_work_item_id = decision.selected_work_item_ids[-1]
         state.last_candidate_sha = current_sha(self.repo_root, "main")
         self._save_state(state)
@@ -698,6 +1062,7 @@ class V3Controller:
             "results": results,
             "scopedBlockers": state.blocked_scopes,
             "interventionMode": "NONE",
+            "activeMilestone": advanced or collection.active_milestone,
         }
 
     def salvage_candidate(self, work_item_id: str, destination: Path) -> Path:

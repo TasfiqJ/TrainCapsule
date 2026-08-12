@@ -1,0 +1,15 @@
+{
+  "transcriptVersion": 1,
+  "command": [
+    ".venv/bin/pytest",
+    "tests/test_v3_config_and_roadmap.py",
+    "tests/test_v3_scheduler_and_recovery.py",
+    "tests/test_v3_supervisor_and_status.py"
+  ],
+  "workingDirectory": ".",
+  "exitCode": 0,
+  "passedCount": 23,
+  "failedCount": 0,
+  "stdout": ".......................                                                  [100%]\n23 passed in 2.83s\n",
+  "stderr": ""
+}

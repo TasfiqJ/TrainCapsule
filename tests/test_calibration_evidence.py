@@ -146,11 +146,13 @@ def test_valid_calibration_evidence_passes(tmp_path: Path) -> None:
     assert result["version"] == 3
 
 
-def test_calibration_script_uses_pinned_python_for_evidence() -> None:
+def test_legacy_live_calibration_script_is_fail_closed() -> None:
     script = Path("scripts/run_one_time_calibration.sh").read_text(encoding="utf-8")
 
-    assert 'uv run python - "$SUMMARY" "$EVIDENCE_DIR"' in script
-    assert 'python3 - "$SUMMARY" "$EVIDENCE_DIR"' not in script
+    assert "permanently disabled" in script
+    assert "exit 64" in script
+    assert "uv run" not in script
+    assert "rm -rf" not in script
 
 
 def test_tampered_calibration_log_fails(tmp_path: Path) -> None:

@@ -3,6 +3,16 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/../.." && pwd)"
 cd "$ROOT"
 
+EVIDENCE_MODE="validate"
+if [[ ${1:-} == "--pre-evidence" ]]; then
+  EVIDENCE_MODE="pre-evidence"
+  shift
+fi
+if [[ $# -ne 0 ]]; then
+  echo "usage: full_quality.sh [--pre-evidence]" >&2
+  exit 2
+fi
+
 bash scripts/gates/secret_scan.sh
 COMMON_GIT_DIR="$(git rev-parse --path-format=absolute --git-common-dir)"
 SHARED_VENV="$(dirname "$COMMON_GIT_DIR")/.venv"
@@ -12,6 +22,13 @@ for executable in ruff pyright python; do
     exit 3
   fi
 done
+
+"$SHARED_VENV/bin/python" scripts/gates/active_policy_integrity.py
+"$SHARED_VENV/bin/python" scripts/gates/v3_bundle_integrity.py --check-report
+"$SHARED_VENV/bin/python" scripts/gates/source_of_truth_integrity.py
+if [[ $EVIDENCE_MODE == "validate" ]]; then
+  "$SHARED_VENV/bin/python" scripts/gates/v3_migration_evidence.py
+fi
 
 UV_BIN="$(command -v uv || true)"
 if [[ -z "$UV_BIN" && -x "$HOME/.local/bin/uv" ]]; then
@@ -27,6 +44,15 @@ export UV_OFFLINE=1
 "$UV_BIN" run --active --no-sync ruff check .
 "$UV_BIN" run --active --no-sync pyright
 "$UV_BIN" run --active --no-sync python -m pytest -q
+"$UV_BIN" run --active --no-sync python scripts/generate_v3_schemas.py --check
+"$UV_BIN" run --active --no-sync python scripts/generate_v3_roadmap.py --check
+"$UV_BIN" run --active --no-sync python scripts/generate_v3_legacy_migration.py --check
+"$UV_BIN" run --active --no-sync python scripts/generate_product_schemas.py --check
+"$UV_BIN" run --active --no-sync python scripts/update_v3_migration_inventory.py --check
+"$UV_BIN" run --active --no-sync python scripts/gates/no_paid_usage.py
+"$UV_BIN" run --active --no-sync tcfactory config validate
+"$UV_BIN" run --active --no-sync tcfactory migrate-roadmap --from-v2 --dry-run
+"$UV_BIN" build --offline --wheel
 
 root_script_present() {
   "$SHARED_VENV/bin/python" - "$1" <<'PY'

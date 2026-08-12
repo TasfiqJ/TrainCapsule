@@ -50,10 +50,18 @@ from tcfactory.v3.configuration import (
 )
 from tcfactory.v3.dispositions import DispositionLedger
 from tcfactory.v3.external_evidence import ExternalEvidenceReceipt
+from tcfactory.v3.migration_evidence import MigrationEvidenceDocument
 from tcfactory.v3.migrations import LegacyMigrationMap
+from tcfactory.v3.milestone_runtime import (
+    MilestoneAdvanceTransaction,
+    MilestoneCompletionReceipt,
+    MilestoneRuntimeState,
+    WorkItemCompletionEvidence,
+)
 from tcfactory.v3.milestones import MilestoneRoadmap
 from tcfactory.v3.pipeline_services import ReleaseCandidate, V3Finding
 from tcfactory.v3.planning import V3TaskPacket
+from tcfactory.v3.private_gate import PrivateGateReceipt
 from tcfactory.v3.recovery import FindingCounter, HardStuckRecord
 from tcfactory.v3.retry_policy import RetryPolicy
 from tcfactory.v3.scheduler import SchedulerConfig
@@ -89,9 +97,15 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "legacy-migration.schema.json": LegacyMigrationMap,
     "milestones.schema.json": MilestoneRoadmap,
     "migration-complete-marker.schema.json": MigrationCompleteMarker,
+    "migration-evidence.schema.json": MigrationEvidenceDocument,
     "milestone-completion.schema.json": MilestoneCompletionDecision,
+    "milestone-completion-receipt.schema.json": MilestoneCompletionReceipt,
+    "milestone-runtime-state.schema.json": MilestoneRuntimeState,
+    "milestone-advance-transaction.schema.json": MilestoneAdvanceTransaction,
+    "work-item-completion-evidence.schema.json": WorkItemCompletionEvidence,
     "milestone-policy-config.schema.json": MilestonePolicyConfig,
     "retry-policy.schema.json": RetryPolicy,
+    "private-gate-receipt.schema.json": PrivateGateReceipt,
     "release-candidate.schema.json": ReleaseCandidate,
     "scheduler.schema.json": SchedulerConfig,
     "supervisor-state.schema.json": SupervisorState,

@@ -1,15 +1,70 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "workItemId": "V3-MIG-016",
+  "status": "FINAL",
   "result": "PASS",
   "evidenceType": "OWNER_DIRECTED_MACHINE_POLICY",
-  "recordedAt": "2026-08-11T22:45:00Z",
-  "authority": "config/owner_directives.yaml",
-  "policy": "factory/policy/ZERO_HUMAN_OPERATION_OVERRIDE.json",
-  "verification": [
-    "scripts/gates/source_of_truth_integrity.py",
-    "tests/test_source_of_truth_integrity.py",
-    "tests/test_v3_config_and_roadmap.py"
+  "recordedAt": "2026-08-12T11:54:31.911441Z",
+  "binding": {
+    "subjectSha": null,
+    "implementationTreeSha256": "8a2f80ae17cfe2dbcf45ea296bc7c984901ca2a744809ee4151569203e66db6b",
+    "implementationTreeFileCount": 663,
+    "algorithm": "sha256-mode-path-blob-manifest"
+  },
+  "authorityDigests": {
+    "sourceManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c",
+    "sourcePrecedenceSha256": "15a2043b31286bfc35fb7d70e8b29e59eea90af8b3abbbe256cff50084b383bb",
+    "ownerDirectivesSha256": "f803e131f5717b1384645f1dedb46646eb5a589b43025b1e34c1e09591d6f7c9",
+    "ownerOverridePolicySha256": "db371226f5f10e93ae6b228baa106fb430252aa5354fe696b195c5a1188187d2"
+  },
+  "executions": [
+    {
+      "commandId": "source-authority-integrity",
+      "command": [
+        ".venv/bin/python",
+        "scripts/gates/source_of_truth_integrity.py"
+      ],
+      "workingDirectory": ".",
+      "exitCode": 0,
+      "result": "PASS",
+      "passedCount": 1,
+      "failedCount": 0,
+      "failureAttribution": "NONE",
+      "transcriptPath": "docs/migrations/evidence/transcripts/V3-MIG-016-01-source-authority-integrity.json",
+      "transcriptSha256": "3758f410be7bb06ba8f8f6d89f735e33e3656ee808b20dae6b4586d7279ada63"
+    },
+    {
+      "commandId": "active-policy-integrity",
+      "command": [
+        ".venv/bin/python",
+        "scripts/gates/active_policy_integrity.py"
+      ],
+      "workingDirectory": ".",
+      "exitCode": 0,
+      "result": "PASS",
+      "passedCount": 1,
+      "failedCount": 0,
+      "failureAttribution": "NONE",
+      "transcriptPath": "docs/migrations/evidence/transcripts/V3-MIG-016-02-active-policy-integrity.json",
+      "transcriptSha256": "e99f008ac50599f50c4d65d11bf2da2cfb2adae4ddef4b8755266fc81e49ef47"
+    },
+    {
+      "commandId": "authoritative-bundle-integrity",
+      "command": [
+        ".venv/bin/python",
+        "scripts/gates/v3_bundle_integrity.py",
+        "--check-report"
+      ],
+      "workingDirectory": ".",
+      "exitCode": 0,
+      "result": "PASS",
+      "passedCount": 1,
+      "failedCount": 0,
+      "failureAttribution": "NONE",
+      "transcriptPath": "docs/migrations/evidence/transcripts/V3-MIG-016-03-authoritative-bundle-integrity.json",
+      "transcriptSha256": "5541e7f4753d6f8094443e5ae459f36d99db7399d9ede397a347cdef43c7e82c"
+    }
   ],
-  "truthBoundary": "The owner override replaces human approval with deterministic machine-policy receipts; it does not create external, customer, GPU, or commercial evidence."
+  "evidenceInputs": {},
+  "truthBoundary": "Machine policy replaces human/PR approval only; no external fact is created."
 }

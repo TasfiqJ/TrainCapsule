@@ -39,7 +39,7 @@ Return at most 8 findings total. A blocking finding must be reproducible and use
     reproduction:
     expected:
     observed:
-    ownerClass: PRODUCT | FACTORY | EXTERNAL | HUMAN
+    ownerClass: PRODUCT | FACTORY | EXTERNAL
     minimalRepair:
 
 Future enhancements, style preferences, and speculative risks are advisory, not blocking. When a fingerprint reaches its configured repetition limit, escalate and stop instead of reporting it as new.

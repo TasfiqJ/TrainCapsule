@@ -1,0 +1,64 @@
+{
+  "$defs": {
+    "MilestoneStatus": {
+      "enum": [
+        "PROPOSED",
+        "ACTIVE",
+        "WAITING_EXTERNAL",
+        "PAUSED",
+        "COMPLETED",
+        "CANCELLED"
+      ],
+      "title": "MilestoneStatus",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "default": 3,
+      "maximum": 3,
+      "minimum": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "activeMilestone": {
+      "title": "Activemilestone",
+      "type": "string"
+    },
+    "statuses": {
+      "additionalProperties": {
+        "$ref": "#/$defs/MilestoneStatus"
+      },
+      "title": "Statuses",
+      "type": "object"
+    },
+    "lastCompletionDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Lastcompletiondigest"
+    },
+    "updatedAt": {
+      "format": "date-time",
+      "title": "Updatedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "activeMilestone",
+    "statuses",
+    "updatedAt"
+  ],
+  "title": "MilestoneRuntimeState",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/milestone-runtime-state.schema.json"
+}

@@ -8,6 +8,32 @@
           "title": "Artifactid",
           "type": "string"
         },
+        "baselineEnvironmentId": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Baselineenvironmentid"
+        },
+        "candidateEnvironmentId": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Candidateenvironmentid"
+        },
         "capturedAt": {
           "format": "date-time",
           "title": "Capturedat",
@@ -51,6 +77,11 @@
           "title": "Kind",
           "type": "string"
         },
+        "metadataDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Metadatadigest",
+          "type": "string"
+        },
         "privacyClass": {
           "$ref": "#/$defs/PrivacyClass"
         },
@@ -82,6 +113,19 @@
           "minLength": 1,
           "title": "Sourceversion",
           "type": "string"
+        },
+        "workloadId": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workloadid"
         }
       },
       "required": [
@@ -97,7 +141,8 @@
         "customerLocalUri",
         "exportPolicy",
         "provenance",
-        "integrityStatus"
+        "integrityStatus",
+        "metadataDigest"
       ],
       "title": "EvidenceArtifact",
       "type": "object"
@@ -227,6 +272,24 @@
       "title": "Artifacts",
       "type": "array"
     },
+    "baselineEnvironmentId": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Baselineenvironmentid",
+      "type": "string"
+    },
+    "bindingArtifacts": {
+      "items": {
+        "$ref": "#/$defs/EvidenceArtifact"
+      },
+      "minItems": 2,
+      "title": "Bindingartifacts",
+      "type": "array"
+    },
+    "candidateEnvironmentId": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Candidateenvironmentid",
+      "type": "string"
+    },
     "caseId": {
       "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$",
       "title": "Caseid",
@@ -308,12 +371,31 @@
       "title": "Generationpolicyversion",
       "type": "string"
     },
+    "importDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Importdigest",
+      "type": "string"
+    },
+    "importWarnings": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Importwarnings",
+      "type": "array"
+    },
     "limitations": {
       "items": {
         "type": "string"
       },
       "minItems": 1,
       "title": "Limitations",
+      "type": "array"
+    },
+    "missingRanks": {
+      "items": {
+        "type": "integer"
+      },
+      "title": "Missingranks",
       "type": "array"
     },
     "operatorEffortSeconds": {
@@ -327,6 +409,16 @@
       "minimum": 1,
       "title": "Schemaversion",
       "type": "integer"
+    },
+    "sourceFormat": {
+      "minLength": 1,
+      "title": "Sourceformat",
+      "type": "string"
+    },
+    "sourceFormatVersion": {
+      "minLength": 1,
+      "title": "Sourceformatversion",
+      "type": "string"
     },
     "toolName": {
       "minLength": 1,
@@ -344,17 +436,31 @@
       },
       "title": "Unresolvedquestions",
       "type": "array"
+    },
+    "workloadId": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Workloadid",
+      "type": "string"
     }
   },
   "required": [
     "caseId",
+    "workloadId",
+    "baselineEnvironmentId",
+    "candidateEnvironmentId",
     "toolName",
     "toolVersion",
+    "sourceFormat",
+    "sourceFormatVersion",
+    "importDigest",
     "command",
     "configuration",
     "artifacts",
+    "bindingArtifacts",
     "findings",
     "limitations",
+    "importWarnings",
+    "missingRanks",
     "elapsedSeconds",
     "operatorEffortSeconds",
     "decisionEvidenceRefs",

@@ -1,0 +1,13 @@
+{
+  "transcriptVersion": 1,
+  "command": [
+    ".venv/bin/python",
+    "scripts/gates/source_of_truth_integrity.py"
+  ],
+  "workingDirectory": ".",
+  "exitCode": 0,
+  "passedCount": 1,
+  "failedCount": 0,
+  "stdout": "PASS: TrainCapsule V3 source authority and 11 files verified\n",
+  "stderr": ""
+}

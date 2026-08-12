@@ -36,8 +36,8 @@ uv run python scripts/generate_product_schemas.py --check
 ```
 
 The complete factory and product quality path is local and deterministic. The owner-directed
-runtime is fully unattended and publishes only an exact verified candidate SHA to `main`; it never
-creates or pushes a non-main branch and never depends on a pull request. Required hosted checks run
+runtime is fully unattended and publishes only an exact verified candidate SHA to `main`; bounded
+local worktree branches may exist, but it never pushes a non-main branch or depends on a pull request. Required hosted checks run
 against that exact `main` SHA. A failed or incomplete hosted result is quarantined and reverted by a
 normal follow-up commit, with finite recovery and a durable hard stop if recovery itself fails.
 

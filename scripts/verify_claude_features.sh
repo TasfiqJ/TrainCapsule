@@ -41,4 +41,4 @@ assert settings['autoMemoryEnabled'] is True
 assert settings['forceLoginMethod'] == 'claudeai'
 print('Claude-native policy passed: renewable production agents, memory, messaging, hooks, and isolation configured.')
 PY
-printf 'A live cross-session handshake is verified later by scripts/run_one_time_calibration.sh.\n'
+printf 'V3 validates the backend boundary through deterministic controller tests; legacy live calibration is disabled.\n'

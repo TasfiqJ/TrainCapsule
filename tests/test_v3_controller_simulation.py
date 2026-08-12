@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 import shutil
 import subprocess
 from pathlib import Path
@@ -9,11 +10,12 @@ from typing import cast
 import pytest
 import yaml
 
-from tcfactory.backends.base import AgentRunResult, AgentTaskRequest
+from tcfactory.backends.base import AgentRunResult, AgentTaskRequest, SessionState
 from tcfactory.backends.fake import FakeBackend
 from tcfactory.util import sha256_file
 from tcfactory.v3.controller import V3Controller
 from tcfactory.v3.external_evidence import ExternalEvidenceReceipt, TrustedEvidenceRecord
+from tcfactory.v3.milestone_runtime import load_milestone_state
 from tcfactory.v3.work_items import WorkItem, WorkItemCollection
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -81,8 +83,13 @@ def _simulation_repo(tmp_path: Path) -> Path:
     )
     (repo / "docs").mkdir(exist_ok=True)
     shutil.copy2(ROOT / "docs/CONTEXT_INDEX.yaml", repo / "docs/CONTEXT_INDEX.yaml")
+    shutil.copy2(ROOT / "SOURCE_PRECEDENCE.md", repo / "SOURCE_PRECEDENCE.md")
     shutil.copytree(ROOT / "factory/policy", repo / "factory/policy")
     (repo / "factory/roadmap").mkdir(parents=True)
+    shutil.copy2(
+        ROOT / "factory/roadmap/milestones.yaml",
+        repo / "factory/roadmap/milestones.yaml",
+    )
     (repo / "tcfactory/v3").mkdir(parents=True)
     shutil.copy2(ROOT / "tcfactory/v3/planning.py", repo / "tcfactory/v3/planning.py")
     (repo / "factory/feature_ledger.yaml").write_text(
@@ -126,6 +133,32 @@ class _CommittingBackend(FakeBackend):
             _git(worktree, "add", str(artifact.relative_to(worktree)))
             _git(worktree, "commit", "-m", f"simulate {request.work_item_id}")
         return await super().execute(request)
+
+
+class _FailThenCommitBackend(_CommittingBackend):
+    def __init__(self, *, always_fail: bool = False) -> None:
+        super().__init__()
+        self.calls = 0
+        self.always_fail = always_fail
+
+    async def execute(self, request: AgentTaskRequest) -> AgentRunResult:
+        self.calls += 1
+        if self.always_fail or self.calls == 1:
+            result = await FakeBackend.execute(self, request)
+            return result.model_copy(
+                update={
+                    "state": SessionState.FAILED,
+                    "verdict": "fail",
+                    "redacted_summary": "deterministic repeated simulation finding",
+                }
+            )
+        return await super().execute(request)
+
+
+class _CrashingBackend(FakeBackend):
+    async def execute(self, request: AgentTaskRequest) -> AgentRunResult:
+        del request
+        raise RuntimeError("simulated process crash after durable checkpoint")
 
 
 class _LocalMainPublisher:
@@ -177,6 +210,152 @@ def test_disposable_controller_progresses_mechanical_and_standard_without_humans
     assert controller.queue.load("V3-SIM-003").status.value == "WAITING_EXTERNAL"
     assert sha256_file(repo / "factory/feature_ledger.yaml") == legacy_digest
     assert _git(repo, "rev-list", "--count", "HEAD") == "3"
+    packet_path = next((repo / "factory/artifacts/v3/V3-SIM-001").glob("*/task-packet.yaml"))
+    packet = yaml.safe_load(packet_path.read_text(encoding="utf-8"))
+    sources = cast(list[str], packet["sourceDocuments"])
+    assert sources[:2] == ["config/owner_directives.yaml", "SOURCE_PRECEDENCE.md"]
+    assert not any("CODEX_MASTER_MIGRATION_PROMPT" in source for source in sources)
+    assert all(
+        (Path(source).is_file() if Path(source).is_absolute() else (repo / source).is_file())
+        for source in sources
+    )
+
+
+def test_controller_consumes_bounded_repair_then_succeeds(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _simulation_repo(tmp_path)
+    monkeypatch.delenv("TCF_RUNTIME_ROOT", raising=False)
+    backend = _FailThenCommitBackend()
+    controller = V3Controller(
+        repo_root=repo,
+        backend=backend,
+        publisher=_LocalMainPublisher(repo, tmp_path / "gates"),
+    )
+
+    result = asyncio.run(controller.run_cycle())
+
+    assert cast(list[dict[str, object]], result["results"])[0]["status"] == (
+        "PASSED_ENGINEERING"
+    )
+    checkpoint = controller.checkpoints.load_v3("V3-SIM-001")
+    assert checkpoint is not None
+    assert checkpoint.budget.plan_attempts_remaining == 1
+    assert checkpoint.budget.repair_cycles_remaining == 1
+    handoffs = list(
+        (repo / "factory/artifacts/v3/V3-SIM-001").glob(
+            "*/recovery-handoff-builder-01.json"
+        )
+    )
+    assert len(handoffs) == 1
+
+
+def test_repeated_finding_blocks_after_finite_attempts_and_proposes_redesign(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _simulation_repo(tmp_path)
+    monkeypatch.delenv("TCF_RUNTIME_ROOT", raising=False)
+    backend = _FailThenCommitBackend(always_fail=True)
+    controller = V3Controller(
+        repo_root=repo,
+        backend=backend,
+        publisher=_LocalMainPublisher(repo, tmp_path / "gates"),
+    )
+
+    result = asyncio.run(controller.run_cycle())
+
+    item_result = cast(list[dict[str, object]], result["results"])[0]
+    assert item_result["status"] == "BLOCKED_TECHNICAL"
+    assert item_result["redesignProposed"] is True
+    assert backend.calls == 2
+    checkpoint = controller.checkpoints.load_v3("V3-SIM-001")
+    assert checkpoint is not None and checkpoint.active is False
+    assert checkpoint.budget.repair_cycles_remaining == 0
+
+
+def test_interrupted_controller_resumes_candidate_with_finite_restart_budget(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _simulation_repo(tmp_path)
+    monkeypatch.delenv("TCF_RUNTIME_ROOT", raising=False)
+    crashing = V3Controller(
+        repo_root=repo,
+        backend=_CrashingBackend(),
+        publisher=_LocalMainPublisher(repo, tmp_path / "gates"),
+    )
+    with pytest.raises(RuntimeError, match="simulated process crash"):
+        asyncio.run(crashing.run_cycle())
+    interrupted = crashing.checkpoints.load_v3("V3-SIM-001")
+    assert interrupted is not None
+    assert interrupted.budget.plan_attempts_remaining == 1
+    assert interrupted.budget.restarts_remaining == 1
+    assert crashing.queue.load("V3-SIM-001").status.value == "RUNNING"
+
+    lease_path = crashing.queue.lease_root / "V3-SIM-001.json"
+    lease = json.loads(lease_path.read_text(encoding="utf-8"))
+    lease["ownerProcessIdentity"] = "linux-proc:999999999:0"
+    lease_path.write_text(json.dumps(lease), encoding="utf-8")
+
+    resumed = V3Controller(
+        repo_root=repo,
+        backend=_CommittingBackend(),
+        publisher=_LocalMainPublisher(repo, tmp_path / "gates"),
+    )
+    result = asyncio.run(resumed.run_cycle())
+
+    assert "results" in result, result
+    assert cast(list[dict[str, object]], result["results"])[0]["status"] == (
+        "PASSED_ENGINEERING"
+    )
+    checkpoint = resumed.checkpoints.load_v3("V3-SIM-001")
+    assert checkpoint is not None
+    assert checkpoint.budget.plan_attempts_remaining == 0
+    assert checkpoint.budget.restarts_remaining == 0
+    handoffs = list(
+        (repo / "factory/artifacts/v3/V3-SIM-001").glob("recovery-*/handoff.json")
+    )
+    assert len(handoffs) == 1
+
+
+def test_controller_records_digest_bound_evidence_and_atomically_advances_runtime_milestone(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _simulation_repo(tmp_path)
+    collection = WorkItemCollection(
+        active_milestone="M1_NATIVE_PREFLIGHT",
+        work_items=[_item("V3-SIM-001", risk="MECHANICAL")],
+    )
+    roadmap_path = repo / "factory/roadmap/work_items.yaml"
+    roadmap_path.write_text(
+        yaml.safe_dump(collection.model_dump(mode="json", by_alias=True), sort_keys=False),
+        encoding="utf-8",
+    )
+    _git(repo, "add", str(roadmap_path.relative_to(repo)))
+    _git(repo, "commit", "-m", "bounded milestone fixture")
+    tracked_roadmap = roadmap_path.read_bytes()
+    tracked_scheduler = (repo / "config/scheduler.yaml").read_bytes()
+    monkeypatch.delenv("TCF_RUNTIME_ROOT", raising=False)
+    controller = V3Controller(
+        repo_root=repo,
+        backend=_CommittingBackend(),
+        publisher=_LocalMainPublisher(repo, tmp_path / "gates"),
+    )
+
+    result = asyncio.run(controller.run_cycle())
+
+    assert result["activeMilestone"] == "M2_CONTROLLED_QUALIFICATION"
+    state = load_milestone_state(controller.runtime_paths.milestone_state)
+    assert state is not None
+    assert state.active_milestone == "M2_CONTROLLED_QUALIFICATION"
+    decision = json.loads(
+        (
+            controller.runtime_paths.milestone_decisions / "M1_NATIVE_PREFLIGHT.json"
+        ).read_text(encoding="utf-8")
+    )
+    assert decision["record"]["proposals"] == []
+    assert decision["record"]["evidenceDigests"]["V3-SIM-001"].startswith("sha256:")
+    assert roadmap_path.read_bytes() == tracked_roadmap
+    assert (repo / "config/scheduler.yaml").read_bytes() == tracked_scheduler
 
 
 def test_controller_binds_verified_outside_fact_receipt_before_pass(

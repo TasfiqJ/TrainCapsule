@@ -1,16 +1,39 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "workItemId": "V3-MIG-017",
+  "status": "FINAL",
   "result": "PASS",
-  "evidenceType": "DISPOSABLE_ROLLBACK_REHEARSAL",
-  "recordedAt": "2026-08-11T22:45:00Z",
-  "rollbackRef": "safety/traincapsule-v3-pre-migration-20260811T212024Z",
-  "restoredSha": "6b480232fa92b069103da44c475bd17bcb3e6bd1",
-  "legacyLedgerSha256": "ab5d10c6718d3a9fdf53dd78cf0c387e995cd1723cf10b76fb53e14af559c994",
-  "checks": [
-    "detached disposable worktree reached the exact rollback SHA",
-    "disposable rollback tree was clean",
-    "legacy ledger matched the snapshot-bound digest",
-    "disposable worktree was removed without modifying main or runtime state"
-  ]
+  "evidenceType": "READ_ONLY_ROLLBACK_REHEARSAL",
+  "recordedAt": "2026-08-12T11:54:31.911441Z",
+  "binding": {
+    "subjectSha": null,
+    "implementationTreeSha256": "8a2f80ae17cfe2dbcf45ea296bc7c984901ca2a744809ee4151569203e66db6b",
+    "implementationTreeFileCount": 663,
+    "algorithm": "sha256-mode-path-blob-manifest"
+  },
+  "authorityDigests": {
+    "sourceManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c",
+    "sourcePrecedenceSha256": "15a2043b31286bfc35fb7d70e8b29e59eea90af8b3abbbe256cff50084b383bb",
+    "ownerDirectivesSha256": "f803e131f5717b1384645f1dedb46646eb5a589b43025b1e34c1e09591d6f7c9",
+    "ownerOverridePolicySha256": "db371226f5f10e93ae6b228baa106fb430252aa5354fe696b195c5a1188187d2"
+  },
+  "executions": [
+    {
+      "commandId": "rollback-archive-rehearsal",
+      "command": [
+        ".venv/bin/python",
+        "scripts/gates/v3_rollback_rehearsal.py"
+      ],
+      "workingDirectory": ".",
+      "exitCode": 0,
+      "result": "PASS",
+      "passedCount": 1,
+      "failedCount": 0,
+      "failureAttribution": "NONE",
+      "transcriptPath": "docs/migrations/evidence/transcripts/V3-MIG-017-01-rollback-archive-rehearsal.json",
+      "transcriptSha256": "217154cf3b2dd5af23976f07ffd6bd3bde7284cf222fee9d8d73c05d592eebbc"
+    }
+  ],
+  "evidenceInputs": {},
+  "truthBoundary": "The rehearsal verifies repository rollback bytes only; it does not mutate Git or runtime."
 }

@@ -2,11 +2,18 @@
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+export TCF_REQUIRE_MODEL_CREDENTIALS=0
+# shellcheck disable=SC1091
+source "$ROOT/scripts/load_factory_env.sh"
 STATE_DIR="${TCF_RUNTIME_ROOT:-$ROOT/factory/state}"
+if [[ "$STATE_DIR" != /* ]]; then
+  printf 'TCF_RUNTIME_ROOT must be absolute.\n' >&2
+  exit 2
+fi
 LOG_DIR="$ROOT/factory/logs"
 mkdir -p "$STATE_DIR" "$LOG_DIR"
 
-# One launcher owns supervision. The controller retains its separate autopilot lock.
+# One launcher owns supervision. Each controller also holds controller.lock for its lifetime.
 exec 9>"$STATE_DIR/supervisor.lock"
 if ! flock -n 9; then
   printf 'Another V3 supervisor owns the single-instance lock; launcher exiting.\n' \
@@ -25,6 +32,7 @@ if [[ -f "$STATE_DIR/HARD_STUCK.json" ]]; then
 fi
 
 # shellcheck disable=SC1091
+export TCF_REQUIRE_MODEL_CREDENTIALS=1
 source "$ROOT/scripts/load_factory_env.sh"
 export TCF_LIGHTS_OUT=1
 cd "$ROOT"

@@ -1,18 +1,39 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "workItemId": "V3-MIG-019",
+  "status": "FINAL",
   "result": "PASS",
   "evidenceType": "DISPOSABLE_END_TO_END_CONTROLLER_SIMULATION",
-  "recordedAt": "2026-08-11T22:45:00Z",
-  "verification": "tests/test_v3_controller_simulation.py",
-  "outcomes": {
-    "mechanical": "PASSED_ENGINEERING",
-    "standard": "PASSED_ENGINEERING",
-    "external": "WAITING_EXTERNAL",
-    "interventionMode": "NONE",
-    "legacyLedgerChanged": false,
-    "commitCount": 3
+  "recordedAt": "2026-08-12T11:54:31.911441Z",
+  "binding": {
+    "subjectSha": null,
+    "implementationTreeSha256": "8a2f80ae17cfe2dbcf45ea296bc7c984901ca2a744809ee4151569203e66db6b",
+    "implementationTreeFileCount": 663,
+    "algorithm": "sha256-mode-path-blob-manifest"
   },
-  "networkUsed": false,
-  "modelUsed": false
+  "authorityDigests": {
+    "sourceManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c",
+    "sourcePrecedenceSha256": "15a2043b31286bfc35fb7d70e8b29e59eea90af8b3abbbe256cff50084b383bb",
+    "ownerDirectivesSha256": "f803e131f5717b1384645f1dedb46646eb5a589b43025b1e34c1e09591d6f7c9",
+    "ownerOverridePolicySha256": "db371226f5f10e93ae6b228baa106fb430252aa5354fe696b195c5a1188187d2"
+  },
+  "executions": [
+    {
+      "commandId": "controller-simulation",
+      "command": [
+        ".venv/bin/pytest",
+        "tests/test_v3_controller_simulation.py"
+      ],
+      "workingDirectory": ".",
+      "exitCode": 0,
+      "result": "PASS",
+      "passedCount": 6,
+      "failedCount": 0,
+      "failureAttribution": "NONE",
+      "transcriptPath": "docs/migrations/evidence/transcripts/V3-MIG-019-01-controller-simulation.json",
+      "transcriptSha256": "bac1f375e63fecc4a85f28a706433810fba2aa202a98deb0b55afcd91f10448a"
+    }
+  ],
+  "evidenceInputs": {},
+  "truthBoundary": "The simulation uses local fakes and cannot create GPU, customer, or commercial evidence."
 }

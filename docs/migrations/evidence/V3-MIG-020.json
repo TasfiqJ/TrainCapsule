@@ -1,20 +1,45 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "workItemId": "V3-MIG-020",
+  "status": "FINAL",
   "result": "PASS",
   "evidenceType": "M0_COMPLETION_RECORD",
-  "recordedAt": "2026-08-11T22:45:00Z",
-  "milestone": "M0_FACTORY_MIGRATED",
-  "milestoneStatus": "COMPLETED",
-  "acceptanceWorkItems": [
-    "V3-MIG-016",
-    "V3-MIG-017",
-    "V3-MIG-018",
-    "V3-MIG-019",
-    "V3-MIG-020"
+  "recordedAt": "2026-08-12T11:54:31.911441Z",
+  "binding": {
+    "subjectSha": null,
+    "implementationTreeSha256": "8a2f80ae17cfe2dbcf45ea296bc7c984901ca2a744809ee4151569203e66db6b",
+    "implementationTreeFileCount": 663,
+    "algorithm": "sha256-mode-path-blob-manifest"
+  },
+  "authorityDigests": {
+    "sourceManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c",
+    "sourcePrecedenceSha256": "15a2043b31286bfc35fb7d70e8b29e59eea90af8b3abbbe256cff50084b383bb",
+    "ownerDirectivesSha256": "f803e131f5717b1384645f1dedb46646eb5a589b43025b1e34c1e09591d6f7c9",
+    "ownerOverridePolicySha256": "db371226f5f10e93ae6b228baa106fb430252aa5354fe696b195c5a1188187d2"
+  },
+  "executions": [
+    {
+      "commandId": "complete-pre-evidence-acceptance",
+      "command": [
+        "bash",
+        "scripts/gates/full_quality.sh",
+        "--pre-evidence"
+      ],
+      "workingDirectory": ".",
+      "exitCode": 0,
+      "result": "PASS",
+      "passedCount": 1,
+      "failedCount": 0,
+      "failureAttribution": "NONE",
+      "transcriptPath": "docs/migrations/evidence/transcripts/V3-MIG-020-01-complete-pre-evidence-acceptance.json",
+      "transcriptSha256": "27e702f6049e9ff02ce33e3151ec951e14d5e529e355c3b81c92a4c4c1a19811"
+    }
   ],
-  "publicationPolicy": "owner_directed_main_only",
-  "interventionMode": "NONE",
-  "runtimeStateDuringMigration": "STOPPED",
-  "remainingExternalFacts": "UNKNOWN_OR_WAITING_EXTERNAL"
+  "evidenceInputs": {
+    "V3-MIG-016": "5a990bb111b81b5bf22feb3a509ab5148ccf263a9070400f559e6f045a6041ed",
+    "V3-MIG-017": "f28280b578c06bba09d35c81b440e22943eba904dcee2b3db037ca599257928b",
+    "V3-MIG-018": "b6a0438c1d265c2bda4231c45917aa7c21f69af3f2a9a3d6806b9e76d378bcee",
+    "V3-MIG-019": "7262f7dd9b0e770db1c70a1ea96d3a78f0eb32a071a099c4f32df406b78001f4"
+  },
+  "truthBoundary": "Complete pre-evidence acceptance passed and completion binds only the four prerequisites."
 }

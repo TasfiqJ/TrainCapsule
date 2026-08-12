@@ -40,6 +40,53 @@ class V3ContextManifest(V3Model):
     max_context_chars: int = Field(ge=1)
 
 
+def _owner_authority_entries(repo_root: Path) -> list[V3ContextEntry]:
+    """Bind the owner override and precedence rules into every runtime context."""
+
+    specifications = (
+        (
+            "config/owner_directives.yaml",
+            "owner_directive",
+            [
+                "directives.unattendedOperation",
+                "directives.humanIntervention",
+                "directives.publicationBranch",
+                "directives.nonMainPushes",
+                "directives.pullRequestDependency",
+                "deviationsFromBundle",
+            ],
+            "Highest authority: unattended machine-policy operation and exact-SHA "
+            "main-only publication.",
+        ),
+        (
+            "SOURCE_PRECEDENCE.md",
+            "authority_precedence",
+            ["§Normative authority", "§Conflict handling", "§Product and commercial truth"],
+            "Authority ordering and the narrow scope of owner-directed overrides.",
+        ),
+    )
+    entries: list[V3ContextEntry] = []
+    for relative, authority_class, sections, relevance in specifications:
+        path = repo_root / relative
+        if not path.is_file():
+            raise ContextPolicyError(f"required owner authority is missing: {relative}")
+        source_text = path.read_text(encoding="utf-8")
+        entries.append(
+            V3ContextEntry(
+                path=relative,
+                bytes=path.stat().st_size,
+                characters=len(source_text),
+                sha256=sha256_file(path),
+                authority_class=authority_class,
+                authority_sections=sections,
+                relevance=relevance,
+                freshness_policy="manifest_locked",
+                freshness_status="LOCKED",
+            )
+        )
+    return entries
+
+
 def _load_yaml(path: Path) -> dict[str, Any]:
     if not path.exists():
         return {}
@@ -292,7 +339,7 @@ def build_v3_context_manifest(
 
     observed = (now or datetime.now(UTC)).astimezone(UTC)
     freshness = freshness_receipts or {}
-    entries: list[V3ContextEntry] = []
+    entries = _owner_authority_entries(repo_root)
     excluded: list[str] = sorted(forbidden)
     for group_name in requested_groups:
         group = cast(dict[str, Any], groups[group_name])

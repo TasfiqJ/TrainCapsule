@@ -39,6 +39,7 @@ class V3Checkpoint(V3Model):
     candidate_sha: str = Field(pattern=SHA_PATTERN.pattern)
     approval_state: str
     circuit_breaker_reason: str | None = None
+    finding_fingerprints: dict[str, int] = Field(default_factory=dict[str, int])
     active: bool
     created_at: datetime
     updated_at: datetime

@@ -9,6 +9,10 @@ from .checkpoints import CheckpointError, CheckpointStore, V3Checkpoint
 from .github_sync import GitHubReleaseMetadata, load_github_config
 from .supervisor import supervisor_status
 from .util import read_json
+from .v3.configuration import load_factory_v3
+from .v3.milestone_runtime import load_milestone_state
+from .v3.queue import V3Queue
+from .v3.runtime_paths import V3RuntimePaths, resolve_v3_runtime_paths
 from .v3.work_items import WorkItem, WorkItemCollection
 from .yamlutil import load_yaml
 
@@ -21,13 +25,14 @@ def _current_item(roadmap: WorkItemCollection) -> WorkItem:
     return min(active, key=lambda item: (priority.get(item.status.value, 9), item.work_item_id))
 
 
-def _active_checkpoint(repo_root: Path, work_item_id: str) -> V3Checkpoint | None:
+def _checkpoint(paths: V3RuntimePaths, work_item_id: str) -> V3Checkpoint | None:
     try:
-        active = CheckpointStore(repo_root / "factory" / "state" / "pipelines").list_active_v3()
+        store = CheckpointStore(paths.checkpoints)
+        exact = store.load_v3(work_item_id)
+        active = store.list_active_v3()
     except CheckpointError:
         return None
-    exact = [checkpoint for checkpoint in active if checkpoint.work_item_id == work_item_id]
-    candidates = exact or active
+    candidates = ([exact] if exact is not None else []) or active
     if not candidates:
         return None
     return max(candidates, key=lambda checkpoint: checkpoint.updated_at)
@@ -64,12 +69,34 @@ def _ci_rollup(
 
 
 def build_runtime_status(repo_root: Path) -> dict[str, Any]:
+    factory = load_factory_v3(repo_root / "config" / "factory.yaml")
+    paths = resolve_v3_runtime_paths(repo_root, factory)
     roadmap = WorkItemCollection.model_validate(
         load_yaml(repo_root / "factory" / "roadmap" / "work_items.yaml")
     )
-    current = _current_item(roadmap)
-    active = [item for item in roadmap.work_items if item.milestone == roadmap.active_milestone]
-    checkpoint = _active_checkpoint(repo_root, current.work_item_id)
+    milestone_state = load_milestone_state(paths.milestone_state)
+    if milestone_state is not None:
+        roadmap = roadmap.model_copy(
+            update={"active_milestone": milestone_state.active_milestone}
+        )
+    queue = V3Queue(paths.queue)
+    runtime_items = (
+        {item.work_item_id: item for item in queue.items()} if paths.queue.exists() else {}
+    )
+    runtime_roadmap = roadmap.model_copy(
+        update={
+            "work_items": [
+                runtime_items.get(item.work_item_id, item) for item in roadmap.work_items
+            ]
+        }
+    )
+    current = _current_item(runtime_roadmap)
+    active = [
+        item
+        for item in runtime_roadmap.work_items
+        if item.milestone == runtime_roadmap.active_milestone
+    ]
+    checkpoint = _checkpoint(paths, current.work_item_id)
     release = _release_metadata(repo_root)
     retry_budget: dict[str, int] = {
         "planAttemptsRemaining": current.retry_policy.max_plan_attempts,
@@ -97,7 +124,7 @@ def build_runtime_status(repo_root: Path) -> dict[str, Any]:
     return cast(
         dict[str, Any],
         {
-            "activeMilestone": roadmap.active_milestone,
+            "activeMilestone": runtime_roadmap.active_milestone,
             "currentWorkItem": {
                 "workItemId": current.work_item_id,
                 "lane": current.lane.value,
@@ -109,6 +136,11 @@ def build_runtime_status(repo_root: Path) -> dict[str, Any]:
             "externalBlockers": [
                 item.work_item_id for item in active if item.status.value == "WAITING_EXTERNAL"
             ],
+            "queueRoot": str(paths.queue),
+            "queueCounts": {
+                status: sum(item.status.value == status for item in runtime_items.values())
+                for status in sorted({item.status.value for item in runtime_items.values()})
+            },
             "candidateSha": candidate_sha,
             "factoryCi": _ci_rollup(release, factory_names),
             "productCi": _ci_rollup(release, product_names),

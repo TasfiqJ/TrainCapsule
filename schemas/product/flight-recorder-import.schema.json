@@ -8,6 +8,32 @@
           "title": "Artifactid",
           "type": "string"
         },
+        "baselineEnvironmentId": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Baselineenvironmentid"
+        },
+        "candidateEnvironmentId": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Candidateenvironmentid"
+        },
         "capturedAt": {
           "format": "date-time",
           "title": "Capturedat",
@@ -51,6 +77,11 @@
           "title": "Kind",
           "type": "string"
         },
+        "metadataDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Metadatadigest",
+          "type": "string"
+        },
         "privacyClass": {
           "$ref": "#/$defs/PrivacyClass"
         },
@@ -82,6 +113,19 @@
           "minLength": 1,
           "title": "Sourceversion",
           "type": "string"
+        },
+        "workloadId": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Workloadid"
         }
       },
       "required": [
@@ -97,7 +141,8 @@
         "customerLocalUri",
         "exportPolicy",
         "provenance",
-        "integrityStatus"
+        "integrityStatus",
+        "metadataDigest"
       ],
       "title": "EvidenceArtifact",
       "type": "object"
@@ -291,6 +336,14 @@
       },
       "minItems": 1,
       "title": "Artifacts",
+      "type": "array"
+    },
+    "bindingArtifacts": {
+      "default": [],
+      "items": {
+        "$ref": "#/$defs/EvidenceArtifact"
+      },
+      "title": "Bindingartifacts",
       "type": "array"
     },
     "caseId": {

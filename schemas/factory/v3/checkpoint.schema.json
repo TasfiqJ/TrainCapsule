@@ -129,6 +129,13 @@
       "default": null,
       "title": "Circuitbreakerreason"
     },
+    "findingFingerprints": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "title": "Findingfingerprints",
+      "type": "object"
+    },
     "active": {
       "title": "Active",
       "type": "boolean"

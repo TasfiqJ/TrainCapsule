@@ -182,6 +182,22 @@ def test_v3_context_is_scoped_digest_bound_and_freshness_aware() -> None:
     )
     assert manifest.entries
     assert all(entry.authority_class for entry in manifest.entries)
+    authority_paths = [entry.path for entry in manifest.entries[:2]]
+    assert authority_paths == ["config/owner_directives.yaml", "SOURCE_PRECEDENCE.md"]
+    assert manifest.entries[0].authority_sections == [
+        "directives.unattendedOperation",
+        "directives.humanIntervention",
+        "directives.publicationBranch",
+        "directives.nonMainPushes",
+        "directives.pullRequestDependency",
+        "deviationsFromBundle",
+    ]
+    assert manifest.entries[1].authority_sections == [
+        "§Normative authority",
+        "§Conflict handling",
+        "§Product and commercial truth",
+    ]
+    assert all((ROOT / entry.path).is_file() for entry in manifest.entries)
     assert "advisory_career" in manifest.excluded_groups
     assert manifest.source_digest.startswith("sha256:")
 
@@ -201,7 +217,11 @@ def test_v3_context_is_scoped_digest_bound_and_freshness_aware() -> None:
         max_context_chars=100_000,
         freshness_receipts={"current_facts": datetime.now(UTC)},
     )
-    assert fresh.entries[0].freshness_status == "CURRENT"
+    current_fact_entries = [
+        entry for entry in fresh.entries if entry.freshness_policy != "manifest_locked"
+    ]
+    assert current_fact_entries
+    assert all(entry.freshness_status == "CURRENT" for entry in current_fact_entries)
 
 
 def test_milestone_completion_is_bounded_and_external_truth_is_not_simulated() -> None:

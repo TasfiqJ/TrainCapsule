@@ -22,4 +22,6 @@ def identity_reference(payload: Mapping[str, object], identity_field: str) -> st
     material.pop(identity_field, None)
     material.pop("createdAt", None)
     material.pop("created_at", None)
+    if material.get("identityConflict") is False:
+        material.pop("identityConflict")
     return digest_reference(material)

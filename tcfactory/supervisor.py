@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import argparse
 import json
-import os
 import sys
 from datetime import UTC, datetime
 from pathlib import Path
@@ -30,7 +29,13 @@ from .v3.migrations import (
     verify_legacy_queue_archive_receipt,
 )
 from .v3.milestones import MilestoneRoadmap
+from .v3.private_gate import (
+    validate_private_gate_installation,
+    validate_private_gate_runtime_health,
+)
+from .v3.queue import V3Queue
 from .v3.recovery import enforce_controller_restart_budget
+from .v3.runtime_paths import V3RuntimePaths, resolve_v3_runtime_paths
 from .v3.work_items import WorkItemCollection
 from .yamlutil import load_yaml
 
@@ -67,6 +72,8 @@ class RestartDecision(V3Model):
 
 
 class RuntimePaths(V3Model):
+    """Supervisor view of the shared V3 runtime paths (legacy constructor compatible)."""
+
     state_root: Path
     migration_marker: Path
     supervisor_state: Path
@@ -74,28 +81,30 @@ class RuntimePaths(V3Model):
     hard_stuck: Path
     stop: Path
 
+    @property
+    def queue(self) -> Path:
+        return self.state_root / "v3-queue"
+
+    @property
+    def checkpoints(self) -> Path:
+        return self.state_root / "pipelines"
+
 
 def _factory_config(repo_root: Path) -> FactoryV3Config:
     return load_factory_v3(repo_root / "config" / "factory.yaml")
 
 
 def runtime_paths(repo_root: Path, config: FactoryV3Config | None = None) -> RuntimePaths:
-    factory = config or _factory_config(repo_root)
-    raw_root = os.getenv(factory.runtime.local_state_root_environment_variable)
-    if raw_root:
-        state_root = Path(raw_root).expanduser()
-        if not state_root.is_absolute():
-            raise ValueError("configured runtime state root must be absolute")
-        state_root = state_root.resolve()
-    else:
-        state_root = (repo_root / "factory" / "state").resolve()
+    """Compatibility export for callers migrated to the shared V3 resolver."""
+
+    paths: V3RuntimePaths = resolve_v3_runtime_paths(repo_root, config)
     return RuntimePaths(
-        state_root=state_root,
-        migration_marker=state_root / factory.runtime.migration_complete_marker,
-        supervisor_state=state_root / factory.runtime.supervisor_state_file,
-        supervisor_lock=state_root / factory.runtime.supervisor_lock_file,
-        hard_stuck=state_root / factory.runtime.hard_stuck_file,
-        stop=state_root / factory.runtime.stop_file,
+        state_root=paths.state_root,
+        migration_marker=paths.migration_marker,
+        supervisor_state=paths.supervisor_state,
+        supervisor_lock=paths.supervisor_lock,
+        hard_stuck=paths.hard_stuck,
+        stop=paths.stop,
     )
 
 
@@ -179,6 +188,8 @@ def run_startup_preflight(repo_root: Path) -> dict[str, object]:
         raise RuntimeError("durable STOP is present")
     if paths.hard_stuck.exists():
         raise RuntimeError("HARD_STUCK is present")
+    validate_private_gate_installation(repo_root)
+    private_gate_health = validate_private_gate_runtime_health(repo_root, paths.state_root)
     github = load_github_config(repo_root / "config/github.yaml")
     publication_recovery: dict[str, object] = {"status": "GITHUB_DISABLED"}
     if github.enabled:
@@ -190,13 +201,10 @@ def run_startup_preflight(repo_root: Path) -> dict[str, object]:
         )
         publication_recovery = publisher.reconcile_pending()
     marker = _verify_migration_marker(repo_root, config, paths.migration_marker)
-    running_dir = repo_root / "factory" / "queue" / "running"
-    running_records = [
-        path for path in running_dir.glob("*") if path.is_file() and not path.name.startswith(".")
-    ]
-    if running_records:
-        raise RuntimeError("running queue records require explicit recovery before startup")
-    corrupt = list((repo_root / "factory" / "state" / "pipelines").glob("*.corrupt-*"))
+    queue = V3Queue(paths.queue)
+    queue.initialize()
+    pending_claim_recovery = len(queue.items(WorkStatus.RUNNING))
+    corrupt = list(paths.checkpoints.glob("*.corrupt-*"))
     if corrupt:
         raise RuntimeError("corrupt checkpoints require explicit recovery before startup")
     route = ClaudeCredentialProvider(require_long_lived_token=True).state()
@@ -210,8 +218,10 @@ def run_startup_preflight(repo_root: Path) -> dict[str, object]:
         "legacyMigrationRecords": len(legacy_migration.records),
         "migrationCompletedSha": marker.completed_sha,
         "credentials": route.value,
-        "runtimeState": "CLEAN",
+        "runtimeState": "RECOVERY_PENDING" if pending_claim_recovery else "CLEAN",
+        "pendingClaimRecovery": pending_claim_recovery,
         "publicationRecovery": publication_recovery,
+        "privateGateHealth": private_gate_health.model_dump(mode="json", by_alias=True),
     }
 
 

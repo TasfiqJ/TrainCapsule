@@ -5,17 +5,19 @@ from __future__ import annotations
 import json
 import os
 import stat
+from contextlib import suppress
 from datetime import datetime
 from pathlib import Path
 from uuid import uuid4
 
-from .base import sha256_digest
+from .base import digest_json, sha256_digest
 from .models import (
     EvidenceArtifact,
     EvidenceIntegrity,
     PrivacyClass,
     safe_identifier,
 )
+from .secure_fs import open_directory_fd
 
 
 class EvidenceStoreError(ValueError):
@@ -32,50 +34,70 @@ class LocalEvidenceStore:
     ) -> None:
         if max_artifact_bytes < 1 or max_case_artifacts < 1:
             raise ValueError("evidence limits must be positive")
-        if root.is_symlink():
-            raise EvidenceStoreError("evidence root cannot be a symlink")
-        self.root = root.resolve()
+        self.root = root.absolute()
         self.max_artifact_bytes = max_artifact_bytes
         self.max_case_artifacts = max_case_artifacts
-        if self.root.exists() and self.root.is_symlink():
-            raise EvidenceStoreError("evidence root cannot be a symlink")
-        self.root.mkdir(parents=True, exist_ok=True)
+        try:
+            descriptor = open_directory_fd(self.root, create=True)
+        except OSError as error:
+            raise EvidenceStoreError(
+                "evidence root is unavailable, unsafe, or symlinked"
+            ) from error
+        os.close(descriptor)
 
     def _case_root(self, case_id: str) -> Path:
         safe_identifier(case_id)
-        path = (self.root / "cases" / case_id).resolve()
-        if not path.is_relative_to(self.root):
-            raise EvidenceStoreError("case path escapes evidence root")
-        return path
+        return self.root / "cases" / case_id
 
     @staticmethod
     def _atomic_write(path: Path, payload: bytes) -> None:
-        path.parent.mkdir(parents=True, exist_ok=True)
-        if any(parent.is_symlink() for parent in (path, *path.parents)):
-            raise EvidenceStoreError("evidence destination contains a symlink")
-        temporary = path.parent / f".{path.name}.{uuid4().hex}.tmp"
+        temporary = f".{path.name}.{uuid4().hex}.tmp"
+        parent_descriptor = -1
         try:
+            parent_descriptor = open_directory_fd(path.parent, create=True)
             flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0)
-            descriptor = os.open(temporary, flags, 0o600)
+            descriptor = os.open(temporary, flags, 0o600, dir_fd=parent_descriptor)
             with os.fdopen(descriptor, "wb") as handle:
                 handle.write(payload)
                 handle.flush()
                 os.fsync(handle.fileno())
             try:
-                os.link(temporary, path, follow_symlinks=False)
+                os.link(
+                    temporary,
+                    path.name,
+                    src_dir_fd=parent_descriptor,
+                    dst_dir_fd=parent_descriptor,
+                    follow_symlinks=False,
+                )
             except FileExistsError as error:
                 raise EvidenceStoreError(
                     "evidence destination changed during atomic write"
                 ) from error
-            temporary.unlink()
+            os.unlink(temporary, dir_fd=parent_descriptor)
+            os.fsync(parent_descriptor)
+        except EvidenceStoreError:
+            raise
+        except OSError as error:
+            raise EvidenceStoreError("evidence destination is unavailable or unsafe") from error
         finally:
-            temporary.unlink(missing_ok=True)
+            if parent_descriptor >= 0:
+                with suppress(FileNotFoundError):
+                    os.unlink(temporary, dir_fd=parent_descriptor)
+                os.close(parent_descriptor)
 
     @staticmethod
     def _read_regular(path: Path, *, limit: int) -> bytes:
+        parent_descriptor = -1
         try:
-            descriptor = os.open(path, os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0))
+            parent_descriptor = open_directory_fd(path.parent, create=False)
+            descriptor = os.open(
+                path.name,
+                os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+                dir_fd=parent_descriptor,
+            )
         except OSError as error:
+            if parent_descriptor >= 0:
+                os.close(parent_descriptor)
             raise EvidenceStoreError("stored evidence is unavailable or unsafe") from error
         try:
             details = os.fstat(descriptor)
@@ -92,6 +114,7 @@ class LocalEvidenceStore:
             return bytes(payload)
         finally:
             os.close(descriptor)
+            os.close(parent_descriptor)
 
     def put_bytes(
         self,
@@ -104,6 +127,9 @@ class LocalEvidenceStore:
         captured_at: datetime,
         privacy_class: PrivacyClass = PrivacyClass.CONFIDENTIAL,
         provenance: dict[str, str] | None = None,
+        workload_id: str | None = None,
+        baseline_environment_id: str | None = None,
+        candidate_environment_id: str | None = None,
     ) -> EvidenceArtifact:
         if len(payload) > self.max_artifact_bytes:
             raise EvidenceStoreError("artifact exceeds configured size policy")
@@ -124,21 +150,29 @@ class LocalEvidenceStore:
                 raise EvidenceStoreError("content-address collision or substitution detected")
         else:
             self._atomic_write(object_path, payload)
-        artifact = EvidenceArtifact(
-            artifact_id=digest,
-            case_id=case_id,
-            kind=kind,
-            source_adapter=source_adapter,
-            source_version=source_version,
-            captured_at=captured_at,
-            content_digest=digest,
-            size_bytes=len(payload),
-            privacy_class=privacy_class,
-            customer_local_uri=f"cas://{case_id}/sha256/{digest_hex}",
-            export_policy="LOCAL_ONLY",
-            provenance=provenance or {},
-            integrity_status=EvidenceIntegrity.VALID,
-        )
+        artifact_payload: dict[str, object] = {
+            "schemaVersion": 1,
+            "artifactId": digest,
+            "caseId": case_id,
+            "workloadId": workload_id,
+            "baselineEnvironmentId": baseline_environment_id,
+            "candidateEnvironmentId": candidate_environment_id,
+            "kind": kind,
+            "sourceAdapter": source_adapter,
+            "sourceVersion": source_version,
+            "capturedAt": captured_at.isoformat().replace("+00:00", "Z"),
+            "contentDigest": digest,
+            "sizeBytes": len(payload),
+            "compression": "none",
+            "encryption": "none",
+            "privacyClass": privacy_class.value,
+            "customerLocalUri": f"cas://{case_id}/sha256/{digest_hex}",
+            "exportPolicy": "LOCAL_ONLY",
+            "provenance": provenance or {},
+            "integrityStatus": EvidenceIntegrity.VALID.value,
+        }
+        artifact_payload["metadataDigest"] = digest_json(artifact_payload)
+        artifact = EvidenceArtifact.model_validate(artifact_payload)
         rendered = (
             json.dumps(
                 artifact.model_dump(mode="json", by_alias=True),
@@ -167,6 +201,9 @@ class LocalEvidenceStore:
         captured_at: datetime,
         privacy_class: PrivacyClass = PrivacyClass.CONFIDENTIAL,
         provenance: dict[str, str] | None = None,
+        workload_id: str | None = None,
+        baseline_environment_id: str | None = None,
+        candidate_environment_id: str | None = None,
     ) -> EvidenceArtifact:
         flags = os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0)
         try:
@@ -203,16 +240,33 @@ class LocalEvidenceStore:
             captured_at=captured_at,
             privacy_class=privacy_class,
             provenance=provenance,
+            workload_id=workload_id,
+            baseline_environment_id=baseline_environment_id,
+            candidate_environment_id=candidate_environment_id,
         )
+
+    def get_artifact(self, *, case_id: str, artifact_id: str) -> EvidenceArtifact:
+        case_root = self._case_root(case_id)
+        digest_hex = artifact_id.removeprefix("sha256:")
+        if len(digest_hex) != 64 or any(value not in "0123456789abcdef" for value in digest_hex):
+            raise EvidenceStoreError("artifact id is not a canonical SHA-256 digest")
+        metadata_path = case_root / "metadata" / f"{digest_hex}.json"
+        try:
+            return EvidenceArtifact.model_validate_json(
+                self._read_regular(metadata_path, limit=self.max_artifact_bytes)
+            )
+        except ValueError as error:
+            raise EvidenceStoreError("stored artifact metadata is invalid") from error
 
     def get_bytes(self, *, case_id: str, artifact: EvidenceArtifact) -> bytes:
         if artifact.case_id != case_id:
             raise EvidenceStoreError("cross-case evidence access is forbidden")
+        stored = self.get_artifact(case_id=case_id, artifact_id=artifact.artifact_id)
+        if stored.canonical_json_bytes() != artifact.canonical_json_bytes():
+            raise EvidenceStoreError("caller artifact metadata does not match persisted metadata")
         case_root = self._case_root(case_id)
         digest_hex = artifact.content_digest.removeprefix("sha256:")
-        path = (case_root / "objects/sha256" / digest_hex).resolve()
-        if not path.is_relative_to(case_root) or path.is_symlink():
-            raise EvidenceStoreError("stored evidence path is unsafe")
+        path = case_root / "objects/sha256" / digest_hex
         rendered = self._read_regular(path, limit=self.max_artifact_bytes)
         if sha256_digest(rendered) != artifact.content_digest:
             raise EvidenceStoreError("stored evidence digest mismatch")

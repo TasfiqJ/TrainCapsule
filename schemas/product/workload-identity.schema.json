@@ -198,6 +198,11 @@
     "framework": {
       "$ref": "#/$defs/FrameworkIdentity"
     },
+    "identityConflict": {
+      "default": false,
+      "title": "Identityconflict",
+      "type": "boolean"
+    },
     "identityStrength": {
       "$ref": "#/$defs/IdentityStrength"
     },

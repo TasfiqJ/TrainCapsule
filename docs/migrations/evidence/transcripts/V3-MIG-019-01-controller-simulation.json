@@ -1,0 +1,13 @@
+{
+  "transcriptVersion": 1,
+  "command": [
+    ".venv/bin/pytest",
+    "tests/test_v3_controller_simulation.py"
+  ],
+  "workingDirectory": ".",
+  "exitCode": 0,
+  "passedCount": 6,
+  "failedCount": 0,
+  "stdout": "......                                                                   [100%]\n6 passed in 2.99s\n",
+  "stderr": ""
+}

@@ -17,13 +17,18 @@ from .models import RiskTier, TaskPacket
 from .util import read_json, redact_sensitive, run_command, sha256_file, write_json
 from .v3.base import SHA_PATTERN, V3Model
 from .v3.candidate_manifest import CandidateManifest
+from .v3.private_gate import (
+    PRIVATE_GATE_PUBLIC_KEY,
+    PRIVATE_GATE_RUNNER,
+    PrivateGateVerificationError,
+    validate_private_gate_installation,
+    verify_private_gate_receipt,
+)
 from .yamlutil import load_yaml
 
 _BRANCH_PATTERN = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9._/-]{0,126}[A-Za-z0-9])?$")
-CONTROLLER_PRIVATE_GATE = (
-    Path.home()
-    / ".local/share/traincapsule-factory/private-gates/run_private_gate.sh"
-)
+CONTROLLER_PRIVATE_GATE = PRIVATE_GATE_RUNNER
+CONTROLLER_PRIVATE_GATE_KEY = PRIVATE_GATE_PUBLIC_KEY
 
 
 class RemoteCIConfig(V3Model):
@@ -347,10 +352,17 @@ class MainOnlyPublisher:
         local_path = gate_root / f"local-{candidate_sha}.json"
         write_json(local_path, local_evidence)
         evidence_paths = {"deterministic-local": local_path}
-        private_evidence: dict[str, str] = {}
-        private_runner = CONTROLLER_PRIVATE_GATE
-        if private_runner.is_file():
+        private_evidence: dict[str, str]
+        try:
+            private_runner, private_key = validate_private_gate_installation(
+                self.repo_root,
+                runner=CONTROLLER_PRIVATE_GATE,
+                public_key=CONTROLLER_PRIVATE_GATE_KEY,
+            )
             private_artifacts = self.receipt_root / "private-gates" / str(item.work_item_id)
+            private_artifacts.mkdir(parents=True, exist_ok=True)
+            private_receipt = private_artifacts / f"{candidate_sha}.receipt.json"
+            private_signature = private_artifacts / f"{candidate_sha}.receipt.json.sig"
             result = run_private_gate(
                 runner=private_runner,
                 suite="full-release",
@@ -361,17 +373,35 @@ class MainOnlyPublisher:
                 task_id=str(item.work_item_id),
                 run_id=f"publish-{candidate_sha[:12]}",
                 candidate_sha=candidate_sha,
+                receipt_path=private_receipt,
+                signature_path=private_signature,
             )
             if not result.passed:
                 raise GitHubSyncError("configured private pre-promotion gate failed")
+            verified = verify_private_gate_receipt(
+                repo_root=self.repo_root,
+                runner=private_runner,
+                public_key=private_key,
+                receipt_path=private_receipt,
+                signature_path=private_signature,
+                result_path=Path(result.stdout_path),
+                expected_candidate_sha=candidate_sha,
+                expected_work_item_id=str(item.work_item_id),
+            )
             private_evidence = {
                 "candidateSha": candidate_sha,
                 "suite": "full-release",
+                "receiptDigest": f"sha256:{sha256_file(private_receipt)}",
+                "signatureDigest": f"sha256:{sha256_file(private_signature)}",
+                "runnerDigest": verified.runner_digest,
+                "runnerVersion": verified.runner_version,
                 "resultDigest": f"sha256:{sha256_file(Path(result.stdout_path))}",
             }
             private_path = gate_root / f"private-{candidate_sha}.json"
             write_json(private_path, private_evidence)
             evidence_paths["configured-private"] = private_path
+        except PrivateGateVerificationError as exc:
+            raise GitHubSyncError(f"mandatory private pre-promotion gate rejected: {exc}") from exc
         if current_sha(candidate_worktree) != candidate_sha:
             raise GitHubSyncError("pre-promotion gates mutated the exact candidate")
         self._prepared[candidate_sha] = (local_evidence, private_evidence)

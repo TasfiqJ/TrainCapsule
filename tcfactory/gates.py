@@ -213,6 +213,8 @@ def run_private_gate(
     task_id: str,
     run_id: str,
     candidate_sha: str,
+    receipt_path: Path | None = None,
+    signature_path: Path | None = None,
 ) -> GateResult:
     resolved_runner = runner.expanduser().resolve()
     if not resolved_runner.exists():
@@ -232,6 +234,16 @@ def run_private_gate(
         "private-"
         + "".join(char if char.isalnum() or char in "-_." else "-" for char in suite)[:80]
     )
+    private_environment = {
+        "TCF_TASK_ID": task_id,
+        "TCF_RUN_ID": run_id,
+        "TCF_CANDIDATE_SHA": candidate_sha,
+        "TCF_CANDIDATE_WORKTREE": str(cwd),
+    }
+    if receipt_path is not None:
+        private_environment["TCF_PRIVATE_GATE_RECEIPT"] = str(receipt_path)
+    if signature_path is not None:
+        private_environment["TCF_PRIVATE_GATE_SIGNATURE"] = str(signature_path)
     return _execute_gate_command(
         args=[str(resolved_runner), suite, str(cwd)],
         display_command=f"<external-private-gate> {suite} <candidate-worktree>",
@@ -239,10 +251,5 @@ def run_private_gate(
         cwd=cwd,
         artifact_dir=artifact_dir,
         timeout_seconds=timeout_seconds,
-        env={
-            "TCF_TASK_ID": task_id,
-            "TCF_RUN_ID": run_id,
-            "TCF_CANDIDATE_SHA": candidate_sha,
-            "TCF_CANDIDATE_WORKTREE": str(cwd),
-        },
+        env=private_environment,
     )

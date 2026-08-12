@@ -4,8 +4,11 @@ from __future__ import annotations
 
 from collections.abc import Callable, Iterable, Mapping
 from datetime import datetime
+from html import escape
+from typing import cast
 
 from traincapsule_core.base import digest_json, sha256_digest
+from traincapsule_core.identity import redact_sensitive_value
 from traincapsule_core.models import (
     CompletenessState,
     EligibilityDecision,
@@ -17,6 +20,7 @@ from traincapsule_core.models import (
     FindingAttribution,
     IdentityStrength,
     MachineVerification,
+    NativeFinding,
     OperationalDecision,
     PolicyName,
     TechnicalResult,
@@ -26,6 +30,7 @@ from traincapsule_ingest_pytorch import (
     FlightRecorderImport,
     FlightRecorderImportError,
     lifecycle_disagreement_from_raw,
+    reimport_from_raw_artifacts,
     verify_import_against_raw,
 )
 
@@ -33,7 +38,89 @@ from .models import NATIVE_SUFFICIENT_DECISION, NativeBaseline, PreflightInputs
 
 _SUPPORTED_PACKS = frozenset({"ddp-hang-v1"})
 _SUPPORTED_NATIVE_TOOL = "PyTorch Flight Recorder"
-_SUPPORTED_PYTORCH_PREFIXES = ("2.5",)
+_SUPPORTED_PYTORCH_VERSIONS = frozenset({"2.5.1"})
+_INITIAL_PACK_REQUIREMENTS = frozenset(
+    {
+        "flight_recorder_raw",
+        "collective_lifecycle",
+        "rank_process_group_inventory",
+        "workload_identity",
+        "environment_identity",
+    }
+)
+
+
+def _redacted_native_finding(finding: NativeFinding) -> NativeFinding:
+    payload = finding.model_dump(mode="json", by_alias=True)
+    payload.pop("findingId")
+    redacted = cast(
+        dict[str, object],
+        redact_sensitive_value(
+            payload, policy_version="traincapsule-redaction-v1"
+        ),
+    )
+    redacted["findingId"] = digest_json(redacted)
+    return NativeFinding.model_validate(redacted)
+
+
+def _authoritative_completeness(
+    inputs: PreflightInputs, imported: FlightRecorderImport
+) -> EvidenceCompletenessReport:
+    states = {
+        "flight_recorder_raw": CompletenessState.PRESENT_VALID,
+        "collective_lifecycle": (
+            CompletenessState.PRESENT_VALID
+            if imported.entries
+            else CompletenessState.MISSING_NOT_CAPTURED
+        ),
+        "rank_process_group_inventory": (
+            CompletenessState.PRESENT_PARTIAL
+            if imported.missing_ranks or imported.world_size is None
+            else CompletenessState.PRESENT_VALID
+        ),
+        "workload_identity": (
+            CompletenessState.PRESENT_VALID
+            if inputs.workload_identity.identity_strength is IdentityStrength.FULLY_VERIFIED
+            else CompletenessState.IDENTITY_UNBOUND
+        ),
+        "environment_identity": (
+            CompletenessState.PRESENT_VALID
+            if all(
+                environment.identity_strength is IdentityStrength.FULLY_VERIFIED
+                for environment in (
+                    inputs.baseline_environment,
+                    inputs.candidate_environment,
+                )
+            )
+            else CompletenessState.IDENTITY_UNBOUND
+        ),
+    }
+    evidence = [*imported.artifacts, *imported.binding_artifacts]
+    refs = {
+        name: [artifact.artifact_id for artifact in evidence]
+        for name, state in states.items()
+        if state
+        in {
+            CompletenessState.PRESENT_VALID,
+            CompletenessState.PRESENT_PARTIAL,
+            CompletenessState.PRESENT_CONFLICTING,
+            CompletenessState.PRESENT_CORRUPTED,
+        }
+    }
+    return assess_completeness(
+        case_id=inputs.incident_case.case_id,
+        requirements=states,
+        roles={name: EvidenceRole.MANDATORY_FOR_ELIGIBILITY for name in states},
+        verified_artifacts=inputs.verified_artifacts,
+        artifact_refs=refs,
+        details={
+            "rank_process_group_inventory": (
+                f"missing ranks: {imported.missing_ranks}"
+                if imported.missing_ranks
+                else "rank/process-group inventory captured"
+            )
+        },
+    )
 
 
 def assess_completeness(
@@ -115,10 +202,44 @@ def generate_native_baseline(
     artifact_reader: Callable[[EvidenceArtifact], bytes],
 ) -> NativeBaseline:
     """Generate a bound native record from importer output rather than echoing caller JSON."""
+    redacted_command: list[str] = []
+    previous_option = ""
+    for argument in command:
+        if argument.startswith("-") and "=" not in argument:
+            redacted_command.append(argument)
+            previous_option = argument.lstrip("-").replace("-", "_")
+            continue
+        rendered = redact_sensitive_value(
+            argument,
+            policy_version="traincapsule-redaction-v1",
+            name=previous_option,
+        )
+        redacted_command.append(cast(str, rendered))
+        previous_option = ""
+    redacted_questions = [
+        cast(
+            str,
+            redact_sensitive_value(
+                question,
+                policy_version="traincapsule-redaction-v1",
+                name="unresolved_question",
+            ),
+        )
+        for question in unresolved_questions
+    ]
     limitations = sorted(
         {limitation for finding in imported.native_findings for limitation in finding.limitations}
     )
     lifecycle_disagreement = verify_import_against_raw(imported, artifact_reader)
+    workload_id = imported.artifacts[0].workload_id
+    baseline_environment_id = imported.artifacts[0].baseline_environment_id
+    candidate_environment_id = imported.artifacts[0].candidate_environment_id
+    if (
+        workload_id is None
+        or baseline_environment_id is None
+        or candidate_environment_id is None
+    ):
+        raise ValueError("native baseline requires workload and environment-bound artifacts")
     decision = NATIVE_SUFFICIENT_DECISION if lifecycle_disagreement else None
     decision_refs = (
         sorted(artifact.artifact_id for artifact in imported.artifacts)
@@ -139,38 +260,74 @@ def generate_native_baseline(
     )
     return NativeBaseline(
         case_id=imported.case_id,
+        workload_id=workload_id,
+        baseline_environment_id=baseline_environment_id,
+        candidate_environment_id=candidate_environment_id,
         tool_name="PyTorch Flight Recorder",
         tool_version=imported.pytorch_version,
-        command=command,
-        configuration=dict(configuration),
+        source_format=imported.source_format,
+        source_format_version=imported.source_format_version,
+        import_digest=digest_json(imported.model_dump(mode="json", by_alias=True)),
+        command=redacted_command,
+        configuration=cast(
+            dict[str, object],
+            redact_sensitive_value(
+                configuration, policy_version="traincapsule-redaction-v1"
+            ),
+        ),
         artifacts=imported.artifacts,
-        findings=imported.native_findings,
+        binding_artifacts=imported.binding_artifacts,
+        findings=[_redacted_native_finding(finding) for finding in imported.native_findings],
         limitations=limitations,
+        import_warnings=imported.warnings,
+        missing_ranks=imported.missing_ranks,
         elapsed_seconds=elapsed_seconds,
         operator_effort_seconds=operator_effort_seconds,
         decision_reached=decision,
         decision_evidence_refs=decision_refs,
         decision_provenance_digest=decision_digest,
-        unresolved_questions=[] if decision else unresolved_questions,
+        unresolved_questions=[] if decision else redacted_questions,
         executed_at=executed_at,
     )
 
 
 def render_native_baseline_human(baseline: NativeBaseline) -> str:
-    decision = baseline.decision_reached or "No native decision reached."
+    def report_text(value: str, *, name: str = "report") -> str:
+        redacted = cast(
+            str,
+            redact_sensitive_value(
+                value,
+                policy_version="traincapsule-redaction-v1",
+                name=name,
+            ),
+        )
+        single_line = " ".join(redacted.splitlines())
+        printable = "".join(
+            character if ord(character) >= 32 and ord(character) != 127 else " "
+            for character in single_line
+        )
+        return escape(printable, quote=True).replace("`", "&#96;")
+
+    decision = report_text(baseline.decision_reached or "No native decision reached.")
     finding_sections: list[str] = []
     for attribution in FindingAttribution:
         attributed = [item for item in baseline.findings if item.attribution is attribution]
-        body = "\n".join(f"- {item.observation}" for item in attributed) or "- None"
+        body = (
+            "\n".join(f"- {report_text(item.observation)}" for item in attributed)
+            or "- None"
+        )
         finding_sections.append(f"### {attribution.value}\n\n{body}")
     findings = "\n\n".join(finding_sections)
-    limitations = "\n".join(f"- {item}" for item in baseline.limitations)
-    questions = "\n".join(f"- {item}" for item in baseline.unresolved_questions) or "- None"
+    limitations = "\n".join(f"- {report_text(item)}" for item in baseline.limitations)
+    questions = (
+        "\n".join(f"- {report_text(item)}" for item in baseline.unresolved_questions)
+        or "- None"
+    )
     return (
         f"# Native baseline — {baseline.case_id}\n\n"
         f"Tool: {baseline.tool_name} {baseline.tool_version}\n\n"
-        f"Command: `{' '.join(baseline.command)}`\n\n"
-        f"Configuration: `{baseline.configuration}`\n\n"
+        f"Command: `{report_text(' '.join(baseline.command), name='command')}`\n\n"
+        f"Configuration: `{report_text(str(baseline.configuration), name='configuration')}`\n\n"
         f"Elapsed: {baseline.elapsed_seconds}s; operator effort: "
         f"{baseline.operator_effort_seconds}s\n\n"
         f"## Native findings\n\n{findings}\n\n"
@@ -213,9 +370,24 @@ def _verification(
 def _policy_verifications(inputs: PreflightInputs) -> list[MachineVerification]:
     case = inputs.incident_case
     pack_supported = case.pack_candidate in _SUPPORTED_PACKS
+    binding_artifacts = inputs.native_baseline.binding_artifacts
+    expected_bindings = (
+        (
+            inputs.baseline_environment.materialization_recipe_artifact_id,
+            "BASELINE_MATERIALIZATION_RECIPE",
+        ),
+        (
+            inputs.candidate_environment.materialization_recipe_artifact_id,
+            "CANDIDATE_MATERIALIZATION_RECIPE",
+        ),
+    )
     access_known = all(
-        environment.materialization_recipe_digest is not None
-        for environment in (inputs.baseline_environment, inputs.candidate_environment)
+        artifact_id is not None
+        and any(
+            artifact.kind == expected_kind and artifact.artifact_id == artifact_id
+            for artifact in binding_artifacts
+        )
+        for artifact_id, expected_kind in expected_bindings
     )
     privacy_supported = case.privacy_policy == "LOCAL_ONLY"
     export_supported = all(
@@ -223,7 +395,7 @@ def _policy_verifications(inputs: PreflightInputs) -> list[MachineVerification]:
     )
     source_supported = (
         inputs.native_baseline.tool_name == _SUPPORTED_NATIVE_TOOL
-        and inputs.native_baseline.tool_version.startswith(_SUPPORTED_PYTORCH_PREFIXES)
+        and inputs.native_baseline.tool_version in _SUPPORTED_PYTORCH_VERSIONS
     )
     original = inputs.original_experiment_economics
     proposed = inputs.proposed_experiment_economics
@@ -260,6 +432,9 @@ def _policy_verifications(inputs: PreflightInputs) -> list[MachineVerification]:
             {
                 "baseline": inputs.baseline_environment.materialization_recipe_digest,
                 "candidate": inputs.candidate_environment.materialization_recipe_digest,
+                "bindingArtifacts": [
+                    item.metadata_digest for item in binding_artifacts
+                ],
             },
             (
                 "Both environments have case-bound materialization recipes."
@@ -330,6 +505,60 @@ def evaluate_preflight(
             EligibilityOutcome.NEEDS_MORE_EVIDENCE,
             TechnicalResult.INVALID_EVIDENCE,
             ["One or more case-bound artifact payloads failed local CAS verification."],
+            [],
+        )
+    try:
+        reconstructed = reimport_from_raw_artifacts(
+            inputs.native_baseline.artifacts,
+            artifact_reader,
+            binding_artifacts=inputs.native_baseline.binding_artifacts,
+        )
+    except (FlightRecorderImportError, OSError, ValueError):
+        return _decision(
+            inputs,
+            identity_strength,
+            EligibilityOutcome.NEEDS_MORE_EVIDENCE,
+            TechnicalResult.INVALID_EVIDENCE,
+            ["The complete native import could not be reconstructed from raw CAS evidence."],
+            [],
+        )
+    expected_import_digest = digest_json(
+        reconstructed.model_dump(mode="json", by_alias=True)
+    )
+    expected_findings = [
+        _redacted_native_finding(finding).model_dump(mode="json", by_alias=True)
+        for finding in reconstructed.native_findings
+    ]
+    claimed_findings = [
+        finding.model_dump(mode="json", by_alias=True)
+        for finding in inputs.native_baseline.findings
+    ]
+    if (
+        inputs.native_baseline.tool_name != _SUPPORTED_NATIVE_TOOL
+        or inputs.native_baseline.tool_version != reconstructed.pytorch_version
+        or inputs.native_baseline.source_format != reconstructed.source_format
+        or inputs.native_baseline.source_format_version != reconstructed.source_format_version
+        or inputs.native_baseline.import_digest != expected_import_digest
+        or claimed_findings != expected_findings
+        or inputs.native_baseline.import_warnings != reconstructed.warnings
+        or inputs.native_baseline.missing_ranks != reconstructed.missing_ranks
+    ):
+        return _decision(
+            inputs,
+            identity_strength,
+            EligibilityOutcome.NEEDS_MORE_EVIDENCE,
+            TechnicalResult.INVALID_EVIDENCE,
+            ["Native baseline metadata/findings do not match reconstructed raw CAS evidence."],
+            [],
+        )
+    expected_completeness = _authoritative_completeness(inputs, reconstructed)
+    if inputs.completeness_report != expected_completeness:
+        return _decision(
+            inputs,
+            identity_strength,
+            EligibilityOutcome.NEEDS_MORE_EVIDENCE,
+            TechnicalResult.INVALID_EVIDENCE,
+            ["Caller completeness does not match the authoritative pack policy."],
             [],
         )
     try:
@@ -411,6 +640,15 @@ def evaluate_preflight(
             ["The named customer decision deadline has passed."],
             [],
         )
+    if inputs.native_baseline.decision_reached:
+        return _decision(
+            inputs,
+            identity_strength,
+            EligibilityOutcome.NATIVE_WORKFLOW_SUFFICIENT,
+            TechnicalResult.PASS,
+            ["The complete native workflow already records a decision."],
+            [],
+        )
     unknown = sorted(
         result.policy.value
         for result in verifications
@@ -424,15 +662,6 @@ def evaluate_preflight(
             TechnicalResult.UNKNOWN,
             ["One or more machine-verifiable preflight inputs are unknown."],
             unknown,
-        )
-    if inputs.native_baseline.decision_reached:
-        return _decision(
-            inputs,
-            identity_strength,
-            EligibilityOutcome.NATIVE_WORKFLOW_SUFFICIENT,
-            TechnicalResult.PASS,
-            ["The complete native workflow already records a decision."],
-            [],
         )
     if inputs.completeness_report.technical_result is not TechnicalResult.PASS:
         result = inputs.completeness_report.technical_result

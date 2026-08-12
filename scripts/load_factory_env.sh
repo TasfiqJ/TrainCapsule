@@ -11,9 +11,11 @@ set -a
 source "$ENV_FILE"
 set +a
 TOKEN_FILE="${TCF_CLAUDE_OAUTH_TOKEN_FILE:-$HOME/.config/traincapsule/claude-oauth-token}"
-if [[ ! -s "$TOKEN_FILE" ]]; then
+if [[ "${TCF_REQUIRE_MODEL_CREDENTIALS:-1}" == "1" && ! -s "$TOKEN_FILE" ]]; then
   echo "Missing or empty Claude subscription OAuth token file: $TOKEN_FILE" >&2
   return 1 2>/dev/null || exit 1
 fi
-export CLAUDE_CODE_OAUTH_TOKEN="$(<"$TOKEN_FILE")"
+if [[ "${TCF_REQUIRE_MODEL_CREDENTIALS:-1}" == "1" ]]; then
+  export CLAUDE_CODE_OAUTH_TOKEN="$(<"$TOKEN_FILE")"
+fi
 unset TOKEN_FILE ENV_FILE

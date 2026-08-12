@@ -73,17 +73,29 @@ roadmap states.
 
 ## Runtime and publication handoff
 
-During migration verification the live controller remained stopped, the Windows task remained
-disabled, and durable `STOP`/`PAUSE` were preserved. After the final commit:
+The implementation acceptance commit is
+`f1fd8077fee001fa6751aa86b26f341f04d0d150`. It was pushed only to `refs/heads/main` without
+force, the remote ref resolved to that exact SHA, and all eight configured workflows passed there:
+Factory quality `31563636477`, Product unit `31563636487`, Product contract `31563636485`, Security
+`31563636472`, Source-of-truth integrity `31563636497`, Packaging install `31563636469`, Docs and
+schemas `31563636505`, and Source freshness `31563636499`.
 
-1. Create the ignored migration marker bound to the exact final commit and the five evidence files.
-2. Push only that exact SHA to `refs/heads/main` without force.
-3. Verify every configured hosted workflow at the exact SHA.
-4. Remove runtime stops, enable the launcher, and observe the real V3 controller only after startup
-   preflight validates configuration, source integrity, marker, credentials, queue, and recovery.
+The private GitHub account's hosted-runner billing/spending restriction initially prevented runner
+assignment. Final verification used the already-provisioned `traincapsule-wsl-local` runner through
+the bounded `TRAINCAPSULE_CI_RUNNER` repository variable, with `ubuntu-latest` retained as the
+workflow fallback. No new paid runner usage was created.
 
-If publication or hosted verification fails, retain the stopped state and follow
-`docs/migrations/V3_ROLLBACK.md`; never reset or rewrite published history.
+The ignored migration marker is valid and bound to the published commit, source manifest, owner
+directives, and five M0 evidence files. Runtime startup was attempted only after publication. Its
+preflight passed every repository/runtime invariant before returning `AUTH_EXPIRED` at the existing
+Claude subscription credential gate. No model was invoked. Durable `STOP` and `PAUSE` were restored,
+the Windows task remains disabled, and no controller process is running.
+
+The remaining operational dependency is therefore exact and external: renew the existing
+subscription credential without changing the no-paid policy, rerun startup preflight, and enable the
+launcher only after it returns ready. If any later publication or hosted verification fails, retain
+the stopped state and follow `docs/migrations/V3_ROLLBACK.md`; never reset or rewrite published
+history.
 
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory

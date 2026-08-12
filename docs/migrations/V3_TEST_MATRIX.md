@@ -1,9 +1,9 @@
 # TrainCapsule V3 test matrix
 
-> Final V3 acceptance supersedes the phase-by-phase counts below. The current pre-publication tree
-> has 552 passing tests, clean Ruff, and strict Pyright at 0 errors/0 warnings. Exact final commands,
-> commit SHA, clean-install results, and hosted main checks are appended after publication. No model,
-> network mutation, GPU run, or paid service was used for the local migration proof.
+> Final V3 acceptance supersedes the phase-by-phase counts below. The accepted implementation at
+> `f1fd8077fee001fa6751aa86b26f341f04d0d150` has 554 passing local tests, clean Ruff, strict
+> Pyright at 0 errors/0 warnings, a passing clean-wheel journey, and eight passing exact-SHA remote
+> workflows. No model, GPU run, paid API, customer action, or commercial claim was used.
 
 ## Baseline
 
@@ -18,7 +18,7 @@ The exact baseline and results are recorded in `V3_BASELINE_REPORT.md`: 394 test
 | Scheduler/policy | lane independence, WIP, deterministic score, finite retries, repeated finding, hard stuck | passed; 40 focused checks and 430-test full-suite regression |
 | Completion/context/value | proposal-only expansion, scoped context/freshness, terminal value outcomes | passed; focused adversarial coverage and 443-test full-suite regression |
 | Backend | protocol, Claude adapter, fake backend, redaction, checkpoint recovery | passed; 33 focused checks and 456-test full-suite regression |
-| Release | main-only exact-SHA policy, no non-main ref, no force, divergence, durable recovery, required hosted CI, automatic ordinary revert | passed locally; publication recovery adversarial suite passed; no network mutation |
+| Release | main-only exact-SHA policy, no non-main ref, no force, divergence, durable recovery, required hosted CI, automatic ordinary revert | passed locally and all eight required workflows passed at exact implementation SHA `f1fd8077…` |
 | Startup/status | finite 15/60/300 restart, healthy reset, preflight, portable controls, durable stop/hard-stuck, complete status | passed; focused checks and 471-test full-suite regression; stopped launcher exercised without model use |
 | Prompts | finite packet/session, native-first, exact truth states, bounded findings, external/policy stop, specialist contracts | passed; focused adversarial coverage; no model use |
 | Legacy migration | 124-entry mapping, exact ledger archive, dry/apply, non-resuming queue archive, deterministic migration | passed; 1 passed/1 paused/2 external-wait/120 blocked preserved; 88 mapped, 29 deferred, 7 factory history; original queue retained |
@@ -59,8 +59,8 @@ uv run --active --no-sync tcfactory config validate
 uv run --active --no-sync tcfactory migrate-roadmap --from-v2 --dry-run
 ```
 
-Final results before publication: secret scan passed; Ruff passed; strict Pyright reported 0 errors
-and 0 warnings; 527 tests passed; both source authorities passed; 32 factory schemas, ten product
+Final results at implementation acceptance: secret scan passed; Ruff passed; strict Pyright reported
+0 errors and 0 warnings; 554 tests passed locally; both source authorities passed; 39 factory schemas, ten product
 schemas, 109 roadmap items, and 124 legacy mappings matched; configuration validation and the
 migration dry-run passed; the no-paid-usage gate passed.
 
@@ -72,4 +72,33 @@ Rollback rehearsal used a detached worktree at
 `6b480232fa92b069103da44c475bd17bcb3e6bd1`. Historical authority, Ruff, strict Pyright, and all 394
 baseline tests passed. The rehearsal worktree was removed and `main`/runtime were unchanged.
 
-No GPU check was run. GPU/customer/external evidence remains deferred.
+The independent four-wheel install and complete installed-CLI journey passed locally and in remote
+workflow `31563636469`. Remote Factory quality reported 497 non-product tests passing, with product
+tests enforced separately by Product unit and Product contract.
+
+## Exact-SHA publication acceptance
+
+All required workflows completed successfully at
+`f1fd8077fee001fa6751aa86b26f341f04d0d150`:
+
+| Required workflow | Run |
+|---|---|
+| Factory quality | `31563636477` |
+| Product unit | `31563636487` |
+| Product contract | `31563636485` |
+| Security | `31563636472` |
+| Source-of-truth integrity | `31563636497` |
+| Packaging install | `31563636469` |
+| Docs and schemas | `31563636505` |
+| Source freshness | `31563636499` |
+
+The first GitHub-hosted attempt never received a runner because of the private account's
+billing/spending restriction. A second defect, an invalid immutable `setup-uv` revision, was also
+corrected. Final verification ran on the already-provisioned `traincapsule-wsl-local` runner through
+the bounded repository variable; `ubuntu-latest` remains the workflow fallback. This used no new
+paid runner entitlement.
+
+Startup preflight then passed configuration, source, migration, live archive, publication recovery,
+and exact-SHA marker checks before failing at the final subscription credential gate with
+`AUTH_EXPIRED`. `STOP` and `PAUSE` were restored, the Windows task remains disabled, and no model was
+invoked. No GPU check was run; GPU/customer/external evidence remains deferred.

@@ -354,28 +354,133 @@ class FingerprintCounterV31(V31Model):
         return self
 
 
+class NativeToolConfigurationV31(V31Model):
+    tool_name: str = Field(min_length=1, max_length=256)
+    tool_version: str = Field(min_length=1, max_length=128)
+    configuration_digest: Digest
+
+
+class ApprovedAgentAssistanceV31(V31Model):
+    system_id: Identifier
+    version: str = Field(min_length=1, max_length=128)
+    configuration_digest: Digest
+    allowed_tasks: list[str] = Field(min_length=1, max_length=32)
+
+    @field_validator("allowed_tasks")
+    @classmethod
+    def unique_tasks(cls, values: list[str]) -> list[str]:
+        _require_unique(values, "approved agent-assistance tasks")
+        return values
+
+
+class CostTimeResourceComparisonV31(V31Model):
+    native_cost: float = Field(ge=0, le=1_000_000_000)
+    traincapsule_cost: float = Field(ge=0, le=1_000_000_000)
+    native_minutes: float = Field(gt=0, le=1_000_000)
+    traincapsule_minutes: float = Field(gt=0, le=1_000_000)
+    native_resources: list[str] = Field(min_length=1, max_length=64)
+    traincapsule_resources: list[str] = Field(min_length=1, max_length=64)
+
+    @field_validator("native_resources", "traincapsule_resources")
+    @classmethod
+    def unique_resources(cls, values: list[str]) -> list[str]:
+        _require_unique(values, "benchmark resources")
+        return values
+
+
+class BenchmarkReproducibilityV31(V31Model):
+    repetitions: int = Field(ge=2, le=1000)
+    matching_decision_count: int = Field(ge=0, le=1000)
+    command_digests: list[Digest] = Field(min_length=1, max_length=64)
+    environment_digest: Digest
+
+    @model_validator(mode="after")
+    def validate_reproducibility(self) -> BenchmarkReproducibilityV31:
+        _require_unique(self.command_digests, "benchmark command digests")
+        if self.matching_decision_count > self.repetitions:
+            raise ValueError("matching decision count cannot exceed repetitions")
+        return self
+
+
 class NativeSubstituteBenchmarkV31(V31Model):
     benchmark_id: Identifier
     work_item_id: str = Field(pattern=r"^V3-[A-Z]+-[0-9]{3}$")
+    case_id: Identifier
     candidate_sha: GitSha
     candidate_tree_sha: GitSha
+    environment_digest: Digest
     baseline_environment_digest: Digest
     candidate_environment_digest: Digest
+    source_freshness_receipts: list[Digest] = Field(min_length=1, max_length=64)
+    native_tool_names_versions_configs: list[NativeToolConfigurationV31] = Field(
+        min_length=1, max_length=32
+    )
+    approved_agent_assistance_baseline: list[ApprovedAgentAssistanceV31] = Field(max_length=16)
     native_tool: str = Field(min_length=1, max_length=128)
     native_tool_version: str = Field(min_length=1, max_length=64)
+    native_inputs: list[Digest] = Field(min_length=1, max_length=128)
+    native_outputs: list[Digest] = Field(min_length=1, max_length=128)
+    native_findings: list[Digest] = Field(min_length=1, max_length=128)
+    native_operational_decision: str = Field(min_length=1, max_length=4000)
+    traincapsule_incremental_capability: str = Field(min_length=1, max_length=4000)
+    traincapsule_outputs: list[Digest] = Field(min_length=1, max_length=128)
+    traincapsule_operational_decision: str = Field(min_length=1, max_length=4000)
     native_evidence_digests: list[Digest] = Field(min_length=1, max_length=64)
     candidate_evidence_digests: list[Digest] = Field(min_length=1, max_length=64)
+    incident_derived_contract_digests: list[Digest] = Field(min_length=1, max_length=64)
     independent_oracle_ids: list[Identifier] = Field(min_length=1, max_length=16)
+    oracle_identity: Identifier
+    issuer_identity: Identifier
     native_effort_minutes: float = Field(gt=0, le=1_000_000)
     candidate_effort_minutes: float = Field(gt=0, le=1_000_000)
+    cost_time_resource_comparison: CostTimeResourceComparisonV31
+    reproducibility: BenchmarkReproducibilityV31
+    limitations: list[str] = Field(max_length=64)
+    truth_state: EpistemicState
+    raw_artifact_hashes: list[Digest] = Field(min_length=1, max_length=256)
     decision_changed: bool
     disposition: NativeSubstituteDisposition
 
     @model_validator(mode="after")
     def validate_benchmark(self) -> NativeSubstituteBenchmarkV31:
-        _require_unique(self.native_evidence_digests, "native evidence digests")
-        _require_unique(self.candidate_evidence_digests, "candidate evidence digests")
-        _require_unique(self.independent_oracle_ids, "independent oracle IDs")
+        for values, label in (
+            (self.source_freshness_receipts, "source freshness receipts"),
+            (self.native_inputs, "native inputs"),
+            (self.native_outputs, "native outputs"),
+            (self.native_findings, "native findings"),
+            (self.traincapsule_outputs, "TrainCapsule outputs"),
+            (self.native_evidence_digests, "native evidence digests"),
+            (self.candidate_evidence_digests, "candidate evidence digests"),
+            (self.incident_derived_contract_digests, "incident-derived contracts"),
+            (self.independent_oracle_ids, "independent oracle IDs"),
+            (self.raw_artifact_hashes, "raw artifact hashes"),
+        ):
+            _require_unique(values, label)
+        if self.environment_digest != self.candidate_environment_digest:
+            raise ValueError("environment digest must identify the candidate environment")
+        first_tool = self.native_tool_names_versions_configs[0]
+        if (
+            first_tool.tool_name != self.native_tool
+            or first_tool.tool_version != self.native_tool_version
+        ):
+            raise ValueError("primary native tool must match the complete substitute inventory")
+        if self.oracle_identity not in self.independent_oracle_ids:
+            raise ValueError("oracle identity must be one of the independent oracle IDs")
+        if self.native_effort_minutes != self.cost_time_resource_comparison.native_minutes:
+            raise ValueError("native effort must match the cost/time/resource comparison")
+        if self.candidate_effort_minutes != self.cost_time_resource_comparison.traincapsule_minutes:
+            raise ValueError("candidate effort must match the cost/time/resource comparison")
+        raw_references = {
+            *self.native_inputs,
+            *self.native_outputs,
+            *self.native_findings,
+            *self.traincapsule_outputs,
+            *self.native_evidence_digests,
+            *self.candidate_evidence_digests,
+            *self.incident_derived_contract_digests,
+        }
+        if not raw_references.issubset(set(self.raw_artifact_hashes)):
+            raise ValueError("every benchmark evidence reference must bind a raw artifact")
         if (
             self.disposition is NativeSubstituteDisposition.INCREMENTAL_VALUE
             and not self.decision_changed
@@ -386,6 +491,19 @@ class NativeSubstituteBenchmarkV31(V31Model):
             and self.decision_changed
         ):
             raise ValueError("native sufficiency cannot claim a candidate-caused decision change")
+        if (
+            self.disposition
+            in {
+                NativeSubstituteDisposition.NOT_COMPARABLE,
+                NativeSubstituteDisposition.UNKNOWN,
+            }
+            and self.decision_changed
+        ):
+            raise ValueError("unknown/not-comparable benchmark cannot claim a decision change")
+        if (self.disposition is NativeSubstituteDisposition.UNKNOWN) != (
+            self.truth_state is EpistemicState.UNKNOWN
+        ):
+            raise ValueError("UNKNOWN disposition and truth state must agree")
         return self
 
 

@@ -1,7 +1,162 @@
 {
   "$defs": {
+    "ApprovedAgentAssistanceV31": {
+      "additionalProperties": false,
+      "properties": {
+        "allowedTasks": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Allowedtasks",
+          "type": "array"
+        },
+        "configurationDigest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "systemId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "version": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "systemId",
+        "version",
+        "configurationDigest",
+        "allowedTasks"
+      ],
+      "title": "ApprovedAgentAssistanceV31",
+      "type": "object"
+    },
+    "BenchmarkReproducibilityV31": {
+      "additionalProperties": false,
+      "properties": {
+        "commandDigests": {
+          "items": {
+            "$ref": "#/$defs/Digest"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Commanddigests",
+          "type": "array"
+        },
+        "environmentDigest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "matchingDecisionCount": {
+          "maximum": 1000,
+          "minimum": 0,
+          "title": "Matchingdecisioncount",
+          "type": "integer"
+        },
+        "repetitions": {
+          "maximum": 1000,
+          "minimum": 2,
+          "title": "Repetitions",
+          "type": "integer"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "repetitions",
+        "matchingDecisionCount",
+        "commandDigests",
+        "environmentDigest"
+      ],
+      "title": "BenchmarkReproducibilityV31",
+      "type": "object"
+    },
+    "CostTimeResourceComparisonV31": {
+      "additionalProperties": false,
+      "properties": {
+        "nativeCost": {
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Nativecost",
+          "type": "number"
+        },
+        "nativeMinutes": {
+          "exclusiveMinimum": 0,
+          "maximum": 1000000,
+          "title": "Nativeminutes",
+          "type": "number"
+        },
+        "nativeResources": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Nativeresources",
+          "type": "array"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "traincapsuleCost": {
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Traincapsulecost",
+          "type": "number"
+        },
+        "traincapsuleMinutes": {
+          "exclusiveMinimum": 0,
+          "maximum": 1000000,
+          "title": "Traincapsuleminutes",
+          "type": "number"
+        },
+        "traincapsuleResources": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Traincapsuleresources",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "nativeCost",
+        "traincapsuleCost",
+        "nativeMinutes",
+        "traincapsuleMinutes",
+        "nativeResources",
+        "traincapsuleResources"
+      ],
+      "title": "CostTimeResourceComparisonV31",
+      "type": "object"
+    },
     "Digest": {
       "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "EpistemicState": {
+      "enum": [
+        "UNKNOWN",
+        "CONTROLLED",
+        "EXTERNALLY_VERIFIED"
+      ],
+      "title": "EpistemicState",
       "type": "string"
     },
     "GitSha": {
@@ -21,12 +176,53 @@
       ],
       "title": "NativeSubstituteDisposition",
       "type": "string"
+    },
+    "NativeToolConfigurationV31": {
+      "additionalProperties": false,
+      "properties": {
+        "configurationDigest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "toolName": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Toolname",
+          "type": "string"
+        },
+        "toolVersion": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Toolversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "toolName",
+        "toolVersion",
+        "configurationDigest"
+      ],
+      "title": "NativeToolConfigurationV31",
+      "type": "object"
     }
   },
   "$id": "https://traincapsule.local/schemas/factory/v3.1/native-substitute-benchmark.schema.json",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
   "additionalProperties": false,
   "properties": {
+    "approvedAgentAssistanceBaseline": {
+      "items": {
+        "$ref": "#/$defs/ApprovedAgentAssistanceV31"
+      },
+      "maxItems": 16,
+      "title": "Approvedagentassistancebaseline",
+      "type": "array"
+    },
     "baselineEnvironmentDigest": {
       "$ref": "#/$defs/Digest"
     },
@@ -57,12 +253,30 @@
     "candidateTreeSha": {
       "$ref": "#/$defs/GitSha"
     },
+    "caseId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "costTimeResourceComparison": {
+      "$ref": "#/$defs/CostTimeResourceComparisonV31"
+    },
     "decisionChanged": {
       "title": "Decisionchanged",
       "type": "boolean"
     },
     "disposition": {
       "$ref": "#/$defs/NativeSubstituteDisposition"
+    },
+    "environmentDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "incidentDerivedContractDigests": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Incidentderivedcontractdigests",
+      "type": "array"
     },
     "independentOracleIds": {
       "items": {
@@ -71,6 +285,17 @@
       "maxItems": 16,
       "minItems": 1,
       "title": "Independentoracleids",
+      "type": "array"
+    },
+    "issuerIdentity": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "title": "Limitations",
       "type": "array"
     },
     "nativeEffortMinutes": {
@@ -88,11 +313,53 @@
       "title": "Nativeevidencedigests",
       "type": "array"
     },
+    "nativeFindings": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Nativefindings",
+      "type": "array"
+    },
+    "nativeInputs": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Nativeinputs",
+      "type": "array"
+    },
+    "nativeOperationalDecision": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Nativeoperationaldecision",
+      "type": "string"
+    },
+    "nativeOutputs": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Nativeoutputs",
+      "type": "array"
+    },
     "nativeTool": {
       "maxLength": 128,
       "minLength": 1,
       "title": "Nativetool",
       "type": "string"
+    },
+    "nativeToolNamesVersionsConfigs": {
+      "items": {
+        "$ref": "#/$defs/NativeToolConfigurationV31"
+      },
+      "maxItems": 32,
+      "minItems": 1,
+      "title": "Nativetoolnamesversionsconfigs",
+      "type": "array"
     },
     "nativeToolVersion": {
       "maxLength": 64,
@@ -100,10 +367,58 @@
       "title": "Nativetoolversion",
       "type": "string"
     },
+    "oracleIdentity": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "rawArtifactHashes": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 256,
+      "minItems": 1,
+      "title": "Rawartifacthashes",
+      "type": "array"
+    },
+    "reproducibility": {
+      "$ref": "#/$defs/BenchmarkReproducibilityV31"
+    },
     "schemaVersion": {
       "const": "3.1",
       "title": "Schemaversion",
       "type": "string"
+    },
+    "sourceFreshnessReceipts": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Sourcefreshnessreceipts",
+      "type": "array"
+    },
+    "traincapsuleIncrementalCapability": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Traincapsuleincrementalcapability",
+      "type": "string"
+    },
+    "traincapsuleOperationalDecision": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Traincapsuleoperationaldecision",
+      "type": "string"
+    },
+    "traincapsuleOutputs": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Traincapsuleoutputs",
+      "type": "array"
+    },
+    "truthState": {
+      "$ref": "#/$defs/EpistemicState"
     },
     "workItemId": {
       "pattern": "^V3-[A-Z]+-[0-9]{3}$",
@@ -115,17 +430,37 @@
     "schemaVersion",
     "benchmarkId",
     "workItemId",
+    "caseId",
     "candidateSha",
     "candidateTreeSha",
+    "environmentDigest",
     "baselineEnvironmentDigest",
     "candidateEnvironmentDigest",
+    "sourceFreshnessReceipts",
+    "nativeToolNamesVersionsConfigs",
+    "approvedAgentAssistanceBaseline",
     "nativeTool",
     "nativeToolVersion",
+    "nativeInputs",
+    "nativeOutputs",
+    "nativeFindings",
+    "nativeOperationalDecision",
+    "traincapsuleIncrementalCapability",
+    "traincapsuleOutputs",
+    "traincapsuleOperationalDecision",
     "nativeEvidenceDigests",
     "candidateEvidenceDigests",
+    "incidentDerivedContractDigests",
     "independentOracleIds",
+    "oracleIdentity",
+    "issuerIdentity",
     "nativeEffortMinutes",
     "candidateEffortMinutes",
+    "costTimeResourceComparison",
+    "reproducibility",
+    "limitations",
+    "truthState",
+    "rawArtifactHashes",
     "decisionChanged",
     "disposition"
   ],

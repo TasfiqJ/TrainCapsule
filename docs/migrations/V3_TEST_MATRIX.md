@@ -98,7 +98,11 @@ corrected. Final verification ran on the already-provisioned `traincapsule-wsl-l
 the bounded repository variable; `ubuntu-latest` remains the workflow fallback. This used no new
 paid runner entitlement.
 
-Startup preflight then passed configuration, source, migration, live archive, publication recovery,
-and exact-SHA marker checks before failing at the final subscription credential gate with
-`AUTH_EXPIRED`. `STOP` and `PAUSE` were restored, the Windows task remains disabled, and no model was
-invoked. No GPU check was run; GPU/customer/external evidence remains deferred.
+The first direct startup-preflight probe returned `AUTH_EXPIRED` because it did not load the launcher
+PATH. Loading the real launcher environment then exposed and removed two forbidden V2-only
+overrides. Private-gate discovery was moved to its fixed controller-owned path outside the repository.
+The corrected launcher-environment preflight returned `ready: true`, `credentials: AUTHENTICATED`,
+`runtimeState: CLEAN`, and validated all 16 V3 configuration sets, exact marker, source, legacy
+archive, and publication recovery. The runtime-path follow-up raises the current complete-suite proof
+to 555 passing tests. No model was invoked. No GPU check was run; GPU/customer/external evidence
+remains deferred.

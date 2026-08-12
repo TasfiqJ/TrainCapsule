@@ -86,16 +86,19 @@ the bounded `TRAINCAPSULE_CI_RUNNER` repository variable, with `ubuntu-latest` r
 workflow fallback. No new paid runner usage was created.
 
 The ignored migration marker is valid and bound to the published commit, source manifest, owner
-directives, and five M0 evidence files. Runtime startup was attempted only after publication. Its
-preflight passed every repository/runtime invariant before returning `AUTH_EXPIRED` at the existing
-Claude subscription credential gate. No model was invoked. Durable `STOP` and `PAUSE` were restored,
-the Windows task remains disabled, and no controller process is running.
+directives, and five M0 evidence files. A direct preflight probe initially misclassified the
+credential as `AUTH_EXPIRED` because it did not load the launcher PATH. The installed Claude CLI
+actually reports first-party `claude.ai` Max authentication. Loading the real launcher environment
+then exposed two forbidden V2-only overrides; those were removed, and private-gate discovery now
+uses its fixed controller-owned path outside the repository. The corrected preflight returned
+`ready: true`, `credentials: AUTHENTICATED`, `runtimeState: CLEAN`, and validated all 16 V3 config
+sets plus source, marker, live archive, and publication recovery. No model was invoked during these
+probes.
 
-The remaining operational dependency is therefore exact and external: renew the existing
-subscription credential without changing the no-paid policy, rerun startup preflight, and enable the
-launcher only after it returns ready. If any later publication or hosted verification fails, retain
-the stopped state and follow `docs/migrations/V3_ROLLBACK.md`; never reset or rewrite published
-history.
+After the runtime-path repair is exact-SHA hosted-green, the durable stops may be removed and the
+verified launcher enabled for a bounded observation. If any later publication or hosted verification
+fails, retain the stopped state and follow `docs/migrations/V3_ROLLBACK.md`; never reset or rewrite
+published history.
 
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory

@@ -7,11 +7,11 @@
 - Bundle integrity: 30/30 declared files, 542907/542907 bytes, every declared SHA-256 matched
 - Completed milestone: `M0_FACTORY_MIGRATED`, proven by the five tracked acceptance receipts under
   `docs/migrations/evidence/`; active engineering milestone: `M1_NATIVE_PREFLIGHT`
-- Controller: safely stopped; Windows task disabled; durable `STOP` and `PAUSE` restored after
-  startup preflight reached the credential gate and returned `AUTH_EXPIRED`
+- Controller: safely stopped while the final runtime-path repair is published; Windows task
+  disabled; durable `STOP` and `PAUSE` present
 - Owner deviations: zero-human execution and exact-SHA main-only publication; non-main pushes and pull requests are forbidden
 - External truth: GPU, customer, operator, payment, repeat-use, and commercial-support facts remain UNKNOWN or `WAITING_EXTERNAL`
-- Current local proof: 554 tests pass, Ruff passes, strict Pyright reports 0 errors and 0 warnings,
+- Current local proof: 555 tests pass, Ruff passes, strict Pyright reports 0 errors and 0 warnings,
   all generators/gates pass, and the clean independent-wheel installation journey passes
 - Publication proof: `origin/main` resolved to the accepted implementation SHA and all eight required
   workflows passed at that exact SHA: Factory quality `31563636477`, Product unit `31563636487`,
@@ -24,9 +24,12 @@
   `ubuntu-latest` as their declared fallback. No new paid runner or model usage was created.
 - Network use was limited to GitHub fetch/push, workflow verification, and existing package tooling;
   no model call, GPU run, paid API, customer action, or commercial claim was made
-- Next runtime action: renew the existing Claude subscription credential without changing the
-  no-paid policy, rerun startup preflight, and only then remove `STOP`/`PAUSE` and enable the task.
-  Until that external credential state changes, the stopped state is the only truthful safe state.
+- Runtime preflight with the actual launcher environment now returns `ready: true` and
+  `credentials: AUTHENTICATED`. The earlier `AUTH_EXPIRED` was a PATH/configuration false negative,
+  not an expired Max subscription: the installed Claude CLI reports first-party `claude.ai` Max.
+  Two V2-only environment overrides were removed, and private-gate discovery now uses its fixed
+  controller-owned out-of-repository path. After this repair is exact-SHA hosted-green, remove
+  `STOP`/`PAUSE`, enable the task, and observe one bounded V3 controller cycle.
 
 ## Rollback
 

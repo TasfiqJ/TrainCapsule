@@ -2,7 +2,6 @@ from __future__ import annotations
 
 import hashlib
 import json
-import os
 import re
 import shutil
 import time
@@ -21,6 +20,10 @@ from .v3.candidate_manifest import CandidateManifest
 from .yamlutil import load_yaml
 
 _BRANCH_PATTERN = re.compile(r"^[A-Za-z0-9](?:[A-Za-z0-9._/-]{0,126}[A-Za-z0-9])?$")
+CONTROLLER_PRIVATE_GATE = (
+    Path.home()
+    / ".local/share/traincapsule-factory/private-gates/run_private_gate.sh"
+)
 
 
 class RemoteCIConfig(V3Model):
@@ -345,11 +348,11 @@ class MainOnlyPublisher:
         write_json(local_path, local_evidence)
         evidence_paths = {"deterministic-local": local_path}
         private_evidence: dict[str, str] = {}
-        private_runner_value = os.getenv("TCF_PRIVATE_GATE_RUNNER")
-        if private_runner_value:
+        private_runner = CONTROLLER_PRIVATE_GATE
+        if private_runner.is_file():
             private_artifacts = self.receipt_root / "private-gates" / str(item.work_item_id)
             result = run_private_gate(
-                runner=Path(private_runner_value),
+                runner=private_runner,
                 suite="full-release",
                 cwd=candidate_worktree,
                 repo_root=self.repo_root,

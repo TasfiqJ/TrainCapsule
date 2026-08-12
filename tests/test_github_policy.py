@@ -49,6 +49,17 @@ def test_non_main_push_and_pr_surfaces_do_not_exist() -> None:
     assert not hasattr(github_sync, "run_remote_ci")
 
 
+def test_private_gate_uses_fixed_controller_owned_path(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    monkeypatch.setenv("TCF_PRIVATE_GATE_RUNNER", "/attacker/controlled")
+    assert (
+        Path.home()
+        / ".local/share/traincapsule-factory/private-gates/run_private_gate.sh"
+    ) == github_sync.CONTROLLER_PRIVATE_GATE
+    assert "TCF_PRIVATE_GATE_RUNNER" not in github_sync.CONTROLLER_PRIVATE_GATE.as_posix()
+
+
 def test_push_helper_accepts_only_exact_sha_to_main(monkeypatch: pytest.MonkeyPatch) -> None:
     config = GitHubConfig(enabled=True, retry_attempts=1, retry_backoff_seconds=1)
     for refspec in ("candidate:refs/heads/main", f"{CANDIDATE}:refs/heads/dev"):
@@ -88,6 +99,7 @@ def test_main_only_publisher_binds_gates_and_publishes_exact_sha(
         quarantine_root=repo / "factory/state/quarantine",
         local_gate_command=("bash", "gate.sh"),
     )
+    monkeypatch.setattr(github_sync, "CONTROLLER_PRIVATE_GATE", tmp_path / "missing-private-gate")
     item = SimpleNamespace(work_item_id="V3-MIG-019")
     monkeypatch.setattr(github_sync, "current_branch", lambda _: "main")
 

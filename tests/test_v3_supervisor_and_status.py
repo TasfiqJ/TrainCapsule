@@ -110,6 +110,9 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
     write_json(paths.migration_marker, marker.model_dump(mode="json", by_alias=True))
     monkeypatch.setattr("tcfactory.supervisor._verify_migration_marker", lambda *_: marker)
     monkeypatch.setattr("tcfactory.supervisor._verify_source_integrity", lambda _: None)
+    monkeypatch.setattr(
+        "tcfactory.supervisor.verify_legacy_queue_archive_receipt", lambda *_, **__: {}
+    )
 
     class AuthenticatedProvider:
         def __init__(self, *, require_long_lived_token: bool = False) -> None:
@@ -170,6 +173,9 @@ def test_startup_reconciles_publication_before_exact_sha_marker(
         return marker
 
     monkeypatch.setattr("tcfactory.supervisor._verify_source_integrity", lambda _: None)
+    monkeypatch.setattr(
+        "tcfactory.supervisor.verify_legacy_queue_archive_receipt", lambda *_, **__: {}
+    )
     monkeypatch.setattr("tcfactory.supervisor.MainOnlyPublisher", RecoveringPublisher)
     monkeypatch.setattr("tcfactory.supervisor._verify_migration_marker", verify_marker)
     monkeypatch.setattr("tcfactory.supervisor.ClaudeCredentialProvider", AuthenticatedProvider)

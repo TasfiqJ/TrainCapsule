@@ -67,3 +67,20 @@ def test_migration_report_file_inventory_is_current() -> None:
         text=True,
     )
     assert completed.returncode == 0
+
+
+def test_migration_inventory_ignores_untracked_ci_artifacts(tmp_path: Path) -> None:
+    artifact = ROOT / ".ci-artifacts" / "inventory-negative-control.log"
+    artifact.parent.mkdir(exist_ok=True)
+    artifact.write_text(str(tmp_path), encoding="utf-8")
+    try:
+        completed = subprocess.run(
+            [sys.executable, "scripts/update_v3_migration_inventory.py", "--check"],
+            cwd=ROOT,
+            check=False,
+            capture_output=True,
+            text=True,
+        )
+        assert completed.returncode == 0
+    finally:
+        artifact.unlink(missing_ok=True)

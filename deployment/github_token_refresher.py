@@ -70,7 +70,11 @@ class RefreshPolicy(_Strict):
 
     @model_validator(mode="after")
     def exact_scope(self) -> RefreshPolicy:
-        if self.permissions != {"actions": "write", "contents": "read"}:
+        if self.permissions != {
+            "actions": "write",
+            "contents": "read",
+            "pull_requests": "read",
+        }:
             raise ValueError("GitHub App token permissions exceed the isolated canary scope")
         return self
 

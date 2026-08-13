@@ -733,7 +733,11 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                     "installationId": 456,
                     "repository": "test-owner/isolated-canary",
                     "audience": "https://api.github.com",
-                    "permissions": {"actions": "write", "contents": "read"},
+                    "permissions": {
+                        "actions": "write",
+                        "contents": "read",
+                        "pull_requests": "read",
+                    },
                     "privateKeyPath": ROLE_TARGETS["github-token-refresher-private-key"],
                     "outboxTokenPath": "/var/lib/traincapsule-github-token/outbox/token",
                     "outboxMetadataPath": (

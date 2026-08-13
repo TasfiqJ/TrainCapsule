@@ -46,7 +46,11 @@ def _policy(tmp_path: Path) -> RefreshPolicy:
         installation_id=456,
         repository="test-owner/isolated-canary",
         audience="https://api.github.com",
-        permissions={"actions": "write", "contents": "read"},
+        permissions={
+            "actions": "write",
+            "contents": "read",
+            "pull_requests": "read",
+        },
         private_key_path=str(key_path),
         outbox_token_path=str(outbox / "token"),
         outbox_metadata_path=str(outbox / "metadata.json"),
@@ -74,7 +78,11 @@ def test_policy_loader_accepts_the_repository_canonical_json_line(tmp_path: Path
         installation_id=456,
         repository="test-owner/isolated-canary",
         audience="https://api.github.com",
-        permissions={"actions": "write", "contents": "read"},
+        permissions={
+            "actions": "write",
+            "contents": "read",
+            "pull_requests": "read",
+        },
         private_key_path="/var/lib/traincapsule-github-token/github-app-private-key.pem",
         outbox_token_path="/var/lib/traincapsule-github-token/outbox/token",
         outbox_metadata_path=(
@@ -130,7 +138,11 @@ def test_scoped_refresh_rotation_and_promotion_never_log_token(
     )
     request_payload = json.loads(cast(bytes, request.data))
     assert request_payload == {
-        "permissions": {"actions": "write", "contents": "read"},
+        "permissions": {
+            "actions": "write",
+            "contents": "read",
+            "pull_requests": "read",
+        },
         "repositories": ["isolated-canary"],
     }
     assert metadata.expires_at == NOW + timedelta(hours=1)
@@ -161,6 +173,32 @@ def test_refresher_rejects_unsafe_key_expiry_and_scope(
                 "repository": "test-owner/isolated-canary",
                 "audience": "https://api.github.com",
                 "permissions": {"contents": "write"},
+                "privateKeyPath": (
+                    "/var/lib/traincapsule-github-token/github-app-private-key.pem"
+                ),
+                "outboxTokenPath": "/var/lib/traincapsule-github-token/outbox/token",
+                "outboxMetadataPath": (
+                    "/var/lib/traincapsule-github-token/outbox/token-metadata.json"
+                ),
+                "targetTokenPath": (
+                    "/var/lib/traincapsule-canary-secrets/github-app-installation-token"
+                ),
+                "targetMetadataPath": (
+                    "/var/lib/traincapsule-canary-secrets/"
+                    "github-app-installation-token.json"
+                ),
+                "refreshBeforeSeconds": 600,
+            }
+        )
+    with pytest.raises(ValueError, match="permissions exceed"):
+        RefreshPolicy.model_validate(
+            {
+                "schemaVersion": "3.1",
+                "githubAppId": 123,
+                "installationId": 456,
+                "repository": "test-owner/isolated-canary",
+                "audience": "https://api.github.com",
+                "permissions": {"actions": "write", "contents": "read"},
                 "privateKeyPath": (
                     "/var/lib/traincapsule-github-token/github-app-private-key.pem"
                 ),

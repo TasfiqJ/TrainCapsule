@@ -895,7 +895,12 @@ def _validate_github_token_refresher(sources: Mapping[str, Path]) -> None:
         or not isinstance(policy["repository"], str)
         or not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", policy["repository"])
         or policy["audience"] != "https://api.github.com"
-        or policy["permissions"] != {"actions": "write", "contents": "read"}
+        or policy["permissions"]
+        != {
+            "actions": "write",
+            "contents": "read",
+            "pull_requests": "read",
+        }
         or policy["privateKeyPath"] != ROLE_TARGETS["github-token-refresher-private-key"]
         or policy["outboxTokenPath"] != "/var/lib/traincapsule-github-token/outbox/token"
         or policy["outboxMetadataPath"]

@@ -29,6 +29,13 @@ from traincapsule_verifier.bootstrap import production_install_manifest
 from traincapsule_verifier.canonical import canonical_json_bytes, sha256_digest
 from traincapsule_verifier.models import StrictModel
 
+from .runtime_distribution import (
+    RuntimeDistributionManifest,
+    extract_runtime_distribution,
+    validate_extracted_runtime_distribution,
+    validate_runtime_distribution,
+)
+
 APPLY_CONFIRMATION = "APPLY_PRIVILEGED_INSTALL"
 SERVICE_USER = "traincapsule-verifier"
 SELECTOR_USER = "traincapsule-selector"
@@ -36,6 +43,20 @@ RULESET_USER = "traincapsule-ruleset-observer"
 TOKEN_REFRESHER_USER = "traincapsule-github-token"
 ANCHOR_FETCHER_USER = "traincapsule-anchor-fetcher"
 DEFAULT_CONTROLLER_USER = "traincapsule-controller"
+INITIAL_CONTROLLER_PYTHONPATH = ":".join(
+    (
+        "/var/lib/traincapsule-verifier/repository-boundary",
+        "/var/lib/traincapsule-verifier/repository-boundary/packages/traincapsule-core/src",
+        (
+            "/var/lib/traincapsule-verifier/repository-boundary/"
+            "packages/traincapsule-ingest-pytorch/src"
+        ),
+        "/var/lib/traincapsule-verifier/repository-boundary/packages/traincapsule-qualify/src",
+        "/var/lib/traincapsule-verifier/repository-boundary/packages/traincapsule-cli/src",
+        "/var/lib/traincapsule-verifier/repository-boundary/verifier/src",
+        "/var/lib/traincapsule-verifier/repository-boundary/canary_runner/src",
+    )
+)
 CANARY_GITHUB_TOKEN_TARGET = (
     "/var/lib/traincapsule-canary-secrets/github-app-installation-token"
 )
@@ -64,6 +85,8 @@ FileRole = Literal[
     "canary-receipt-probe",
     "python-runtime",
     "python-runtime-manifest",
+    "python-runtime-archive",
+    "python-runtime-distribution-manifest",
     "runtime-verifier-wheel",
     "runtime-controller-wheel",
     "runtime-deployment-wheel",
@@ -219,8 +242,12 @@ ROLE_TARGETS: dict[str, str] = {
     "canary-policy": "/etc/traincapsule-canary-runner/policy.json",
     "canary-live-probes-policy": "/etc/traincapsule-canary-runner/live-probes.json",
     "canary-receipt-probe": "/usr/libexec/traincapsule-verifier-canary-receipt-probe",
-    "python-runtime": "/opt/traincapsule-runtime/bin/python3.12",
+    "python-runtime": "/opt/traincapsule-runtime/python/bin/python3.12",
     "python-runtime-manifest": "/etc/traincapsule-runtime/runtime.json",
+    "python-runtime-archive": "/opt/traincapsule-runtime/artifacts/python-runtime.zip",
+    "python-runtime-distribution-manifest": (
+        "/etc/traincapsule-runtime/python-distribution.json"
+    ),
     "runtime-verifier-wheel": "/opt/traincapsule-runtime/wheels/verifier.whl",
     "runtime-controller-wheel": "/opt/traincapsule-runtime/wheels/controller.whl",
     "runtime-deployment-wheel": "/opt/traincapsule-runtime/wheels/deployment.whl",
@@ -760,6 +787,10 @@ def _validate_role_metadata(spec: PrivilegedInstallSpec) -> None:
         "0444",
     ):
         raise ValueError("Python runtime manifest must be root-owned and immutable")
+    for role in ("python-runtime-archive", "python-runtime-distribution-manifest"):
+        artifact = by_role[role]
+        if (artifact.owner, artifact.group, artifact.mode) != ("root", "root", "0444"):
+            raise ValueError("Python runtime distribution must be root-owned and immutable")
     for role in (
         "runtime-verifier-wheel",
         "runtime-controller-wheel",
@@ -971,7 +1002,7 @@ def production_directory_pins(
         ("/var/lib/traincapsule-verifier/anchor-fetcher-outbox", fetcher, fetcher, "0700"),
         ("/var/lib/traincapsule-verifier/anchor-fetcher-private", fetcher, fetcher, "0700"),
         ("/opt/traincapsule-runtime", "root", "root", "0755"),
-        ("/opt/traincapsule-runtime/bin", "root", "root", "0755"),
+        ("/opt/traincapsule-runtime/artifacts", "root", "root", "0755"),
         ("/opt/traincapsule-runtime/wheels", "root", "root", "0755"),
         ("/opt/traincapsule-runtime/generations", "root", "root", "0555"),
         ("/opt/traincapsule-canary-runner", "root", "root", "0755"),
@@ -1459,6 +1490,7 @@ class PrivilegedInstaller:
             self._ensure_accounts()
             self._ensure_directories()
             self._stage_sources()
+            self._install_runtime_distribution()
             self._install_files()
             self._install_repository_snapshot()
             self._attest_installed_tree()
@@ -1510,6 +1542,7 @@ class PrivilegedInstaller:
             self._attest_metadata(target, item.owner, item.group, item.mode, directory=False)
             if _sha256_file(target) != item.sha256:
                 raise InstallFailure(f"installed digest mismatch: {item.target}")
+        self._attest_runtime_distribution()
         self._attest_repository_snapshot()
         self._attest_controller_runtime_contract()
         self._attest_activation_supervisor_unit()
@@ -1575,6 +1608,34 @@ class PrivilegedInstaller:
                     raise InstallFailure(f"rollback target changed type: {target_text}")
                 target.unlink()
             self._record("FILE_ROLLED_BACK", {"target": target_text})
+        runtime_root = self._target("/opt/traincapsule-runtime/python")
+        runtime_entries = cast(list[str], self._state.get("runtimeEntries", []))
+        if runtime_entries and runtime_root.is_dir() and not runtime_root.is_symlink():
+            os.chmod(runtime_root, 0o700, follow_symlinks=False)
+            for directory in sorted(
+                (path for path in runtime_root.rglob("*") if path.is_dir()),
+                reverse=True,
+            ):
+                if directory.is_symlink():
+                    raise InstallFailure("rollback runtime directory changed type")
+                os.chmod(directory, 0o700, follow_symlinks=False)
+            for relative in sorted(
+                runtime_entries,
+                key=lambda value: (value.count("/"), value),
+                reverse=True,
+            ):
+                target = runtime_root / relative
+                if target.is_symlink():
+                    raise InstallFailure("rollback runtime entry changed type")
+                if target.is_file():
+                    target.unlink()
+                parent = target.parent
+                while parent != runtime_root and parent.is_dir() and not any(parent.iterdir()):
+                    parent.rmdir()
+                    parent = parent.parent
+            if not any(runtime_root.iterdir()):
+                runtime_root.rmdir()
+            self._record("RUNTIME_DISTRIBUTION_ROLLED_BACK", {})
         for item in reversed(self.spec.directories):
             saved = resources.get(item.target)
             if saved is None:
@@ -1647,6 +1708,18 @@ class PrivilegedInstaller:
         validate_repository_snapshot_archive(
             self._source(by_role["repository-snapshot"].source), snapshot_manifest
         )
+        runtime_distribution = RuntimeDistributionManifest.model_validate_json(
+            self._source(by_role["python-runtime-distribution-manifest"].source).read_bytes(),
+            strict=True,
+        )
+        validate_runtime_distribution(
+            self._source(by_role["python-runtime-archive"].source), runtime_distribution
+        )
+        if (
+            runtime_distribution.executable_digest != by_role["python-runtime"].sha256
+            or runtime_distribution.archive_digest != by_role["python-runtime-archive"].sha256
+        ):
+            raise InstallFailure("runtime distribution deployment binding mismatch")
         bindings = {
             "effectiveConfigDigest": by_role["controller-effective-config"].sha256,
             "pythonRuntimeManifestDigest": by_role["python-runtime-manifest"].sha256,
@@ -1796,7 +1869,7 @@ class PrivilegedInstaller:
 
     def _install_files(self) -> None:
         for item in self.spec.files:
-            if item.role == "repository-snapshot-manifest":
+            if item.role in {"python-runtime", "repository-snapshot-manifest"}:
                 continue
             target = self._target(item.target)
             saved = self._prepare_resource(item.target, target, directory=False)
@@ -1808,6 +1881,54 @@ class PrivilegedInstaller:
             self._save_state()
             self._record("FILE_INSTALLED", {"target": item.target, "digest": item.sha256})
             self._fail("file:" + item.role)
+
+    def _install_runtime_distribution(self) -> None:
+        by_role = {item.role: item for item in self.spec.files}
+        destination = self._target("/opt/traincapsule-runtime/python")
+        archive = self.txn / "stage" / "python-runtime-archive"
+        manifest_raw = (self.txn / "stage" / "python-runtime-distribution-manifest").read_bytes()
+        manifest = RuntimeDistributionManifest.model_validate_json(manifest_raw, strict=True)
+        entries = [entry.path for entry in manifest.entries]
+        if destination.exists() or destination.is_symlink():
+            if (
+                self._state.get("runtimeEntries") != entries
+                or self._state.get("runtimeManifestDigest") != manifest.manifest_digest
+            ):
+                raise InstallFailure("runtime distribution destination already exists")
+            validate_extracted_runtime_distribution(destination, manifest)
+        else:
+            extract_runtime_distribution(archive, manifest, destination)
+            self._state["runtimeEntries"] = entries
+            self._state["runtimeManifestDigest"] = manifest.manifest_digest
+            self._save_state()
+        for path in [destination, *destination.rglob("*")]:
+            self.authority.chown(path, "root", "root")
+        executable = destination / manifest.executable_path
+        if _sha256_file(executable) != by_role["python-runtime"].sha256:
+            raise InstallFailure("installed runtime executable differs")
+        self._record(
+            "RUNTIME_DISTRIBUTION_INSTALLED",
+            {"manifest": manifest.manifest_digest, "entries": len(entries)},
+        )
+        self._fail("runtime-distribution")
+
+    def _attest_runtime_distribution(self) -> None:
+        by_role = {item.role: item for item in self.spec.files}
+        manifest_path = self._target(
+            by_role["python-runtime-distribution-manifest"].target
+        )
+        manifest = RuntimeDistributionManifest.model_validate_json(
+            manifest_path.read_bytes(), strict=True
+        )
+        destination = self._target("/opt/traincapsule-runtime/python")
+        validate_extracted_runtime_distribution(destination, manifest)
+        expected_owner = (
+            self.authority.uid("root"),
+            self.authority.gid("root"),
+        )
+        for path in [destination, *destination.rglob("*")]:
+            if self.authority.owner(path) != expected_owner:
+                raise InstallFailure("runtime distribution owner differs")
 
     def _install_repository_snapshot(self) -> None:
         by_role = {item.role: item for item in self.spec.files}

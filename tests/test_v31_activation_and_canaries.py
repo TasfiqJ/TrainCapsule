@@ -73,7 +73,7 @@ def _runtime_loader() -> tuple[InstalledControllerRuntimeManifest, RuntimeLoader
         repository_root="/var/lib/traincapsule-verifier/repository-boundary",
         runtime_root="/var/lib/traincapsule-runtime",
         python_runtime=InstalledArtifact(
-            path="/opt/traincapsule-runtime/bin/python3.12",
+            path="/opt/traincapsule-runtime/python/bin/python3.12",
             digest=DIGEST,
             executable=True,
         ),

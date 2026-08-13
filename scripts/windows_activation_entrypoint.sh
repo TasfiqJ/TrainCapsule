@@ -1,6 +1,6 @@
 #!/bin/sh
 set -eu
-readonly TCF_RUNTIME_PYTHON=/opt/traincapsule-runtime/bin/python3.12
+readonly TCF_RUNTIME_PYTHON=/opt/traincapsule-runtime/python/bin/python3.12
 readonly TCF_REPOSITORY_BOUNDARY=/var/lib/traincapsule-verifier/repository-boundary
 readonly TCF_EFFECTIVE_ENV=/etc/traincapsule-controller/controller-runtime.env
 if [ ! -x "$TCF_RUNTIME_PYTHON" ] || [ ! -r "$TCF_EFFECTIVE_ENV" ]; then

@@ -77,7 +77,7 @@ class InstalledControllerRuntimeManifest(V3Model):
 
     @model_validator(mode="after")
     def exact_paths(self) -> InstalledControllerRuntimeManifest:
-        if self.python_runtime.path != "/opt/traincapsule-runtime/bin/python3.12":
+        if self.python_runtime.path != "/opt/traincapsule-runtime/python/bin/python3.12":
             raise ValueError("controller Python runtime path is not the installed runtime")
         if not self.python_runtime.executable:
             raise ValueError("controller Python runtime must be executable")

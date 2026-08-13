@@ -37,6 +37,7 @@ from .privileged_installer import (
     CANARY_GITHUB_TOKEN_TARGET,
     CANARY_IDS,
     DEFAULT_CONTROLLER_USER,
+    INITIAL_CONTROLLER_PYTHONPATH,
     PATH_UNITS,
     ROLE_TARGETS,
     RULESET_USER,
@@ -50,6 +51,13 @@ from .privileged_installer import (
     production_directory_pins,
     unsigned_manifest_digest,
     validate_repository_snapshot_archive,
+)
+from .runtime_distribution import (
+    COMPLETE_RUNTIME_IMPORTS,
+    PROJECT_RUNTIME_IMPORTS,
+    PROJECT_SOURCE_MAPPINGS,
+    RuntimeDistributionManifest,
+    validate_runtime_distribution,
 )
 
 SECRET_ROLES = frozenset(
@@ -125,6 +133,8 @@ def _metadata(role: str) -> tuple[str, str, str]:
         return "root", "root", "0444"
     if role in {
         "installed-controller-runtime-manifest",
+        "python-runtime-archive",
+        "python-runtime-distribution-manifest",
         "controller-package-manifest",
         "controller-dependency-lock",
         "controller-runtime-environment",
@@ -155,7 +165,14 @@ def _metadata(role: str) -> tuple[str, str, str]:
     return "root", "root", "0644"
 
 
-def _safe_source(path: Path, *, secret: bool, executable: bool, repo_root: Path) -> Path:
+def _safe_source(
+    path: Path,
+    *,
+    secret: bool,
+    executable: bool,
+    repo_root: Path,
+    maximum_size: int = 128_000_000,
+) -> Path:
     if not path.is_absolute():
         raise BundleAssemblyError("artifact paths must be absolute")
     try:
@@ -175,7 +192,7 @@ def _safe_source(path: Path, *, secret: bool, executable: bool, repo_root: Path)
         or not stat.S_ISREG(metadata.st_mode)
         or metadata.st_nlink != 1
         or metadata.st_size == 0
-        or metadata.st_size > 128_000_000
+        or metadata.st_size > maximum_size
     ):
         raise BundleAssemblyError("artifacts must be regular files")
     if executable and not metadata.st_mode & 0o111:
@@ -193,34 +210,6 @@ def _digest(path: Path) -> str:
         while chunk := handle.read(1024 * 1024):
             value.update(chunk)
     return "sha256:" + value.hexdigest()
-
-
-def _validate_static_elf(path: Path) -> None:
-    raw = path.read_bytes()
-    if len(raw) < 64 or raw[:4] != b"\x7fELF" or raw[5] not in {1, 2}:
-        raise BundleAssemblyError("Python runtime must be a self-contained ELF executable")
-    byteorder = "little" if raw[5] == 1 else "big"
-    if raw[4] == 2:
-        program_offset = int.from_bytes(raw[32:40], byteorder)
-        entry_size = int.from_bytes(raw[54:56], byteorder)
-        entry_count = int.from_bytes(raw[56:58], byteorder)
-    elif raw[4] == 1:
-        program_offset = int.from_bytes(raw[28:32], byteorder)
-        entry_size = int.from_bytes(raw[42:44], byteorder)
-        entry_count = int.from_bytes(raw[44:46], byteorder)
-    else:
-        raise BundleAssemblyError("Python runtime ELF class is unsupported")
-    if (
-        entry_size < 4
-        or entry_count == 0
-        or entry_count > 4096
-        or program_offset + entry_size * entry_count > len(raw)
-    ):
-        raise BundleAssemblyError("Python runtime ELF program table is invalid")
-    for index in range(entry_count):
-        offset = program_offset + index * entry_size
-        if int.from_bytes(raw[offset : offset + 4], byteorder) == 3:
-            raise BundleAssemblyError("Python runtime has an external dynamic loader")
 
 
 def _validate_python_runtime(
@@ -241,7 +230,11 @@ def _validate_python_runtime(
             "schemaVersion",
             "pythonVersion",
             "executableDigest",
-            "selfContained",
+            "selfContainedDistribution",
+            "distributionDigest",
+            "distributionManifestDigest",
+            "dependencyLockDigest",
+            "requiredImports",
             "dependencies",
             "applications",
         }
@@ -249,7 +242,12 @@ def _validate_python_runtime(
         or not isinstance(manifest["pythonVersion"], str)
         or not re.fullmatch(r"3\.12\.\d+", manifest["pythonVersion"])
         or manifest["executableDigest"] != _digest(runtime_path)
-        or manifest["selfContained"] is not True
+        or manifest["selfContainedDistribution"] is not True
+        or manifest["distributionDigest"] != _digest(sources["python-runtime-archive"])
+        or manifest["distributionManifestDigest"]
+        != _digest(sources["python-runtime-distribution-manifest"])
+        or manifest["dependencyLockDigest"] != _digest(sources["controller-dependency-lock"])
+        or manifest["requiredImports"] != list(COMPLETE_RUNTIME_IMPORTS)
         or not isinstance(dependencies_raw, list)
         or not isinstance(applications_raw, list)
     ):
@@ -315,7 +313,41 @@ def _validate_python_runtime(
         seen_applications.add(name)
     if seen_applications != set(application_roles):
         raise BundleAssemblyError("Python runtime lacks an application distribution")
-    _validate_static_elf(runtime_path)
+    distribution = RuntimeDistributionManifest.model_validate_json(
+        sources["python-runtime-distribution-manifest"].read_bytes(), strict=True
+    )
+    if (
+        distribution.python_version != manifest["pythonVersion"]
+        or distribution.executable_digest != manifest["executableDigest"]
+        or distribution.required_imports != list(COMPLETE_RUNTIME_IMPORTS)
+    ):
+        raise BundleAssemblyError("Python runtime distribution identity is inconsistent")
+    validate_runtime_distribution(sources["python-runtime-archive"], distribution)
+    snapshot = load_repository_snapshot_manifest(sources["repository-snapshot-manifest"])
+    snapshot_files = {
+        entry.path: entry.digest
+        for entry in snapshot.entries
+        if entry.kind == "file" and entry.digest is not None
+    }
+    distribution_files = {entry.path: entry.digest for entry in distribution.entries}
+    expected_application_files: dict[str, str] = {}
+    application_roots: list[str] = []
+    for source_prefix, target_prefix in PROJECT_SOURCE_MAPPINGS:
+        distribution_prefix = "lib/python3.12/site-packages/" + target_prefix
+        application_roots.append(distribution_prefix)
+        for source_path, digest in snapshot_files.items():
+            if source_path.startswith(source_prefix) and source_path.endswith(".py"):
+                target = distribution_prefix + source_path.removeprefix(source_prefix)
+                expected_application_files[target] = digest
+    observed_application_files = {
+        path: digest
+        for path, digest in distribution_files.items()
+        if path.endswith(".py") and any(path.startswith(root) for root in application_roots)
+    }
+    if observed_application_files != expected_application_files:
+        raise BundleAssemblyError(
+            "Python runtime application sources differ from the repository snapshot"
+        )
 
 
 def _validate_controller_runtime(sources: Mapping[str, Path]) -> None:
@@ -435,13 +467,17 @@ def _validate_controller_runtime(sources: Mapping[str, Path]) -> None:
         environment.count(b"TCF_RUNTIME_ROOT=/var/lib/traincapsule-runtime\n") != 1
         or environment.count(b"PYTHONSAFEPATH=1\n") != 1
         or environment.count(b"PYTHONNOUSERSITE=1\n") != 1
+        or environment.count(
+            f"PYTHONPATH={INITIAL_CONTROLLER_PYTHONPATH}\n".encode()
+        )
+        != 1
         or b"TRAINCAPSULE_RUNTIME_ROOT=" in environment
     ):
         raise BundleAssemblyError("controller environment does not bind the installed runtime root")
 
 
 def _validate_interpreters(sources: Mapping[str, Path]) -> None:
-    expected = b"#!/opt/traincapsule-runtime/bin/python3.12"
+    expected = b"#!/opt/traincapsule-runtime/python/bin/python3.12"
     forbidden = (
         b"/home/",
         b"/usr/bin/env python",
@@ -605,22 +641,12 @@ def _validate_deployment_refresh(sources: Mapping[str, Path]) -> None:
         "effectiveConfigPath": "/etc/traincapsule-controller/effective-config.yaml",
         "generationManifestPath": "/etc/traincapsule-controller/deployment-generation.json",
         "currentPointer": "/opt/traincapsule-runtime/current",
-        "pythonRuntime": "/opt/traincapsule-runtime/bin/python3.12",
+        "pythonRuntime": "/opt/traincapsule-runtime/python/bin/python3.12",
         "pythonRuntimeDigest": _digest(sources["python-runtime"]),
         "dependencyManifestPath": "/etc/traincapsule-runtime/runtime.json",
         "dependencyManifestDigest": _digest(sources["python-runtime-manifest"]),
-        "allowedSourcePrefixes": [
-            "tcfactory/",
-            "deployment/",
-            "verifier/src/traincapsule_verifier/",
-            "canary_runner/src/traincapsule_canary_runner/",
-        ],
-        "requiredImports": [
-            "tcfactory",
-            "deployment",
-            "traincapsule_verifier",
-            "traincapsule_canary_runner",
-        ],
+        "allowedSourcePrefixes": [source for source, _target in PROJECT_SOURCE_MAPPINGS],
+        "requiredImports": list(PROJECT_RUNTIME_IMPORTS),
         "controllerUnit": "traincapsule-controller.service",
     }
     if policy != expected:
@@ -938,6 +964,7 @@ def assemble_bundle(
             secret=role in SECRET_ROLES,
             executable=bool(int(mode, 8) & 0o111),
             repo_root=repo_root,
+            maximum_size=1_000_000_000 if role == "python-runtime-archive" else 128_000_000,
         )
         identity = (source.stat().st_dev, source.stat().st_ino)
         prior_role = identities.get(identity)

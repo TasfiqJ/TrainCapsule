@@ -29,6 +29,7 @@ from deployment.privileged_installer import (
     APPLY_CONFIRMATION,
     CANARY_GITHUB_TOKEN_TARGET,
     CANARY_IDS,
+    INITIAL_CONTROLLER_PYTHONPATH,
     PATH_UNITS,
     ROLE_TARGETS,
     DeploymentAttestation,
@@ -38,6 +39,11 @@ from deployment.privileged_installer import (
     PrivilegedInstaller,
     PrivilegedInstallSpec,
     unsigned_manifest_digest,
+)
+from deployment.runtime_distribution import (
+    COMPLETE_RUNTIME_IMPORTS,
+    PROJECT_SOURCE_MAPPINGS,
+    build_runtime_distribution,
 )
 
 
@@ -185,7 +191,7 @@ def _directory_rows() -> list[dict[str, str]]:
             "0700",
         ),
         row("/opt/traincapsule-runtime", "root", "0755"),
-        row("/opt/traincapsule-runtime/bin", "root", "0755"),
+        row("/opt/traincapsule-runtime/artifacts", "root", "0755"),
         row("/opt/traincapsule-runtime/wheels", "root", "0755"),
         row("/opt/traincapsule-runtime/generations", "root", "0555"),
         row("/opt/traincapsule-canary-runner", "root", "0755"),
@@ -350,7 +356,13 @@ def _metadata(role: str) -> tuple[str, str, str]:
         return "traincapsule-anchor-fetcher", "traincapsule-anchor-fetcher", "0600"
     if role in {"git-anchor-producer-policy", "git-anchor-observer-public-key"}:
         return "root", "root", "0444"
-    if role in {"canary-policy", "canary-live-probes-policy", "python-runtime-manifest"}:
+    if role in {
+        "canary-policy",
+        "canary-live-probes-policy",
+        "python-runtime-manifest",
+        "python-runtime-archive",
+        "python-runtime-distribution-manifest",
+    }:
         return "root", "root", "0444"
     if role.startswith("canary-distribution-"):
         return "root", "root", "0444"
@@ -392,6 +404,10 @@ def _build_snapshot_fixture(payload_root: Path) -> tuple[str, str]:
     source_raw = canonical_json_bytes({"generationId": "test-final-generation"})
     (snapshot / "config/source-generation.json").write_bytes(source_raw)
     (snapshot / "controller.py").write_text("# exact installed controller source\n")
+    for source_prefix, _target_prefix in PROJECT_SOURCE_MAPPINGS:
+        initializer = snapshot / source_prefix / "__init__.py"
+        initializer.parent.mkdir(parents=True, exist_ok=True)
+        initializer.write_text("# fixture dependency\n")
     subprocess.run(["git", "init", "-b", "main"], cwd=snapshot, check=True, capture_output=True)
     subprocess.run(["git", "add", "."], cwd=snapshot, check=True)
     subprocess.run(
@@ -659,7 +675,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                         "/etc/traincapsule-controller/deployment-generation.json"
                     ),
                     "currentPointer": "/opt/traincapsule-runtime/current",
-                    "pythonRuntime": "/opt/traincapsule-runtime/bin/python3.12",
+                    "pythonRuntime": "/opt/traincapsule-runtime/python/bin/python3.12",
                     "pythonRuntimeDigest": sha256_digest(python_raw),
                     "dependencyManifestPath": "/etc/traincapsule-runtime/runtime.json",
                     "dependencyManifestDigest": sha256_digest(dependency_raw),
@@ -668,12 +684,23 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                         "deployment/",
                         "verifier/src/traincapsule_verifier/",
                         "canary_runner/src/traincapsule_canary_runner/",
+                        "packages/traincapsule-core/src/traincapsule_core/",
+                        (
+                            "packages/traincapsule-ingest-pytorch/src/"
+                            "traincapsule_ingest_pytorch/"
+                        ),
+                        "packages/traincapsule-qualify/src/traincapsule_qualify/",
+                        "packages/traincapsule-cli/src/traincapsule_cli/",
                     ],
                     "requiredImports": [
                         "tcfactory",
                         "deployment",
                         "traincapsule_verifier",
                         "traincapsule_canary_runner",
+                        "traincapsule_core",
+                        "traincapsule_ingest_pytorch",
+                        "traincapsule_qualify",
+                        "traincapsule_cli",
                     ],
                     "controllerUnit": "traincapsule-controller.service",
                 }
@@ -689,7 +716,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                 b"[Service]\n"
                 b"User=traincapsule-controller\n"
                 b"Group=traincapsule-controller\n"
-                b"ExecStart=/opt/traincapsule-runtime/bin/python3.12 -m tcfactory "
+                b"ExecStart=/opt/traincapsule-runtime/python/bin/python3.12 -m tcfactory "
                 b"v3-controller --repo /var/lib/traincapsule-verifier/repository-boundary\n"
                 b"EnvironmentFile=/etc/traincapsule-controller/controller-runtime.env\n"
                 b"WorkingDirectory=/var/lib/traincapsule-verifier/repository-boundary\n"
@@ -700,6 +727,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                 b"TCF_RUNTIME_ROOT=/var/lib/traincapsule-runtime\n"
                 b"PYTHONSAFEPATH=1\n"
                 b"PYTHONNOUSERSITE=1\n"
+                + f"PYTHONPATH={INITIAL_CONTROLLER_PYTHONPATH}\n".encode()
             )
         elif role == "controller-effective-config":
             data = b"schemaVersion: '3.1'\n"
@@ -719,7 +747,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
             and role != "python-runtime"
             and not data.startswith((b"#!", b"\x7fELF"))
         ):
-            data = b"#!/opt/traincapsule-runtime/bin/python3.12\n" + data
+            data = b"#!/opt/traincapsule-runtime/python/bin/python3.12\n" + data
         source = payload_root / role
         source.write_bytes(data)
         source.chmod(int(mode, 8))
@@ -807,11 +835,51 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
     live_policy_path.chmod(0o444)
     live_policy_pin = next(item for item in files if item["role"] == "canary-live-probes-policy")
     live_policy_pin["sha256"] = sha256_digest(live_policy_raw)
+    runtime_source = payload_root.parent / "python-distribution-source"
+    (runtime_source / "bin").mkdir(parents=True)
+    (runtime_source / "lib/python3.12").mkdir(parents=True)
+    runtime_executable = runtime_source / "bin/python3.12"
+    runtime_executable.write_bytes((payload_root / "python-runtime").read_bytes())
+    runtime_executable.chmod(0o555)
+    (runtime_source / "lib/python3.12/os.py").write_text("# fixture stdlib\n")
+    dependency_source = payload_root.parent / "dependency-site-packages"
+    for import_name in COMPLETE_RUNTIME_IMPORTS:
+        package = dependency_source / import_name
+        package.mkdir(parents=True)
+        (package / "__init__.py").write_text("# fixture dependency\n")
+    built_archive, built_manifest = build_runtime_distribution(
+        payload_root.parent / "python-runtime.zip",
+        python_root=runtime_source,
+        dependency_root=dependency_source,
+        python_version="3.12.13",
+        required_imports=COMPLETE_RUNTIME_IMPORTS,
+    )
+    for role, source in (
+        ("python-runtime-archive", built_archive),
+        ("python-runtime-distribution-manifest", built_manifest),
+    ):
+        target = payload_root / role
+        target.chmod(0o600)
+        target.write_bytes(source.read_bytes())
+        target.chmod(0o444)
+        pin = next(item for item in files if item["role"] == role)
+        pin["sha256"] = sha256_digest(target.read_bytes())
+
     runtime_manifest = {
         "schemaVersion": "3.1",
         "pythonVersion": "3.12.13",
         "executableDigest": sha256_digest((payload_root / "python-runtime").read_bytes()),
-        "selfContained": True,
+        "selfContainedDistribution": True,
+        "distributionDigest": sha256_digest(
+            (payload_root / "python-runtime-archive").read_bytes()
+        ),
+        "distributionManifestDigest": sha256_digest(
+            (payload_root / "python-runtime-distribution-manifest").read_bytes()
+        ),
+        "dependencyLockDigest": sha256_digest(
+            (payload_root / "controller-dependency-lock").read_bytes()
+        ),
+        "requiredImports": list(COMPLETE_RUNTIME_IMPORTS),
         "dependencies": [
             {
                 "name": name,

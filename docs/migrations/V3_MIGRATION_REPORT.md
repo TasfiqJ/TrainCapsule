@@ -123,7 +123,7 @@ No future SHA, run ID, receipt, or PASS is invented here. Retain `factory/state/
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **631 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **634 paths**.
 
 This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing
 report must bind acceptance to an immutable candidate SHA and independent test/receipt
@@ -239,9 +239,11 @@ artifacts.
 | `A` | `deployment/bundle_assembler.py` |
 | `A` | `deployment/github_token_refresher.py` |
 | `A` | `deployment/privileged_installer.py` |
+| `A` | `deployment/runtime_distribution.py` |
 | `A` | `deployment/runtime_refresh.py` |
 | `A` | `deployment/tests/test_github_token_refresher.py` |
 | `A` | `deployment/tests/test_privileged_installer.py` |
+| `A` | `deployment/tests/test_runtime_distribution.py` |
 | `A` | `deployment/tests/test_runtime_refresh.py` |
 | `M` | `docs/CONTEXT_INDEX.yaml` |
 | `A` | `docs/migrations/V3_1_ZH_158_ROW_FINDINGS_LEDGER.json` |
@@ -501,6 +503,7 @@ artifacts.
 | `A` | `schemas/product/native-finding.schema.json` |
 | `A` | `schemas/product/preflight-inputs.schema.json` |
 | `A` | `schemas/product/workload-identity.schema.json` |
+| `A` | `scripts/build_production_runtime.py` |
 | `M` | `scripts/configure_github.sh` |
 | `M` | `scripts/configure_max5_token.sh` |
 | `M` | `scripts/enable_lights_out.sh` |

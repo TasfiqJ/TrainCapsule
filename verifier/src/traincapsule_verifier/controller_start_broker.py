@@ -64,7 +64,7 @@ class _RuntimeManifest(_Strict):
     @model_validator(mode="after")
     def exact_runtime(self) -> _RuntimeManifest:
         if (
-            self.python_runtime.path != "/opt/traincapsule-runtime/bin/python3.12"
+            self.python_runtime.path != "/opt/traincapsule-runtime/python/bin/python3.12"
             or not self.python_runtime.executable
             or self.controller_unit.path
             != "/etc/systemd/system/traincapsule-controller.service"

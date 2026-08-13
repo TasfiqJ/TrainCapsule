@@ -47,6 +47,15 @@ def _fixture(tmp_path: Path) -> tuple[RefreshPolicy, DeploymentUpdateHandoff, Pa
         "deployment/__init__.py": b"VALUE = 2\n",
         "verifier/src/traincapsule_verifier/__init__.py": b"VALUE = 3\n",
         "canary_runner/src/traincapsule_canary_runner/__init__.py": b"VALUE = 4\n",
+        "packages/traincapsule-core/src/traincapsule_core/__init__.py": b"VALUE = 5\n",
+        (
+            "packages/traincapsule-ingest-pytorch/src/"
+            "traincapsule_ingest_pytorch/__init__.py"
+        ): b"VALUE = 6\n",
+        "packages/traincapsule-qualify/src/traincapsule_qualify/__init__.py": (
+            b"VALUE = 7\n"
+        ),
+        "packages/traincapsule-cli/src/traincapsule_cli/__init__.py": b"VALUE = 8\n",
         # A project hook is deliberately present.  The packager must treat it only as data.
         "setup.py": b"raise RuntimeError('PROJECT BUILD HOOK EXECUTED')\n",
         "uv.lock": b"offline-lock\n",
@@ -61,7 +70,7 @@ def _fixture(tmp_path: Path) -> tuple[RefreshPolicy, DeploymentUpdateHandoff, Pa
     tree_sha = _git(source, "rev-parse", "HEAD^{tree}")
     bundle = tmp_path / "candidate.bundle"
     _git(source, "bundle", "create", str(bundle), "main")
-    runtime = root / "opt/traincapsule-runtime/bin/python3.12"
+    runtime = root / "opt/traincapsule-runtime/python/bin/python3.12"
     runtime.parent.mkdir(parents=True)
     runtime.write_text(f"#!/bin/sh\nexec {sys.executable} \"$@\"\n", encoding="utf-8")
     runtime.chmod(0o555)
@@ -86,7 +95,7 @@ def _fixture(tmp_path: Path) -> tuple[RefreshPolicy, DeploymentUpdateHandoff, Pa
         effective_config_path="/etc/traincapsule-controller/effective-config.yaml",
         generation_manifest_path="/etc/traincapsule-controller/deployment-generation.json",
         current_pointer="/opt/traincapsule-runtime/current",
-        python_runtime="/opt/traincapsule-runtime/bin/python3.12",
+        python_runtime="/opt/traincapsule-runtime/python/bin/python3.12",
         python_runtime_digest=sha256_digest(runtime.read_bytes()),
         dependency_manifest_path="/etc/traincapsule-runtime/runtime.json",
         dependency_manifest_digest=sha256_digest(dependency.read_bytes()),
@@ -95,12 +104,20 @@ def _fixture(tmp_path: Path) -> tuple[RefreshPolicy, DeploymentUpdateHandoff, Pa
             "deployment/",
             "verifier/src/traincapsule_verifier/",
             "canary_runner/src/traincapsule_canary_runner/",
+            "packages/traincapsule-core/src/traincapsule_core/",
+            "packages/traincapsule-ingest-pytorch/src/traincapsule_ingest_pytorch/",
+            "packages/traincapsule-qualify/src/traincapsule_qualify/",
+            "packages/traincapsule-cli/src/traincapsule_cli/",
         ),
         required_imports=(
             "tcfactory",
             "deployment",
             "traincapsule_verifier",
             "traincapsule_canary_runner",
+            "traincapsule_core",
+            "traincapsule_ingest_pytorch",
+            "traincapsule_qualify",
+            "traincapsule_cli",
         ),
         controller_unit="traincapsule-controller.service",
     )
@@ -183,7 +200,7 @@ def test_candidate_symlink_and_bundle_hardlink_are_rejected(tmp_path: Path) -> N
             digest="sha256:" + "0" * 64,
             source_path="escape.py",
         )
-    assert policy.python_runtime == "/opt/traincapsule-runtime/bin/python3.12"
+    assert policy.python_runtime == "/opt/traincapsule-runtime/python/bin/python3.12"
 
 
 def test_candidate_dependency_lock_cannot_change_offline_runtime(tmp_path: Path) -> None:

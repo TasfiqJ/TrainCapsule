@@ -44,6 +44,7 @@ from .privileged_installer import (
     SnapshotEntry,
     SnapshotGitObject,
 )
+from .runtime_distribution import PROJECT_RUNTIME_IMPORTS, PROJECT_SOURCE_MAPPINGS
 
 POLICY_PATH = Path("/etc/traincapsule-deployment/refresh-policy.json")
 CONTROLLER_USER = "traincapsule-controller"
@@ -81,7 +82,7 @@ class RefreshPolicy(_Strict):
         "/etc/traincapsule-controller/deployment-generation.json"
     ]
     current_pointer: Literal["/opt/traincapsule-runtime/current"]
-    python_runtime: Literal["/opt/traincapsule-runtime/bin/python3.12"]
+    python_runtime: Literal["/opt/traincapsule-runtime/python/bin/python3.12"]
     python_runtime_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     dependency_manifest_path: Literal["/etc/traincapsule-runtime/runtime.json"]
     dependency_manifest_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
@@ -91,20 +92,10 @@ class RefreshPolicy(_Strict):
 
     @model_validator(mode="after")
     def exact_packager(self) -> RefreshPolicy:
-        expected = (
-            "tcfactory/",
-            "deployment/",
-            "verifier/src/traincapsule_verifier/",
-            "canary_runner/src/traincapsule_canary_runner/",
-        )
+        expected = tuple(source for source, _target in PROJECT_SOURCE_MAPPINGS)
         if self.allowed_source_prefixes != expected:
             raise ValueError("refresh source allow-list is not exact")
-        if self.required_imports != (
-            "tcfactory",
-            "deployment",
-            "traincapsule_verifier",
-            "traincapsule_canary_runner",
-        ):
+        if self.required_imports != PROJECT_RUNTIME_IMPORTS:
             raise ValueError("refresh import roster is not exact")
         return self
 
@@ -467,17 +458,9 @@ def _tree_files(
 def _module_target(source: str, policy: RefreshPolicy) -> str | None:
     if not source.endswith(".py"):
         return None
-    mappings = (
-        ("tcfactory/", "site-packages/tcfactory/"),
-        ("deployment/", "site-packages/deployment/"),
-        (
-            "verifier/src/traincapsule_verifier/",
-            "site-packages/traincapsule_verifier/",
-        ),
-        (
-            "canary_runner/src/traincapsule_canary_runner/",
-            "site-packages/traincapsule_canary_runner/",
-        ),
+    mappings = tuple(
+        (source_prefix, "site-packages/" + target_prefix)
+        for source_prefix, target_prefix in PROJECT_SOURCE_MAPPINGS
     )
     if tuple(source for source, _target in mappings) != policy.allowed_source_prefixes:
         raise RefreshFailure("internal packager allow-list diverged from policy")

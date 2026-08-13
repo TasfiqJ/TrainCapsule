@@ -3,6 +3,7 @@ from __future__ import annotations
 import os
 import pwd
 from pathlib import Path
+from typing import cast
 
 import pytest
 from test_public_boundary import PublicFixture
@@ -15,9 +16,16 @@ from traincapsule_verifier.bootstrap import (
     staged_tree_digest,
     systemd_unit_content,
 )
+from traincapsule_verifier.broker_cli import (
+    _promote_names,  # pyright: ignore[reportPrivateUsage]
+)
 from traincapsule_verifier.canonical import canonical_json_bytes, sha256_digest
 from traincapsule_verifier.filesystem import open_trusted_root
-from traincapsule_verifier.receipt_broker import ReceiptPromotionError, RootReceiptBroker
+from traincapsule_verifier.receipt_broker import (
+    ReceiptPromotionError,
+    ReceiptPromotionResult,
+    RootReceiptBroker,
+)
 from traincapsule_verifier.request_broker import (
     RequestSubmissionError,
     RequestSubmissionResult,
@@ -36,6 +44,34 @@ def _prepare_broker(fixture: PublicFixture, tmp_path: Path) -> tuple[Path, Path]
         canonical_json_bytes(fixture.machine)
     )
     return outbox, public
+
+
+def test_receipt_broker_batch_rejection_does_not_starve_current_receipt() -> None:
+    class ReceiptBrokerStub:
+        def promote(self, name: str) -> ReceiptPromotionResult:
+            if name == "stale.json":
+                raise ReceiptPromotionError("expired")
+            return ReceiptPromotionResult(
+                state="PROMOTED",
+                receipt_type="machine-policy",
+                receipt_id="MPOL:CURRENT",
+                receipt_digest="sha256:" + "a" * 64,
+                public_relative_path="machine-policy/V3-MIG-019/current.json",
+            )
+
+    results, rejected = _promote_names(
+        cast(RootReceiptBroker, ReceiptBrokerStub()),
+        ("stale.json", "current.json"),
+        single=False,
+    )
+    assert [result.receipt_id for result in results] == ["MPOL:CURRENT"]
+    assert rejected == ["stale.json"]
+    with pytest.raises(ReceiptPromotionError, match="expired"):
+        _promote_names(
+            cast(RootReceiptBroker, ReceiptBrokerStub()),
+            ("stale.json",),
+            single=True,
+        )
 
 
 def test_request_broker_rejection_does_not_block_later_valid_request() -> None:
@@ -445,9 +481,20 @@ def test_broker_promotion_replay_crash_and_partial_state(
         selector.chmod(0o600)
         selector.parent.chmod(0o700)
         selector.parent.parent.chmod(0o700)
-        assert (
-            broker.promote(f"{public_fixture.machine.receipt_id}.json").state == "ALREADY_PROMOTED"
-        )
+
+        def reject_revalidation(_receipt: object) -> None:
+            pytest.fail("an exact root-owned historical receipt must not be revalidated")
+
+        with monkeypatch.context() as scoped:
+            scoped.setattr(
+                broker.verifier,
+                "verify_machine_receipt_authority",
+                reject_revalidation,
+            )
+            assert (
+                broker.promote(f"{public_fixture.machine.receipt_id}.json").state
+                == "ALREADY_PROMOTED"
+            )
         assert promoted.stat().st_mode & 0o777 == 0o644
         assert selector.stat().st_mode & 0o777 == 0o644
         assert selector.parent.stat().st_mode & 0o777 == 0o755

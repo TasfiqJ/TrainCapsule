@@ -12,6 +12,7 @@ from traincapsule_verifier.canonical import canonical_json_bytes, sha256_digest
 from traincapsule_verifier.crypto import sign_model
 from traincapsule_verifier.filesystem import open_trusted_root
 from traincapsule_verifier.models import (
+    ObservedMainReceipt,
     RulesetObservationReceipt,
     ruleset_observation_identifier,
 )
@@ -118,6 +119,40 @@ def test_selector_accepts_heterogeneous_trusted_app_mapping_only() -> None:
         verified_check_digests(forged, required)
 
 
+def test_observed_main_receipt_accepts_exact_github_check_names() -> None:
+    observed = ObservedMainReceipt(
+        schema_version="3.1",
+        observation_id="OBS:CHECK_NAMES_0001",
+        repository="TasfiqJ/TrainCapsule",
+        verified_main_sha="a" * 40,
+        verified_main_tree_sha="b" * 40,
+        source_generation_id="traincapsule-v3.1-zh-2026-08-12",
+        source_generation_digest="sha256:" + "c" * 64,
+        ruleset_observation_digest="sha256:" + "d" * 64,
+        required_check_digests={
+            "TrainCapsule / Factory quality": "sha256:" + "e" * 64,
+            "TrainCapsule / Machine policy": "sha256:" + "f" * 64,
+        },
+        github_app_id=4_580_794,
+        observed_at=datetime(2026, 8, 13, 21, 0, tzinfo=UTC),
+        expires_at=datetime(2026, 8, 13, 21, 15, tzinfo=UTC),
+        issuer_id="SELECTOR:EXACT-MAIN",
+        issuer_key_id="KEY:SELECTOR:ACTIVE",
+        signature_algorithm="ed25519",
+        signature="A" * 88,
+    )
+    assert set(observed.required_check_digests) == {
+        "TrainCapsule / Factory quality",
+        "TrainCapsule / Machine policy",
+    }
+    payload = observed.model_dump(mode="python", by_alias=False)
+    payload["required_check_digests"] = {
+        "TrainCapsule / Security\n": "sha256:" + "a" * 64
+    }
+    with pytest.raises(ValueError, match="check name"):
+        ObservedMainReceipt.model_validate(payload)
+
+
 def test_selector_reads_request_through_retained_directory_descriptor(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -162,6 +197,39 @@ def test_selector_reads_request_through_retained_directory_descriptor(
     assert captured == [original]
 
 
+def test_selector_stale_request_does_not_starve_current_request(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    import traincapsule_verifier.observed_main_selector as selector
+
+    request_root = tmp_path / "activation-requests"
+    request_root.mkdir(mode=0o700)
+    (request_root / "ACT:000.json").write_bytes(b"stale")
+    (request_root / "ACT:999.json").write_bytes(b"current")
+    selected: list[bytes] = []
+    account = pwd.struct_passwd(
+        ("traincapsule-selector", "x", os.getuid(), os.getgid(), "", "/", "/bin/false")
+    )
+
+    def select(raw: bytes, *, selector_uid: int) -> None:
+        assert selector_uid == os.getuid()
+        if raw == b"stale":
+            raise ValueError("stale SHA")
+        selected.append(raw)
+
+    def get_account(_name: str) -> pwd.struct_passwd:
+        return account
+
+    monkeypatch.setattr(selector, "REQUEST_ROOT", request_root)
+    monkeypatch.setattr(selector.pwd, "getpwnam", get_account)
+    monkeypatch.setattr(selector.os, "geteuid", os.getuid)
+    monkeypatch.setattr(selector.sys, "argv", ["selector", "process-requests"])
+    monkeypatch.setattr(selector, "_select", select)
+
+    assert selector.main() == 0
+    assert selected == [b"current"]
+
+
 def test_ruleset_broker_rotates_replays_and_recovers_after_preselector_crash(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -198,6 +266,9 @@ def test_ruleset_broker_rotates_replays_and_recovers_after_preselector_crash(
     ).observation_id == second.observation_id
     assert (target_path / f"{first.observation_id}.json").exists()
     assert (target_path / f"{second.observation_id}.json").exists()
+    assert (target_path / "current.json").stat().st_mode & 0o777 == 0o644
+    assert (target_path / f"{first.observation_id}.json").stat().st_mode & 0o777 == 0o644
+    assert (target_path / f"{second.observation_id}.json").stat().st_mode & 0o777 == 0o644
 
 
 def test_ruleset_broker_rejects_mismatched_signature(tmp_path: Path) -> None:

@@ -206,9 +206,21 @@ def main() -> int:
         with open_trusted_root(REQUEST_ROOT, expected_uid=selector_uid) as root:
             names = sorted(name for name in os.listdir(root.descriptor) if name.endswith(".json"))
             requests = [read_bounded_file(root, name, maximum_bytes=5_000_000) for name in names]
+        selected = 0
+        rejected = 0
         for request_raw in requests:
-            _select(request_raw, selector_uid=selector_uid)
-        return 0
+            try:
+                _select(request_raw, selector_uid=selector_uid)
+                selected += 1
+            except (KeyError, OSError, ValueError):
+                rejected += 1
+        if rejected:
+            print(
+                "independent observed-main selector rejected "
+                f"{rejected} stale or invalid request(s)",
+                file=sys.stderr,
+            )
+        return 0 if selected else 1
     except (KeyError, OSError, ValueError):
         print("independent observed-main selector rejected work", file=sys.stderr)
         return 1

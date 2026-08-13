@@ -32,6 +32,21 @@ def promotion_payload(
     return serialized[0] if single else {"promotions": serialized}
 
 
+def _promote_names(
+    broker: RootReceiptBroker, names: tuple[str, ...], *, single: bool
+) -> tuple[list[ReceiptPromotionResult], list[str]]:
+    results: list[ReceiptPromotionResult] = []
+    rejected: list[str] = []
+    for name in names:
+        try:
+            results.append(broker.promote(name))
+        except ReceiptPromotionError:
+            if single:
+                raise
+            rejected.append(name)
+    return results, rejected
+
+
 def main() -> int:
     if os.geteuid() != 0:
         print("root receipt broker rejected execution", file=sys.stderr)
@@ -69,10 +84,17 @@ def main() -> int:
                     )
                 )
             )
-            results = [broker.promote(name) for name in names]
+            results, rejected = _promote_names(
+                broker, names, single=sys.argv[1] == "promote"
+            )
         payload = promotion_payload(results, single=sys.argv[1] == "promote")
         sys.stdout.buffer.write(canonical_json_bytes(payload))
-        return 0
+        if rejected:
+            print(
+                f"root receipt broker rejected {len(rejected)} stale or invalid receipt(s)",
+                file=sys.stderr,
+            )
+        return 0 if sys.argv[1] == "promote" or results or not rejected else 1
     except (KeyError, OSError, ValueError, ReceiptPromotionError):
         print("root receipt broker rejected promotion", file=sys.stderr)
         return 1

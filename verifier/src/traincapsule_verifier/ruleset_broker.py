@@ -44,6 +44,7 @@ def promote_ruleset_observation(
             target,
             version_name,
             raw,
+            mode=0o644,
             owner_uid=target_owner,
             owner_gid=os.fstat(descriptor).st_gid,
         )
@@ -70,6 +71,7 @@ def promote_ruleset_observation(
             target,
             pending,
             raw,
+            mode=0o644,
             owner_uid=target_owner,
             owner_gid=os.fstat(descriptor).st_gid,
         )

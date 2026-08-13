@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from datetime import UTC, datetime, timedelta
 from enum import StrEnum
-from typing import Annotated, ClassVar, Literal
+from typing import Annotated, ClassVar, Literal, cast
 
 from pydantic import (
     AfterValidator,
@@ -36,6 +36,19 @@ def _normalized_relative_path(value: str) -> str:
 type Digest = Annotated[str, StringConstraints(pattern=r"^sha256:[0-9a-f]{64}$")]
 type GitSha = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{40}$")]
 type Identifier = Annotated[str, StringConstraints(pattern=r"^[A-Z0-9][A-Z0-9._:-]{2,127}$")]
+
+
+def _validated_check_name(value: str) -> str:
+    if value != value.strip() or any(ord(character) < 0x20 for character in value):
+        raise ValueError("check name must be trimmed and contain no control characters")
+    return value
+
+
+type CheckName = Annotated[
+    str,
+    StringConstraints(min_length=1, max_length=128),
+    AfterValidator(_validated_check_name),
+]
 
 
 def ruleset_observation_identifier(
@@ -460,7 +473,7 @@ class ObservedMainReceipt(V31Model):
     source_generation_id: SourceGenerationId
     source_generation_digest: Digest
     ruleset_observation_digest: Digest
-    required_check_digests: dict[Identifier, Digest] = Field(min_length=1, max_length=64)
+    required_check_digests: dict[CheckName, Digest] = Field(min_length=1, max_length=64)
     github_app_id: int = Field(gt=0)
     observed_at: AwareDatetime
     expires_at: AwareDatetime
@@ -468,6 +481,18 @@ class ObservedMainReceipt(V31Model):
     issuer_key_id: Identifier
     signature_algorithm: Literal["ed25519"]
     signature: str = Field(min_length=80, max_length=128)
+
+    @field_validator("required_check_digests", mode="before")
+    @classmethod
+    def validate_required_check_names(cls, value: object) -> object:
+        if not isinstance(value, dict):
+            return value
+        typed_value = cast(dict[object, object], value)
+        for name in typed_value:
+            if not isinstance(name, str):
+                raise ValueError("check name must be a string")
+            _validated_check_name(name)
+        return typed_value
 
     @model_validator(mode="after")
     def validate_observation_lifetime(self) -> ObservedMainReceipt:

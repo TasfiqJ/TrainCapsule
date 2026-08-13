@@ -65,13 +65,11 @@ class RootReceiptBroker:
             activation: ActivationReceipt | None
             if outbox_name.startswith("MPOL:"):
                 machine = MachinePolicyReceipt.model_validate_json(raw, strict=True)
-                self.verifier.verify_machine_receipt_authority(machine)
                 receipt_type: Literal["machine-policy", "activation"] = "machine-policy"
                 receipt_id = machine.receipt_id
                 activation = None
             elif outbox_name.startswith("ACT:"):
                 activation = ActivationReceipt.model_validate_json(raw, strict=True)
-                self.verifier.verify_activation_authority(activation)
                 receipt_type = "activation"
                 receipt_id = activation.receipt_id
                 machine = None
@@ -89,6 +87,54 @@ class RootReceiptBroker:
                     "outbox filename does not match signed receipt identity"
                 )
             digest = sha256_digest(canonical)
+            public_relative_path = expected_name
+            already_promoted = False
+            try:
+                observed = read_bounded_file(
+                    self.public_root,
+                    expected_name,
+                    maximum_bytes=MAX_RECEIPT_BYTES,
+                    expected_file_uid=os.fstat(self.public_root.descriptor).st_uid,
+                )
+                if observed != canonical:
+                    raise ReceiptPromotionError(
+                        "public receipt identity already exists with different bytes"
+                    )
+                already_promoted = True
+            except FileNotFoundError:
+                pass
+            if machine is not None:
+                public_relative_path = (
+                    f"machine-policy/{machine.work_item_id}/{machine.candidate_sha}.json"
+                )
+                try:
+                    selected = read_bounded_file(
+                        self.public_root,
+                        public_relative_path,
+                        maximum_bytes=MAX_RECEIPT_BYTES,
+                        expected_file_uid=os.fstat(self.public_root.descriptor).st_uid,
+                    )
+                    if selected != canonical:
+                        raise ReceiptPromotionError(
+                            "machine-policy selector conflicts for exact work item/SHA"
+                        )
+                except FileNotFoundError:
+                    already_promoted = False
+            if already_promoted:
+                make_publicly_readable(self.public_root, expected_name)
+                if machine is not None:
+                    make_publicly_readable(self.public_root, public_relative_path)
+                return ReceiptPromotionResult(
+                    state="ALREADY_PROMOTED",
+                    receipt_type=receipt_type,
+                    receipt_id=receipt_id,
+                    receipt_digest=digest,
+                    public_relative_path=public_relative_path,
+                )
+            if machine is not None:
+                self.verifier.verify_machine_receipt_authority(machine)
+            elif activation is not None:
+                self.verifier.verify_activation_authority(activation)
             try:
                 atomic_write_new(self.public_root, expected_name, canonical)
                 state: Literal["PROMOTED", "ALREADY_PROMOTED"] = "PROMOTED"
@@ -105,11 +151,7 @@ class RootReceiptBroker:
                     ) from None
                 state = "ALREADY_PROMOTED"
             make_publicly_readable(self.public_root, expected_name)
-            public_relative_path = expected_name
             if machine is not None:
-                public_relative_path = (
-                    f"machine-policy/{machine.work_item_id}/{machine.candidate_sha}.json"
-                )
                 try:
                     atomic_write_new(self.public_root, public_relative_path, canonical)
                 except TrustedPathError:

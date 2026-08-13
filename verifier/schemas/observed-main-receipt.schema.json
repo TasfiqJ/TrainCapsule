@@ -1,5 +1,10 @@
 {
   "$defs": {
+    "CheckName": {
+      "maxLength": 128,
+      "minLength": 1,
+      "type": "string"
+    },
     "Digest": {
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
@@ -58,7 +63,7 @@
       "maxProperties": 64,
       "minProperties": 1,
       "propertyNames": {
-        "$ref": "#/$defs/Identifier"
+        "$ref": "#/$defs/CheckName"
       },
       "title": "Requiredcheckdigests",
       "type": "object"

@@ -907,7 +907,10 @@ def test_machine_policy_review_binds_exact_context_evidence_and_live_activation(
     for update, message in (
         ({"work_item_id": "V3-PROD-002"}, "receipt was rejected"),
         ({"candidate_sha": "f" * 40}, "receipt was rejected"),
-        ({"request_digest": DIGEST_TC}, "request_digest mismatch"),
+        (
+            {"request_digest": DIGEST_TC},
+            "LIVE activation does not bind the exact machine-policy review receipt",
+        ),
         ({"raw_evidence_artifact_hashes": [DIGEST_TC]}, "evidence roster mismatch"),
     ):
         forged = receipt.model_copy(update=update)

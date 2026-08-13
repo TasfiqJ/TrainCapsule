@@ -42,7 +42,7 @@ remote_ci:
     TrainCapsule / Packaging install: 15368
     TrainCapsule / Docs and schemas: 15368
     TrainCapsule / Source freshness: 15368
-    TrainCapsule / Machine policy: null
+    TrainCapsule / Machine policy: 4580794
   postMergeRequiredWorkflows:
   - TrainCapsule / Factory quality
   - TrainCapsule / Product unit

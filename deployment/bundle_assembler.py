@@ -500,6 +500,11 @@ def _validate_controller_runtime(sources: Mapping[str, Path]) -> None:
         raise BundleAssemblyError("controller environment contains a forbidden runtime or key")
     if (
         environment.count(b"TCF_RUNTIME_ROOT=/var/lib/traincapsule-runtime\n") != 1
+        or environment.count(
+            b"TCF_CANARY_PUBLICATION_REMOTE="
+            b"https://github.com/TasfiqJ/TrainCapsule-Canary.git\n"
+        )
+        != 1
         or environment.count(b"PYTHONSAFEPATH=1\n") != 1
         or environment.count(b"PYTHONNOUSERSITE=1\n") != 1
         or environment.count(b"GIT_CONFIG_COUNT=1\n") != 1

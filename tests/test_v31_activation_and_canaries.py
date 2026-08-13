@@ -406,11 +406,15 @@ def test_stopped_activation_supervisor_runs_canaries_then_coordinates_without_co
     (runtime / "STOP").write_text("stopped\n", encoding="utf-8")
     paths = _runtime_paths(runtime)
     calls: list[str] = []
+    monkeypatch.setenv(
+        "TCF_CANARY_PUBLICATION_REMOTE", canaries.CANARY_PUBLICATION_REMOTE
+    )
 
     def resolve_paths(_root: Path) -> V3RuntimePaths:
         return paths
 
-    def run_canaries(**_kwargs: object) -> Path:
+    def run_canaries(**kwargs: object) -> Path:
+        assert kwargs["publication_remote"] == canaries.CANARY_PUBLICATION_REMOTE
         calls.append("canaries")
         suite_path = tmp_path / "suite.json"
         suite_path.write_bytes(b"{}")
@@ -766,6 +770,30 @@ def test_missing_live_runner_emits_only_typed_blocked_results(
     assert len(MandatoryCanaryId) == 20
     with pytest.raises(RuntimeError, match="have not passed"):
         verify_mandatory_canary_suite(suite_path, repo_root=repo, require_pass=True)
+
+
+def test_canary_publication_remote_is_explicit_and_exact(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _repo(tmp_path)
+    _git(repo, "remote", "remove", "origin")
+    monkeypatch.setattr(canaries, "validate_active_source_generation", _active_for_path)
+    suite_path = run_mandatory_canaries(
+        repo_root=repo,
+        result_root=tmp_path / "explicit-remote-results",
+        runner_factory=_passing_runner,
+        publication_remote=canaries.CANARY_PUBLICATION_REMOTE,
+        now=NOW,
+    )
+    assert verify_mandatory_canary_suite(suite_path, repo_root=repo).status is CanaryStatus.PASS
+    with pytest.raises(RuntimeError, match="publication remote is not trusted"):
+        canaries._prepare_isolated_canary_repo(  # pyright: ignore[reportPrivateUsage]
+            repo_root=repo,
+            run_root=tmp_path / "untrusted-remote",
+            exact_main_sha=_git(repo, "rev-parse", "HEAD"),
+            exact_tree_sha=_git(repo, "rev-parse", "HEAD^{tree}"),
+            publication_remote="https://github.com/attacker/repository.git",
+        )
 
 
 def test_canary_suite_reopens_every_exact_result_and_evidence_byte(

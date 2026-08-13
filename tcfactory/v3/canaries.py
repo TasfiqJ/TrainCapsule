@@ -30,6 +30,8 @@ from .base import DIGEST_PATTERN, SHA_PATTERN, V3Model, sha256_digest
 from .publication import PublicationError, trusted_external_path
 from .source_authority import validate_active_source_generation
 
+CANARY_PUBLICATION_REMOTE = "https://github.com/TasfiqJ/TrainCapsule-Canary.git"
+
 
 class MandatoryCanaryId(StrEnum):
     REAL_CLAUDE_MECHANICAL_TASK = "real_claude_mechanical_task"
@@ -297,13 +299,20 @@ def _active_tree_is_exact(repo_root: Path) -> None:
 
 
 def _prepare_isolated_canary_repo(
-    *, repo_root: Path, run_root: Path, exact_main_sha: str, exact_tree_sha: str
+    *,
+    repo_root: Path,
+    run_root: Path,
+    exact_main_sha: str,
+    exact_tree_sha: str,
+    publication_remote: str | None = None,
 ) -> tuple[Path, Path]:
     """Clone exact local bytes into a disposable repo/runtime without touching live state."""
 
     isolated_repo = run_root / "isolated-repo"
     isolated_runtime = run_root / "isolated-runtime"
-    origin = run_command(
+    if publication_remote is not None and publication_remote != CANARY_PUBLICATION_REMOTE:
+        raise RuntimeError("mandatory live canary publication remote is not trusted")
+    origin = publication_remote or run_command(
         ["git", "remote", "get-url", "origin"], cwd=repo_root, check=False
     ).stdout.strip()
     if not origin:
@@ -429,6 +438,7 @@ def run_mandatory_canaries(
     result_root: Path,
     runner_executable: Path = Path("/usr/local/bin/traincapsule-v31-run-canary"),
     runner_factory: Callable[[Path], CanaryRunner] = ExternalCanaryRunner,
+    publication_remote: str | None = None,
     now: datetime | None = None,
 ) -> Path:
     """Run the exact mandatory roster or emit a typed blocked suite."""
@@ -459,6 +469,7 @@ def run_mandatory_canaries(
                 run_root=run_root,
                 exact_main_sha=main_sha,
                 exact_tree_sha=tree_sha,
+                publication_remote=publication_remote,
             )
         except (OSError, RuntimeError, ValueError) as exc:
             runner = None

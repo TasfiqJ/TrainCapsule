@@ -497,6 +497,7 @@ def _process_refresh_activation(
                 repo_root=repo_root,
                 result_root=result_root,
                 runner_executable=runner_executable,
+                publication_remote=os.environ.get("TCF_CANARY_PUBLICATION_REMOTE"),
             )
             suite = MandatoryCanarySuite.model_validate_json(
                 suite_path.read_bytes(), strict=True
@@ -693,6 +694,7 @@ def _run_activation_supervisor_locked(
         repo_root=repo_root,
         result_root=paths.canary_results,
         runner_executable=runner_executable,
+        publication_remote=os.environ.get("TCF_CANARY_PUBLICATION_REMOTE"),
     )
     suite = MandatoryCanarySuite.model_validate_json(suite_path.read_bytes(), strict=True)
     if suite.status is not CanaryStatus.PASS:

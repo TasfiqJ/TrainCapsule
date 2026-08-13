@@ -1389,6 +1389,8 @@ def refresh(
         _attest_repository_boundary(boundary_stage, snapshot)
         environment = (
             "TCF_RUNTIME_ROOT=/var/lib/traincapsule-runtime\n"
+            "TCF_CANARY_PUBLICATION_REMOTE="
+            "https://github.com/TasfiqJ/TrainCapsule-Canary.git\n"
             "PYTHONSAFEPATH=1\n"
             "PYTHONNOUSERSITE=1\n"
             "GIT_CONFIG_COUNT=1\n"

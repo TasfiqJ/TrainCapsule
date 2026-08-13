@@ -838,6 +838,8 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
         elif role == "controller-runtime-environment":
             data = (
                 b"TCF_RUNTIME_ROOT=/var/lib/traincapsule-runtime\n"
+                b"TCF_CANARY_PUBLICATION_REMOTE="
+                b"https://github.com/TasfiqJ/TrainCapsule-Canary.git\n"
                 b"PYTHONSAFEPATH=1\n"
                 b"PYTHONNOUSERSITE=1\n"
                 b"GIT_CONFIG_COUNT=1\n"

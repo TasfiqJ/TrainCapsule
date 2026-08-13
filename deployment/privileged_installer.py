@@ -1844,6 +1844,16 @@ class PrivilegedInstaller:
             self._record("BEGIN", {})
         elif self._state.get("manifest") != self.spec.manifest_digest:
             raise InstallFailure("transaction journal belongs to another manifest")
+        elif self._state.get("status") == "ROLLED_BACK":
+            self._state = {
+                "manifest": self.spec.manifest_digest,
+                "initialized": False,
+                "resources": {},
+                "snapshotEntries": {},
+                "accounts": {},
+            }
+            self._save_state()
+            self._record("BEGIN_RETRY", {})
         if self._state.get("initialized") is not True:
             if self._state.get("resources") or self._state.get("accounts"):
                 raise InstallFailure("incomplete legacy journal cannot be replayed safely")
@@ -2331,6 +2341,7 @@ class PrivilegedInstaller:
                     "GIT_CONFIG_NOSYSTEM": "1",
                     "GIT_CONFIG_GLOBAL": "/dev/null",
                     "GIT_CONFIG_SYSTEM": "/dev/null",
+                    "GIT_OPTIONAL_LOCKS": "0",
                 },
             )
             if result.returncode != 0 or (

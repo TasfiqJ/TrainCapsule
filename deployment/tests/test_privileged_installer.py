@@ -1296,6 +1296,8 @@ def test_default_is_read_only_and_apply_attests_exact_tree(tmp_path: Path) -> No
     )
     assert system.reloads == 1
     assert installer.apply(APPLY_CONFIRMATION) == result
+    snapshot_index = root / "var/lib/traincapsule-verifier/repository-boundary/.git/index"
+    assert stat.S_IMODE(snapshot_index.stat().st_mode) == 0o444
 
 
 def test_production_apply_rejects_missing_systemd_before_mutation(
@@ -1322,7 +1324,7 @@ def test_production_apply_rejects_missing_systemd_before_mutation(
 
     assert not authority.accounts
     assert not system.calls
-    assert not installer.txn.exists()
+    assert installer._state == {}  # pyright: ignore[reportPrivateUsage]
 
 
 def test_partial_crash_replays_from_durable_journal(tmp_path: Path) -> None:
@@ -1453,6 +1455,22 @@ def test_enable_succeeds_start_fails_and_rollback_undoes_only_enable(tmp_path: P
     assert ("disable", PATH_UNITS[0]) in system.calls
     events = (installer.txn / "events.jsonl").read_text(encoding="utf-8")
     assert '"event":"PATH_START_FAILED"' in events
+
+
+def test_apply_restarts_cleanly_after_completed_rollback(tmp_path: Path) -> None:
+    root, bundle, spec, authority, system = _fixture(tmp_path)
+    system.fail_start_unit = PATH_UNITS[0]
+    installer = _installer(root, bundle, spec, authority, system)
+
+    with pytest.raises(RuntimeError, match="start failure"):
+        installer.apply(APPLY_CONFIRMATION)
+
+    system.fail_start_unit = None
+    result = installer.apply(APPLY_CONFIRMATION)
+    assert isinstance(result, DeploymentAttestation)
+    assert result.state == "PATH_UNITS_ENABLED"
+    events = (installer.txn / "events.jsonl").read_text(encoding="utf-8")
+    assert '"event":"BEGIN_RETRY"' in events
 
 
 def test_preexisting_controller_process_blocks_install_without_mutation(tmp_path: Path) -> None:

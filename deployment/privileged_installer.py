@@ -1709,6 +1709,17 @@ class PrivilegedInstaller:
                     self._unit_transition("ROLLBACK_ENABLE_STATE", unit, action)
                 wanted_active = bool(baseline["active"])
                 if wanted_active:
+                    unit_file = self._target(f"/etc/systemd/system/{unit}")
+                    if not unit_file.is_file():
+                        if self.system.unit_active(unit):
+                            self._unit_transition(
+                                "ROLLBACK_ACTIVE_STATE", unit, self.system.stop_unit
+                            )
+                        self._record(
+                            "ROLLBACK_ACTIVE_STATE_UNAVAILABLE",
+                            {"unit": unit, "reason": "unit-file-absent"},
+                        )
+                        continue
                     action = (
                         self.system.restart_unit
                         if self.system.unit_active(unit)

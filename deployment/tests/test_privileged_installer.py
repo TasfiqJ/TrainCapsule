@@ -1471,6 +1471,11 @@ def test_rollback_restores_exact_preexisting_unit_states(tmp_path: Path) -> None
     root, bundle, spec, authority, _ = _fixture(tmp_path)
     initial_enabled = {PATH_UNITS[0], PATH_UNITS[1]}
     initial_active = {PATH_UNITS[0], PATH_UNITS[2]}
+    for unit in initial_enabled | initial_active:
+        target = root / "etc/systemd/system" / unit
+        target.write_text("preexisting unit\n", encoding="utf-8")
+        target.chmod(0o600)
+        authority.chown(target, "root", "root")
     system = FakeSystem(enabled=initial_enabled, active=initial_active)
     installer = _installer(root, bundle, spec, authority, system)
 
@@ -1483,6 +1488,23 @@ def test_rollback_restores_exact_preexisting_unit_states(tmp_path: Path) -> None
     assert system.active == initial_active
     events = (installer.txn / "events.jsonl").read_text(encoding="utf-8")
     assert '"event":"UNIT_BASELINES_CAPTURED"' in events
+
+
+def test_rollback_does_not_restart_memory_only_unit_without_unit_file(
+    tmp_path: Path,
+) -> None:
+    root, bundle, spec, authority, _ = _fixture(tmp_path)
+    memory_only = PATH_UNITS[0]
+    system = FakeSystem(active={memory_only})
+    installer = _installer(root, bundle, spec, authority, system)
+
+    installer.apply(APPLY_CONFIRMATION)
+    installer.rollback()
+
+    assert memory_only not in system.active
+    assert ("start", memory_only) not in system.calls
+    events = (installer.txn / "events.jsonl").read_text(encoding="utf-8")
+    assert '"event":"ROLLBACK_ACTIVE_STATE_UNAVAILABLE"' in events
 
 
 def test_direct_rollback_without_initialized_journal_has_no_effect(tmp_path: Path) -> None:

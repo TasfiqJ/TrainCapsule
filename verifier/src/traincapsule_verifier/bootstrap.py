@@ -137,6 +137,7 @@ Wants=network-online.target
 
 [Service]
 Type=oneshot
+TimeoutStartSec=4h
 User={controller_user}
 Group={controller_user}
 EnvironmentFile=/etc/traincapsule-controller/controller-runtime.env

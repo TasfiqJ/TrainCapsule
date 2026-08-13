@@ -184,6 +184,7 @@ def test_activation_units_use_installed_environment_and_create_stop_fail_closed(
     observer = systemd_unit_content(unit="post-activation-observer").decode()
     assert "EnvironmentFile=/etc/traincapsule-controller/controller-runtime.env" in supervisor
     assert "EnvironmentFile=/etc/traincapsule-verifier/controller-runtime.env" not in supervisor
+    assert "TimeoutStartSec=4h" in supervisor
     assert "ReadWritePaths=/var/lib/traincapsule-runtime\n" in observer
     assert "ReadWritePaths=/var/lib/traincapsule-runtime/STOP" not in observer
     assert (

@@ -22,6 +22,11 @@
       "title": "Sourceauthoritydigest",
       "type": "string"
     },
+    "productLineageDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Productlineagedigest",
+      "type": "string"
+    },
     "customerIdentityDigest": {
       "pattern": "^sha256:[0-9a-f]{64}$",
       "title": "Customeridentitydigest",
@@ -70,6 +75,7 @@
     "workItemId",
     "evidenceBasisSha",
     "sourceAuthorityDigest",
+    "productLineageDigest",
     "customerIdentityDigest",
     "familyIdentityDigest",
     "caseIdentityDigests",

@@ -3,6 +3,271 @@
   "sourceMigrationBaseSha": "6b480232fa92b069103da44c475bd17bcb3e6bd1",
   "inventory": [
     {
+      "path": "docs/evidence/T001/final_bundle.sha256",
+      "mode": "0644",
+      "sha256": "838f5bfb120fcfe92ada26bc3fd29d15dea3eb3d4c88b792ef7d65645613b51a"
+    },
+    {
+      "path": "docs/evidence/T001/manifest_copies.sha256",
+      "mode": "0644",
+      "sha256": "34bcfaf4688472d2029445d11df8ca2856514f6ae21ce55c552ddb977789e6e0"
+    },
+    {
+      "path": "docs/evidence/T001/negative_control.py",
+      "mode": "0644",
+      "sha256": "631280ad7d40294a92bbd930ce65f3c4e845eb3efa6072500d5991a50dc2688c"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt3/contract.txt",
+      "mode": "0644",
+      "sha256": "c8e464ead269a11f9e73f4a83ee931f919e454f552884955a52cf64d9c0b87c6"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt3/fast_quality.txt",
+      "mode": "0644",
+      "sha256": "2fb210c1a65b81ef45ce0960a2fd466353b529b865ade22d2e18079366255baa"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt3/nb_checker.txt",
+      "mode": "0644",
+      "sha256": "db0203157632e288476133acea231e6809e2ac8e035cf9ee69c6313cef07e88c"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt3/nb_checker_negative_control.txt",
+      "mode": "0644",
+      "sha256": "103965a18ec92a31b63ac302614fd592f376207fec95c8a9c97d709ff247a7b2"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt3/real_integration.txt",
+      "mode": "0644",
+      "sha256": "5b5269a0517a2ec79eaea1831816ebc9a9b7190c3d9a0c8ec65665e312f263d3"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt3/secret_scan.txt",
+      "mode": "0644",
+      "sha256": "c5232049bbf8e127a76aac1d6c35a024b1589686f34861b90bf6b46d80084d6d"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt4/contract.txt",
+      "mode": "0644",
+      "sha256": "81e53a056d3efec1c341a5aeef8e6cea1b84cffc2fed6ff150dc77b06e70a1bf"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt4/fast_quality.txt",
+      "mode": "0644",
+      "sha256": "e8ddb364e1b51ba488ccc51f3cc2a64c4821b8a53fcadd4d793a78d368bec852"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt4/nb_checker.txt",
+      "mode": "0644",
+      "sha256": "56b31cafc478eb72038f2bc05576c6c48802d83f244e56f410477643f60fe78e"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt4/nb_checker_negative_control.txt",
+      "mode": "0644",
+      "sha256": "b566c7cab4cf077970008fc25d153753899ae2cf1281e816dfff46f35bcfe301"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt4/negative_control.txt",
+      "mode": "0644",
+      "sha256": "97c03e42c8900108c40be96145226edb0368ef5cf386832606c4451a7feacca0"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt4/real_integration.txt",
+      "mode": "0644",
+      "sha256": "bc58cb63a8c3c0ba7fd7efb43bd9fd6dcd14b3c70f734db97900e78d097c19ca"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt4/secret_scan.txt",
+      "mode": "0644",
+      "sha256": "f4078b96a516a09f16d2eb7348c99e36d95767c506ed8b736eb7162df6632d9a"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt5/contract.txt",
+      "mode": "0644",
+      "sha256": "f506a8d99bd5a8c81553a637e54a04ac4a35b195147f315903c0b51acda57584"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt5/fast_quality.txt",
+      "mode": "0644",
+      "sha256": "640f5474f03176fdfb796b58f34d7f034fea6d5a7f1006767d2ae11f27cd4e25"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt5/nb_checker.txt",
+      "mode": "0644",
+      "sha256": "4a40b9ea677659493ed2e2b0cb224bca030174098704e6af6e36e25a59336465"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt5/negative_control.txt",
+      "mode": "0644",
+      "sha256": "48145cb089ddd4f98b81d5dca4a17dc7e2b5d46229ac2fd7c3e6e5303ac956f0"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt5/real_integration.txt",
+      "mode": "0644",
+      "sha256": "d5aa194fc09ed2f06297f1b9ceffa27a8a9eee4672e93cee6951a6c26814a6af"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt5/secret_scan.txt",
+      "mode": "0644",
+      "sha256": "da117bbb12b46a19fc4f6c2893e3ef20b42cf3c056a8098ab1e256f9343fa867"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt6/contract.txt",
+      "mode": "0644",
+      "sha256": "a2b4f188e6292a522b3c8fb566760c241483cc23192ce2ba3e9ef7e17041f839"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt6/evidence_currency.txt",
+      "mode": "0644",
+      "sha256": "26bf92990db9e3baa6496857954f3b91a7325f4c51bf1e4cb77a90734ae170b0"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt6/evidence_currency_negative_control.txt",
+      "mode": "0644",
+      "sha256": "874468a561d2ef560776bacdf0d8fe2e2084cbce30db287bf7bfd405c1ddee62"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt6/fast_quality.txt",
+      "mode": "0644",
+      "sha256": "a87b6fae2bc9fb1fd702e2554f6aadb1154e8b1249a2c02bdd58864dfbaec485"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt6/head.txt",
+      "mode": "0644",
+      "sha256": "39fadd191701fa49d6aac4d53bed848788981c27266e186d0955ec5d3d9dee48"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt6/manifest_copies.txt",
+      "mode": "0644",
+      "sha256": "3becf0c41c23f5a702e3ac9fe65818c228cb968d331df66def83f730231ba6b0"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt6/nb_checker.txt",
+      "mode": "0644",
+      "sha256": "8a2331566efd0b84ac24e472b2038a198d05fef16499c84ff7731869d2dd928b"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt6/negative_control.txt",
+      "mode": "0644",
+      "sha256": "24b69fc70719089eac975b65028f58b0a4681502e135d2f82516dbfc9f87d367"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt6/real_integration.txt",
+      "mode": "0644",
+      "sha256": "e9175886479469e86b9e3d930919d304e60803deb64164be96b10a696e89c756"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt6/secret_scan.txt",
+      "mode": "0644",
+      "sha256": "e2d26dab2801eb811421a7ed33d0d022d4741b4d5788b602f4847099f049130a"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt7/contract.txt",
+      "mode": "0644",
+      "sha256": "f506a8d99bd5a8c81553a637e54a04ac4a35b195147f315903c0b51acda57584"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt7/evidence_currency.txt",
+      "mode": "0644",
+      "sha256": "5a1c196c76adaf04288e7722db6ff6d3c37cc9fdcf2ac993f01beedff8d44299"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt7/evidence_currency_negative_control.txt",
+      "mode": "0644",
+      "sha256": "02f4b8f1985b42c6bea62fa1c1ebae0568aeaa740a0ba7a91e0c9fd88d67b2b9"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt7/fast_quality.txt",
+      "mode": "0644",
+      "sha256": "10e37e3978df143bd3e3b25026bec9d913f1b53d4f6dd583622403e2363bc0af"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt7/head.txt",
+      "mode": "0644",
+      "sha256": "dc0e82a54626c625fdebd4f49b36f8aafbcd8ee10d5f642525133a5091809889"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt7/nb_checker.txt",
+      "mode": "0644",
+      "sha256": "4a40b9ea677659493ed2e2b0cb224bca030174098704e6af6e36e25a59336465"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt7/real_integration.txt",
+      "mode": "0644",
+      "sha256": "d5aa194fc09ed2f06297f1b9ceffa27a8a9eee4672e93cee6951a6c26814a6af"
+    },
+    {
+      "path": "docs/evidence/T001/raw/attempt7/secret_scan.txt",
+      "mode": "0644",
+      "sha256": "da117bbb12b46a19fc4f6c2893e3ef20b42cf3c056a8098ab1e256f9343fa867"
+    },
+    {
+      "path": "docs/evidence/T001/raw/contract.txt",
+      "mode": "0644",
+      "sha256": "f0273ba83fe160697bff90cf3987d46c301393fecd6c805adc6e214c71167204"
+    },
+    {
+      "path": "docs/evidence/T001/raw/fast_quality.txt",
+      "mode": "0644",
+      "sha256": "60f9be7af4167e7b63061eb420e9e71c6972157b5690ef1a21320bff9435adde"
+    },
+    {
+      "path": "docs/evidence/T001/raw/nb1_bundle_verify.txt",
+      "mode": "0644",
+      "sha256": "e50113228dc3d569eb339dbb0416b8c12b3b7cab1f56c8c87e15ccd6e45df7cc"
+    },
+    {
+      "path": "docs/evidence/T001/raw/nb1_nb5_checker.txt",
+      "mode": "0644",
+      "sha256": "db0203157632e288476133acea231e6809e2ac8e035cf9ee69c6313cef07e88c"
+    },
+    {
+      "path": "docs/evidence/T001/raw/nb2_manifest_copies.txt",
+      "mode": "0644",
+      "sha256": "f41b2982d62a70f971df5875471a3e957732432669c20d7860a85dbcbf0bc88c"
+    },
+    {
+      "path": "docs/evidence/T001/raw/nb3_nb4_consistency.txt",
+      "mode": "0644",
+      "sha256": "3e1af7b136088d4164249495910522a520f52bcaf411a50d366e7c6983fe7d4b"
+    },
+    {
+      "path": "docs/evidence/T001/raw/nb_checker_negative_control.txt",
+      "mode": "0644",
+      "sha256": "053f84e9f46d1f427932b5637a679c066e5266920c411e155e420c9dcccc6546"
+    },
+    {
+      "path": "docs/evidence/T001/raw/real_integration.txt",
+      "mode": "0644",
+      "sha256": "6ec0472112cfa7f25f2282ef7500ebf10b976f7bdf0ce4f7e7f2d6e63c17292e"
+    },
+    {
+      "path": "docs/evidence/T001/raw/secret_scan.txt",
+      "mode": "0644",
+      "sha256": "207f993502781cc0ec8edea419185b5a679f4159e500840c30107ee58a2214ec"
+    },
+    {
+      "path": "docs/evidence/T001/verification.md",
+      "mode": "0644",
+      "sha256": "e80dec3d7a3273529f7d3fc88fa54a1723600bcdc2c286bc9ecfea90027aac72"
+    },
+    {
+      "path": "docs/evidence/T001/verify_evidence_currency.py",
+      "mode": "0644",
+      "sha256": "49c4fc0538d6e87baf521cc6968d88abd7cb8e10d6c9fdacc38833c3e6c56ba0"
+    },
+    {
+      "path": "docs/evidence/T001/verify_precedence.py",
+      "mode": "0644",
+      "sha256": "332919003286352196e4463dfc96023eef80323dae0a0bcce034a8bdd4b28e71"
+    },
+    {
+      "path": "docs/migrations/V3_RUNTIME_SNAPSHOT_METADATA.json",
+      "mode": "0644",
+      "sha256": "715ee4f07074671ef26552c2273790728c47b796c7ce3cdb1495f21122274a76"
+    },
+    {
       "path": "factory/artifacts/T001/20260810T085832Z/pipeline-failure.json",
       "mode": "0644",
       "sha256": "18ee1cc7aefc8741bde9a13297103a19dee00c1ce6988040f5745b725bc15b53"
@@ -5446,7 +5711,117 @@
       "path": "factory/artifacts/T002/20260811T183844Z/research-a3/transcript.jsonl",
       "mode": "0644",
       "sha256": "a2112bde50d9692cfa24ac2673a88fca869834af389da76c94be0ca46f9f749b"
+    },
+    {
+      "path": "factory/feature_ledger.yaml",
+      "mode": "0644",
+      "sha256": "ab5d10c6718d3a9fdf53dd78cf0c387e995cd1723cf10b76fb53e14af559c994"
+    },
+    {
+      "path": "factory/proposals/T002.yaml",
+      "mode": "0644",
+      "sha256": "28a53f80e0b72072005385dd186cc06ca5d3ad2bd08c446ac5651987a9a05ea9"
+    },
+    {
+      "path": "factory/recovery/task-packets/T001-infrastructure-max-turns.error.txt",
+      "mode": "0644",
+      "sha256": "f0861ea49711b8272d5ca83f42859a7a6d67b9a0f017407cbeccb4539f06ad66"
+    },
+    {
+      "path": "factory/recovery/task-packets/T001-infrastructure-max-turns.yaml",
+      "mode": "0644",
+      "sha256": "c342a67ab2c75a133dd7c30a54c961cf49ab3f0200de76c6d7d7a93f63696297"
+    },
+    {
+      "path": "factory/recovery/task-packets/T001-r1.yaml",
+      "mode": "0755",
+      "sha256": "c342a67ab2c75a133dd7c30a54c961cf49ab3f0200de76c6d7d7a93f63696297"
+    },
+    {
+      "path": "factory/recovery/task-packets/T001-r2.yaml",
+      "mode": "0755",
+      "sha256": "f8eded6f36711a2dbe3bd4cc1597b5b825d5b46ef25694a6cfa50aaa6b50597a"
+    },
+    {
+      "path": "factory/recovery/task-packets/T001-r3.yaml",
+      "mode": "0755",
+      "sha256": "f8eded6f36711a2dbe3bd4cc1597b5b825d5b46ef25694a6cfa50aaa6b50597a"
+    },
+    {
+      "path": "factory/recovery/task-packets/T002-r1.yaml",
+      "mode": "0644",
+      "sha256": "eb7164c903362b45c4d8ace30d7e0318cbdda4fb57c3bf888795f1e66a5b4e13"
+    },
+    {
+      "path": "factory/recovery/task-packets/T002-r10.yaml",
+      "mode": "0644",
+      "sha256": "28c4ebde61f616527acc4e1ae30371dbbad0031a5c29ee89bd1b5d7098719cac"
+    },
+    {
+      "path": "factory/recovery/task-packets/T002-r11.yaml",
+      "mode": "0644",
+      "sha256": "3b1848186b88f24f0823e32299d87bf47af5fbfd111e0447f7508a6ea12dcfff"
+    },
+    {
+      "path": "factory/recovery/task-packets/T002-r12.yaml",
+      "mode": "0644",
+      "sha256": "e6cfb391fb802f233c5da395c535bbd00a78f5c36d8d04d47c3ad024511ca884"
+    },
+    {
+      "path": "factory/recovery/task-packets/T002-r2.yaml",
+      "mode": "0644",
+      "sha256": "eb7164c903362b45c4d8ace30d7e0318cbdda4fb57c3bf888795f1e66a5b4e13"
+    },
+    {
+      "path": "factory/recovery/task-packets/T002-r3.yaml",
+      "mode": "0644",
+      "sha256": "eb7164c903362b45c4d8ace30d7e0318cbdda4fb57c3bf888795f1e66a5b4e13"
+    },
+    {
+      "path": "factory/recovery/task-packets/T002-r4.yaml",
+      "mode": "0644",
+      "sha256": "eead239ac7345b60e75a43412ce1173961ef7243e24e45fa6d4ad4d015a22f7c"
+    },
+    {
+      "path": "factory/recovery/task-packets/T002-r5.yaml",
+      "mode": "0644",
+      "sha256": "770c2ebc215d9b4d2137084541a6fe31cc801b54af3420ab89c65a01bf2e7842"
+    },
+    {
+      "path": "factory/recovery/task-packets/T002-r6.yaml",
+      "mode": "0644",
+      "sha256": "c5aec8e0ea3c9f82e4640a6c64e8d87c18c7943c7fe8af5042713cdfa81c076b"
+    },
+    {
+      "path": "factory/recovery/task-packets/T002-r7.yaml",
+      "mode": "0644",
+      "sha256": "0b10f26f49c3395d326cf15876dbf42fcdc5e8c483102ebe97b0dab266899a7f"
+    },
+    {
+      "path": "factory/recovery/task-packets/T002-r8.yaml",
+      "mode": "0644",
+      "sha256": "afe3de713609bafc01840b5f45f7462ba1bef6559dc1ada2e74bb09a5f066a6d"
+    },
+    {
+      "path": "factory/recovery/task-packets/T002-r9.yaml",
+      "mode": "0644",
+      "sha256": "84f7fe7ec1cb8a9bc5b73641626cbb3ecbd8cddb9dcf399755ca4f66bf7c4176"
+    },
+    {
+      "path": "specs/tasks/T002.md",
+      "mode": "0644",
+      "sha256": "37b437fd756db9aa674596169142a4d0d53adb82846c4925327abcffa4640d05"
+    },
+    {
+      "path": "tasks/T001.yaml",
+      "mode": "0755",
+      "sha256": "f8eded6f36711a2dbe3bd4cc1597b5b825d5b46ef25694a6cfa50aaa6b50597a"
+    },
+    {
+      "path": "tasks/T002.yaml",
+      "mode": "0644",
+      "sha256": "b11bb3d937ad0b85c7406076b577bcdaa6e4e3afcdd8a3fd4c7cc8a7ddbb0d04"
     }
   ],
-  "inventoryDigest": "sha256:b8426b38de009811f3b88eb3119682b7f8e09b11001060bc9d5c718c4f3f96fc"
+  "inventoryDigest": "sha256:4f93c21024373a267527cb8332649a8364b790139ab3ff6060c55cbf9e0afffa"
 }

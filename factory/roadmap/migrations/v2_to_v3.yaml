@@ -4860,13 +4860,13 @@ preservedEvidenceInventory:
   mode: '0644'
   sha256: c342a67ab2c75a133dd7c30a54c961cf49ab3f0200de76c6d7d7a93f63696297
 - path: factory/recovery/task-packets/T001-r1.yaml
-  mode: '0777'
+  mode: '0755'
   sha256: c342a67ab2c75a133dd7c30a54c961cf49ab3f0200de76c6d7d7a93f63696297
 - path: factory/recovery/task-packets/T001-r2.yaml
-  mode: '0777'
+  mode: '0755'
   sha256: f8eded6f36711a2dbe3bd4cc1597b5b825d5b46ef25694a6cfa50aaa6b50597a
 - path: factory/recovery/task-packets/T001-r3.yaml
-  mode: '0777'
+  mode: '0755'
   sha256: f8eded6f36711a2dbe3bd4cc1597b5b825d5b46ef25694a6cfa50aaa6b50597a
 - path: factory/recovery/task-packets/T002-r1.yaml
   mode: '0644'
@@ -4908,9 +4908,9 @@ preservedEvidenceInventory:
   mode: '0644'
   sha256: 37b437fd756db9aa674596169142a4d0d53adb82846c4925327abcffa4640d05
 - path: tasks/T001.yaml
-  mode: '0777'
+  mode: '0755'
   sha256: f8eded6f36711a2dbe3bd4cc1597b5b825d5b46ef25694a6cfa50aaa6b50597a
 - path: tasks/T002.yaml
   mode: '0644'
   sha256: b11bb3d937ad0b85c7406076b577bcdaa6e4e3afcdd8a3fd4c7cc8a7ddbb0d04
-preservedEvidenceInventoryDigest: sha256:64e8b1321a4a420b21aeaab9ee16f038f8347d254dbe79404399b198afe8cca9
+preservedEvidenceInventoryDigest: sha256:4f93c21024373a267527cb8332649a8364b790139ab3ff6060c55cbf9e0afffa

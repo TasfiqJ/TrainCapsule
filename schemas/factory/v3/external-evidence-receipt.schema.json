@@ -83,6 +83,11 @@
       "additionalProperties": false,
       "description": "Stable identities used to correlate separately signed commercial facts.",
       "properties": {
+        "productLineageDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Productlineagedigest",
+          "type": "string"
+        },
         "candidateSha": {
           "pattern": "^[0-9a-f]{40}$",
           "title": "Candidatesha",
@@ -142,6 +147,7 @@
         }
       },
       "required": [
+        "productLineageDigest",
         "candidateSha"
       ],
       "title": "EvidenceCorrelationIdentity",

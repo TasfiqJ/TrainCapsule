@@ -86,6 +86,9 @@ class MilestoneCompletionReceipt(V3Model):
     next_milestone_id: str | None
     evidence_digests: dict[str, str]
     source_authority_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    commercial_authorization_digest: str | None = Field(
+        default=None, pattern=DIGEST_PATTERN.pattern
+    )
     proposals: list[str] = Field(default_factory=list[str], max_length=5)
     decision: MilestoneStatus
     decided_at: datetime
@@ -197,6 +200,7 @@ def advance_milestone_state(
     evidence_digests: dict[str, str],
     expected_evidence_ids: set[str],
     source_authority_digest: str,
+    commercial_authorization_digest: str | None = None,
     proposals: list[str] | None = None,
     now: datetime,
 ) -> MilestoneRuntimeState:
@@ -224,6 +228,7 @@ def advance_milestone_state(
         next_milestone_id=next_milestone,
         evidence_digests=evidence_digests,
         source_authority_digest=source_authority_digest,
+        commercial_authorization_digest=commercial_authorization_digest,
         proposals=proposals or [],
         decision=MilestoneStatus.COMPLETED,
         decided_at=now,

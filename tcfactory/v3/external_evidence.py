@@ -96,6 +96,7 @@ class CustomerDecisionValueAttestation(V3Model):
 class EvidenceCorrelationIdentity(V3Model):
     """Stable identities used to correlate separately signed commercial facts."""
 
+    product_lineage_digest: Digest
     candidate_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
     customer_identity_digest: Digest | None = None
     family_identity_digest: Digest | None = None

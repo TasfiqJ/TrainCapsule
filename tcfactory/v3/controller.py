@@ -80,11 +80,12 @@ from tcfactory.v3.completion_policy import (
     evaluate_milestone_exit_criteria,
     evaluate_work_item_evidence_contract,
     load_completion_evidence_policy,
+    product_lineage_digest,
 )
 from tcfactory.v3.completion_verification import (
     CompletionVerificationError,
     DescriptorBoundArtifactReader,
-    ExecutableReductionOracle,
+    evaluate_installed_reduction_oracle,
     verify_delivery_economics,
 )
 from tcfactory.v3.configuration import (
@@ -129,8 +130,8 @@ from tcfactory.v3.machine_policy_runtime import (
 )
 from tcfactory.v3.market_artifacts import ReachableAccountMap
 from tcfactory.v3.maturity import (
-    CommercialMaturityAuthorization,
     commercial_maturity_supported,
+    derive_commercial_maturity_authorization,
 )
 from tcfactory.v3.milestone_runtime import (
     WorkItemCompletionEvidence,
@@ -539,6 +540,7 @@ class V3Controller:
         checkpoint: V3Checkpoint | None,
         base_sha: str,
         candidate_sha: str,
+        candidate_manifest_path: Path | None,
     ) -> tuple[dict[SemanticEvidence, list[str]], dict[str, str]]:
         """Derive semantics only from strict controller-bound artifact bytes."""
 
@@ -631,21 +633,13 @@ class V3Controller:
                 self.artifact_root, artifact_paths_by_digest
             )
             if isinstance(record, ReductionBoundaryEvidence):
-                executable_text = os.environ.get("TCF_REDUCTION_ORACLE_EXECUTABLE")
-                executable_digest = os.environ.get("TCF_REDUCTION_ORACLE_DIGEST")
-                public_key_text = os.environ.get("TCF_REDUCTION_ORACLE_PUBLIC_KEY")
-                public_key_digest = os.environ.get("TCF_REDUCTION_ORACLE_PUBLIC_KEY_DIGEST")
-                if not all(
-                    (
-                        executable_text,
-                        executable_digest,
-                        public_key_text,
-                        public_key_digest,
-                    )
-                ):
+                installed_runtime_loader = getattr(self, "installed_runtime_loader", None)
+                if installed_runtime_loader is None or candidate_manifest_path is None:
                     raise RuntimeError("reduction oracle installation is unavailable")
-                assert executable_text is not None
-                assert public_key_text is not None
+                try:
+                    installed_runtime = installed_runtime_loader()
+                except RuntimeError as exc:
+                    raise RuntimeError("reduction oracle installation is unavailable") from exc
                 tree = run_command(
                     ["git", "rev-parse", f"{candidate_sha}^{{tree}}"],
                     cwd=self.git_root,
@@ -654,17 +648,15 @@ class V3Controller:
                 if tree.returncode != 0 or SHA_PATTERN.fullmatch(tree.stdout.strip()) is None:
                     raise RuntimeError("reduction oracle candidate tree is unavailable")
                 try:
-                    assert executable_digest is not None
-                    assert public_key_digest is not None
-                    decision, receipt_raw = ExecutableReductionOracle(
-                        Path(executable_text),
-                        executable_digest,
-                        Path(public_key_text),
-                        public_key_digest,
-                    ).evaluate(
+                    authorized, receipt_raw = evaluate_installed_reduction_oracle(
                         record,
+                        installed_runtime=installed_runtime,
+                        candidate_manifest_path=candidate_manifest_path,
                         candidate_sha=candidate_sha,
                         candidate_tree_sha=tree.stdout.strip(),
+                        base_sha=base_sha,
+                        source_generation_id=self.active_source.generation_id,
+                        source_generation_digest=self.active_source.canonical_digest(),
                         artifacts=artifact_reader,
                         now=datetime.now(UTC),
                     )
@@ -673,10 +665,42 @@ class V3Controller:
                 receipt_path = path.parent / "reduction-oracle-receipt.json"
                 atomic_write_bytes(receipt_path, receipt_raw)
                 receipt_digest = _digest_file(receipt_path)
-                if decision.oracle_result_digest != record.oracle_result_digest:
+                if authorized.decision.oracle_result_digest != record.oracle_result_digest:
                     raise RuntimeError("reduction oracle result does not match evidence")
+                installation = installed_runtime.reduction_oracle
+                assert installation is not None
+                machine_receipt_path = (
+                    Path(installation.public_receipt_root)
+                    / "machine-policy"
+                    / item.work_item_id
+                    / f"{candidate_sha}.json"
+                )
                 artifact_bindings[str(receipt_path.resolve())] = receipt_digest
-                artifact_bindings[str(Path(executable_text).resolve())] = executable_digest
+                authority_snapshots = {
+                    "oracle-executable.bin": (
+                        Path(installation.executable.path),
+                        installation.executable.digest,
+                    ),
+                    "oracle-public-key.bin": (
+                        Path(installation.public_key.path),
+                        installation.public_key.digest,
+                    ),
+                    "oracle-machine-policy-receipt.json": (
+                        machine_receipt_path,
+                        authorized.machine_policy_receipt_digest,
+                    ),
+                    "oracle-live-activation.json": (
+                        Path(installation.activation_receipt_path),
+                        authorized.activation_receipt_digest,
+                    ),
+                }
+                for name, (authority_path, authority_digest) in authority_snapshots.items():
+                    authority_raw = authority_path.read_bytes()
+                    if sha256_digest(authority_raw) != authority_digest:
+                        raise RuntimeError("reduction authority changed after verification")
+                    snapshot_path = path.parent / name
+                    atomic_write_bytes(snapshot_path, authority_raw)
+                    artifact_bindings[str(snapshot_path.resolve())] = authority_digest
                 for digest in record.raw_artifact_digests:
                     raw_path = artifact_paths_by_digest.get(digest)
                     if raw_path is None:
@@ -845,6 +869,7 @@ class V3Controller:
             checkpoint=checkpoint,
             base_sha=base_sha,
             candidate_sha=candidate_sha,
+            candidate_manifest_path=manifest_path,
         )
         for semantic, digests in derived_semantics.items():
             semantic_refs.setdefault(semantic, []).extend(digests)
@@ -955,6 +980,8 @@ class V3Controller:
         milestone_external_identities: set[tuple[str, str, str]] = set()
         milestone_semantic_counts: dict[SemanticEvidence, int] = {}
         milestone_correlated_facts: list[CorrelatedEvidenceFact] = []
+        milestone_verified_receipt_digests: set[str] = set()
+        expected_product_lineage = product_lineage_digest(active_source.canonical_digest())
         completion_policy = load_completion_evidence_policy(self.repo_root)
         milestone_contract = completion_policy.milestone(collection.active_milestone)
         required_evidence_item_ids = {
@@ -964,6 +991,19 @@ class V3Controller:
             for criterion in milestone_contract.exit_criteria
             for work_item_id in criterion.required_work_item_ids
         }
+        if collection.active_milestone == "M6_COMMERCIALLY_SUPPORTED_PACK":
+            required_evidence_item_ids.update(
+                {
+                    "V3-PILOT-003",
+                    "V3-PILOT-011",
+                    "V3-REPEAT-001",
+                    "V3-REPEAT-005",
+                    "V3-REPEAT-006",
+                    "V3-PACK-002",
+                    "V3-PROD-029",
+                    "V3-MKT-011",
+                }
+            )
         evidence_items = [
             collection.item(work_item_id)
             for work_item_id in sorted(required_evidence_item_ids)
@@ -1012,7 +1052,18 @@ class V3Controller:
                 )
             external_type_counts: dict[EvidenceType, int] = {}
             prior_evidence: dict[str, list[SemanticEvidence]] = {}
-            item_correlation_verified = False
+            item_correlated_facts: list[CorrelatedEvidenceFact] = []
+            item_verified_receipt_digests: set[str] = set()
+            pending_semantic_facts: list[
+                tuple[
+                    SemanticEvidence,
+                    str,
+                    str | None,
+                    str | None,
+                    str | None,
+                    str | None,
+                ]
+            ] = []
             if evidence.checkpoint_path is not None:
                 checkpoint_path = evidence.checkpoint_path.resolve()
                 try:
@@ -1073,36 +1124,48 @@ class V3Controller:
                         support = SupportPolicyEvidence.model_validate_json(
                             raw_semantic, strict=True
                         )
-                        milestone_correlated_facts.append(
-                            CorrelatedEvidenceFact(
-                                candidate_sha=evidence.candidate_sha,
-                                pack_identity_digest=support.pack_identity_digest,
-                                semantic=SemanticEvidence.SUPPORT_POLICY,
+                        if support.product_lineage_digest != expected_product_lineage:
+                            raise RuntimeError("support policy product lineage mismatch")
+                        pending_semantic_facts.append(
+                            (
+                                SemanticEvidence.SUPPORT_POLICY,
+                                expected_digest,
+                                None,
+                                support.family_identity_digest,
+                                None,
+                                support.pack_identity_digest,
                             )
                         )
                     if SemanticEvidence.DELIVERY_ECONOMICS in semantic_counts:
                         economics = DeliveryEconomicsEvidence.model_validate_json(
                             raw_semantic, strict=True
                         )
-                        milestone_correlated_facts.append(
-                            CorrelatedEvidenceFact(
-                                candidate_sha=evidence.candidate_sha,
-                                customer_identity_digest=(economics.customer_identity_digest),
-                                offer_identity_digest=economics.offer_identity_digest,
-                                semantic=SemanticEvidence.DELIVERY_ECONOMICS,
+                        if economics.product_lineage_digest != expected_product_lineage:
+                            raise RuntimeError("delivery economics product lineage mismatch")
+                        pending_semantic_facts.append(
+                            (
+                                SemanticEvidence.DELIVERY_ECONOMICS,
+                                expected_digest,
+                                economics.customer_identity_digest,
+                                None,
+                                economics.offer_identity_digest,
+                                None,
                             )
                         )
                     if SemanticEvidence.THIRD_SAME_FAMILY_CASE in semantic_counts:
                         family_case = ThirdSameFamilyCaseEvidence.model_validate_json(
                             raw_semantic, strict=True
                         )
-                        milestone_correlated_facts.append(
-                            CorrelatedEvidenceFact(
-                                candidate_sha=evidence.candidate_sha,
-                                customer_identity_digest=(family_case.customer_identity_digest),
-                                family_identity_digest=(family_case.family_identity_digest),
-                                pack_identity_digest=family_case.reusable_pack_digest,
-                                semantic=SemanticEvidence.THIRD_SAME_FAMILY_CASE,
+                        if family_case.product_lineage_digest != expected_product_lineage:
+                            raise RuntimeError("same-family case product lineage mismatch")
+                        pending_semantic_facts.append(
+                            (
+                                SemanticEvidence.THIRD_SAME_FAMILY_CASE,
+                                expected_digest,
+                                family_case.customer_identity_digest,
+                                family_case.family_identity_digest,
+                                None,
+                                family_case.reusable_pack_digest,
                             )
                         )
                 except ValueError:
@@ -1187,7 +1250,11 @@ class V3Controller:
                     ):
                         raise RuntimeError("prior authority artifact bytes changed")
                 if SemanticEvidence.NATIVE_VALUE_AUTHORIZATION in required_semantics:
-                    if prior.checkpoint_path is None or prior.candidate_manifest_path is None:
+                    if (
+                        prior.checkpoint_path is None
+                        or prior.candidate_manifest_path is None
+                        or prior.machine_policy_receipt_digest is None
+                    ):
                         raise RuntimeError("prior native authority lacks frozen provenance")
                     prior_checkpoint = V3Checkpoint.model_validate(
                         read_json(prior.checkpoint_path, {})
@@ -1199,6 +1266,25 @@ class V3Controller:
                         prior_checkpoint, prior.candidate_manifest_path
                     )
                     observed_authorities.add(EvidenceAuthority.INDEPENDENT_MACHINE_POLICY)
+                    native_digests = prior.semantic_evidence_refs.get(
+                        SemanticEvidence.NATIVE_VALUE_AUTHORIZATION, []
+                    )
+                    if len(native_digests) != 1:
+                        raise RuntimeError("prior native authority has an inexact fact roster")
+                    native_fact = CorrelatedEvidenceFact(
+                        product_lineage_digest=expected_product_lineage,
+                        candidate_sha=prior.candidate_sha,
+                        source_work_item_id=prior.work_item_id,
+                        evidence_digest=native_digests[0],
+                        authority_receipt_digest=prior.machine_policy_receipt_digest,
+                        semantic=SemanticEvidence.NATIVE_VALUE_AUTHORIZATION,
+                    )
+                    item_correlated_facts.append(native_fact)
+                    milestone_correlated_facts.append(native_fact)
+                    item_verified_receipt_digests.add(prior.machine_policy_receipt_digest)
+                    milestone_verified_receipt_digests.add(
+                        prior.machine_policy_receipt_digest
+                    )
                 prior_evidence[prior_item_id] = sorted(
                     required_semantics, key=lambda value: value.value
                 )
@@ -1231,6 +1317,24 @@ class V3Controller:
                 )
                 bound_digests.append(evidence.machine_policy_receipt_digest)
                 observed_authorities.add(EvidenceAuthority.INDEPENDENT_MACHINE_POLICY)
+                item_verified_receipt_digests.add(evidence.machine_policy_receipt_digest)
+                milestone_verified_receipt_digests.add(evidence.machine_policy_receipt_digest)
+                native_digests = evidence.semantic_evidence_refs.get(
+                    SemanticEvidence.NATIVE_VALUE_AUTHORIZATION, []
+                )
+                if native_digests:
+                    if len(native_digests) != 1:
+                        raise RuntimeError("native authority has an inexact fact roster")
+                    native_fact = CorrelatedEvidenceFact(
+                        product_lineage_digest=expected_product_lineage,
+                        candidate_sha=evidence.candidate_sha,
+                        source_work_item_id=evidence.work_item_id,
+                        evidence_digest=native_digests[0],
+                        authority_receipt_digest=evidence.machine_policy_receipt_digest,
+                        semantic=SemanticEvidence.NATIVE_VALUE_AUTHORIZATION,
+                    )
+                    item_correlated_facts.append(native_fact)
+                    milestone_correlated_facts.append(native_fact)
             if (
                 item.machine_policy_receipt_required or item.kind is WorkKind.MACHINE_POLICY_REVIEW
             ) and evidence.machine_policy_receipt_path is None:
@@ -1245,6 +1349,7 @@ class V3Controller:
                     ),
                 )
                 receipt = record.require_commercial_trust()
+                receipt_digest = receipt.canonical_digest()
                 expected_external_reference = (
                     f"external-receipt:{receipt.receipt_id}@{receipt.canonical_digest()}"
                 )
@@ -1257,10 +1362,12 @@ class V3Controller:
                     and evidence.checkpoint_digest != receipt.canonical_digest()
                 ):
                     raise RuntimeError("external completion evidence digest mismatch")
-                reference = f"{receipt.receipt_id}:{receipt.canonical_digest()}"
+                reference = f"{receipt.receipt_id}:{receipt_digest}"
                 trusted_external_receipt_refs.append(reference)
-                bound_digests.append(receipt.canonical_digest())
+                bound_digests.append(receipt_digest)
                 observed_authorities.add(EvidenceAuthority.TRUSTED_EXTERNAL)
+                item_verified_receipt_digests.add(receipt_digest)
+                milestone_verified_receipt_digests.add(receipt_digest)
                 unique_external_artifacts = {
                     (artifact.name, artifact.digest, artifact.location_class.value)
                     for artifact in receipt.artifacts
@@ -1292,28 +1399,81 @@ class V3Controller:
                 if correlation is not None:
                     if correlation.candidate_sha != evidence.candidate_sha:
                         raise RuntimeError("external correlation candidate mismatch")
-                    item_correlation_verified = True
-                    milestone_correlated_facts.append(
-                        CorrelatedEvidenceFact(
+                    if correlation.product_lineage_digest != expected_product_lineage:
+                        raise RuntimeError("external correlation product lineage mismatch")
+                    external_fact = CorrelatedEvidenceFact(
+                        product_lineage_digest=correlation.product_lineage_digest,
+                        candidate_sha=correlation.candidate_sha,
+                        source_work_item_id=evidence.work_item_id,
+                        evidence_digest=receipt_digest,
+                        authority_receipt_digest=receipt_digest,
+                        customer_identity_digest=correlation.customer_identity_digest,
+                        family_identity_digest=correlation.family_identity_digest,
+                        offer_identity_digest=correlation.offer_identity_digest,
+                        pack_identity_digest=correlation.pack_identity_digest,
+                        external_evidence_type=receipt.evidence_type,
+                    )
+                    item_correlated_facts.append(external_fact)
+                    milestone_correlated_facts.append(external_fact)
+                    for semantic in self._external_receipt_semantic_evidence(receipt):
+                        semantic_fact = CorrelatedEvidenceFact(
+                            product_lineage_digest=correlation.product_lineage_digest,
                             candidate_sha=correlation.candidate_sha,
-                            customer_identity_digest=(correlation.customer_identity_digest),
+                            source_work_item_id=evidence.work_item_id,
+                            evidence_digest=receipt_digest,
+                            authority_receipt_digest=receipt_digest,
+                            customer_identity_digest=correlation.customer_identity_digest,
                             family_identity_digest=correlation.family_identity_digest,
                             offer_identity_digest=correlation.offer_identity_digest,
                             pack_identity_digest=correlation.pack_identity_digest,
-                            external_evidence_type=receipt.evidence_type,
+                            semantic=semantic,
                         )
-                    )
-                    for semantic in self._external_receipt_semantic_evidence(receipt):
-                        milestone_correlated_facts.append(
-                            CorrelatedEvidenceFact(
-                                candidate_sha=correlation.candidate_sha,
-                                customer_identity_digest=(correlation.customer_identity_digest),
-                                family_identity_digest=(correlation.family_identity_digest),
-                                offer_identity_digest=correlation.offer_identity_digest,
-                                pack_identity_digest=correlation.pack_identity_digest,
-                                semantic=semantic,
+                        item_correlated_facts.append(semantic_fact)
+                        milestone_correlated_facts.append(semantic_fact)
+                    for (
+                        semantic,
+                        semantic_digest,
+                        customer_digest,
+                        family_digest,
+                        offer_digest,
+                        pack_digest,
+                    ) in pending_semantic_facts:
+                        if (
+                            semantic is SemanticEvidence.SUPPORT_POLICY
+                            and semantic_digest not in digests
+                        ):
+                            raise RuntimeError(
+                                "support policy bytes are absent from the signed receipt"
                             )
+                        if any(
+                            (
+                                customer_digest is not None
+                                and customer_digest != correlation.customer_identity_digest,
+                                family_digest is not None
+                                and family_digest != correlation.family_identity_digest,
+                                offer_digest is not None
+                                and offer_digest != correlation.offer_identity_digest,
+                                pack_digest is not None
+                                and pack_digest != correlation.pack_identity_digest,
+                            )
+                        ):
+                            raise RuntimeError("semantic artifact correlation identity mismatch")
+                        semantic_fact = CorrelatedEvidenceFact(
+                            product_lineage_digest=correlation.product_lineage_digest,
+                            candidate_sha=evidence.candidate_sha,
+                            source_work_item_id=evidence.work_item_id,
+                            evidence_digest=semantic_digest,
+                            authority_receipt_digest=receipt_digest,
+                            customer_identity_digest=customer_digest,
+                            family_identity_digest=family_digest,
+                            offer_identity_digest=offer_digest,
+                            pack_identity_digest=pack_digest,
+                            semantic=semantic,
                         )
+                        item_correlated_facts.append(semantic_fact)
+                        milestone_correlated_facts.append(semantic_fact)
+                elif pending_semantic_facts:
+                    raise RuntimeError("commercial semantic artifact lacks signed correlation")
             grade = {
                 ExecutionEvidenceMode.SIMULATION: EvidenceGrade.DETERMINISTIC,
                 ExecutionEvidenceMode.CONTROLLED_VALIDATION: EvidenceGrade.CONTROLLED,
@@ -1334,24 +1494,23 @@ class V3Controller:
             )
             if (
                 item.maturity_target.commercial is CommercialMaturity.EXTERNAL_VALUE_DEMONSTRATED
-            ) and not commercial_maturity_supported(
-                item.maturity_target.commercial,
-                CommercialMaturityAuthorization(
-                    external_evidence_types=sorted(
-                        external_type_counts, key=lambda value: value.value
-                    ),
-                    semantic_evidence=sorted(
-                        set(semantic_counts)
-                        | {semantic for values in prior_evidence.values() for semantic in values},
-                        key=lambda value: value.value,
-                    ),
-                    exact_identity_correlation_verified=item_correlation_verified,
-                ),
             ):
-                contract_failures.append(
-                    f"{item.work_item_id} commercial maturity "
-                    f"{item.maturity_target.commercial.value} exceeds exact trusted evidence"
-                )
+                try:
+                    maturity_authorization = derive_commercial_maturity_authorization(
+                        item_correlated_facts,
+                        sorted(item_verified_receipt_digests),
+                    )
+                except ValueError:
+                    maturity_authorization = None
+                if commercial_maturity_supported(
+                    item.maturity_target.commercial, maturity_authorization
+                ):
+                    pass
+                else:
+                    contract_failures.append(
+                        f"{item.work_item_id} commercial maturity "
+                        f"{item.maturity_target.commercial.value} exceeds exact trusted evidence"
+                    )
             if (
                 item.maturity_target.commercial is CommercialMaturity.NATIVE_ADVANTAGE_DEMONSTRATED
                 and semantic_counts.get(SemanticEvidence.NATIVE_VALUE_AUTHORIZATION, 0) < 1
@@ -1384,25 +1543,26 @@ class V3Controller:
             correlated_facts=milestone_correlated_facts,
         )
         contract_failures.extend(exit_failures)
+        milestone_maturity_authorization = None
         if any(
             item.maturity_target.commercial is CommercialMaturity.COMMERCIALLY_SUPPORTED
             for item in active
-        ) and not commercial_maturity_supported(
-            CommercialMaturity.COMMERCIALLY_SUPPORTED,
-            CommercialMaturityAuthorization(
-                external_evidence_types=sorted(
-                    milestone_external_counts, key=lambda value: value.value
-                ),
-                semantic_evidence=sorted(milestone_semantic_counts, key=lambda value: value.value),
-                exact_identity_correlation_verified=not any(
-                    "correlated" in failure for failure in exit_failures
-                ),
-            ),
         ):
-            contract_failures.append(
-                f"{collection.active_milestone} commercially-supported maturity "
-                "lacks its exact correlated authorization envelope"
-            )
+            try:
+                milestone_maturity_authorization = derive_commercial_maturity_authorization(
+                    milestone_correlated_facts,
+                    sorted(milestone_verified_receipt_digests),
+                )
+            except ValueError:
+                milestone_maturity_authorization = None
+            if not commercial_maturity_supported(
+                CommercialMaturity.COMMERCIALLY_SUPPORTED,
+                milestone_maturity_authorization,
+            ):
+                contract_failures.append(
+                    f"{collection.active_milestone} commercially-supported maturity "
+                    "lacks its exact correlated authorization envelope"
+                )
         milestones = MilestoneRoadmap.model_validate(
             load_yaml(self.repo_root / self.factory.roadmap.milestones)
         )
@@ -1462,6 +1622,21 @@ class V3Controller:
         receipt_path = (
             self.runtime_paths.milestone_decisions / f"{collection.active_milestone}.json"
         )
+        commercial_authorization_digest: str | None = None
+        if milestone_maturity_authorization is not None:
+            authorization_path = (
+                self.runtime_paths.milestone_decisions
+                / f"{collection.active_milestone}-commercial-authorization.json"
+            )
+            authorization_raw = milestone_maturity_authorization.canonical_json_bytes()
+            if (
+                authorization_path.is_file()
+                and authorization_path.read_bytes() != authorization_raw
+            ):
+                raise RuntimeError("commercial maturity authorization is immutable")
+            if not authorization_path.is_file():
+                atomic_write_bytes(authorization_path, authorization_raw)
+            commercial_authorization_digest = milestone_maturity_authorization.canonical_digest()
         state = advance_milestone_state(
             roadmap=milestones,
             state_path=self.runtime_paths.milestone_state,
@@ -1469,6 +1644,7 @@ class V3Controller:
             evidence_digests=evidence_digests,
             expected_evidence_ids={item.work_item_id for item in evidence_items},
             source_authority_digest=active_source.canonical_digest(),
+            commercial_authorization_digest=commercial_authorization_digest,
             proposals=[],
             now=datetime.now(UTC),
         )

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 from collections import Counter
 from pathlib import Path
@@ -109,7 +110,7 @@ def test_preserved_evidence_inventory_detects_byte_tamper(tmp_path: Path) -> Non
     shutil.copytree(ROOT, copied, ignore=shutil.ignore_patterns(".git", ".venv", "worktrees"))
     target = copied / "specs/tasks/T002.md"
     target.write_bytes(target.read_bytes() + b"\ntampered\n")
-    with pytest.raises(ValueError, match="stopped-runtime snapshot|stale"):
+    with pytest.raises(ValueError, match="byte digest mismatch|stale"):
         verify_installed(copied)
 
 
@@ -141,8 +142,9 @@ def test_ignored_runtime_evidence_manifest_rejects_digest_tamper(
         copied
         / "factory/roadmap/migrations/v2_runtime_evidence_manifest.json"
     )
-    payload = manifest.read_text(encoding="utf-8")
-    manifest.write_text(payload.replace("b8426b38", "08426b38", 1), encoding="utf-8")
+    payload = json.loads(manifest.read_text(encoding="utf-8"))
+    payload["inventory"][0]["sha256"] = "0" * 64
+    manifest.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
     with pytest.raises(ValueError, match="manifest digest mismatch"):
         build_mapping(copied)
 

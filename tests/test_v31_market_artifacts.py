@@ -288,6 +288,7 @@ def test_controller_counts_only_named_attributable_reachable_accounts(
         checkpoint=checkpoint,
         base_sha=SHA,
         candidate_sha="d" * 40,
+        candidate_manifest_path=None,
     )
     assert semantics[SemanticEvidence.REACHABLE_ACCOUNT] == []
     assert semantics[SemanticEvidence.ATTRIBUTABLE_SOURCE] == []
@@ -306,6 +307,7 @@ def test_controller_counts_only_named_attributable_reachable_accounts(
         checkpoint=checkpoint,
         base_sha=SHA,
         candidate_sha="d" * 40,
+        candidate_manifest_path=None,
     )
     assert len(semantics[SemanticEvidence.REACHABLE_ACCOUNT]) == 30
     assert semantics[SemanticEvidence.ATTRIBUTABLE_SOURCE] == [DIGEST]

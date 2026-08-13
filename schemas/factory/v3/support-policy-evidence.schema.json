@@ -22,9 +22,19 @@
       "title": "Sourceauthoritydigest",
       "type": "string"
     },
+    "productLineageDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Productlineagedigest",
+      "type": "string"
+    },
     "packId": {
       "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
       "title": "Packid",
+      "type": "string"
+    },
+    "familyIdentityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Familyidentitydigest",
       "type": "string"
     },
     "packIdentityDigest": {
@@ -91,7 +101,9 @@
     "workItemId",
     "evidenceBasisSha",
     "sourceAuthorityDigest",
+    "productLineageDigest",
     "packId",
+    "familyIdentityDigest",
     "packIdentityDigest",
     "supportedVersions",
     "supportedScope",

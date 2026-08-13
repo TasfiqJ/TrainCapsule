@@ -11,6 +11,7 @@ from typing import Any, Literal, cast
 import pytest
 
 from tcfactory.checkpoints import V3Checkpoint
+from tcfactory.v3.candidate_manifest import CandidateManifest, ExecutorIdentity
 from tcfactory.v3.completion_artifacts import (
     DeliveryEconomicsEvidence,
     FrozenReleaseEvidenceAuthorization,
@@ -27,6 +28,7 @@ from tcfactory.v3.completion_policy import (
     evaluate_milestone_exit_criteria,
     evaluate_work_item_evidence_contract,
     load_completion_evidence_policy,
+    product_lineage_digest,
 )
 from tcfactory.v3.completion_verification import (
     CompletionVerificationError,
@@ -34,18 +36,27 @@ from tcfactory.v3.completion_verification import (
     DescriptorBoundArtifactReader,
     ExecutableReductionOracle,
     ReductionCandidateInput,
+    ReductionOracleDecision,
+    evaluate_installed_reduction_oracle,
     verify_delivery_economics,
 )
 from tcfactory.v3.controller import V3Controller
-from tcfactory.v3.enums import CommercialMaturity, EvidenceType
+from tcfactory.v3.enums import CommercialMaturity, EvidenceType, ReleaseDecision
 from tcfactory.v3.external_evidence import (
     CustomerDecisionValueAttestation,
     ExternalEvidenceReceipt,
 )
+from tcfactory.v3.installed_runtime import (
+    InstalledArtifact,
+    InstalledControllerRuntimeManifest,
+    InstalledReductionOracle,
+)
 from tcfactory.v3.maturity import (
     CommercialMaturityAuthorization,
     commercial_maturity_supported,
+    derive_commercial_maturity_authorization,
 )
+from tcfactory.v3.publication import PublicationError
 from tcfactory.v3.traincheck_differential import (
     IncidentContract,
     TrainCheckDifferentialRequest,
@@ -208,7 +219,11 @@ def test_every_source_exit_criterion_has_an_exact_typed_evidence_closure() -> No
                 continue
             correlated.extend(
                 CorrelatedEvidenceFact(
+                    product_lineage_digest="sha256:" + "0" * 64,
                     candidate_sha="a" * 40,
+                    source_work_item_id="V3-PILOT-011",
+                    evidence_digest="sha256:" + "5" * 64,
+                    authority_receipt_digest="sha256:" + "6" * 64,
                     customer_identity_digest="sha256:" + "1" * 64,
                     family_identity_digest="sha256:" + "2" * 64,
                     offer_identity_digest="sha256:" + "3" * 64,
@@ -219,7 +234,11 @@ def test_every_source_exit_criterion_has_an_exact_typed_evidence_closure() -> No
             )
             correlated.extend(
                 CorrelatedEvidenceFact(
+                    product_lineage_digest="sha256:" + "0" * 64,
                     candidate_sha="a" * 40,
+                    source_work_item_id="V3-PILOT-011",
+                    evidence_digest="sha256:" + "7" * 64,
+                    authority_receipt_digest="sha256:" + "7" * 64,
                     customer_identity_digest="sha256:" + "1" * 64,
                     family_identity_digest="sha256:" + "2" * 64,
                     offer_identity_digest="sha256:" + "3" * 64,
@@ -283,13 +302,21 @@ def test_reduction_and_customer_value_criteria_reject_shared_generic_facts() -> 
     facts = {SemanticEvidence.CUSTOMER_DECISION_CHANGED: 1}
     correlated_changed = [
         CorrelatedEvidenceFact(
+            product_lineage_digest="sha256:" + "0" * 64,
             candidate_sha="a" * 40,
+            source_work_item_id="V3-PILOT-011",
+            evidence_digest="sha256:" + "5" * 64,
+            authority_receipt_digest="sha256:" + "6" * 64,
             customer_identity_digest="sha256:" + "1" * 64,
             offer_identity_digest="sha256:" + "2" * 64,
             semantic=SemanticEvidence.CUSTOMER_DECISION_CHANGED,
         ),
         CorrelatedEvidenceFact(
+            product_lineage_digest="sha256:" + "0" * 64,
             candidate_sha="a" * 40,
+            source_work_item_id="V3-PILOT-011",
+            evidence_digest="sha256:" + "7" * 64,
+            authority_receipt_digest="sha256:" + "7" * 64,
             customer_identity_digest="sha256:" + "1" * 64,
             offer_identity_digest="sha256:" + "2" * 64,
             external_evidence_type=EvidenceType.DECISION_CHANGED,
@@ -336,7 +363,9 @@ def test_strict_semantic_artifacts_reject_laundered_claims() -> None:
         work_item_id="V3-PROD-029",
         evidence_basis_sha=base,
         source_authority_digest=source,
+        product_lineage_digest=product_lineage_digest(source),
         pack_id="PACK-1",
+        family_identity_digest="sha256:" + "0" * 64,
         pack_identity_digest=digest,
         supported_versions=["1.0"],
         supported_scope=["initial-pack"],
@@ -350,6 +379,7 @@ def test_strict_semantic_artifacts_reject_laundered_claims() -> None:
             work_item_id="V3-REPEAT-006",
             evidence_basis_sha=base,
             source_authority_digest=source,
+            product_lineage_digest=product_lineage_digest(source),
             source_record_digests=[digest, "sha256:" + "3" * 64],
             signed_external_receipt_digest="sha256:" + "4" * 64,
             customer_identity_digest="sha256:" + "5" * 64,
@@ -368,6 +398,7 @@ def test_strict_semantic_artifacts_reject_laundered_claims() -> None:
             work_item_id="V3-PACK-002",
             evidence_basis_sha=base,
             source_authority_digest=source,
+            product_lineage_digest=product_lineage_digest(source),
             customer_identity_digest="sha256:" + "9" * 64,
             family_identity_digest=digest,
             case_identity_digests=[digest, digest, digest],
@@ -575,7 +606,9 @@ def test_controller_semantic_fan_in_reopens_strict_output_and_detects_tamper(
         work_item_id="V3-PROD-029",
         evidence_basis_sha=base_sha,
         source_authority_digest=source_digest,
+        product_lineage_digest=product_lineage_digest(source_digest),
         pack_id="PACK-1",
+        family_identity_digest="sha256:" + "8" * 64,
         pack_identity_digest="sha256:" + "9" * 64,
         supported_versions=["1.0"],
         supported_scope=["initial-pack"],
@@ -610,6 +643,7 @@ def test_controller_semantic_fan_in_reopens_strict_output_and_detects_tamper(
         checkpoint=checkpoint,
         base_sha=base_sha,
         candidate_sha="b" * 40,
+        candidate_manifest_path=None,
     )
     assert semantics == {SemanticEvidence.SUPPORT_POLICY: [digest]}
     assert bindings == {str(path.resolve()): digest}
@@ -620,11 +654,13 @@ def test_controller_semantic_fan_in_reopens_strict_output_and_detects_tamper(
             checkpoint=checkpoint,
             base_sha=base_sha,
             candidate_sha="b" * 40,
+            candidate_manifest_path=None,
         )
 
 
 def test_reduction_semantics_require_fresh_independent_review_bytes(
     tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
 ) -> None:
     source_digest = "sha256:" + "2" * 64
     base_sha = "a" * 40
@@ -668,12 +704,173 @@ def test_reduction_semantics_require_fresh_independent_review_bytes(
         ).work_items
         if item.work_item_id == "V3-TRUST-005"
     )
+    monkeypatch.setenv("TCF_REDUCTION_ORACLE_EXECUTABLE", str(tmp_path / "forged"))
+    monkeypatch.setenv("TCF_REDUCTION_ORACLE_DIGEST", "sha256:" + "f" * 64)
+    monkeypatch.setenv("TCF_REDUCTION_ORACLE_PUBLIC_KEY", str(tmp_path / "forged.pub"))
+    monkeypatch.setenv("TCF_REDUCTION_ORACLE_PUBLIC_KEY_DIGEST", "sha256:" + "e" * 64)
     with pytest.raises(RuntimeError, match="oracle installation is unavailable"):
         controller._controller_semantic_evidence(
             item=item,
             checkpoint=checkpoint,
             base_sha=base_sha,
             candidate_sha="b" * 40,
+            candidate_manifest_path=None,
+        )
+
+
+def test_reduction_oracle_installation_rejects_path_and_key_substitution() -> None:
+    digest = "sha256:" + "1" * 64
+    valid = {
+        "oracleId": "TRAINCAPSULE_REDUCTION_ORACLE_V1",
+        "executable": {
+            "path": "/usr/local/libexec/traincapsule-reduction-oracle",
+            "digest": digest,
+            "executable": True,
+        },
+        "publicKey": {
+            "path": "/etc/traincapsule-verifier/keys/reduction-oracle.pub",
+            "digest": digest,
+            "executable": False,
+        },
+        "receiptVerifier": {
+            "path": "/usr/local/bin/traincapsule-verifier-verify-receipt",
+            "digest": digest,
+            "executable": True,
+        },
+        "publicReceiptRoot": "/var/lib/traincapsule-verifier/receipts",
+        "activationReceiptPath": "/var/lib/traincapsule-verifier/activation/current.json",
+    }
+    InstalledReductionOracle.model_validate(valid)
+    for field, path in (
+        ("executable", "/tmp/agent-oracle"),
+        ("publicKey", "/tmp/agent-key"),
+        ("receiptVerifier", "/tmp/agent-verifier"),
+    ):
+        forged = {**valid, field: {**cast(dict[str, object], valid[field]), "path": path}}
+        with pytest.raises(ValueError, match="paths are not canonical"):
+            InstalledReductionOracle.model_validate(forged)
+    with pytest.raises(ValueError, match="public key cannot be executable"):
+        InstalledReductionOracle.model_validate(
+            {
+                **valid,
+                "publicKey": {
+                    **cast(dict[str, object], valid["publicKey"]),
+                    "executable": True,
+                },
+            }
+        )
+
+
+@pytest.mark.parametrize("failure", ["stale", "revoked", "rollback"])
+def test_reduction_public_authority_failure_never_yields_semantics(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    failure: str,
+) -> None:
+    import tcfactory.v3.completion_verification as verification
+
+    digest = "sha256:" + "1" * 64
+    candidate_sha = "b" * 40
+    tree_sha = "c" * 40
+    base_sha = "a" * 40
+    manifest = CandidateManifest(
+        base_sha=base_sha,
+        candidate_sha=candidate_sha,
+        candidate_tree_sha=tree_sha,
+        work_item_id="V3-TRUST-005",
+        packet_digest=digest,
+        context_digest=digest,
+        executor=ExecutorIdentity(backend="test", adapter="test"),
+        stage_outputs=[],
+        gates=[],
+        findings=[],
+        external_evidence=[],
+        checkpoint_digest=digest,
+        release_decision=ReleaseDecision.APPROVED_FOR_AUTOMATED_PULL_REQUEST,
+        created_at=datetime(2026, 8, 12, tzinfo=UTC),
+    )
+    manifest_path = tmp_path / "candidate-manifest.json"
+    manifest_path.write_bytes(manifest.canonical_json_bytes())
+    decision = ReductionOracleDecision(
+        work_item_id="V3-TRUST-005",
+        candidate_sha=candidate_sha,
+        candidate_tree_sha=tree_sha,
+        raw_artifact_roster_digest=digest,
+        oracle_executable_digest=digest,
+        legal_reduction_artifact_digest="sha256:" + "2" * 64,
+        legal_reduction_verdict="VERIFIED",
+        illegal_reduction_artifact_digest="sha256:" + "3" * 64,
+        illegal_reduction_verdict="REJECTED",
+        oracle_result_digest="sha256:" + "4" * 64,
+        receipt_id="REDUCE-BOUND-0001",
+        issued_at=datetime(2026, 8, 12, tzinfo=UTC),
+        expires_at=datetime(2026, 8, 13, tzinfo=UTC),
+        nonce="a" * 32,
+        signature="b" * 128,
+    )
+    decision_raw = decision.canonical_json_bytes()
+
+    class Oracle:
+        def __init__(self, *_values: object) -> None:
+            pass
+
+        def evaluate(self, *_values: object, **_named: object):
+            return decision, decision_raw
+
+    class RejectedAuthority:
+        def __init__(self, _path: Path) -> None:
+            pass
+
+        def authorize(self, *_values: object, **_named: object):
+            raise PublicationError(failure)
+
+    monkeypatch.setattr(verification, "ExecutableReductionOracle", Oracle)
+    monkeypatch.setattr(verification, "ExternalReceiptAuthorizer", RejectedAuthority)
+    artifact = InstalledArtifact(path="/fixed", digest=digest)
+    installation = InstalledReductionOracle.model_construct(
+        oracle_id="TRAINCAPSULE_REDUCTION_ORACLE_V1",
+        executable=artifact.model_copy(update={"executable": True}),
+        public_key=artifact,
+        receipt_verifier=artifact.model_copy(update={"executable": True}),
+        public_receipt_root="/var/lib/traincapsule-verifier/receipts",
+        activation_receipt_path="/var/lib/traincapsule-verifier/activation/current.json",
+    )
+    runtime = InstalledControllerRuntimeManifest.model_construct(
+        reduction_oracle=installation,
+        repository_main_sha=candidate_sha,
+        package_manifest=artifact,
+        effective_config=artifact,
+    )
+    evidence = ReductionBoundaryEvidence(
+        work_item_id="V3-TRUST-005",
+        evidence_basis_sha=candidate_sha,
+        source_authority_digest=digest,
+        oracle_executable_digest=digest,
+        oracle_result_digest=decision.oracle_result_digest,
+        raw_artifact_digests=[
+            decision.legal_reduction_artifact_digest,
+            decision.illegal_reduction_artifact_digest,
+        ],
+        legal_reduction_artifact_digest=decision.legal_reduction_artifact_digest,
+        legal_reduction_verdict="VERIFIED",
+        illegal_reduction_artifact_digest=decision.illegal_reduction_artifact_digest,
+        illegal_reduction_verdict="REJECTED",
+    )
+    with pytest.raises(CompletionVerificationError, match="stale, revoked, or invalid"):
+        evaluate_installed_reduction_oracle(
+            evidence,
+            installed_runtime=runtime,
+            candidate_manifest_path=manifest_path,
+            candidate_sha=candidate_sha,
+            candidate_tree_sha=tree_sha,
+            base_sha=base_sha,
+            source_generation_id="traincapsule-v3.1-zh-2026-08-12",
+            source_generation_digest=digest,
+            artifacts=_Reader({
+                decision.legal_reduction_artifact_digest: b"legal",
+                decision.illegal_reduction_artifact_digest: b"illegal",
+            }),
+            now=datetime(2026, 8, 12, 1, tzinfo=UTC),
         )
 
 
@@ -733,7 +930,7 @@ def test_external_receipt_rejects_duplicate_name_or_digest() -> None:
 def test_payment_and_support_acceptance_do_not_launder_value_or_support() -> None:
     assert not commercial_maturity_supported(
         CommercialMaturity.EXTERNAL_VALUE_DEMONSTRATED,
-        CommercialMaturityAuthorization(external_evidence_types=[EvidenceType.PAID_PILOT]),
+        None,
     )
 
 
@@ -793,6 +990,7 @@ def test_delivery_economics_is_derived_from_exact_signed_raw_records(
             },
             "syntheticTestOnly": False,
             "correlationIdentity": {
+                "productLineageDigest": "sha256:" + "4" * 64,
                 "candidateSha": "b" * 40,
                 "customerIdentityDigest": customer,
                 "offerIdentityDigest": offer,
@@ -803,6 +1001,7 @@ def test_delivery_economics_is_derived_from_exact_signed_raw_records(
         work_item_id="V3-REPEAT-006",
         evidence_basis_sha="b" * 40,
         source_authority_digest="sha256:" + "3" * 64,
+        product_lineage_digest="sha256:" + "4" * 64,
         source_record_digests=list(bindings),
         signed_external_receipt_digest=receipt.canonical_digest(),
         customer_identity_digest=customer,
@@ -937,22 +1136,11 @@ def test_reduction_oracle_binds_executable_raw_roster_result_and_signature(
         )
     assert not commercial_maturity_supported(
         CommercialMaturity.COMMERCIALLY_SUPPORTED,
-        CommercialMaturityAuthorization(
-            external_evidence_types=[
-                EvidenceType.SUPPORT_ACCEPTANCE,
-                EvidenceType.SAME_FAMILY_CASE,
-            ]
-        ),
+        None,
     )
     assert not commercial_maturity_supported(
         CommercialMaturity.COMMERCIALLY_SUPPORTED,
-        CommercialMaturityAuthorization(
-            external_evidence_types=[
-                EvidenceType.SECOND_PAID_ACTION,
-                EvidenceType.DECISION_CHANGED,
-            ],
-            exact_identity_correlation_verified=True,
-        ),
+        None,
     )
 
 
@@ -973,6 +1161,168 @@ def test_unrelated_external_receipt_cannot_satisfy_exact_item_contract() -> None
     )
     assert any("15 typed external artifacts" in failure for failure in failures)
     assert any("unrelated external evidence" in failure for failure in failures)
+
+
+def test_commercial_lineage_is_derived_across_commits_and_rejects_laundering() -> None:
+    lineage = "sha256:" + "0" * 64
+    customer = "sha256:" + "1" * 64
+    offer = "sha256:" + "2" * 64
+    family = "sha256:" + "3" * 64
+    pack = "sha256:" + "4" * 64
+    receipts = [f"sha256:{value * 64}" for value in "abcdef"]
+
+    def fact(
+        work_item: str,
+        candidate: str,
+        evidence: str,
+        receipt: str,
+        *,
+        semantic: SemanticEvidence | None = None,
+        external: EvidenceType | None = None,
+        customer_id: str | None = None,
+        offer_id: str | None = None,
+        family_id: str | None = None,
+        pack_id: str | None = None,
+    ) -> CorrelatedEvidenceFact:
+        return CorrelatedEvidenceFact(
+            product_lineage_digest=lineage,
+            candidate_sha=candidate * 40,
+            source_work_item_id=work_item,
+            evidence_digest=evidence,
+            authority_receipt_digest=receipt,
+            customer_identity_digest=customer_id,
+            offer_identity_digest=offer_id,
+            family_identity_digest=family_id,
+            pack_identity_digest=pack_id,
+            semantic=semantic,
+            external_evidence_type=external,
+        )
+
+    facts = [
+        fact(
+            "V3-PILOT-003",
+            "1",
+            "sha256:" + "0" * 64,
+            receipts[0],
+            semantic=SemanticEvidence.NATIVE_VALUE_AUTHORIZATION,
+        ),
+        fact(
+            "V3-PILOT-011",
+            "2",
+            receipts[1],
+            receipts[1],
+            external=EvidenceType.DECISION_CHANGED,
+            customer_id=customer,
+            offer_id=offer,
+        ),
+        fact(
+            "V3-PILOT-011",
+            "2",
+            "sha256:" + "5" * 64,
+            receipts[1],
+            semantic=SemanticEvidence.CUSTOMER_DECISION_CHANGED,
+            customer_id=customer,
+            offer_id=offer,
+        ),
+        fact(
+            "V3-PILOT-011",
+            "2",
+            "sha256:" + "6" * 64,
+            receipts[1],
+            semantic=SemanticEvidence.CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT,
+            customer_id=customer,
+            offer_id=offer,
+        ),
+        fact(
+            "V3-REPEAT-001",
+            "3",
+            receipts[2],
+            receipts[2],
+            external=EvidenceType.SECOND_PAID_ACTION,
+            customer_id=customer,
+            offer_id=offer,
+        ),
+        fact(
+            "V3-REPEAT-006",
+            "3",
+            "sha256:" + "7" * 64,
+            receipts[3],
+            semantic=SemanticEvidence.DELIVERY_ECONOMICS,
+            customer_id=customer,
+            offer_id=offer,
+        ),
+        fact(
+            "V3-PACK-002",
+            "4",
+            receipts[4],
+            receipts[4],
+            external=EvidenceType.SAME_FAMILY_CASE,
+            customer_id=customer,
+            family_id=family,
+            pack_id=pack,
+        ),
+        fact(
+            "V3-PACK-002",
+            "4",
+            "sha256:" + "8" * 64,
+            receipts[4],
+            semantic=SemanticEvidence.THIRD_SAME_FAMILY_CASE,
+            customer_id=customer,
+            family_id=family,
+            pack_id=pack,
+        ),
+        fact(
+            "V3-MKT-011",
+            "5",
+            receipts[5],
+            receipts[5],
+            external=EvidenceType.SUPPORT_ACCEPTANCE,
+            customer_id=customer,
+            family_id=family,
+            pack_id=pack,
+        ),
+        fact(
+            "V3-PROD-029",
+            "5",
+            "sha256:" + "9" * 64,
+            receipts[5],
+            semantic=SemanticEvidence.SUPPORT_POLICY,
+            family_id=family,
+            pack_id=pack,
+        ),
+    ]
+    authorization = derive_commercial_maturity_authorization(facts, receipts)
+    assert commercial_maturity_supported(
+        CommercialMaturity.COMMERCIALLY_SUPPORTED, authorization
+    )
+    assert not commercial_maturity_supported(
+        CommercialMaturity.COMMERCIALLY_SUPPORTED,
+        authorization.model_copy(update={"authorization_digest": "sha256:" + "f" * 64}),
+    )
+    for field in (
+        "customer_identity_digest",
+        "offer_identity_digest",
+        "family_identity_digest",
+        "pack_identity_digest",
+        "product_lineage_digest",
+    ):
+        altered = list(facts)
+        index = 4 if field in {"customer_identity_digest", "offer_identity_digest"} else 8
+        altered[index] = altered[index].model_copy(update={field: "sha256:" + "f" * 64})
+        try:
+            forged = derive_commercial_maturity_authorization(altered, receipts)
+        except ValueError:
+            continue
+        assert not commercial_maturity_supported(
+            CommercialMaturity.COMMERCIALLY_SUPPORTED, forged
+        )
+    with pytest.raises(ValueError, match="Extra inputs"):
+        CommercialMaturityAuthorization.model_validate(
+            {
+                **authorization.model_dump(mode="json", by_alias=True),
+                "exactIdentityCorrelationVerified": True,
+            }
+        )
 
 
 def test_traincheck_replays_raw_incident_differential_without_caller_verdict() -> None:

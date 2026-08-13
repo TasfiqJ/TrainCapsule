@@ -15,6 +15,11 @@ from pathlib import Path
 from .base import V3Model
 from .configuration import FactoryV3Config, load_factory_v3
 
+CONTROLLER_GIT_IDENTITY = {
+    "user.name": "TrainCapsule Controller",
+    "user.email": "traincapsule-controller@localhost.invalid",
+}
+
 
 class V3RuntimePaths(V3Model):
     state_root: Path
@@ -192,10 +197,7 @@ def ensure_v3_mutable_runtime(
                 if clone.returncode != 0:
                     raise RuntimeError("could not materialize isolated mutable Git anchor")
                 _git(stage, "remote", "remove", "origin")
-                for key in ("user.name", "user.email"):
-                    identity = _git(immutable, "config", key)
-                    if not identity:
-                        raise RuntimeError("installed repository has no bound Git author identity")
+                for key, identity in CONTROLLER_GIT_IDENTITY.items():
                     _git(stage, "config", key, identity)
                 shutil.rmtree(stage / "hooks")
                 os.replace(stage, paths.git_root)

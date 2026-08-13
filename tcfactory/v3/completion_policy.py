@@ -8,13 +8,14 @@ ad hoc at a release or completion boundary.
 
 from __future__ import annotations
 
+import json
 from enum import StrEnum
 from pathlib import Path
 
 from pydantic import Field, model_validator
 
 from tcfactory.util import sha256_file
-from tcfactory.v3.base import DIGEST_PATTERN, V3Model
+from tcfactory.v3.base import DIGEST_PATTERN, V3Model, sha256_digest
 from tcfactory.v3.enums import EvidenceType
 from tcfactory.yamlutil import load_yaml
 
@@ -53,7 +54,7 @@ class EvidenceGrade(StrEnum):
 
 
 class CorrelationField(StrEnum):
-    CANDIDATE = "CANDIDATE"
+    PRODUCT_LINEAGE = "PRODUCT_LINEAGE"
     CUSTOMER = "CUSTOMER"
     FAMILY = "FAMILY"
     OFFER = "OFFER"
@@ -63,7 +64,11 @@ class CorrelationField(StrEnum):
 class CorrelatedEvidenceFact(V3Model):
     """One controller-verified fact and the identities to which it applies."""
 
+    product_lineage_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     candidate_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    source_work_item_id: str = Field(pattern=r"^V3-[A-Z]+-[0-9]{3}$")
+    evidence_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    authority_receipt_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     customer_identity_digest: str | None = Field(default=None, pattern=DIGEST_PATTERN.pattern)
     family_identity_digest: str | None = Field(default=None, pattern=DIGEST_PATTERN.pattern)
     offer_identity_digest: str | None = Field(default=None, pattern=DIGEST_PATTERN.pattern)
@@ -79,12 +84,24 @@ class CorrelatedEvidenceFact(V3Model):
 
     def identity(self, field: CorrelationField) -> str | None:
         return {
-            CorrelationField.CANDIDATE: self.candidate_sha,
+            CorrelationField.PRODUCT_LINEAGE: self.product_lineage_digest,
             CorrelationField.CUSTOMER: self.customer_identity_digest,
             CorrelationField.FAMILY: self.family_identity_digest,
             CorrelationField.OFFER: self.offer_identity_digest,
             CorrelationField.PACK: self.pack_identity_digest,
         }[field]
+
+
+def product_lineage_digest(source_authority_digest: str) -> str:
+    """Return a product identity that remains stable across candidate commits."""
+
+    payload = {
+        "productId": "TRAINCAPSULE",
+        "schemaVersion": "3.1",
+        "sourceAuthorityDigest": source_authority_digest,
+    }
+    raw = (json.dumps(payload, separators=(",", ":"), sort_keys=True) + "\n").encode()
+    return sha256_digest(raw)
 
 
 class MilestoneExitCriterionContract(V3Model):
@@ -340,6 +357,8 @@ def load_completion_evidence_policy(repo_root: Path) -> CompletionEvidencePolicy
 __all__ = [
     "CompletionEvidenceObservation",
     "CompletionEvidencePolicy",
+    "CorrelatedEvidenceFact",
+    "CorrelationField",
     "EvidenceAuthority",
     "EvidenceGrade",
     "MilestoneExitCriterionContract",
@@ -349,4 +368,5 @@ __all__ = [
     "evaluate_work_item_evidence_contract",
     "evaluate_milestone_exit_criteria",
     "load_completion_evidence_policy",
+    "product_lineage_digest",
 ]

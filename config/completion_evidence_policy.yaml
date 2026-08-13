@@ -2062,7 +2062,7 @@ milestones:
       CUSTOMER_DECISION_CHANGED: 1
     machinePolicyRequired: false
     requiredCorrelationFields:
-    - CANDIDATE
+    - PRODUCT_LINEAGE
     - CUSTOMER
     - OFFER
   - criterionId: M4_PAID_PILOT-EXIT-02
@@ -2088,7 +2088,7 @@ milestones:
       CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT: 1
     machinePolicyRequired: false
     requiredCorrelationFields:
-    - CANDIDATE
+    - PRODUCT_LINEAGE
     - CUSTOMER
     - OFFER
   - criterionId: M4_PAID_PILOT-EXIT-04
@@ -2149,7 +2149,7 @@ milestones:
       DELIVERY_ECONOMICS: 1
     machinePolicyRequired: false
     requiredCorrelationFields:
-    - CANDIDATE
+    - PRODUCT_LINEAGE
     - CUSTOMER
     - OFFER
   - criterionId: M5_PAID_REPEAT-EXIT-04
@@ -2221,7 +2221,7 @@ milestones:
       THIRD_SAME_FAMILY_CASE: 1
     machinePolicyRequired: false
     requiredCorrelationFields:
-    - CANDIDATE
+    - PRODUCT_LINEAGE
     - CUSTOMER
     - FAMILY
     - PACK
@@ -2234,7 +2234,7 @@ milestones:
       THIRD_SAME_FAMILY_CASE: 1
     machinePolicyRequired: false
     requiredCorrelationFields:
-    - CANDIDATE
+    - PRODUCT_LINEAGE
     - CUSTOMER
     - FAMILY
     - PACK
@@ -2258,6 +2258,7 @@ milestones:
       SUPPORT_POLICY: 1
     machinePolicyRequired: false
     requiredCorrelationFields:
+    - PRODUCT_LINEAGE
     - PACK
   - criterionId: M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-07
     criterionDigest: sha256:44db7d08039173d6cdb627319548a55ed584ecda862a2b4a5a69f84000f3420a

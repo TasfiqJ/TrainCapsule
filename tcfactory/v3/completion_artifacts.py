@@ -20,7 +20,9 @@ class SupportPolicyEvidence(V3Model):
     work_item_id: Literal["V3-PROD-029"]
     evidence_basis_sha: str = Field(pattern=SHA_PATTERN.pattern)
     source_authority_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    product_lineage_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     pack_id: str = Field(pattern=r"^[A-Z0-9][A-Z0-9._:-]{2,127}$")
+    family_identity_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     pack_identity_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     supported_versions: list[str] = Field(min_length=1, max_length=64)
     supported_scope: list[str] = Field(min_length=1, max_length=64)
@@ -49,6 +51,7 @@ class DeliveryEconomicsEvidence(V3Model):
     work_item_id: Literal["V3-REPEAT-006"]
     evidence_basis_sha: str = Field(pattern=SHA_PATTERN.pattern)
     source_authority_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    product_lineage_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     source_record_digests: list[str] = Field(min_length=2, max_length=2)
     signed_external_receipt_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     customer_identity_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
@@ -81,6 +84,7 @@ class ThirdSameFamilyCaseEvidence(V3Model):
     work_item_id: Literal["V3-PACK-002"]
     evidence_basis_sha: str = Field(pattern=SHA_PATTERN.pattern)
     source_authority_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    product_lineage_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     customer_identity_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     family_identity_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     case_identity_digests: list[str] = Field(min_length=3, max_length=3)

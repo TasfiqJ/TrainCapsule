@@ -2,7 +2,7 @@
   "$defs": {
     "CorrelationField": {
       "enum": [
-        "CANDIDATE",
+        "PRODUCT_LINEAGE",
         "CUSTOMER",
         "FAMILY",
         "OFFER",

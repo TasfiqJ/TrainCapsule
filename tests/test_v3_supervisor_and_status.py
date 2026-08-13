@@ -137,6 +137,9 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
         lambda **_: "sha256:" + "b" * 64,
     )
     monkeypatch.setattr(
+        "tcfactory.v3.activation.validate_activation_control_state", lambda **_: None
+    )
+    monkeypatch.setattr(
         "tcfactory.supervisor.validate_repository_release_controls",
         lambda **_: {"status": "PASS", "rulesDigest": "sha256:" + "c" * 64},
     )
@@ -188,6 +191,9 @@ def test_startup_reconciles_publication_before_exact_sha_marker(
     monkeypatch.setattr(
         "tcfactory.supervisor.validate_controller_activation",
         lambda **_: "sha256:" + "b" * 64,
+    )
+    monkeypatch.setattr(
+        "tcfactory.v3.activation.validate_activation_control_state", lambda **_: None
     )
     monkeypatch.setattr(
         "tcfactory.supervisor.validate_repository_release_controls",

@@ -17,8 +17,12 @@ from pydantic import Field
 from tcfactory.util import run_command, sanitized_subprocess_env, sha256_file
 
 from .base import DIGEST_PATTERN, SHA_PATTERN, V3Model, sha256_digest
+from .candidate_manifest import CandidateManifest
 from .completion_artifacts import DeliveryEconomicsEvidence, ReductionBoundaryEvidence
+from .contracts_v31 import ActivationMode, ActivationReceiptV31
 from .external_evidence import ExternalEvidenceReceipt
+from .installed_runtime import InstalledControllerRuntimeManifest
+from .publication import ExternalReceiptAuthorizer, PublicationError
 
 
 class CompletionVerificationError(RuntimeError):
@@ -225,6 +229,133 @@ class ExecutableReductionOracle:
         except (ValueError, InvalidSignature) as exc:
             raise CompletionVerificationError("reduction oracle signature is invalid") from exc
         return decision, result.stdout.encode()
+
+
+class AuthorizedReductionDecision(V3Model):
+    decision: ReductionOracleDecision
+    decision_file_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    machine_policy_receipt_id: str
+    machine_policy_receipt_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    activation_receipt_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+
+
+def evaluate_installed_reduction_oracle(
+    evidence: ReductionBoundaryEvidence,
+    *,
+    installed_runtime: InstalledControllerRuntimeManifest,
+    candidate_manifest_path: Path,
+    candidate_sha: str,
+    candidate_tree_sha: str,
+    base_sha: str,
+    source_generation_id: str,
+    source_generation_digest: str,
+    artifacts: ExactArtifactReader,
+    now: datetime,
+) -> tuple[AuthorizedReductionDecision, bytes]:
+    """Execute only the installed oracle and verify its public Phase-3 authority."""
+
+    installation = installed_runtime.reduction_oracle
+    if installation is None:
+        raise CompletionVerificationError("reduction oracle installation is unavailable")
+    try:
+        manifest_raw = candidate_manifest_path.read_bytes()
+        manifest = CandidateManifest.model_validate_json(manifest_raw, strict=True)
+    except (OSError, ValueError) as exc:
+        raise CompletionVerificationError("reduction candidate manifest is unavailable") from exc
+    if manifest_raw != manifest.canonical_json_bytes():
+        raise CompletionVerificationError("reduction candidate manifest is not canonical")
+    manifest_digest = sha256_digest(manifest_raw)
+    if (
+        manifest.work_item_id != evidence.work_item_id
+        or manifest.candidate_sha != candidate_sha
+        or manifest.base_sha != base_sha
+    ):
+        raise CompletionVerificationError("reduction candidate manifest identity mismatch")
+    decision, raw = ExecutableReductionOracle(
+        Path(installation.executable.path),
+        installation.executable.digest,
+        Path(installation.public_key.path),
+        installation.public_key.digest,
+    ).evaluate(
+        evidence,
+        candidate_sha=candidate_sha,
+        candidate_tree_sha=candidate_tree_sha,
+        artifacts=artifacts,
+        now=now,
+    )
+    decision_file_digest = sha256_digest(raw)
+    receipt_path = (
+        Path(installation.public_receipt_root)
+        / "machine-policy"
+        / evidence.work_item_id
+        / f"{candidate_sha}.json"
+    )
+    authority = ExternalReceiptAuthorizer(Path(installation.receipt_verifier.path))
+    try:
+        authorized = authority.authorize(
+            receipt_path,
+            candidate_sha=candidate_sha,
+            candidate_tree_sha=candidate_tree_sha,
+            base_sha=base_sha,
+            work_item_id=evidence.work_item_id,
+            candidate_manifest_digest=manifest_digest,
+        )
+    except (OSError, PublicationError) as exc:
+        raise CompletionVerificationError(
+            "reduction machine-policy receipt is stale, revoked, or invalid"
+        ) from exc
+    receipt = authorized.receipt
+    expected_raw = set(evidence.raw_artifact_digests) | {
+        installation.executable.digest,
+        installation.public_key.digest,
+        decision_file_digest,
+    }
+    if (
+        receipt.source_generation_id != source_generation_id
+        or receipt.source_generation_digest != source_generation_digest
+        or receipt.independent_oracle_ids != [installation.oracle_id]
+        or set(receipt.raw_evidence_artifact_hashes) != expected_raw
+        or set(receipt.allowed_claims)
+        != {"LEGAL_REDUCTION_VERIFIED", "ILLEGAL_REDUCTION_REJECTED"}
+    ):
+        raise CompletionVerificationError(
+            "reduction machine-policy receipt does not bind the exact oracle result"
+        )
+    activation_path = Path(installation.activation_receipt_path)
+    try:
+        authority.verify_activation(
+            activation_path,
+            expected_main_sha=installed_runtime.repository_main_sha,
+            source_generation_id=source_generation_id,
+            source_generation_digest=source_generation_digest,
+            controller_binary_digest=installed_runtime.package_manifest.digest,
+            controller_config_digest=installed_runtime.effective_config.digest,
+        )
+        activation = ActivationReceiptV31.model_validate_json(
+            activation_path.read_bytes(), strict=True
+        )
+    except (OSError, PublicationError, ValueError) as exc:
+        raise CompletionVerificationError(
+            "reduction LIVE activation is stale, revoked, or invalid"
+        ) from exc
+    if (
+        activation.mode is not ActivationMode.LIVE
+        or activation.machine_policy_receipt_id != receipt.receipt_id
+        or activation.machine_policy_receipt_digest != receipt.canonical_digest()
+    ):
+        raise CompletionVerificationError(
+            "reduction LIVE activation does not authorize the exact receipt"
+        )
+    return (
+        AuthorizedReductionDecision(
+            decision=decision,
+            decision_file_digest=decision_file_digest,
+            machine_policy_receipt_id=receipt.receipt_id,
+            machine_policy_receipt_digest=receipt.canonical_digest(),
+            activation_receipt_digest=activation.canonical_digest(),
+        ),
+        raw,
+    )
 
 
 class DeliveryMeasurement(V3Model):

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import subprocess
 from pathlib import Path
 from typing import cast
 
@@ -127,6 +128,12 @@ def test_mutable_git_anchor_accepts_only_exact_private_empty_installer_leaf(
     paths.git_root.mkdir(parents=True, mode=0o700)
     ensure_v3_mutable_runtime(ROOT, paths)
     assert (paths.git_root / "HEAD").is_file()
+    assert subprocess.run(
+        ["git", "-C", str(paths.git_root), "config", "user.name"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip() == "TrainCapsule Controller"
 
     substituted = tmp_path / "substituted"
     monkeypatch.setenv("TCF_RUNTIME_ROOT", str(substituted))

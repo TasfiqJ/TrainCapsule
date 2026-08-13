@@ -20,6 +20,32 @@ class InstalledArtifact(V3Model):
     executable: bool = False
 
 
+class InstalledReductionOracle(V3Model):
+    oracle_id: Literal["TRAINCAPSULE_REDUCTION_ORACLE_V1"]
+    executable: InstalledArtifact
+    public_key: InstalledArtifact
+    receipt_verifier: InstalledArtifact
+    public_receipt_root: Literal["/var/lib/traincapsule-verifier/receipts"]
+    activation_receipt_path: Literal[
+        "/var/lib/traincapsule-verifier/activation/current.json"
+    ]
+
+    @model_validator(mode="after")
+    def exact_installation(self) -> InstalledReductionOracle:
+        if (
+            self.executable.path != "/usr/local/libexec/traincapsule-reduction-oracle"
+            or self.public_key.path != "/etc/traincapsule-verifier/keys/reduction-oracle.pub"
+            or self.receipt_verifier.path
+            != "/usr/local/bin/traincapsule-verifier-verify-receipt"
+        ):
+            raise ValueError("reduction oracle installation paths are not canonical")
+        if not self.executable.executable or not self.receipt_verifier.executable:
+            raise ValueError("reduction oracle and public verifier must be executable")
+        if self.public_key.executable:
+            raise ValueError("reduction oracle public key cannot be executable")
+        return self
+
+
 class InstalledControllerRuntimeManifest(V3Model):
     schema_version: Literal["3.1"] = "3.1"
     manifest_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
@@ -35,6 +61,7 @@ class InstalledControllerRuntimeManifest(V3Model):
     environment_file: InstalledArtifact
     effective_config: InstalledArtifact
     repository_snapshot_manifest: InstalledArtifact
+    reduction_oracle: InstalledReductionOracle | None = None
     repository_main_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
     repository_tree_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
     mutable_git_root: Literal["/var/lib/traincapsule-runtime/git"]
@@ -98,7 +125,7 @@ def load_installed_controller_runtime(
         raise RuntimeError("installed controller runtime manifest is not canonical")
     if manifest.manifest_digest != manifest.computed_manifest_digest():
         raise RuntimeError("installed controller runtime manifest digest mismatch")
-    for artifact in (
+    artifacts = [
         manifest.python_runtime,
         manifest.package_manifest,
         manifest.dependency_lock,
@@ -106,7 +133,16 @@ def load_installed_controller_runtime(
         manifest.environment_file,
         manifest.effective_config,
         manifest.repository_snapshot_manifest,
-    ):
+    ]
+    if manifest.reduction_oracle is not None:
+        artifacts.extend(
+            [
+                manifest.reduction_oracle.executable,
+                manifest.reduction_oracle.public_key,
+                manifest.reduction_oracle.receipt_verifier,
+            ]
+        )
+    for artifact in artifacts:
         artifact_path = Path(artifact.path)
         artifact_observed = artifact_path.lstat()
         if (
@@ -162,3 +198,11 @@ def load_installed_controller_runtime(
     if os.path.commonpath((str(resolved), manifest.repository_root)) == manifest.repository_root:
         raise RuntimeError("installed controller manifest cannot resolve inside repository")
     return manifest, raw
+
+
+__all__ = [
+    "InstalledArtifact",
+    "InstalledControllerRuntimeManifest",
+    "InstalledReductionOracle",
+    "load_installed_controller_runtime",
+]

@@ -11,7 +11,6 @@ from tcfactory.v3.base import V3Model
 from tcfactory.v3.enums import (
     CommercialMaturity,
     Disposition,
-    EvidenceType,
     Lane,
     OwnerType,
     RiskTier,
@@ -19,11 +18,7 @@ from tcfactory.v3.enums import (
     WorkStatus,
 )
 from tcfactory.v3.external_evidence import TrustedEvidenceRecord
-from tcfactory.v3.maturity import (
-    CommercialMaturityAuthorization,
-    MaturityTarget,
-    commercial_maturity_supported,
-)
+from tcfactory.v3.maturity import MaturityTarget, commercial_maturity_supported
 from tcfactory.v3.retry_policy import RetryPolicy
 
 ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
@@ -271,21 +266,16 @@ class WorkItemCollection(V3Model):
         for item in self.work_items:
             if item.status is not WorkStatus.COMPLETED:
                 continue
-            trusted_types: list[EvidenceType] = []
             for receipt_id in item.external_evidence_refs:
                 record = receipts.get(receipt_id)
                 if record is None:
                     raise ValueError(
                         f"completed work {item.work_item_id} has unknown receipt {receipt_id}"
                     )
-                trusted_types.append(record.require_commercial_trust().evidence_type)
+                record.require_commercial_trust()
             if not commercial_maturity_supported(
                 item.maturity_target.commercial,
-                CommercialMaturityAuthorization(
-                    external_evidence_types=trusted_types,
-                    semantic_evidence=[],
-                    exact_identity_correlation_verified=False,
-                ),
+                None,
             ):
                 raise ValueError(
                     f"commercial maturity for {item.work_item_id} exceeds trusted evidence"

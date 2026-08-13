@@ -167,7 +167,7 @@ def test_m0_through_m6_are_bounded_and_external_milestones_remain_waiting() -> N
 
 
 def test_every_generated_schema_rejects_unknown_top_level_fields() -> None:
-    assert len(SCHEMAS) == 60
+    assert len(SCHEMAS) == len(set(SCHEMAS)) == 63
     assert {
         "private-gate-receipt.schema.json",
         "milestone-runtime-state.schema.json",

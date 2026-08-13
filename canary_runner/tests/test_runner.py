@@ -345,3 +345,63 @@ def test_github_live_probe_forces_read_only_method_before_dispatch(
         "--method",
         "GET",
     ]
+
+
+def test_claude_live_probe_uses_and_cleans_disposable_workspace_output(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = tmp_path / "repo"
+    artifacts = tmp_path / "artifacts"
+    runtime = tmp_path / "runtime"
+    for path in (repo, artifacts, runtime):
+        path.mkdir()
+    executable = tmp_path / "claude"
+    executable.write_bytes(b"claude")
+    token = tmp_path / "token"
+    token.write_text("test-token", encoding="utf-8")
+    token.chmod(0o600)
+    workspace_output = repo / f".traincapsule-canary-{RUN.lower()}.txt"
+
+    def policy() -> Any:
+        return SimpleNamespace(
+            claude=SimpleNamespace(
+                executable=str(executable),
+                executable_digest=sha256_digest(executable.read_bytes()),
+                token_file=str(token),
+            )
+        )
+
+    def trust(_path: Path, _expected_digest: str) -> None:
+        return None
+
+    def run(
+        command: list[str], **_kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        if command[0] == str(executable):
+            workspace_output.write_text(
+                "TRAINCAPSULE_CLAUDE_CANARY_OK\n", encoding="utf-8"
+            )
+            return subprocess.CompletedProcess(command, 0, "{}", "")
+        if command[-1] == "HEAD":
+            return subprocess.CompletedProcess(command, 0, SHA + "\n", "")
+        if command[-1].endswith("^{tree}"):
+            return subprocess.CompletedProcess(command, 0, TREE + "\n", "")
+        return subprocess.CompletedProcess(command, 0, "", "")
+
+    monkeypatch.setattr(external_probes, "_load_policy", policy)
+    monkeypatch.setattr(external_probes, "_trusted_executable", trust)
+    monkeypatch.setattr(subprocess, "run", run)
+    args = argparse.Namespace(
+        repo=repo,
+        runtime_root=runtime,
+        artifact_root=artifacts,
+        run_id=RUN,
+        main_sha=SHA,
+        tree_sha=TREE,
+    )
+    result = external_probes._claude(args)  # pyright: ignore[reportPrivateUsage]
+    assert result["proven"] is True
+    assert not workspace_output.exists()
+    assert (artifacts / "real-claude-mechanical.txt").read_text() == (
+        "TRAINCAPSULE_CLAUDE_CANARY_OK\n"
+    )

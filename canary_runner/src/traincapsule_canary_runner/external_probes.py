@@ -91,10 +91,13 @@ def _claude(args: argparse.Namespace) -> dict[str, object]:
     token_file = Path(config.token_file)
     _trusted_executable(executable, config.executable_digest)
     output = args.artifact_root / "real-claude-mechanical.txt"
+    workspace_output = args.repo / f".traincapsule-canary-{args.run_id.lower()}.txt"
+    if workspace_output.exists() or workspace_output.is_symlink():
+        raise ValueError("Claude canary workspace output already exists")
     prompt = (
         "Mechanical canary only. Create exactly the file "
-        f"{output} containing one line: TRAINCAPSULE_CLAUDE_CANARY_OK. "
-        "Do not change any repository file and do not use network tools."
+        f"{workspace_output} containing one line: TRAINCAPSULE_CLAUDE_CANARY_OK. "
+        "Do not change any other repository file and do not use network tools."
     )
     env = {
         "HOME": str(args.artifact_root / "claude-home"),
@@ -132,6 +135,14 @@ def _claude(args: argparse.Namespace) -> dict[str, object]:
         text=True,
         timeout=900,
     )
+    artifact_bytes: bytes | None = None
+    if workspace_output.exists() and not workspace_output.is_symlink():
+        workspace_stat = workspace_output.stat(follow_symlinks=False)
+        if stat.S_ISREG(workspace_stat.st_mode) and workspace_stat.st_nlink == 1:
+            artifact_bytes = workspace_output.read_bytes()
+        workspace_output.unlink()
+    if artifact_bytes == b"TRAINCAPSULE_CLAUDE_CANARY_OK\n":
+        output.write_bytes(artifact_bytes)
     after = subprocess.run(
         ["git", "status", "--porcelain"],
         cwd=args.repo,
@@ -155,8 +166,8 @@ def _claude(args: argparse.Namespace) -> dict[str, object]:
     ).stdout.strip()
     proven = (
         observed.returncode == 0
+        and artifact_bytes == b"TRAINCAPSULE_CLAUDE_CANARY_OK\n"
         and output.is_file()
-        and output.read_text() == "TRAINCAPSULE_CLAUDE_CANARY_OK\n"
         and before == after
         and after_sha == args.main_sha
         and after_tree == args.tree_sha

@@ -10,6 +10,7 @@ from test_independent_verifier import (
 )
 from traincapsule_verifier.canonical import canonical_json_bytes, sha256_digest
 from traincapsule_verifier.filesystem import open_trusted_root
+from traincapsule_verifier.models import TrustedEvidenceManifest
 from traincapsule_verifier.request_broker import RequestSubmissionError, RootRequestBroker
 
 from tcfactory.v3.verifier_submission import (
@@ -171,3 +172,6 @@ def test_controller_profile_builder_emits_strict_request_and_submits_atomically(
         ".request.json", ".evidence/evidence.json"
     )
     assert evidence_path.is_file()
+    evidence_raw = evidence_path.read_bytes()
+    evidence = TrustedEvidenceManifest.model_validate_json(evidence_raw, strict=True)
+    assert evidence_raw == canonical_json_bytes(evidence)

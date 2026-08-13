@@ -300,7 +300,12 @@ def create_and_submit_verification_request(
         "privateGateRunnerDigest": profile["privateGateRunnerDigest"],
         "oracles": oracle_observations,
         "rawArtifacts": raw_artifacts,
-        "observedAt": (now or datetime.now(UTC)).isoformat(),
+        "observedAt": (
+            (now or datetime.now(UTC))
+            .astimezone(UTC)
+            .isoformat()
+            .replace("+00:00", "Z")
+        ),
     }
     atomic_write_bytes(evidence_root / "evidence.json", _canonical_json(evidence))
     (evidence_root / "evidence.json").chmod(0o600)

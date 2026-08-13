@@ -340,6 +340,13 @@ def coordinate_activation_policy_request(
         / "activation-policy-evidence"
         / evidence_identity.removeprefix("sha256:")
     )
+    suite_root = suite_path.parent.resolve(strict=True)
+    result_evidence: dict[str, Path] = {}
+    for canary_id, relative in suite.result_artifacts.items():
+        result_path = (suite_root / relative).resolve(strict=True)
+        if not result_path.is_relative_to(suite_root):
+            raise ValueError("canary result evidence escapes its suite root")
+        result_evidence[f"CANARY-RESULT:{canary_id}"] = result_path
     return create_and_submit_verification_request(
         profile_path=profile_path,
         work_item_id=ACTIVATION_POLICY_WORK_ITEM,
@@ -355,6 +362,7 @@ def coordinate_activation_policy_request(
         candidate_manifest_digest=suite.factory_config_digest,
         checkpoint_digest=runtime_digest,
         gate_evidence={"CANDIDATE-MANIFEST": suite_path},
+        raw_evidence=result_evidence,
         evidence_root=evidence_root,
         controller_outbox=controller_outbox,
         now=suite.completed_at,

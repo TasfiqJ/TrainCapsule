@@ -457,7 +457,11 @@ def test_activation_policy_request_uses_independent_verifier_bridge(
     assert request["workItemId"] == "V3-MIG-019"
     assert request["requestedClaims"] == ["ACTIVATION"]
     assert request["publicationScope"] == ["factory/state"]
-    assert (outbox / f"{request['requestId']}.evidence/evidence.json").is_file()
+    evidence_path = outbox / f"{request['requestId']}.evidence/evidence.json"
+    assert evidence_path.is_file()
+    evidence = json.loads(evidence_path.read_bytes())
+    assert len(evidence["rawArtifacts"]) == 21
+    assert len({item["digest"] for item in evidence["rawArtifacts"].values()}) == 21
     assert (
         activation.coordinate_activation_policy_request(
             repo_root=repo,

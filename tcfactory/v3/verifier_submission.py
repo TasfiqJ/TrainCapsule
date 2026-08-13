@@ -164,6 +164,7 @@ def create_and_submit_verification_request(
     candidate_manifest_digest: str,
     checkpoint_digest: str,
     gate_evidence: Mapping[str, Path],
+    raw_evidence: Mapping[str, Path] | None = None,
     evidence_root: Path,
     controller_outbox: Path = Path("/var/lib/traincapsule-verifier/controller-outbox"),
     now: datetime | None = None,
@@ -226,6 +227,22 @@ def create_and_submit_verification_request(
             "evidenceDigest": digest,
         }
         raw_hashes.append(digest)
+    for index, (label, source) in enumerate(sorted((raw_evidence or {}).items()), 1):
+        if source.is_symlink() or not source.is_file():
+            raise VerifierSubmissionError(f"verification raw evidence is invalid: {label}")
+        data = source.read_bytes()
+        digest = _digest(data)
+        relative = f"raw/evidence-{index:03d}.bin"
+        target = evidence_root / relative
+        atomic_write_bytes(target, data)
+        target.chmod(0o600)
+        raw_artifacts[f"ARTIFACT:RAW:{index:03d}"] = {
+            "path": relative,
+            "digest": digest,
+        }
+        raw_hashes.append(digest)
+    if len(raw_hashes) != len(set(raw_hashes)):
+        raise VerifierSubmissionError("verification evidence digests must be unique")
     oracle_observations: dict[str, object] = {}
     for oracle_id, raw_binding in sorted(cast(dict[str, object], oracles).items()):
         if not isinstance(raw_binding, dict):

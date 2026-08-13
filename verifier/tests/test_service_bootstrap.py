@@ -18,6 +18,13 @@ from traincapsule_verifier.bootstrap import (
 from traincapsule_verifier.canonical import canonical_json_bytes, sha256_digest
 from traincapsule_verifier.filesystem import open_trusted_root
 from traincapsule_verifier.receipt_broker import ReceiptPromotionError, RootReceiptBroker
+from traincapsule_verifier.request_broker import (
+    RequestSubmissionError,
+    RequestSubmissionResult,
+)
+from traincapsule_verifier.request_broker_cli import (
+    _process_names,  # pyright: ignore[reportPrivateUsage]
+)
 
 
 def _prepare_broker(fixture: PublicFixture, tmp_path: Path) -> tuple[Path, Path]:
@@ -29,6 +36,33 @@ def _prepare_broker(fixture: PublicFixture, tmp_path: Path) -> tuple[Path, Path]
         canonical_json_bytes(fixture.machine)
     )
     return outbox, public
+
+
+def test_request_broker_rejection_does_not_block_later_valid_request() -> None:
+    class Broker:
+        def submit(self, request_name: str) -> RequestSubmissionResult:
+            if request_name == "BAD.request.json":
+                raise RequestSubmissionError("rejected")
+            return RequestSubmissionResult(
+                state="SUBMITTED",
+                request_id="REQUEST:GOOD",
+                request_digest="sha256:" + "a" * 64,
+                evidence_digest="sha256:" + "b" * 64,
+                issuer_request_name=request_name,
+                issuer_evidence_name="REQUEST:GOOD.evidence",
+            )
+
+    results, rejected = _process_names(
+        Broker(),
+        ["BAD.request.json", "GOOD.request.json"],
+        tolerate_rejections=True,
+    )
+    assert rejected == 1
+    assert [item.request_id for item in results] == ["REQUEST:GOOD"]
+    with pytest.raises(RequestSubmissionError):
+        _process_names(
+            Broker(), ["BAD.request.json"], tolerate_rejections=False
+        )
 
 
 def test_install_manifest_denies_controller_and_service_cross_authority() -> None:

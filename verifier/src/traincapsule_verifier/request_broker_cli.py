@@ -6,10 +6,15 @@ import os
 import pwd
 import sys
 from pathlib import Path
+from typing import Protocol
 
 from .canonical import canonical_json_bytes
 from .filesystem import open_trusted_root
-from .request_broker import RequestSubmissionError, RootRequestBroker
+from .request_broker import (
+    RequestSubmissionError,
+    RequestSubmissionResult,
+    RootRequestBroker,
+)
 
 STATE_ROOT = Path("/var/lib/traincapsule-verifier")
 CONTROLLER_OUTBOX = STATE_ROOT / "controller-outbox"
@@ -17,6 +22,28 @@ SERVICE_INBOX = STATE_ROOT / "inbox"
 JOURNAL_ROOT = STATE_ROOT / "request-journal"
 CONTROLLER_USER = "traincapsule-controller"
 SERVICE_USER = "traincapsule-verifier"
+
+
+class _RequestSubmitter(Protocol):
+    def submit(self, request_name: str) -> RequestSubmissionResult: ...
+
+
+def _process_names(
+    broker: _RequestSubmitter,
+    names: list[str],
+    *,
+    tolerate_rejections: bool,
+) -> tuple[list[RequestSubmissionResult], int]:
+    results: list[RequestSubmissionResult] = []
+    rejected = 0
+    for name in names:
+        try:
+            results.append(broker.submit(name))
+        except RequestSubmissionError:
+            if not tolerate_rejections:
+                raise
+            rejected += 1
+    return results, rejected
 
 
 def main() -> int:
@@ -64,10 +91,15 @@ def main() -> int:
                     if name.endswith(".request.json")
                 )
             )
-            results = [broker.submit(name) for name in names]
+            results, rejected = _process_names(
+                broker,
+                names,
+                tolerate_rejections=sys.argv[1] == "process-outbox",
+            )
         payload = {
-            "state": "PROCESSED",
+            "state": "PROCESSED" if rejected == 0 else "PROCESSED_WITH_REJECTIONS",
             "count": len(results),
+            "rejected": rejected,
             "submissions": [
                 result.model_dump(mode="json", by_alias=True) for result in results
             ],

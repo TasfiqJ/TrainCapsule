@@ -142,11 +142,16 @@ def stage_activation_request(
         raise RuntimeError(
             "machine-policy receipt does not authorize the exact activation evidence"
         )
-    runtime_value, controller_raw, config_raw = installed_runtime_loader(
+    installed_runtime, controller_raw, config_raw = installed_runtime_loader(
         installed_runtime_manifest_path
     )
-    installed_runtime = runtime_value
     suite_digest = sha256_digest(suite_raw)
+    controller_digest = sha256_digest(controller_raw)
+    config_digest = sha256_digest(config_raw)
+    if controller_raw != installed_runtime.canonical_json_bytes():
+        raise RuntimeError("installed runtime manifest bytes are not canonical")
+    if config_digest != installed_runtime.effective_config.digest:
+        raise RuntimeError("installed runtime config digest mismatch")
     identity = sha256_digest(
         b"\0".join(
             (
@@ -154,8 +159,8 @@ def stage_activation_request(
                 tree_sha.encode(),
                 suite_digest.encode(),
                 receipt.canonical_digest().encode(),
-                installed_runtime.manifest_digest.encode(),
-                installed_runtime.effective_config.digest.encode(),
+                controller_digest.encode(),
+                config_digest.encode(),
             )
         )
     )
@@ -168,8 +173,8 @@ def stage_activation_request(
         machine_environment_digest=suite_digest,
         source_generation_id=suite.source_generation_id,
         source_generation_digest=suite.source_generation_digest,
-        controller_binary_digest=installed_runtime.manifest_digest,
-        controller_config_digest=installed_runtime.effective_config.digest,
+        controller_binary_digest=controller_digest,
+        controller_config_digest=config_digest,
         machine_environment_path="canary-suite.json",
         controller_binary_path="installed-controller-runtime.json",
         controller_config_path="effective-config.yaml",

@@ -42,6 +42,7 @@ from tcfactory.v3.canaries import (
 from tcfactory.v3.contracts_v31 import (
     ActivationMode,
     ActivationReceiptV31,
+    ActivationRequestV31,
     CommercialState,
     DecisionValueDisposition,
     GateResult,
@@ -91,6 +92,7 @@ def test_activation_git_identity_pins_the_exact_trusted_repository(
 
 def _runtime_loader() -> tuple[InstalledControllerRuntimeManifest, RuntimeLoader]:
     artifact = InstalledArtifact(path="/opt/traincapsule-runtime/package.json", digest=DIGEST)
+    config_raw = b"schemaVersion: '3.1'\n"
     provisional = InstalledControllerRuntimeManifest(
         manifest_digest=DIGEST,
         controller_principal="traincapsule-controller",
@@ -114,7 +116,8 @@ def _runtime_loader() -> tuple[InstalledControllerRuntimeManifest, RuntimeLoader
             path="/etc/traincapsule-controller/controller-runtime.env", digest=DIGEST
         ),
         effective_config=InstalledArtifact(
-            path="/etc/traincapsule-controller/effective-config.yaml", digest=DIGEST
+            path="/etc/traincapsule-controller/effective-config.yaml",
+            digest=sha256_digest(config_raw),
         ),
         repository_snapshot_manifest=InstalledArtifact(
             path=(
@@ -142,7 +145,7 @@ def _runtime_loader() -> tuple[InstalledControllerRuntimeManifest, RuntimeLoader
     raw = manifest.canonical_json_bytes()
 
     def load(_: Path) -> tuple[InstalledControllerRuntimeManifest, bytes, bytes]:
-        return manifest, raw, b"schemaVersion: '3.1'\n"
+        return manifest, raw, config_raw
 
     return manifest, load
 
@@ -381,6 +384,15 @@ def test_activation_request_is_exact_idempotent_and_stopped(
     assert first == second
     assert (runtime / "STOP").is_file()
     assert len(list(outbox.glob("*.activation-request.json"))) == 1
+    request = ActivationRequestV31.model_validate_json(first.read_bytes(), strict=True)
+    controller_raw = (
+        outbox / f"{request.request_id}.evidence" / request.controller_binary_path
+    ).read_bytes()
+    config_raw = (
+        outbox / f"{request.request_id}.evidence" / request.controller_config_path
+    ).read_bytes()
+    assert request.controller_binary_digest == sha256_digest(controller_raw)
+    assert request.controller_config_digest == sha256_digest(config_raw)
     manifest, _ = _runtime_loader()
 
     def tampered_loader(
@@ -388,7 +400,7 @@ def test_activation_request_is_exact_idempotent_and_stopped(
     ) -> tuple[InstalledControllerRuntimeManifest, bytes, bytes]:
         return manifest, manifest.canonical_json_bytes(), b"tampered: true\n"
 
-    with pytest.raises(RuntimeError, match="activation request evidence identity conflicts"):
+    with pytest.raises(RuntimeError, match="installed runtime config digest mismatch"):
         stage_activation_request(
             repo_root=repo,
             canary_suite_path=suite,

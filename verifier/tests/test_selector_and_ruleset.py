@@ -16,7 +16,10 @@ from traincapsule_verifier.models import (
     ruleset_observation_identifier,
 )
 from traincapsule_verifier.observed_main_selector import verified_check_digests
-from traincapsule_verifier.ruleset_broker import promote_ruleset_observation
+from traincapsule_verifier.ruleset_broker import (
+    promote_ruleset_observation,
+    promote_ruleset_outbox_item,
+)
 
 
 def test_ruleset_observer_accepts_github_null_as_no_bypass_and_uses_graphql_auto_merge(
@@ -212,3 +215,24 @@ def test_ruleset_broker_rejects_mismatched_signature(tmp_path: Path) -> None:
             target=target,
             public_key=Ed25519PrivateKey.generate().public_key(),
         )
+
+
+def test_ruleset_broker_skips_exact_expired_history_but_rejects_conflicts(
+    tmp_path: Path,
+) -> None:
+    target_path = tmp_path / "ruleset"
+    target_path.mkdir(mode=0o700)
+    key = Ed25519PrivateKey.generate()
+    expired = _ruleset_receipt(key, datetime.now(UTC) - timedelta(hours=1))
+    raw = canonical_json_bytes(expired)
+    name = f"{expired.observation_id}.json"
+    (target_path / name).write_bytes(raw)
+
+    with open_trusted_root(target_path, expected_uid=os.getuid()) as target:
+        promote_ruleset_outbox_item(
+            name, raw, target=target, public_key=key.public_key()
+        )
+        with pytest.raises(ValueError, match="history conflicts"):
+            promote_ruleset_outbox_item(
+                name, raw + b"\n", target=target, public_key=key.public_key()
+            )

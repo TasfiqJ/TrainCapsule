@@ -80,6 +80,23 @@ def promote_ruleset_observation(
     os.fsync(descriptor)
 
 
+def promote_ruleset_outbox_item(
+    name: str,
+    raw: bytes,
+    *,
+    target: TrustedRoot,
+    public_key: Ed25519PublicKey,
+) -> None:
+    """Skip an exact immutable history item; promote only unseen observations."""
+    try:
+        existing = read_bounded_file(target, name, maximum_bytes=1_000_000)
+    except FileNotFoundError:
+        promote_ruleset_observation(raw, target=target, public_key=public_key)
+        return
+    if existing != raw:
+        raise ValueError("ruleset observation history conflicts")
+
+
 def main() -> int:
     if sys.argv[1:] != ["process-outbox"]:
         print("usage: traincapsule-verifier-ruleset-broker process-outbox", file=sys.stderr)
@@ -100,7 +117,8 @@ def main() -> int:
             for name in sorted(os.listdir(source.descriptor)):
                 if not name.startswith("RULESET:") or not name.endswith(".json"):
                     continue
-                promote_ruleset_observation(
+                promote_ruleset_outbox_item(
+                    name,
                     read_bounded_file(source, name, maximum_bytes=1_000_000),
                     target=target,
                     public_key=public_key,

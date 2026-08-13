@@ -154,7 +154,12 @@ def test_issuer_and_broker_entrypoints_fail_closed_for_wrong_identity(
         assert name == "traincapsule-verifier"
         return pwd.struct_passwd((name, "x", 7, 7, "", "/nonexistent", "/usr/sbin/nologin"))
 
-    monkeypatch.setattr(issuer_service.pwd, "getpwnam", service_identity)
+    lookup_name = issuer_service.pwd.getpwnam.__name__
+    monkeypatch.setattr(
+        issuer_service.pwd,
+        lookup_name,
+        service_identity,
+    )
     monkeypatch.setattr(issuer_service.os, "geteuid", lambda: 8)
     monkeypatch.setattr(issuer_service.sys, "argv", ["issuer", "process-inbox"])
     assert issuer_service.main() == 1
@@ -174,7 +179,7 @@ def test_issuer_and_broker_entrypoints_fail_closed_for_wrong_identity(
             "GitHub App check worker rejected execution\n",
         ),
     ):
-        monkeypatch.setattr(module.pwd, "getpwnam", service_identity)
+        monkeypatch.setattr(module.pwd, lookup_name, service_identity)
         monkeypatch.setattr(module.os, "geteuid", lambda: 8)
         monkeypatch.setattr(module.sys, "argv", argv)
         assert module.main() == 1
@@ -248,7 +253,12 @@ def test_issuer_isolates_rejected_requests_without_authorizing_them(
         assert service_uid == 7
         return ("stale.request.json",)
 
-    monkeypatch.setattr(issuer_service.pwd, "getpwnam", service_identity)
+    lookup_name = issuer_service.pwd.getpwnam.__name__
+    monkeypatch.setattr(
+        issuer_service.pwd,
+        lookup_name,
+        service_identity,
+    )
     monkeypatch.setattr(issuer_service.os, "geteuid", lambda: 7)
     monkeypatch.setattr(issuer_service.sys, "argv", ["issuer", "process-inbox"])
     monkeypatch.setattr(

@@ -47,7 +47,11 @@ The package matrix contains 158 rows. Its starting verdicts are not accepted as 
 - 10 `EXTERNAL_WAIT`
 - 6 `DEFERRED_BY_SCOPE`
 
-Current-SHA hostile reclassification is complete in the machine-readable [158-row ledger](./V3_1_ZH_158_ROW_FINDINGS_LEDGER.json). It contains all 158 unique IDs, every original package field, current-SHA classification, evidence paths, remediation phase, positive and hostile controls, rollback behavior, and before/after status.
+The immutable Phase-0 classification and the separate implementation-candidate rebase are recorded
+in the machine-readable [158-row ledger](./V3_1_ZH_158_ROW_FINDINGS_LEDGER.json). It contains all 158
+unique IDs and preserves the original package fields. Candidate binding does **not** close a row:
+exact positive, hostile, hosted, installed, external, rollback, and live evidence remains required as
+applicable.
 
 The Phase-0 current classifications are:
 
@@ -57,6 +61,12 @@ The Phase-0 current classifications are:
 - 3 `OPEN_CONFLICT`.
 - 10 `EXTERNAL_WAIT` — these remain scoped and cannot globally block independent engineering lanes.
 - 2 `DEFERRED` — these may not be used as completion proxies.
+
+The implementation candidate `81e46ce5ad95c588c8fae3bd64f5704e40ac984b` has a separate,
+non-final classification: 100 local implementations pending integrated acceptance, 14 external
+facts pending, 10 independent provisioning requirements pending, 32 live-canary/observer
+requirements pending, and 2 M0 external-evidence requirements pending. No row is `PROVEN_FINAL`.
+See [the remaining-acceptance checklist](./V3_1_ZH_REMAINING_ACCEPTANCE.md).
 
 There are 75 Phase-0 open findings, including 40 critical open findings. The package matrix has 45 critical rows, while its acceptance contract lists only 44 critical IDs. The omitted row is `B004`; V3.1 remediation must add it explicitly as a critical, scoped, nonblocking external wait.
 

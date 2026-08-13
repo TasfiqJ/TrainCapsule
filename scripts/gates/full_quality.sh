@@ -56,6 +56,7 @@ PYTHONPATH="$ROOT/verifier/src${PYTHONPATH:+:$PYTHONPATH}" \
 "$UV_BIN" run --active --no-sync python scripts/generate_v3_legacy_migration.py --check
 "$UV_BIN" run --active --no-sync python scripts/generate_product_schemas.py --check
 "$UV_BIN" run --active --no-sync python scripts/update_v3_migration_inventory.py --check
+"$UV_BIN" run --active --no-sync python scripts/update_v31_findings_candidate.py --check
 "$UV_BIN" run --active --no-sync python scripts/gates/no_paid_usage.py
 "$UV_BIN" run --active --no-sync tcfactory config validate
 "$UV_BIN" run --active --no-sync tcfactory migrate-roadmap --from-v2 --dry-run

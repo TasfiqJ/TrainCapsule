@@ -12,19 +12,20 @@ The authoritative 2026-08-11 V3 bundle was verified before implementation: all 3
 542,907 declared bytes, and every declared SHA-256 matched. Installed normative source files remain
 byte-identical to the supplied bundle.
 
-Two later owner instructions are active, scoped overrides:
+The historical V3 implementation used two scoped owner instructions:
 
 1. Runtime operation is 100% zero-human. Deterministic, digest-bound machine-policy receipts replace
    human operational approvals. There is no human wait/review/owner state in the active V3 domain.
 2. Publication is exact-SHA `main` only. Non-main pushes, pull requests, force pushes, and automatic
    dependence on an interactive login are forbidden.
 
-The override authority is explicit in `config/owner_directives.yaml`,
+That historical override authority is preserved in `config/owner_directives.yaml`,
 `docs/migrations/V3_OWNER_DIRECTIVES.md`, and
-`factory/policy/ZERO_HUMAN_OPERATION_OVERRIDE.json`. It does not relax evidence truth, external-fact
-ceilings, source integrity, exact-SHA binding, finite recovery, or commercial non-claims.
+`factory/policy/ZERO_HUMAN_OPERATION_OVERRIDE.json`. It is not active V3.1 authority. V3.1 replaces
+direct-main and owner authority with automated PR-only publication plus independent machine-policy
+authorization. Historical files remain immutable inputs and may not be imported into active policy.
 
-## Completed migration
+## Historical V3 completed migration
 
 - The real Windows/WSL launcher invokes the V3 controller. V2 autopilot and ledger-mutation entry
   points fail closed and the 124-entry legacy ledger no longer schedules V3 work.
@@ -34,7 +35,7 @@ ceilings, source integrity, exact-SHA binding, finite recovery, or commercial no
   and restart recovery.
 - Autonomous changes cannot rewrite owner directives, source precedence, V3 source, policy, roadmap,
   or other protected authority. Candidate changed paths and artifacts are verified before publication.
-- Publication accepts only an exact verified candidate SHA, pushes only `<sha>:refs/heads/main`, never
+- Historical V3 publication accepted only an exact verified candidate SHA, pushed only `<sha>:refs/heads/main`, never
   force-pushes, verifies remote SHA, monitors the complete configured hosted-workflow set at that SHA,
   and quarantines plus publishes an ordinary multi-commit-tree revert if a hosted gate fails.
 - Publication transactions are durable and idempotent across every pre-push, post-push, hosted-poll,
@@ -47,14 +48,15 @@ ceilings, source integrity, exact-SHA binding, finite recovery, or commercial no
 - T002 and all V2 evidence remain preserved. T002 is explicitly `DEFERRED_NON_BLOCKING`, has no V3
   mapped item, and cannot auto-resume.
 
-## M0 acceptance
+## Historical V3 M0 acceptance
 
-The roadmap records `M0_FACTORY_MIGRATED` as completed historically, but the earlier five JSON files
+The historical V3 roadmap recorded `M0_FACTORY_MIGRATED` as completed, but those files cannot satisfy
+V3.1 M0. The earlier five JSON files
 were self-declared summaries rather than independently auditable execution receipts. They have been
 replaced with five schema-valid `FINAL`/`PASS` records after the repaired implementation tree was
 frozen.
 
-Final M0 acceptance requires `scripts/finalize_v3_m0_evidence.py` to generate schema-valid records
+Historical V3 finalization used `scripts/finalize_v3_m0_evidence.py` to generate schema-valid records
 containing exact command argv, exit/result/count, failure attribution, transcript path/digest, active
 authority digests, and one clean exact subject SHA or mode-aware nonrecursive implementation-tree
 digest. Per-ID evidence types and argv are allowlisted, and result counts are derived from the bound
@@ -63,7 +65,7 @@ completion record binds only `V3-MIG-016` through `V3-MIG-019` by their exact fi
 cite itself. `scripts/gates/v3_migration_evidence.py` fails closed on pending, missing, altered,
 authority-mismatched, transcript-mismatched, tree-mismatched, or recursive evidence.
 
-`V3-MIG-020` runs `scripts/gates/full_quality.sh --pre-evidence` before it is written. That phase runs
+Historical `V3-MIG-020` ran `scripts/gates/full_quality.sh --pre-evidence` before it was written. That phase ran
 complete local acceptance while deliberately skipping only the final evidence gate that cannot pass
 until the receipts exist. Normal `full_quality.sh` then validates the final evidence and reruns the
 same complete acceptance, avoiding both circularity and premature M0 completion.
@@ -85,9 +87,10 @@ No real GPU run, customer archive, customer conversation, customer decision, ind
 operator run, payment, second paid use, or commercially supported pack is evidenced. Those facts
 remain UNKNOWN or `WAITING_EXTERNAL`; synthetic fixtures cannot advance their maturity.
 
-M1 is the active engineering milestone. Product/trust items already implemented are marked `PASSED_ENGINEERING` so the scheduler will not
-repeat them. Competitor/current-fact research and all outside/commercial work retain their bounded
-roadmap states.
+Active V3.1 remains at M0 pending independent source authorization, real automated-PR/required-CI/
+verified-merged-main receipts, installed authority, live canaries, and activation evidence. Historical
+V3 completion or `PASSED_ENGINEERING` rows cannot advance V3.1 maturity. Outside commercial facts
+remain UNKNOWN or `WAITING_EXTERNAL` until signed attributable evidence exists.
 
 ## Historical runtime and publication record
 
@@ -107,18 +110,24 @@ Those publication and preflight facts are historical observations for the SHA na
 ignored migration marker is mutable runtime state and cannot substitute for tracked, replayable
 evidence for a later implementation tree.
 
-## Historical V3 handoff
+## Current V3.1 handoff
 
-The current implementation tree has strict local M0 evidence and complete local acceptance. It is
-not yet hosted-release accepted: the resulting commit must be published to `main` only, pass the
-actual clean-candidate private gate, and pass every required hosted workflow at its own exact SHA.
-No future SHA or run ID is invented in this report. Until those checks complete, retain the stopped
-state and follow `docs/migrations/V3_ROLLBACK.md`; never reset or rewrite published history.
+Implementation candidate `81e46ce5ad95c588c8fae3bd64f5704e40ac984b` has scoped local evidence,
+not complete acceptance. It still requires canonical full local/pre-evidence acceptance, every
+exact-head hosted PR check, independent verifier/runtime installation, trusted GitHub App and exact
+ruleset, V3.1 M0 receipts, all 20 live canaries, signed activation, and the ordered seven-event
+observer. Publication must use the automated PR-only path; direct-main publication is forbidden.
+No future SHA, run ID, receipt, or PASS is invented here. Retain `factory/state/STOP` and follow
+`docs/migrations/V3_ROLLBACK.md` on ambiguity; never reset or rewrite published history.
 
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **631 paths**.
+
+This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing
+report must bind acceptance to an immutable candidate SHA and independent test/receipt
+artifacts.
 
 | Change | Path |
 |---|---|
@@ -138,13 +147,74 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `M` | `Control-TrainCapsuleBuilder.ps1` |
 | `M` | `README.md` |
 | `M` | `SOURCE_PRECEDENCE.md` |
+| `A` | `TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/00_START_HERE.md` |
+| `A` | `TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/01_CODEX_MASTER_EXECUTION_PROMPT.md` |
+| `A` | `TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/02_FILES_AND_AUTHORITY_ORDER.md` |
+| `A` | `TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/03_V3_1_ZH_ACCEPTANCE_CONTRACT.yaml` |
+| `A` | `TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/04_ZERO_HUMAN_CONFORMANCE_AUDIT.md` |
+| `A` | `TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/05_ZERO_HUMAN_CONFORMANCE_MATRIX.csv` |
+| `A` | `TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/06_REQUIRED_FINAL_REPORT_TEMPLATE.md` |
+| `A` | `TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/07_CODEX_PHASE_CHECKLIST.md` |
+| `A` | `TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/08_LAUNCHER_PROMPT.txt` |
+| `A` | `TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/09_REMEDIATION_PLAN.yaml` |
+| `A` | `TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/10_UNRESOLVED_REQUIREMENTS.md` |
+| `A` | `TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/11_PACKAGE_INVENTORY.md` |
+| `A` | `TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/12_SHA256SUMS.txt` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/06_COMMERCIAL_MODEL_AND_GTM_V3.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/13_SOURCE_REGISTER_V3.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/CODEX_MASTER_MIGRATION_PROMPT.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/FINAL_MANIFEST_V3.json` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/README_FIRST.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/REPOSITORY_AUDIT_AND_FILE_CHANGE_MATRIX.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/SOURCE_OF_TRUTH_MIGRATION_PLAN.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/TRAINCAPSULE_V3_MASTER_PLAN.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/config/autonomy.v3.example.yaml` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/config/executors.v3.example.yaml` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/config/factory.v3.example.yaml` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/config/roles.v3.example.yaml` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/config/scheduler.v3.example.yaml` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/factory/milestones.v3.example.yaml` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/factory/work_items.v3.example.yaml` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/market/account-map.template.yaml` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/market/discovery-interview.template.yaml` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/market/pricing-experiment.template.yaml` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/product/customer-local-security-checklist.md` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/product/qualification-pilot-intake.template.yaml` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/schemas/external-evidence-receipt.schema.json` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/schemas/human-approval.schema.json` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/schemas/native-substitute-benchmark.schema.json` |
+| `A` | `TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/examples/schemas/work-item-v3.schema.json` |
+| `A` | `canary_runner/policy/runner-policy.template.json` |
+| `A` | `canary_runner/pyproject.toml` |
+| `A` | `canary_runner/schemas/mandatory-canary-result.schema.json` |
+| `A` | `canary_runner/schemas/mechanism-outcome.schema.json` |
+| `A` | `canary_runner/schemas/mechanism-policy.schema.json` |
+| `A` | `canary_runner/schemas/runner-policy.schema.json` |
+| `A` | `canary_runner/scripts/generate_policy.py` |
+| `A` | `canary_runner/scripts/generate_schemas.py` |
+| `A` | `canary_runner/src/traincapsule_canary_runner/__init__.py` |
+| `A` | `canary_runner/src/traincapsule_canary_runner/cli.py` |
+| `A` | `canary_runner/src/traincapsule_canary_runner/external_probes.py` |
+| `A` | `canary_runner/src/traincapsule_canary_runner/mechanisms.py` |
+| `A` | `canary_runner/src/traincapsule_canary_runner/models.py` |
+| `A` | `canary_runner/src/traincapsule_canary_runner/runner.py` |
+| `A` | `canary_runner/tests/test_runner.py` |
 | `A` | `config/active_generation.yaml` |
 | `M` | `config/autonomy.yaml` |
 | `M` | `config/claude_features.yaml` |
 | `A` | `config/commercial_maturity.yaml` |
+| `A` | `config/completion_evidence_policy.yaml` |
 | `M` | `config/context.yaml` |
 | `A` | `config/executors.yaml` |
 | `A` | `config/external_evidence.yaml` |
+| `A` | `config/external_evidence_authority_installation.yaml` |
 | `M` | `config/factory.yaml` |
 | `M` | `config/github.yaml` |
 | `A` | `config/human_approval.yaml` |
@@ -153,12 +223,33 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `M` | `config/risk_profiles.yaml` |
 | `M` | `config/roles.yaml` |
 | `A` | `config/scheduler.yaml` |
+| `A` | `config/traincapsule-deployment-refresh-claim.path` |
+| `A` | `config/traincapsule-deployment-refresh-claim.service` |
+| `A` | `config/traincapsule-deployment-refresh-completion.path` |
+| `A` | `config/traincapsule-deployment-refresh-completion.service` |
+| `A` | `config/traincapsule-deployment-refresh.path` |
+| `A` | `config/traincapsule-deployment-refresh.service` |
+| `A` | `config/traincapsule-external-evidence-authority.path` |
+| `A` | `config/traincapsule-external-evidence-authority.service` |
+| `A` | `config/traincapsule-github-token-promoter.path` |
+| `A` | `config/traincapsule-github-token-promoter.service` |
+| `A` | `config/traincapsule-github-token-refresher.service` |
+| `A` | `config/traincapsule-github-token-refresher.timer` |
+| `A` | `deployment/__init__.py` |
+| `A` | `deployment/bundle_assembler.py` |
+| `A` | `deployment/github_token_refresher.py` |
+| `A` | `deployment/privileged_installer.py` |
+| `A` | `deployment/runtime_refresh.py` |
+| `A` | `deployment/tests/test_github_token_refresher.py` |
+| `A` | `deployment/tests/test_privileged_installer.py` |
+| `A` | `deployment/tests/test_runtime_refresh.py` |
 | `M` | `docs/CONTEXT_INDEX.yaml` |
 | `A` | `docs/migrations/V3_1_ZH_158_ROW_FINDINGS_LEDGER.json` |
 | `A` | `docs/migrations/V3_1_ZH_CODEX_EXECUTION_STATE.md` |
 | `A` | `docs/migrations/V3_1_ZH_FINDINGS_CROSS_REFERENCE.md` |
 | `A` | `docs/migrations/V3_1_ZH_PACKAGE_INTEGRITY.json` |
 | `A` | `docs/migrations/V3_1_ZH_PHASE_0_BASELINE.json` |
+| `A` | `docs/migrations/V3_1_ZH_REMAINING_ACCEPTANCE.md` |
 | `A` | `docs/migrations/V3_BASELINE_REPORT.md` |
 | `A` | `docs/migrations/V3_BUNDLE_INTEGRITY_REPORT.json` |
 | `A` | `docs/migrations/V3_CODEX_EXECUTION_STATE.md` |
@@ -225,7 +316,9 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `A` | `factory/policy/ZERO_HUMAN_OPERATION_OVERRIDE.json` |
 | `A` | `factory/roadmap/dispositions.yaml` |
 | `A` | `factory/roadmap/legacy_feature_ledger.yaml` |
+| `A` | `factory/roadmap/migrations/v2_runtime_evidence_manifest.json` |
 | `A` | `factory/roadmap/migrations/v2_to_v3.yaml` |
+| `A` | `factory/roadmap/migrations/v2_to_v3.yaml.previous` |
 | `A` | `factory/roadmap/migrations/v3_to_v3_1_zh.yaml` |
 | `A` | `factory/roadmap/milestones.yaml` |
 | `A` | `factory/roadmap/work_items.yaml` |
@@ -275,14 +368,26 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `A` | `schemas/factory/v3.1/account-evidence-field.schema.json` |
 | `A` | `schemas/factory/v3.1/account-qualification-score.schema.json` |
 | `A` | `schemas/factory/v3.1/activation-receipt.schema.json` |
+| `A` | `schemas/factory/v3.1/activation-request.schema.json` |
+| `A` | `schemas/factory/v3.1/activation-transaction.schema.json` |
+| `A` | `schemas/factory/v3.1/agent-execution-report.schema.json` |
 | `A` | `schemas/factory/v3.1/authorized-value-transition.schema.json` |
+| `A` | `schemas/factory/v3.1/compiled-task-contract.schema.json` |
 | `A` | `schemas/factory/v3.1/decision-value.schema.json` |
 | `A` | `schemas/factory/v3.1/discovery-interview-guide.schema.json` |
 | `A` | `schemas/factory/v3.1/execution-report.schema.json` |
+| `A` | `schemas/factory/v3.1/external-action-installation.schema.json` |
+| `A` | `schemas/factory/v3.1/external-action-outcome.schema.json` |
+| `A` | `schemas/factory/v3.1/external-action-payload.schema.json` |
+| `A` | `schemas/factory/v3.1/external-action-request.schema.json` |
+| `A` | `schemas/factory/v3.1/external-action-template.schema.json` |
+| `A` | `schemas/factory/v3.1/external-delivery-receipt.schema.json` |
 | `A` | `schemas/factory/v3.1/fingerprint-counter.schema.json` |
 | `A` | `schemas/factory/v3.1/interview-question.schema.json` |
 | `A` | `schemas/factory/v3.1/machine-policy-receipt.schema.json` |
 | `A` | `schemas/factory/v3.1/machine-policy-revocation-list.schema.json` |
+| `A` | `schemas/factory/v3.1/mandatory-canary-result.schema.json` |
+| `A` | `schemas/factory/v3.1/mandatory-canary-suite.schema.json` |
 | `A` | `schemas/factory/v3.1/migrated-agent-capability.schema.json` |
 | `A` | `schemas/factory/v3.1/migrated-agent-request.schema.json` |
 | `A` | `schemas/factory/v3.1/migrated-candidate-manifest.schema.json` |
@@ -295,7 +400,10 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `A` | `schemas/factory/v3.1/native-substitute-benchmark.schema.json` |
 | `A` | `schemas/factory/v3.1/native-value-gate-policy.schema.json` |
 | `A` | `schemas/factory/v3.1/output-declaration.schema.json` |
+| `A` | `schemas/factory/v3.1/parsed-claim-result.schema.json` |
+| `A` | `schemas/factory/v3.1/parsed-source-result.schema.json` |
 | `A` | `schemas/factory/v3.1/pilot-qualification-rubric.schema.json` |
+| `A` | `schemas/factory/v3.1/post-activation-observation.schema.json` |
 | `A` | `schemas/factory/v3.1/pr-publication-transaction.schema.json` |
 | `A` | `schemas/factory/v3.1/reachable-account-map.schema.json` |
 | `A` | `schemas/factory/v3.1/reachable-account.schema.json` |
@@ -304,6 +412,8 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `A` | `schemas/factory/v3.1/research-finding.schema.json` |
 | `A` | `schemas/factory/v3.1/research-query-plan.schema.json` |
 | `A` | `schemas/factory/v3.1/research-report.schema.json` |
+| `A` | `schemas/factory/v3.1/research-resolution.schema.json` |
+| `A` | `schemas/factory/v3.1/research-source-request.schema.json` |
 | `A` | `schemas/factory/v3.1/research-source.schema.json` |
 | `A` | `schemas/factory/v3.1/runtime-event.schema.json` |
 | `A` | `schemas/factory/v3.1/runtime-status.schema.json` |
@@ -312,6 +422,12 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `A` | `schemas/factory/v3.1/source-artifact.schema.json` |
 | `A` | `schemas/factory/v3.1/source-freshness-receipt.schema.json` |
 | `A` | `schemas/factory/v3.1/source-generation.schema.json` |
+| `A` | `schemas/factory/v3.1/source-hop-receipt.schema.json` |
+| `A` | `schemas/factory/v3.1/source-parser-limits.schema.json` |
+| `A` | `schemas/factory/v3.1/source-retrieval-receipt.schema.json` |
+| `A` | `schemas/factory/v3.1/task-output-declaration.schema.json` |
+| `A` | `schemas/factory/v3.1/task-result-artifact.schema.json` |
+| `A` | `schemas/factory/v3.1/task-tool-policy.schema.json` |
 | `A` | `schemas/factory/v3/active-generation.schema.json` |
 | `A` | `schemas/factory/v3/active-source-generation.schema.json` |
 | `A` | `schemas/factory/v3/agent-capabilities.schema.json` |
@@ -321,38 +437,58 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `A` | `schemas/factory/v3/candidate-manifest.schema.json` |
 | `A` | `schemas/factory/v3/checkpoint.schema.json` |
 | `A` | `schemas/factory/v3/commercial-maturity-config.schema.json` |
+| `A` | `schemas/factory/v3/completion-evidence-observation.schema.json` |
+| `A` | `schemas/factory/v3/completion-evidence-policy.schema.json` |
 | `A` | `schemas/factory/v3/context-manifest.schema.json` |
 | `A` | `schemas/factory/v3/context-policy-config.schema.json` |
 | `A` | `schemas/factory/v3/decision-value.schema.json` |
+| `A` | `schemas/factory/v3/delivery-economics-evidence.schema.json` |
+| `A` | `schemas/factory/v3/delivery-measurement.schema.json` |
 | `A` | `schemas/factory/v3/dispositions.schema.json` |
 | `A` | `schemas/factory/v3/executors-config.schema.json` |
+| `A` | `schemas/factory/v3/external-evidence-authority-anchor.schema.json` |
+| `A` | `schemas/factory/v3/external-evidence-authority-ledger.schema.json` |
+| `A` | `schemas/factory/v3/external-evidence-authority-state.schema.json` |
 | `A` | `schemas/factory/v3/external-evidence-config.schema.json` |
 | `A` | `schemas/factory/v3/external-evidence-receipt.schema.json` |
+| `A` | `schemas/factory/v3/external-evidence-revocation-list.schema.json` |
 | `A` | `schemas/factory/v3/factory-config.schema.json` |
 | `A` | `schemas/factory/v3/finding-counter.schema.json` |
 | `A` | `schemas/factory/v3/finding.schema.json` |
+| `A` | `schemas/factory/v3/frozen-release-evidence-authorization.schema.json` |
 | `A` | `schemas/factory/v3/github-config.schema.json` |
 | `A` | `schemas/factory/v3/handoff.schema.json` |
 | `A` | `schemas/factory/v3/hard-stuck.schema.json` |
+| `A` | `schemas/factory/v3/incident-contract.schema.json` |
+| `A` | `schemas/factory/v3/incident-invariant-observation.schema.json` |
 | `A` | `schemas/factory/v3/legacy-migration.schema.json` |
 | `A` | `schemas/factory/v3/migration-complete-marker.schema.json` |
 | `A` | `schemas/factory/v3/migration-evidence.schema.json` |
 | `A` | `schemas/factory/v3/milestone-advance-transaction.schema.json` |
 | `A` | `schemas/factory/v3/milestone-completion-receipt.schema.json` |
 | `A` | `schemas/factory/v3/milestone-completion.schema.json` |
+| `A` | `schemas/factory/v3/milestone-evidence-contract.schema.json` |
 | `A` | `schemas/factory/v3/milestone-policy-config.schema.json` |
 | `A` | `schemas/factory/v3/milestone-runtime-state.schema.json` |
 | `A` | `schemas/factory/v3/milestones.schema.json` |
 | `A` | `schemas/factory/v3/private-gate-receipt.schema.json` |
+| `A` | `schemas/factory/v3/reduction-boundary-evidence.schema.json` |
+| `A` | `schemas/factory/v3/reduction-candidate-input.schema.json` |
+| `A` | `schemas/factory/v3/reduction-oracle-decision.schema.json` |
 | `A` | `schemas/factory/v3/release-candidate.schema.json` |
 | `A` | `schemas/factory/v3/retry-policy.schema.json` |
 | `A` | `schemas/factory/v3/scheduler.schema.json` |
 | `A` | `schemas/factory/v3/source-generation-manifest.schema.json` |
 | `A` | `schemas/factory/v3/source-wedge-proposal.schema.json` |
 | `A` | `schemas/factory/v3/supervisor-state.schema.json` |
+| `A` | `schemas/factory/v3/support-policy-evidence.schema.json` |
 | `A` | `schemas/factory/v3/task-packet.schema.json` |
+| `A` | `schemas/factory/v3/third-same-family-case-evidence.schema.json` |
+| `A` | `schemas/factory/v3/traincheck-differential-request.schema.json` |
+| `A` | `schemas/factory/v3/traincheck-differential-result.schema.json` |
 | `A` | `schemas/factory/v3/usage-state.schema.json` |
 | `A` | `schemas/factory/v3/work-item-completion-evidence.schema.json` |
+| `A` | `schemas/factory/v3/work-item-evidence-contract.schema.json` |
 | `A` | `schemas/factory/v3/work-item-v3.schema.json` |
 | `A` | `schemas/factory/v3/work-items.schema.json` |
 | `A` | `schemas/product/eligibility-decision.schema.json` |
@@ -382,6 +518,7 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `A` | `scripts/gates/v3_bundle_integrity.py` |
 | `A` | `scripts/gates/v3_migration_evidence.py` |
 | `A` | `scripts/gates/v3_rollback_rehearsal.py` |
+| `A` | `scripts/generate_completion_evidence_policy.py` |
 | `A` | `scripts/generate_product_schemas.py` |
 | `A` | `scripts/generate_v31_contract_schemas.py` |
 | `A` | `scripts/generate_v3_1_zh_source.py` |
@@ -399,10 +536,12 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `M` | `scripts/run_one_time_calibration.sh` |
 | `M` | `scripts/stop_factory.sh` |
 | `M` | `scripts/systemd_entrypoint.sh` |
+| `A` | `scripts/update_v31_findings_candidate.py` |
 | `A` | `scripts/update_v3_migration_inventory.py` |
 | `M` | `scripts/verify_autonomous_loop.sh` |
 | `M` | `scripts/verify_claude_features.sh` |
 | `M` | `scripts/verify_factory_authority.sh` |
+| `A` | `scripts/windows_activation_entrypoint.sh` |
 | `M` | `scripts/windows_task_entrypoint.sh` |
 | `M` | `scripts/windows_wsl_prepare.sh` |
 | `M` | `tcfactory/autopilot.py` |
@@ -440,8 +579,15 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `M` | `tcfactory/usage.py` |
 | `M` | `tcfactory/util.py` |
 | `A` | `tcfactory/v3/__init__.py` |
+| `A` | `tcfactory/v3/activation.py` |
+| `A` | `tcfactory/v3/activation_supervisor.py` |
 | `A` | `tcfactory/v3/base.py` |
+| `A` | `tcfactory/v3/canaries.py` |
+| `A` | `tcfactory/v3/candidate_freeze.py` |
 | `A` | `tcfactory/v3/candidate_manifest.py` |
+| `A` | `tcfactory/v3/completion_artifacts.py` |
+| `A` | `tcfactory/v3/completion_policy.py` |
+| `A` | `tcfactory/v3/completion_verification.py` |
 | `A` | `tcfactory/v3/configuration.py` |
 | `A` | `tcfactory/v3/contracts_v31.py` |
 | `A` | `tcfactory/v3/controller.py` |
@@ -449,7 +595,12 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `A` | `tcfactory/v3/dispositions.py` |
 | `A` | `tcfactory/v3/doctor.py` |
 | `A` | `tcfactory/v3/enums.py` |
+| `A` | `tcfactory/v3/external_actions.py` |
 | `A` | `tcfactory/v3/external_evidence.py` |
+| `A` | `tcfactory/v3/external_evidence_authority.py` |
+| `A` | `tcfactory/v3/external_evidence_broker_cli.py` |
+| `A` | `tcfactory/v3/installed_runtime.py` |
+| `A` | `tcfactory/v3/machine_policy_runtime.py` |
 | `A` | `tcfactory/v3/market_artifacts.py` |
 | `A` | `tcfactory/v3/maturity.py` |
 | `A` | `tcfactory/v3/migration_evidence.py` |
@@ -457,17 +608,25 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `A` | `tcfactory/v3/milestone_runtime.py` |
 | `A` | `tcfactory/v3/milestones.py` |
 | `A` | `tcfactory/v3/native_value_gate.py` |
+| `A` | `tcfactory/v3/native_value_runtime.py` |
+| `A` | `tcfactory/v3/phase6_installation.py` |
+| `A` | `tcfactory/v3/phase6_runtime.py` |
 | `A` | `tcfactory/v3/pilot.py` |
 | `A` | `tcfactory/v3/pipeline_services.py` |
 | `A` | `tcfactory/v3/planning.py` |
 | `A` | `tcfactory/v3/private_gate.py` |
+| `A` | `tcfactory/v3/publication.py` |
 | `A` | `tcfactory/v3/queue.py` |
 | `A` | `tcfactory/v3/recovery.py` |
 | `A` | `tcfactory/v3/retry_policy.py` |
 | `A` | `tcfactory/v3/runtime_paths.py` |
 | `A` | `tcfactory/v3/scheduler.py` |
+| `A` | `tcfactory/v3/service_storage.py` |
 | `A` | `tcfactory/v3/source_acquisition.py` |
 | `A` | `tcfactory/v3/source_authority.py` |
+| `A` | `tcfactory/v3/task_compiler_v31.py` |
+| `A` | `tcfactory/v3/traincheck_differential.py` |
+| `A` | `tcfactory/v3/verifier_submission.py` |
 | `A` | `tcfactory/v3/work_items.py` |
 | `M` | `tcfactory/value.py` |
 | `M` | `tcfactory/value_policy.py` |
@@ -496,10 +655,18 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `M` | `tests/test_risk_routing.py` |
 | `A` | `tests/test_sbom_generation.py` |
 | `A` | `tests/test_source_of_truth_integrity.py` |
+| `A` | `tests/test_v31_activation_and_canaries.py` |
+| `A` | `tests/test_v31_completion_policy.py` |
 | `A` | `tests/test_v31_contracts.py` |
 | `A` | `tests/test_v31_controlled_source_acquisition.py` |
+| `A` | `tests/test_v31_external_actions.py` |
+| `A` | `tests/test_v31_findings_candidate_ledger.py` |
 | `A` | `tests/test_v31_market_artifacts.py` |
 | `A` | `tests/test_v31_native_value_gate.py` |
+| `A` | `tests/test_v31_output_integration_gate.py` |
+| `A` | `tests/test_v31_phase6_installation.py` |
+| `A` | `tests/test_v31_task_compiler.py` |
+| `A` | `tests/test_v3_backend_runtime_policy.py` |
 | `A` | `tests/test_v3_backends_and_checkpoints.py` |
 | `A` | `tests/test_v3_candidate_salvage.py` |
 | `A` | `tests/test_v3_config_and_roadmap.py` |
@@ -523,6 +690,7 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `A` | `tests/test_v3_scheduler_and_recovery.py` |
 | `A` | `tests/test_v3_source_authority.py` |
 | `A` | `tests/test_v3_supervisor_and_status.py` |
+| `A` | `tests/test_v3_verifier_submission_bridge.py` |
 | `M` | `tests/test_windows_autostart_scripts.py` |
 | `M` | `uv.lock` |
 | `A` | `verifier/.gitignore` |
@@ -530,27 +698,68 @@ Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **431 paths**.
 | `A` | `verifier/__init__.py` |
 | `A` | `verifier/pyproject.toml` |
 | `A` | `verifier/pyrightconfig.json` |
+| `A` | `verifier/schemas/activation-authorization.schema.json` |
 | `A` | `verifier/schemas/activation-receipt.schema.json` |
 | `A` | `verifier/schemas/activation-request.schema.json` |
 | `A` | `verifier/schemas/authority-anchor.schema.json` |
 | `A` | `verifier/schemas/check-authorization.schema.json` |
+| `A` | `verifier/schemas/check-delivery-receipt.schema.json` |
+| `A` | `verifier/schemas/check-event.schema.json` |
+| `A` | `verifier/schemas/check-process-result.schema.json` |
+| `A` | `verifier/schemas/check-publish-request.schema.json` |
+| `A` | `verifier/schemas/check-publisher-policy.schema.json` |
 | `A` | `verifier/schemas/installation-attestation.schema.json` |
 | `A` | `verifier/schemas/machine-policy-receipt.schema.json` |
+| `A` | `verifier/schemas/observed-main-receipt.schema.json` |
 | `A` | `verifier/schemas/oracle-execution-result.schema.json` |
 | `A` | `verifier/schemas/revocation-list.schema.json` |
+| `A` | `verifier/schemas/ruleset-observation-receipt.schema.json` |
 | `A` | `verifier/schemas/trusted-evidence-manifest.schema.json` |
 | `A` | `verifier/schemas/verification-request.schema.json` |
 | `A` | `verifier/schemas/verifier-policy.schema.json` |
 | `A` | `verifier/scripts/__init__.py` |
 | `A` | `verifier/scripts/generate_schemas.py` |
+| `A` | `verifier/scripts/plan_production_install.py` |
 | `A` | `verifier/scripts/rehearse_install.py` |
 | `A` | `verifier/src/traincapsule_verifier/__init__.py` |
+| `A` | `verifier/src/traincapsule_verifier/activation_issuer_service.py` |
+| `A` | `verifier/src/traincapsule_verifier/activation_request_broker.py` |
+| `A` | `verifier/src/traincapsule_verifier/activation_selector_broker.py` |
 | `A` | `verifier/src/traincapsule_verifier/attestation.py` |
+| `A` | `verifier/src/traincapsule_verifier/bootstrap.py` |
+| `A` | `verifier/src/traincapsule_verifier/broker_cli.py` |
+| `A` | `verifier/src/traincapsule_verifier/canary_receipt_probe.py` |
 | `A` | `verifier/src/traincapsule_verifier/canonical.py` |
+| `A` | `verifier/src/traincapsule_verifier/check_publisher.py` |
+| `A` | `verifier/src/traincapsule_verifier/check_worker_cli.py` |
 | `A` | `verifier/src/traincapsule_verifier/cli.py` |
+| `A` | `verifier/src/traincapsule_verifier/controller_start_broker.py` |
 | `A` | `verifier/src/traincapsule_verifier/crypto.py` |
 | `A` | `verifier/src/traincapsule_verifier/evaluator.py` |
 | `A` | `verifier/src/traincapsule_verifier/filesystem.py` |
+| `A` | `verifier/src/traincapsule_verifier/git_anchor_producer.py` |
+| `A` | `verifier/src/traincapsule_verifier/git_anchor_updater.py` |
+| `A` | `verifier/src/traincapsule_verifier/github_app_backend.py` |
+| `A` | `verifier/src/traincapsule_verifier/install_cli.py` |
+| `A` | `verifier/src/traincapsule_verifier/issuer_service.py` |
 | `A` | `verifier/src/traincapsule_verifier/models.py` |
+| `A` | `verifier/src/traincapsule_verifier/observed_main_selector.py` |
+| `A` | `verifier/src/traincapsule_verifier/post_activation_observer.py` |
+| `A` | `verifier/src/traincapsule_verifier/public_cli.py` |
+| `A` | `verifier/src/traincapsule_verifier/public_crypto.py` |
+| `A` | `verifier/src/traincapsule_verifier/public_verifier.py` |
+| `A` | `verifier/src/traincapsule_verifier/receipt_broker.py` |
+| `A` | `verifier/src/traincapsule_verifier/request_broker.py` |
+| `A` | `verifier/src/traincapsule_verifier/request_broker_cli.py` |
+| `A` | `verifier/src/traincapsule_verifier/ruleset_broker.py` |
+| `A` | `verifier/src/traincapsule_verifier/ruleset_observer.py` |
 | `A` | `verifier/tests/canonical-vector.json` |
+| `A` | `verifier/tests/test_canary_receipt_probe.py` |
+| `A` | `verifier/tests/test_controller_start_broker.py` |
+| `A` | `verifier/tests/test_git_anchor_producer.py` |
+| `A` | `verifier/tests/test_git_anchor_updater.py` |
+| `A` | `verifier/tests/test_post_activation_observer.py` |
+| `A` | `verifier/tests/test_public_boundary.py` |
+| `A` | `verifier/tests/test_selector_and_ruleset.py` |
+| `A` | `verifier/tests/test_service_bootstrap.py` |
 <!-- END GENERATED FILE INVENTORY -->

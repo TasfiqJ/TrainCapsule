@@ -1,6 +1,6 @@
 # TrainCapsule V3 test matrix
 
-> **HISTORICAL V3 TEST RECORD — NOT CURRENT V3.1-ZH ACCEPTANCE.** The tables and results below
+> **HISTORICAL V3 TEST RECORD — NOT CURRENT V3.1-ZH ACCEPTANCE.** The historical tables and results below
 > describe the frozen V3 baseline under its superseded release policy. Current V3.1-ZH status is
 > `STOPPED / NOT AUTHORIZED` and M0 is active/pending. The repository's Phase 4 PR-only
 > publisher is implemented, but external repository rules, trusted check identity, verifier
@@ -9,8 +9,21 @@
 
 > Historical acceptance at `f1fd8077fee001fa6751aa86b26f341f04d0d150` superseded the
 > phase-by-phase counts below at that SHA only. Its 554-test local result and eight remote workflow
-> runs must not be attributed to a later repair. Current exact-tree evidence and local acceptance
-> are recorded below; exact-SHA hosted acceptance remains pending publication.
+> runs must not be attributed to a later repair.
+
+## Current V3.1-ZH candidate status
+
+Implementation candidate `81e46ce5ad95c588c8fae3bd64f5704e40ac984b` is pushed on the draft
+PR branch. Scoped candidate evidence includes exact 109-row completion policy, 63 V3 schemas,
+repository-wide Ruff, strict Pyright with zero errors, 71 product/trust tests, 28 controller
+simulations, 124 exact legacy mappings, 11 hostile legacy tests, and 11 hosted-runtime regression
+tests. These results do not constitute complete candidate acceptance.
+
+Still pending are the canonical full local/pre-evidence gate, every exact-head hosted PR check,
+the independent root-owned verifier/runtime installation, trusted GitHub App and exact ruleset,
+V3.1 M0 receipts, all 20 live canaries, a signed LIVE activation transaction, and the ordered
+seven-event post-activation observation. See
+`docs/migrations/V3_1_ZH_REMAINING_ACCEPTANCE.md` and the candidate section of the 158-row ledger.
 
 ## Baseline
 
@@ -139,6 +152,8 @@ full suite passed 599 tests; Ruff and strict Pyright were clean; 45 factory sche
 migration dry-run, no-paid-usage, and offline wheel build passed. The real root-owned private-gate
 health probe passed without creating a receipt or signature.
 
-Next, publish the resulting commit to `main` only and record the clean-candidate private-gate receipt
-and required hosted runs at that exact SHA. A historical run ID, an unbound PASS JSON object, or a
-digest of a self-declared claim is not acceptable current evidence.
+The historical V3 handoff instructed exact-main publication. That instruction is superseded and is
+not current guidance. Active V3.1 publication must use the automated PR-only path with the trusted
+machine-policy App, exact required checks, independently verified receipt, and verified merged SHA.
+A historical run ID, an unbound PASS JSON object, or a digest of a self-declared claim is not
+acceptable current evidence.

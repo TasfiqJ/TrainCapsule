@@ -183,6 +183,62 @@ def test_issuer_and_broker_entrypoints_fail_closed_for_wrong_identity(
         assert output.err == expected
 
 
+def test_issuer_isolates_rejected_requests_without_authorizing_them(
+    monkeypatch: pytest.MonkeyPatch,
+    capfd: pytest.CaptureFixture[str],
+) -> None:
+    import traincapsule_verifier.issuer_service as issuer_service
+
+    def service_identity(name: str) -> pwd.struct_passwd:
+        assert name == "traincapsule-verifier"
+        return pwd.struct_passwd(
+            (name, "x", 7, 7, "", "/nonexistent", "/usr/sbin/nologin")
+        )
+
+    seen: list[tuple[str, int]] = []
+
+    def issue_one(name: str, service_uid: int) -> None:
+        seen.append((name, service_uid))
+        if name == "stale.request.json":
+            raise issuer_service.VerificationError("stale request is rejected")
+
+    def mixed_requests(service_uid: int) -> tuple[str, ...]:
+        assert service_uid == 7
+        return ("stale.request.json", "valid.request.json")
+
+    def stale_request(service_uid: int) -> tuple[str, ...]:
+        assert service_uid == 7
+        return ("stale.request.json",)
+
+    monkeypatch.setattr(issuer_service.pwd, "getpwnam", service_identity)
+    monkeypatch.setattr(issuer_service.os, "geteuid", lambda: 7)
+    monkeypatch.setattr(issuer_service.sys, "argv", ["issuer", "process-inbox"])
+    monkeypatch.setattr(
+        issuer_service,
+        "_request_names",
+        mixed_requests,
+    )
+    monkeypatch.setattr(issuer_service, "_issue_one", issue_one)
+
+    assert issuer_service.main() == 0
+    assert seen == [
+        ("stale.request.json", 7),
+        ("valid.request.json", 7),
+    ]
+    output = capfd.readouterr()
+    assert output.out == ""
+    assert output.err == "independent issuer rejected 1 request(s)\n"
+
+    seen.clear()
+    monkeypatch.setattr(
+        issuer_service,
+        "_request_names",
+        stale_request,
+    )
+    assert issuer_service.main() == 1
+    assert seen == [("stale.request.json", 7)]
+
+
 def test_staged_installer_is_inert_exact_and_idempotently_rejected(tmp_path: Path) -> None:
     destination = tmp_path / "stage"
     before = {path.relative_to(tmp_path) for path in tmp_path.rglob("*")}

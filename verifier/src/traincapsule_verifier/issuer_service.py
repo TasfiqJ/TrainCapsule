@@ -89,9 +89,22 @@ def main() -> int:
         service_uid = pwd.getpwnam(SERVICE_USER).pw_uid
         if os.geteuid() != service_uid:
             raise VerificationError("issuer must run as dedicated verifier service account")
-        for name in _request_names(service_uid):
-            _issue_one(name, service_uid)
-        return 0
+        names = _request_names(service_uid)
+        accepted = 0
+        rejected = 0
+        for name in names:
+            try:
+                _issue_one(name, service_uid)
+            except (OSError, TrustedPathError, VerificationError):
+                rejected += 1
+                continue
+            accepted += 1
+        if rejected:
+            print(
+                f"independent issuer rejected {rejected} request(s)",
+                file=sys.stderr,
+            )
+        return 0 if accepted or not names else 1
     except (KeyError, OSError, TrustedPathError, VerificationError):
         print("independent issuer service rejected work", file=sys.stderr)
         return 1

@@ -1282,6 +1282,20 @@ def test_default_is_read_only_and_apply_attests_exact_tree(tmp_path: Path) -> No
     assert "traincapsule-controller.service" not in system.active
     assert "traincapsule-verifier-post-activation-observer.timer" in system.enabled
     assert "traincapsule-verifier-git-anchor-updater.path" in system.enabled
+    authority_bootstrap = (
+        "start",
+        "traincapsule-external-evidence-authority.service",
+    )
+    authority_path_start = (
+        "start",
+        "traincapsule-external-evidence-authority.path",
+    )
+    assert authority_bootstrap in system.calls
+    assert system.calls.index(authority_bootstrap) < system.calls.index(authority_path_start)
+    assert (
+        "stop",
+        "traincapsule-external-evidence-authority.service",
+    ) in system.calls
     assert not any(
         action == "start" and unit == "traincapsule-controller.service"
         for action, unit in system.calls

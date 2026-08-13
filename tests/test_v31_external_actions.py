@@ -1256,8 +1256,9 @@ def test_authority_path_unit_bootstraps_preexisting_signed_genesis() -> None:
     service_unit = (
         root / "config/traincapsule-external-evidence-authority.service"
     ).read_text(encoding="utf-8")
+    assert "PathExists=" not in path_unit
     assert (
-        "PathExists=/var/lib/traincapsule-external-evidence/"
+        "PathChanged=/var/lib/traincapsule-external-evidence/"
         "staged-authority/authority-anchor.json"
     ) in path_unit
     assert "Unit=traincapsule-external-evidence-authority.service" in path_unit

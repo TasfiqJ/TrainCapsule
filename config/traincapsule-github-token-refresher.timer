@@ -1,6 +1,6 @@
 [Timer]
 OnBootSec=1m
-OnUnitActiveSec=30m
+OnCalendar=*-*-* *:00/30:00
 RandomizedDelaySec=2m
 Persistent=true
 Unit=traincapsule-github-token-refresher.service

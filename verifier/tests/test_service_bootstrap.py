@@ -186,6 +186,16 @@ def test_activation_units_use_installed_environment_and_create_stop_fail_closed(
     assert "EnvironmentFile=/etc/traincapsule-verifier/controller-runtime.env" not in supervisor
     assert "ReadWritePaths=/var/lib/traincapsule-runtime\n" in observer
     assert "ReadWritePaths=/var/lib/traincapsule-runtime/STOP" not in observer
+    assert (
+        "ConditionPathExists=/var/lib/traincapsule-verifier/activation/current.json"
+        in observer
+    )
+    assert "OnCalendar=*-*-* *:00/5:00" in systemd_unit_content(
+        unit="activation-supervisor-timer"
+    ).decode()
+    assert "OnCalendar=*-*-* *:00/2:00" in systemd_unit_content(
+        unit="post-activation-observer-timer"
+    ).decode()
 
 
 def test_unit_separation_and_rollback_are_explicit(tmp_path: Path) -> None:

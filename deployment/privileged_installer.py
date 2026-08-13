@@ -2157,6 +2157,18 @@ class PrivilegedInstaller:
             self._unit_transition("CONTROLLER_DISABLE", unit, self.system.disable_unit)
 
     def _enable_paths_after_attestation(self) -> None:
+        authority_service = "traincapsule-external-evidence-authority.service"
+        self._unit_transition(
+            "AUTHORITY_BOOTSTRAP",
+            authority_service,
+            self.system.start_unit,
+        )
+        if self.system.unit_active(authority_service):
+            self._unit_transition(
+                "AUTHORITY_BOOTSTRAP_STOP",
+                authority_service,
+                self.system.stop_unit,
+            )
         for unit in self.spec.path_units:
             if not self.system.unit_enabled(unit):
                 self._unit_transition("PATH_ENABLE", unit, self.system.enable_unit)

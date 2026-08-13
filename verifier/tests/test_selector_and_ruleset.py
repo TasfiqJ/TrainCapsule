@@ -19,22 +19,28 @@ from traincapsule_verifier.ruleset_broker import promote_ruleset_observation
 def test_ruleset_observer_accepts_github_null_as_no_bypass_and_uses_graphql_auto_merge(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
-    assert ruleset_observer._has_no_bypass_actors(None)
-    assert ruleset_observer._has_no_bypass_actors([])
-    assert not ruleset_observer._has_no_bypass_actors([{"actor_id": 1}])
-    monkeypatch.setattr(
-        ruleset_observer,
-        "_graphql",
-        lambda _query, variables, _token: {
+    assert ruleset_observer.has_no_bypass_actors(None)
+    assert ruleset_observer.has_no_bypass_actors([])
+    assert not ruleset_observer.has_no_bypass_actors([{"actor_id": 1}])
+
+    def fake_graphql(
+        _query: str, variables: dict[str, str], _token: str
+    ) -> object:
+        return {
             "data": {
                 "repository": {
                     "autoMergeAllowed": variables
                     == {"owner": "TasfiqJ", "name": "TrainCapsule"}
                 }
             }
-        },
+        }
+
+    monkeypatch.setattr(
+        ruleset_observer,
+        "_graphql",
+        fake_graphql,
     )
-    assert ruleset_observer._repository_auto_merge_enabled(
+    assert ruleset_observer.repository_auto_merge_enabled(
         "TasfiqJ/TrainCapsule", "installation-token"
     )
 

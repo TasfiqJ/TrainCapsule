@@ -185,6 +185,7 @@ WantedBy=multi-user.target
         value = """[Unit]
 Description=TrainCapsule independent post-activation observer
 After=traincapsule-controller.service traincapsule-verifier-controller-start.service
+ConditionPathExists=/var/lib/traincapsule-verifier/activation/current.json
 
 [Service]
 Type=oneshot
@@ -207,7 +208,7 @@ InaccessiblePaths=/var/lib/traincapsule-verifier/private /var/lib/traincapsule-v
     elif unit == "post-activation-observer-timer":
         value = """[Timer]
 OnBootSec=2m
-OnUnitActiveSec=2m
+OnCalendar=*-*-* *:00/2:00
 Persistent=true
 Unit=traincapsule-verifier-post-activation-observer.service
 
@@ -217,7 +218,7 @@ WantedBy=multi-user.target
     elif unit == "activation-supervisor-timer":
         value = """[Timer]
 OnBootSec=1m
-OnUnitActiveSec=5m
+OnCalendar=*-*-* *:00/5:00
 Persistent=true
 Unit=traincapsule-activation-supervisor.service
 
@@ -367,7 +368,7 @@ Description=TrainCapsule bounded ruleset observation refresh
 
 [Timer]
 OnBootSec=30s
-OnUnitActiveSec=5m
+OnCalendar=*-*-* *:00/5:00
 RandomizedDelaySec=30s
 Persistent=true
 Unit=traincapsule-verifier-ruleset-observer.service

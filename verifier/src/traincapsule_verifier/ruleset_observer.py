@@ -65,7 +65,7 @@ def _graphql(query: str, variables: dict[str, str], token: str) -> object:
         raise ValueError("ruleset observer GitHub GraphQL API is unavailable") from exc
 
 
-def _repository_auto_merge_enabled(repository: str, token: str) -> bool:
+def repository_auto_merge_enabled(repository: str, token: str) -> bool:
     owner, name = repository.split("/", 1)
     marker = "$"
     query = (
@@ -92,7 +92,7 @@ def _repository_auto_merge_enabled(repository: str, token: str) -> bool:
     )
 
 
-def _has_no_bypass_actors(value: object) -> bool:
+def has_no_bypass_actors(value: object) -> bool:
     return value is None or value == []
 
 
@@ -157,7 +157,7 @@ def _observe(uid: int) -> None:
         if candidate.get("enforcement") == "active" and exact_main:
             selected = candidate
             break
-    if selected is None or not _has_no_bypass_actors(selected.get("bypass_actors")):
+    if selected is None or not has_no_bypass_actors(selected.get("bypass_actors")):
         raise ValueError("no bypass-free active ruleset is available")
     rules = selected.get("rules")
     if not isinstance(rules, list):
@@ -184,7 +184,7 @@ def _observe(uid: int) -> None:
                 observed[cast(str, check["context"])] = cast(int, check["integration_id"])
     if observed != expected:
         raise ValueError("ruleset exact check/App mapping differs from policy")
-    if not _repository_auto_merge_enabled(repository, token):
+    if not repository_auto_merge_enabled(repository, token):
         raise ValueError("repository auto-merge is disabled")
     now = datetime.now(UTC)
     core = {

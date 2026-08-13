@@ -222,6 +222,10 @@ CANARY_DISTRIBUTION_FILES = (
 
 ROLE_TARGETS: dict[str, str] = {
     "public-verifier": "/usr/local/bin/traincapsule-verifier-verify-receipt",
+    "reduction-oracle": "/usr/local/libexec/traincapsule-reduction-oracle",
+    "reduction-oracle-public-key": (
+        "/etc/traincapsule-verifier/keys/reduction-oracle.pub"
+    ),
     "issuer": "/usr/libexec/traincapsule-verifier-issuer",
     "receipt-broker": "/usr/libexec/traincapsule-verifier-broker",
     "request-broker": "/usr/libexec/traincapsule-verifier-request-broker",
@@ -658,6 +662,20 @@ def _validate_role_metadata(spec: PrivilegedInstallSpec) -> None:
     public = by_role["public-verifier"]
     if (public.owner, public.group, public.mode) != ("root", "root", "0755"):
         raise ValueError("public verifier must be root-owned and publicly executable")
+    reduction_oracle = by_role["reduction-oracle"]
+    if (
+        reduction_oracle.owner,
+        reduction_oracle.group,
+        reduction_oracle.mode,
+    ) != ("root", "root", "0555"):
+        raise ValueError("reduction oracle must be root-owned and immutable")
+    reduction_key = by_role["reduction-oracle-public-key"]
+    if (reduction_key.owner, reduction_key.group, reduction_key.mode) != (
+        "root",
+        "root",
+        "0444",
+    ):
+        raise ValueError("reduction oracle public key must be root-owned and immutable")
     for role in ("issuer", "activation-issuer", "check-worker"):
         issuer = by_role[role]
         if (issuer.owner, issuer.group, issuer.mode) != ("root", SERVICE_USER, "0750"):
@@ -993,8 +1011,10 @@ def production_directory_pins(
     fetcher = anchor_fetcher_account.name
     controller = controller_account.name
     rows = [
+        ("/usr/local/libexec", "root", "root", "0755"),
         ("/var/lib/traincapsule-verifier", "root", "root", "0755"),
         ("/etc/traincapsule-verifier", "root", "root", "0755"),
+        ("/etc/traincapsule-verifier/keys", "root", "root", "0755"),
         ("/etc/traincapsule-verifier/request-profiles", "root", "root", "0755"),
         ("/etc/traincapsule-canary-runner", "root", "root", "0755"),
         ("/etc/traincapsule-runtime", "root", "root", "0755"),
@@ -2177,6 +2197,7 @@ class PrivilegedInstaller:
             "environmentFile",
             "effectiveConfig",
             "repositorySnapshotManifest",
+            "reductionOracle",
             "repositoryMainSha",
             "repositoryTreeSha",
             "mutableGitRoot",
@@ -2230,6 +2251,31 @@ class PrivilegedInstaller:
                 "executable": executable,
             }:
                 raise InstallFailure("installed controller runtime artifact pin mismatch")
+        reduction_oracle = manifest["reductionOracle"]
+        expected_reduction_oracle = {
+            "oracleId": "TRAINCAPSULE_REDUCTION_ORACLE_V1",
+            "executable": {
+                "path": pins["reduction-oracle"].target,
+                "digest": pins["reduction-oracle"].sha256,
+                "executable": True,
+            },
+            "publicKey": {
+                "path": pins["reduction-oracle-public-key"].target,
+                "digest": pins["reduction-oracle-public-key"].sha256,
+                "executable": False,
+            },
+            "receiptVerifier": {
+                "path": pins["public-verifier"].target,
+                "digest": pins["public-verifier"].sha256,
+                "executable": True,
+            },
+            "publicReceiptRoot": "/var/lib/traincapsule-verifier/receipts",
+            "activationReceiptPath": (
+                "/var/lib/traincapsule-verifier/activation/current.json"
+            ),
+        }
+        if reduction_oracle != expected_reduction_oracle:
+            raise InstallFailure("installed reduction oracle pin mismatch")
         snapshot = load_repository_snapshot_manifest(
             self._target(ROLE_TARGETS["repository-snapshot-manifest"])
         )

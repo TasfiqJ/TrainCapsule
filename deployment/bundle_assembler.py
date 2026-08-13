@@ -86,6 +86,10 @@ class BundleAssemblyError(RuntimeError):
 def _metadata(role: str) -> tuple[str, str, str]:
     if role == "public-verifier":
         return "root", "root", "0755"
+    if role == "reduction-oracle":
+        return "root", "root", "0555"
+    if role == "reduction-oracle-public-key":
+        return "root", "root", "0444"
     if role in {"issuer", "activation-issuer", "check-worker"}:
         return "root", SERVICE_USER, "0750"
     if role == "observed-main-selector":
@@ -369,6 +373,7 @@ def _validate_controller_runtime(sources: Mapping[str, Path]) -> None:
         "environmentFile",
         "effectiveConfig",
         "repositorySnapshotManifest",
+        "reductionOracle",
         "repositoryMainSha",
         "repositoryTreeSha",
         "mutableGitRoot",
@@ -421,6 +426,31 @@ def _validate_controller_runtime(sources: Mapping[str, Path]) -> None:
             "executable": executable,
         }:
             raise BundleAssemblyError("installed controller artifact pin is inconsistent")
+    reduction_oracle = manifest["reductionOracle"]
+    expected_reduction_oracle = {
+        "oracleId": "TRAINCAPSULE_REDUCTION_ORACLE_V1",
+        "executable": {
+            "path": ROLE_TARGETS["reduction-oracle"],
+            "digest": _digest(sources["reduction-oracle"]),
+            "executable": True,
+        },
+        "publicKey": {
+            "path": ROLE_TARGETS["reduction-oracle-public-key"],
+            "digest": _digest(sources["reduction-oracle-public-key"]),
+            "executable": False,
+        },
+        "receiptVerifier": {
+            "path": ROLE_TARGETS["public-verifier"],
+            "digest": _digest(sources["public-verifier"]),
+            "executable": True,
+        },
+        "publicReceiptRoot": "/var/lib/traincapsule-verifier/receipts",
+        "activationReceiptPath": (
+            "/var/lib/traincapsule-verifier/activation/current.json"
+        ),
+    }
+    if reduction_oracle != expected_reduction_oracle:
+        raise BundleAssemblyError("installed reduction oracle pin is inconsistent")
     snapshot = load_repository_snapshot_manifest(sources["repository-snapshot-manifest"])
     if (
         manifest["repositoryMainSha"] != snapshot.main_sha

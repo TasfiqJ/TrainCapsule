@@ -165,8 +165,10 @@ def _directory_rows() -> list[dict[str, str]]:
         return {"target": target, "owner": owner, "group": owner, "mode": mode}
 
     return [
+        row("/usr/local/libexec", "root", "0755"),
         row("/var/lib/traincapsule-verifier", "root", "0755"),
         row("/etc/traincapsule-verifier", "root", "0755"),
+        row("/etc/traincapsule-verifier/keys", "root", "0755"),
         row("/etc/traincapsule-verifier/request-profiles", "root", "0755"),
         row("/etc/traincapsule-canary-runner", "root", "0755"),
         row("/etc/traincapsule-runtime", "root", "0755"),
@@ -323,6 +325,10 @@ def _directory_rows() -> list[dict[str, str]]:
 def _metadata(role: str) -> tuple[str, str, str]:
     if role == "public-verifier":
         return "root", "root", "0755"
+    if role == "reduction-oracle":
+        return "root", "root", "0555"
+    if role == "reduction-oracle-public-key":
+        return "root", "root", "0444"
     if role in {"issuer", "activation-issuer", "check-worker"}:
         return "root", "traincapsule-verifier", "0750"
     if role == "observed-main-selector":
@@ -1078,6 +1084,34 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
             "--repo",
             "/var/lib/traincapsule-verifier/repository-boundary",
         ],
+        "reductionOracle": {
+            "oracleId": "TRAINCAPSULE_REDUCTION_ORACLE_V1",
+            "executable": {
+                "path": ROLE_TARGETS["reduction-oracle"],
+                "digest": sha256_digest(
+                    (payload_root / "reduction-oracle").read_bytes()
+                ),
+                "executable": True,
+            },
+            "publicKey": {
+                "path": ROLE_TARGETS["reduction-oracle-public-key"],
+                "digest": sha256_digest(
+                    (payload_root / "reduction-oracle-public-key").read_bytes()
+                ),
+                "executable": False,
+            },
+            "receiptVerifier": {
+                "path": ROLE_TARGETS["public-verifier"],
+                "digest": sha256_digest(
+                    (payload_root / "public-verifier").read_bytes()
+                ),
+                "executable": True,
+            },
+            "publicReceiptRoot": "/var/lib/traincapsule-verifier/receipts",
+            "activationReceiptPath": (
+                "/var/lib/traincapsule-verifier/activation/current.json"
+            ),
+        },
     }
     for field, (role, executable) in controller_artifact_roles.items():
         controller_runtime_manifest[field] = {

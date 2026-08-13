@@ -529,7 +529,7 @@ NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectSystem=strict
 ReadOnlyPaths=/etc/traincapsule-verifier /var/lib/traincapsule-verifier/outbox
-ReadWritePaths=/var/lib/traincapsule-verifier/receipts
+ReadWritePaths=/var/lib/traincapsule-verifier/receipts /var/lib/traincapsule-verifier/activation
 
 [Install]
 WantedBy=multi-user.target

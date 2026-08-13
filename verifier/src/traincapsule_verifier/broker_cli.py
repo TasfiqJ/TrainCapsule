@@ -21,6 +21,7 @@ CONFIG_ROOT = Path("/etc/traincapsule-verifier")
 STATE_ROOT = Path("/var/lib/traincapsule-verifier")
 OUTBOX_ROOT = STATE_ROOT / "outbox"
 PUBLIC_ROOT = STATE_ROOT / "receipts"
+ACTIVATION_ROOT = STATE_ROOT / "activation"
 REPOSITORY_BOUNDARY_ROOT = STATE_ROOT / "repository-boundary"
 SERVICE_USER = "traincapsule-verifier"
 
@@ -69,9 +70,13 @@ def main() -> int:
             ) as verifier,
             open_trusted_root(OUTBOX_ROOT, expected_uid=service_uid) as outbox,
             open_trusted_root(PUBLIC_ROOT, expected_uid=0) as public,
+            open_trusted_root(ACTIVATION_ROOT, expected_uid=0) as activation,
         ):
             broker = RootReceiptBroker(
-                verifier=verifier, outbox_root=outbox, public_root=public
+                verifier=verifier,
+                outbox_root=outbox,
+                public_root=public,
+                activation_root=activation,
             )
             names = (
                 (sys.argv[2],)

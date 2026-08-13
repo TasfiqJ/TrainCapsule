@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import os
 import pwd
+from datetime import timedelta
 from pathlib import Path
 from typing import cast
 
@@ -21,6 +22,7 @@ from traincapsule_verifier.broker_cli import (
 )
 from traincapsule_verifier.canonical import canonical_json_bytes, sha256_digest
 from traincapsule_verifier.filesystem import open_trusted_root
+from traincapsule_verifier.public_verifier import PublicVerifier
 from traincapsule_verifier.receipt_broker import (
     ReceiptPromotionError,
     ReceiptPromotionResult,
@@ -72,6 +74,68 @@ def test_receipt_broker_batch_rejection_does_not_starve_current_receipt() -> Non
             ("stale.json",),
             single=True,
         )
+
+
+def test_activation_receipt_promotion_selects_current_without_rollback(
+    public_fixture: PublicFixture, tmp_path: Path
+) -> None:
+    outbox, public = _prepare_broker(public_fixture, tmp_path)
+    activation = tmp_path / "activation"
+    activation.mkdir(mode=0o700)
+    activation_name = f"{public_fixture.activation.receipt_id}.json"
+    activation_raw = canonical_json_bytes(public_fixture.activation)
+    (outbox / activation_name).write_bytes(activation_raw)
+    verifier = PublicVerifier.from_public_roots(
+        repository_root=public_fixture.repository,
+        config_root=public_fixture.config,
+        state_root=public_fixture.state,
+        receipt_root=public,
+        expected_owner_uid=os.getuid(),
+    )
+    outbox_root = open_trusted_root(outbox, expected_uid=os.getuid())
+    public_root = open_trusted_root(public, expected_uid=os.getuid())
+    activation_root = open_trusted_root(activation, expected_uid=os.getuid())
+    public_root.expected_uid = os.getuid() + 1
+    activation_root.expected_uid = os.getuid() + 1
+    broker = RootReceiptBroker(
+        verifier=verifier,
+        outbox_root=outbox_root,
+        public_root=public_root,
+        activation_root=activation_root,
+    )
+    public_root.expected_uid = os.getuid()
+    activation_root.expected_uid = os.getuid()
+    try:
+        broker.promote(f"{public_fixture.machine.receipt_id}.json")
+        assert broker.promote(activation_name).state == "PROMOTED"
+        current = activation / "current.json"
+        assert current.read_bytes() == activation_raw
+        assert current.stat().st_mode & 0o777 == 0o644
+
+        newer = public_fixture.activation.model_copy(
+            update={
+                "receipt_id": "ACT:NEWER-ROOT-OWNED-SELECTOR",
+                "issued_at": public_fixture.activation.issued_at + timedelta(minutes=1),
+                "expires_at": public_fixture.activation.expires_at + timedelta(minutes=1),
+            }
+        )
+        newer_raw = canonical_json_bytes(newer)
+        current.write_bytes(newer_raw)
+        assert broker.promote(activation_name).state == "ALREADY_PROMOTED"
+        assert current.read_bytes() == newer_raw
+    finally:
+        broker.verifier.close()
+        broker.outbox_root.close()
+        broker.public_root.close()
+        activation_root.close()
+
+
+def test_receipt_broker_unit_can_select_root_owned_activation() -> None:
+    assert (
+        "ReadWritePaths=/var/lib/traincapsule-verifier/receipts "
+        "/var/lib/traincapsule-verifier/activation"
+        in systemd_unit_content(unit="receipt-broker").decode("utf-8")
+    )
 
 
 def test_request_broker_rejection_does_not_block_later_valid_request() -> None:

@@ -1,0 +1,140 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/external-evidence-receipt-v1.json",
+  "title": "ExternalEvidenceReceipt",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "receiptVersion",
+    "receiptId",
+    "evidenceType",
+    "subjectId",
+    "issuer",
+    "observedAt",
+    "outcome",
+    "artifacts",
+    "limitations",
+    "signature",
+    "syntheticTestOnly"
+  ],
+  "properties": {
+    "receiptVersion": {
+      "const": 1
+    },
+    "receiptId": {
+      "type": "string",
+      "pattern": "^XREC-[A-Z0-9_-]+$"
+    },
+    "evidenceType": {
+      "enum": [
+        "CUSTOMER_CONVERSATION",
+        "INCIDENT_ARCHIVE_ACCESS",
+        "PAID_PREFLIGHT",
+        "PAID_PILOT",
+        "DECISION_CHANGED",
+        "SECOND_PAID_ACTION",
+        "INDEPENDENT_OPERATOR",
+        "HUMAN_REVIEW",
+        "UPSTREAM_ACCEPTANCE",
+        "PROVIDER_ACCEPTANCE"
+      ]
+    },
+    "subjectId": {
+      "type": "string",
+      "minLength": 1
+    },
+    "issuer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "authority"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "authority": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "observedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "candidateOrOfferIdentity": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "outcome": {
+      "type": "string",
+      "minLength": 1
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "digest",
+          "locationClass"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "digest": {
+            "type": "string",
+            "pattern": "^sha256:[0-9a-f]{64}$"
+          },
+          "locationClass": {
+            "enum": [
+              "TRUSTED_EXTERNAL",
+              "CUSTOMER_LOCAL",
+              "REDACTED_REFERENCE"
+            ]
+          }
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "keyId",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "enum": [
+            "ed25519",
+            "external-trusted-root"
+          ]
+        },
+        "keyId": {
+          "type": "string"
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "syntheticTestOnly": {
+      "type": "boolean"
+    }
+  }
+}

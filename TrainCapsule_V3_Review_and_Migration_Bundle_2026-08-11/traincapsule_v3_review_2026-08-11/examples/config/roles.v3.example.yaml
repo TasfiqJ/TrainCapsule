@@ -1,0 +1,45 @@
+version: 3
+roles:
+  planner:
+    backend: claude
+    writable: false
+    network: current_primary_sources_only
+    maxTurns: 24
+  builder:
+    backend: claude
+    writable: true
+    network: denied_by_default
+    maxTurns: 80
+  adversary:
+    backend: claude
+    writable: false
+    network: denied_by_default
+    maxTurns: 40
+  nativeSubstituteReviewer:
+    backend: claude
+    writable: false
+    network: current_primary_sources_only
+    maxTurns: 40
+  milestoneAuditor:
+    backend: claude
+    writable: false
+    network: denied_by_default
+    maxTurns: 40
+  factoryRepair:
+    backend: claude
+    writable: true
+    network: denied
+    maxTurns: 40
+    maxPerIncident: 1
+    forbiddenPaths:
+      - docs/source-of-truth/**
+      - factory/market/**
+      - factory/trust/approvals/**
+      - scripts/private-gates/**
+      - config/human_approval.yaml
+
+humanOnly:
+  - externalReleaseApproval
+  - commercialPackApproval
+  - sourceOfTruthMigrationApproval
+  - customerClaimApproval

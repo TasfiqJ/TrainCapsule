@@ -1,0 +1,68 @@
+version: 1
+plan_id: TRAINCAPSULE_V3_1_ZH_FULL_REMEDIATION
+base_sha_reviewed: "26c855efbe9178066a10c8981c32bf5b2a07a6c6"
+controller_activation_default: STOPPED
+phases:
+  - id: 0
+    name: baseline_and_rollback
+    depends_on: []
+  - id: 1
+    name: v3_1_zh_authority
+    depends_on: [0]
+  - id: 2
+    name: schemas_and_configuration
+    depends_on: [0, 1]
+  - id: 3
+    name: external_machine_authority
+    depends_on: [0, 1, 2]
+  - id: 4
+    name: automated_pr_release
+    depends_on: [3]
+  - id: 5
+    name: task_compiler_context_outputs
+    depends_on: [4]
+  - id: 6
+    name: controlled_source_acquisition
+    depends_on: [5]
+  - id: 7
+    name: claude_backend_hardening
+    depends_on: [6]
+  - id: 8
+    name: runtime_paths_leases_supervisor
+    depends_on: [7]
+  - id: 9
+    name: finite_repair_recovery
+    depends_on: [8]
+  - id: 10
+    name: evidence_and_handoffs
+    depends_on: [9]
+  - id: 11
+    name: native_and_value_gates
+    depends_on: [10]
+  - id: 12
+    name: milestone_advancement
+    depends_on: [11]
+  - id: 13
+    name: lane_execution
+    depends_on: [12]
+  - id: 14
+    name: product_preservation
+    depends_on: [13]
+  - id: 15
+    name: validation
+    depends_on: [14]
+  - id: 16
+    name: canaries_and_activation
+    depends_on: [15]
+mandatory_canaries:
+  - real_claude_mechanical_task
+  - process_kill_and_resume
+  - quota_pause_and_resume
+  - authentication_expiry_and_recovery
+  - repeated_finding_finite_stop
+  - external_wait_lane_isolation
+  - bad_candidate_rejected_before_main
+  - release_transaction_crash_idempotency
+  - automatic_milestone_advancement
+  - machine_receipt_missing_invalid_expired_revoked
+completion_source: 03_V3_1_ZH_ACCEPTANCE_CONTRACT.yaml

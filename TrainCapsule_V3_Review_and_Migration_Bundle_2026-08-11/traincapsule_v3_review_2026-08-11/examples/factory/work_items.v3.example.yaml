@@ -1,0 +1,99 @@
+version: 3
+activeMilestone: M0_FACTORY_MIGRATED
+workItems:
+  - workItemId: V3-MIG-003
+    title: Install the V3 source-of-truth bundle
+    lane: TRUST
+    kind: MIGRATION
+    milestone: M0_FACTORY_MIGRATED
+    decisionContribution: Establish the controlling bounded product and factory policy.
+    customerOutcome: Prevent implementation from following the obsolete build-everything graph.
+    dependsOn:
+      - V3-MIG-001
+    softDependsOn: []
+    blocksCommercialRelease: true
+    priority: 100
+    riskTier: TRUST_CORE
+    maturityTarget:
+      engineering: CONTROLLED_VALIDATED
+      commercial: NOT_EVALUATED
+    disposition: KEEP
+    status: READY
+    ownerType: AI
+    automatable: true
+    packetPath: specs/v3/V3-MIG-003.yaml
+    evidenceRequired:
+      - source manifest passes
+      - old bundle remains intact
+      - authority tests pass
+    externalReceiptRequired: false
+    humanApprovalRequired: true
+    retryPolicy:
+      maxPlanAttempts: 2
+      maxCandidateRepairCycles: 3
+
+  - workItemId: V3-MKT-003
+    title: Record fifteen qualified operator conversations
+    lane: MARKET
+    kind: EXTERNAL_EVIDENCE
+    milestone: M1_NATIVE_PREFLIGHT
+    decisionContribution: Determine whether the initial wedge maps to real incidents and upcoming changes.
+    customerOutcome: None until attributable operator evidence exists.
+    dependsOn:
+      - V3-MKT-001
+      - V3-MKT-002
+    softDependsOn: []
+    blocksCommercialRelease: true
+    priority: 90
+    riskTier: EXTERNAL
+    maturityTarget:
+      engineering: DESIGN_ONLY
+      commercial: NATIVE_ADVANTAGE_UNPROVEN
+    disposition: NOT_REVIEWED
+    status: WAITING_EXTERNAL
+    ownerType: FOUNDER
+    automatable: false
+    packetPath: null
+    evidenceRequired:
+      - signed or attributable interview receipts
+    externalReceiptRequired: true
+    humanApprovalRequired: false
+    retryPolicy:
+      maxPlanAttempts: 0
+      maxCandidateRepairCycles: 0
+
+  - workItemId: V3-PROD-006
+    title: Import supported PyTorch Flight Recorder evidence
+    lane: PRODUCT
+    kind: CODE
+    milestone: M1_NATIVE_PREFLIGHT
+    decisionContribution: Establish the native evidence baseline without duplicating it.
+    customerOutcome: A customer-local case can ingest and preserve native findings and evidence gaps.
+    dependsOn:
+      - V3-PROD-003
+      - V3-PROD-004
+      - V3-PROD-005
+      - V3-COMP-001
+    softDependsOn: []
+    blocksCommercialRelease: false
+    priority: 85
+    riskTier: STANDARD
+    maturityTarget:
+      engineering: CONTROLLED_VALIDATED
+      commercial: NATIVE_ADVANTAGE_UNPROVEN
+    disposition: INTEGRATE_EXISTING_BACKEND
+    status: PROPOSED
+    ownerType: AI
+    automatable: true
+    packetPath: specs/v3/V3-PROD-006.yaml
+    evidenceRequired:
+      - supported-format positive fixture
+      - malformed input
+      - unsupported version
+      - missing rank
+      - native finding attribution
+    externalReceiptRequired: false
+    humanApprovalRequired: false
+    retryPolicy:
+      maxPlanAttempts: 2
+      maxCandidateRepairCycles: 3

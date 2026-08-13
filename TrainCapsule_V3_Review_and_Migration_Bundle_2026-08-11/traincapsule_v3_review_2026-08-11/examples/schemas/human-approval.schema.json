@@ -1,0 +1,144 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/human-approval-v1.json",
+  "title": "HumanApprovalRecord",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "approvalId",
+    "scope",
+    "candidateCommit",
+    "artifactDigests",
+    "reviewer",
+    "reviewerQualification",
+    "decision",
+    "conditions",
+    "limitations",
+    "issuedAt",
+    "expiresAt",
+    "signature"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "approvalId": {
+      "type": "string",
+      "pattern": "^HAPR-[A-Z0-9_-]+$"
+    },
+    "scope": {
+      "enum": [
+        "SOURCE_OF_TRUTH_MIGRATION",
+        "EXTERNAL_RELEASE",
+        "COMMERCIAL_PACK_RELEASE",
+        "TRUST_CORE_CHANGE",
+        "SECURITY_BOUNDARY_CHANGE",
+        "CUSTOMER_CLAIM",
+        "ROADMAP_EXPANSION",
+        "WEDGE_DECISION"
+      ]
+    },
+    "candidateCommit": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{40}$"
+    },
+    "artifactDigests": {
+      "type": "object",
+      "minProperties": 1,
+      "additionalProperties": {
+        "type": "string",
+        "pattern": "^sha256:[0-9a-f]{64}$"
+      }
+    },
+    "reviewer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "displayName",
+        "organization"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "minLength": 1
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1
+        },
+        "organization": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "reviewerQualification": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "decision": {
+      "enum": [
+        "APPROVED",
+        "APPROVED_WITH_CONDITIONS",
+        "REJECTED"
+      ]
+    },
+    "conditions": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "issuedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "expiresAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "signature": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "algorithm",
+        "keyId",
+        "value"
+      ],
+      "properties": {
+        "algorithm": {
+          "enum": [
+            "ed25519",
+            "external-trusted-root"
+          ]
+        },
+        "keyId": {
+          "type": "string",
+          "minLength": 1
+        },
+        "value": {
+          "type": "string",
+          "minLength": 1
+        }
+      }
+    },
+    "syntheticTestOnly": {
+      "const": false
+    }
+  }
+}

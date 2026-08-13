@@ -1,0 +1,55 @@
+schemaVersion: 1
+pilotId: PILOT-000
+accountId: ACCOUNT-000
+status: DRAFT
+
+incident:
+  caseId: null
+  activeOrHistorical: null
+  summary: null
+  estimatedOriginalExecutionCost: null
+  estimatedInvestigationCost: null
+  evidenceAvailable: []
+
+change:
+  type: null
+  baselineEnvironment: null
+  candidateEnvironment: null
+  plannedWithinDays: null
+
+decision:
+  statement: null
+  owner: null
+  deadline: null
+  approveBlockOrEscalate: null
+
+authority:
+  customerLocalExecution: false
+  codeAccessPolicy: null
+  dataAccessPolicy: null
+  checkpointAccessPolicy: null
+  networkPolicy: null
+
+nativeBaseline:
+  required: true
+  tools: []
+  completed: false
+
+secondUse:
+  included: true
+  dateOrTrigger: null
+  candidateOrWorkload: null
+
+commercial:
+  paid: false
+  amount: null
+  currency: null
+  externalReceiptRef: null
+
+goNoGo:
+  evidenceIdentitySufficient: false
+  supportedPackFit: false
+  economicHypothesis: null
+  privacyFeasible: false
+  humanReviewerAvailable: false
+  outcome: NOT_EVALUATED

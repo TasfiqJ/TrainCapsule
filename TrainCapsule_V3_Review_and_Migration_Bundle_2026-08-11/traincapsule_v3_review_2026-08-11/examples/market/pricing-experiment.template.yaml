@@ -1,0 +1,24 @@
+version: 1
+experimentId: PRICE-000
+accountId: ACCOUNT-000
+offer: INCIDENT_TO_CHANGE_QUALIFICATION_PILOT
+incidentClass: null
+decision: null
+quotedPrice:
+  amount: null
+  currency: USD
+scope:
+  paidPreflightIncluded: false
+  baselineCandidateQualification: true
+  secondExecutionIncluded: true
+  computeIncluded: false
+response:
+  status: NOT_ASKED
+  exactResponse: null
+objection: null
+alternativeBudget: null
+buyer: null
+observedAt: null
+externalReceiptRef: null
+nextStep: null
+evidenceStrength: EXTERNAL_EVIDENCE_REQUIRED

@@ -183,7 +183,11 @@ def run_startup_preflight(
     paths = runtime_paths(repo_root, config)
     _verify_source_integrity(repo_root)
     legacy_migration = load_installed_legacy_migration(repo_root)
-    verify_legacy_queue_archive_receipt(repo_root, require_live=True)
+    # Production executes from an immutable clean snapshot, where ignored legacy
+    # queue copies are intentionally absent.  The tracked canonical archive
+    # receipt remains authoritative and still revalidates live copies whenever
+    # they are present.
+    verify_legacy_queue_archive_receipt(repo_root, require_live=False)
     if paths.stop.exists() and not allow_stop_for_activation:
         raise RuntimeError("durable STOP is present")
     if paths.hard_stuck.exists():

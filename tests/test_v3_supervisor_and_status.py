@@ -119,8 +119,15 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
     write_json(paths.migration_marker, marker.model_dump(mode="json", by_alias=True))
     monkeypatch.setattr("tcfactory.supervisor._verify_migration_marker", lambda *_: marker)
     monkeypatch.setattr("tcfactory.supervisor._verify_source_integrity", lambda _: None)
+    def verify_tracked_legacy_archive(
+        _repo_root: Path, *, require_live: bool = True
+    ) -> dict[str, object]:
+        assert require_live is False
+        return {}
+
     monkeypatch.setattr(
-        "tcfactory.supervisor.verify_legacy_queue_archive_receipt", lambda *_, **__: {}
+        "tcfactory.supervisor.verify_legacy_queue_archive_receipt",
+        verify_tracked_legacy_archive,
     )
 
     class AuthenticatedProvider:

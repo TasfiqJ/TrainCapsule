@@ -21,6 +21,7 @@ class SupportPolicyEvidence(V3Model):
     evidence_basis_sha: str = Field(pattern=SHA_PATTERN.pattern)
     source_authority_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     pack_id: str = Field(pattern=r"^[A-Z0-9][A-Z0-9._:-]{2,127}$")
+    pack_identity_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     supported_versions: list[str] = Field(min_length=1, max_length=64)
     supported_scope: list[str] = Field(min_length=1, max_length=64)
     upgrade_rules: list[str] = Field(min_length=1, max_length=64)
@@ -48,7 +49,10 @@ class DeliveryEconomicsEvidence(V3Model):
     work_item_id: Literal["V3-REPEAT-006"]
     evidence_basis_sha: str = Field(pattern=SHA_PATTERN.pattern)
     source_authority_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
-    source_record_digests: list[str] = Field(min_length=2, max_length=64)
+    source_record_digests: list[str] = Field(min_length=2, max_length=2)
+    signed_external_receipt_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    customer_identity_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    offer_identity_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     original_setup_minutes: int = Field(gt=0, le=1_000_000)
     proposed_setup_minutes: int = Field(ge=0, le=1_000_000)
     original_delivery_minutes: int = Field(gt=0, le=1_000_000)
@@ -60,7 +64,7 @@ class DeliveryEconomicsEvidence(V3Model):
 
     @model_validator(mode="after")
     def measured_improvement(self) -> DeliveryEconomicsEvidence:
-        if len(self.source_record_digests) != len(set(self.source_record_digests)):
+        if len(set(self.source_record_digests)) != 2:
             raise ValueError("delivery-economics source records must be unique")
         if not (
             self.proposed_setup_minutes < self.original_setup_minutes
@@ -77,6 +81,7 @@ class ThirdSameFamilyCaseEvidence(V3Model):
     work_item_id: Literal["V3-PACK-002"]
     evidence_basis_sha: str = Field(pattern=SHA_PATTERN.pattern)
     source_authority_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    customer_identity_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     family_identity_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     case_identity_digests: list[str] = Field(min_length=3, max_length=3)
     case_evidence_artifact_digests: list[str] = Field(min_length=3, max_length=3)
@@ -104,7 +109,7 @@ class ReductionBoundaryEvidence(V3Model):
     source_authority_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     oracle_executable_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     oracle_result_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
-    raw_artifact_digests: list[str] = Field(min_length=3, max_length=64)
+    raw_artifact_digests: list[str] = Field(min_length=2, max_length=64)
     legal_reduction_artifact_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     legal_reduction_verdict: Literal["VERIFIED"]
     illegal_reduction_artifact_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
@@ -119,11 +124,8 @@ class ReductionBoundaryEvidence(V3Model):
         if not {
             self.legal_reduction_artifact_digest,
             self.illegal_reduction_artifact_digest,
-            self.oracle_result_digest,
         }.issubset(self.raw_artifact_digests):
-            raise ValueError(
-                "reduction outcomes and oracle result must be present in the raw roster"
-            )
+            raise ValueError("legal and illegal reduction inputs must be present in the raw roster")
         return self
 
 

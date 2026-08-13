@@ -2,10 +2,11 @@ from __future__ import annotations
 
 import hashlib
 import json
+import os
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 import pytest
 
@@ -19,6 +20,7 @@ from tcfactory.v3.completion_artifacts import (
 )
 from tcfactory.v3.completion_policy import (
     CompletionEvidenceObservation,
+    CorrelatedEvidenceFact,
     EvidenceAuthority,
     EvidenceGrade,
     SemanticEvidence,
@@ -26,13 +28,24 @@ from tcfactory.v3.completion_policy import (
     evaluate_work_item_evidence_contract,
     load_completion_evidence_policy,
 )
+from tcfactory.v3.completion_verification import (
+    CompletionVerificationError,
+    DeliveryMeasurement,
+    DescriptorBoundArtifactReader,
+    ExecutableReductionOracle,
+    ReductionCandidateInput,
+    verify_delivery_economics,
+)
 from tcfactory.v3.controller import V3Controller
 from tcfactory.v3.enums import CommercialMaturity, EvidenceType
 from tcfactory.v3.external_evidence import (
     CustomerDecisionValueAttestation,
     ExternalEvidenceReceipt,
 )
-from tcfactory.v3.maturity import commercial_maturity_supported
+from tcfactory.v3.maturity import (
+    CommercialMaturityAuthorization,
+    commercial_maturity_supported,
+)
 from tcfactory.v3.traincheck_differential import (
     IncidentContract,
     TrainCheckDifferentialRequest,
@@ -119,6 +132,7 @@ def test_all_109_contracts_are_satisfiable_only_with_their_exact_authority() -> 
                 evidence_type: contract.minimum_external_artifacts
                 for evidence_type in contract.allowed_external_evidence_types
             },
+            prior_evidence=contract.required_prior_evidence,
         )
         assert evaluate_work_item_evidence_contract(contract, observation) == []
         if (
@@ -129,6 +143,37 @@ def test_all_109_contracts_are_satisfiable_only_with_their_exact_authority() -> 
             assert SemanticEvidence.NATIVE_VALUE_AUTHORIZATION in contract.required_semantics
 
 
+def test_external_value_items_consume_exact_prior_authority_without_self_issuing() -> None:
+    policy = load_completion_evidence_policy(ROOT)
+    for work_item_id in ("V3-PILOT-011", "V3-REPEAT-005"):
+        contract = policy.work_item(work_item_id)
+        assert EvidenceAuthority.INDEPENDENT_MACHINE_POLICY not in contract.required_authorities
+        assert SemanticEvidence.NATIVE_VALUE_AUTHORIZATION not in contract.required_semantics
+        observation = CompletionEvidenceObservation(
+            grade=contract.minimum_grade,
+            authorities=contract.required_authorities,
+            semantic_counts={
+                semantic: max(1, contract.minimum_semantic_counts.get(semantic, 0))
+                for semantic in contract.required_semantics
+            },
+            external_type_counts={
+                evidence_type: contract.minimum_external_artifacts
+                for evidence_type in contract.allowed_external_evidence_types
+            },
+        )
+        assert any(
+            "prior authority" in failure
+            for failure in evaluate_work_item_evidence_contract(contract, observation)
+        )
+        assert (
+            evaluate_work_item_evidence_contract(
+                contract,
+                observation.model_copy(update={"prior_evidence": contract.required_prior_evidence}),
+            )
+            == []
+        )
+
+
 def test_every_source_exit_criterion_has_an_exact_typed_evidence_closure() -> None:
     policy = load_completion_evidence_policy(ROOT)
     roadmap = load_yaml(ROOT / "factory/roadmap/milestones.yaml")
@@ -136,28 +181,53 @@ def test_every_source_exit_criterion_has_an_exact_typed_evidence_closure() -> No
         contract = policy.milestone(source["milestoneId"])
         assert len(contract.exit_criteria) == len(source["exitCriteria"])
         if len(contract.exit_criteria) > 1:
-            assert len(
-                {
-                    (
-                        tuple(criterion.required_work_item_ids),
-                        tuple(criterion.required_external_evidence_types),
-                        tuple(criterion.required_semantic_counts.items()),
-                        criterion.machine_policy_required,
-                    )
-                    for criterion in contract.exit_criteria
-                }
-            ) > 1
+            assert (
+                len(
+                    {
+                        (
+                            tuple(criterion.required_work_item_ids),
+                            tuple(criterion.required_external_evidence_types),
+                            tuple(criterion.required_semantic_counts.items()),
+                            criterion.machine_policy_required,
+                        )
+                        for criterion in contract.exit_criteria
+                    }
+                )
+                > 1
+            )
         completed = {
             item_id
             for criterion in contract.exit_criteria
             for item_id in criterion.required_work_item_ids
         }
-        semantic = {
-            value: count for value, count in contract.required_semantic_counts.items()
-        }
-        external = {
-            value: 1 for value in contract.required_external_evidence_types
-        }
+        semantic = {value: count for value, count in contract.required_semantic_counts.items()}
+        external = {value: 1 for value in contract.required_external_evidence_types}
+        correlated: list[CorrelatedEvidenceFact] = []
+        for criterion in contract.exit_criteria:
+            if not criterion.required_correlation_fields:
+                continue
+            correlated.extend(
+                CorrelatedEvidenceFact(
+                    candidate_sha="a" * 40,
+                    customer_identity_digest="sha256:" + "1" * 64,
+                    family_identity_digest="sha256:" + "2" * 64,
+                    offer_identity_digest="sha256:" + "3" * 64,
+                    pack_identity_digest="sha256:" + "4" * 64,
+                    semantic=semantic,
+                )
+                for semantic in criterion.required_semantic_counts
+            )
+            correlated.extend(
+                CorrelatedEvidenceFact(
+                    candidate_sha="a" * 40,
+                    customer_identity_digest="sha256:" + "1" * 64,
+                    family_identity_digest="sha256:" + "2" * 64,
+                    offer_identity_digest="sha256:" + "3" * 64,
+                    pack_identity_digest="sha256:" + "4" * 64,
+                    external_evidence_type=evidence_type,
+                )
+                for evidence_type in criterion.required_external_evidence_types
+            )
         assert (
             evaluate_milestone_exit_criteria(
                 contract,
@@ -165,6 +235,7 @@ def test_every_source_exit_criterion_has_an_exact_typed_evidence_closure() -> No
                 semantic_counts=semantic,
                 external_type_counts=external,
                 machine_policy_available=contract.machine_policy_required,
+                correlated_facts=correlated,
             )
             == []
         )
@@ -183,19 +254,18 @@ def test_reduction_and_customer_value_criteria_reject_shared_generic_facts() -> 
     policy = load_completion_evidence_policy(ROOT)
     reduction = policy.milestone("M2_CONTROLLED_QUALIFICATION")
     reduction_items = {"V3-PROD-014", "V3-TRUST-005", "V3-PROD-016"}
-    legal = next(
-        value for value in reduction.exit_criteria if value.criterion_id.endswith("04")
+    legal = next(value for value in reduction.exit_criteria if value.criterion_id.endswith("04"))
+    illegal = next(value for value in reduction.exit_criteria if value.criterion_id.endswith("05"))
+    assert (
+        evaluate_milestone_exit_criteria(
+            reduction.model_copy(update={"exit_criteria": [legal]}),
+            completed_work_item_ids=reduction_items,
+            semantic_counts={SemanticEvidence.LEGAL_REDUCTION_VERIFIED: 1},
+            external_type_counts={},
+            machine_policy_available=False,
+        )
+        == []
     )
-    illegal = next(
-        value for value in reduction.exit_criteria if value.criterion_id.endswith("05")
-    )
-    assert evaluate_milestone_exit_criteria(
-        reduction.model_copy(update={"exit_criteria": [legal]}),
-        completed_work_item_ids=reduction_items,
-        semantic_counts={SemanticEvidence.LEGAL_REDUCTION_VERIFIED: 1},
-        external_type_counts={},
-        machine_policy_available=False,
-    ) == []
     failures = evaluate_milestone_exit_criteria(
         reduction.model_copy(update={"exit_criteria": [illegal]}),
         completed_work_item_ids=reduction_items,
@@ -206,20 +276,48 @@ def test_reduction_and_customer_value_criteria_reject_shared_generic_facts() -> 
     assert any("ILLEGAL_REDUCTION_REJECTED" in failure for failure in failures)
 
     paid = policy.milestone("M4_PAID_PILOT")
-    changed = next(
-        value for value in paid.exit_criteria if value.criterion_id.endswith("01")
-    )
+    changed = next(value for value in paid.exit_criteria if value.criterion_id.endswith("01"))
     customer_value = next(
         value for value in paid.exit_criteria if value.criterion_id.endswith("03")
     )
     facts = {SemanticEvidence.CUSTOMER_DECISION_CHANGED: 1}
-    assert evaluate_milestone_exit_criteria(
+    correlated_changed = [
+        CorrelatedEvidenceFact(
+            candidate_sha="a" * 40,
+            customer_identity_digest="sha256:" + "1" * 64,
+            offer_identity_digest="sha256:" + "2" * 64,
+            semantic=SemanticEvidence.CUSTOMER_DECISION_CHANGED,
+        ),
+        CorrelatedEvidenceFact(
+            candidate_sha="a" * 40,
+            customer_identity_digest="sha256:" + "1" * 64,
+            offer_identity_digest="sha256:" + "2" * 64,
+            external_evidence_type=EvidenceType.DECISION_CHANGED,
+        ),
+    ]
+    assert (
+        evaluate_milestone_exit_criteria(
+            paid.model_copy(update={"exit_criteria": [changed]}),
+            completed_work_item_ids={"V3-PILOT-011"},
+            semantic_counts=facts,
+            external_type_counts={EvidenceType.DECISION_CHANGED: 1},
+            machine_policy_available=False,
+            correlated_facts=correlated_changed,
+        )
+        == []
+    )
+    substituted = correlated_changed[1].model_copy(
+        update={"customer_identity_digest": "sha256:" + "f" * 64}
+    )
+    correlation_failures = evaluate_milestone_exit_criteria(
         paid.model_copy(update={"exit_criteria": [changed]}),
         completed_work_item_ids={"V3-PILOT-011"},
         semantic_counts=facts,
         external_type_counts={EvidenceType.DECISION_CHANGED: 1},
         machine_policy_available=False,
-    ) == []
+        correlated_facts=[correlated_changed[0], substituted],
+    )
+    assert any("correlated" in failure for failure in correlation_failures)
     failures = evaluate_milestone_exit_criteria(
         paid.model_copy(update={"exit_criteria": [customer_value]}),
         completed_work_item_ids={"V3-PILOT-011"},
@@ -227,10 +325,7 @@ def test_reduction_and_customer_value_criteria_reject_shared_generic_facts() -> 
         external_type_counts={EvidenceType.DECISION_CHANGED: 1},
         machine_policy_available=False,
     )
-    assert any(
-        "CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT" in failure
-        for failure in failures
-    )
+    assert any("CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT" in failure for failure in failures)
 
 
 def test_strict_semantic_artifacts_reject_laundered_claims() -> None:
@@ -242,6 +337,7 @@ def test_strict_semantic_artifacts_reject_laundered_claims() -> None:
         evidence_basis_sha=base,
         source_authority_digest=source,
         pack_id="PACK-1",
+        pack_identity_digest=digest,
         supported_versions=["1.0"],
         supported_scope=["initial-pack"],
         upgrade_rules=["requalify"],
@@ -255,6 +351,9 @@ def test_strict_semantic_artifacts_reject_laundered_claims() -> None:
             evidence_basis_sha=base,
             source_authority_digest=source,
             source_record_digests=[digest, "sha256:" + "3" * 64],
+            signed_external_receipt_digest="sha256:" + "4" * 64,
+            customer_identity_digest="sha256:" + "5" * 64,
+            offer_identity_digest="sha256:" + "6" * 64,
             original_setup_minutes=60,
             proposed_setup_minutes=60,
             original_delivery_minutes=120,
@@ -269,6 +368,7 @@ def test_strict_semantic_artifacts_reject_laundered_claims() -> None:
             work_item_id="V3-PACK-002",
             evidence_basis_sha=base,
             source_authority_digest=source,
+            customer_identity_digest="sha256:" + "9" * 64,
             family_identity_digest=digest,
             case_identity_digests=[digest, digest, digest],
             case_evidence_artifact_digests=[
@@ -339,15 +439,11 @@ def test_customer_decision_value_attestation_is_distinct_and_artifact_bound() ->
             "limitations": ["one observed decision"],
             "signature": {"algorithm": "ed25519", "keyId": "KEY-1", "value": "sig"},
             "syntheticTestOnly": False,
-            "customerDecisionValue": attestation.model_dump(
-                mode="json", by_alias=True
-            ),
+            "customerDecisionValue": attestation.model_dump(mode="json", by_alias=True),
         }
     )
     semantic_loader = cast(Any, V3Controller)._external_receipt_semantic_evidence
-    assert semantic_loader(receipt) == {
-        SemanticEvidence.CUSTOMER_DECISION_CHANGED: 1
-    }
+    assert semantic_loader(receipt) == {SemanticEvidence.CUSTOMER_DECISION_CHANGED: 1}
     generic = receipt.model_copy(update={"customer_decision_value": None})
     assert semantic_loader(generic) == {}
 
@@ -444,22 +540,16 @@ def test_controller_reopens_frozen_release_envelope_and_rejects_late_tamper(
             candidate_sha="a" * 40,
             publication_candidate_tree_sha="b" * 40,
             publication_expected_machine_policy_receipt_id="MPREC-1",
-            publication_expected_machine_policy_receipt_digest=(
-                "sha256:" + "a" * 64
-            ),
+            publication_expected_machine_policy_receipt_digest=("sha256:" + "a" * 64),
             publication_authorization_envelope_path=str(envelope_path),
-            publication_authorization_envelope_digest=_digest(
-                envelope_path.read_bytes()
-            ),
+            publication_authorization_envelope_digest=_digest(envelope_path.read_bytes()),
             stage_artifact_digests=stage_digests,
         ),
     )
     controller = cast(Any, object.__new__(V3Controller))
     controller.artifact_root = tmp_path
 
-    def _accept_bound_traincheck(
-        _checkpoint: V3Checkpoint, _manifest_path: Path
-    ) -> None:
+    def _accept_bound_traincheck(_checkpoint: V3Checkpoint, _manifest_path: Path) -> None:
         return None
 
     controller._reverify_traincheck_evidence = _accept_bound_traincheck
@@ -467,21 +557,13 @@ def test_controller_reopens_frozen_release_envelope_and_rejects_late_tamper(
 
     envelope_path.write_bytes(envelope.canonical_json_bytes() + b"\n")
     with pytest.raises(RuntimeError, match="envelope bytes changed"):
-        controller._reverify_release_evidence_authorization(
-            checkpoint, manifest_path
-        )
+        controller._reverify_release_evidence_authorization(checkpoint, manifest_path)
 
-    forged = envelope.model_copy(
-        update={"native_value_authorization_digest": "sha256:" + "f" * 64}
-    )
+    forged = envelope.model_copy(update={"native_value_authorization_digest": "sha256:" + "f" * 64})
     envelope_path.write_bytes(forged.canonical_json_bytes())
-    checkpoint.publication_authorization_envelope_digest = _digest(
-        envelope_path.read_bytes()
-    )
+    checkpoint.publication_authorization_envelope_digest = _digest(envelope_path.read_bytes())
     with pytest.raises(RuntimeError, match="envelope identity mismatch"):
-        controller._reverify_release_evidence_authorization(
-            checkpoint, manifest_path
-        )
+        controller._reverify_release_evidence_authorization(checkpoint, manifest_path)
 
 
 def test_controller_semantic_fan_in_reopens_strict_output_and_detects_tamper(
@@ -494,6 +576,7 @@ def test_controller_semantic_fan_in_reopens_strict_output_and_detects_tamper(
         evidence_basis_sha=base_sha,
         source_authority_digest=source_digest,
         pack_id="PACK-1",
+        pack_identity_digest="sha256:" + "9" * 64,
         supported_versions=["1.0"],
         supported_scope=["initial-pack"],
         upgrade_rules=["requalify"],
@@ -504,10 +587,7 @@ def test_controller_semantic_fan_in_reopens_strict_output_and_detects_tamper(
     path = tmp_path / "support-policy.json"
     path.write_bytes(record.canonical_json_bytes())
     digest = _digest(path.read_bytes())
-    key = (
-        "implementation-owner:materialized-output:"
-        "OUT:V3:PROD:029:SUPPORT_POLICY"
-    )
+    key = "implementation-owner:materialized-output:OUT:V3:PROD:029:SUPPORT_POLICY"
     checkpoint = cast(
         V3Checkpoint,
         SimpleNamespace(
@@ -517,9 +597,7 @@ def test_controller_semantic_fan_in_reopens_strict_output_and_detects_tamper(
     )
     controller = cast(Any, object.__new__(V3Controller))
     controller.artifact_root = tmp_path
-    controller.active_source = SimpleNamespace(
-        canonical_digest=lambda: source_digest
-    )
+    controller.active_source = SimpleNamespace(canonical_digest=lambda: source_digest)
     item = next(
         item
         for item in WorkItemCollection.model_validate(
@@ -568,10 +646,7 @@ def test_reduction_semantics_require_fresh_independent_review_bytes(
     )
     path = tmp_path / "reduction-boundary.json"
     path.write_bytes(record.canonical_json_bytes())
-    output_key = (
-        "implementation-owner:materialized-output:"
-        "OUT:V3:TRUST:005:REDUCTION_BOUNDARY"
-    )
+    output_key = "implementation-owner:materialized-output:OUT:V3:TRUST:005:REDUCTION_BOUNDARY"
     review_key = "audit:execution-report"
     checkpoint = cast(
         V3Checkpoint,
@@ -585,9 +660,7 @@ def test_reduction_semantics_require_fresh_independent_review_bytes(
     )
     controller = cast(Any, object.__new__(V3Controller))
     controller.artifact_root = tmp_path
-    controller.active_source = SimpleNamespace(
-        canonical_digest=lambda: source_digest
-    )
+    controller.active_source = SimpleNamespace(canonical_digest=lambda: source_digest)
     item = next(
         item
         for item in WorkItemCollection.model_validate(
@@ -595,18 +668,7 @@ def test_reduction_semantics_require_fresh_independent_review_bytes(
         ).work_items
         if item.work_item_id == "V3-TRUST-005"
     )
-    semantics, _ = controller._controller_semantic_evidence(
-        item=item,
-        checkpoint=checkpoint,
-        base_sha=base_sha,
-        candidate_sha="b" * 40,
-    )
-    assert semantics == {
-        SemanticEvidence.LEGAL_REDUCTION_VERIFIED: [_digest(path.read_bytes())],
-        SemanticEvidence.ILLEGAL_REDUCTION_REJECTED: [_digest(path.read_bytes())],
-    }
-    del checkpoint.stage_artifact_digests[review_key]
-    with pytest.raises(RuntimeError, match="independent authority bytes"):
+    with pytest.raises(RuntimeError, match="oracle installation is unavailable"):
         controller._controller_semantic_evidence(
             item=item,
             checkpoint=checkpoint,
@@ -671,15 +733,226 @@ def test_external_receipt_rejects_duplicate_name_or_digest() -> None:
 def test_payment_and_support_acceptance_do_not_launder_value_or_support() -> None:
     assert not commercial_maturity_supported(
         CommercialMaturity.EXTERNAL_VALUE_DEMONSTRATED,
-        [EvidenceType.PAID_PILOT],
+        CommercialMaturityAuthorization(external_evidence_types=[EvidenceType.PAID_PILOT]),
+    )
+
+
+def test_delivery_economics_is_derived_from_exact_signed_raw_records(
+    tmp_path: Path,
+) -> None:
+    customer = "sha256:" + "1" * 64
+    offer = "sha256:" + "2" * 64
+    original = DeliveryMeasurement(
+        phase="ORIGINAL",
+        customer_identity_digest=customer,
+        offer_identity_digest=offer,
+        setup_minutes=60,
+        delivery_minutes=120,
+        cost_microusd=80,
+        revenue_microusd=100,
+    )
+    proposed = DeliveryMeasurement(
+        phase="PROPOSED",
+        customer_identity_digest=customer,
+        offer_identity_digest=offer,
+        setup_minutes=10,
+        delivery_minutes=20,
+        cost_microusd=20,
+        revenue_microusd=100,
+    )
+    bindings: dict[str, Path] = {}
+    artifacts: list[dict[str, str]] = []
+    for name, record in (("original", original), ("proposed", proposed)):
+        raw = record.canonical_json_bytes()
+        digest = _digest(raw)
+        path = tmp_path / f"{name}.json"
+        path.write_bytes(raw)
+        bindings[digest] = path
+        artifacts.append({"name": name, "digest": digest, "locationClass": "TRUSTED_EXTERNAL"})
+    now = datetime.now(UTC)
+    receipt = ExternalEvidenceReceipt.model_validate(
+        {
+            "receiptId": "XREC-DELIVERY-ECONOMICS",
+            "evidenceType": "DELIVERY_ECONOMICS",
+            "subjectId": "V3-REPEAT-006",
+            "issuer": {"id": "billing", "authority": "payment-processor"},
+            "issuedAt": now.isoformat(),
+            "observedAt": now.isoformat(),
+            "expiresAt": (now + timedelta(hours=1)).isoformat(),
+            "revocationEpoch": 1,
+            "revoked": False,
+            "nonce": "a" * 32,
+            "candidateOrOfferIdentity": "b" * 40,
+            "outcome": "Bound delivery measurements observed.",
+            "artifacts": artifacts,
+            "limitations": [],
+            "signature": {
+                "algorithm": "ed25519",
+                "keyId": "billing-1",
+                "value": "detached",
+            },
+            "syntheticTestOnly": False,
+            "correlationIdentity": {
+                "candidateSha": "b" * 40,
+                "customerIdentityDigest": customer,
+                "offerIdentityDigest": offer,
+            },
+        }
+    )
+    valid = DeliveryEconomicsEvidence(
+        work_item_id="V3-REPEAT-006",
+        evidence_basis_sha="b" * 40,
+        source_authority_digest="sha256:" + "3" * 64,
+        source_record_digests=list(bindings),
+        signed_external_receipt_digest=receipt.canonical_digest(),
+        customer_identity_digest=customer,
+        offer_identity_digest=offer,
+        original_setup_minutes=60,
+        proposed_setup_minutes=10,
+        original_delivery_minutes=120,
+        proposed_delivery_minutes=20,
+        original_cost_microusd=80,
+        proposed_cost_microusd=20,
+        original_margin_basis_points=2_000,
+        proposed_margin_basis_points=8_000,
+    )
+    reader = DescriptorBoundArtifactReader(tmp_path, bindings)
+    assert len(verify_delivery_economics(valid, artifacts=reader, receipt=receipt)) == 2
+    forged = valid.model_copy(update={"proposed_cost_microusd": 1})
+    with pytest.raises(CompletionVerificationError, match="raw records"):
+        verify_delivery_economics(forged, artifacts=reader, receipt=receipt)
+
+
+def test_reduction_oracle_binds_executable_raw_roster_result_and_signature(
+    tmp_path: Path,
+) -> None:
+    from cryptography.hazmat.primitives import serialization
+    from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+
+    private = Ed25519PrivateKey.generate()
+    private_raw = private.private_bytes(
+        serialization.Encoding.Raw,
+        serialization.PrivateFormat.Raw,
+        serialization.NoEncryption(),
+    )
+    public_raw = private.public_key().public_bytes(
+        serialization.Encoding.Raw, serialization.PublicFormat.Raw
+    )
+    executable = tmp_path / "reduction-oracle"
+    executable.write_text(
+        "#!/usr/bin/env python3\n"
+        "import hashlib,json,sys\n"
+        "from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey\n"
+        f"KEY=bytes.fromhex('{private_raw.hex()}')\n"
+        "request=json.load(sys.stdin)\n"
+        "payload={'schemaVersion':'3.1','workItemId':request['workItemId'],"
+        "'candidateSha':request['candidateSha'],'candidateTreeSha':request['candidateTreeSha'],"
+        "'rawArtifactRosterDigest':request['rawArtifactRosterDigest'],"
+        "'oracleExecutableDigest':request['oracleExecutableDigest'],"
+        "'legalReductionArtifactDigest':request['legalReductionArtifactDigest'],"
+        "'legalReductionVerdict':'VERIFIED',"
+        "'illegalReductionArtifactDigest':request['illegalReductionArtifactDigest'],"
+        "'illegalReductionVerdict':'REJECTED'}\n"
+        "result='sha256:'+hashlib.sha256((json.dumps(payload,sort_keys=True,separators=(',',':'))+'\\n').encode()).hexdigest()\n"
+        "record={**payload,'oracleResultDigest':result,'receiptId':'REDUCE-BOUND-0001',"
+        "'issuedAt':'2026-08-12T00:00:00Z','expiresAt':'2027-08-12T00:00:00Z',"
+        "'nonce':'a'*32}\n"
+        "signed=(json.dumps(record,sort_keys=True,separators=(',',':'))+'\\n').encode()\n"
+        "record['signature']=Ed25519PrivateKey.from_private_bytes(KEY).sign(signed).hex()\n"
+        "print(json.dumps(record,sort_keys=True,separators=(',',':')))\n",
+        encoding="utf-8",
+    )
+    os.chmod(executable, 0o700)
+    public_key = tmp_path / "oracle.pub"
+    public_key.write_bytes(public_raw)
+    raw_bindings: dict[str, Path] = {}
+    reduction_inputs: list[
+        tuple[str, Literal["LEGAL_CANDIDATE", "ILLEGAL_CANDIDATE"], list[str]]
+    ] = [
+        ("legal", "LEGAL_CANDIDATE", []),
+        ("illegal", "ILLEGAL_CANDIDATE", ["collective:required"]),
+    ]
+    for name, kind, omitted in reduction_inputs:
+        value = ReductionCandidateInput(
+            reduction_class=kind,
+            original_rank_ids=[0, 1],
+            retained_rank_ids=[0],
+            collective_participants={"all-reduce": [0, 1]},
+            omitted_required_dependency_ids=omitted,
+        )
+        raw = value.canonical_json_bytes()
+        path = tmp_path / f"{name}.json"
+        path.write_bytes(raw)
+        raw_bindings[_digest(raw)] = path
+    executable_digest = _digest(executable.read_bytes())
+    roster = _digest((json.dumps(sorted(raw_bindings), separators=(",", ":")) + "\n").encode())
+    payload = {
+        "schemaVersion": "3.1",
+        "workItemId": "V3-TRUST-005",
+        "candidateSha": "b" * 40,
+        "candidateTreeSha": "c" * 40,
+        "rawArtifactRosterDigest": roster,
+        "oracleExecutableDigest": executable_digest,
+        "legalReductionArtifactDigest": next(iter(raw_bindings)),
+        "legalReductionVerdict": "VERIFIED",
+        "illegalReductionArtifactDigest": list(raw_bindings)[1],
+        "illegalReductionVerdict": "REJECTED",
+    }
+    result_digest = _digest(
+        (json.dumps(payload, sort_keys=True, separators=(",", ":")) + "\n").encode()
+    )
+    evidence = ReductionBoundaryEvidence(
+        work_item_id="V3-TRUST-005",
+        evidence_basis_sha="b" * 40,
+        source_authority_digest="sha256:" + "3" * 64,
+        oracle_executable_digest=executable_digest,
+        oracle_result_digest=result_digest,
+        raw_artifact_digests=list(raw_bindings),
+        legal_reduction_artifact_digest=next(iter(raw_bindings)),
+        legal_reduction_verdict="VERIFIED",
+        illegal_reduction_artifact_digest=list(raw_bindings)[1],
+        illegal_reduction_verdict="REJECTED",
+    )
+    public_key_digest = _digest(public_raw)
+    decision, _ = ExecutableReductionOracle(
+        executable, executable_digest, public_key, public_key_digest
+    ).evaluate(
+        evidence,
+        candidate_sha="b" * 40,
+        candidate_tree_sha="c" * 40,
+        artifacts=DescriptorBoundArtifactReader(tmp_path, raw_bindings),
+        now=datetime(2026, 8, 12, 1, tzinfo=UTC),
+    )
+    assert decision.oracle_result_digest == result_digest
+    forged = evidence.model_copy(update={"oracle_result_digest": "sha256:" + "1" * 64})
+    with pytest.raises(CompletionVerificationError, match="binding mismatch"):
+        ExecutableReductionOracle(
+            executable, executable_digest, public_key, public_key_digest
+        ).evaluate(
+            forged,
+            candidate_sha="b" * 40,
+            candidate_tree_sha="c" * 40,
+            artifacts=DescriptorBoundArtifactReader(tmp_path, raw_bindings),
+            now=datetime(2026, 8, 12, 1, tzinfo=UTC),
+        )
+    assert not commercial_maturity_supported(
+        CommercialMaturity.COMMERCIALLY_SUPPORTED,
+        CommercialMaturityAuthorization(
+            external_evidence_types=[
+                EvidenceType.SUPPORT_ACCEPTANCE,
+                EvidenceType.SAME_FAMILY_CASE,
+            ]
+        ),
     )
     assert not commercial_maturity_supported(
         CommercialMaturity.COMMERCIALLY_SUPPORTED,
-        [EvidenceType.SUPPORT_ACCEPTANCE, EvidenceType.SAME_FAMILY_CASE],
-    )
-    assert commercial_maturity_supported(
-        CommercialMaturity.COMMERCIALLY_SUPPORTED,
-        [EvidenceType.SECOND_PAID_ACTION, EvidenceType.DECISION_CHANGED],
+        CommercialMaturityAuthorization(
+            external_evidence_types=[
+                EvidenceType.SECOND_PAID_ACTION,
+                EvidenceType.DECISION_CHANGED,
+            ],
+            exact_identity_correlation_verified=True,
+        ),
     )
 
 
@@ -774,9 +1047,7 @@ def test_traincheck_replays_raw_incident_differential_without_caller_verdict() -
     unknown = candidate.replace(b"HOLDS", b"UNKNOWN")
     unknown_values = dict(values)
     unknown_values[_digest(unknown)] = unknown
-    unknown_request = request.model_copy(
-        update={"candidate_observation_digest": _digest(unknown)}
-    )
+    unknown_request = request.model_copy(update={"candidate_observation_digest": _digest(unknown)})
     with pytest.raises(ValueError, match="UNKNOWN"):
         evaluate_traincheck_differential(
             unknown_request,
@@ -789,9 +1060,7 @@ def test_traincheck_replays_raw_incident_differential_without_caller_verdict() -
     missing = b"[]"
     missing_values = dict(values)
     missing_values[_digest(missing)] = missing
-    missing_request = request.model_copy(
-        update={"candidate_observation_digest": _digest(missing)}
-    )
+    missing_request = request.model_copy(update={"candidate_observation_digest": _digest(missing)})
     with pytest.raises(ValueError, match="exactly cover"):
         evaluate_traincheck_differential(
             missing_request,

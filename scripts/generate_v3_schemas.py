@@ -44,6 +44,11 @@ from tcfactory.v3.completion_policy import (
     MilestoneEvidenceContract,
     WorkItemEvidenceContract,
 )
+from tcfactory.v3.completion_verification import (
+    DeliveryMeasurement,
+    ReductionCandidateInput,
+    ReductionOracleDecision,
+)
 from tcfactory.v3.configuration import (
     AutonomyV3Config,
     CommercialMaturityConfig,
@@ -107,9 +112,10 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "completion-evidence-observation.schema.json": CompletionEvidenceObservation,
     "completion-evidence-policy.schema.json": CompletionEvidencePolicy,
     "delivery-economics-evidence.schema.json": DeliveryEconomicsEvidence,
-    "frozen-release-evidence-authorization.schema.json": (
-        FrozenReleaseEvidenceAuthorization
-    ),
+    "delivery-measurement.schema.json": DeliveryMeasurement,
+    "reduction-candidate-input.schema.json": ReductionCandidateInput,
+    "reduction-oracle-decision.schema.json": ReductionOracleDecision,
+    "frozen-release-evidence-authorization.schema.json": (FrozenReleaseEvidenceAuthorization),
     "context-policy-config.schema.json": ContextRoutingConfig,
     "dispositions.schema.json": DispositionLedger,
     "executors-config.schema.json": ExecutorConfig,

@@ -88,10 +88,31 @@ class CustomerDecisionValueAttestation(V3Model):
 
     @model_validator(mode="after")
     def unique_attribution(self) -> CustomerDecisionValueAttestation:
-        if len(self.attribution_artifact_digests) != len(
-            set(self.attribution_artifact_digests)
-        ):
+        if len(self.attribution_artifact_digests) != len(set(self.attribution_artifact_digests)):
             raise ValueError("customer decision/value attribution must be unique")
+        return self
+
+
+class EvidenceCorrelationIdentity(V3Model):
+    """Stable identities used to correlate separately signed commercial facts."""
+
+    candidate_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    customer_identity_digest: Digest | None = None
+    family_identity_digest: Digest | None = None
+    offer_identity_digest: Digest | None = None
+    pack_identity_digest: Digest | None = None
+
+    @model_validator(mode="after")
+    def has_commercial_identity(self) -> EvidenceCorrelationIdentity:
+        if not any(
+            (
+                self.customer_identity_digest,
+                self.family_identity_digest,
+                self.offer_identity_digest,
+                self.pack_identity_digest,
+            )
+        ):
+            raise ValueError("external evidence correlation lacks a commercial identity")
         return self
 
 
@@ -115,6 +136,7 @@ class ExternalEvidenceReceipt(V3Model):
     synthetic_test_only: bool
     action_response_binding: ExternalActionResponseBinding | None = None
     customer_decision_value: CustomerDecisionValueAttestation | None = None
+    correlation_identity: EvidenceCorrelationIdentity | None = None
 
     @model_validator(mode="after")
     def unique_artifact_roster(self) -> ExternalEvidenceReceipt:
@@ -123,8 +145,7 @@ class ExternalEvidenceReceipt(V3Model):
         names = [artifact.name for artifact in self.artifacts]
         digests = [artifact.digest for artifact in self.artifacts]
         identities = [
-            (artifact.name, artifact.digest, artifact.location_class)
-            for artifact in self.artifacts
+            (artifact.name, artifact.digest, artifact.location_class) for artifact in self.artifacts
         ]
         if len(names) != len(set(names)):
             raise ValueError("external evidence artifact names must be unique")
@@ -138,11 +159,17 @@ class ExternalEvidenceReceipt(V3Model):
                     "customer decision/value attestation requires DECISION_CHANGED evidence"
                 )
             artifact_digests = set(digests)
-            if not set(
-                self.customer_decision_value.attribution_artifact_digests
-            ).issubset(artifact_digests):
+            if not set(self.customer_decision_value.attribution_artifact_digests).issubset(
+                artifact_digests
+            ):
                 raise ValueError(
                     "customer decision/value attribution is absent from receipt artifacts"
+                )
+        if self.correlation_identity is not None:
+            candidate_identity = self.candidate_or_offer_identity
+            if candidate_identity != self.correlation_identity.candidate_sha:
+                raise ValueError(
+                    "external evidence correlation candidate does not match its receipt"
                 )
         return self
 
@@ -222,8 +249,7 @@ class ExternalEvidenceReceipt(V3Model):
             or delivery.delivered_at > self.observed_at
             or self.observed_at > now
             or binding.response_expires_at <= self.observed_at
-            or binding.response_expires_at - self.observed_at
-            > _ACTION_RESPONSE_CONSUMPTION_WINDOW
+            or binding.response_expires_at - self.observed_at > _ACTION_RESPONSE_CONSUMPTION_WINDOW
             or now >= binding.response_expires_at
         ):
             raise ValueError("external response timing is stale or impossible")
@@ -426,9 +452,7 @@ def load_verified_external_evidence(
     subject_id: str,
     trusted_root_environment_variable: str,
     trusted_public_key_environment_variable: str,
-    trusted_authority_state_environment_variable: str = (
-        "TCF_EXTERNAL_EVIDENCE_AUTHORITY_STATE"
-    ),
+    trusted_authority_state_environment_variable: str = ("TCF_EXTERNAL_EVIDENCE_AUTHORITY_STATE"),
     environment: Mapping[str, str] | None = None,
     now: datetime | None = None,
 ) -> TrustedEvidenceRecord:
@@ -442,9 +466,7 @@ def load_verified_external_evidence(
     environ = os.environ if environment is None else environment
     root_value = environ.get(trusted_root_environment_variable, "").strip()
     key_value = environ.get(trusted_public_key_environment_variable, "").strip()
-    authority_state_value = environ.get(
-        trusted_authority_state_environment_variable, ""
-    ).strip()
+    authority_state_value = environ.get(trusted_authority_state_environment_variable, "").strip()
     if not root_value or not key_value or not authority_state_value:
         raise ExternalEvidenceVerificationError(
             "trusted external evidence root, public key, or authority state is not configured"
@@ -529,9 +551,7 @@ def load_verified_external_evidence(
             "external evidence receipt does not declare Ed25519"
         )
     verification_time = now or datetime.now(UTC)
-    revocation_digest = "sha256:" + hashlib.sha256(
-        revocations.canonical_json_bytes()
-    ).hexdigest()
+    revocation_digest = "sha256:" + hashlib.sha256(revocations.canonical_json_bytes()).hexdigest()
     if (
         revocations.authority_id != anchor.authority_id
         or revocations.issuer_id != anchor.issuer_id
@@ -552,9 +572,7 @@ def load_verified_external_evidence(
         or anchor.issued_at > verification_time
         or verification_time >= anchor.expires_at
     ):
-        raise ExternalEvidenceVerificationError(
-            "external evidence revocation authority is stale"
-        )
+        raise ExternalEvidenceVerificationError("external evidence revocation authority is stale")
     if (
         receipt.receipt_id in revocations.revoked_receipt_ids
         or receipt.nonce in revocations.revoked_nonces
@@ -562,11 +580,12 @@ def load_verified_external_evidence(
         raise ExternalEvidenceVerificationError("external evidence receipt is revoked")
     current_root_identity = root.stat()
     current_key_identity = public_key.stat()
-    if (
-        (current_root_identity.st_dev, current_root_identity.st_ino)
-        != (root_identity.st_dev, root_identity.st_ino)
-        or (current_key_identity.st_dev, current_key_identity.st_ino)
-        != (key_identity.st_dev, key_identity.st_ino)
+    if (current_root_identity.st_dev, current_root_identity.st_ino) != (
+        root_identity.st_dev,
+        root_identity.st_ino,
+    ) or (current_key_identity.st_dev, current_key_identity.st_ino) != (
+        key_identity.st_dev,
+        key_identity.st_ino,
     ):
         raise ExternalEvidenceVerificationError(
             "external evidence authority root or key changed during verification"
@@ -605,9 +624,7 @@ def load_verified_external_evidence_payload(
     subject_id: str,
     trusted_root_environment_variable: str,
     trusted_public_key_environment_variable: str,
-    trusted_authority_state_environment_variable: str = (
-        "TCF_EXTERNAL_EVIDENCE_AUTHORITY_STATE"
-    ),
+    trusted_authority_state_environment_variable: str = ("TCF_EXTERNAL_EVIDENCE_AUTHORITY_STATE"),
     environment: Mapping[str, str] | None = None,
     now: datetime | None = None,
 ) -> VerifiedExternalEvidencePayload:
@@ -618,21 +635,17 @@ def load_verified_external_evidence_payload(
         subject_id=subject_id,
         trusted_root_environment_variable=trusted_root_environment_variable,
         trusted_public_key_environment_variable=trusted_public_key_environment_variable,
-        trusted_authority_state_environment_variable=(
-            trusted_authority_state_environment_variable
-        ),
+        trusted_authority_state_environment_variable=(trusted_authority_state_environment_variable),
         environment=environment,
         now=now,
     )
     canonical = record.receipt.canonical_json_bytes()
     environ = os.environ if environment is None else environment
     root = Path(environ[trusted_root_environment_variable]).expanduser().resolve()
-    public_key = Path(
-        environ[trusted_public_key_environment_variable]
-    ).expanduser().resolve()
-    authority_state = Path(
-        environ[trusted_authority_state_environment_variable]
-    ).expanduser().resolve()
+    public_key = Path(environ[trusted_public_key_environment_variable]).expanduser().resolve()
+    authority_state = (
+        Path(environ[trusted_authority_state_environment_variable]).expanduser().resolve()
+    )
     authority_payloads = {
         "receipt": canonical,
         "receipt-signature": (root / f"{subject_id}.json.sig").read_bytes(),
@@ -650,9 +663,7 @@ def load_verified_external_evidence_payload(
         subject_id=subject_id,
         trusted_root_environment_variable=trusted_root_environment_variable,
         trusted_public_key_environment_variable=trusted_public_key_environment_variable,
-        trusted_authority_state_environment_variable=(
-            trusted_authority_state_environment_variable
-        ),
+        trusted_authority_state_environment_variable=(trusted_authority_state_environment_variable),
         environment=environment,
         now=now,
     )

@@ -155,6 +155,14 @@ FileRole = Literal[
     "github-token-refresher-timer",
     "github-token-promoter-service",
     "github-token-promoter-path",
+    "deployment-refresh",
+    "deployment-refresh-policy",
+    "deployment-refresh-service",
+    "deployment-refresh-path",
+    "deployment-refresh-claim-service",
+    "deployment-refresh-claim-path",
+    "deployment-refresh-completion-service",
+    "deployment-refresh-completion-path",
     "controller-service",
 ]
 
@@ -376,6 +384,26 @@ ROLE_TARGETS: dict[str, str] = {
     "github-token-promoter-path": (
         "/etc/systemd/system/traincapsule-github-token-promoter.path"
     ),
+    "deployment-refresh": "/usr/libexec/traincapsule-deployment-refresh",
+    "deployment-refresh-policy": "/etc/traincapsule-deployment/refresh-policy.json",
+    "deployment-refresh-service": (
+        "/etc/systemd/system/traincapsule-deployment-refresh.service"
+    ),
+    "deployment-refresh-path": (
+        "/etc/systemd/system/traincapsule-deployment-refresh.path"
+    ),
+    "deployment-refresh-claim-service": (
+        "/etc/systemd/system/traincapsule-deployment-refresh-claim.service"
+    ),
+    "deployment-refresh-claim-path": (
+        "/etc/systemd/system/traincapsule-deployment-refresh-claim.path"
+    ),
+    "deployment-refresh-completion-service": (
+        "/etc/systemd/system/traincapsule-deployment-refresh-completion.service"
+    ),
+    "deployment-refresh-completion-path": (
+        "/etc/systemd/system/traincapsule-deployment-refresh-completion.path"
+    ),
     "controller-service": "/etc/systemd/system/traincapsule-controller.service",
 }
 ROLE_TARGETS.update(
@@ -408,6 +436,9 @@ PATH_UNITS = (
     "traincapsule-verifier-post-activation-observer.timer",
     "traincapsule-github-token-promoter.path",
     "traincapsule-github-token-refresher.timer",
+    "traincapsule-deployment-refresh.path",
+    "traincapsule-deployment-refresh-claim.path",
+    "traincapsule-deployment-refresh-completion.path",
     "traincapsule-verifier-observed-main-selector.path",
     "traincapsule-verifier-activation-selector-broker.path",
     "traincapsule-verifier-activation-issuer.path",
@@ -630,6 +661,7 @@ def _validate_role_metadata(spec: PrivilegedInstallSpec) -> None:
         "controller-start-broker",
         "post-activation-observer",
         "git-anchor-updater",
+        "deployment-refresh",
     ):
         broker = by_role[role]
         if (broker.owner, broker.group, broker.mode) != ("root", "root", "0700"):
@@ -655,6 +687,13 @@ def _validate_role_metadata(spec: PrivilegedInstallSpec) -> None:
         "0600",
     ):
         raise ValueError("GitHub token refresher key must be refresher-only")
+    refresh_policy = by_role["deployment-refresh-policy"]
+    if (refresh_policy.owner, refresh_policy.group, refresh_policy.mode) != (
+        "root",
+        "root",
+        "0444",
+    ):
+        raise ValueError("deployment refresh policy must be immutable")
     for role in ("git-anchor-producer", "git-anchor-askpass"):
         item = by_role[role]
         if (item.owner, item.group, item.mode) != (
@@ -857,6 +896,12 @@ def _validate_role_metadata(spec: PrivilegedInstallSpec) -> None:
         "github-token-refresher-timer",
         "github-token-promoter-service",
         "github-token-promoter-path",
+        "deployment-refresh-service",
+        "deployment-refresh-path",
+        "deployment-refresh-claim-service",
+        "deployment-refresh-claim-path",
+        "deployment-refresh-completion-service",
+        "deployment-refresh-completion-path",
     ):
         item = by_role[role]
         if (item.owner, item.group, item.mode) != ("root", "root", "0644"):
@@ -919,6 +964,7 @@ def production_directory_pins(
         ("/etc/traincapsule-canary-runner", "root", "root", "0755"),
         ("/etc/traincapsule-runtime", "root", "root", "0755"),
         ("/etc/traincapsule-controller", "root", "root", "0755"),
+        ("/etc/traincapsule-deployment", "root", "root", "0755"),
         ("/var/lib/traincapsule-github-token", refresher, refresher, "0700"),
         ("/var/lib/traincapsule-github-token/outbox", refresher, refresher, "0700"),
         ("/var/lib/traincapsule-verifier/anchor-fetcher-inbox", fetcher, fetcher, "0700"),
@@ -927,6 +973,7 @@ def production_directory_pins(
         ("/opt/traincapsule-runtime", "root", "root", "0755"),
         ("/opt/traincapsule-runtime/bin", "root", "root", "0755"),
         ("/opt/traincapsule-runtime/wheels", "root", "root", "0755"),
+        ("/opt/traincapsule-runtime/generations", "root", "root", "0555"),
         ("/opt/traincapsule-canary-runner", "root", "root", "0755"),
         ("/opt/traincapsule-canary-runner/lib", "root", "root", "0755"),
         ("/opt/traincapsule-canary-runner/lib/python3.12", "root", "root", "0755"),
@@ -954,7 +1001,31 @@ def production_directory_pins(
         ("/var/lib/traincapsule-runtime/worktrees", controller, controller, "0700"),
         ("/var/lib/traincapsule-runtime/artifacts", controller, controller, "0700"),
         ("/var/lib/traincapsule-runtime/artifacts/v3", controller, controller, "0700"),
+        (
+            "/var/lib/traincapsule-runtime/deployment-update-handoffs",
+            controller,
+            controller,
+            "0700",
+        ),
         ("/var/lib/traincapsule-verifier/anchor-update-journal", "root", "root", "0700"),
+        (
+            "/var/lib/traincapsule-verifier/deployment-refresh-claims",
+            "root",
+            "root",
+            "0700",
+        ),
+        (
+            "/var/lib/traincapsule-verifier/activation-refresh-inbox",
+            "root",
+            controller,
+            "0750",
+        ),
+        (
+            "/var/lib/traincapsule-verifier/deployment-refresh-journal",
+            "root",
+            "root",
+            "0700",
+        ),
         (controller_account.home, controller, controller, "0700"),
         (f"{controller_account.home}/.config", controller, controller, "0700"),
         (
@@ -2117,6 +2188,14 @@ class PrivilegedInstaller:
             (controller, ROLE_TARGETS["ruleset-broker"], "execute", False),
             (controller, ROLE_TARGETS["git-anchor-updater"], "execute", False),
             (controller, ROLE_TARGETS["git-anchor-producer"], "execute", False),
+            (controller, ROLE_TARGETS["deployment-refresh"], "execute", False),
+            (
+                controller,
+                "/var/lib/traincapsule-verifier/deployment-refresh-journal",
+                "read",
+                False,
+            ),
+            (controller, "/opt/traincapsule-runtime/generations", "write", False),
             (controller, ROLE_TARGETS["git-anchor-github-private-key"], "read", False),
             (controller, "/var/lib/traincapsule-verifier/anchor-updates", "read", False),
             (controller, ROLE_TARGETS["activation-supervisor-launcher"], "execute", True),

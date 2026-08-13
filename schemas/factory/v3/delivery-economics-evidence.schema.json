@@ -26,10 +26,25 @@
       "items": {
         "type": "string"
       },
-      "maxItems": 64,
+      "maxItems": 2,
       "minItems": 2,
       "title": "Sourcerecorddigests",
       "type": "array"
+    },
+    "signedExternalReceiptDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Signedexternalreceiptdigest",
+      "type": "string"
+    },
+    "customerIdentityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Customeridentitydigest",
+      "type": "string"
+    },
+    "offerIdentityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Offeridentitydigest",
+      "type": "string"
     },
     "originalSetupMinutes": {
       "exclusiveMinimum": 0,
@@ -85,6 +100,9 @@
     "evidenceBasisSha",
     "sourceAuthorityDigest",
     "sourceRecordDigests",
+    "signedExternalReceiptDigest",
+    "customerIdentityDigest",
+    "offerIdentityDigest",
     "originalSetupMinutes",
     "proposedSetupMinutes",
     "originalDeliveryMinutes",

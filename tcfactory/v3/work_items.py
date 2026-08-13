@@ -19,7 +19,11 @@ from tcfactory.v3.enums import (
     WorkStatus,
 )
 from tcfactory.v3.external_evidence import TrustedEvidenceRecord
-from tcfactory.v3.maturity import MaturityTarget, commercial_maturity_supported
+from tcfactory.v3.maturity import (
+    CommercialMaturityAuthorization,
+    MaturityTarget,
+    commercial_maturity_supported,
+)
 from tcfactory.v3.retry_policy import RetryPolicy
 
 ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
@@ -277,7 +281,11 @@ class WorkItemCollection(V3Model):
                 trusted_types.append(record.require_commercial_trust().evidence_type)
             if not commercial_maturity_supported(
                 item.maturity_target.commercial,
-                trusted_types,
+                CommercialMaturityAuthorization(
+                    external_evidence_types=trusted_types,
+                    semantic_evidence=[],
+                    exact_identity_correlation_verified=False,
+                ),
             ):
                 raise ValueError(
                     f"commercial maturity for {item.work_item_id} exceeds trusted evidence"

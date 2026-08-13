@@ -1,0 +1,69 @@
+{
+  "additionalProperties": false,
+  "description": "Raw reduction graph presented to the independent oracle.",
+  "properties": {
+    "schemaVersion": {
+      "const": "3.1",
+      "default": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "reductionClass": {
+      "enum": [
+        "LEGAL_CANDIDATE",
+        "ILLEGAL_CANDIDATE"
+      ],
+      "title": "Reductionclass",
+      "type": "string"
+    },
+    "originalRankIds": {
+      "items": {
+        "type": "integer"
+      },
+      "maxItems": 100000,
+      "minItems": 2,
+      "title": "Originalrankids",
+      "type": "array"
+    },
+    "retainedRankIds": {
+      "items": {
+        "type": "integer"
+      },
+      "maxItems": 100000,
+      "minItems": 1,
+      "title": "Retainedrankids",
+      "type": "array"
+    },
+    "collectiveParticipants": {
+      "additionalProperties": {
+        "items": {
+          "type": "integer"
+        },
+        "type": "array"
+      },
+      "maxProperties": 10000,
+      "minProperties": 1,
+      "title": "Collectiveparticipants",
+      "type": "object"
+    },
+    "omittedRequiredDependencyIds": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 100000,
+      "title": "Omittedrequireddependencyids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "reductionClass",
+    "originalRankIds",
+    "retainedRankIds",
+    "collectiveParticipants",
+    "omittedRequiredDependencyIds"
+  ],
+  "title": "ReductionCandidateInput",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/reduction-candidate-input.schema.json"
+}

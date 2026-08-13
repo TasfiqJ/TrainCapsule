@@ -65,18 +65,27 @@ from tcfactory.v3.candidate_manifest import (
 )
 from tcfactory.v3.completion_artifacts import (
     SEMANTIC_OUTPUT_SPECS,
+    DeliveryEconomicsEvidence,
     FrozenReleaseEvidenceAuthorization,
     ReductionBoundaryEvidence,
+    SupportPolicyEvidence,
     ThirdSameFamilyCaseEvidence,
 )
 from tcfactory.v3.completion_policy import (
     CompletionEvidenceObservation,
+    CorrelatedEvidenceFact,
     EvidenceAuthority,
     EvidenceGrade,
     SemanticEvidence,
     evaluate_milestone_exit_criteria,
     evaluate_work_item_evidence_contract,
     load_completion_evidence_policy,
+)
+from tcfactory.v3.completion_verification import (
+    CompletionVerificationError,
+    DescriptorBoundArtifactReader,
+    ExecutableReductionOracle,
+    verify_delivery_economics,
 )
 from tcfactory.v3.configuration import (
     ExternalEvidenceConfig,
@@ -119,7 +128,10 @@ from tcfactory.v3.machine_policy_runtime import (
     load_authorized_machine_policy_review,
 )
 from tcfactory.v3.market_artifacts import ReachableAccountMap
-from tcfactory.v3.maturity import commercial_maturity_supported
+from tcfactory.v3.maturity import (
+    CommercialMaturityAuthorization,
+    commercial_maturity_supported,
+)
 from tcfactory.v3.milestone_runtime import (
     WorkItemCompletionEvidence,
     advance_milestone_state,
@@ -351,10 +363,8 @@ class V3Controller:
         self.owner_id = owner_id
         self.phase6_runtime = phase6_runtime
         self.installed_runtime_loader = installed_runtime_loader
-        if (
-            self.installed_runtime_loader is None
-            and self.repo_root
-            == Path("/var/lib/traincapsule-verifier/repository-boundary")
+        if self.installed_runtime_loader is None and self.repo_root == Path(
+            "/var/lib/traincapsule-verifier/repository-boundary"
         ):
             self.installed_runtime_loader = lambda: load_installed_controller_runtime()[0]
         if lease_renewal_interval_seconds <= 0:
@@ -393,9 +403,7 @@ class V3Controller:
                 f"lease renewal failed for {work_item_id}; execution quarantined"
             ) from error
 
-    def _quarantine_lease_loss(
-        self, work_item_id: str, error: BaseException | None
-    ) -> None:
+    def _quarantine_lease_loss(self, work_item_id: str, error: BaseException | None) -> None:
         item = self.queue.load(work_item_id)
         if item.status is WorkStatus.RUNNING:
             self.queue.transition(
@@ -423,12 +431,9 @@ class V3Controller:
                 }
                 quarantine_tainted_evidence(
                     evidence,
-                    quarantine_root=(
-                        self.runtime_paths.quarantine / "lease-loss" / work_item_id
-                    ),
+                    quarantine_root=(self.runtime_paths.quarantine / "lease-loss" / work_item_id),
                     reason=(
-                        "lease renewal failed: "
-                        f"{type(error).__name__ if error else 'stopped'}"
+                        f"lease renewal failed: {type(error).__name__ if error else 'stopped'}"
                     ),
                 )
 
@@ -474,10 +479,7 @@ class V3Controller:
                 )
             except RuntimeError:
                 runtime_attested = False
-        if (
-            (installed_main, installed_tree) == (anchored_main, anchored_tree)
-            and runtime_attested
-        ):
+        if (installed_main, installed_tree) == (anchored_main, anchored_tree) and runtime_attested:
             if state.deployment_update_handoff is not None:
                 state.deployment_update_handoff = None
                 state.deployment_update_digest = None
@@ -500,8 +502,7 @@ class V3Controller:
             "nextAction": "INSTALL_SIGNED_SNAPSHOT_RUNTIME_AT_REQUIRED_MAIN",
         }
         encoded = (
-            json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
-            + "\n"
+            json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True) + "\n"
         ).encode("utf-8")
         digest = sha256_digest(encoded)
         handoff = handoff_root / f"{anchored_main}-{digest[7:23]}.json"
@@ -558,13 +559,11 @@ class V3Controller:
                 raise RuntimeError("reachable-account evidence escaped the artifact root") from exc
             if path.is_symlink() or not path.is_file() or _digest_file(path) != expected_digest:
                 raise RuntimeError("reachable-account evidence bytes changed")
-            account_map = ReachableAccountMap.model_validate_json(
-                path.read_bytes(), strict=True
-            )
-            if (
-                account_map.work_item_id != item.work_item_id
-                or account_map.candidate_sha not in {base_sha, candidate_sha}
-            ):
+            account_map = ReachableAccountMap.model_validate_json(path.read_bytes(), strict=True)
+            if account_map.work_item_id != item.work_item_id or account_map.candidate_sha not in {
+                base_sha,
+                candidate_sha,
+            }:
                 raise RuntimeError("reachable-account evidence identity mismatch")
             qualified_accounts = [
                 account
@@ -597,25 +596,17 @@ class V3Controller:
         spec = SEMANTIC_OUTPUT_SPECS.get(item.work_item_id)
         if spec is not None:
             suffix = f":materialized-output:{spec.output_id}"
-            keys = [
-                key
-                for key in checkpoint.stage_artifact_paths
-                if key.endswith(suffix)
-            ]
+            keys = [key for key in checkpoint.stage_artifact_paths if key.endswith(suffix)]
             semantic_label = "/".join(spec.semantic_names)
             if len(keys) != 1:
-                raise RuntimeError(
-                    f"{semantic_label} evidence has no unique validated output"
-                )
+                raise RuntimeError(f"{semantic_label} evidence has no unique validated output")
             key = keys[0]
             path = Path(checkpoint.stage_artifact_paths[key]).resolve()
             expected_digest = checkpoint.stage_artifact_digests.get(key)
             try:
                 path.relative_to(self.artifact_root.resolve())
             except ValueError as exc:
-                raise RuntimeError(
-                    f"{semantic_label} evidence escaped the artifact root"
-                ) from exc
+                raise RuntimeError(f"{semantic_label} evidence escaped the artifact root") from exc
             if (
                 expected_digest is None
                 or path.is_symlink()
@@ -631,17 +622,90 @@ class V3Controller:
                 != self.active_source.canonical_digest()
             ):
                 raise RuntimeError(f"{semantic_label} evidence identity mismatch")
+            artifact_paths_by_digest = {
+                digest: Path(checkpoint.stage_artifact_paths[stage_key]).resolve()
+                for stage_key, digest in checkpoint.stage_artifact_digests.items()
+                if stage_key in checkpoint.stage_artifact_paths
+            }
+            artifact_reader = DescriptorBoundArtifactReader(
+                self.artifact_root, artifact_paths_by_digest
+            )
             if isinstance(record, ReductionBoundaryEvidence):
-                independent_review_digests = {
-                    digest
-                    for stage_key, digest in checkpoint.stage_artifact_digests.items()
-                    if stage_key.split(":", 1)[0]
-                    in {"audit", "adversary", "security"}
-                }
-                if not independent_review_digests:
-                    raise RuntimeError(
-                        "reduction-boundary evidence lacks its independent authority bytes"
+                executable_text = os.environ.get("TCF_REDUCTION_ORACLE_EXECUTABLE")
+                executable_digest = os.environ.get("TCF_REDUCTION_ORACLE_DIGEST")
+                public_key_text = os.environ.get("TCF_REDUCTION_ORACLE_PUBLIC_KEY")
+                public_key_digest = os.environ.get("TCF_REDUCTION_ORACLE_PUBLIC_KEY_DIGEST")
+                if not all(
+                    (
+                        executable_text,
+                        executable_digest,
+                        public_key_text,
+                        public_key_digest,
                     )
+                ):
+                    raise RuntimeError("reduction oracle installation is unavailable")
+                assert executable_text is not None
+                assert public_key_text is not None
+                tree = run_command(
+                    ["git", "rev-parse", f"{candidate_sha}^{{tree}}"],
+                    cwd=self.git_root,
+                    check=False,
+                )
+                if tree.returncode != 0 or SHA_PATTERN.fullmatch(tree.stdout.strip()) is None:
+                    raise RuntimeError("reduction oracle candidate tree is unavailable")
+                try:
+                    assert executable_digest is not None
+                    assert public_key_digest is not None
+                    decision, receipt_raw = ExecutableReductionOracle(
+                        Path(executable_text),
+                        executable_digest,
+                        Path(public_key_text),
+                        public_key_digest,
+                    ).evaluate(
+                        record,
+                        candidate_sha=candidate_sha,
+                        candidate_tree_sha=tree.stdout.strip(),
+                        artifacts=artifact_reader,
+                        now=datetime.now(UTC),
+                    )
+                except CompletionVerificationError as exc:
+                    raise RuntimeError(str(exc)) from exc
+                receipt_path = path.parent / "reduction-oracle-receipt.json"
+                atomic_write_bytes(receipt_path, receipt_raw)
+                receipt_digest = _digest_file(receipt_path)
+                if decision.oracle_result_digest != record.oracle_result_digest:
+                    raise RuntimeError("reduction oracle result does not match evidence")
+                artifact_bindings[str(receipt_path.resolve())] = receipt_digest
+                artifact_bindings[str(Path(executable_text).resolve())] = executable_digest
+                for digest in record.raw_artifact_digests:
+                    raw_path = artifact_paths_by_digest.get(digest)
+                    if raw_path is None:
+                        raise RuntimeError("reduction raw artifact is not checkpoint-bound")
+                    artifact_bindings[str(raw_path)] = digest
+            if isinstance(record, DeliveryEconomicsEvidence):
+                external = ExternalEvidenceConfig.model_validate(
+                    load_yaml(self.repo_root / "config/external_evidence.yaml")
+                )
+                try:
+                    trusted = load_verified_external_evidence(
+                        repo_root=self.repo_root,
+                        subject_id=item.work_item_id,
+                        trusted_root_environment_variable=(
+                            external.trusted_root_environment_variable
+                        ),
+                        trusted_public_key_environment_variable=(
+                            external.trusted_public_key_environment_variable
+                        ),
+                    )
+                    receipt = trusted.require_commercial_trust()
+                    verify_delivery_economics(record, artifacts=artifact_reader, receipt=receipt)
+                except (ExternalEvidenceVerificationError, CompletionVerificationError) as exc:
+                    raise RuntimeError(str(exc)) from exc
+                for digest in record.source_record_digests:
+                    raw_path = artifact_paths_by_digest.get(digest)
+                    if raw_path is None:
+                        raise RuntimeError("delivery measurement is not checkpoint-bound")
+                    artifact_bindings[str(raw_path)] = digest
             if isinstance(record, ThirdSameFamilyCaseEvidence):
                 external_paths = [
                     Path(value).resolve()
@@ -649,17 +713,22 @@ class V3Controller:
                     if key.startswith("external_evidence:")
                 ]
                 if len(external_paths) != 1:
-                    raise RuntimeError(
-                        "third same-family evidence lacks one authoritative receipt"
-                    )
+                    raise RuntimeError("third same-family evidence lacks one authoritative receipt")
                 external_receipt = ExternalEvidenceReceipt.model_validate_json(
                     external_paths[0].read_bytes(), strict=True
                 )
                 if external_receipt.evidence_type is not EvidenceType.SAME_FAMILY_CASE:
                     raise RuntimeError("third same-family receipt has the wrong type")
-                artifact_digests = {
-                    artifact.digest for artifact in external_receipt.artifacts
-                }
+                correlation = external_receipt.correlation_identity
+                if (
+                    correlation is None
+                    or correlation.candidate_sha != candidate_sha
+                    or correlation.customer_identity_digest != record.customer_identity_digest
+                    or correlation.family_identity_digest != record.family_identity_digest
+                    or correlation.pack_identity_digest != record.reusable_pack_digest
+                ):
+                    raise RuntimeError("third same-family receipt correlation identity mismatch")
+                artifact_digests = {artifact.digest for artifact in external_receipt.artifacts}
                 if set(record.case_evidence_artifact_digests) - artifact_digests:
                     raise RuntimeError(
                         "third same-family cases are absent from the trusted receipt"
@@ -680,9 +749,7 @@ class V3Controller:
         if attestation.decision_changed_or_materially_strengthened:
             observed[SemanticEvidence.CUSTOMER_DECISION_CHANGED] = 1
         if attestation.value_exceeds_price_and_retained_effort:
-            observed[
-                SemanticEvidence.CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT
-            ] = 1
+            observed[SemanticEvidence.CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT] = 1
         return observed
 
     def _record_completion_evidence(
@@ -772,13 +839,12 @@ class V3Controller:
         semantic_refs: dict[SemanticEvidence, list[str]] = {
             SemanticEvidence.DETERMINISTIC_ARTIFACT: [checkpoint_digest]
         }
-        derived_semantics, semantic_artifact_bindings = (
-            self._controller_semantic_evidence(
-                item=item,
-                checkpoint=checkpoint,
-                base_sha=base_sha,
-                candidate_sha=candidate_sha,
-            )
+        trusted_additional_refs = list(additional_evidence_refs)
+        derived_semantics, semantic_artifact_bindings = self._controller_semantic_evidence(
+            item=item,
+            checkpoint=checkpoint,
+            base_sha=base_sha,
+            candidate_sha=candidate_sha,
         )
         for semantic, digests in derived_semantics.items():
             semantic_refs.setdefault(semantic, []).extend(digests)
@@ -806,18 +872,14 @@ class V3Controller:
             release_envelope_path = Path(
                 checkpoint.publication_authorization_envelope_path
             ).resolve()
-            release_envelope_digest = (
-                checkpoint.publication_authorization_envelope_digest
-            )
+            release_envelope_digest = checkpoint.publication_authorization_envelope_digest
             if (
                 release_envelope_path.is_symlink()
                 or not release_envelope_path.is_file()
                 or _digest_file(release_envelope_path) != release_envelope_digest
             ):
                 raise RuntimeError("release authorization envelope bytes changed")
-            semantic_artifact_bindings[str(release_envelope_path)] = (
-                release_envelope_digest
-            )
+            semantic_artifact_bindings[str(release_envelope_path)] = release_envelope_digest
         prefix_semantics = {
             "native-value-authorization": SemanticEvidence.NATIVE_VALUE_AUTHORIZATION,
             "traincheck-differential": SemanticEvidence.TRAINCHECK_INCIDENT_DIFFERENTIAL,
@@ -849,7 +911,7 @@ class V3Controller:
                 if item.external_receipt_required
                 or any(
                     reference.startswith("external-receipt:")
-                    for reference in additional_evidence_refs
+                    for reference in trusted_additional_refs
                 )
                 else checkpoint.execution_evidence_mode
                 if checkpoint is not None and checkpoint.execution_evidence_mode is not None
@@ -864,7 +926,7 @@ class V3Controller:
             machine_policy_receipt_path=machine_policy_receipt_path,
             release_authorization_envelope_digest=release_envelope_digest,
             release_authorization_envelope_path=release_envelope_path,
-            external_receipt_refs=[*item.external_evidence_refs, *additional_evidence_refs],
+            external_receipt_refs=[*item.external_evidence_refs, *trusted_additional_refs],
             semantic_evidence_refs=semantic_refs,
             semantic_artifact_bindings=semantic_artifact_bindings,
             created_at=now,
@@ -892,12 +954,25 @@ class V3Controller:
         milestone_external_digests: set[str] = set()
         milestone_external_identities: set[tuple[str, str, str]] = set()
         milestone_semantic_counts: dict[SemanticEvidence, int] = {}
+        milestone_correlated_facts: list[CorrelatedEvidenceFact] = []
         completion_policy = load_completion_evidence_policy(self.repo_root)
+        milestone_contract = completion_policy.milestone(collection.active_milestone)
+        required_evidence_item_ids = {
+            item.work_item_id for item in active
+        } | {
+            work_item_id
+            for criterion in milestone_contract.exit_criteria
+            for work_item_id in criterion.required_work_item_ids
+        }
+        evidence_items = [
+            collection.item(work_item_id)
+            for work_item_id in sorted(required_evidence_item_ids)
+        ]
         external = ExternalEvidenceConfig.model_validate(
             load_yaml(self.repo_root / "config/external_evidence.yaml")
         )
         github = load_github_config(self.repo_root / "config/github.yaml")
-        for item in active:
+        for item in evidence_items:
             item_contract = completion_policy.work_item(item.work_item_id)
             loaded = load_work_item_completion_evidence(
                 self.runtime_paths.milestone_evidence, item.work_item_id
@@ -907,7 +982,7 @@ class V3Controller:
             evidence, digest = loaded
             if (
                 evidence.work_item_id != item.work_item_id
-                or evidence.milestone_id != collection.active_milestone
+                or evidence.milestone_id != item.milestone
                 or evidence.source_authority_digest != active_source.canonical_digest()
             ):
                 raise RuntimeError("milestone evidence identity mismatch")
@@ -936,6 +1011,8 @@ class V3Controller:
                     milestone_semantic_counts.get(semantic, 0) + count
                 )
             external_type_counts: dict[EvidenceType, int] = {}
+            prior_evidence: dict[str, list[SemanticEvidence]] = {}
+            item_correlation_verified = False
             if evidence.checkpoint_path is not None:
                 checkpoint_path = evidence.checkpoint_path.resolve()
                 try:
@@ -953,9 +1030,7 @@ class V3Controller:
                     or _digest_file(checkpoint_path) != evidence.checkpoint_digest
                 ):
                     raise RuntimeError("milestone checkpoint bytes changed")
-                checkpoint_record = V3Checkpoint.model_validate(
-                    read_json(checkpoint_path, {})
-                )
+                checkpoint_record = V3Checkpoint.model_validate(read_json(checkpoint_path, {}))
                 bound_digests.append(evidence.checkpoint_digest)
             elif not item.external_receipt_required:
                 raise RuntimeError("milestone evidence omitted its checkpoint bytes")
@@ -976,13 +1051,12 @@ class V3Controller:
                 stage_path = Path(stage_path_text).resolve()
                 if stage_path.is_symlink() or not stage_path.is_file():
                     raise RuntimeError(f"{semantic.value} evidence bytes are missing")
-                if _digest_file(stage_path) != stage_digest or stage_digest not in (
-                    evidence.semantic_evidence_refs[semantic]
+                if (
+                    _digest_file(stage_path) != stage_digest
+                    or stage_digest not in (evidence.semantic_evidence_refs[semantic])
                 ):
                     raise RuntimeError(f"{semantic.value} evidence bytes changed")
-            for path_text, expected_digest in sorted(
-                evidence.semantic_artifact_bindings.items()
-            ):
+            for path_text, expected_digest in sorted(evidence.semantic_artifact_bindings.items()):
                 path = Path(path_text).resolve()
                 try:
                     path.relative_to(self.artifact_root.resolve())
@@ -990,13 +1064,50 @@ class V3Controller:
                     raise RuntimeError(
                         "semantic completion artifact escaped the artifact root"
                     ) from exc
-                if (
-                    path.is_symlink()
-                    or not path.is_file()
-                    or _digest_file(path) != expected_digest
-                ):
+                if path.is_symlink() or not path.is_file() or _digest_file(path) != expected_digest:
                     raise RuntimeError("semantic completion artifact bytes changed")
                 bound_digests.append(expected_digest)
+                try:
+                    raw_semantic = path.read_bytes()
+                    if SemanticEvidence.SUPPORT_POLICY in semantic_counts:
+                        support = SupportPolicyEvidence.model_validate_json(
+                            raw_semantic, strict=True
+                        )
+                        milestone_correlated_facts.append(
+                            CorrelatedEvidenceFact(
+                                candidate_sha=evidence.candidate_sha,
+                                pack_identity_digest=support.pack_identity_digest,
+                                semantic=SemanticEvidence.SUPPORT_POLICY,
+                            )
+                        )
+                    if SemanticEvidence.DELIVERY_ECONOMICS in semantic_counts:
+                        economics = DeliveryEconomicsEvidence.model_validate_json(
+                            raw_semantic, strict=True
+                        )
+                        milestone_correlated_facts.append(
+                            CorrelatedEvidenceFact(
+                                candidate_sha=evidence.candidate_sha,
+                                customer_identity_digest=(economics.customer_identity_digest),
+                                offer_identity_digest=economics.offer_identity_digest,
+                                semantic=SemanticEvidence.DELIVERY_ECONOMICS,
+                            )
+                        )
+                    if SemanticEvidence.THIRD_SAME_FAMILY_CASE in semantic_counts:
+                        family_case = ThirdSameFamilyCaseEvidence.model_validate_json(
+                            raw_semantic, strict=True
+                        )
+                        milestone_correlated_facts.append(
+                            CorrelatedEvidenceFact(
+                                candidate_sha=evidence.candidate_sha,
+                                customer_identity_digest=(family_case.customer_identity_digest),
+                                family_identity_digest=(family_case.family_identity_digest),
+                                pack_identity_digest=family_case.reusable_pack_digest,
+                                semantic=SemanticEvidence.THIRD_SAME_FAMILY_CASE,
+                            )
+                        )
+                except ValueError:
+                    # Only the path corresponding to a semantic model can parse as it.
+                    pass
             if evidence.candidate_manifest_path is not None:
                 manifest_path = evidence.candidate_manifest_path.resolve()
                 try:
@@ -1018,26 +1129,17 @@ class V3Controller:
                 ):
                     raise RuntimeError("milestone candidate manifest identity mismatch")
                 if checkpoint_record is not None:
-                    self._reverify_traincheck_evidence(
-                        checkpoint_record, manifest_path
-                    )
-                    self._reverify_release_evidence_authorization(
-                        checkpoint_record, manifest_path
-                    )
+                    self._reverify_traincheck_evidence(checkpoint_record, manifest_path)
+                    self._reverify_release_evidence_authorization(checkpoint_record, manifest_path)
                 tree = run_command(
                     ["git", "rev-parse", f"{evidence.candidate_sha}^{{tree}}"],
                     cwd=self.git_root,
                     check=False,
                 )
-                if (
-                    tree.returncode != 0
-                    or tree.stdout.strip() != evidence.candidate_tree_sha
-                ):
+                if tree.returncode != 0 or tree.stdout.strip() != evidence.candidate_tree_sha:
                     raise RuntimeError("milestone candidate tree identity changed")
                 bound_digests.append(evidence.candidate_manifest_digest)
-            for path_text, expected_digest in sorted(
-                evidence.independent_review_artifacts.items()
-            ):
+            for path_text, expected_digest in sorted(evidence.independent_review_artifacts.items()):
                 path = Path(path_text).resolve()
                 try:
                     path.relative_to(self.artifact_root.resolve())
@@ -1060,6 +1162,47 @@ class V3Controller:
                 evidence.independent_review_artifacts
             ):
                 raise RuntimeError("integration/trust evidence lacks independent review bytes")
+            for prior_item_id, required_semantics in item_contract.required_prior_evidence.items():
+                prior_loaded = load_work_item_completion_evidence(
+                    self.runtime_paths.milestone_evidence, prior_item_id
+                )
+                if prior_loaded is None:
+                    continue
+                prior, prior_digest = prior_loaded
+                if prior.source_authority_digest != active_source.canonical_digest():
+                    raise RuntimeError("prior completion authority is stale")
+                observed_semantics = set(prior.semantic_evidence_refs)
+                if not set(required_semantics).issubset(observed_semantics):
+                    continue
+                for path_text, expected_digest in prior.semantic_artifact_bindings.items():
+                    prior_path = Path(path_text).resolve()
+                    try:
+                        prior_path.relative_to(self.artifact_root.resolve())
+                    except ValueError as exc:
+                        raise RuntimeError("prior authority artifact escaped its root") from exc
+                    if (
+                        prior_path.is_symlink()
+                        or not prior_path.is_file()
+                        or _digest_file(prior_path) != expected_digest
+                    ):
+                        raise RuntimeError("prior authority artifact bytes changed")
+                if SemanticEvidence.NATIVE_VALUE_AUTHORIZATION in required_semantics:
+                    if prior.checkpoint_path is None or prior.candidate_manifest_path is None:
+                        raise RuntimeError("prior native authority lacks frozen provenance")
+                    prior_checkpoint = V3Checkpoint.model_validate(
+                        read_json(prior.checkpoint_path, {})
+                    )
+                    self._reverify_traincheck_evidence(
+                        prior_checkpoint, prior.candidate_manifest_path
+                    )
+                    self._reverify_release_evidence_authorization(
+                        prior_checkpoint, prior.candidate_manifest_path
+                    )
+                    observed_authorities.add(EvidenceAuthority.INDEPENDENT_MACHINE_POLICY)
+                prior_evidence[prior_item_id] = sorted(
+                    required_semantics, key=lambda value: value.value
+                )
+                bound_digests.append(prior_digest)
             if evidence.machine_policy_receipt_path is not None:
                 if (
                     evidence.candidate_manifest_digest is None
@@ -1089,17 +1232,14 @@ class V3Controller:
                 bound_digests.append(evidence.machine_policy_receipt_digest)
                 observed_authorities.add(EvidenceAuthority.INDEPENDENT_MACHINE_POLICY)
             if (
-                item.machine_policy_receipt_required
-                or item.kind is WorkKind.MACHINE_POLICY_REVIEW
+                item.machine_policy_receipt_required or item.kind is WorkKind.MACHINE_POLICY_REVIEW
             ) and evidence.machine_policy_receipt_path is None:
                 raise RuntimeError("required independent machine-policy receipt is absent")
             if item.external_receipt_required or item_contract.allowed_external_evidence_types:
                 record = load_verified_external_evidence(
                     repo_root=self.repo_root,
                     subject_id=item.work_item_id,
-                    trusted_root_environment_variable=(
-                        external.trusted_root_environment_variable
-                    ),
+                    trusted_root_environment_variable=(external.trusted_root_environment_variable),
                     trusted_public_key_environment_variable=(
                         external.trusted_public_key_environment_variable
                     ),
@@ -1132,29 +1272,48 @@ class V3Controller:
                 if (
                     milestone_external_names.intersection(names)
                     or milestone_external_digests.intersection(digests)
-                    or milestone_external_identities.intersection(
-                        unique_external_artifacts
-                    )
+                    or milestone_external_identities.intersection(unique_external_artifacts)
                 ):
-                    raise RuntimeError(
-                        "milestone external evidence repeats an artifact identity"
-                    )
+                    raise RuntimeError("milestone external evidence repeats an artifact identity")
                 milestone_external_names.update(names)
                 milestone_external_digests.update(digests)
                 milestone_external_identities.update(unique_external_artifacts)
                 artifact_count = len(unique_external_artifacts)
                 external_type_counts[receipt.evidence_type] = artifact_count
                 milestone_external_counts[receipt.evidence_type] = (
-                    milestone_external_counts.get(receipt.evidence_type, 0)
-                    + artifact_count
+                    milestone_external_counts.get(receipt.evidence_type, 0) + artifact_count
                 )
-                for semantic, count in self._external_receipt_semantic_evidence(
-                    receipt
-                ).items():
+                for semantic, count in self._external_receipt_semantic_evidence(receipt).items():
                     semantic_counts[semantic] = semantic_counts.get(semantic, 0) + count
                     milestone_semantic_counts[semantic] = (
                         milestone_semantic_counts.get(semantic, 0) + count
                     )
+                correlation = receipt.correlation_identity
+                if correlation is not None:
+                    if correlation.candidate_sha != evidence.candidate_sha:
+                        raise RuntimeError("external correlation candidate mismatch")
+                    item_correlation_verified = True
+                    milestone_correlated_facts.append(
+                        CorrelatedEvidenceFact(
+                            candidate_sha=correlation.candidate_sha,
+                            customer_identity_digest=(correlation.customer_identity_digest),
+                            family_identity_digest=correlation.family_identity_digest,
+                            offer_identity_digest=correlation.offer_identity_digest,
+                            pack_identity_digest=correlation.pack_identity_digest,
+                            external_evidence_type=receipt.evidence_type,
+                        )
+                    )
+                    for semantic in self._external_receipt_semantic_evidence(receipt):
+                        milestone_correlated_facts.append(
+                            CorrelatedEvidenceFact(
+                                candidate_sha=correlation.candidate_sha,
+                                customer_identity_digest=(correlation.customer_identity_digest),
+                                family_identity_digest=(correlation.family_identity_digest),
+                                offer_identity_digest=correlation.offer_identity_digest,
+                                pack_identity_digest=correlation.pack_identity_digest,
+                                semantic=semantic,
+                            )
+                        )
             grade = {
                 ExecutionEvidenceMode.SIMULATION: EvidenceGrade.DETERMINISTIC,
                 ExecutionEvidenceMode.CONTROLLED_VALIDATION: EvidenceGrade.CONTROLLED,
@@ -1169,33 +1328,39 @@ class V3Controller:
                         authorities=sorted(observed_authorities, key=lambda value: value.value),
                         semantic_counts=semantic_counts,
                         external_type_counts=external_type_counts,
+                        prior_evidence=prior_evidence,
                     ),
                 )
             )
-            if item.maturity_target.commercial in {
-                CommercialMaturity.EXTERNAL_VALUE_DEMONSTRATED,
-                CommercialMaturity.COMMERCIALLY_SUPPORTED,
-            } and not commercial_maturity_supported(
-                item.maturity_target.commercial, external_type_counts
+            if (
+                item.maturity_target.commercial is CommercialMaturity.EXTERNAL_VALUE_DEMONSTRATED
+            ) and not commercial_maturity_supported(
+                item.maturity_target.commercial,
+                CommercialMaturityAuthorization(
+                    external_evidence_types=sorted(
+                        external_type_counts, key=lambda value: value.value
+                    ),
+                    semantic_evidence=sorted(
+                        set(semantic_counts)
+                        | {semantic for values in prior_evidence.values() for semantic in values},
+                        key=lambda value: value.value,
+                    ),
+                    exact_identity_correlation_verified=item_correlation_verified,
+                ),
             ):
                 contract_failures.append(
                     f"{item.work_item_id} commercial maturity "
                     f"{item.maturity_target.commercial.value} exceeds exact trusted evidence"
                 )
             if (
-                item.maturity_target.commercial
-                is CommercialMaturity.NATIVE_ADVANTAGE_DEMONSTRATED
-                and semantic_counts.get(
-                    SemanticEvidence.NATIVE_VALUE_AUTHORIZATION, 0
-                )
-                < 1
+                item.maturity_target.commercial is CommercialMaturity.NATIVE_ADVANTAGE_DEMONSTRATED
+                and semantic_counts.get(SemanticEvidence.NATIVE_VALUE_AUTHORIZATION, 0) < 1
             ):
                 contract_failures.append(
                     f"{item.work_item_id} native advantage lacks independent authorization"
                 )
             evidence_digests[item.work_item_id] = digest
             deterministic_evidence[item.work_item_id] = bound_digests
-        milestone_contract = completion_policy.milestone(collection.active_milestone)
         for evidence_type in milestone_contract.required_external_evidence_types:
             if milestone_external_counts.get(evidence_type, 0) < 1:
                 contract_failures.append(
@@ -1210,15 +1375,34 @@ class V3Controller:
             contract_failures.append(
                 f"{collection.active_milestone} lacks machine-policy authorization"
             )
-        contract_failures.extend(
-            evaluate_milestone_exit_criteria(
-                milestone_contract,
-                completed_work_item_ids=set(evidence_digests),
-                semantic_counts=milestone_semantic_counts,
-                external_type_counts=milestone_external_counts,
-                machine_policy_available=bool(machine_policy_receipt_refs),
-            )
+        exit_failures = evaluate_milestone_exit_criteria(
+            milestone_contract,
+            completed_work_item_ids=set(evidence_digests),
+            semantic_counts=milestone_semantic_counts,
+            external_type_counts=milestone_external_counts,
+            machine_policy_available=bool(machine_policy_receipt_refs),
+            correlated_facts=milestone_correlated_facts,
         )
+        contract_failures.extend(exit_failures)
+        if any(
+            item.maturity_target.commercial is CommercialMaturity.COMMERCIALLY_SUPPORTED
+            for item in active
+        ) and not commercial_maturity_supported(
+            CommercialMaturity.COMMERCIALLY_SUPPORTED,
+            CommercialMaturityAuthorization(
+                external_evidence_types=sorted(
+                    milestone_external_counts, key=lambda value: value.value
+                ),
+                semantic_evidence=sorted(milestone_semantic_counts, key=lambda value: value.value),
+                exact_identity_correlation_verified=not any(
+                    "correlated" in failure for failure in exit_failures
+                ),
+            ),
+        ):
+            contract_failures.append(
+                f"{collection.active_milestone} commercially-supported maturity "
+                "lacks its exact correlated authorization envelope"
+            )
         milestones = MilestoneRoadmap.model_validate(
             load_yaml(self.repo_root / self.factory.roadmap.milestones)
         )
@@ -1283,7 +1467,7 @@ class V3Controller:
             state_path=self.runtime_paths.milestone_state,
             receipt_path=receipt_path,
             evidence_digests=evidence_digests,
-            expected_evidence_ids={item.work_item_id for item in active},
+            expected_evidence_ids={item.work_item_id for item in evidence_items},
             source_authority_digest=active_source.canonical_digest(),
             proposals=[],
             now=datetime.now(UTC),
@@ -1483,9 +1667,7 @@ class V3Controller:
         authorization = load_authorized_machine_policy_review(
             receipt_path=receipt_path,
             activation_path=Path(github.activation_receipt_path),
-            authority=ExternalPhase3NativeValueAuthority(
-                Path(github.receipt_verifier_executable)
-            ),
+            authority=ExternalPhase3NativeValueAuthority(Path(github.receipt_verifier_executable)),
             work_item_id=item.work_item_id,
             milestone_id=item.milestone,
             lane=item.lane,
@@ -1513,13 +1695,9 @@ class V3Controller:
         )
         return authorization, checkpoint_path, manifest_path, manifest_digest
 
-    def _future_lane_milestones(
-        self, collection: WorkItemCollection
-    ) -> dict[Lane, frozenset[str]]:
+    def _future_lane_milestones(self, collection: WorkItemCollection) -> dict[Lane, frozenset[str]]:
         active_items = [
-            item
-            for item in collection.work_items
-            if item.milestone == collection.active_milestone
+            item for item in collection.work_items if item.milestone == collection.active_milestone
         ]
         if not active_items or not any(
             item.status is WorkStatus.WAITING_EXTERNAL for item in active_items
@@ -1602,15 +1780,16 @@ class V3Controller:
                             candidate_sha=authorization.candidate_sha,
                             checkpoint_digest=_digest_file(checkpoint_path),
                             manifest_digest=manifest_digest,
-                            machine_policy_receipt_digest=(
-                                authorization.machine_receipt_digest
-                            ),
+                            machine_policy_receipt_digest=(authorization.machine_receipt_digest),
                             independent_reviewed=False,
                             additional_evidence_refs=(
                                 *authorization.completion_evidence_refs(),
                                 "machine-policy-authorization:"
-                                f"{_digest_file(manifest_path.parent / 'machine-policy-'
-                                'authorization.json')}",
+                                f"{
+                                    _digest_file(
+                                        manifest_path.parent / 'machine-policy-authorization.json'
+                                    )
+                                }",
                             ),
                             now=now,
                         )
@@ -1667,9 +1846,7 @@ class V3Controller:
                         if action_outcome is not None:
                             receipt.require_exact_action_response(action_outcome, now=now)
                             if self.phase6_runtime is None:
-                                raise Phase6RuntimeError(
-                                    "external response runtime is unavailable"
-                                )
+                                raise Phase6RuntimeError("external response runtime is unavailable")
                             response_consumption = (
                                 self.phase6_runtime.reserve_external_response_consumption(
                                     outcome=action_outcome,
@@ -1834,15 +2011,11 @@ class V3Controller:
             "controller:research-advisory-bundle": Path(advisory.bundle_path),
             "controller:research-report": Path(advisory.report_path),
             **{
-                f"controller:research-raw-{artifact.source_id}": Path(
-                    artifact.raw_cas_path
-                )
+                f"controller:research-raw-{artifact.source_id}": Path(artifact.raw_cas_path)
                 for artifact in advisory.artifacts
             },
             **{
-                f"controller:research-receipt-{artifact.source_id}": Path(
-                    artifact.receipt_path
-                )
+                f"controller:research-receipt-{artifact.source_id}": Path(artifact.receipt_path)
                 for artifact in advisory.artifacts
             },
             **{
@@ -1851,18 +2024,15 @@ class V3Controller:
             },
         }
         for key, path in expected_paths.items():
-            if (
-                checkpoint.stage_artifact_paths.get(key) != str(path.resolve())
-                or checkpoint.stage_artifact_digests.get(key) != _digest_file(path)
-            ):
+            if checkpoint.stage_artifact_paths.get(key) != str(
+                path.resolve()
+            ) or checkpoint.stage_artifact_digests.get(key) != _digest_file(path):
                 raise RuntimeError("research evidence changed after controller verification")
 
     def _checkpoint_research_advisory(
         self, checkpoint: V3Checkpoint
     ) -> ResearchAdvisoryBundle | None:
-        path_text = checkpoint.stage_artifact_paths.get(
-            "controller:research-advisory-bundle"
-        )
+        path_text = checkpoint.stage_artifact_paths.get("controller:research-advisory-bundle")
         if path_text is None:
             return None
         try:
@@ -1874,9 +2044,7 @@ class V3Controller:
         self._reverify_research_advisory(advisory, checkpoint)
         return advisory
 
-    def _reverify_traincheck_evidence(
-        self, checkpoint: V3Checkpoint, manifest_path: Path
-    ) -> None:
+    def _reverify_traincheck_evidence(self, checkpoint: V3Checkpoint, manifest_path: Path) -> None:
         """Reopen every frozen TrainCheck byte and match manifest bindings."""
 
         bindings = {
@@ -1928,9 +2096,7 @@ class V3Controller:
             / checkpoint.work_item_id
             / f"{checkpoint.candidate_sha}.json"
         )
-        authorized = ExternalReceiptAuthorizer(
-            Path(github.receipt_verifier_executable)
-        ).authorize(
+        authorized = ExternalReceiptAuthorizer(Path(github.receipt_verifier_executable)).authorize(
             trusted_receipt_path,
             candidate_sha=checkpoint.candidate_sha,
             candidate_tree_sha=manifest.candidate_tree_sha,
@@ -1943,8 +2109,7 @@ class V3Controller:
         )
         if (
             receipt_copy_path.read_bytes() != trusted_receipt_path.read_bytes()
-            or result.canonical_digest()
-            not in authorized.receipt.raw_evidence_artifact_hashes
+            or result.canonical_digest() not in authorized.receipt.raw_evidence_artifact_hashes
         ):
             raise RuntimeError("TrainCheck receipt/result binding changed")
         authorize_traincheck_differential(
@@ -1974,21 +2139,16 @@ class V3Controller:
         if (
             envelope.work_item_id != checkpoint.work_item_id
             or envelope.candidate_sha != checkpoint.candidate_sha
-            or envelope.candidate_tree_sha
-            != checkpoint.publication_candidate_tree_sha
+            or envelope.candidate_tree_sha != checkpoint.publication_candidate_tree_sha
             or envelope.candidate_manifest_digest != _digest_file(manifest_path)
             or envelope.machine_policy_receipt_id
             != checkpoint.publication_expected_machine_policy_receipt_id
             or envelope.machine_policy_receipt_digest
             != checkpoint.publication_expected_machine_policy_receipt_digest
             or envelope.native_value_authorization_digest
-            != checkpoint.stage_artifact_digests.get(
-                "machine_policy:authorization-envelope"
-            )
+            != checkpoint.stage_artifact_digests.get("machine_policy:authorization-envelope")
             or envelope.activation_receipt_digest
-            != checkpoint.stage_artifact_digests.get(
-                "machine_policy:activation-receipt"
-            )
+            != checkpoint.stage_artifact_digests.get("machine_policy:activation-receipt")
         ):
             raise RuntimeError("release authorization envelope identity mismatch")
         expected_frozen = {
@@ -1996,9 +2156,7 @@ class V3Controller:
             for name, digest in checkpoint.stage_artifact_digests.items()
             if name.startswith("machine_policy:traincheck:")
         }
-        receipt_digest = checkpoint.stage_artifact_digests.get(
-            "machine_policy:traincheck-receipt"
-        )
+        receipt_digest = checkpoint.stage_artifact_digests.get("machine_policy:traincheck-receipt")
         if receipt_digest is not None:
             expected_frozen["machine-policy-receipt"] = receipt_digest
         if envelope.frozen_artifact_digests != expected_frozen:
@@ -2235,9 +2393,7 @@ class V3Controller:
                     item=item,
                     candidate_sha=base_sha,
                     artifact_root=(
-                        self.artifact_root
-                        / item.work_item_id
-                        / f"research-{base_sha[:12]}"
+                        self.artifact_root / item.work_item_id / f"research-{base_sha[:12]}"
                     ),
                     now=now,
                 )
@@ -2284,13 +2440,9 @@ class V3Controller:
             ):
                 raise RuntimeError("pending publication checkpoint is incomplete")
             publication_worktree = Path(recovered_checkpoint.candidate_worktree).resolve()
-            publication_manifest = Path(
-                recovered_checkpoint.publication_manifest_path
-            ).resolve()
+            publication_manifest = Path(recovered_checkpoint.publication_manifest_path).resolve()
             try:
-                publication_worktree.relative_to(
-                    self.runtime_paths.worktree_root.resolve()
-                )
+                publication_worktree.relative_to(self.runtime_paths.worktree_root.resolve())
                 publication_manifest.relative_to(self.artifact_root.resolve())
             except ValueError as exc:
                 raise RuntimeError("pending publication paths escaped their bounded roots") from exc
@@ -2320,23 +2472,17 @@ class V3Controller:
                 )
             except ExternalEvidenceVerificationError as exc:
                 recovered_checkpoint.active = False
-                recovered_checkpoint.approval_state = (
-                    "TRUSTED_EXTERNAL_EVIDENCE_TAINTED"
-                )
+                recovered_checkpoint.approval_state = "TRUSTED_EXTERNAL_EVIDENCE_TAINTED"
                 recovered_checkpoint.circuit_breaker_reason = str(exc)
                 recovered_checkpoint.updated_at = now
                 self.checkpoints.save_v3(recovered_checkpoint)
-                self.queue.transition(
-                    item.work_item_id, WorkStatus.BLOCKED_POLICY, updated_at=now
-                )
+                self.queue.transition(item.work_item_id, WorkStatus.BLOCKED_POLICY, updated_at=now)
                 return {
                     "status": WorkStatus.BLOCKED_POLICY.value,
                     "workItemId": item.work_item_id,
                     "reason": "external authority changed before publication recovery",
                 }
-            self._reverify_traincheck_evidence(
-                recovered_checkpoint, publication_manifest
-            )
+            self._reverify_traincheck_evidence(recovered_checkpoint, publication_manifest)
             self._reverify_release_evidence_authorization(
                 recovered_checkpoint, publication_manifest
             )
@@ -2532,11 +2678,7 @@ class V3Controller:
                 raise RuntimeError("research advisory lost its controller runtime")
             research_advisory = self.phase6_runtime.materialize_research_advisory(
                 research_advisory,
-                evidence_root=(
-                    root
-                    / "research-evidence"
-                    / f"generation-{generation:04d}"
-                ),
+                evidence_root=(root / "research-evidence" / f"generation-{generation:04d}"),
             )
         checkpoint = V3Checkpoint(
             generation=generation,
@@ -2771,9 +2913,7 @@ class V3Controller:
         }
         if research_advisory is not None:
             assert self.phase6_runtime is not None
-            research_payloads = self.phase6_runtime.verify_research_advisory(
-                research_advisory
-            )
+            research_payloads = self.phase6_runtime.verify_research_advisory(research_advisory)
             research_paths: dict[str, Path] = {
                 "research-advisory-bundle": Path(research_advisory.bundle_path),
                 "research-report": Path(research_advisory.report_path),
@@ -2879,9 +3019,7 @@ class V3Controller:
                     "taskContract": task_contract.model_dump(mode="json", by_alias=True),
                     "sourceContextManifest": role_context.model_dump(mode="json", by_alias=True),
                     "controllerAdvisoryEvidence": (
-                        research_advisory.agent_context()
-                        if research_advisory is not None
-                        else None
+                        research_advisory.agent_context() if research_advisory is not None else None
                     ),
                 },
                 ensure_ascii=False,
@@ -2921,9 +3059,7 @@ class V3Controller:
                     "contextDigest": role_context_digest,
                     "packetDigest": packet.canonical_digest(),
                     "controllerAdvisoryEvidence": (
-                        research_advisory.agent_context()
-                        if research_advisory is not None
-                        else None
+                        research_advisory.agent_context() if research_advisory is not None else None
                     ),
                 },
                 allowed_paths=packet.allowed_paths,
@@ -2998,12 +3134,16 @@ class V3Controller:
                 }
                 if result.terminal_disposition in retryable_dispositions:
                     backend_state = result.error_state
-                    if backend_state not in {
-                        BackendRouteState.AUTH_EXPIRED,
-                        BackendRouteState.QUOTA_WAIT,
-                        BackendRouteState.INFRASTRUCTURE,
-                        BackendRouteState.TIMEOUT,
-                    } or result.terminal_record_digest is None:
+                    if (
+                        backend_state
+                        not in {
+                            BackendRouteState.AUTH_EXPIRED,
+                            BackendRouteState.QUOTA_WAIT,
+                            BackendRouteState.INFRASTRUCTURE,
+                            BackendRouteState.TIMEOUT,
+                        }
+                        or result.terminal_record_digest is None
+                    ):
                         raise RuntimeError(
                             "retryable backend result omitted its typed durable binding"
                         )
@@ -3032,9 +3172,7 @@ class V3Controller:
                         checkpoint.active = False
                         checkpoint.backend_wait_state = backend_state
                         checkpoint.backend_resume_at = None
-                        checkpoint.backend_terminal_record_digest = (
-                            result.terminal_record_digest
-                        )
+                        checkpoint.backend_terminal_record_digest = result.terminal_record_digest
                         checkpoint.circuit_breaker_reason = (
                             f"{backend_state.value} backend recheck budget exhausted"
                         )
@@ -3059,7 +3197,7 @@ class V3Controller:
                             retry_at = retry_at.replace(tzinfo=UTC)
                     except ValueError:
                         retry_at = datetime.now(UTC) + timedelta(
-                            minutes=min(30, 2 ** checkpoint.backend_recheck_attempts)
+                            minutes=min(30, 2**checkpoint.backend_recheck_attempts)
                         )
                     if retry_at <= datetime.now(UTC):
                         retry_at = datetime.now(UTC) + timedelta(minutes=1)
@@ -3240,8 +3378,7 @@ class V3Controller:
                     POLICY_FILE: POLICY_BINDING,
                 }
                 by_filename = {
-                    PurePosixPath(output.path).name: output
-                    for output in execution_report.outputs
+                    PurePosixPath(output.path).name: output for output in execution_report.outputs
                 }
                 if set(logical_bindings) - set(by_filename):
                     raise RuntimeError("controlled experiment report omitted native/value outputs")
@@ -3549,14 +3686,11 @@ class V3Controller:
                     }
                 )
             handoff_findings.extend(
-                {"role": report.role, "limitation": limitation}
-                for limitation in report.limitations
+                {"role": report.role, "limitation": limitation} for limitation in report.limitations
             )
             for reference in report.external_receipt_refs:
                 receipt_id, digest = reference.split("@", 1)
-                handoff_findings.append(
-                    {"role": report.role, "externalReceiptRef": reference}
-                )
+                handoff_findings.append({"role": report.role, "externalReceiptRef": reference})
                 if receipt_id not in seen_receipts:
                     try:
                         external_config = ExternalEvidenceConfig.model_validate(
@@ -3613,12 +3747,12 @@ class V3Controller:
                     )
                     bound_artifacts[f"external:{receipt_id}"] = payload.canonical_bytes
                     report_handoff_artifacts[f"externalReceipt:{receipt_id}"] = external_copy
-                    checkpoint.stage_artifact_digests[
-                        f"external_evidence:{receipt_id}"
-                    ] = payload.canonical_digest
-                    checkpoint.stage_artifact_paths[
-                        f"external_evidence:{receipt_id}"
-                    ] = str(external_copy.resolve())
+                    checkpoint.stage_artifact_digests[f"external_evidence:{receipt_id}"] = (
+                        payload.canonical_digest
+                    )
+                    checkpoint.stage_artifact_paths[f"external_evidence:{receipt_id}"] = str(
+                        external_copy.resolve()
+                    )
                     for authority_name, authority_bytes in sorted(
                         payload.authority_payloads.items()
                     ):
@@ -3631,9 +3765,7 @@ class V3Controller:
                             raise RuntimeError(
                                 "materialized external authority evidence was substituted"
                             )
-                        binding_name = (
-                            f"external-evidence:{receipt_id}:{authority_name}"
-                        )
+                        binding_name = f"external-evidence:{receipt_id}:{authority_name}"
                         stage_bindings.append(
                             StageArtifactBinding(
                                 stage="controller",
@@ -3641,9 +3773,7 @@ class V3Controller:
                                 digest=authority_digest,
                             )
                         )
-                        bound_artifacts[
-                            f"stage:controller:{binding_name}"
-                        ] = authority_bytes
+                        bound_artifacts[f"stage:controller:{binding_name}"] = authority_bytes
                         report_handoff_artifacts[
                             f"externalAuthority:{receipt_id}:{authority_name}"
                         ] = authority_copy
@@ -3654,8 +3784,7 @@ class V3Controller:
                             f"external_authority:{receipt_id}:{authority_name}"
                         ] = str(authority_copy.resolve())
                         verified_external_evidence_refs.append(
-                            "external-authority:"
-                            f"{receipt_id}:{authority_name}@{authority_digest}"
+                            f"external-authority:{receipt_id}:{authority_name}@{authority_digest}"
                         )
                     verified_external_evidence_refs.append(
                         f"external-receipt:{receipt_id}@{payload.canonical_digest}"
@@ -3672,8 +3801,7 @@ class V3Controller:
                 for report, _, _ in validated_reports
                 if report.owner_class == "CANDIDATE_AGENT"
                 for output in report.outputs
-                if PurePosixPath(output.path).name
-                == "traincheck-differential-request.json"
+                if PurePosixPath(output.path).name == "traincheck-differential-request.json"
             ]
             if len(requests) != 1:
                 raise RuntimeError("TrainCheck work has no unique differential request")
@@ -3694,9 +3822,7 @@ class V3Controller:
             traincheck_root.mkdir(parents=True, exist_ok=True)
             traincheck_artifacts = {
                 "request": traincheck_request.canonical_json_bytes(),
-                "tool": traincheck_raw_store.read_exact(
-                    traincheck_request.traincheck_tool_digest
-                ),
+                "tool": traincheck_raw_store.read_exact(traincheck_request.traincheck_tool_digest),
                 "incident-contract": traincheck_raw_store.read_exact(
                     traincheck_request.incident_contract_digest
                 ),
@@ -3721,12 +3847,10 @@ class V3Controller:
                     )
                 )
                 bound_artifacts[f"stage:controller:{binding_name}"] = raw
-                checkpoint.stage_artifact_digests[
-                    f"machine_policy:{binding_name}"
-                ] = digest
-                checkpoint.stage_artifact_paths[
-                    f"machine_policy:{binding_name}"
-                ] = str(path.resolve())
+                checkpoint.stage_artifact_digests[f"machine_policy:{binding_name}"] = digest
+                checkpoint.stage_artifact_paths[f"machine_policy:{binding_name}"] = str(
+                    path.resolve()
+                )
                 if name == "result":
                     traincheck_result_path = path
         manifest = CandidateManifest(
@@ -3760,10 +3884,7 @@ class V3Controller:
         native_value_handoff_artifacts = {
             "candidateManifest": manifest_path,
             **report_handoff_artifacts,
-            **{
-                f"gate:{name}": path
-                for name, path in sorted(gate_handoff_paths.items())
-            },
+            **{f"gate:{name}": path for name, path in sorted(gate_handoff_paths.items())},
             **{
                 f"materialized:{key}": Path(path_text)
                 for key, path_text in sorted(checkpoint.stage_artifact_paths.items())
@@ -3778,9 +3899,7 @@ class V3Controller:
                         for artifact in research_advisory.artifacts
                     },
                     **{
-                        f"researchReceipt:{artifact.source_id}": Path(
-                            artifact.receipt_path
-                        )
+                        f"researchReceipt:{artifact.source_id}": Path(artifact.receipt_path)
                         for artifact in research_advisory.artifacts
                     },
                     **{
@@ -3873,19 +3992,19 @@ class V3Controller:
                     checkpoint.stage_artifact_digests["machine_policy:traincheck-receipt"] = (
                         traincheck_receipt_digest
                     )
-                    checkpoint.stage_artifact_paths["machine_policy:traincheck-receipt"] = (
-                        str(traincheck_receipt_copy.resolve())
+                    checkpoint.stage_artifact_paths["machine_policy:traincheck-receipt"] = str(
+                        traincheck_receipt_copy.resolve()
                     )
                     traincheck_evidence_refs = (
                         f"traincheck-differential:{traincheck_result_digest}",
                         f"machine-policy-receipt:{traincheck_receipt_digest}",
                     )
-                    native_value_handoff_artifacts[
-                        "trainCheckDifferential"
-                    ] = traincheck_result_path
-                    native_value_handoff_artifacts[
-                        "trainCheckMachinePolicyReceipt"
-                    ] = traincheck_receipt_copy
+                    native_value_handoff_artifacts["trainCheckDifferential"] = (
+                        traincheck_result_path
+                    )
+                    native_value_handoff_artifacts["trainCheckMachinePolicyReceipt"] = (
+                        traincheck_receipt_copy
+                    )
                 assert_frozen_candidate(
                     worktree.path,
                     expected_candidate_sha=candidate_sha,
@@ -4002,9 +4121,7 @@ class V3Controller:
                 )
                 if receipt_file_digest is None:
                     raise RuntimeError("TrainCheck release envelope lacks receipt bytes")
-                frozen_traincheck_digests["machine-policy-receipt"] = (
-                    receipt_file_digest
-                )
+                frozen_traincheck_digests["machine-policy-receipt"] = receipt_file_digest
                 result_digest = frozen_traincheck_digests.get("result")
                 if result_digest is None:
                     raise RuntimeError("TrainCheck release envelope lacks result bytes")
@@ -4014,12 +4131,8 @@ class V3Controller:
                     candidate_sha=candidate_sha,
                     candidate_tree_sha=frozen_candidate.candidate_tree_sha,
                     candidate_manifest_digest=_digest_file(manifest_path),
-                    native_value_authorization_digest=_digest_file(
-                        native_value_authorization_path
-                    ),
-                    machine_policy_receipt_id=(
-                        native_value_authorization.machine_receipt_id
-                    ),
+                    native_value_authorization_digest=_digest_file(native_value_authorization_path),
+                    machine_policy_receipt_id=(native_value_authorization.machine_receipt_id),
                     machine_policy_receipt_digest=transition.machine_receipt_digest,
                     activation_receipt_digest=(
                         native_value_authorization.activation_receipt_digest
@@ -4029,30 +4142,22 @@ class V3Controller:
                     frozen_artifact_digests=frozen_traincheck_digests,
                     authorized_at=datetime.now(UTC),
                 )
-                release_authorization_path = (
-                    root / "frozen-release-evidence-authorization.json"
-                )
-                release_authorization_path.write_bytes(
-                    release_authorization.canonical_json_bytes()
-                )
-                release_authorization_digest = _digest_file(
-                    release_authorization_path
-                )
+                release_authorization_path = root / "frozen-release-evidence-authorization.json"
+                release_authorization_path.write_bytes(release_authorization.canonical_json_bytes())
+                release_authorization_digest = _digest_file(release_authorization_path)
                 checkpoint.publication_authorization_envelope_path = str(
                     release_authorization_path.resolve()
                 )
-                checkpoint.publication_authorization_envelope_digest = (
+                checkpoint.publication_authorization_envelope_digest = release_authorization_digest
+                checkpoint.stage_artifact_paths["machine_policy:frozen-release-authorization"] = (
+                    str(release_authorization_path.resolve())
+                )
+                checkpoint.stage_artifact_digests["machine_policy:frozen-release-authorization"] = (
                     release_authorization_digest
                 )
-                checkpoint.stage_artifact_paths[
-                    "machine_policy:frozen-release-authorization"
-                ] = str(release_authorization_path.resolve())
-                checkpoint.stage_artifact_digests[
-                    "machine_policy:frozen-release-authorization"
-                ] = release_authorization_digest
-                native_value_handoff_artifacts[
-                    "frozenReleaseEvidenceAuthorization"
-                ] = release_authorization_path
+                native_value_handoff_artifacts["frozenReleaseEvidenceAuthorization"] = (
+                    release_authorization_path
+                )
             checkpoint.updated_at = datetime.now(UTC)
             self.checkpoints.save_v3(checkpoint)
             if transition.resulting_status is not WorkStatus.PASSED_ENGINEERING:
@@ -4085,9 +4190,7 @@ class V3Controller:
                 self._record_completion_evidence(
                     item=item,
                     candidate_sha=candidate_sha,
-                    checkpoint_digest=_digest_file(
-                        self.checkpoints.path_for(item.work_item_id)
-                    ),
+                    checkpoint_digest=_digest_file(self.checkpoints.path_for(item.work_item_id)),
                     manifest_digest=_digest_file(manifest_path),
                     machine_policy_receipt_digest=transition.machine_receipt_digest,
                     independent_reviewed=True,

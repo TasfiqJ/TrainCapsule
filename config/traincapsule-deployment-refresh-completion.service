@@ -1,0 +1,18 @@
+[Unit]
+Description=Publish attested TrainCapsule refresh completion to activation supervisor
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/libexec/traincapsule-deployment-refresh --publish-activation-completion --apply --confirm APPLY_DEPLOYMENT_REFRESH
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadOnlyPaths=/var/lib/traincapsule-verifier/deployment-refresh-journal/completions
+ReadWritePaths=/var/lib/traincapsule-verifier/activation-refresh-inbox
+CapabilityBoundingSet=CAP_CHOWN CAP_FOWNER
+RestrictAddressFamilies=AF_UNIX
+SystemCallFilter=@system-service
+UMask=0027

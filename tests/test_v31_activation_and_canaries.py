@@ -22,7 +22,10 @@ from tcfactory.v3.activation import (
     stage_activation_request,
     validate_activation_control_state,
 )
-from tcfactory.v3.activation_supervisor import run_activation_supervisor
+from tcfactory.v3.activation_supervisor import (
+    RefreshCompletionV31,
+    run_activation_supervisor,
+)
 from tcfactory.v3.base import sha256_digest
 from tcfactory.v3.canaries import (
     CanaryStatus,
@@ -487,6 +490,169 @@ def test_activation_supervisor_consumes_delayed_live_receipt_and_stages_start(
         "ACTIVATED_START_REQUESTED:ACTIVATE-ACT-TEST"
     )
     assert calls[-2:] == ["activate", "start"]
+
+
+def test_refresh_completion_forces_fresh_exact_canaries_and_never_reuses_history(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _repo(tmp_path)
+    main_sha = _git(repo, "rev-parse", "HEAD")
+    tree_sha = _git(repo, "rev-parse", "HEAD^{tree}")
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    paths = _runtime_paths(runtime)
+    paths.canary_results.mkdir(parents=True)
+    old_suite = paths.canary_results / "OLD" / "suite.json"
+    old_suite.parent.mkdir()
+    old_suite.write_bytes(b"old suite must never be opened\n")
+    completion = RefreshCompletionV31(
+        transaction_id=main_sha + "-" + "1" * 16,
+        handoff_digest=DIGEST,
+        previous_main_sha="c" * 40,
+        required_main_sha=main_sha,
+        required_main_tree_sha=tree_sha,
+        source_generation_id="traincapsule-v3.1-zh-2026-08-12",
+        source_generation_digest=DIGEST,
+        generation_manifest_digest=DIGEST,
+        runtime_manifest_digest=DIGEST,
+        environment_digest=DIGEST,
+        effective_config_digest=DIGEST,
+        snapshot_manifest_digest=DIGEST,
+        committed_at=NOW,
+    )
+    completion_root = tmp_path / "completion-inbox"
+    completion_root.mkdir()
+    completion_path = completion_root / f"{main_sha}-{completion.transaction_id}.json"
+    completion_raw = completion.canonical_json_bytes()
+    completion_path.write_bytes(completion_raw)
+    calls: list[str] = []
+    fresh_suite = tmp_path / "fresh-suite.bin"
+    fresh_suite.write_bytes(b"fresh\n")
+    runtime_manifest, runtime_loader = _runtime_loader()
+
+    import tcfactory.v3.activation_supervisor as supervisor
+
+    def resolved_paths(_repo: Path) -> V3RuntimePaths:
+        return paths
+
+    monkeypatch.setattr(supervisor, "resolve_v3_runtime_paths", resolved_paths)
+
+    def accept_completion(**_kwargs: object) -> str:
+        return "sha256:" + "f" * 64
+
+    monkeypatch.setattr(
+        supervisor,
+        "_validate_refresh_completion",
+        accept_completion,
+    )
+
+    def run_canaries(**kwargs: object) -> Path:
+        result_root = kwargs["result_root"]
+        assert isinstance(result_root, Path)
+        assert "deployment-refresh" in result_root.parts
+        calls.append("fresh-canaries")
+        return fresh_suite
+
+    fresh = SimpleNamespace(
+        status=CanaryStatus.PASS,
+        exact_main_sha=main_sha,
+        exact_tree_sha=tree_sha,
+        source_generation_id=completion.source_generation_id,
+        source_generation_digest=completion.source_generation_digest,
+    )
+    monkeypatch.setattr(supervisor, "run_mandatory_canaries", run_canaries)
+    def parse_fresh(_raw: bytes, *, strict: bool) -> SimpleNamespace:
+        assert strict
+        return fresh
+
+    monkeypatch.setattr(supervisor.MandatoryCanarySuite, "model_validate_json", parse_fresh)
+
+    def stage(**kwargs: object) -> Path:
+        assert kwargs["canary_suite_path"] == fresh_suite
+        assert kwargs["installed_runtime_loader"] is runtime_loader
+        calls.append("fresh-request")
+        request = tmp_path / "request.json"
+        request.write_bytes(b"request\n")
+        return request
+
+    monkeypatch.setattr(supervisor, "stage_activation_request", stage)
+    def receipt_pending(**_kwargs: object) -> Never:
+        raise RuntimeError("receipt pending")
+
+    monkeypatch.setattr(supervisor, "activate_v31", receipt_pending)
+    state = run_activation_supervisor(
+        repo_root=repo,
+        refresh_completion_root=completion_root,
+        refresh_completion_loader=lambda _path: (completion, completion_raw),
+        installed_runtime_loader=runtime_loader,
+        installed_runtime_manifest_path=tmp_path / "runtime-manifest.json",
+    )
+    assert state == "ACTIVATION_REQUEST_SUBMITTED"
+    assert calls == ["fresh-canaries", "fresh-request"]
+    assert paths.stop.is_file()
+    state_files = list((paths.state_root / "refresh-activation").glob("*.json"))
+    assert len(state_files) == 1
+    assert old_suite.read_bytes() == b"old suite must never be opened\n"
+    assert runtime_manifest.repository_main_sha == "a" * 40
+    fresh_suite.write_bytes(b"substituted\n")
+    with pytest.raises(RuntimeError, match="evidence digest changed"):
+        run_activation_supervisor(
+            repo_root=repo,
+            refresh_completion_root=completion_root,
+            refresh_completion_loader=lambda _path: (completion, completion_raw),
+            installed_runtime_loader=runtime_loader,
+            installed_runtime_manifest_path=tmp_path / "runtime-manifest.json",
+        )
+
+
+def test_refresh_completion_substitution_and_ambiguity_fail_before_canaries(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _repo(tmp_path)
+    main_sha = _git(repo, "rev-parse", "HEAD")
+    tree_sha = _git(repo, "rev-parse", "HEAD^{tree}")
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    paths = _runtime_paths(runtime)
+    completion = RefreshCompletionV31(
+        transaction_id=main_sha + "-" + "2" * 16,
+        handoff_digest=DIGEST,
+        previous_main_sha="c" * 40,
+        required_main_sha=main_sha,
+        required_main_tree_sha=tree_sha,
+        source_generation_id="traincapsule-v3.1-zh-2026-08-12",
+        source_generation_digest=DIGEST,
+        generation_manifest_digest=DIGEST,
+        runtime_manifest_digest=DIGEST,
+        environment_digest=DIGEST,
+        effective_config_digest=DIGEST,
+        snapshot_manifest_digest=DIGEST,
+        committed_at=NOW,
+    )
+    raw = completion.canonical_json_bytes()
+    for suffix in ("one", "two"):
+        (tmp_path / f"claim-{suffix}.json").write_bytes(raw)
+    import tcfactory.v3.activation_supervisor as supervisor
+
+    def resolved_paths(_repo: Path) -> V3RuntimePaths:
+        return paths
+
+    monkeypatch.setattr(supervisor, "resolve_v3_runtime_paths", resolved_paths)
+    called = False
+
+    def no_canaries(**_kwargs: object) -> Path:
+        nonlocal called
+        called = True
+        raise AssertionError
+
+    monkeypatch.setattr(supervisor, "run_mandatory_canaries", no_canaries)
+    with pytest.raises(RuntimeError, match="multiple refresh completions"):
+        run_activation_supervisor(
+            repo_root=repo,
+            refresh_completion_root=tmp_path,
+            refresh_completion_loader=lambda path: (completion, path.read_bytes()),
+        )
+    assert not called
 
 
 def test_activation_receipt_contract_matches_independent_verifier() -> None:

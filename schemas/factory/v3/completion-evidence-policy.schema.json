@@ -1,5 +1,16 @@
 {
   "$defs": {
+    "CorrelationField": {
+      "enum": [
+        "CANDIDATE",
+        "CUSTOMER",
+        "FAMILY",
+        "OFFER",
+        "PACK"
+      ],
+      "title": "CorrelationField",
+      "type": "string"
+    },
     "EvidenceAuthority": {
       "enum": [
         "CONTROLLER",
@@ -146,6 +157,13 @@
         "machinePolicyRequired": {
           "title": "Machinepolicyrequired",
           "type": "boolean"
+        },
+        "requiredCorrelationFields": {
+          "items": {
+            "$ref": "#/$defs/CorrelationField"
+          },
+          "title": "Requiredcorrelationfields",
+          "type": "array"
         }
       },
       "required": [
@@ -237,6 +255,16 @@
             "$ref": "#/$defs/SemanticEvidence"
           },
           "title": "Minimumsemanticcounts",
+          "type": "object"
+        },
+        "requiredPriorEvidence": {
+          "additionalProperties": {
+            "items": {
+              "$ref": "#/$defs/SemanticEvidence"
+            },
+            "type": "array"
+          },
+          "title": "Requiredpriorevidence",
           "type": "object"
         }
       },

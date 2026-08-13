@@ -35,6 +35,7 @@ EXTERNAL_OVERRIDES: dict[str, tuple[list[str], int]] = {
     "V3-TRUST-013": (["PROVIDER_ACCEPTANCE"], 1),
     "V3-REPEAT-004": (["INDEPENDENT_OPERATOR"], 1),
     "V3-REPEAT-005": (["DECISION_CHANGED"], 1),
+    "V3-REPEAT-006": (["DELIVERY_ECONOMICS"], 2),
 }
 
 
@@ -51,6 +52,15 @@ SEMANTIC_OVERRIDES: dict[str, dict[str, int]] = {
     "V3-PILOT-011": {
         "CUSTOMER_DECISION_CHANGED": 1,
         "CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT": 1,
+    },
+}
+
+PRIOR_EVIDENCE_REQUIREMENTS: dict[str, dict[str, list[str]]] = {
+    "V3-PILOT-011": {
+        "V3-PILOT-003": ["NATIVE_VALUE_AUTHORIZATION"],
+    },
+    "V3-REPEAT-005": {
+        "V3-PILOT-003": ["NATIVE_VALUE_AUTHORIZATION"],
     },
 }
 
@@ -114,6 +124,7 @@ MILESTONE_REQUIREMENTS: dict[str, dict[str, Any]] = {
             "SECOND_PAID_ACTION",
             "INDEPENDENT_OPERATOR",
             "DECISION_CHANGED",
+            "DELIVERY_ECONOMICS",
         ],
         "semantic": {"DELIVERY_ECONOMICS": 1},
         "machine": True,
@@ -155,24 +166,31 @@ EXIT_CRITERION_WORK_ITEMS: dict[str, tuple[str, ...]] = {
     "M1_NATIVE_PREFLIGHT-EXIT-01": ("V3-PROD-001",),
     "M1_NATIVE_PREFLIGHT-EXIT-02": ("V3-PROD-002",),
     "M1_NATIVE_PREFLIGHT-EXIT-03": ("V3-PROD-006",),
-    "M1_NATIVE_PREFLIGHT-EXIT-04": (
-        "V3-TRUST-001", "V3-PROD-003", "V3-PROD-004", "V3-PROD-005"
-    ),
-    "M1_NATIVE_PREFLIGHT-EXIT-05": (
-        "V3-COMP-001", "V3-COMP-003", "V3-PROD-007", "V3-PROD-008"
-    ),
+    "M1_NATIVE_PREFLIGHT-EXIT-04": ("V3-TRUST-001", "V3-PROD-003", "V3-PROD-004", "V3-PROD-005"),
+    "M1_NATIVE_PREFLIGHT-EXIT-05": ("V3-COMP-001", "V3-COMP-003", "V3-PROD-007", "V3-PROD-008"),
     "M1_NATIVE_PREFLIGHT-EXIT-06": ("V3-PROD-009",),
     "M1_NATIVE_PREFLIGHT-EXIT-07": ("V3-PROD-010",),
     "M1_NATIVE_PREFLIGHT-EXIT-08": (
-        "V3-MKT-001", "V3-MKT-003", "V3-MKT-004", "V3-MKT-005",
-        "V3-MKT-006", "V3-MKT-007"
+        "V3-MKT-001",
+        "V3-MKT-003",
+        "V3-MKT-004",
+        "V3-MKT-005",
+        "V3-MKT-006",
+        "V3-MKT-007",
     ),
     "M1_NATIVE_PREFLIGHT-EXIT-09": ("V3-COMP-002", "V3-COMP-003", "V3-COMP-004"),
     "M1_NATIVE_PREFLIGHT-EXIT-10": (
-        "V3-TRUST-001", "V3-TRUST-002", "V3-TRUST-003", "V3-MKT-002", "V3-DEC-001"
+        "V3-TRUST-001",
+        "V3-TRUST-002",
+        "V3-TRUST-003",
+        "V3-MKT-002",
+        "V3-DEC-001",
     ),
     "M2_CONTROLLED_QUALIFICATION-EXIT-01": (
-        "V3-PROD-018", "V3-PROD-020", "V3-PROD-024", "V3-PROD-025"
+        "V3-PROD-018",
+        "V3-PROD-020",
+        "V3-PROD-024",
+        "V3-PROD-025",
     ),
     "M2_CONTROLLED_QUALIFICATION-EXIT-02": ("V3-PROD-020", "V3-PROD-024"),
     "M2_CONTROLLED_QUALIFICATION-EXIT-03": ("V3-PROD-020", "V3-PROD-024"),
@@ -191,7 +209,11 @@ EXIT_CRITERION_WORK_ITEMS: dict[str, tuple[str, ...]] = {
     "M3_PAID_PREFLIGHT-EXIT-05": ("V3-DEC-003",),
     "M4_PAID_PILOT-EXIT-01": ("V3-PILOT-011",),
     "M4_PAID_PILOT-EXIT-02": (
-        "V3-PILOT-003", "V3-PILOT-005", "V3-PILOT-006", "V3-PILOT-007", "V3-PILOT-009"
+        "V3-PILOT-003",
+        "V3-PILOT-005",
+        "V3-PILOT-006",
+        "V3-PILOT-007",
+        "V3-PILOT-009",
     ),
     "M4_PAID_PILOT-EXIT-03": ("V3-PILOT-011",),
     "M4_PAID_PILOT-EXIT-04": ("V3-PILOT-012",),
@@ -222,6 +244,7 @@ EXIT_CRITERION_EXTERNAL: dict[str, list[str]] = {
     "M4_PAID_PILOT-EXIT-03": ["DECISION_CHANGED"],
     "M4_PAID_PILOT-EXIT-05": ["SECOND_ACTION_COMMITMENT"],
     "M5_PAID_REPEAT-EXIT-01": ["SECOND_PAID_ACTION"],
+    "M5_PAID_REPEAT-EXIT-03": ["DECISION_CHANGED", "DELIVERY_ECONOMICS"],
     "M5_PAID_REPEAT-EXIT-05": ["INDEPENDENT_OPERATOR"],
     "M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-01": ["DECISION_CHANGED"],
     "M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-02": ["SECOND_PAID_ACTION"],
@@ -237,9 +260,7 @@ EXIT_CRITERION_SEMANTICS: dict[str, dict[str, int]] = {
     "M2_CONTROLLED_QUALIFICATION-EXIT-04": {"LEGAL_REDUCTION_VERIFIED": 1},
     "M2_CONTROLLED_QUALIFICATION-EXIT-05": {"ILLEGAL_REDUCTION_REJECTED": 1},
     "M4_PAID_PILOT-EXIT-01": {"CUSTOMER_DECISION_CHANGED": 1},
-    "M4_PAID_PILOT-EXIT-03": {
-        "CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT": 1
-    },
+    "M4_PAID_PILOT-EXIT-03": {"CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT": 1},
     "M4_PAID_PILOT-EXIT-02": {"NATIVE_VALUE_AUTHORIZATION": 1},
     "M5_PAID_REPEAT-EXIT-03": {"DELIVERY_ECONOMICS": 1},
     "M5_PAID_REPEAT-EXIT-06": {"DELIVERY_ECONOMICS": 1},
@@ -262,6 +283,15 @@ EXIT_CRITERION_MACHINE = {
     "M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-07",
 }
 
+EXIT_CRITERION_CORRELATION: dict[str, list[str]] = {
+    "M4_PAID_PILOT-EXIT-01": ["CANDIDATE", "CUSTOMER", "OFFER"],
+    "M4_PAID_PILOT-EXIT-03": ["CANDIDATE", "CUSTOMER", "OFFER"],
+    "M5_PAID_REPEAT-EXIT-03": ["CANDIDATE", "CUSTOMER", "OFFER"],
+    "M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-03": ["CANDIDATE", "CUSTOMER", "FAMILY", "PACK"],
+    "M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-04": ["CANDIDATE", "CUSTOMER", "FAMILY", "PACK"],
+    "M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-06": ["PACK"],
+}
+
 
 def digest(path: Path) -> str:
     return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
@@ -276,9 +306,7 @@ def evidence_digest(item: dict[str, Any]) -> str:
             "maturityTarget": item["maturityTarget"],
             "evidenceRequired": item["evidenceRequired"],
             "externalReceiptRequired": item["externalReceiptRequired"],
-            "machinePolicyReceiptRequired": item.get(
-                "machinePolicyReceiptRequired", False
-            ),
+            "machinePolicyReceiptRequired": item.get("machinePolicyReceiptRequired", False),
         },
         sort_keys=True,
     ).encode()
@@ -312,18 +340,12 @@ def work_contract(item: dict[str, Any]) -> dict[str, Any]:
         authorities.append("INDEPENDENT_MACHINE_POLICY")
         semantics.append("MACHINE_POLICY_DECISION")
     commercial = str(item["maturityTarget"]["commercial"])
-    if item["kind"] == "CONTROLLED_EXPERIMENT" or commercial in {
-        "NATIVE_ADVANTAGE_DEMONSTRATED",
-        "EXTERNAL_VALUE_DEMONSTRATED",
-        "COMMERCIALLY_SUPPORTED",
-    }:
+    if item["kind"] == "CONTROLLED_EXPERIMENT" or commercial == ("NATIVE_ADVANTAGE_DEMONSTRATED"):
         authorities.append("INDEPENDENT_MACHINE_POLICY")
         semantics.append("NATIVE_VALUE_AUTHORIZATION")
     if external_types or item["externalReceiptRequired"]:
         if not external_types:
-            raise ValueError(
-                f"ambiguous external evidence requires reviewed mapping: {identifier}"
-            )
+            raise ValueError(f"ambiguous external evidence requires reviewed mapping: {identifier}")
         authorities.append("TRUSTED_EXTERNAL")
     engineering = str(item["maturityTarget"]["engineering"])
     minimum_grade = {
@@ -331,9 +353,7 @@ def work_contract(item: dict[str, Any]) -> dict[str, Any]:
         "IMPLEMENTED_EXPERIMENTAL": "CONTROLLED",
         "CONTROLLED_VALIDATED": "CONTROLLED",
         "EXTERNAL_VALIDATED": (
-            "EXTERNAL"
-            if external_types or item["externalReceiptRequired"]
-            else "LIVE"
+            "EXTERNAL" if external_types or item["externalReceiptRequired"] else "LIVE"
         ),
         "DEPRECATED": "DETERMINISTIC",
     }[engineering]
@@ -351,6 +371,7 @@ def work_contract(item: dict[str, Any]) -> dict[str, Any]:
         "allowedExternalEvidenceTypes": sorted(external_types),
         "minimumExternalArtifacts": minimum_external,
         "minimumSemanticCounts": semantic_counts,
+        "requiredPriorEvidence": PRIOR_EVIDENCE_REQUIREMENTS.get(identifier, {}),
     }
 
 
@@ -372,16 +393,12 @@ def exit_criterion_contracts(
         contracts.append(
             {
                 "criterionId": criterion_id,
-                "criterionDigest": "sha256:"
-                + hashlib.sha256(str(criterion).encode()).hexdigest(),
+                "criterionDigest": "sha256:" + hashlib.sha256(str(criterion).encode()).hexdigest(),
                 "requiredWorkItemIds": list(required_items),
-                "requiredExternalEvidenceTypes": EXIT_CRITERION_EXTERNAL.get(
-                    criterion_id, []
-                ),
-                "requiredSemanticCounts": EXIT_CRITERION_SEMANTICS.get(
-                    criterion_id, {}
-                ),
+                "requiredExternalEvidenceTypes": EXIT_CRITERION_EXTERNAL.get(criterion_id, []),
+                "requiredSemanticCounts": EXIT_CRITERION_SEMANTICS.get(criterion_id, {}),
                 "machinePolicyRequired": criterion_id in EXIT_CRITERION_MACHINE,
+                "requiredCorrelationFields": EXIT_CRITERION_CORRELATION.get(criterion_id, []),
             }
         )
     return contracts
@@ -406,9 +423,7 @@ def generate() -> str:
     if set(EXIT_CRITERION_WORK_ITEMS) != expected_criteria:
         raise ValueError("reviewed exit-criterion roster does not exactly cover the roadmap")
     if (
-        set(EXIT_CRITERION_EXTERNAL)
-        | set(EXIT_CRITERION_SEMANTICS)
-        | set(EXIT_CRITERION_MACHINE)
+        set(EXIT_CRITERION_EXTERNAL) | set(EXIT_CRITERION_SEMANTICS) | set(EXIT_CRITERION_MACHINE)
     ) - expected_criteria:
         raise ValueError("exit-criterion evidence mapping references an unknown criterion")
     payload = {
@@ -421,15 +436,11 @@ def generate() -> str:
                 "milestoneId": item["milestoneId"],
                 "roadmapEvidenceDigest": "sha256:"
                 + hashlib.sha256(yaml.safe_dump(item, sort_keys=True).encode()).hexdigest(),
-                "requiredExternalEvidenceTypes": MILESTONE_REQUIREMENTS[
-                    item["milestoneId"]
-                ]["external"],
-                "requiredSemanticCounts": MILESTONE_REQUIREMENTS[
-                    item["milestoneId"]
-                ]["semantic"],
-                "machinePolicyRequired": MILESTONE_REQUIREMENTS[item["milestoneId"]][
-                    "machine"
+                "requiredExternalEvidenceTypes": MILESTONE_REQUIREMENTS[item["milestoneId"]][
+                    "external"
                 ],
+                "requiredSemanticCounts": MILESTONE_REQUIREMENTS[item["milestoneId"]]["semantic"],
+                "machinePolicyRequired": MILESTONE_REQUIREMENTS[item["milestoneId"]]["machine"],
                 "allowUnrelatedFutureLanesWhileExternalWait": MILESTONE_REQUIREMENTS[
                     item["milestoneId"]
                 ]["future"],

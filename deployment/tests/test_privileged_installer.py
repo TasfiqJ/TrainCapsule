@@ -158,6 +158,7 @@ def _directory_rows() -> list[dict[str, str]]:
         row("/etc/traincapsule-canary-runner", "root", "0755"),
         row("/etc/traincapsule-runtime", "root", "0755"),
         row("/etc/traincapsule-controller", "root", "0755"),
+        row("/etc/traincapsule-deployment", "root", "0755"),
         row(
             "/var/lib/traincapsule-github-token",
             "traincapsule-github-token",
@@ -186,6 +187,7 @@ def _directory_rows() -> list[dict[str, str]]:
         row("/opt/traincapsule-runtime", "root", "0755"),
         row("/opt/traincapsule-runtime/bin", "root", "0755"),
         row("/opt/traincapsule-runtime/wheels", "root", "0755"),
+        row("/opt/traincapsule-runtime/generations", "root", "0555"),
         row("/opt/traincapsule-canary-runner", "root", "0755"),
         row("/opt/traincapsule-canary-runner/lib", "root", "0755"),
         row("/opt/traincapsule-canary-runner/lib/python3.12", "root", "0755"),
@@ -210,7 +212,20 @@ def _directory_rows() -> list[dict[str, str]]:
         row("/var/lib/traincapsule-runtime/worktrees", "traincapsule-controller", "0700"),
         row("/var/lib/traincapsule-runtime/artifacts", "traincapsule-controller", "0700"),
         row("/var/lib/traincapsule-runtime/artifacts/v3", "traincapsule-controller", "0700"),
+        row(
+            "/var/lib/traincapsule-runtime/deployment-update-handoffs",
+            "traincapsule-controller",
+            "0700",
+        ),
         row("/var/lib/traincapsule-verifier/anchor-update-journal", "root", "0700"),
+        row("/var/lib/traincapsule-verifier/deployment-refresh-journal", "root", "0700"),
+        row("/var/lib/traincapsule-verifier/deployment-refresh-claims", "root", "0700"),
+        {
+            "target": "/var/lib/traincapsule-verifier/activation-refresh-inbox",
+            "owner": "root",
+            "group": "traincapsule-controller",
+            "mode": "0750",
+        },
         row(
             "/var/lib/traincapsule-controller",
             "traincapsule-controller",
@@ -305,6 +320,7 @@ def _metadata(role: str) -> tuple[str, str, str]:
         "controller-start-broker",
         "post-activation-observer",
         "git-anchor-updater",
+        "deployment-refresh",
     }:
         return "root", "root", "0700"
     if role in {"private-key", "github-app-private-key"}:
@@ -320,6 +336,8 @@ def _metadata(role: str) -> tuple[str, str, str]:
     if role == "github-token-refresher-private-key":
         return "traincapsule-github-token", "traincapsule-github-token", "0600"
     if role == "github-token-refresher-policy":
+        return "root", "root", "0444"
+    if role == "deployment-refresh-policy":
         return "root", "root", "0444"
     if role in {"git-anchor-producer", "git-anchor-askpass"}:
         return "root", "traincapsule-anchor-fetcher", "0750"
@@ -565,14 +583,14 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                 Path(__file__).resolve().parents[2] / "scripts/windows_activation_entrypoint.sh"
             ).read_bytes()
         elif role in {"external-evidence-service", "external-evidence-path"} or (
-            role.startswith("github-token-")
+            role.startswith(("github-token-", "deployment-refresh-"))
             and role.endswith(("-service", "-timer", "-path"))
         ):
             data = (Path(__file__).resolve().parents[2] / "config" / Path(target).name).read_bytes()
         elif role == "controller-oauth-token":
-            data = b"test-only-controller-oauth-token-material-000000000000"
+            data = b"sk-" + b"ant-" + b"oat01-" + b"test-controller-" + b"0" * 32
         elif role == "canary-claude-token":
-            data = b"test-only-canary-oauth-token-material-000000000000"
+            data = b"sk-" + b"ant-" + b"oat01-" + b"test-canary-" + b"0" * 32
         elif role == "github-token-refresher-policy":
             data = canonical_json_bytes(
                 {
@@ -602,6 +620,59 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                 serialization.PrivateFormat.PKCS8,
                 serialization.NoEncryption(),
             )
+        elif role == "deployment-refresh-policy":
+            python_raw = (payload_root / "python-runtime").read_bytes()
+            dependency_raw = (payload_root / "python-runtime-manifest").read_bytes()
+            data = canonical_json_bytes(
+                {
+                    "schemaVersion": "3.1",
+                    "proposalRoot": (
+                        "/var/lib/traincapsule-runtime/deployment-update-handoffs"
+                    ),
+                    "handoffRoot": (
+                        "/var/lib/traincapsule-verifier/deployment-refresh-claims"
+                    ),
+                    "evidenceRoot": "/var/lib/traincapsule-verifier/anchor-updates",
+                    "anchorRoot": "/var/lib/traincapsule-runtime/git",
+                    "generationRoot": "/opt/traincapsule-runtime/generations",
+                    "repositoryBoundary": (
+                        "/var/lib/traincapsule-verifier/repository-boundary"
+                    ),
+                    "journalRoot": (
+                        "/var/lib/traincapsule-verifier/deployment-refresh-journal"
+                    ),
+                    "runtimeManifestPath": (
+                        "/etc/traincapsule-controller/runtime-manifest.json"
+                    ),
+                    "environmentPath": (
+                        "/etc/traincapsule-controller/controller-runtime.env"
+                    ),
+                    "effectiveConfigPath": (
+                        "/etc/traincapsule-controller/effective-config.yaml"
+                    ),
+                    "generationManifestPath": (
+                        "/etc/traincapsule-controller/deployment-generation.json"
+                    ),
+                    "currentPointer": "/opt/traincapsule-runtime/current",
+                    "pythonRuntime": "/opt/traincapsule-runtime/bin/python3.12",
+                    "pythonRuntimeDigest": sha256_digest(python_raw),
+                    "dependencyManifestPath": "/etc/traincapsule-runtime/runtime.json",
+                    "dependencyManifestDigest": sha256_digest(dependency_raw),
+                    "allowedSourcePrefixes": [
+                        "tcfactory/",
+                        "deployment/",
+                        "verifier/src/traincapsule_verifier/",
+                        "canary_runner/src/traincapsule_canary_runner/",
+                    ],
+                    "requiredImports": [
+                        "tcfactory",
+                        "deployment",
+                        "traincapsule_verifier",
+                        "traincapsule_canary_runner",
+                    ],
+                    "controllerUnit": "traincapsule-controller.service",
+                }
+            )
         elif role.startswith("canary-distribution-"):
             data = (
                 Path(__file__).resolve().parents[2]
@@ -620,7 +691,11 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                 b"NoNewPrivileges=yes\n"
             )
         elif role == "controller-runtime-environment":
-            data = b"TCF_RUNTIME_ROOT=/var/lib/traincapsule-runtime\n"
+            data = (
+                b"TCF_RUNTIME_ROOT=/var/lib/traincapsule-runtime\n"
+                b"PYTHONSAFEPATH=1\n"
+                b"PYTHONNOUSERSITE=1\n"
+            )
         elif role == "controller-effective-config":
             data = b"schemaVersion: '3.1'\n"
         elif role == "python-runtime":
@@ -770,6 +845,16 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
     runtime_manifest_path.chmod(0o444)
     runtime_manifest_pin = next(item for item in files if item["role"] == "python-runtime-manifest")
     runtime_manifest_pin["sha256"] = sha256_digest(runtime_manifest_raw)
+    refresh_policy_path = payload_root / "deployment-refresh-policy"
+    refresh_policy = cast(dict[str, object], json.loads(refresh_policy_path.read_bytes()))
+    refresh_policy["dependencyManifestDigest"] = sha256_digest(runtime_manifest_raw)
+    refresh_policy_path.chmod(0o600)
+    refresh_policy_path.write_bytes(canonical_json_bytes(refresh_policy))
+    refresh_policy_path.chmod(0o444)
+    refresh_policy_pin = next(
+        item for item in files if item["role"] == "deployment-refresh-policy"
+    )
+    refresh_policy_pin["sha256"] = sha256_digest(refresh_policy_path.read_bytes())
     repository_main_sha, repository_tree_sha = _build_snapshot_fixture(payload_root)
     for role in ("repository-snapshot", "repository-snapshot-manifest"):
         pin = next(item for item in files if item["role"] == role)
@@ -1177,6 +1262,12 @@ def _assembler_repo(tmp_path: Path, artifacts: dict[str, Path]) -> Path:
         "traincapsule-github-token-refresher.timer",
         "traincapsule-github-token-promoter.service",
         "traincapsule-github-token-promoter.path",
+        "traincapsule-deployment-refresh.service",
+        "traincapsule-deployment-refresh.path",
+        "traincapsule-deployment-refresh-claim.service",
+        "traincapsule-deployment-refresh-claim.path",
+        "traincapsule-deployment-refresh-completion.service",
+        "traincapsule-deployment-refresh-completion.path",
     ):
         (config / name).write_bytes((source_repo / "config" / name).read_bytes())
     package = repo / "canary_runner/src/traincapsule_canary_runner"

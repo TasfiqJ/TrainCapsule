@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch controller deployment update proposals
+
+[Path]
+PathChanged=/var/lib/traincapsule-runtime/deployment-update-handoffs
+Unit=traincapsule-deployment-refresh-claim.service
+
+[Install]
+WantedBy=multi-user.target

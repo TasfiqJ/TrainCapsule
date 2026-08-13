@@ -79,6 +79,74 @@
       "title": "EvidenceArtifact",
       "type": "object"
     },
+    "EvidenceCorrelationIdentity": {
+      "additionalProperties": false,
+      "description": "Stable identities used to correlate separately signed commercial facts.",
+      "properties": {
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "customerIdentityDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Customeridentitydigest"
+        },
+        "familyIdentityDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Familyidentitydigest"
+        },
+        "offerIdentityDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Offeridentitydigest"
+        },
+        "packIdentityDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Packidentitydigest"
+        }
+      },
+      "required": [
+        "candidateSha"
+      ],
+      "title": "EvidenceCorrelationIdentity",
+      "type": "object"
+    },
     "EvidenceIssuer": {
       "additionalProperties": false,
       "properties": {
@@ -391,6 +459,17 @@
       "anyOf": [
         {
           "$ref": "#/$defs/CustomerDecisionValueAttestation"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "correlationIdentity": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvidenceCorrelationIdentity"
         },
         {
           "type": "null"

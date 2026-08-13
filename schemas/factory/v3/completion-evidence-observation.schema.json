@@ -100,6 +100,16 @@
       },
       "title": "Externaltypecounts",
       "type": "object"
+    },
+    "priorEvidence": {
+      "additionalProperties": {
+        "items": {
+          "$ref": "#/$defs/SemanticEvidence"
+        },
+        "type": "array"
+      },
+      "title": "Priorevidence",
+      "type": "object"
     }
   },
   "required": [

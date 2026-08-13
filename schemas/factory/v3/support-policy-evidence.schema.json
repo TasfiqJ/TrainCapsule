@@ -27,6 +27,11 @@
       "title": "Packid",
       "type": "string"
     },
+    "packIdentityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Packidentitydigest",
+      "type": "string"
+    },
     "supportedVersions": {
       "items": {
         "type": "string"
@@ -87,6 +92,7 @@
     "evidenceBasisSha",
     "sourceAuthorityDigest",
     "packId",
+    "packIdentityDigest",
     "supportedVersions",
     "supportedScope",
     "upgradeRules",

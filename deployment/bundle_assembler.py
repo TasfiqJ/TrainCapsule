@@ -92,6 +92,7 @@ def _metadata(role: str) -> tuple[str, str, str]:
         "controller-start-broker",
         "post-activation-observer",
         "git-anchor-updater",
+        "deployment-refresh",
     }:
         return "root", "root", "0700"
     if role in {"git-anchor-producer", "git-anchor-askpass"}:
@@ -113,6 +114,8 @@ def _metadata(role: str) -> tuple[str, str, str]:
     if role == "github-token-refresher-private-key":
         return TOKEN_REFRESHER_USER, TOKEN_REFRESHER_USER, "0600"
     if role == "github-token-refresher-policy":
+        return "root", "root", "0444"
+    if role == "deployment-refresh-policy":
         return "root", "root", "0444"
     if role == "canary-policy":
         return "root", "root", "0444"
@@ -430,6 +433,8 @@ def _validate_controller_runtime(sources: Mapping[str, Path]) -> None:
         raise BundleAssemblyError("controller environment contains a forbidden runtime or key")
     if (
         environment.count(b"TCF_RUNTIME_ROOT=/var/lib/traincapsule-runtime\n") != 1
+        or environment.count(b"PYTHONSAFEPATH=1\n") != 1
+        or environment.count(b"PYTHONNOUSERSITE=1\n") != 1
         or b"TRAINCAPSULE_RUNTIME_ROOT=" in environment
     ):
         raise BundleAssemblyError("controller environment does not bind the installed runtime root")
@@ -579,6 +584,47 @@ def _validate_controller_oauth(path: Path) -> None:
     expected_suffix = Path(".config/traincapsule/claude-oauth-token").parts
     if path.parts[-len(expected_suffix) :] != expected_suffix:
         raise BundleAssemblyError("controller OAuth token source path is not the fixed WSL path")
+
+
+def _validate_deployment_refresh(sources: Mapping[str, Path]) -> None:
+    policy = _canonical_mapping(
+        sources["deployment-refresh-policy"].read_bytes(),
+        label="deployment refresh policy",
+    )
+    expected: dict[str, object] = {
+        "schemaVersion": "3.1",
+        "proposalRoot": "/var/lib/traincapsule-runtime/deployment-update-handoffs",
+        "handoffRoot": "/var/lib/traincapsule-verifier/deployment-refresh-claims",
+        "evidenceRoot": "/var/lib/traincapsule-verifier/anchor-updates",
+        "anchorRoot": "/var/lib/traincapsule-runtime/git",
+        "generationRoot": "/opt/traincapsule-runtime/generations",
+        "repositoryBoundary": "/var/lib/traincapsule-verifier/repository-boundary",
+        "journalRoot": "/var/lib/traincapsule-verifier/deployment-refresh-journal",
+        "runtimeManifestPath": "/etc/traincapsule-controller/runtime-manifest.json",
+        "environmentPath": "/etc/traincapsule-controller/controller-runtime.env",
+        "effectiveConfigPath": "/etc/traincapsule-controller/effective-config.yaml",
+        "generationManifestPath": "/etc/traincapsule-controller/deployment-generation.json",
+        "currentPointer": "/opt/traincapsule-runtime/current",
+        "pythonRuntime": "/opt/traincapsule-runtime/bin/python3.12",
+        "pythonRuntimeDigest": _digest(sources["python-runtime"]),
+        "dependencyManifestPath": "/etc/traincapsule-runtime/runtime.json",
+        "dependencyManifestDigest": _digest(sources["python-runtime-manifest"]),
+        "allowedSourcePrefixes": [
+            "tcfactory/",
+            "deployment/",
+            "verifier/src/traincapsule_verifier/",
+            "canary_runner/src/traincapsule_canary_runner/",
+        ],
+        "requiredImports": [
+            "tcfactory",
+            "deployment",
+            "traincapsule_verifier",
+            "traincapsule_canary_runner",
+        ],
+        "controllerUnit": "traincapsule-controller.service",
+    }
+    if policy != expected:
+        raise BundleAssemblyError("deployment refresh policy is not exact or runtime-bound")
 
 
 def _validate_github_token_refresher(sources: Mapping[str, Path]) -> None:
@@ -943,6 +989,7 @@ def assemble_bundle(
         raise BundleAssemblyError("repository snapshot deployment binding is inconsistent")
     _validate_controller_runtime(sources)
     _validate_github_token_refresher(sources)
+    _validate_deployment_refresh(sources)
     _validate_anchor_producer(sources)
     _validate_controller_oauth(sources["controller-oauth-token"])
     if _digest(sources["canary-claude-token"]) != _digest(sources["controller-oauth-token"]):
@@ -967,6 +1014,24 @@ def assemble_bundle(
         ),
         "github-token-promoter-path": (
             repo_root / "config/traincapsule-github-token-promoter.path"
+        ),
+        "deployment-refresh-service": (
+            repo_root / "config/traincapsule-deployment-refresh.service"
+        ),
+        "deployment-refresh-path": (
+            repo_root / "config/traincapsule-deployment-refresh.path"
+        ),
+        "deployment-refresh-claim-service": (
+            repo_root / "config/traincapsule-deployment-refresh-claim.service"
+        ),
+        "deployment-refresh-claim-path": (
+            repo_root / "config/traincapsule-deployment-refresh-claim.path"
+        ),
+        "deployment-refresh-completion-service": (
+            repo_root / "config/traincapsule-deployment-refresh-completion.service"
+        ),
+        "deployment-refresh-completion-path": (
+            repo_root / "config/traincapsule-deployment-refresh-completion.path"
         ),
     }
     repository_pins.update(

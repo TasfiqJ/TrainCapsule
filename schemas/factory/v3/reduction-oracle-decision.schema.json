@@ -1,6 +1,5 @@
 {
   "additionalProperties": false,
-  "description": "Independent-oracle evidence for one legal and one illegal reduction.",
   "properties": {
     "schemaVersion": {
       "const": "3.1",
@@ -13,34 +12,25 @@
       "title": "Workitemid",
       "type": "string"
     },
-    "evidenceBasisSha": {
+    "candidateSha": {
       "pattern": "^[0-9a-f]{40}$",
-      "title": "Evidencebasissha",
+      "title": "Candidatesha",
       "type": "string"
     },
-    "sourceAuthorityDigest": {
+    "candidateTreeSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatetreesha",
+      "type": "string"
+    },
+    "rawArtifactRosterDigest": {
       "pattern": "^sha256:[0-9a-f]{64}$",
-      "title": "Sourceauthoritydigest",
+      "title": "Rawartifactrosterdigest",
       "type": "string"
     },
     "oracleExecutableDigest": {
       "pattern": "^sha256:[0-9a-f]{64}$",
       "title": "Oracleexecutabledigest",
       "type": "string"
-    },
-    "oracleResultDigest": {
-      "pattern": "^sha256:[0-9a-f]{64}$",
-      "title": "Oracleresultdigest",
-      "type": "string"
-    },
-    "rawArtifactDigests": {
-      "items": {
-        "type": "string"
-      },
-      "maxItems": 64,
-      "minItems": 2,
-      "title": "Rawartifactdigests",
-      "type": "array"
     },
     "legalReductionArtifactDigest": {
       "pattern": "^sha256:[0-9a-f]{64}$",
@@ -61,22 +51,57 @@
       "const": "REJECTED",
       "title": "Illegalreductionverdict",
       "type": "string"
+    },
+    "oracleResultDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Oracleresultdigest",
+      "type": "string"
+    },
+    "receiptId": {
+      "pattern": "^REDUCE-[A-Z0-9_-]{8,128}$",
+      "title": "Receiptid",
+      "type": "string"
+    },
+    "issuedAt": {
+      "format": "date-time",
+      "title": "Issuedat",
+      "type": "string"
+    },
+    "expiresAt": {
+      "format": "date-time",
+      "title": "Expiresat",
+      "type": "string"
+    },
+    "nonce": {
+      "pattern": "^[0-9a-f]{32,128}$",
+      "title": "Nonce",
+      "type": "string"
+    },
+    "signature": {
+      "pattern": "^[0-9a-f]{128}$",
+      "title": "Signature",
+      "type": "string"
     }
   },
   "required": [
     "workItemId",
-    "evidenceBasisSha",
-    "sourceAuthorityDigest",
+    "candidateSha",
+    "candidateTreeSha",
+    "rawArtifactRosterDigest",
     "oracleExecutableDigest",
-    "oracleResultDigest",
-    "rawArtifactDigests",
     "legalReductionArtifactDigest",
     "legalReductionVerdict",
     "illegalReductionArtifactDigest",
-    "illegalReductionVerdict"
+    "illegalReductionVerdict",
+    "oracleResultDigest",
+    "receiptId",
+    "issuedAt",
+    "expiresAt",
+    "nonce",
+    "signature"
   ],
-  "title": "ReductionBoundaryEvidence",
+  "title": "ReductionOracleDecision",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",
-  "$id": "https://traincapsule.local/schemas/factory/v3/reduction-boundary-evidence.schema.json"
+  "$id": "https://traincapsule.local/schemas/factory/v3/reduction-oracle-decision.schema.json"
 }

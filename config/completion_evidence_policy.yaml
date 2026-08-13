@@ -14,6 +14,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-002
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:013f7e66f4e6e0b18a83b506ee0426ae6098c1669fe3b919cf857eea729e1ab1
@@ -26,6 +27,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-003
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:35cf0e3a5c9784738ef683d66a32d260d560cd4f438b44fcb7c4bdb781bde5c6
@@ -40,6 +42,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-004
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:a92d23b149031e07aaefd6c9bc9385d04e8e94af168c20145c14a721646fc363
@@ -54,6 +57,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-005
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:b715c8b215eae96cde8e777896d515a9efb393d7809306a3204530be49c09cbb
@@ -66,6 +70,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-006
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:5ae1959e3a8341ecf1fd0852029c5e43dbb7f0da23953b9198df016a4cde0e72
@@ -78,6 +83,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-007
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:bcc3b809ee35cab3590c054757d4dd43c8cb6efc526977ccc79b1cbf87615454
@@ -90,6 +96,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-008
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:6e295d6037132ef334d8a821813060c55bce62c30aba8a9ab1a486743d1fd38e
@@ -105,6 +112,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-009
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:2e475ff087d5965f4c70e10a13925e52ff8665a39a815d86c7e6ce18e93c6879
@@ -117,6 +125,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-010
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:b9ec428ae9b3f0081d34ced984aed769b2fb74ef0daeddb46b39fc157f33fdae
@@ -129,6 +138,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-011
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:39c657a91dc654e213bac40df75eafda422d472670f0455a4f5303e960496194
@@ -141,6 +151,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-012
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:41697460f3bd3921d5c7e8cdb661ffc2b68cef13febeae116dc29e21e30f7c83
@@ -153,6 +164,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-013
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:7ec7c8bc98e72d4616e77b5b3dd35e10d2c4ad9a41abe5a3582b5407e249d0ca
@@ -165,6 +177,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-014
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:bd931ca0ec3daf7b118da41c774850c208513994d097c8c4b2415e032f9d0039
@@ -177,6 +190,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-015
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:24a529294e1030b19d4d41bb44935469e71fe29dd3f38705b34075960e5f6d1b
@@ -189,6 +203,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-016
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:5f893ac03d560609e52f199ce7e4651444d2841ef1507a97c19d43a388025bf5
@@ -204,6 +219,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-017
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:162c252b80296c2acd46c21ef806199e003df64c57eed1dba9391f30ab4a947a
@@ -216,6 +232,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-018
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:af91e41e889887790420453f5af7b47621a4c01810df87a4b6cdaf700bd3fb9d
@@ -228,6 +245,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-019
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:c6cffef586c7ecc4db7a9f63330196d6f7d9011b2a1e7e9dfb3d499928b7586f
@@ -240,6 +258,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MIG-020
   milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:f82aad344308fa2149048c0d3a4bf973257cfe68639c7bac2733ef05b3fea076
@@ -252,6 +271,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-001
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:7758d5ba15e30c9f9db7d5d0ff1fcf359563bd14caed14f929a37471db460c74
@@ -264,6 +284,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-002
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:05e9787f49f888ab361f70df560c9b2f36b0999f186f8acd79e4db092214f60c
@@ -276,6 +297,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-001
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:3f6e6a88320104bd89509f6828e4218385eade2fcfef5403c4e587ca506bbfbd
@@ -290,6 +312,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-003
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:d287c2341157221aace1fe9c17ccef2d8c9a47bd92a571bbb41aae51f53c9c0a
@@ -302,6 +325,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-004
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:c6325570d208425245309de41352cffc9ca9c33ffb8ae9033db4fc7010c03164
@@ -314,6 +338,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-005
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:e47ab10f690f71a7f7c5427007e4888df8e45b59f2160376ed619241dd35d23d
@@ -326,6 +351,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-006
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:67630fe395f55615d777d33cf3227a59c7fe0da23cb1fc379a78941a603162cd
@@ -338,6 +364,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-COMP-001
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:3380b07902bd76c409384a669836c2d4791d593550f6e8ec62712366c4680916
@@ -354,6 +381,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-007
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:6855223f648872c41bbc8117e254cf46a4757734f7df7eaea06bcc89e5772f91
@@ -366,6 +394,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-008
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:c9ff6794014fe587baddbe8f23ab1227643df7306c12e03577be6c79195c22c8
@@ -378,6 +407,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-009
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:17390881462668d3b36948d7ce6653f3636e177d449ce1fc7bb289f56d70ef60
@@ -390,6 +420,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-010
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:2c4e6dbb8309201ebcab56701a44c218dc6cce1da883225cf2c53455e1cdb340
@@ -402,6 +433,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-002
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:31b7a1626450acf0ab6939ce70bc11aa0950d79b771fdcf4d170f09292848290
@@ -416,6 +448,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-003
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:20bad4ea63795d54517b019b6837259b0571c10d389cf9723411fbbb41c5fe98
@@ -430,6 +463,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-COMP-002
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:db0e8ef07202d9981e64cadc7356db5fe7063a3e07f3eb616742b8de8df64839
@@ -444,6 +478,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-COMP-003
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:3c460b80ab862052cdc174366fa19cf370333e6123d3120e90acf27900c48752
@@ -460,6 +495,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-COMP-004
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:1881469d6cda5f4b114ef5844b7c955557d0f05f39f219611055069a9cb37304
@@ -474,6 +510,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MKT-001
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:6eb54ab0f292ba6c54989665fbe79a313dc06a2e84f486aeb5d2809733c5c0b2
@@ -490,6 +527,7 @@ workItems:
   minimumSemanticCounts:
     REACHABLE_ACCOUNT: 30
     ATTRIBUTABLE_SOURCE: 1
+  requiredPriorEvidence: {}
 - workItemId: V3-MKT-002
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:3294938610c2feb1fcd92c89cd42e2eb6fcdee9068c9cccf18c7ec8c4eefab8f
@@ -502,6 +540,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MKT-003
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:db5f79e0c76f0e871fc7a8071e404162304f4a7a567c7e4572b0536133ac9fdd
@@ -515,6 +554,7 @@ workItems:
   - CUSTOMER_CONVERSATION
   minimumExternalArtifacts: 15
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MKT-004
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:74816db9b85cf5ce9d22f3cbfccdb76ecb15ae694b4696c769b2bc82ea37fd09
@@ -528,6 +568,7 @@ workItems:
   - INCIDENT_TIMELINE
   minimumExternalArtifacts: 5
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MKT-005
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:fcdc3ab3686c2131a8acecc8df0b13cba722893494e449ffbd4fcc0197180a7b
@@ -541,6 +582,7 @@ workItems:
   - UPCOMING_CHANGE
   minimumExternalArtifacts: 3
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MKT-006
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:a14de914c55e4eb51a5996e9cd2d4401203113074da66027af660169f77bed2f
@@ -554,6 +596,7 @@ workItems:
   - PILOT_CANDIDATE
   minimumExternalArtifacts: 2
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MKT-007
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:f3d62c704b142b641cf94c1a5b6aabde2a60e76125b96a67fd101864858ac531
@@ -567,6 +610,7 @@ workItems:
   - INCIDENT_ARCHIVE_ACCESS
   minimumExternalArtifacts: 1
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-DEC-001
   milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:d48329b949597f54460fd72727855abc4b7774e752c69b65e9f6ca0ffb63352f
@@ -582,6 +626,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-011
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:b9ae29ba27369416e09e429477da131b3f884193202d2c530cfaded35b013f90
@@ -596,6 +641,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-004
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:f957a7ec24c75d65562a071c53a3826f2cc935c77cbee23a47153a84ea117d55
@@ -610,6 +656,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-012
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:6668d0a37b7b91adb412f5b0b03340b7fd325c8d17f8001d2d924137ce677bce
@@ -624,6 +671,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-013
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:faff2bc9cbe029f66ac7c39ff643ac6f5ddcc765f7f0e83c79a149e23dcdda66
@@ -638,6 +686,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-014
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:ad056151db2562aa3acf35f57365feac33d605b1469035d3be9482bc701ddc87
@@ -652,6 +701,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-005
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:d78f0db71ab95d872eba1aa07b98a90c4c633e0f27163a3f563cf24c60a8d6c8
@@ -670,6 +720,7 @@ workItems:
   minimumSemanticCounts:
     LEGAL_REDUCTION_VERIFIED: 1
     ILLEGAL_REDUCTION_REJECTED: 1
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-015
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:588db238afd4d56a9e666b6cd03d220405a263078d1f63fe64370d45fcd0bab0
@@ -684,6 +735,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-016
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:c1ccc1d74773e7162829818a82d6c29687f00e52b351f6ae7e3f0e9c88039079
@@ -698,6 +750,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-017
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:5b85bd47d71de41509673d2979793a6efff2a76d4e0033c2018d66a641128a7f
@@ -712,6 +765,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-006
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:6f12e4ce4903701fd099ea62d7a84f9bad4bda9e07c4890186e19c923e863d77
@@ -726,6 +780,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-018
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:acd311bb2e0d3beb5eaa76b625d9deb86dae6fcb16df046163f47cb97b77f963
@@ -740,6 +795,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-019
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:1e3ea2b27a11a399cabf49c9a6341686272d692a26fb1277108f7a7bbe442652
@@ -754,6 +810,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-007
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:9cddb0c229ba193ae1ac938f69da952905e2c5327f9d08933f1d694d06299d0f
@@ -768,6 +825,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-020
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:b8bfcaab5226feb09d9a4ac475ff89b86ccb31b3034c033e4b24bebbd5717a65
@@ -782,6 +840,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-008
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:e83905e81326c2a6c1c2f4e8ab9f3613b19da12cb4265c2ef755cc4a4b8704f1
@@ -796,6 +855,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-021
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:9822356f85aaf654c3b5bb897217df9ae56101534e67846b00c3c896fb1ec090
@@ -810,6 +870,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-022
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:4804c8d691897066671a5d5c190c96324e663238bcddea5537da404c7d543198
@@ -824,6 +885,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-023
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:7fcbf5782c53c426a20673a41e8a3318e098d643aa2d53d45720b58a87b4f293
@@ -838,6 +900,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-024
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:53ccc3848642d4604cad9276016bf28f8df00ab72d761ca4ad63f3afaf63019c
@@ -852,6 +915,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-025
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:0187e0d2dfe8b58d65095735ea1433e84950711615b80fa5d4de51e557b90142
@@ -866,6 +930,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-026
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:1dffb8df001a4c52e61c14d3f3387aea7efdce74e32755b67f49ef1c3cb1718e
@@ -882,6 +947,7 @@ workItems:
   - GPU_EXECUTION
   minimumExternalArtifacts: 1
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-COMP-005
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:a9c543e113c5a61b1387d2ac485ab76763c131245c7cca0cedaffeec6afc5348
@@ -900,6 +966,7 @@ workItems:
   minimumExternalArtifacts: 0
   minimumSemanticCounts:
     TRAINCHECK_INCIDENT_DIFFERENTIAL: 1
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-027
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:fe1593c827778126c5b714667cf395f190322e09c18b88d3a6cba410f9b455ce
@@ -914,6 +981,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-009
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:90a90c0326cc7268412b05be6d93bc193e76abc7c61aaea29248a08d62c2fcd2
@@ -930,6 +998,7 @@ workItems:
   - INDEPENDENT_OPERATOR
   minimumExternalArtifacts: 1
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-010
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:fadc9d941665cbc8463c82316ac2721c56a67d61e9c23c8cb46f80d1331439df
@@ -945,6 +1014,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-DEC-002
   milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:187c0cf3ad7495ae7f37a9f4324ed0fd2c75a6e385d38c7e6f0e6f3aff2e5841
@@ -960,6 +1030,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MKT-008
   milestoneId: M3_PAID_PREFLIGHT
   roadmapEvidenceDigest: sha256:e459167e26c4ec63328bbc0c926483763b2aa96842a3cd7765c49f0bd0691283
@@ -973,6 +1044,7 @@ workItems:
   - CUSTOMER_AUTHORIZATION
   minimumExternalArtifacts: 1
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MKT-009
   milestoneId: M3_PAID_PREFLIGHT
   roadmapEvidenceDigest: sha256:78a50926e27c03f27cf61efffaa532fad3da6600aa148b126d824030849c52c5
@@ -987,6 +1059,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-011
   milestoneId: M3_PAID_PREFLIGHT
   roadmapEvidenceDigest: sha256:c13ddcec9235c2389399d5b0e5dbdf04b1497e5a46fc42860faf623525393916
@@ -1001,6 +1074,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-012
   milestoneId: M3_PAID_PREFLIGHT
   roadmapEvidenceDigest: sha256:696ae626b91fa40abd9277afc4725341f0497fe8dc2ed8d283a34d7a70907067
@@ -1017,6 +1091,7 @@ workItems:
   - PROVIDER_ACCEPTANCE
   minimumExternalArtifacts: 1
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-013
   milestoneId: M3_PAID_PREFLIGHT
   roadmapEvidenceDigest: sha256:caa85e61f4513dad463df1d237e83d7eb50119c216718ef0e95afe9e405b63ee
@@ -1033,6 +1108,7 @@ workItems:
   - PROVIDER_ACCEPTANCE
   minimumExternalArtifacts: 1
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-028
   milestoneId: M3_PAID_PREFLIGHT
   roadmapEvidenceDigest: sha256:d7ec14cdf0d34fc66ba45c5955307e906cebd91550e0e0b87cbbdad02291fa13
@@ -1047,6 +1123,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-COMP-006
   milestoneId: M3_PAID_PREFLIGHT
   roadmapEvidenceDigest: sha256:3ea55512180244a7260d5a1344f08c1cc159f09e35346f12d1f670ac7a51751e
@@ -1063,6 +1140,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-MKT-010
   milestoneId: M3_PAID_PREFLIGHT
   roadmapEvidenceDigest: sha256:cb7b2746750d27464637539236de939455ac99b188a030f240897295ff1f406a
@@ -1076,6 +1154,7 @@ workItems:
   - CUSTOMER_AUTHORIZATION
   minimumExternalArtifacts: 1
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-DEC-003
   milestoneId: M3_PAID_PREFLIGHT
   roadmapEvidenceDigest: sha256:0cd7f284f33e8e20cbc17760f894b7ccdf19290832cb71d32151ebf8cb9756ed
@@ -1091,6 +1170,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PILOT-001
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:4dbb46bcec79bfa127c2038856214c47d4c43e8be2a108473a50c6d670fbf233
@@ -1104,6 +1184,7 @@ workItems:
   - PAID_PILOT
   minimumExternalArtifacts: 1
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PILOT-002
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:892ef5c05e9e3cc24c6ee759c5945a5f04a0c2ee2b4c7a5efa4087581dccbbe8
@@ -1118,6 +1199,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PILOT-003
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:fa171a7635b275ab2c367cac4b1bdb767d5107051db460e3575cc592e5a0cf3e
@@ -1134,6 +1216,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PILOT-004
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:371dbfb27850209b517b03ed2c93149c3b5a74280a5a76e2939c275feea55db2
@@ -1148,6 +1231,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PILOT-005
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:0f5962dab996296d7203c1f4df8e44468ad9a7a4b2b4397f27be11c4d941e9d9
@@ -1163,6 +1247,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PILOT-006
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:45f7654e147801ee1326b8328df6ce8034b982909cfe328afa38c4b4050fe266
@@ -1177,6 +1262,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PILOT-007
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:063bf3c20896b9239b23744f928901b05eb6ceb86c1bd25e85361dde985b4705
@@ -1191,6 +1277,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PILOT-008
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:9c3d630806c6db7fa7a9a56966de2c7f3f725fbd78ddbe7baed01579752ab87f
@@ -1205,6 +1292,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PILOT-009
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:366cc89d3a95bab596da9ffc70ea7ad3fba60c1ce93dc6cfd4f10c1d04398700
@@ -1219,6 +1307,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PILOT-010
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:907ab45d94d82d1a64f3ed7923e5ba41265beba9eda9df6527fe364941d6807c
@@ -1234,25 +1323,27 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PILOT-011
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:091c3e747ef325e8290a83d3329b2bb067b28bdc12ac854f7511bc3d53ff7845
   minimumGrade: EXTERNAL
   requiredAuthorities:
   - CONTROLLER
-  - INDEPENDENT_MACHINE_POLICY
   - TRUSTED_EXTERNAL
   requiredSemantics:
   - CUSTOMER_DECISION_CHANGED
   - CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT
   - DETERMINISTIC_ARTIFACT
-  - NATIVE_VALUE_AUTHORIZATION
   allowedExternalEvidenceTypes:
   - DECISION_CHANGED
   minimumExternalArtifacts: 1
   minimumSemanticCounts:
     CUSTOMER_DECISION_CHANGED: 1
     CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT: 1
+  requiredPriorEvidence:
+    V3-PILOT-003:
+    - NATIVE_VALUE_AUTHORIZATION
 - workItemId: V3-PILOT-012
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:05f2a8171c8431738f81dc0c8fa457a7d37ab22c44fe083527c284ae32d35699
@@ -1267,6 +1358,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PILOT-013
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:5215cb785bfdd98a9bc4285cca4e1115d81946db8d595513c12935098b02909a
@@ -1280,6 +1372,7 @@ workItems:
   - SECOND_ACTION_COMMITMENT
   minimumExternalArtifacts: 1
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-DEC-004
   milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:91712090adf8ff1bd2aebd09ba903ff970e35af637240514dd37b532004082a1
@@ -1295,6 +1388,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-REPEAT-001
   milestoneId: M5_PAID_REPEAT
   roadmapEvidenceDigest: sha256:41f3c460e341cfbbf62f2d30f7fb468c1c78f0f38fe056aa794e3fd63f537827
@@ -1308,6 +1402,7 @@ workItems:
   - SECOND_PAID_ACTION
   minimumExternalArtifacts: 1
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-REPEAT-002
   milestoneId: M5_PAID_REPEAT
   roadmapEvidenceDigest: sha256:f384359a5874e6354e0c1774c360cc3d702d97c87c2cb126f63b7579503650e8
@@ -1322,6 +1417,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-REPEAT-003
   milestoneId: M5_PAID_REPEAT
   roadmapEvidenceDigest: sha256:8c91ade97c71cd3f0ad542e53e4042e2a5b7f10726b093cce47ef09e85e6a1db
@@ -1336,6 +1432,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-REPEAT-004
   milestoneId: M5_PAID_REPEAT
   roadmapEvidenceDigest: sha256:190744244f99dbf1eae5b9e514fd740911e92d2921c63ae558d93209ff83158f
@@ -1352,40 +1449,45 @@ workItems:
   - INDEPENDENT_OPERATOR
   minimumExternalArtifacts: 1
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-REPEAT-005
   milestoneId: M5_PAID_REPEAT
   roadmapEvidenceDigest: sha256:eadd0453484cab5d1f8d90d0cd602b14d55cd2695a090bca68881cc6c7f77d07
   minimumGrade: EXTERNAL
   requiredAuthorities:
   - CONTROLLER
-  - INDEPENDENT_MACHINE_POLICY
   - INDEPENDENT_REVIEWER
   - TRUSTED_EXTERNAL
   requiredSemantics:
   - CANDIDATE_MANIFEST
   - DETERMINISTIC_ARTIFACT
   - INDEPENDENT_REVIEW
-  - NATIVE_VALUE_AUTHORIZATION
   allowedExternalEvidenceTypes:
   - DECISION_CHANGED
   minimumExternalArtifacts: 1
   minimumSemanticCounts: {}
+  requiredPriorEvidence:
+    V3-PILOT-003:
+    - NATIVE_VALUE_AUTHORIZATION
 - workItemId: V3-REPEAT-006
   milestoneId: M5_PAID_REPEAT
   roadmapEvidenceDigest: sha256:6da09ac0a7a4747e60df267c5d2bf141d477d37c2a1d6e2ccdca1676b4474a6d
-  minimumGrade: LIVE
+  minimumGrade: EXTERNAL
   requiredAuthorities:
   - CONTROLLER
   - INDEPENDENT_REVIEWER
+  - TRUSTED_EXTERNAL
   requiredSemantics:
   - CANDIDATE_MANIFEST
   - DELIVERY_ECONOMICS
   - DETERMINISTIC_ARTIFACT
   - INDEPENDENT_REVIEW
-  allowedExternalEvidenceTypes: []
-  minimumExternalArtifacts: 0
+  allowedExternalEvidenceTypes:
+  - DELIVERY_ECONOMICS
+  minimumExternalArtifacts: 2
   minimumSemanticCounts:
     DELIVERY_ECONOMICS: 1
+  requiredPriorEvidence: {}
 - workItemId: V3-DEC-005
   milestoneId: M5_PAID_REPEAT
   roadmapEvidenceDigest: sha256:beabfac8c0bb5b4883bc5c2e87faed099c8c40c5909de95d33fa9e7a0071a1bb
@@ -1401,6 +1503,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PACK-001
   milestoneId: M6_COMMERCIALLY_SUPPORTED_PACK
   roadmapEvidenceDigest: sha256:7ae7200281606ed328c689f3aee3a792b8ba14f2e845f1e631a47d57af7d695e
@@ -1415,6 +1518,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PACK-002
   milestoneId: M6_COMMERCIALLY_SUPPORTED_PACK
   roadmapEvidenceDigest: sha256:33166c8fdc6eff8e55d5cea76519d1668fa96fc16b192dc6bd89898b6b373dec
@@ -1433,6 +1537,7 @@ workItems:
   minimumExternalArtifacts: 1
   minimumSemanticCounts:
     THIRD_SAME_FAMILY_CASE: 1
+  requiredPriorEvidence: {}
 - workItemId: V3-COMP-007
   milestoneId: M6_COMMERCIALLY_SUPPORTED_PACK
   roadmapEvidenceDigest: sha256:f596ee84901184968c087c68caee2eb2534ca1f6e4c010a9f152b1d4ad61476a
@@ -1449,6 +1554,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-014
   milestoneId: M6_COMMERCIALLY_SUPPORTED_PACK
   roadmapEvidenceDigest: sha256:331eb723471c169ecce12867a5e98f63ac1884eafbdcb6f78e1ef868ae17bc49
@@ -1463,6 +1569,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-TRUST-015
   milestoneId: M6_COMMERCIALLY_SUPPORTED_PACK
   roadmapEvidenceDigest: sha256:7b667a8f8948523c820a826adf4f6cefe39ee0f55b36174af54addcaa8387d09
@@ -1479,6 +1586,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-PROD-029
   milestoneId: M6_COMMERCIALLY_SUPPORTED_PACK
   roadmapEvidenceDigest: sha256:5cba3d78a791fe48f8a04903c68acdcd2dbc8e07c45cff63e879a2afaecfe510
@@ -1495,6 +1603,7 @@ workItems:
   minimumExternalArtifacts: 0
   minimumSemanticCounts:
     SUPPORT_POLICY: 1
+  requiredPriorEvidence: {}
 - workItemId: V3-MKT-011
   milestoneId: M6_COMMERCIALLY_SUPPORTED_PACK
   roadmapEvidenceDigest: sha256:55cc8f2c7bb10dc322311ad93de29ca00e9a9142166cb47c024e59ae78f0d58e
@@ -1508,6 +1617,7 @@ workItems:
   - SUPPORT_ACCEPTANCE
   minimumExternalArtifacts: 1
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 - workItemId: V3-DEC-006
   milestoneId: M6_COMMERCIALLY_SUPPORTED_PACK
   roadmapEvidenceDigest: sha256:6373296a3fd1feccbc408c8772f94a0f90a54902813a1fc163bf933d5d5d9437
@@ -1523,6 +1633,7 @@ workItems:
   allowedExternalEvidenceTypes: []
   minimumExternalArtifacts: 0
   minimumSemanticCounts: {}
+  requiredPriorEvidence: {}
 milestones:
 - milestoneId: M0_FACTORY_MIGRATED
   roadmapEvidenceDigest: sha256:b5c4c1ece3dcb387b480897cf57f3c6148e604dc312ed7faeac53331bbe82569
@@ -1540,6 +1651,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M0_FACTORY_MIGRATED-EXIT-02
     criterionDigest: sha256:8428186d213f037c84fa7fecef2d62cd3f04d73add3c321cbbaa20a6f6fb67dd
     requiredWorkItemIds:
@@ -1547,6 +1659,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M0_FACTORY_MIGRATED-EXIT-03
     criterionDigest: sha256:1a9c4ef3b74da9177d8ba5187f13039d77e93b425a450ff32b3be136e0f9e665
     requiredWorkItemIds:
@@ -1554,6 +1667,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M0_FACTORY_MIGRATED-EXIT-04
     criterionDigest: sha256:37e86cd48a022072e53477a8577274ffb90df256391a1c8f4a141b25c9745a46
     requiredWorkItemIds:
@@ -1562,6 +1676,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M0_FACTORY_MIGRATED-EXIT-05
     criterionDigest: sha256:09b0614d178c4445bf81ed8b6c44afeb1a62b96ca97f6f1363f28ce05238e8ce
     requiredWorkItemIds:
@@ -1570,6 +1685,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: true
+    requiredCorrelationFields: []
   - criterionId: M0_FACTORY_MIGRATED-EXIT-06
     criterionDigest: sha256:707f60db187edb08dd8230a5477f6ca05d0372c0ff78faef8621276e31d1b30b
     requiredWorkItemIds:
@@ -1577,6 +1693,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M0_FACTORY_MIGRATED-EXIT-07
     criterionDigest: sha256:35dc0d4366e048d95799f3ff329897b3ea6110c367fca9ccafaf501f44338559
     requiredWorkItemIds:
@@ -1586,6 +1703,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: true
+    requiredCorrelationFields: []
   - criterionId: M0_FACTORY_MIGRATED-EXIT-08
     criterionDigest: sha256:0333390e6ea746fbbd19d197f76b100b0afa50a964796021844d88bf15916a76
     requiredWorkItemIds:
@@ -1593,6 +1711,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M0_FACTORY_MIGRATED-EXIT-09
     criterionDigest: sha256:66c6c305704c3e136012273ce2ba6d4848fafd87e7dbad1df6a5185939a91658
     requiredWorkItemIds:
@@ -1600,6 +1719,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M0_FACTORY_MIGRATED-EXIT-10
     criterionDigest: sha256:25932ac5778c7d4e53127b0467d4f25b1870286b3b44f62bb904d5e36310c0d8
     requiredWorkItemIds:
@@ -1607,6 +1727,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M0_FACTORY_MIGRATED-EXIT-11
     criterionDigest: sha256:07bb19e09410edf92c50504dce8de4da75be4f4c434f621796e97b3de1339c2f
     requiredWorkItemIds:
@@ -1614,6 +1735,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M0_FACTORY_MIGRATED-EXIT-12
     criterionDigest: sha256:cefaecdd98cee1319721ab006abbed26f8561daeed35708af2758a934f240a58
     requiredWorkItemIds:
@@ -1622,6 +1744,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: true
+    requiredCorrelationFields: []
 - milestoneId: M1_NATIVE_PREFLIGHT
   roadmapEvidenceDigest: sha256:e3494ec6612746e74436caa54c68d55d09ed79190bdf8d087362a6257ec0acc0
   requiredExternalEvidenceTypes: &id001
@@ -1646,6 +1769,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M1_NATIVE_PREFLIGHT-EXIT-02
     criterionDigest: sha256:05a51e3565be9d7172b007c9fdd3a100514419d157bd339a0a6a87cc999dbeff
     requiredWorkItemIds:
@@ -1653,6 +1777,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M1_NATIVE_PREFLIGHT-EXIT-03
     criterionDigest: sha256:7a801b176bd460d1cda03911350bcb8d857f18a1cecf5aa4932a8536342684b9
     requiredWorkItemIds:
@@ -1660,6 +1785,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M1_NATIVE_PREFLIGHT-EXIT-04
     criterionDigest: sha256:106c746ac5de4f915ce2c7052a656c6cc5c83a6fed46717ef229e664ae697e85
     requiredWorkItemIds:
@@ -1670,6 +1796,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M1_NATIVE_PREFLIGHT-EXIT-05
     criterionDigest: sha256:dbc6b235660c3946f724758818645f098c52b83704aef9ed396e787f2b21196e
     requiredWorkItemIds:
@@ -1680,6 +1807,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M1_NATIVE_PREFLIGHT-EXIT-06
     criterionDigest: sha256:61fa89df6bccb0229b6f81bc4bf2442ee037a7f169ef4fab92b6e84dc956b3ab
     requiredWorkItemIds:
@@ -1687,6 +1815,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M1_NATIVE_PREFLIGHT-EXIT-07
     criterionDigest: sha256:78b7ea6bbde0874093222ec4651d04cea3cce96ecaeef012107ba8bee464a2fd
     requiredWorkItemIds:
@@ -1694,6 +1823,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M1_NATIVE_PREFLIGHT-EXIT-08
     criterionDigest: sha256:4a85b2a15553bdf715814f3bdbf9559c2fbdcec0a44fdec500d8cd021dfaf1ea
     requiredWorkItemIds:
@@ -1708,6 +1838,7 @@ milestones:
       REACHABLE_ACCOUNT: 30
       ATTRIBUTABLE_SOURCE: 1
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M1_NATIVE_PREFLIGHT-EXIT-09
     criterionDigest: sha256:5079bdac1c160d8044794e649f99ce6a2f8eac94dfe4d5f87ada4d583a8ab4bb
     requiredWorkItemIds:
@@ -1717,6 +1848,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M1_NATIVE_PREFLIGHT-EXIT-10
     criterionDigest: sha256:b6f87d63d86dfc7a0ebb2fa6446eaa6284f8aa1001c67e72560508cd8d1e1aa9
     requiredWorkItemIds:
@@ -1728,6 +1860,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
 - milestoneId: M2_CONTROLLED_QUALIFICATION
   roadmapEvidenceDigest: sha256:4f0bdec9933b52e0ed2583419c8ef0a180def06f4b28b1acfd5268edb5d2f837
   requiredExternalEvidenceTypes:
@@ -1752,6 +1885,7 @@ milestones:
     requiredSemanticCounts:
       TRAINCHECK_INCIDENT_DIFFERENTIAL: 1
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M2_CONTROLLED_QUALIFICATION-EXIT-02
     criterionDigest: sha256:c462abdbb189c73834b0464ab0d39e381b661f1679a880641c23bd753ee70773
     requiredWorkItemIds:
@@ -1761,6 +1895,7 @@ milestones:
     requiredSemanticCounts:
       TRAINCHECK_INCIDENT_DIFFERENTIAL: 1
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M2_CONTROLLED_QUALIFICATION-EXIT-03
     criterionDigest: sha256:9ab8db6c9a59afe8df731dcd1cab1f06cb9402d2836ad5978fb1d829b082a86d
     requiredWorkItemIds:
@@ -1770,6 +1905,7 @@ milestones:
     requiredSemanticCounts:
       TRAINCHECK_INCIDENT_DIFFERENTIAL: 1
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M2_CONTROLLED_QUALIFICATION-EXIT-04
     criterionDigest: sha256:523a36268e74e64316f1360ddad7ddbe830fc1d66ac24e188781ecb81c7de56a
     requiredWorkItemIds:
@@ -1780,6 +1916,7 @@ milestones:
     requiredSemanticCounts:
       LEGAL_REDUCTION_VERIFIED: 1
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M2_CONTROLLED_QUALIFICATION-EXIT-05
     criterionDigest: sha256:f767c90ff34cb55d0ca4dfaa88344b2bb8c4bc48d2cc20e8ad0e250063b6a532
     requiredWorkItemIds:
@@ -1790,6 +1927,7 @@ milestones:
     requiredSemanticCounts:
       ILLEGAL_REDUCTION_REJECTED: 1
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M2_CONTROLLED_QUALIFICATION-EXIT-06
     criterionDigest: sha256:295b690acab1a04bf9c814672d84248d7d381f822e5c9ef1927c1a3f291fd08d
     requiredWorkItemIds:
@@ -1798,6 +1936,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M2_CONTROLLED_QUALIFICATION-EXIT-07
     criterionDigest: sha256:17e78e33d5154d65cbc41c58c9f9cfee3f9a613ca24eb4ce9685a7536bb5634f
     requiredWorkItemIds:
@@ -1807,6 +1946,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M2_CONTROLLED_QUALIFICATION-EXIT-08
     criterionDigest: sha256:0e14715bcd44dbb6f34cfbcce57717bb300551917205479fc557d6d5f9501aae
     requiredWorkItemIds:
@@ -1814,6 +1954,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M2_CONTROLLED_QUALIFICATION-EXIT-09
     criterionDigest: sha256:788fbe6bd4ded90ad3016c3adb04864ad45f606ab409b1c72b435b946351dfc8
     requiredWorkItemIds:
@@ -1822,6 +1963,7 @@ milestones:
     - GPU_EXECUTION
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M2_CONTROLLED_QUALIFICATION-EXIT-10
     criterionDigest: sha256:fcda85adbc452a124f70bf0c4656235c857a8eb17a5d4ed97248e2af5ddb3f27
     requiredWorkItemIds:
@@ -1830,6 +1972,7 @@ milestones:
     - INDEPENDENT_OPERATOR
     requiredSemanticCounts: {}
     machinePolicyRequired: true
+    requiredCorrelationFields: []
   - criterionId: M2_CONTROLLED_QUALIFICATION-EXIT-11
     criterionDigest: sha256:d675329c50227b6023b59be581ca07509eff675be0e58bdb6b190884cce94cc9
     requiredWorkItemIds:
@@ -1838,6 +1981,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: true
+    requiredCorrelationFields: []
 - milestoneId: M3_PAID_PREFLIGHT
   roadmapEvidenceDigest: sha256:b1e4f0039e320147ffeaf7211ee9e5986628bcb9dfb9733521d63be12dbcdb77
   requiredExternalEvidenceTypes:
@@ -1857,6 +2001,7 @@ milestones:
     - INCIDENT_ARCHIVE_ACCESS
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M3_PAID_PREFLIGHT-EXIT-02
     criterionDigest: sha256:298323aee50d80a0fb53c8846e7e4100cbf8017101f4101987c10caf02cd0a73
     requiredWorkItemIds:
@@ -1866,6 +2011,7 @@ milestones:
     - CUSTOMER_AUTHORIZATION
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M3_PAID_PREFLIGHT-EXIT-03
     criterionDigest: sha256:287a61ab590bd097fdc0bbffcb4bc9d974a455b6110cd71e4b06ca593683fa65
     requiredWorkItemIds:
@@ -1875,6 +2021,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M3_PAID_PREFLIGHT-EXIT-04
     criterionDigest: sha256:d163db71531f5678f6e4b044d6eebf412fd40c61fc2ad9b33daf295e8744486e
     requiredWorkItemIds:
@@ -1883,6 +2030,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: true
+    requiredCorrelationFields: []
   - criterionId: M3_PAID_PREFLIGHT-EXIT-05
     criterionDigest: sha256:6d0ece2c95aeccb20f69b03ab7ca81d5b5b41d22fdb515021621430137d60c49
     requiredWorkItemIds:
@@ -1890,6 +2038,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
 - milestoneId: M4_PAID_PILOT
   roadmapEvidenceDigest: sha256:11a5df4425fd58f4690d22345bbb4eb478cd2bd7223ef0883a587174813a4a72
   requiredExternalEvidenceTypes:
@@ -1912,6 +2061,10 @@ milestones:
     requiredSemanticCounts:
       CUSTOMER_DECISION_CHANGED: 1
     machinePolicyRequired: false
+    requiredCorrelationFields:
+    - CANDIDATE
+    - CUSTOMER
+    - OFFER
   - criterionId: M4_PAID_PILOT-EXIT-02
     criterionDigest: sha256:3568a0edc529000457367b739538b1bbe6bf05c8683c60caee9708dd22e39d2c
     requiredWorkItemIds:
@@ -1924,6 +2077,7 @@ milestones:
     requiredSemanticCounts:
       NATIVE_VALUE_AUTHORIZATION: 1
     machinePolicyRequired: true
+    requiredCorrelationFields: []
   - criterionId: M4_PAID_PILOT-EXIT-03
     criterionDigest: sha256:d5781c752a9c89f02cbbc056396a8be6207cb6e9fc413d06ee75f30c741fa821
     requiredWorkItemIds:
@@ -1933,6 +2087,10 @@ milestones:
     requiredSemanticCounts:
       CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT: 1
     machinePolicyRequired: false
+    requiredCorrelationFields:
+    - CANDIDATE
+    - CUSTOMER
+    - OFFER
   - criterionId: M4_PAID_PILOT-EXIT-04
     criterionDigest: sha256:51d914fbf82b40e94e46b0e7c933b7742ec1ea852a5491e4f574743856b1ba1a
     requiredWorkItemIds:
@@ -1940,6 +2098,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M4_PAID_PILOT-EXIT-05
     criterionDigest: sha256:0ac873891ae4327de5db5576675ad105f0d4fe7a5244a6801c4c9f5fcec30abe
     requiredWorkItemIds:
@@ -1948,12 +2107,14 @@ milestones:
     - SECOND_ACTION_COMMITMENT
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
 - milestoneId: M5_PAID_REPEAT
   roadmapEvidenceDigest: sha256:71a5864f059692cc1fcc4e7e63a277936f91e078ff625d6c18e13434a3a898df
   requiredExternalEvidenceTypes:
   - SECOND_PAID_ACTION
   - INDEPENDENT_OPERATOR
   - DECISION_CHANGED
+  - DELIVERY_ECONOMICS
   requiredSemanticCounts:
     DELIVERY_ECONOMICS: 1
   machinePolicyRequired: true
@@ -1967,6 +2128,7 @@ milestones:
     - SECOND_PAID_ACTION
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M5_PAID_REPEAT-EXIT-02
     criterionDigest: sha256:68869b66b9aea9b561523de7fa2a86f9a92c76d0c663f960e55441a22e98da4c
     requiredWorkItemIds:
@@ -1974,15 +2136,22 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M5_PAID_REPEAT-EXIT-03
     criterionDigest: sha256:e171dbc971e084ae63455664519e217a1e6825aba9be5869522559f32b72e97c
     requiredWorkItemIds:
     - V3-REPEAT-005
     - V3-REPEAT-006
-    requiredExternalEvidenceTypes: []
+    requiredExternalEvidenceTypes:
+    - DECISION_CHANGED
+    - DELIVERY_ECONOMICS
     requiredSemanticCounts:
       DELIVERY_ECONOMICS: 1
     machinePolicyRequired: false
+    requiredCorrelationFields:
+    - CANDIDATE
+    - CUSTOMER
+    - OFFER
   - criterionId: M5_PAID_REPEAT-EXIT-04
     criterionDigest: sha256:45be1e3b8a6eca175d609c907fef4ee2ef2e5b6a1a11dec3556d13d1351b5484
     requiredWorkItemIds:
@@ -1991,6 +2160,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M5_PAID_REPEAT-EXIT-05
     criterionDigest: sha256:f5b7136a93970dc48f6f1ea11d3b60a095e72303936ce9e57a0b579506a90e35
     requiredWorkItemIds:
@@ -1999,6 +2169,7 @@ milestones:
     - INDEPENDENT_OPERATOR
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M5_PAID_REPEAT-EXIT-06
     criterionDigest: sha256:7b511f4462b4f90df88378d81ca3089df81c867a0591f968fb946db9ebd67b5c
     requiredWorkItemIds:
@@ -2007,6 +2178,7 @@ milestones:
     requiredSemanticCounts:
       DELIVERY_ECONOMICS: 1
     machinePolicyRequired: false
+    requiredCorrelationFields: []
 - milestoneId: M6_COMMERCIALLY_SUPPORTED_PACK
   roadmapEvidenceDigest: sha256:13e8f545d471b2f4bfae27be364b9bf37fc7588dc1ad372fac15398e2363d345
   requiredExternalEvidenceTypes:
@@ -2029,6 +2201,7 @@ milestones:
     - DECISION_CHANGED
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-02
     criterionDigest: sha256:8dca3dcf76c913e1e20174f8e46176644e1986f12559161db4998764d374aa4f
     requiredWorkItemIds:
@@ -2037,6 +2210,7 @@ milestones:
     - SECOND_PAID_ACTION
     requiredSemanticCounts: {}
     machinePolicyRequired: false
+    requiredCorrelationFields: []
   - criterionId: M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-03
     criterionDigest: sha256:55b6659288e4d35140648b50874a48f2c618851cc0fbd7f5f26422c89a13f7ad
     requiredWorkItemIds:
@@ -2046,6 +2220,11 @@ milestones:
     requiredSemanticCounts:
       THIRD_SAME_FAMILY_CASE: 1
     machinePolicyRequired: false
+    requiredCorrelationFields:
+    - CANDIDATE
+    - CUSTOMER
+    - FAMILY
+    - PACK
   - criterionId: M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-04
     criterionDigest: sha256:68869b66b9aea9b561523de7fa2a86f9a92c76d0c663f960e55441a22e98da4c
     requiredWorkItemIds:
@@ -2054,6 +2233,11 @@ milestones:
     requiredSemanticCounts:
       THIRD_SAME_FAMILY_CASE: 1
     machinePolicyRequired: false
+    requiredCorrelationFields:
+    - CANDIDATE
+    - CUSTOMER
+    - FAMILY
+    - PACK
   - criterionId: M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-05
     criterionDigest: sha256:6e45b2e65ef2f4abc21af1a4522285d55cf68bb34fbede686343a384039f4367
     requiredWorkItemIds:
@@ -2061,6 +2245,7 @@ milestones:
     requiredExternalEvidenceTypes: []
     requiredSemanticCounts: {}
     machinePolicyRequired: true
+    requiredCorrelationFields: []
   - criterionId: M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-06
     criterionDigest: sha256:33782c4160f0cac8ebc582d6f834abbe52b9e42949480a4ca5524890f8bc192a
     requiredWorkItemIds:
@@ -2072,6 +2257,8 @@ milestones:
     requiredSemanticCounts:
       SUPPORT_POLICY: 1
     machinePolicyRequired: false
+    requiredCorrelationFields:
+    - PACK
   - criterionId: M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-07
     criterionDigest: sha256:44db7d08039173d6cdb627319548a55ed584ecda862a2b4a5a69f84000f3420a
     requiredWorkItemIds:
@@ -2080,6 +2267,7 @@ milestones:
     requiredSemanticCounts:
       NATIVE_VALUE_AUTHORIZATION: 1
     machinePolicyRequired: true
+    requiredCorrelationFields: []
   - criterionId: M6_COMMERCIALLY_SUPPORTED_PACK-EXIT-08
     criterionDigest: sha256:d2e4863a88af4f6141a3de34f2eee6ca136d1471851daac03f22cdcf37844a08
     requiredWorkItemIds:
@@ -2088,3 +2276,4 @@ milestones:
     requiredSemanticCounts:
       SUPPORT_POLICY: 1
     machinePolicyRequired: false
+    requiredCorrelationFields: []

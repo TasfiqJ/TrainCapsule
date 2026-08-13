@@ -14,6 +14,10 @@ from pydantic import Field, model_validator
 
 from tcfactory.v3.base import DIGEST_PATTERN, SHA_PATTERN, sha256_digest
 from tcfactory.v3.completion_artifacts import SEMANTIC_OUTPUT_SPECS
+from tcfactory.v3.completion_verification import (
+    DeliveryMeasurement,
+    ReductionCandidateInput,
+)
 from tcfactory.v3.contracts_v31 import (
     DecisionValueResultV31,
     NativeSubstituteBenchmarkV31,
@@ -306,9 +310,7 @@ class AgentExecutionReportV31(V31Model):
         _validate_digest_list(self.artifact_digests, "artifact digests")
         if len(self.finding_fingerprints) != len(set(self.finding_fingerprints)):
             raise ValueError("finding fingerprints must be unique")
-        if {finding.fingerprint for finding in self.findings} != set(
-            self.finding_fingerprints
-        ):
+        if {finding.fingerprint for finding in self.findings} != set(self.finding_fingerprints):
             raise ValueError("finding fingerprint index does not match findings")
         return self
 
@@ -447,17 +449,17 @@ def output_declarations_for_item_v31(item: WorkItem) -> list[OutputDeclarationV3
     output_id = "OUT:" + item.work_item_id.replace("-", ":") + ":RESULT"
     declarations = [
         OutputDeclarationV31(
-        schema_version="3.1",
-        output_id=output_id,
-        path=result_path,
-        schema_id="traincapsule.v3.1.task-result",
-        required=True,
-        evidence_class=_EVIDENCE_CLASS[item.lane],
-        mutating_owner="CANDIDATE_AGENT",
-        readers=["CONTROLLER", "VERIFIER"],
-        content_digest_required=True,
-        external_authority_required=False,
-        maximum_bytes=10_000_000,
+            schema_version="3.1",
+            output_id=output_id,
+            path=result_path,
+            schema_id="traincapsule.v3.1.task-result",
+            required=True,
+            evidence_class=_EVIDENCE_CLASS[item.lane],
+            mutating_owner="CANDIDATE_AGENT",
+            readers=["CONTROLLER", "VERIFIER"],
+            content_digest_required=True,
+            external_authority_required=False,
+            maximum_bytes=10_000_000,
         )
     ]
     semantic_output = SEMANTIC_OUTPUT_SPECS.get(item.work_item_id)
@@ -468,6 +470,48 @@ def output_declarations_for_item_v31(item: WorkItem) -> list[OutputDeclarationV3
                 output_id=semantic_output.output_id,
                 path=semantic_output.relative_path,
                 schema_id=semantic_output.schema_id,
+                required=True,
+                evidence_class=_EVIDENCE_CLASS[item.lane],
+                mutating_owner="CANDIDATE_AGENT",
+                readers=["CONTROLLER", "VERIFIER"],
+                content_digest_required=True,
+                external_authority_required=False,
+                maximum_bytes=2_000_000,
+            )
+        )
+    derived_inputs = {
+        "V3-TRUST-005": (
+            (
+                "OUT:V3:TRUST:005:LEGAL_REDUCTION_INPUT",
+                "docs/evidence/trust/v3-trust-005/legal-reduction-input.json",
+                "traincapsule.v3.1.reduction-candidate-input",
+            ),
+            (
+                "OUT:V3:TRUST:005:ILLEGAL_REDUCTION_INPUT",
+                "docs/evidence/trust/v3-trust-005/illegal-reduction-input.json",
+                "traincapsule.v3.1.reduction-candidate-input",
+            ),
+        ),
+        "V3-REPEAT-006": (
+            (
+                "OUT:V3:REPEAT:006:ORIGINAL_DELIVERY",
+                "docs/evidence/market/v3-repeat-006/original-delivery.json",
+                "traincapsule.v3.1.delivery-measurement",
+            ),
+            (
+                "OUT:V3:REPEAT:006:PROPOSED_DELIVERY",
+                "docs/evidence/market/v3-repeat-006/proposed-delivery.json",
+                "traincapsule.v3.1.delivery-measurement",
+            ),
+        ),
+    }
+    for derived_id, derived_path, schema_id in derived_inputs.get(item.work_item_id, ()):
+        declarations.append(
+            OutputDeclarationV31(
+                schema_version="3.1",
+                output_id=derived_id,
+                path=derived_path,
+                schema_id=schema_id,
                 required=True,
                 evidence_class=_EVIDENCE_CLASS[item.lane],
                 mutating_owner="CANDIDATE_AGENT",
@@ -489,9 +533,7 @@ def output_declarations_for_item_v31(item: WorkItem) -> list[OutputDeclarationV3
         declarations.extend(
             OutputDeclarationV31(
                 schema_version="3.1",
-                output_id=(
-                    "OUT:" + item.work_item_id.replace("-", ":") + f":{suffix}"
-                ),
+                output_id=("OUT:" + item.work_item_id.replace("-", ":") + f":{suffix}"),
                 path=f"{root}/{filename}",
                 schema_id=schema_id,
                 required=True,
@@ -582,9 +624,7 @@ def validate_execution_report_v31(
         if expected is not None and getattr(report, name) != expected:
             raise TaskCompilationError(f"execution report {name} does not match request")
     read_only_roles = {"audit", "adversary", "security", "integration_scout", "release"}
-    expected_owner = (
-        "READ_ONLY_REVIEWER" if report.role in read_only_roles else "CANDIDATE_AGENT"
-    )
+    expected_owner = "READ_ONLY_REVIEWER" if report.role in read_only_roles else "CANDIDATE_AGENT"
     if report.owner_class != expected_owner:
         raise TaskCompilationError(
             "execution report owner class does not match its role; "
@@ -597,9 +637,7 @@ def validate_execution_report_v31(
             or not parts[0].startswith("XREC-")
             or DIGEST_PATTERN.fullmatch(parts[1]) is None
         ):
-            raise TaskCompilationError(
-                "external receipt reference must be XREC-ID@sha256:<digest>"
-            )
+            raise TaskCompilationError("external receipt reference must be XREC-ID@sha256:<digest>")
     if report.owner_class == "READ_ONLY_REVIEWER" and report.changed_files:
         raise TaskCompilationError("read-only reviewer reported candidate mutations")
     for changed_file in report.changed_files:
@@ -719,13 +757,8 @@ def _verify_materialized_output(
         opened.append(file_fd)
         observed = os.fstat(file_fd)
         if not stat.S_ISREG(observed.st_mode):
-            raise TaskCompilationError(
-                f"materialized output is not a regular file: {output.path}"
-            )
-        if (
-            observed.st_size != output.size_bytes
-            or observed.st_size > declaration.maximum_bytes
-        ):
+            raise TaskCompilationError(f"materialized output is not a regular file: {output.path}")
+        if observed.st_size != output.size_bytes or observed.st_size > declaration.maximum_bytes:
             raise TaskCompilationError(f"materialized output size mismatch: {output.path}")
         chunks: list[bytes] = []
         remaining = declaration.maximum_bytes + 1
@@ -752,9 +785,9 @@ def _verify_materialized_output(
         "traincapsule.v3.1.native-substitute-benchmark": NativeSubstituteBenchmarkV31,
         "traincapsule.v3.1.decision-value": DecisionValueResultV31,
         "traincapsule.v3.1.native-value-gate-policy": NativeValueGatePolicyV31,
-        "traincapsule.v3.1.traincheck-differential-request": (
-            TrainCheckDifferentialRequest
-        ),
+        "traincapsule.v3.1.traincheck-differential-request": (TrainCheckDifferentialRequest),
+        "traincapsule.v3.1.delivery-measurement": DeliveryMeasurement,
+        "traincapsule.v3.1.reduction-candidate-input": ReductionCandidateInput,
         **{spec.schema_id: spec.model for spec in SEMANTIC_OUTPUT_SPECS.values()},
     }
     validator = validators.get(output.schema_id)

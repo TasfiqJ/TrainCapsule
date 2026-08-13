@@ -126,6 +126,16 @@
       },
       "title": "Minimumsemanticcounts",
       "type": "object"
+    },
+    "requiredPriorEvidence": {
+      "additionalProperties": {
+        "items": {
+          "$ref": "#/$defs/SemanticEvidence"
+        },
+        "type": "array"
+      },
+      "title": "Requiredpriorevidence",
+      "type": "object"
     }
   },
   "required": [

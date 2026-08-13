@@ -190,15 +190,16 @@ def test_commercial_completion_requires_trusted_attributable_evidence() -> None:
         active_milestone="M1_NATIVE_PREFLIGHT",
         work_items=[completed],
     )
-    collection.validate_completion_evidence(
-        {
-            "XREC-PAID-PILOT-1": TrustedEvidenceRecord(
-                receipt=_receipt(),
-                signature_valid=True,
-                source_agent_writable=False,
-            )
-        }
-    )
+    with pytest.raises(ValueError, match="exceeds trusted evidence"):
+        collection.validate_completion_evidence(
+            {
+                "XREC-PAID-PILOT-1": TrustedEvidenceRecord(
+                    receipt=_receipt(),
+                    signature_valid=True,
+                    source_agent_writable=False,
+                )
+            }
+        )
     with pytest.raises(ValueError, match="synthetic evidence"):
         collection.validate_completion_evidence(
             {
@@ -297,9 +298,7 @@ def test_candidate_manifest_rejects_artifact_substitution() -> None:
             "externalEvidence": [
                 {
                     "receiptId": "XREC-PAID-PILOT-1",
-                    "recordDigest": sha256_digest(
-                        artifacts["external:XREC-PAID-PILOT-1"]
-                    ),
+                    "recordDigest": sha256_digest(artifacts["external:XREC-PAID-PILOT-1"]),
                 }
             ],
             "checkpointDigest": sha256_digest(artifacts["checkpoint"]),

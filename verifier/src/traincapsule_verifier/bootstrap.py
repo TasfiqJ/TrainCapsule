@@ -148,6 +148,7 @@ ProtectSystem=strict
 ProtectHome=read-only
 ReadOnlyPaths=/var/lib/traincapsule-verifier/receipts
 ReadWritePaths=/var/lib/traincapsule-runtime
+ReadWritePaths=/var/lib/traincapsule-verifier/controller-outbox
 ReadWritePaths=/var/lib/traincapsule-verifier/activation-controller-outbox
 ReadWritePaths=/var/lib/traincapsule-verifier/controller-start-outbox
 InaccessiblePaths=/var/lib/traincapsule-verifier/private /var/lib/traincapsule-verifier/oracle

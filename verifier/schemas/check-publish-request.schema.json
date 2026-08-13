@@ -1,0 +1,82 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "GitSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/verifier/v3.1/check-publish-request.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actionDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "backendId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "candidateSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "checkName": {
+      "const": "TrainCapsule / Machine policy",
+      "title": "Checkname",
+      "type": "string"
+    },
+    "conclusion": {
+      "const": "success",
+      "title": "Conclusion",
+      "type": "string"
+    },
+    "credentialReference": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "githubAppId": {
+      "title": "Githubappid",
+      "type": "integer"
+    },
+    "installationId": {
+      "title": "Installationid",
+      "type": "integer"
+    },
+    "receiptDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "receiptId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "repository": {
+      "title": "Repository",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "actionDigest",
+    "repository",
+    "githubAppId",
+    "installationId",
+    "backendId",
+    "credentialReference",
+    "checkName",
+    "candidateSha",
+    "conclusion",
+    "receiptId",
+    "receiptDigest"
+  ],
+  "title": "CheckPublishRequest",
+  "type": "object"
+}

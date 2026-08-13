@@ -63,6 +63,7 @@ _LIMIT_MARKERS: tuple[tuple[PauseKind, re.Pattern[str]], ...] = (
     ),
 )
 
+
 @dataclass(frozen=True)
 class FailureDisposition:
     kind: PauseKind
@@ -118,9 +119,7 @@ def stage_failure_texts(result: StageResult, artifact_dir: Path) -> list[tuple[s
         texts.append(("stage.terminal_reason", redact_sensitive(result.terminal_reason)))
     stderr_path = artifact_dir / "claude-stderr.log"
     if stderr_path.exists():
-        texts.append(
-            ("claude-stderr.log", redact_sensitive(_safe_read(stderr_path)[-100_000:]))
-        )
+        texts.append(("claude-stderr.log", redact_sensitive(_safe_read(stderr_path)[-100_000:])))
     return texts
 
 

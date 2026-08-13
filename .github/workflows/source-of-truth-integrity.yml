@@ -1,6 +1,9 @@
 name: TrainCapsule / Source-of-truth integrity
 
 on:
+  pull_request:
+    branches: [main]
+  merge_group:
   push:
     branches: [main]
   workflow_dispatch:
@@ -14,6 +17,7 @@ concurrency:
 
 jobs:
   source-of-truth-integrity:
+    name: TrainCapsule / Source-of-truth integrity
     runs-on: ${{ fromJSON(vars.TRAINCAPSULE_CI_RUNNER || '["ubuntu-latest"]') }}
     timeout-minutes: 15
     steps:
@@ -29,7 +33,10 @@ jobs:
         run: |
           set -o pipefail
           mkdir -p .ci-artifacts
+          uv run python scripts/gates/validate_source_manifest.py 2>&1 | tee .ci-artifacts/v2-source-integrity.log
+          uv run python scripts/gates/v3_1_zh_package_integrity.py 2>&1 | tee .ci-artifacts/v31-package-integrity.log
           uv run python scripts/gates/source_of_truth_integrity.py 2>&1 | tee .ci-artifacts/source-integrity.log
+          uv run python scripts/generate_v3_1_zh_source.py --check 2>&1 | tee .ci-artifacts/v31-source-generation.log
           uv run python scripts/generate_v3_roadmap.py --check 2>&1 | tee .ci-artifacts/roadmap-generation.log
           uv run python scripts/generate_v3_legacy_migration.py --check 2>&1 | tee .ci-artifacts/legacy-migration.log
           uv run pytest tests/test_source_of_truth_integrity.py 2>&1 | tee .ci-artifacts/source-tests.log

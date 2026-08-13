@@ -116,9 +116,7 @@ def _validate_public_key(public_key: Path) -> None:
         capture_output=True,
         check=False,
     )
-    if key_type.returncode != 0 or "ED25519" not in (
-        key_type.stdout + key_type.stderr
-    ).upper():
+    if key_type.returncode != 0 or "ED25519" not in (key_type.stdout + key_type.stderr).upper():
         raise PrivateGateVerificationError("private-gate public key is not Ed25519")
 
 
@@ -239,9 +237,7 @@ def verify_private_gate_receipt(
         raise PrivateGateVerificationError("private-gate receipt, signature, or result is missing")
     _verify_signature(receipt_path, signature_path, resolved_key)
     try:
-        receipt = PrivateGateReceipt.model_validate_json(
-            receipt_path.read_text(encoding="utf-8")
-        )
+        receipt = PrivateGateReceipt.model_validate_json(receipt_path.read_text(encoding="utf-8"))
     except (OSError, ValueError) as exc:
         raise PrivateGateVerificationError("private-gate receipt schema is invalid") from exc
     observed = (now or datetime.now(UTC)).astimezone(UTC)

@@ -1,5 +1,51 @@
 {
   "$defs": {
+    "AgentSession": {
+      "additionalProperties": false,
+      "properties": {
+        "sessionRef": {
+          "pattern": "^ASESS-[A-Z0-9_-]+$",
+          "title": "Sessionref",
+          "type": "string"
+        },
+        "backend": {
+          "title": "Backend",
+          "type": "string"
+        },
+        "requestId": {
+          "title": "Requestid",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/SessionState"
+        },
+        "startedAt": {
+          "title": "Startedat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "sessionRef",
+        "backend",
+        "requestId",
+        "state",
+        "startedAt"
+      ],
+      "title": "AgentSession",
+      "type": "object"
+    },
+    "BackendRouteState": {
+      "enum": [
+        "AUTHENTICATED",
+        "AUTH_EXPIRED",
+        "QUOTA_WAIT",
+        "INFRASTRUCTURE",
+        "TIMEOUT",
+        "ROUTE_REFUSED"
+      ],
+      "title": "BackendRouteState",
+      "type": "string"
+    },
     "CheckpointBudget": {
       "additionalProperties": false,
       "properties": {
@@ -44,6 +90,16 @@
       "title": "CheckpointBudget",
       "type": "object"
     },
+    "ExecutionEvidenceMode": {
+      "enum": [
+        "SIMULATION",
+        "CONTROLLED_VALIDATION",
+        "LIVE_VALIDATION",
+        "EXTERNAL_VALIDATION"
+      ],
+      "title": "ExecutionEvidenceMode",
+      "type": "string"
+    },
     "Lane": {
       "enum": [
         "PRODUCT",
@@ -53,6 +109,17 @@
         "FACTORY"
       ],
       "title": "Lane",
+      "type": "string"
+    },
+    "SessionState": {
+      "enum": [
+        "STARTED",
+        "RUNNING",
+        "COMPLETED",
+        "FAILED",
+        "CANCELLED"
+      ],
+      "title": "SessionState",
       "type": "string"
     }
   },
@@ -95,6 +162,105 @@
       "default": null,
       "title": "Backendsessionref"
     },
+    "backendSession": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/AgentSession"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "activeRole": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Activerole"
+    },
+    "stageAttempt": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Stageattempt",
+      "type": "integer"
+    },
+    "handoffPath": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Handoffpath"
+    },
+    "handoffDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Handoffdigest"
+    },
+    "candidateWorktree": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Candidateworktree"
+    },
+    "artifactRoot": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Artifactroot"
+    },
+    "completedRoles": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Completedroles",
+      "type": "array"
+    },
+    "stageArtifactDigests": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Stageartifactdigests",
+      "type": "object"
+    },
+    "stageArtifactPaths": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Stageartifactpaths",
+      "type": "object"
+    },
     "budget": {
       "$ref": "#/$defs/CheckpointBudget"
     },
@@ -135,6 +301,219 @@
       },
       "title": "Findingfingerprints",
       "type": "object"
+    },
+    "valueFailureCount": {
+      "default": 0,
+      "minimum": 0,
+      "title": "Valuefailurecount",
+      "type": "integer"
+    },
+    "valueRedesignsRemaining": {
+      "default": 0,
+      "maximum": 3,
+      "minimum": 0,
+      "title": "Valueredesignsremaining",
+      "type": "integer"
+    },
+    "backendWaitState": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/BackendRouteState"
+        },
+        {
+          "const": "PUBLICATION_PENDING",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Backendwaitstate"
+    },
+    "backendResumeAt": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Backendresumeat"
+    },
+    "backendRechecksRemaining": {
+      "default": 3,
+      "maximum": 8,
+      "minimum": 0,
+      "title": "Backendrechecksremaining",
+      "type": "integer"
+    },
+    "backendRecheckAttempts": {
+      "default": 0,
+      "maximum": 8,
+      "minimum": 0,
+      "title": "Backendrecheckattempts",
+      "type": "integer"
+    },
+    "backendTerminalRecordDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Backendterminalrecorddigest"
+    },
+    "executionEvidenceMode": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExecutionEvidenceMode"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "publicationTransactionId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publicationtransactionid"
+    },
+    "publicationManifestPath": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publicationmanifestpath"
+    },
+    "publicationManifestDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publicationmanifestdigest"
+    },
+    "publicationCandidateTreeSha": {
+      "anyOf": [
+        {
+          "pattern": "^[0-9a-f]{40}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publicationcandidatetreesha"
+    },
+    "publicationCheckpointDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publicationcheckpointdigest"
+    },
+    "publicationPacketDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publicationpacketdigest"
+    },
+    "publicationGateDigests": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Publicationgatedigests",
+      "type": "object"
+    },
+    "publicationExpectedMachinePolicyReceiptId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publicationexpectedmachinepolicyreceiptid"
+    },
+    "publicationExpectedMachinePolicyReceiptDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publicationexpectedmachinepolicyreceiptdigest"
+    },
+    "publicationAuthorizationEnvelopePath": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publicationauthorizationenvelopepath"
+    },
+    "publicationAuthorizationEnvelopeDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Publicationauthorizationenvelopedigest"
     },
     "active": {
       "title": "Active",

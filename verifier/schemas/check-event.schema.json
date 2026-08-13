@@ -1,0 +1,83 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "GitSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/verifier/v3.1/check-event.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "baseSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "candidateManifestDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "candidateSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "candidateTreeSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "eventId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "githubAppId": {
+      "exclusiveMinimum": 0,
+      "title": "Githubappid",
+      "type": "integer"
+    },
+    "installationId": {
+      "exclusiveMinimum": 0,
+      "title": "Installationid",
+      "type": "integer"
+    },
+    "receiptDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "receiptId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "repository": {
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+      "title": "Repository",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "eventId",
+    "repository",
+    "githubAppId",
+    "installationId",
+    "candidateSha",
+    "candidateTreeSha",
+    "baseSha",
+    "workItemId",
+    "candidateManifestDigest",
+    "receiptId",
+    "receiptDigest"
+  ],
+  "title": "CheckEvent",
+  "type": "object"
+}

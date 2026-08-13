@@ -320,7 +320,7 @@ def test_company_product_brief_routes_v3_without_advisory_material() -> None:
         for entry in groups[name]["entries"]
     }
     assert len(brief) == 9
-    assert all("docs/source-of-truth/v3-2026-08-11/" in path for path in brief)
+    assert all("docs/source-of-truth/v3.1-zh-2026-08-12/" in path for path in brief)
     assert not any("ACQUISITION" in path or "CAREER" in path for path in brief)
     assert not any("final-2026-08-09" in path for path in brief)
 

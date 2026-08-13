@@ -15,8 +15,7 @@ from pydantic import Field
 
 from tcfactory.github_sync import load_github_config
 from tcfactory.v3.base import V3Model
-from tcfactory.v3.configuration import OwnerDirectives, validate_v3_configuration
-from tcfactory.yamlutil import load_yaml
+from tcfactory.v3.configuration import validate_v3_configuration
 
 
 class DoctorCheck(V3Model):
@@ -65,9 +64,7 @@ def package_contracts(repo_root: Path) -> str:
 def _product_import_probe(repo_root: Path) -> str:
     source_roots = [str(path) for path in sorted((repo_root / "packages").glob("*/src"))]
     environment = os.environ.copy()
-    environment["PYTHONPATH"] = os.pathsep.join(
-        [*source_roots, environment.get("PYTHONPATH", "")]
-    )
+    environment["PYTHONPATH"] = os.pathsep.join([*source_roots, environment.get("PYTHONPATH", "")])
     code = (
         "import traincapsule_core, traincapsule_ingest_pytorch, traincapsule_qualify; "
         "from traincapsule_cli.cli import main; "
@@ -118,16 +115,15 @@ def _source_integrity(repo_root: Path) -> str:
     from scripts.gates.source_of_truth_integrity import validate_repository
 
     validate_repository(repo_root)
-    return "active source, precedence, owner directives, and context digests are valid"
+    return "active V3.1 source generation and context digests are valid"
 
 
 def _configuration(repo_root: Path) -> str:
     loaded = validate_v3_configuration(repo_root)
-    OwnerDirectives.model_validate(load_yaml(repo_root / "config/owner_directives.yaml"))
     github = load_github_config(repo_root / "config/github.yaml")
-    if github.branch != "main" or github.release_mode != "owner_directed_main_only":
-        raise RuntimeError("GitHub publication policy is not main-only")
-    return f"validated {len(loaded)} V3 configurations and the owner main-only policy"
+    if github.direct_main_push or github.publisher_capability != "AUTOMATED_PR_V31_READY":
+        raise RuntimeError("V3.1 automated PR publisher is not the active release mode")
+    return f"validated {len(loaded)} V3.1 configurations and PR-only publication policy"
 
 
 def _root_entry_point(repo_root: Path) -> str:

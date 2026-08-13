@@ -1,6 +1,9 @@
 name: TrainCapsule / Factory quality
 
 on:
+  pull_request:
+    branches: [main]
+  merge_group:
   push:
     branches: [main]
   workflow_dispatch:
@@ -14,6 +17,7 @@ concurrency:
 
 jobs:
   factory-quality:
+    name: TrainCapsule / Factory quality
     runs-on: ${{ fromJSON(vars.TRAINCAPSULE_CI_RUNNER || '["ubuntu-latest"]') }}
     timeout-minutes: 30
     steps:

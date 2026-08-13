@@ -1,0 +1,58 @@
+version: 1
+interviewId: INTERVIEW-000
+accountId: ACCOUNT-000
+interviewedAt: null
+participants: []
+attributionPolicy: PRIVATE_SANITIZED
+externalReceiptRef: null
+
+specificIncident:
+  occurredAt: null
+  workloadClass: null
+  scaleClass: null
+  symptom: null
+  operationalImpact: null
+  gpuOrDelayCost:
+    amount: null
+    currency: null
+    basis: unknown
+  engineeringEffortHours: null
+
+nativeWorkflow:
+  tools: []
+  findings: []
+  decisionReached: null
+  unresolvedQuestions: []
+  acceptedMitigation: null
+
+evidenceAndAccess:
+  artifactsAvailable: []
+  evidenceCanLeaveEnvironment: unknown
+  localExecutionAuthority: unknown
+  baselineAccess: unknown
+  candidateAccess: unknown
+
+upcomingChange:
+  type: null
+  targetDate: null
+  decisionOwner: null
+  consequenceOfWrongDecision: null
+
+commercial:
+  budgetOwner: null
+  paidPreflightReaction: null
+  pilotReaction: null
+  secondUseEvent: null
+  alternatives: []
+  objections: []
+
+qualification:
+  countsAsDetailedConversation: false
+  reason: null
+  nextAction: null
+  evidenceStrength: EXTERNAL_EVIDENCE_REQUIRED
+
+notes:
+  directQuotes: []
+  interpretations: []
+  unsupportedInferences: []

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 from pathlib import Path
@@ -12,18 +13,29 @@ from scripts.gates.source_of_truth_integrity import (
     SourceIntegrityError,
     validate_repository,
 )
+from tcfactory.v3.source_authority import SourceAuthorityError
 
 ROOT = Path(__file__).resolve().parents[1]
 
 
 def _repository_fixture(tmp_path: Path) -> Path:
     shutil.copytree(
-        ROOT / "docs/source-of-truth/v3-2026-08-11",
-        tmp_path / "docs/source-of-truth/v3-2026-08-11",
+        ROOT / "docs/source-of-truth",
+        tmp_path / "docs/source-of-truth",
+    )
+    shutil.copytree(
+        ROOT / "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11",
+        tmp_path / "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11",
     )
     shutil.copy2(ROOT / "docs/CONTEXT_INDEX.yaml", tmp_path / "docs/CONTEXT_INDEX.yaml")
     shutil.copy2(ROOT / "SOURCE_PRECEDENCE.md", tmp_path / "SOURCE_PRECEDENCE.md")
     (tmp_path / "config").mkdir()
+    (tmp_path / "scripts").mkdir()
+    shutil.copy2(
+        ROOT / "scripts/generate_v3_1_zh_source.py",
+        tmp_path / "scripts/generate_v3_1_zh_source.py",
+    )
+    shutil.copy2(ROOT / "config/active_generation.yaml", tmp_path / "config/active_generation.yaml")
     shutil.copy2(ROOT / "config/human_approval.yaml", tmp_path / "config/human_approval.yaml")
     shutil.copy2(ROOT / "config/owner_directives.yaml", tmp_path / "config/owner_directives.yaml")
     (tmp_path / "docs/migrations").mkdir(parents=True)
@@ -50,8 +62,15 @@ def _repository_fixture(tmp_path: Path) -> Path:
 
 
 def _manifest(repo: Path) -> tuple[Path, dict[str, object]]:
-    path = repo / "docs/source-of-truth/v3-2026-08-11/FINAL_MANIFEST_V3.json"
+    path = repo / "docs/source-of-truth/v3.1-zh-2026-08-12/FINAL_MANIFEST_V3_1_ZH.json"
     return path, json.loads(path.read_text(encoding="utf-8"))
+
+
+def _rebind_manifest(repo: Path, manifest: Path) -> None:
+    config_path = repo / "config/active_generation.yaml"
+    config = yaml.safe_load(config_path.read_text(encoding="utf-8"))
+    config["manifestSha256"] = hashlib.sha256(manifest.read_bytes()).hexdigest()
+    config_path.write_text(yaml.safe_dump(config, sort_keys=False), encoding="utf-8")
 
 
 def test_repository_v3_source_authority_is_integral() -> None:
@@ -60,67 +79,76 @@ def test_repository_v3_source_authority_is_integral() -> None:
 
 def test_integrity_rejects_missing_active_file(tmp_path: Path) -> None:
     repo = _repository_fixture(tmp_path)
-    (repo / "docs/source-of-truth/v3-2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3.md").unlink()
-    with pytest.raises(SourceIntegrityError, match="membership mismatch"):
+    target = repo / (
+        "docs/source-of-truth/v3.1-zh-2026-08-12/"
+        "00_EXECUTIVE_BUILD_DECISION_V3_1_ZH.md"
+    )
+    target.unlink()
+    with pytest.raises((OSError, SourceAuthorityError)):
         validate_repository(repo)
 
 
 def test_integrity_rejects_changed_hash(tmp_path: Path) -> None:
     repo = _repository_fixture(tmp_path)
-    path = repo / "docs/source-of-truth/v3-2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3.md"
+    path = repo / "docs/source-of-truth/v3.1-zh-2026-08-12/00_EXECUTIVE_BUILD_DECISION_V3_1_ZH.md"
     path.write_text(path.read_text(encoding="utf-8") + "changed\n", encoding="utf-8")
-    with pytest.raises(SourceIntegrityError, match="manifest content or canonical hashes"):
+    with pytest.raises(SourceAuthorityError, match="deterministic historical derivation"):
         validate_repository(repo)
 
 
 def test_integrity_rejects_duplicate_logical_id(tmp_path: Path) -> None:
     repo = _repository_fixture(tmp_path)
     path, payload = _manifest(repo)
-    files = cast(list[dict[str, object]], payload["files"])
+    files = cast(list[dict[str, object]], payload["documents"])
     assert isinstance(files[0], dict) and isinstance(files[1], dict)
     files[1]["logicalId"] = files[0]["logicalId"]
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    with pytest.raises(SourceIntegrityError, match="duplicate active logical ID"):
+    _rebind_manifest(repo, path)
+    with pytest.raises(SourceAuthorityError, match="deterministic historical derivation"):
         validate_repository(repo)
 
 
 def test_integrity_rejects_manifest_self_hash(tmp_path: Path) -> None:
     repo = _repository_fixture(tmp_path)
     path, payload = _manifest(repo)
-    files = cast(list[dict[str, object]], payload["files"])
+    files = cast(list[dict[str, object]], payload["documents"])
     files.append(
         {
-            "path": "FINAL_MANIFEST_V3.json",
-            "logicalId": "final_manifest_v3",
+            "path": "docs/source-of-truth/v3.1-zh-2026-08-12/FINAL_MANIFEST_V3_1_ZH.json",
+            "logicalId": "TC.V3_1_ZH.SELF",
             "sha256": "0" * 64,
-            "bytes": 0,
             "authorityClass": "metadata",
+            "sections": [{"heading": "self", "level": 1, "sectionId": "self"}],
+            "generationId": "traincapsule-v3.1-zh-2026-08-12",
+            "derivedFrom": "TC.V3.SELF",
+            "required": True,
         }
     )
+    cast(dict[str, object], payload["integrity"])["documentCount"] = len(files)
     path.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
-    with pytest.raises(SourceIntegrityError, match="self-hash"):
+    _rebind_manifest(repo, path)
+    with pytest.raises(SourceAuthorityError, match="deterministic historical derivation"):
         validate_repository(repo)
 
 
 def test_integrity_rejects_active_parenthesized_duplicate(tmp_path: Path) -> None:
     repo = _repository_fixture(tmp_path)
-    duplicate = repo / "docs/source-of-truth/v3-2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3(1).md"
+    duplicate = repo / (
+        "docs/source-of-truth/v3.1-zh-2026-08-12/"
+        "00_EXECUTIVE_BUILD_DECISION_V3_1_ZH(1).md"
+    )
     duplicate.write_text("duplicate\n", encoding="utf-8")
-    with pytest.raises(SourceIntegrityError, match="membership mismatch"):
+    with pytest.raises(SourceAuthorityError, match="membership mismatch"):
         validate_repository(repo)
 
 
 def test_integrity_rejects_old_bundle_as_active(tmp_path: Path) -> None:
     repo = _repository_fixture(tmp_path)
-    path = repo / "SOURCE_PRECEDENCE.md"
-    path.write_text(
-        path.read_text(encoding="utf-8").replace(
-            "docs/source-of-truth/v3-2026-08-11/",
-            "docs/source-of-truth/final-2026-08-09/",
-        ),
-        encoding="utf-8",
-    )
-    with pytest.raises(SourceIntegrityError, match="does not identify the active V3 bundle"):
+    path = repo / "config/active_generation.yaml"
+    payload = yaml.safe_load(path.read_text(encoding="utf-8"))
+    payload["sourceRoot"] = "docs/source-of-truth/v3-2026-08-11"
+    path.write_text(yaml.safe_dump(payload), encoding="utf-8")
+    with pytest.raises(ValueError):
         validate_repository(repo)
 
 

@@ -7,6 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 
 import pytest
+import yaml
 
 from tcfactory.v3.controller_lock import ControllerLockError, controller_process_lock
 from tcfactory.v3.enums import Lane, WorkStatus
@@ -41,6 +42,25 @@ def _claim_and_wait(root: str, ready: object, release: object) -> None:
     )
     ready.set()  # type: ignore[attr-defined]
     release.wait()  # type: ignore[attr-defined]
+
+
+def _transition_process(
+    root: str,
+    target: str,
+    start: object,
+    results: object,
+) -> None:
+    start.wait()  # type: ignore[attr-defined]
+    try:
+        path = V3Queue(Path(root)).transition(
+            "V3-PROD-001",
+            WorkStatus(target),
+            updated_at=NOW,
+        )
+    except Exception as exc:  # noqa: BLE001 - child reports exact losing disposition
+        results.put(("error", type(exc).__name__, str(exc)))  # type: ignore[attr-defined]
+    else:
+        results.put(("transitioned", path.parent.name))  # type: ignore[attr-defined]
 
 
 def _hold_controller_lock(path: str, ready: object, release: object) -> None:
@@ -104,6 +124,45 @@ def test_queue_moves_atomically_and_recovery_never_auto_resumes(tmp_path: Path) 
     assert queue.locate(item.work_item_id).parent.name == "blocked_technical"
 
 
+def test_stopped_queue_policy_compatibility_is_read_only_and_digest_bound(
+    tmp_path: Path,
+) -> None:
+    queue = V3Queue(tmp_path / "v3-queue")
+    authoritative_payload = _item().model_dump(mode="python", by_alias=False)
+    authoritative_payload.update(
+        {
+            "kind": "MACHINE_POLICY_REVIEW",
+            "owner_type": "MACHINE_POLICY_AUTHORITY",
+            "automatable": False,
+            "machine_policy_receipt_required": True,
+        }
+    )
+    authoritative = WorkItem.model_validate(authoritative_payload)
+    queue.initialize()
+    path = queue.root / "ready/V3-PROD-001.yaml"
+    stale = authoritative.model_dump(mode="json", by_alias=True)
+    stale.update(
+        {
+            "kind": "MACHINE_POLICY_REVIEW",
+            "ownerType": "AI",
+            "automatable": True,
+            "machinePolicyReceiptRequired": False,
+        }
+    )
+    path.write_text(yaml.safe_dump(stale, sort_keys=False), encoding="utf-8")
+    before = path.read_bytes()
+
+    items, receipt = queue.compatible_items({authoritative.work_item_id: authoritative})
+
+    assert len(items) == len(receipt) == 1
+    assert items[0].owner_type.value == "MACHINE_POLICY_AUTHORITY"
+    assert items[0].status is WorkStatus.READY
+    assert receipt[0].status_preserved is True
+    assert receipt[0].applied is False
+    assert receipt[0].observed_digest != receipt[0].compatible_digest
+    assert path.read_bytes() == before
+
+
 def test_cross_process_claim_has_exactly_one_owner(tmp_path: Path) -> None:
     root = tmp_path / "v3-queue"
     queue = V3Queue(root)
@@ -127,6 +186,38 @@ def test_cross_process_claim_has_exactly_one_owner(tmp_path: Path) -> None:
     lease = json.loads((root / ".leases/V3-PROD-001.json").read_text(encoding="utf-8"))
     assert lease["ownerId"] in {"owner-a", "owner-b"}
     assert queue.load("V3-PROD-001").status is WorkStatus.RUNNING
+
+
+def test_cross_process_transition_is_compare_and_swap_not_last_writer_wins(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "v3-queue"
+    queue = V3Queue(root)
+    queue.put(_item())
+    context = multiprocessing.get_context("fork")
+    start = context.Event()
+    results = context.Queue()
+    processes = [
+        context.Process(
+            target=_transition_process,
+            args=(str(root), target, start, results),
+        )
+        for target in (WorkStatus.QUEUED.value, WorkStatus.DEFERRED.value)
+    ]
+    for process in processes:
+        process.start()
+    start.set()
+    for process in processes:
+        process.join(timeout=5)
+        assert process.exitcode == 0
+    observed = [results.get(timeout=2), results.get(timeout=2)]
+    assert sum(row[0] == "transitioned" for row in observed) == 1
+    physical_entries = list(root.glob("*/V3-PROD-001.yaml"))
+    assert len(physical_entries) == 1
+    assert queue.load("V3-PROD-001").status in {
+        WorkStatus.QUEUED,
+        WorkStatus.DEFERRED,
+    }
 
 
 def test_claim_lock_is_released_on_process_crash_and_lease_recovers(tmp_path: Path) -> None:

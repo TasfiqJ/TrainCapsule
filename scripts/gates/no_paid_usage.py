@@ -34,7 +34,7 @@ def verify_no_paid_usage(root: Path) -> list[str]:
     )
     auth_source = (root / "tcfactory/auth.py").read_text(encoding="utf-8")
 
-    if factory.get("version") == 3:
+    if factory.get("version") == 3 or factory.get("schemaVersion") == "3.1":
         executors = _mapping(
             yaml.safe_load((root / "config/executors.yaml").read_text(encoding="utf-8")),
             "config/executors.yaml",

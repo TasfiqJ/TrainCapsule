@@ -1,0 +1,197 @@
+{
+  "$defs": {
+    "CommercialState": {
+      "enum": [
+        "NOT_EVALUATED",
+        "NATIVE_ADVANTAGE_UNPROVEN",
+        "PILOT_ELIGIBLE",
+        "COMMERCIALLY_SUPPORTED",
+        "WITHDRAWN"
+      ],
+      "title": "CommercialState",
+      "type": "string"
+    },
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "EpistemicState": {
+      "enum": [
+        "UNKNOWN",
+        "CONTROLLED",
+        "EXTERNALLY_VERIFIED"
+      ],
+      "title": "EpistemicState",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    },
+    "ReleaseState": {
+      "enum": [
+        "NOT_REQUESTED",
+        "BLOCKED",
+        "AUTHORIZED",
+        "PUBLISHED",
+        "REVERTED"
+      ],
+      "title": "ReleaseState",
+      "type": "string"
+    },
+    "RuntimeMode": {
+      "enum": [
+        "STOPPED",
+        "READ_ONLY",
+        "SIMULATION",
+        "CANARY",
+        "LIVE"
+      ],
+      "title": "RuntimeMode",
+      "type": "string"
+    },
+    "SourceGenerationId": {
+      "maxLength": 128,
+      "minLength": 3,
+      "type": "string"
+    },
+    "TechnicalState": {
+      "enum": [
+        "NOT_EVALUATED",
+        "FAILED",
+        "PASSED"
+      ],
+      "title": "TechnicalState",
+      "type": "string"
+    },
+    "ValueState": {
+      "enum": [
+        "NOT_EVALUATED",
+        "REJECTED",
+        "NATIVE_SUFFICIENT",
+        "INCREMENTAL_VALUE"
+      ],
+      "title": "ValueState",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/runtime-status.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "activationReceiptDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Digest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "activationReceiptId": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Identifier"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "autonomyEnabled": {
+      "title": "Autonomyenabled",
+      "type": "boolean"
+    },
+    "blockedCount": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "title": "Blockedcount",
+      "type": "integer"
+    },
+    "commercialState": {
+      "$ref": "#/$defs/CommercialState"
+    },
+    "controllerBinaryDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "controllerConfigDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "currentWorkItemId": {
+      "anyOf": [
+        {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Currentworkitemid"
+    },
+    "epistemicState": {
+      "$ref": "#/$defs/EpistemicState"
+    },
+    "mode": {
+      "$ref": "#/$defs/RuntimeMode"
+    },
+    "observedAt": {
+      "format": "date-time",
+      "title": "Observedat",
+      "type": "string"
+    },
+    "queuedCount": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "title": "Queuedcount",
+      "type": "integer"
+    },
+    "releaseState": {
+      "$ref": "#/$defs/ReleaseState"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "snapshotId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "sourceGenerationDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "sourceGenerationId": {
+      "$ref": "#/$defs/SourceGenerationId"
+    },
+    "technicalState": {
+      "$ref": "#/$defs/TechnicalState"
+    },
+    "valueState": {
+      "$ref": "#/$defs/ValueState"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "snapshotId",
+    "observedAt",
+    "mode",
+    "autonomyEnabled",
+    "sourceGenerationId",
+    "sourceGenerationDigest",
+    "controllerBinaryDigest",
+    "controllerConfigDigest",
+    "technicalState",
+    "epistemicState",
+    "valueState",
+    "releaseState",
+    "commercialState",
+    "queuedCount",
+    "blockedCount"
+  ],
+  "title": "RuntimeStatusV31",
+  "type": "object"
+}

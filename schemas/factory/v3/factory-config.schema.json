@@ -47,6 +47,42 @@
       "title": "ExecutionPolicy",
       "type": "object"
     },
+    "LegacyConfigCompatibility": {
+      "additionalProperties": false,
+      "properties": {
+        "inputVersion": {
+          "const": 3,
+          "title": "Inputversion",
+          "type": "integer"
+        },
+        "disposition": {
+          "const": "READ_ONLY_LOSSLESS_ADAPTER",
+          "title": "Disposition",
+          "type": "string"
+        },
+        "allowedInputs": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Allowedinputs",
+          "type": "array"
+        },
+        "rejectUndeclaredInputs": {
+          "const": true,
+          "title": "Rejectundeclaredinputs",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "inputVersion",
+        "disposition",
+        "allowedInputs",
+        "rejectUndeclaredInputs"
+      ],
+      "title": "LegacyConfigCompatibility",
+      "type": "object"
+    },
     "OperatorPolicy": {
       "additionalProperties": false,
       "properties": {
@@ -60,9 +96,9 @@
           "title": "Policygatemode",
           "type": "string"
         },
-        "ownerDirectedDeviationRecord": {
-          "minLength": 1,
-          "title": "Ownerdirecteddeviationrecord",
+        "activeAuthorityManifest": {
+          "const": "docs/source-of-truth/v3.1-zh-2026-08-12/FINAL_MANIFEST_V3_1_ZH.json",
+          "title": "Activeauthoritymanifest",
           "type": "string"
         },
         "externalTruthRemainsReceiptBound": {
@@ -79,7 +115,7 @@
       "required": [
         "zeroHumanOperation",
         "policyGateMode",
-        "ownerDirectedDeviationRecord",
+        "activeAuthorityManifest",
         "externalTruthRemainsReceiptBound",
         "syntheticCommercialEvidenceForbidden"
       ],
@@ -89,44 +125,50 @@
     "ReleasePolicy": {
       "additionalProperties": false,
       "properties": {
-        "publicationBranch": {
-          "const": "main",
-          "title": "Publicationbranch",
+        "directMainPushForbidden": {
+          "const": true,
+          "title": "Directmainpushforbidden",
+          "type": "boolean"
+        },
+        "automatedPullRequestRequired": {
+          "const": true,
+          "title": "Automatedpullrequestrequired",
+          "type": "boolean"
+        },
+        "exactHeadShaChecksRequired": {
+          "const": true,
+          "title": "Exactheadshachecksrequired",
+          "type": "boolean"
+        },
+        "independentMachinePolicyReceiptRequired": {
+          "const": true,
+          "title": "Independentmachinepolicyreceiptrequired",
+          "type": "boolean"
+        },
+        "mergeQueueOrAutoMergeRequired": {
+          "const": true,
+          "title": "Mergequeueorautomergerequired",
+          "type": "boolean"
+        },
+        "exactMergedMainVerificationRequired": {
+          "const": true,
+          "title": "Exactmergedmainverificationrequired",
+          "type": "boolean"
+        },
+        "publisherCapability": {
+          "const": "AUTOMATED_PR_V31_READY",
+          "title": "Publishercapability",
           "type": "string"
-        },
-        "nonMainPushesForbidden": {
-          "const": true,
-          "title": "Nonmainpushesforbidden",
-          "type": "boolean"
-        },
-        "pullRequestDependencyForbidden": {
-          "const": true,
-          "title": "Pullrequestdependencyforbidden",
-          "type": "boolean"
-        },
-        "monitorHostedMainChecks": {
-          "const": true,
-          "title": "Monitorhostedmainchecks",
-          "type": "boolean"
-        },
-        "automaticRevertAndQuarantine": {
-          "const": true,
-          "title": "Automaticrevertandquarantine",
-          "type": "boolean"
-        },
-        "requireCandidateShaMatch": {
-          "const": true,
-          "title": "Requirecandidateshamatch",
-          "type": "boolean"
         }
       },
       "required": [
-        "publicationBranch",
-        "nonMainPushesForbidden",
-        "pullRequestDependencyForbidden",
-        "monitorHostedMainChecks",
-        "automaticRevertAndQuarantine",
-        "requireCandidateShaMatch"
+        "directMainPushForbidden",
+        "automatedPullRequestRequired",
+        "exactHeadShaChecksRequired",
+        "independentMachinePolicyReceiptRequired",
+        "mergeQueueOrAutoMergeRequired",
+        "exactMergedMainVerificationRequired",
+        "publisherCapability"
       ],
       "title": "ReleasePolicy",
       "type": "object"
@@ -140,14 +182,19 @@
           "type": "string"
         },
         "releaseMode": {
-          "const": "owner_directed_main_only",
+          "const": "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE",
           "title": "Releasemode",
           "type": "string"
         },
         "directMainPush": {
-          "const": true,
+          "const": false,
           "title": "Directmainpush",
           "type": "boolean"
+        },
+        "candidateBranchPrefix": {
+          "const": "factory/",
+          "title": "Candidatebranchprefix",
+          "type": "string"
         },
         "requireCleanBase": {
           "title": "Requirecleanbase",
@@ -163,6 +210,7 @@
         "baseBranch",
         "releaseMode",
         "directMainPush",
+        "candidateBranchPrefix",
         "requireCleanBase",
         "candidateManifestRequired"
       ],
@@ -276,6 +324,11 @@
     "SourceOfTruthPolicy": {
       "additionalProperties": false,
       "properties": {
+        "activeGeneration": {
+          "const": "config/active_generation.yaml",
+          "title": "Activegeneration",
+          "type": "string"
+        },
         "activeBundle": {
           "title": "Activebundle",
           "type": "string"
@@ -294,6 +347,7 @@
         }
       },
       "required": [
+        "activeGeneration",
         "activeBundle",
         "manifest",
         "contextIndex",
@@ -305,12 +359,15 @@
   },
   "additionalProperties": false,
   "properties": {
-    "version": {
-      "default": 3,
-      "maximum": 3,
-      "minimum": 3,
-      "title": "Version",
-      "type": "integer"
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "generationId": {
+      "const": "traincapsule-v3.1-zh-2026-08-12",
+      "title": "Generationid",
+      "type": "string"
     },
     "allowPaidUsage": {
       "const": false,
@@ -338,16 +395,22 @@
     },
     "operatorPolicy": {
       "$ref": "#/$defs/OperatorPolicy"
+    },
+    "compatibility": {
+      "$ref": "#/$defs/LegacyConfigCompatibility"
     }
   },
   "required": [
+    "schemaVersion",
+    "generationId",
     "repository",
     "execution",
     "sourceOfTruth",
     "roadmap",
     "runtime",
     "release",
-    "operatorPolicy"
+    "operatorPolicy",
+    "compatibility"
   ],
   "title": "FactoryV3Config",
   "type": "object",

@@ -1,0 +1,194 @@
+{
+  "manifestVersion": 1,
+  "bundle": "traincapsule-v3-review-2026-08-11",
+  "preparedAt": "2026-08-11T20:04:23Z",
+  "repository": "TasfiqJ/TrainCapsule",
+  "auditBaseline": "c31caefaeed7e605f6ef304fae6fcfe708a163b9",
+  "repositoryChangesMade": false,
+  "selfHashIncluded": false,
+  "hashRule": "SHA-256 of exact file bytes; FINAL_MANIFEST_V3.json is intentionally excluded to avoid a recursive self-hash.",
+  "fileCountExcludingManifest": 30,
+  "totalBytesExcludingManifest": 542907,
+  "files": [
+    {
+      "path": "00_EXECUTIVE_BUILD_DECISION_V3.md",
+      "sha256": "292e0b1d7e3a6225db7ed70dae67cb7557cef2a5e91081bd7149f827a120d484",
+      "bytes": 15667,
+      "category": "normative_proposal"
+    },
+    {
+      "path": "03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md",
+      "sha256": "a1e4ab535d13296512e1a4f7385aee32b08bd9a297e5e9f0452c12a3a97678b3",
+      "bytes": 18897,
+      "category": "normative_proposal"
+    },
+    {
+      "path": "04_TECHNICAL_ARCHITECTURE_V3.md",
+      "sha256": "bdfcbbdcc9a3a5db534017fbde84cbf5e29b4941c2c753327c5fd62f34f7ff2f",
+      "bytes": 30734,
+      "category": "normative_proposal"
+    },
+    {
+      "path": "05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md",
+      "sha256": "3a521fdc41c8ff1a0378a8666a1a45a6fd83addce2420ab38dc1d6417c0c0d0c",
+      "bytes": 26434,
+      "category": "normative_proposal"
+    },
+    {
+      "path": "06_COMMERCIAL_MODEL_AND_GTM_V3.md",
+      "sha256": "21c204e3d2912d18dc30a456ca6694a1958a5490b2e9a593507a39bc326c5ace",
+      "bytes": 24429,
+      "category": "normative_proposal"
+    },
+    {
+      "path": "12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md",
+      "sha256": "4a6c6c660581711ca44bbee7d43f37c2ce244c4f117c84ba1802c19385e5fb37",
+      "bytes": 23211,
+      "category": "normative_proposal"
+    },
+    {
+      "path": "13_SOURCE_REGISTER_V3.md",
+      "sha256": "dcc37f38e4071bc19ccc7607ca100ee39f2808485daa564a7337adb117551cef",
+      "bytes": 14560,
+      "category": "normative_proposal"
+    },
+    {
+      "path": "14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md",
+      "sha256": "d7377e6f1fe86a7a0a70d951ac11a47e717c6988ace97368567bcd343de6b0d5",
+      "bytes": 12104,
+      "category": "normative_proposal"
+    },
+    {
+      "path": "CODEX_MASTER_MIGRATION_PROMPT.md",
+      "sha256": "c98957707ea181e643ec5f152e12257644090dc4ece521d51e8e1601f0a23359",
+      "bytes": 39645,
+      "category": "implementation_prompt"
+    },
+    {
+      "path": "FACTORY_LOOP_REDESIGN_SPEC.md",
+      "sha256": "69500bdc0b9a42cd8bba6190912f5be3e2615189f0c8a9bd2f7c0b700f42cdc6",
+      "bytes": 30852,
+      "category": "normative_proposal"
+    },
+    {
+      "path": "README_FIRST.md",
+      "sha256": "9a226effb32c66c2fe67c859bb0e8b0aa8edf37b44ca49935a45c43e130416e3",
+      "bytes": 5648,
+      "category": "readme"
+    },
+    {
+      "path": "REPOSITORY_AUDIT_AND_FILE_CHANGE_MATRIX.md",
+      "sha256": "f7bf3f7c8c1abbbe76db4dc79e279de79c2e88081d442ac6cd9c393719a27f79",
+      "bytes": 49946,
+      "category": "audit"
+    },
+    {
+      "path": "SOURCE_OF_TRUTH_MIGRATION_PLAN.md",
+      "sha256": "cd1366cb9f9c10153d404388bb03a019603a91c5d800f051aacbc0bedc8a5157",
+      "bytes": 11118,
+      "category": "normative_proposal"
+    },
+    {
+      "path": "TRAINCAPSULE_V3_MASTER_PLAN.md",
+      "sha256": "7eebc2980cba966b80fc568e30eec6a79999cfad962683fce19d11f67a183582",
+      "bytes": 209899,
+      "category": "consolidated"
+    },
+    {
+      "path": "examples/config/autonomy.v3.example.yaml",
+      "sha256": "66d3eefcd26db4c7677c1dc777757a988715713355923bf9625a4e25f9a9da1e",
+      "bytes": 990,
+      "category": "example"
+    },
+    {
+      "path": "examples/config/executors.v3.example.yaml",
+      "sha256": "a7209a043ee3d702e46687c22e304c7fcb4eb6bd28c6c781e0c61434e5d4ceb0",
+      "bytes": 725,
+      "category": "example"
+    },
+    {
+      "path": "examples/config/factory.v3.example.yaml",
+      "sha256": "deeabab7eab3df0fd1347fb51ffdfdf107425169b7d076e2a3563a26f89042f0",
+      "bytes": 1199,
+      "category": "example"
+    },
+    {
+      "path": "examples/config/roles.v3.example.yaml",
+      "sha256": "6e2c77e636aa6139930c823d9d248964c9c2e015321d5ad749141c3911be29ab",
+      "bytes": 986,
+      "category": "example"
+    },
+    {
+      "path": "examples/config/scheduler.v3.example.yaml",
+      "sha256": "d987950bf86769a45dc452e5a83a999a3544e805283e906a3dd9e2f492d79553",
+      "bytes": 982,
+      "category": "example"
+    },
+    {
+      "path": "examples/factory/milestones.v3.example.yaml",
+      "sha256": "9f419668bca7ac676e7f74ed29545cea24fac4bfcaaba5292a14deaacfa9f25d",
+      "bytes": 2150,
+      "category": "example"
+    },
+    {
+      "path": "examples/factory/work_items.v3.example.yaml",
+      "sha256": "a2bdb31296e16f140da6304d1ccab88c46db0c02358efd313ab429b4a79f38fc",
+      "bytes": 3033,
+      "category": "example"
+    },
+    {
+      "path": "examples/market/account-map.template.yaml",
+      "sha256": "2176d04bb3fbfc179d976317700b9341953b9b414e50701cff327658623053d0",
+      "bytes": 856,
+      "category": "example"
+    },
+    {
+      "path": "examples/market/discovery-interview.template.yaml",
+      "sha256": "d3cffe587c65b4fdf5a73ad94940f6a322291518fdaadfecc6ffa44e3b6721cf",
+      "bytes": 1140,
+      "category": "example"
+    },
+    {
+      "path": "examples/market/pricing-experiment.template.yaml",
+      "sha256": "147ea69324a53cc128f775da269f45857949289f70c1f96146439f901d2d67c7",
+      "bytes": 523,
+      "category": "example"
+    },
+    {
+      "path": "examples/product/customer-local-security-checklist.md",
+      "sha256": "7a68264c58b081e2c2c6386df2815109f7928a08ffe65b80efb62397a9e6b29f",
+      "bytes": 1936,
+      "category": "example"
+    },
+    {
+      "path": "examples/product/qualification-pilot-intake.template.yaml",
+      "sha256": "f8f925d324dfb8a166bffd0fc1b13a18de9ba50fe1fc5f6a5764ab07a2fd2582",
+      "bytes": 993,
+      "category": "example"
+    },
+    {
+      "path": "examples/schemas/external-evidence-receipt.schema.json",
+      "sha256": "9536ef08f05f961e61ff292fcde2e446d0f3db49dc1eb4a9d7e9573e4c8cb00c",
+      "bytes": 2864,
+      "category": "example"
+    },
+    {
+      "path": "examples/schemas/human-approval.schema.json",
+      "sha256": "355c3d4405ac01172c7c64aa3efb8f4f7b7e1fae9b321e17792500921bfe4b2e",
+      "bytes": 2895,
+      "category": "example"
+    },
+    {
+      "path": "examples/schemas/native-substitute-benchmark.schema.json",
+      "sha256": "7011f71b35b2c0835e1af8a246d27e21769e87eefd345b90bdda9ed8c8499d14",
+      "bytes": 3286,
+      "category": "example"
+    },
+    {
+      "path": "examples/schemas/work-item-v3.schema.json",
+      "sha256": "1917fbf18f312be815834c173853bb3dc471688f8acfc7e682aa7e9c2397c329",
+      "bytes": 5205,
+      "category": "example"
+    }
+  ]
+}

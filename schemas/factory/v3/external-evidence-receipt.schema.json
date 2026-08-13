@@ -9,6 +9,51 @@
       "title": "ArtifactLocationClass",
       "type": "string"
     },
+    "CustomerDecisionValueAttestation": {
+      "additionalProperties": false,
+      "description": "Two separately asserted customer facts within one signed receipt.",
+      "properties": {
+        "decisionChangedOrMateriallyStrengthened": {
+          "title": "Decisionchangedormateriallystrengthened",
+          "type": "boolean"
+        },
+        "valueExceedsPriceAndRetainedEffort": {
+          "title": "Valueexceedspriceandretainedeffort",
+          "type": "boolean"
+        },
+        "observedPriceMicrousd": {
+          "exclusiveMinimum": 0,
+          "maximum": 1000000000000000,
+          "title": "Observedpricemicrousd",
+          "type": "integer"
+        },
+        "retainedEffortMinutes": {
+          "maximum": 1000000000,
+          "minimum": 0,
+          "title": "Retainedeffortminutes",
+          "type": "integer"
+        },
+        "attributionArtifactDigests": {
+          "items": {
+            "pattern": "^sha256:[0-9a-f]{64}$",
+            "type": "string"
+          },
+          "maxItems": 64,
+          "minItems": 1,
+          "title": "Attributionartifactdigests",
+          "type": "array"
+        }
+      },
+      "required": [
+        "decisionChangedOrMateriallyStrengthened",
+        "valueExceedsPriceAndRetainedEffort",
+        "observedPriceMicrousd",
+        "retainedEffortMinutes",
+        "attributionArtifactDigests"
+      ],
+      "title": "CustomerDecisionValueAttestation",
+      "type": "object"
+    },
     "EvidenceArtifact": {
       "additionalProperties": false,
       "properties": {
@@ -32,6 +77,80 @@
         "locationClass"
       ],
       "title": "EvidenceArtifact",
+      "type": "object"
+    },
+    "EvidenceCorrelationIdentity": {
+      "additionalProperties": false,
+      "description": "Stable identities used to correlate separately signed commercial facts.",
+      "properties": {
+        "productLineageDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Productlineagedigest",
+          "type": "string"
+        },
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "customerIdentityDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Customeridentitydigest"
+        },
+        "familyIdentityDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Familyidentitydigest"
+        },
+        "offerIdentityDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Offeridentitydigest"
+        },
+        "packIdentityDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Packidentitydigest"
+        }
+      },
+      "required": [
+        "productLineageDigest",
+        "candidateSha"
+      ],
+      "title": "EvidenceCorrelationIdentity",
       "type": "object"
     },
     "EvidenceIssuer": {
@@ -90,10 +209,143 @@
         "SECOND_PAID_ACTION",
         "INDEPENDENT_OPERATOR",
         "UPSTREAM_ACCEPTANCE",
-        "PROVIDER_ACCEPTANCE"
+        "PROVIDER_ACCEPTANCE",
+        "INCIDENT_TIMELINE",
+        "UPCOMING_CHANGE",
+        "PILOT_CANDIDATE",
+        "CUSTOMER_AUTHORIZATION",
+        "SECOND_ACTION_COMMITMENT",
+        "GPU_EXECUTION",
+        "SAME_FAMILY_CASE",
+        "SUPPORT_ACCEPTANCE",
+        "DELIVERY_ECONOMICS"
       ],
       "title": "EvidenceType",
       "type": "string"
+    },
+    "ExternalActionResponseBinding": {
+      "additionalProperties": false,
+      "description": "Signed reverse binding from an outside response to one exact delivery.",
+      "properties": {
+        "workItemId": {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "title": "Workitemid",
+          "type": "string"
+        },
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "actionId": {
+          "minLength": 1,
+          "title": "Actionid",
+          "type": "string"
+        },
+        "actionDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Actiondigest",
+          "type": "string"
+        },
+        "payloadDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Payloaddigest",
+          "type": "string"
+        },
+        "deliveryDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Deliverydigest",
+          "type": "string"
+        },
+        "backendDeliveryId": {
+          "minLength": 1,
+          "title": "Backenddeliveryid",
+          "type": "string"
+        },
+        "idempotencyKey": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Idempotencykey",
+          "type": "string"
+        },
+        "deliveryGenerationId": {
+          "pattern": "^[0-9a-f]{32}$",
+          "title": "Deliverygenerationid",
+          "type": "string"
+        },
+        "responseReceiptId": {
+          "pattern": "^XREC-[A-Z0-9_-]+$",
+          "title": "Responsereceiptid",
+          "type": "string"
+        },
+        "responseNonce": {
+          "pattern": "^[0-9a-f]{32,128}$",
+          "title": "Responsenonce",
+          "type": "string"
+        },
+        "channel": {
+          "enum": [
+            "EMAIL",
+            "CRM",
+            "CALENDAR"
+          ],
+          "title": "Channel",
+          "type": "string"
+        },
+        "recipient": {
+          "maxLength": 320,
+          "minLength": 1,
+          "title": "Recipient",
+          "type": "string"
+        },
+        "templateId": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Templateid",
+          "type": "string"
+        },
+        "requestedAt": {
+          "format": "date-time",
+          "title": "Requestedat",
+          "type": "string"
+        },
+        "deliveredAt": {
+          "format": "date-time",
+          "title": "Deliveredat",
+          "type": "string"
+        },
+        "responseObservedAt": {
+          "format": "date-time",
+          "title": "Responseobservedat",
+          "type": "string"
+        },
+        "responseExpiresAt": {
+          "format": "date-time",
+          "title": "Responseexpiresat",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workItemId",
+        "candidateSha",
+        "actionId",
+        "actionDigest",
+        "payloadDigest",
+        "deliveryDigest",
+        "backendDeliveryId",
+        "idempotencyKey",
+        "deliveryGenerationId",
+        "responseReceiptId",
+        "responseNonce",
+        "channel",
+        "recipient",
+        "templateId",
+        "requestedAt",
+        "deliveredAt",
+        "responseObservedAt",
+        "responseExpiresAt"
+      ],
+      "title": "ExternalActionResponseBinding",
+      "type": "object"
     },
     "SignatureAlgorithm": {
       "enum": [
@@ -129,9 +381,33 @@
     "issuer": {
       "$ref": "#/$defs/EvidenceIssuer"
     },
+    "issuedAt": {
+      "format": "date-time",
+      "title": "Issuedat",
+      "type": "string"
+    },
     "observedAt": {
       "format": "date-time",
       "title": "Observedat",
+      "type": "string"
+    },
+    "expiresAt": {
+      "format": "date-time",
+      "title": "Expiresat",
+      "type": "string"
+    },
+    "revocationEpoch": {
+      "minimum": 0,
+      "title": "Revocationepoch",
+      "type": "integer"
+    },
+    "revoked": {
+      "title": "Revoked",
+      "type": "boolean"
+    },
+    "nonce": {
+      "pattern": "^[0-9a-f]{32,128}$",
+      "title": "Nonce",
       "type": "string"
     },
     "candidateOrOfferIdentity": {
@@ -155,6 +431,8 @@
       "items": {
         "$ref": "#/$defs/EvidenceArtifact"
       },
+      "maxItems": 10000,
+      "minItems": 1,
       "title": "Artifacts",
       "type": "array"
     },
@@ -171,6 +449,39 @@
     "syntheticTestOnly": {
       "title": "Synthetictestonly",
       "type": "boolean"
+    },
+    "actionResponseBinding": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExternalActionResponseBinding"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "customerDecisionValue": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/CustomerDecisionValueAttestation"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "correlationIdentity": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/EvidenceCorrelationIdentity"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
     }
   },
   "required": [
@@ -178,7 +489,12 @@
     "evidenceType",
     "subjectId",
     "issuer",
+    "issuedAt",
     "observedAt",
+    "expiresAt",
+    "revocationEpoch",
+    "revoked",
+    "nonce",
     "outcome",
     "artifacts",
     "limitations",

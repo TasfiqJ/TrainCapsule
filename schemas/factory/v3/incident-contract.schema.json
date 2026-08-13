@@ -1,0 +1,39 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "contractId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Contractid",
+      "type": "string"
+    },
+    "incidentId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Incidentid",
+      "type": "string"
+    },
+    "sourceReceiptDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourcereceiptdigest",
+      "type": "string"
+    },
+    "requiredInvariantIds": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Requiredinvariantids",
+      "type": "array"
+    }
+  },
+  "required": [
+    "contractId",
+    "incidentId",
+    "sourceReceiptDigest",
+    "requiredInvariantIds"
+  ],
+  "title": "IncidentContract",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/incident-contract.schema.json"
+}

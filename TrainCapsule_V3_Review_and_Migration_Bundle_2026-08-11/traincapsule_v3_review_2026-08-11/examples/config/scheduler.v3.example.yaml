@@ -1,0 +1,50 @@
+version: 3
+activeMilestone: M0_FACTORY_MIGRATED
+
+wip:
+  PRODUCT:
+    mutating: 1
+    readOnly: 1
+  MARKET:
+    mutating: 0
+    readOnly: 1
+  COMPETITOR:
+    mutating: 0
+    readOnly: 1
+  TRUST:
+    mutating: 1
+    readOnly: 1
+  FACTORY:
+    mutating: 0
+    readOnly: 0
+
+factoryMaintenance:
+  allowMutatingOnlyOnControllerFailure: true
+
+weights:
+  currentMilestoneCriticalPath: 100
+  customerDecisionRelevance: 60
+  externalEvidenceUnblock: 50
+  nativeEquivalenceRisk: 40
+  trustReleaseBlocker: 30
+  reusableSameFamilyValue: 20
+  shortFeedbackCycle: 10
+  speculativeSurfaceArea: -30
+  securityOrIntegrationBurden: -25
+  likelyNativeDuplication: -20
+  contextOrQuotaCost: -10
+
+tieBreak:
+  - shortestCriticalPath
+  - evidenceBeforeImplementation
+  - nativeComparisonBeforeDuplication
+  - trustCoreBeforeDependentUi
+  - smallerReversibleItem
+  - workItemId
+
+waitingStatesDoNotBlockOtherLanes:
+  - WAITING_EXTERNAL
+  - WAITING_HUMAN
+  - DEFERRED
+  - NATIVE_SUFFICIENT
+  - REJECTED_VALUE

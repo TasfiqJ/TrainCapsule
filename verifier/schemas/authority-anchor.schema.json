@@ -1,0 +1,87 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/verifier/v3.1/authority-anchor.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Externally provisioned monotonic pin for authority and revocation state.",
+  "properties": {
+    "issuerId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "issuerKeyId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "keyEpoch": {
+      "minimum": 1,
+      "title": "Keyepoch",
+      "type": "integer"
+    },
+    "policyId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "policyVersion": {
+      "title": "Policyversion",
+      "type": "string"
+    },
+    "previousKeyAnchorDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Digest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "previousRevocationListDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Digest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "publicKeyFingerprint": {
+      "$ref": "#/$defs/Digest"
+    },
+    "revocationEpoch": {
+      "minimum": 1,
+      "title": "Revocationepoch",
+      "type": "integer"
+    },
+    "revocationListDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "policyId",
+    "policyVersion",
+    "issuerId",
+    "issuerKeyId",
+    "publicKeyFingerprint",
+    "keyEpoch",
+    "revocationEpoch",
+    "revocationListDigest"
+  ],
+  "title": "AuthorityAnchor",
+  "type": "object"
+}

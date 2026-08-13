@@ -27,17 +27,14 @@ from .gates import (
     select_gates,
     validate_changed_paths,
 )
-from .github_sync import record_verified_task
 from .gitops import (
     Worktree,
     changed_files,
-    cleanup_task_branches,
     cleanup_worktree,
     commit_all,
     create_worktree,
     current_sha,
     ensure_git_repo,
-    fast_forward_main,
     is_clean,
     squash_candidate,
 )
@@ -134,9 +131,7 @@ STRUCTURED_OUTPUT_FAULT_MARKERS = (
     "subtype=error_max_structured_output_retries",
 )
 FACTORY_REPAIR_SCOPE_MARKER = "factory_repair_required"
-FINDING_PATH_RE = re.compile(
-    r"(?<![A-Za-z0-9_.-])((?:[A-Za-z0-9_.()\-]+/)+[A-Za-z0-9_.()\-]+)"
-)
+FINDING_PATH_RE = re.compile(r"(?<![A-Za-z0-9_.-])((?:[A-Za-z0-9_.()\-]+/)+[A-Za-z0-9_.()\-]+)")
 NON_BLOCKING_FINDING_RE = re.compile(
     r"^\W*(?:non[\s_-]?blocking|verified[\s_-]sound|advisory|informational|observation|nit)\b",
     re.IGNORECASE,
@@ -434,9 +429,7 @@ def _policy_path_matches(path: str, patterns: list[str] | frozenset[str]) -> boo
 def controller_owned_finding_paths(paths: list[str]) -> list[str]:
     """Return findings that product-task re-specification can never authorize."""
 
-    return sorted(
-        path for path in paths if _policy_path_matches(path, PRODUCT_PROTECTED_PATHS)
-    )
+    return sorted(path for path in paths if _policy_path_matches(path, PRODUCT_PROTECTED_PATHS))
 
 
 def repair_demand_findings(findings: list[str]) -> list[str]:
@@ -446,9 +439,7 @@ def repair_demand_findings(findings: list[str]) -> list[str]:
     return demands or list(findings)
 
 
-def review_failure_fingerprint(
-    *, role: RoleName, candidate_sha: str, findings: list[str]
-) -> str:
+def review_failure_fingerprint(*, role: RoleName, candidate_sha: str, findings: list[str]) -> str:
     """Identify a verifier counterexample that made no candidate progress."""
 
     normalized = [" ".join(value.lower().split()) for value in findings]
@@ -494,8 +485,7 @@ def find_mutating_stage_for_findings(
     ]
     candidates = candidates or [fallback]
     coverage = [
-        (stage, {path for path in paths if _stage_may_write(stage, path)})
-        for stage in candidates
+        (stage, {path for path in paths if _stage_may_write(stage, path)}) for stage in candidates
     ]
     best_stage, covered = max(coverage, key=lambda item: len(item[1]))
     gaps = sorted(set(paths) - covered)
@@ -1497,16 +1487,15 @@ async def run_pipeline(
     repo_root = repo_root.resolve()
     if config.version >= 3:
         raise PipelineFailure(
-            "legacy V2 pipeline is disabled for V3; use V3Controller and its main-only publisher"
+            "legacy V2 pipeline is disabled; active V3.1 startup remains fail-closed "
+            "until its automated PR publisher/verifier is installed"
         )
     if config.execution_mode == "claude_led_nodes":
         task = normalize_claude_led_nodes(task)
     task = apply_objective_stage_contracts(task)
     contract_errors = objective_pipeline_errors(task)
     if contract_errors:
-        raise PipelineFailure(
-            "Objective pipeline contract rejected: " + "; ".join(contract_errors)
-        )
+        raise PipelineFailure("Objective pipeline contract rejected: " + "; ".join(contract_errors))
     ensure_git_repo(repo_root)
     if config.require_clean_main and not is_clean(repo_root):
         raise PipelineFailure(
@@ -1722,10 +1711,7 @@ async def run_pipeline(
             if (
                 stage.role in review_roles
                 and task.repair.enabled
-                and (
-                    config.work_until_done
-                    or checkpoint.repair_cycles < task.repair.max_cycles
-                )
+                and (config.work_until_done or checkpoint.repair_cycles < task.repair.max_cycles)
             ):
                 declared_owner, structured_blockers = blocking_review_owner(result)
                 if declared_owner == "external":
@@ -1843,10 +1829,7 @@ async def run_pipeline(
                 # to the original failing stage's signal instead of raising NameError
                 # and replacing a truthful PipelineFailure with a controller crash.
                 repair_result: StageResult | None = None
-                while (
-                    config.work_until_done
-                    or checkpoint.repair_cycles < task.repair.max_cycles
-                ):
+                while config.work_until_done or checkpoint.repair_cycles < task.repair.max_cycles:
                     checkpoint.repair_cycles += 1
                     models = task.repair.builder_models or [
                         mutating.model or role_configs[mutating.role].model
@@ -1993,9 +1976,8 @@ async def run_pipeline(
         checkpoint.private_gate = private_gate_summary
         checkpoint_store.save(checkpoint)
 
-        # Create the exact one-commit release candidate before remote CI. GitHub Actions
-        # therefore validates the same SHA that may later fast-forward main, not merely an
-        # internal role commit with an equivalent tree.
+        # Create the exact one-commit candidate. Publication is exclusively owned by the
+        # V3.1 automated-PR controller; this legacy pipeline cannot update local or remote main.
         release_sha = squash_candidate(
             repo_root,
             task=task,
@@ -2012,11 +1994,7 @@ async def run_pipeline(
             "release_sha": release_sha,
         }
         if task.remote_ci_required and release_sha != starting_sha:
-            # The remote is deliberately single-branch.  Local deterministic and
-            # private gates approve the release commit here; the autopilot's required
-            # origin/main synchronization then pushes this exact SHA and waits for CI
-            # before it starts another task.
-            remote_ci_summary["status"] = "pending-main-push"
+            remote_ci_summary["status"] = "awaiting-v31-automated-pr-publication"
         elif task.remote_ci_required:
             remote_ci_summary["status"] = "no-change"
         checkpoint.remote_ci = remote_ci_summary
@@ -2024,15 +2002,7 @@ async def run_pipeline(
 
         should_merge = task.auto_merge if merge_override is None else merge_override
         if should_merge and release_sha != starting_sha:
-            fast_forward_main(
-                repo_root,
-                task.base_branch,
-                expected_base_sha=starting_sha,
-                final_sha=release_sha,
-            )
-            cleanup_task_branches(repo_root, task_id=task.task_id, run_id=run_id)
-            if task.github_push:
-                record_verified_task(config.resolve(repo_root, config.github_state_path), task=task)
+            remote_ci_summary["status"] = "blocked-use-v31-automated-pr-controller"
 
         checkpoint.state = PipelineState.PASSED
         checkpoint.completed_at = datetime.now(UTC)
@@ -2044,7 +2014,7 @@ async def run_pipeline(
             "starting_sha": starting_sha,
             "verified_candidate_sha": candidate_sha,
             "final_sha": release_sha,
-            "merged": bool(should_merge and release_sha != starting_sha),
+            "merged": False,
             "repair_cycles": checkpoint.repair_cycles,
             "quota_resumptions": checkpoint.quota_resumptions,
             "cost_usd": sum(result.total_cost_usd for result in all_results),

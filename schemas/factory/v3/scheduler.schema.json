@@ -119,6 +119,7 @@
         "QUEUED",
         "RUNNING",
         "PAUSED_QUOTA",
+        "PAUSED_BACKEND",
         "WAITING_EXTERNAL",
         "BLOCKED_TECHNICAL",
         "BLOCKED_POLICY",

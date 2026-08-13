@@ -1,0 +1,57 @@
+{
+  "$defs": {
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/verifier/v3.1/check-publisher-policy.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "backendId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "checkName": {
+      "const": "TrainCapsule / Machine policy",
+      "title": "Checkname",
+      "type": "string"
+    },
+    "credentialReference": {
+      "pattern": "^CREDENTIAL:[A-Z0-9][A-Z0-9._:-]{2,116}$",
+      "title": "Credentialreference",
+      "type": "string"
+    },
+    "githubAppId": {
+      "exclusiveMinimum": 0,
+      "title": "Githubappid",
+      "type": "integer"
+    },
+    "installationId": {
+      "exclusiveMinimum": 0,
+      "title": "Installationid",
+      "type": "integer"
+    },
+    "repository": {
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+      "title": "Repository",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "repository",
+    "githubAppId",
+    "installationId",
+    "backendId",
+    "credentialReference",
+    "checkName"
+  ],
+  "title": "CheckPublisherPolicy",
+  "type": "object"
+}

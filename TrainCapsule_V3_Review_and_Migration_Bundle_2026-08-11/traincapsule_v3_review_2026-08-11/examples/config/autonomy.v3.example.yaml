@@ -1,0 +1,40 @@
+version: 3
+planning:
+  autoPlan: true
+  maxPlanAttempts: 2
+  maxAcceptanceCriteria: 12
+  maxExpectedOutputs: 8
+  maxContextDocuments: 8
+  reuseValidPlans: true
+
+candidate:
+  maxCandidateRepairCycles: 3
+  maxSameFindingRepeats: 2
+  maxCandidateRestarts: 1
+  preserveOnExhaustion: true
+
+recovery:
+  autoResumeQuota: true
+  autoRecoverInterrupted: true
+  maxInfrastructureRecoveriesPerRun: 3
+  maxFactorySelfRepairsPerIncident: 1
+  maxControllerRestarts: 3
+  restartBackoffSeconds: [15, 60, 300]
+  requireHealthySecondsToResetRestartBudget: 1800
+
+value:
+  maxValueRedesigns: 1
+  stopOnNativeWorkflowSufficient: true
+  stopOnNoIncrementalDecisionValue: true
+  stopOnTechnicallyValidButUneconomic: true
+
+completion:
+  maxExpansionRoundsPerMilestone: 1
+  maxExpansionItems: 5
+  roadmapExpansionRequiresHumanApproval: true
+  reviewersMayMutateRoadmap: false
+
+external:
+  aiMayCompleteExternalEvidence: false
+  aiMayCompleteHumanReview: false
+  syntheticEvidenceMayAdvanceCommercialMaturity: false

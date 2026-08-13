@@ -1,0 +1,20 @@
+[Unit]
+Description=TrainCapsule scoped GitHub App installation-token refresher
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=oneshot
+User=traincapsule-github-token
+Group=traincapsule-github-token
+ExecStart=/usr/libexec/traincapsule-github-token-refresher refresh
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadOnlyPaths=/etc/traincapsule-canary-runner/github-token-refresher.json
+ReadOnlyPaths=/var/lib/traincapsule-github-token/github-app-private-key.pem
+ReadWritePaths=/var/lib/traincapsule-github-token/outbox
+InaccessiblePaths=/var/lib/traincapsule-verifier/private
+InaccessiblePaths=/var/lib/traincapsule-controller
+InaccessiblePaths=/var/lib/traincapsule-canary-secrets

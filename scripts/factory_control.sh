@@ -41,6 +41,14 @@ case "$ACTION" in
     fi
     echo "V3 controller started and remained healthy through startup observation."
     ;;
+  canaries)
+    uv run tcfactory canaries "$@"
+    ;;
+  activate)
+    [[ $# -eq 1 ]] || { echo "usage: $0 activate /absolute/path/to/suite.json" >&2; exit 2; }
+    [[ "$1" == /* ]] || { echo "activation canary-suite path must be absolute" >&2; exit 2; }
+    uv run tcfactory activate --canary-suite "$1"
+    ;;
   pause)
     bash scripts/pause_factory.sh
     ;;
@@ -123,7 +131,7 @@ case "$ACTION" in
   *)
     cat >&2 <<'USAGE'
 usage: scripts/factory_control.sh <action> [args]
-actions: overview start pause resume stop verify recover logs queue costs roadmap schedule-dry-run milestone-status lanes commercial competitors pilot approvals kill-gates doctor migration candidate-salvage value peers blocker features github sync
+actions: overview start canaries activate pause resume stop verify recover logs queue costs roadmap schedule-dry-run milestone-status lanes commercial competitors pilot approvals kill-gates doctor migration candidate-salvage value peers blocker features github sync
 USAGE
     exit 2
     ;;

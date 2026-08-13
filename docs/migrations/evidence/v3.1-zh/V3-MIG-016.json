@@ -1,0 +1,10 @@
+{
+  "schemaVersion": 2,
+  "workItemId": "V3-MIG-016",
+  "status": "PENDING_FINALIZATION",
+  "finalizationCommand": [
+    ".venv/bin/python",
+    "scripts/finalize_v3_1_zh_m0_evidence.py"
+  ],
+  "reason": "V3.1 signed source-migration authorization is not yet available; historical V3 evidence is not active."
+}

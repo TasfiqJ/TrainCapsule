@@ -1,0 +1,73 @@
+{
+  "$defs": {
+    "ControlKind": {
+      "enum": [
+        "POSITIVE",
+        "NEGATIVE",
+        "ERROR"
+      ],
+      "title": "ControlKind",
+      "type": "string"
+    },
+    "ResearchVerdict": {
+      "enum": [
+        "CLEAR",
+        "CONFLICT",
+        "UNKNOWN"
+      ],
+      "title": "ResearchVerdict",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/research-control.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifactDigest": {
+      "default": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Artifactdigest",
+      "type": "string"
+    },
+    "expectedVerdict": {
+      "$ref": "#/$defs/ResearchVerdict"
+    },
+    "kind": {
+      "$ref": "#/$defs/ControlKind"
+    },
+    "observedVerdict": {
+      "$ref": "#/$defs/ResearchVerdict"
+    },
+    "oracleExecutableDigest": {
+      "default": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Oracleexecutabledigest",
+      "type": "string"
+    },
+    "oracleResultDigest": {
+      "default": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Oracleresultdigest",
+      "type": "string"
+    },
+    "rawArtifactRosterDigest": {
+      "default": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Rawartifactrosterdigest",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "kind",
+    "expectedVerdict",
+    "observedVerdict"
+  ],
+  "title": "ResearchControl",
+  "type": "object"
+}

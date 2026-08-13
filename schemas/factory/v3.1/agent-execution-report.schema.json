@@ -1,0 +1,579 @@
+{
+  "$defs": {
+    "AgentFindingV31": {
+      "additionalProperties": false,
+      "properties": {
+        "blocking": {
+          "title": "Blocking",
+          "type": "boolean"
+        },
+        "criterionId": {
+          "pattern": "^CRIT:[A-Z0-9:_-]+$",
+          "title": "Criterionid",
+          "type": "string"
+        },
+        "evidenceDigests": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Evidencedigests",
+          "type": "array"
+        },
+        "expected": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Expected",
+          "type": "string"
+        },
+        "findingId": {
+          "pattern": "^FIND:[A-Z0-9:_-]+$",
+          "title": "Findingid",
+          "type": "string"
+        },
+        "fingerprint": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Fingerprint",
+          "type": "string"
+        },
+        "minimalRepair": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Minimalrepair",
+          "type": "string"
+        },
+        "observed": {
+          "maxLength": 4000,
+          "minLength": 1,
+          "title": "Observed",
+          "type": "string"
+        },
+        "ownerClass": {
+          "$ref": "#/$defs/FindingOwnerClass"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "severity": {
+          "$ref": "#/$defs/FindingSeverity"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "findingId",
+        "severity",
+        "blocking",
+        "criterionId",
+        "fingerprint",
+        "evidenceDigests",
+        "expected",
+        "observed",
+        "ownerClass",
+        "minimalRepair"
+      ],
+      "title": "AgentFindingV31",
+      "type": "object"
+    },
+    "CommandResultV31": {
+      "additionalProperties": false,
+      "properties": {
+        "arguments": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 64,
+          "title": "Arguments",
+          "type": "array"
+        },
+        "executable": {
+          "pattern": "^[a-zA-Z0-9._+-]+$",
+          "title": "Executable",
+          "type": "string"
+        },
+        "exitCode": {
+          "maximum": 255,
+          "minimum": 0,
+          "title": "Exitcode",
+          "type": "integer"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "stderrDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Stderrdigest",
+          "type": "string"
+        },
+        "stdoutDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Stdoutdigest",
+          "type": "string"
+        },
+        "wallTimeSeconds": {
+          "maximum": 14400,
+          "minimum": 0,
+          "title": "Walltimeseconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "executable",
+        "arguments",
+        "exitCode",
+        "stdoutDigest",
+        "stderrDigest",
+        "wallTimeSeconds"
+      ],
+      "title": "CommandResultV31",
+      "type": "object"
+    },
+    "CriterionResultV31": {
+      "additionalProperties": false,
+      "properties": {
+        "criterionId": {
+          "pattern": "^CRIT:[A-Z0-9:_-]+$",
+          "title": "Criterionid",
+          "type": "string"
+        },
+        "evidenceDigests": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Evidencedigests",
+          "type": "array"
+        },
+        "explanation": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Explanation",
+          "type": "string"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "criterionId",
+        "passed",
+        "evidenceDigests",
+        "explanation"
+      ],
+      "title": "CriterionResultV31",
+      "type": "object"
+    },
+    "ExecutionVerdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "BLOCKED",
+        "UNKNOWN"
+      ],
+      "title": "ExecutionVerdict",
+      "type": "string"
+    },
+    "FindingOwnerClass": {
+      "enum": [
+        "CANDIDATE",
+        "FACTORY",
+        "MACHINE_POLICY_AUTHORITY",
+        "EXTERNAL_SYSTEM",
+        "UNKNOWN"
+      ],
+      "title": "FindingOwnerClass",
+      "type": "string"
+    },
+    "FindingSeverity": {
+      "enum": [
+        "INFO",
+        "LOW",
+        "MEDIUM",
+        "HIGH",
+        "CRITICAL"
+      ],
+      "title": "FindingSeverity",
+      "type": "string"
+    },
+    "MaterializedOutputV31": {
+      "additionalProperties": false,
+      "properties": {
+        "contentDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contentdigest",
+          "type": "string"
+        },
+        "outputId": {
+          "pattern": "^OUT:V3:[A-Z]+:[0-9]{3}:[A-Z_]+$",
+          "title": "Outputid",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "schemaId": {
+          "pattern": "^traincapsule\\.v3\\.1\\.[a-z0-9.-]+$",
+          "title": "Schemaid",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "sizeBytes": {
+          "maximum": 100000000,
+          "minimum": 1,
+          "title": "Sizebytes",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "outputId",
+        "path",
+        "schemaId",
+        "contentDigest",
+        "sizeBytes"
+      ],
+      "title": "MaterializedOutputV31",
+      "type": "object"
+    },
+    "NextAuthorizedAction": {
+      "enum": [
+        "VERIFY",
+        "REPAIR",
+        "RESUME",
+        "REPLAN",
+        "BLOCK_POLICY",
+        "BLOCK_EXTERNAL",
+        "NONE"
+      ],
+      "title": "NextAuthorizedAction",
+      "type": "string"
+    },
+    "ResourceUsageV31": {
+      "additionalProperties": false,
+      "properties": {
+        "costUsdEquivalent": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Costusdequivalent",
+          "type": "number"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "tokens": {
+          "maximum": 250000,
+          "minimum": 0,
+          "title": "Tokens",
+          "type": "integer"
+        },
+        "turns": {
+          "maximum": 200,
+          "minimum": 0,
+          "title": "Turns",
+          "type": "integer"
+        },
+        "wallTimeSeconds": {
+          "maximum": 14400,
+          "minimum": 0,
+          "title": "Walltimeseconds",
+          "type": "number"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "wallTimeSeconds",
+        "turns",
+        "tokens",
+        "costUsdEquivalent"
+      ],
+      "title": "ResourceUsageV31",
+      "type": "object"
+    },
+    "ResumeState": {
+      "enum": [
+        "NOT_REQUIRED",
+        "RESUMABLE",
+        "EXHAUSTED",
+        "UNSUPPORTED"
+      ],
+      "title": "ResumeState",
+      "type": "string"
+    },
+    "TestResultV31": {
+      "additionalProperties": false,
+      "properties": {
+        "evidenceDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Evidencedigest",
+          "type": "string"
+        },
+        "passed": {
+          "title": "Passed",
+          "type": "boolean"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "testId": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Testid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "testId",
+        "passed",
+        "evidenceDigest"
+      ],
+      "title": "TestResultV31",
+      "type": "object"
+    },
+    "TruthState": {
+      "enum": [
+        "CLEAR",
+        "CONFLICT",
+        "UNKNOWN"
+      ],
+      "title": "TruthState",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/agent-execution-report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "artifactDigests": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 512,
+      "title": "Artifactdigests",
+      "type": "array"
+    },
+    "baseSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Basesha",
+      "type": "string"
+    },
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "changedFiles": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 512,
+      "title": "Changedfiles",
+      "type": "array"
+    },
+    "commandsRun": {
+      "items": {
+        "$ref": "#/$defs/CommandResultV31"
+      },
+      "maxItems": 256,
+      "title": "Commandsrun",
+      "type": "array"
+    },
+    "contextDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Contextdigest",
+      "type": "string"
+    },
+    "criterionResults": {
+      "items": {
+        "$ref": "#/$defs/CriterionResultV31"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Criterionresults",
+      "type": "array"
+    },
+    "externalReceiptRefs": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "title": "Externalreceiptrefs",
+      "type": "array"
+    },
+    "findingFingerprints": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 256,
+      "title": "Findingfingerprints",
+      "type": "array"
+    },
+    "findings": {
+      "items": {
+        "$ref": "#/$defs/AgentFindingV31"
+      },
+      "maxItems": 256,
+      "title": "Findings",
+      "type": "array"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "title": "Limitations",
+      "type": "array"
+    },
+    "nativeDisposition": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Nativedisposition",
+      "type": "string"
+    },
+    "nextAuthorizedAction": {
+      "$ref": "#/$defs/NextAuthorizedAction"
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/MaterializedOutputV31"
+      },
+      "maxItems": 16,
+      "title": "Outputs",
+      "type": "array"
+    },
+    "ownerClass": {
+      "enum": [
+        "CANDIDATE_AGENT",
+        "READ_ONLY_REVIEWER"
+      ],
+      "title": "Ownerclass",
+      "type": "string"
+    },
+    "requestId": {
+      "pattern": "^AREQ-[A-Z0-9_-]+$",
+      "title": "Requestid",
+      "type": "string"
+    },
+    "resourceUsage": {
+      "$ref": "#/$defs/ResourceUsageV31"
+    },
+    "resumeState": {
+      "$ref": "#/$defs/ResumeState"
+    },
+    "role": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Role",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "sessionRef": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Sessionref",
+      "type": "string"
+    },
+    "sourceDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourcedigest",
+      "type": "string"
+    },
+    "sourceGenerationId": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Sourcegenerationid",
+      "type": "string"
+    },
+    "taskPacketDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Taskpacketdigest",
+      "type": "string"
+    },
+    "testsRun": {
+      "items": {
+        "$ref": "#/$defs/TestResultV31"
+      },
+      "maxItems": 256,
+      "title": "Testsrun",
+      "type": "array"
+    },
+    "truthState": {
+      "$ref": "#/$defs/TruthState"
+    },
+    "valueDisposition": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Valuedisposition",
+      "type": "string"
+    },
+    "verdict": {
+      "$ref": "#/$defs/ExecutionVerdict"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "requestId",
+    "workItemId",
+    "role",
+    "ownerClass",
+    "baseSha",
+    "candidateSha",
+    "sourceGenerationId",
+    "sourceDigest",
+    "contextDigest",
+    "taskPacketDigest",
+    "verdict",
+    "truthState",
+    "criterionResults",
+    "findings",
+    "findingFingerprints",
+    "changedFiles",
+    "commandsRun",
+    "testsRun",
+    "outputs",
+    "artifactDigests",
+    "externalReceiptRefs",
+    "nativeDisposition",
+    "valueDisposition",
+    "limitations",
+    "resourceUsage",
+    "sessionRef",
+    "resumeState",
+    "nextAuthorizedAction"
+  ],
+  "title": "AgentExecutionReportV31",
+  "type": "object"
+}

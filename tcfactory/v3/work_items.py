@@ -11,7 +11,6 @@ from tcfactory.v3.base import V3Model
 from tcfactory.v3.enums import (
     CommercialMaturity,
     Disposition,
-    EvidenceType,
     Lane,
     OwnerType,
     RiskTier,
@@ -27,6 +26,8 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
         {
             WorkStatus.READY,
             WorkStatus.WAITING_EXTERNAL,
+            WorkStatus.PASSED_ENGINEERING,
+            WorkStatus.BLOCKED_POLICY,
             WorkStatus.REJECTED_VALUE,
             WorkStatus.NATIVE_SUFFICIENT,
             WorkStatus.DEFERRED,
@@ -48,6 +49,7 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
         {
             WorkStatus.RUNNING,
             WorkStatus.PAUSED_QUOTA,
+            WorkStatus.PAUSED_BACKEND,
             WorkStatus.BLOCKED_TECHNICAL,
             WorkStatus.CANCELLED,
         }
@@ -55,10 +57,12 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
     WorkStatus.RUNNING: frozenset(
         {
             WorkStatus.PAUSED_QUOTA,
+            WorkStatus.PAUSED_BACKEND,
             WorkStatus.WAITING_EXTERNAL,
             WorkStatus.BLOCKED_TECHNICAL,
             WorkStatus.BLOCKED_POLICY,
             WorkStatus.PASSED_ENGINEERING,
+            WorkStatus.READY,
             WorkStatus.REJECTED_VALUE,
             WorkStatus.NATIVE_SUFFICIENT,
             WorkStatus.DEFERRED,
@@ -66,6 +70,9 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
         }
     ),
     WorkStatus.PAUSED_QUOTA: frozenset({WorkStatus.QUEUED, WorkStatus.CANCELLED}),
+    WorkStatus.PAUSED_BACKEND: frozenset(
+        {WorkStatus.READY, WorkStatus.BLOCKED_TECHNICAL, WorkStatus.CANCELLED}
+    ),
     WorkStatus.WAITING_EXTERNAL: frozenset(
         {
             WorkStatus.READY,
@@ -134,6 +141,7 @@ class WorkItem(V3Model):
     packet_path: str | None = None
     evidence_required: list[str]
     external_receipt_required: bool
+    machine_policy_receipt_required: bool = False
     retry_policy: RetryPolicy
     external_evidence_refs: list[str] = Field(default_factory=list[str])
     created_at: datetime | None = None
@@ -158,6 +166,19 @@ class WorkItem(V3Model):
             raise ValueError("external evidence work requires an external receipt")
         if self.kind is WorkKind.COMMERCIAL_EXPERIMENT and not self.external_receipt_required:
             raise ValueError("commercial experiment work requires an external receipt")
+        if self.kind is WorkKind.MACHINE_POLICY_REVIEW:
+            if self.owner_type is not OwnerType.MACHINE_POLICY_AUTHORITY:
+                raise ValueError(
+                    "machine-policy review requires independent machine-policy authority"
+                )
+            if self.automatable:
+                raise ValueError("machine-policy review is not AI-automatable")
+            if not self.machine_policy_receipt_required:
+                raise ValueError("machine-policy review requires an independently signed receipt")
+        if self.owner_type is OwnerType.MACHINE_POLICY_AUTHORITY and (
+            self.kind is not WorkKind.MACHINE_POLICY_REVIEW
+        ):
+            raise ValueError("machine-policy authority may own only machine-policy review work")
         if (
             self.external_receipt_required
             and self.status
@@ -206,8 +227,7 @@ class WorkItemCollection(V3Model):
             missing = ({*item.depends_on, *item.soft_depends_on}) - known
             if missing:
                 raise ValueError(
-                    f"work item {item.work_item_id} has missing dependencies: "
-                    f"{sorted(missing)}"
+                    f"work item {item.work_item_id} has missing dependencies: {sorted(missing)}"
                 )
         self._require_acyclic()
         return self
@@ -246,17 +266,16 @@ class WorkItemCollection(V3Model):
         for item in self.work_items:
             if item.status is not WorkStatus.COMPLETED:
                 continue
-            trusted_types: list[EvidenceType] = []
             for receipt_id in item.external_evidence_refs:
                 record = receipts.get(receipt_id)
                 if record is None:
                     raise ValueError(
                         f"completed work {item.work_item_id} has unknown receipt {receipt_id}"
                     )
-                trusted_types.append(record.require_commercial_trust().evidence_type)
+                record.require_commercial_trust()
             if not commercial_maturity_supported(
                 item.maturity_target.commercial,
-                trusted_types,
+                None,
             ):
                 raise ValueError(
                     f"commercial maturity for {item.work_item_id} exceeds trusted evidence"

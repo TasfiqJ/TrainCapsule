@@ -1,0 +1,96 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "version": {
+      "const": 3,
+      "default": 3,
+      "title": "Version",
+      "type": "integer"
+    },
+    "schemaId": {
+      "const": "traincapsule.source-wedge-proposal/v3.1-zh",
+      "default": "traincapsule.source-wedge-proposal/v3.1-zh",
+      "title": "Schemaid",
+      "type": "string"
+    },
+    "proposalId": {
+      "pattern": "^SOURCE-WEDGE-[0-9a-f]{16}$",
+      "title": "Proposalid",
+      "type": "string"
+    },
+    "workItemId": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "group": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Group",
+      "type": "string"
+    },
+    "freshnessStatus": {
+      "enum": [
+        "STALE",
+        "RECHECK_REQUIRED"
+      ],
+      "title": "Freshnessstatus",
+      "type": "string"
+    },
+    "disposition": {
+      "const": "WAITING_EXTERNAL",
+      "default": "WAITING_EXTERNAL",
+      "title": "Disposition",
+      "type": "string"
+    },
+    "proposedActions": {
+      "default": [
+        "REFRESH_CURRENT_FACT_RECEIPT",
+        "OPEN_ADR_WEDGE_REVIEW_IF_NORMATIVE_DECISION_CHANGES"
+      ],
+      "maxItems": 2,
+      "minItems": 2,
+      "prefixItems": [
+        {
+          "const": "REFRESH_CURRENT_FACT_RECEIPT",
+          "type": "string"
+        },
+        {
+          "const": "OPEN_ADR_WEDGE_REVIEW_IF_NORMATIVE_DECISION_CHANGES",
+          "type": "string"
+        }
+      ],
+      "title": "Proposedactions",
+      "type": "array"
+    },
+    "maxReviewRounds": {
+      "const": 2,
+      "default": 2,
+      "title": "Maxreviewrounds",
+      "type": "integer"
+    },
+    "normativeSourceMutated": {
+      "const": false,
+      "default": false,
+      "title": "Normativesourcemutated",
+      "type": "boolean"
+    },
+    "createdAt": {
+      "format": "date-time",
+      "title": "Createdat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "proposalId",
+    "workItemId",
+    "group",
+    "freshnessStatus",
+    "createdAt"
+  ],
+  "title": "StaleSourceProposal",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/source-wedge-proposal.schema.json"
+}

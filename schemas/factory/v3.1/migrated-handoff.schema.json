@@ -1,0 +1,224 @@
+{
+  "$defs": {
+    "Disposition": {
+      "enum": [
+        "KEEP",
+        "INTEGRATE_EXISTING_BACKEND",
+        "UPSTREAM",
+        "NARROW",
+        "REPLACE",
+        "PAUSE",
+        "STOP",
+        "NOT_REVIEWED"
+      ],
+      "title": "Disposition",
+      "type": "string"
+    },
+    "V3Handoff": {
+      "additionalProperties": false,
+      "properties": {
+        "payload": {
+          "$ref": "#/$defs/V3HandoffPayload"
+        },
+        "payloadDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Payloaddigest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "payload",
+        "payloadDigest"
+      ],
+      "title": "V3Handoff",
+      "type": "object"
+    },
+    "V3HandoffPayload": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactDigests": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Artifactdigests",
+          "type": "object"
+        },
+        "attempt": {
+          "minimum": 1,
+          "title": "Attempt",
+          "type": "integer"
+        },
+        "attemptsRemaining": {
+          "minimum": 0,
+          "title": "Attemptsremaining",
+          "type": "integer"
+        },
+        "backendSessionRef": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Backendsessionref"
+        },
+        "baseSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Basesha",
+          "type": "string"
+        },
+        "candidateManifestDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Candidatemanifestdigest"
+        },
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "circuitBreakerState": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Circuitbreakerstate"
+        },
+        "contextDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contextdigest",
+          "type": "string"
+        },
+        "decisionContribution": {
+          "title": "Decisioncontribution",
+          "type": "string"
+        },
+        "disposition": {
+          "$ref": "#/$defs/Disposition"
+        },
+        "externalEvidenceRequired": {
+          "title": "Externalevidencerequired",
+          "type": "boolean"
+        },
+        "findings": {
+          "items": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "title": "Findings",
+          "type": "array"
+        },
+        "lane": {
+          "title": "Lane",
+          "type": "string"
+        },
+        "milestone": {
+          "title": "Milestone",
+          "type": "string"
+        },
+        "nextAuthorizedTransition": {
+          "minLength": 1,
+          "title": "Nextauthorizedtransition",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "default": 3,
+          "maximum": 3,
+          "minimum": 3,
+          "title": "Schemaversion",
+          "type": "integer"
+        },
+        "sourceDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sourcedigest",
+          "type": "string"
+        },
+        "taskType": {
+          "$ref": "#/$defs/WorkKind"
+        },
+        "workItemId": {
+          "title": "Workitemid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workItemId",
+        "lane",
+        "milestone",
+        "taskType",
+        "decisionContribution",
+        "disposition",
+        "attempt",
+        "attemptsRemaining",
+        "baseSha",
+        "candidateSha",
+        "sourceDigest",
+        "contextDigest",
+        "nextAuthorizedTransition",
+        "findings",
+        "artifactDigests",
+        "externalEvidenceRequired"
+      ],
+      "title": "V3HandoffPayload",
+      "type": "object"
+    },
+    "WorkKind": {
+      "enum": [
+        "CODE",
+        "SPECIFICATION",
+        "RESEARCH",
+        "CONTROLLED_EXPERIMENT",
+        "EXTERNAL_EVIDENCE",
+        "MACHINE_POLICY_REVIEW",
+        "COMMERCIAL_EXPERIMENT",
+        "MAINTENANCE",
+        "MIGRATION"
+      ],
+      "title": "WorkKind",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/migrated-handoff.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "migratedFromSchemaVersion": {
+      "const": "3",
+      "title": "Migratedfromschemaversion",
+      "type": "string"
+    },
+    "payload": {
+      "$ref": "#/$defs/V3Handoff"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "migratedFromSchemaVersion",
+    "payload"
+  ],
+  "title": "MigratedHandoffV31",
+  "type": "object"
+}

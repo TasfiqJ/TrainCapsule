@@ -1,0 +1,38 @@
+{
+  "$defs": {
+    "InvariantState": {
+      "enum": [
+        "HOLDS",
+        "VIOLATED",
+        "UNKNOWN"
+      ],
+      "title": "InvariantState",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "invariantId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Invariantid",
+      "type": "string"
+    },
+    "state": {
+      "$ref": "#/$defs/InvariantState"
+    },
+    "evidenceDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Evidencedigest",
+      "type": "string"
+    }
+  },
+  "required": [
+    "invariantId",
+    "state",
+    "evidenceDigest"
+  ],
+  "title": "IncidentInvariantObservation",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/incident-invariant-observation.schema.json"
+}

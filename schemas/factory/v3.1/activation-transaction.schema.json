@@ -1,0 +1,118 @@
+{
+  "$defs": {
+    "ActivationPhase": {
+      "enum": [
+        "PREPARED",
+        "ACTIVATED"
+      ],
+      "title": "ActivationPhase",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/activation-transaction.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "activatedAt": {
+      "anyOf": [
+        {
+          "format": "date-time",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Activatedat"
+    },
+    "activationReceiptDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Activationreceiptdigest",
+      "type": "string"
+    },
+    "activationReceiptId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Activationreceiptid",
+      "type": "string"
+    },
+    "autonomyEnabled": {
+      "const": true,
+      "default": true,
+      "title": "Autonomyenabled",
+      "type": "boolean"
+    },
+    "canarySuiteDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Canarysuitedigest",
+      "type": "string"
+    },
+    "canarySuitePath": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Canarysuitepath",
+      "type": "string"
+    },
+    "exactMainSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Exactmainsha",
+      "type": "string"
+    },
+    "exactTreeSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Exacttreesha",
+      "type": "string"
+    },
+    "phase": {
+      "$ref": "#/$defs/ActivationPhase"
+    },
+    "preflightDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Preflightdigest",
+      "type": "string"
+    },
+    "preparedAt": {
+      "format": "date-time",
+      "title": "Preparedat",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "stopArchivePath": {
+      "maxLength": 4096,
+      "minLength": 1,
+      "title": "Stoparchivepath",
+      "type": "string"
+    },
+    "stopDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Stopdigest",
+      "type": "string"
+    },
+    "transactionId": {
+      "pattern": "^ACTIVATE-[A-Z0-9._:-]{3,127}$",
+      "title": "Transactionid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "transactionId",
+    "phase",
+    "exactMainSha",
+    "exactTreeSha",
+    "activationReceiptId",
+    "activationReceiptDigest",
+    "canarySuitePath",
+    "canarySuiteDigest",
+    "preflightDigest",
+    "stopDigest",
+    "stopArchivePath",
+    "preparedAt"
+  ],
+  "title": "ActivationTransaction",
+  "type": "object"
+}

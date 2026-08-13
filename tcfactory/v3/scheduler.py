@@ -56,8 +56,7 @@ class SchedulerConfig(V3Model):
             missing = set(Lane) - set(self.wip)
             extra = set(self.wip) - set(Lane)
             raise ValueError(
-                f"scheduler WIP lanes mismatch: missing={sorted(missing)}, "
-                f"extra={sorted(extra)}"
+                f"scheduler WIP lanes mismatch: missing={sorted(missing)}, extra={sorted(extra)}"
             )
         if len(self.tie_break) != len(set(self.tie_break)):
             raise ValueError("scheduler tie-break rules must be unique")
@@ -109,7 +108,7 @@ class SchedulerOverride(V3Model):
     decision_id: str = Field(pattern=r"^SOVR-[A-Z0-9_-]+$")
     work_item_id: str = Field(pattern=r"^V3-[A-Z]+-[0-9]{3}$")
     reason: str = Field(min_length=1)
-    issued_by: Literal[OwnerType.FOUNDER]
+    issued_by: Literal[OwnerType.MACHINE_POLICY_AUTHORITY]
     issued_at: datetime
     signature: EvidenceSignature
 
@@ -158,6 +157,7 @@ class SchedulerDecisionArtifact(V3Model):
 MUTATING_KINDS = {
     WorkKind.CODE,
     WorkKind.SPECIFICATION,
+    WorkKind.RESEARCH,
     WorkKind.CONTROLLED_EXPERIMENT,
     WorkKind.MAINTENANCE,
     WorkKind.MIGRATION,
@@ -166,6 +166,12 @@ SATISFIED_DEPENDENCY_STATES = {
     WorkStatus.PASSED_ENGINEERING,
     WorkStatus.COMPLETED,
 }
+CORE_SCHEDULING_LANES = (
+    Lane.PRODUCT,
+    Lane.MARKET,
+    Lane.COMPETITOR,
+    Lane.TRUST,
+)
 
 
 def is_mutating(item: WorkItem) -> bool:
@@ -179,15 +185,9 @@ def default_scheduling_facts(item: WorkItem, active_milestone: str) -> Schedulin
         current_milestone_critical_path=float(item.milestone == active_milestone),
         external_evidence_unblock=float(item.kind is WorkKind.EXTERNAL_EVIDENCE),
         native_equivalence_risk=float(item.lane is Lane.COMPETITOR),
-        trust_release_blocker=float(
-            item.lane is Lane.TRUST and item.blocks_commercial_release
-        ),
-        short_feedback_cycle=float(
-            item.kind in {WorkKind.RESEARCH, WorkKind.SPECIFICATION}
-        ),
-        security_or_integration_burden=float(
-            item.risk_tier.value in {"INTEGRATION", "TRUST_CORE"}
-        ),
+        trust_release_blocker=float(item.lane is Lane.TRUST and item.blocks_commercial_release),
+        short_feedback_cycle=float(item.kind in {WorkKind.RESEARCH, WorkKind.SPECIFICATION}),
+        security_or_integration_burden=float(item.risk_tier.value in {"INTEGRATION", "TRUST_CORE"}),
     )
 
 
@@ -243,6 +243,7 @@ def schedule_cycle(
     migration_bootstrap: bool = False,
     override: TrustedSchedulerOverride | None = None,
     lane_cursor: Lane | None = None,
+    eligible_future_milestones: Mapping[Lane, frozenset[str]] | None = None,
 ) -> SchedulerDecisionArtifact:
     """Select deterministic independent-lane work and explain every decision."""
 
@@ -260,6 +261,7 @@ def schedule_cycle(
         tuple[float, tuple[int, int, int, int, float, str], WorkItem, SchedulingFacts]
     ] = []
     evaluations: dict[str, SchedulerEvaluation] = {}
+    future_milestones = eligible_future_milestones or {}
 
     for identifier in sorted(items):
         item = items[identifier]
@@ -269,16 +271,19 @@ def schedule_cycle(
         )
         score, components = _score(config, facts)
         reasons: list[str] = []
-        if item.milestone != config.active_milestone:
-            reasons.append(
-                f"milestone {item.milestone} is not active "
-                f"({config.active_milestone})"
-            )
+        if item.milestone != config.active_milestone and item.milestone not in (
+            future_milestones.get(item.lane, frozenset())
+        ):
+            reasons.append(f"milestone {item.milestone} is not active ({config.active_milestone})")
         if item.status is not WorkStatus.READY:
             reasons.append(f"status {item.status} is not READY")
         if item.external_receipt_required:
             reasons.append(
                 "outside-fact work advances only through the trusted external receipt gate"
+            )
+        if item.machine_policy_receipt_required:
+            reasons.append(
+                "machine-policy review advances only through an independently signed receipt"
             )
         if identifier in active_ids:
             reasons.append("work item is already active")
@@ -292,10 +297,7 @@ def schedule_cycle(
         native_dependency = facts.requires_native_comparison_work_item
         if native_dependency is not None:
             native_item = items.get(native_dependency)
-            if (
-                native_item is None
-                or native_item.status not in SATISFIED_DEPENDENCY_STATES
-            ):
+            if native_item is None or native_item.status not in SATISFIED_DEPENDENCY_STATES:
                 reasons.append(f"native comparison not complete: {native_dependency}")
         mutating = is_mutating(item)
         lane_limit = config.wip[item.lane]
@@ -331,13 +333,13 @@ def schedule_cycle(
             ranked.append((-score, _tie_key(item, facts), item, facts))
 
     ranked.sort(key=lambda candidate: (candidate[0], candidate[1]))
-    if lane_cursor is not None:
-        # Rotate equally scored lane heads after every cycle. This prevents a busy
-        # lane from winning forever without changing the inspectable V3 score.
-        lanes = list(Lane)
-        start = lanes.index(lane_cursor)
-        order = {lane: index for index, lane in enumerate(lanes[start:] + lanes[:start])}
-        ranked.sort(key=lambda candidate: (candidate[0], order[candidate[2].lane], candidate[1]))
+    cursor = lane_cursor if lane_cursor in CORE_SCHEDULING_LANES else Lane.PRODUCT
+    start = CORE_SCHEDULING_LANES.index(cursor)
+    fair_lanes = (
+        *CORE_SCHEDULING_LANES[start:],
+        *CORE_SCHEDULING_LANES[:start],
+        Lane.FACTORY,
+    )
     override_record = override.require_trusted() if override is not None else None
     if override_record is not None:
         match = next(
@@ -352,33 +354,57 @@ def schedule_cycle(
             raise ValueError("trusted scheduler override targets an ineligible work item")
         ranked.remove(match)
         ranked.insert(0, match)
+        fair_lanes = (
+            match[2].lane,
+            *(lane for lane in fair_lanes if lane is not match[2].lane),
+        )
 
     selected: list[str] = []
     selected_lane_mode: Counter[tuple[Lane, bool]] = Counter()
-    for _, _, item, _ in ranked:
-        mutating = is_mutating(item)
-        if mutating and global_mutating >= max_concurrent_mutating_sessions:
-            continue
-        if not mutating and global_read_only >= max_concurrent_read_only_sessions:
-            continue
-        lane_limit = config.wip[item.lane]
-        limit = lane_limit.mutating if mutating else lane_limit.read_only
-        factory_exception = controller_failure or (
-            migration_bootstrap
-            and item.milestone == "M0_FACTORY_MIGRATED"
-            and item.kind is WorkKind.MIGRATION
+    remaining = list(ranked)
+    for mutating_mode in (False, True):
+        capacity = (
+            max_concurrent_mutating_sessions - global_mutating
+            if mutating_mode
+            else max_concurrent_read_only_sessions - global_read_only
         )
-        if item.lane is Lane.FACTORY and mutating and factory_exception and limit == 0:
-            limit = 1
-        current_lane = active_lane_mode[(item.lane, mutating)]
-        if current_lane + selected_lane_mode[(item.lane, mutating)] >= limit:
-            continue
-        selected.append(item.work_item_id)
-        selected_lane_mode[(item.lane, mutating)] += 1
-        if mutating:
-            global_mutating += 1
-        else:
-            global_read_only += 1
+        while capacity > 0:
+            chosen_index: int | None = None
+            for lane in fair_lanes:
+                for index, (_, _, item, _) in enumerate(remaining):
+                    if item.lane is not lane or is_mutating(item) is not mutating_mode:
+                        continue
+                    lane_limit = config.wip[item.lane]
+                    limit = lane_limit.mutating if mutating_mode else lane_limit.read_only
+                    factory_exception = controller_failure or (
+                        migration_bootstrap
+                        and item.milestone == "M0_FACTORY_MIGRATED"
+                        and item.kind is WorkKind.MIGRATION
+                    )
+                    if (
+                        item.lane is Lane.FACTORY
+                        and mutating_mode
+                        and factory_exception
+                        and limit == 0
+                    ):
+                        limit = 1
+                    current_lane = active_lane_mode[(item.lane, mutating_mode)]
+                    if current_lane + selected_lane_mode[(item.lane, mutating_mode)] >= limit:
+                        continue
+                    chosen_index = index
+                    break
+                if chosen_index is not None:
+                    break
+            if chosen_index is None:
+                break
+            _, _, chosen, _ = remaining.pop(chosen_index)
+            selected.append(chosen.work_item_id)
+            selected_lane_mode[(chosen.lane, mutating_mode)] += 1
+            capacity -= 1
+            if mutating_mode:
+                global_mutating += 1
+            else:
+                global_read_only += 1
 
     for identifier in selected:
         evaluations[identifier].selected = True
@@ -389,7 +415,5 @@ def schedule_cycle(
         config_digest=config.canonical_digest(),
         evaluations=[evaluations[identifier] for identifier in sorted(evaluations)],
         selected_work_item_ids=selected,
-        override_decision_id=(
-            override_record.decision_id if override_record is not None else None
-        ),
+        override_decision_id=(override_record.decision_id if override_record is not None else None),
     )

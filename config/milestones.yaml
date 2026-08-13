@@ -1,5 +1,5 @@
 version: 3
-activeMilestone: M1_NATIVE_PREFLIGHT
+activeMilestone: M0_FACTORY_MIGRATED
 roadmapPath: factory/roadmap/milestones.yaml
 completionMode: milestone
 expansionMode: proposal_only

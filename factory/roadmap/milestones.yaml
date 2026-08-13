@@ -2,7 +2,7 @@ version: 3
 milestones:
   - milestoneId: M0_FACTORY_MIGRATED
     type: TRUST
-    status: COMPLETED
+    status: ACTIVE
     entryCriteria:
       - current controller paused
       - baseline and state snapshot recorded
@@ -13,10 +13,10 @@ milestones:
       - finite retry and restart budgets enforced
       - machine-policy and external-evidence states implemented
       - completion expansion is proposal-only
-      - release uses exact-SHA gated main-only promotion and automatic revert
+      - release uses an automated pull request, exact-head-SHA checks, an independent machine-policy receipt, and verified merged main
       - factory and product CI separated
       - current queue safely migrated
-      - one mechanical and one standard simulated work item complete
+      - one mechanical and one standard work item have candidate manifests, automated pull requests, required CI, and verified merged-main receipts
       - rollback tested
       - machine-verifiable owner policy and source-migration receipt recorded
     requiredEvidence:
@@ -32,7 +32,7 @@ milestones:
       - customer approved
   - milestoneId: M1_NATIVE_PREFLIGHT
     type: ENGINEERING
-    status: ACTIVE
+    status: PROPOSED
     entryCriteria:
       - M0_FACTORY_MIGRATED completed
     exitCriteria:

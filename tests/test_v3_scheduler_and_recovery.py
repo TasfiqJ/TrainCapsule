@@ -57,15 +57,26 @@ def _item(
             },
             "disposition": "KEEP",
             "status": status,
-            "ownerType": "FOUNDER" if kind == "EXTERNAL_EVIDENCE" else "AI",
-            "automatable": kind != "EXTERNAL_EVIDENCE",
+            "ownerType": (
+                "EXTERNAL_PARTY"
+                if kind == "EXTERNAL_EVIDENCE"
+                else "MACHINE_POLICY_AUTHORITY"
+                if kind == "MACHINE_POLICY_REVIEW"
+                else "AI"
+            ),
+            "automatable": kind not in {"EXTERNAL_EVIDENCE", "MACHINE_POLICY_REVIEW"},
             "packetPath": None,
             "evidenceRequired": ["deterministic test"],
             "externalReceiptRequired": kind == "EXTERNAL_EVIDENCE",
+            "machinePolicyReceiptRequired": kind == "MACHINE_POLICY_REVIEW",
             "externalEvidenceRefs": external_evidence_refs or [],
             "retryPolicy": {
-                "maxPlanAttempts": 0 if kind == "EXTERNAL_EVIDENCE" else 2,
-                "maxCandidateRepairCycles": 0 if kind == "EXTERNAL_EVIDENCE" else 3,
+                "maxPlanAttempts": (
+                    0 if kind in {"EXTERNAL_EVIDENCE", "MACHINE_POLICY_REVIEW"} else 2
+                ),
+                "maxCandidateRepairCycles": (
+                    0 if kind in {"EXTERNAL_EVIDENCE", "MACHINE_POLICY_REVIEW"} else 3
+                ),
             },
         }
     )
@@ -121,6 +132,20 @@ def _config() -> SchedulerConfig:
     )
 
 
+def test_machine_policy_review_is_never_schedulable_by_the_ai_controller() -> None:
+    review = _item("V3-DEC-001", kind="MACHINE_POLICY_REVIEW")
+    decision = schedule_cycle(
+        _collection(review),
+        _config(),
+        cycle_id="machine-policy-negative",
+        decided_at=NOW,
+    )
+    assert decision.selected_work_item_ids == []
+    evaluation = decision.evaluations[0]
+    assert evaluation.eligible is False
+    assert any("independently signed receipt" in reason for reason in evaluation.reasons)
+
+
 def test_waiting_external_lane_does_not_block_product_or_competitor() -> None:
     market = _item(
         "V3-MKT-001",
@@ -136,15 +161,73 @@ def test_waiting_external_lane_does_not_block_product_or_competitor() -> None:
         cycle_id="cycle-1",
         decided_at=NOW,
     )
-    assert set(artifact.selected_work_item_ids) == {
-        "V3-PROD-001",
-        "V3-COMP-001",
-    }
+    # The active factory policy permits one mutating session globally.  A scoped
+    # WAITING_EXTERNAL item therefore must not make the other lanes ineligible,
+    # while fair rotation selects them across bounded cycles rather than claiming
+    # impossible same-cycle concurrency.
+    assert artifact.selected_work_item_ids == ["V3-PROD-001"]
+    competitor_evaluation = next(
+        item for item in artifact.evaluations if item.work_item_id == "V3-COMP-001"
+    )
+    assert competitor_evaluation.eligible is True
+    competitor_cycle = schedule_cycle(
+        _collection(market, product, competitor),
+        _config(),
+        cycle_id="cycle-2",
+        decided_at=NOW,
+        lane_cursor=Lane.COMPETITOR,
+    )
+    assert competitor_cycle.selected_work_item_ids == ["V3-COMP-001"]
     market_evaluation = next(
         item for item in artifact.evaluations if item.work_item_id == "V3-MKT-001"
     )
     assert market_evaluation.eligible is False
     assert "WAITING_EXTERNAL" in market_evaluation.reasons[0]
+
+
+@pytest.mark.parametrize(
+    ("cursor", "expected"),
+    [
+        (Lane.PRODUCT, "V3-PROD-001"),
+        (Lane.MARKET, "V3-MKT-001"),
+        (Lane.COMPETITOR, "V3-COMP-001"),
+        (Lane.TRUST, "V3-TRUST-001"),
+    ],
+)
+def test_four_lane_cursor_prevents_score_starvation(
+    cursor: Lane,
+    expected: str,
+) -> None:
+    items = (
+        _item("V3-PROD-001", kind="RESEARCH"),
+        _item("V3-MKT-001", lane="MARKET", kind="RESEARCH"),
+        _item("V3-COMP-001", lane="COMPETITOR", kind="RESEARCH"),
+        _item("V3-TRUST-001", lane="TRUST", kind="RESEARCH"),
+        _item("V3-MIG-001", lane="FACTORY", kind="RESEARCH"),
+    )
+    artifact = schedule_cycle(
+        _collection(*items),
+        _config(),
+        cycle_id=f"fair-{cursor.value.lower()}",
+        decided_at=NOW,
+        lane_cursor=cursor,
+        max_concurrent_read_only_sessions=1,
+    )
+    assert artifact.selected_work_item_ids == [expected]
+
+
+def test_factory_observation_lane_cannot_starve_the_four_product_lanes() -> None:
+    factory = _item("V3-MIG-001", lane="FACTORY", kind="RESEARCH")
+    product = _item("V3-PROD-001", kind="RESEARCH")
+    artifact = schedule_cycle(
+        _collection(factory, product),
+        _config(),
+        cycle_id="factory-last",
+        decided_at=NOW,
+        lane_cursor=Lane.PRODUCT,
+        max_concurrent_read_only_sessions=1,
+    )
+    assert artifact.selected_work_item_ids == [product.work_item_id]
 
 
 def test_scheduler_order_is_deterministic_and_not_input_order() -> None:
@@ -187,6 +270,58 @@ def test_scheduler_rejects_ready_work_outside_active_milestone() -> None:
     )
     assert future_evaluation.eligible is False
     assert "is not active" in future_evaluation.reasons[0]
+
+
+def test_scheduler_allows_only_explicit_future_lane_during_external_wait() -> None:
+    product = _item("V3-PROD-002", milestone="M2_CONTROLLED_QUALIFICATION")
+    commercial = _item(
+        "V3-PILOT-001",
+        lane="MARKET",
+        milestone="M2_CONTROLLED_QUALIFICATION",
+    )
+    artifact = schedule_cycle(
+        _collection(product, commercial),
+        _config(),
+        cycle_id="decoupled-product-lane",
+        decided_at=NOW,
+        eligible_future_milestones={
+            Lane.PRODUCT: frozenset({"M2_CONTROLLED_QUALIFICATION"})
+        },
+    )
+    assert artifact.selected_work_item_ids == [product.work_item_id]
+    commercial_evaluation = next(
+        value for value in artifact.evaluations if value.work_item_id == commercial.work_item_id
+    )
+    assert any("is not active" in reason for reason in commercial_evaluation.reasons)
+
+
+def test_future_lane_never_skips_required_external_dependency() -> None:
+    waiting = _item(
+        "V3-MKT-003",
+        lane="MARKET",
+        kind="EXTERNAL_EVIDENCE",
+        status="WAITING_EXTERNAL",
+        external_evidence_refs=[],
+    )
+    product = _item(
+        "V3-PROD-002",
+        milestone="M2_CONTROLLED_QUALIFICATION",
+        depends_on=[waiting.work_item_id],
+    )
+    artifact = schedule_cycle(
+        _collection(waiting, product),
+        _config(),
+        cycle_id="future-dependency-remains-blocked",
+        decided_at=NOW,
+        eligible_future_milestones={
+            Lane.PRODUCT: frozenset({"M2_CONTROLLED_QUALIFICATION"})
+        },
+    )
+    assert artifact.selected_work_item_ids == []
+    product_evaluation = next(
+        value for value in artifact.evaluations if value.work_item_id == product.work_item_id
+    )
+    assert any("unsatisfied hard dependencies" in reason for reason in product_evaluation.reasons)
 
 
 def test_scheduler_never_executes_outside_fact_even_with_a_receipt_reference() -> None:
@@ -272,10 +407,10 @@ def test_native_comparison_precedes_configured_duplicate_work() -> None:
 def _override(work_item_id: str, *, valid: bool) -> TrustedSchedulerOverride:
     payload: dict[str, Any] = {
         "record": {
-            "decisionId": "SOVR-FOUNDER-1",
+            "decisionId": "SOVR-MACHINE-POLICY-1",
             "workItemId": work_item_id,
             "reason": "Explicitly prioritize the smaller customer decision blocker.",
-            "issuedBy": "FOUNDER",
+            "issuedBy": "MACHINE_POLICY_AUTHORITY",
             "issuedAt": NOW,
             "signature": {
                 "algorithm": "external-trusted-root",
@@ -289,7 +424,7 @@ def _override(work_item_id: str, *, valid: bool) -> TrustedSchedulerOverride:
     return TrustedSchedulerOverride.model_validate(payload)
 
 
-def test_founder_override_must_be_trusted_and_is_recorded() -> None:
+def test_machine_policy_override_must_be_trusted_and_is_recorded() -> None:
     first = _item("V3-PROD-001")
     second = _item("V3-PROD-002")
     with pytest.raises(ValueError, match="signature is invalid"):
@@ -308,7 +443,7 @@ def test_founder_override_must_be_trusted_and_is_recorded() -> None:
         override=_override(second.work_item_id, valid=True),
     )
     assert artifact.selected_work_item_ids == [second.work_item_id]
-    assert artifact.override_decision_id == "SOVR-FOUNDER-1"
+    assert artifact.override_decision_id == "SOVR-MACHINE-POLICY-1"
 
 
 def test_repeated_finding_and_value_redesign_stop_bounded_loops() -> None:

@@ -1,0 +1,101 @@
+{
+  "additionalProperties": false,
+  "description": "Post-manifest envelope that avoids a receipt/manifest digest cycle.",
+  "properties": {
+    "schemaVersion": {
+      "const": "3.1",
+      "default": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "authorizationId": {
+      "pattern": "^FREA-V3-COMP-005-[0-9A-F]{12}$",
+      "title": "Authorizationid",
+      "type": "string"
+    },
+    "workItemId": {
+      "const": "V3-COMP-005",
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "candidateTreeSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatetreesha",
+      "type": "string"
+    },
+    "candidateManifestDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Candidatemanifestdigest",
+      "type": "string"
+    },
+    "nativeValueAuthorizationDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Nativevalueauthorizationdigest",
+      "type": "string"
+    },
+    "machinePolicyReceiptId": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Machinepolicyreceiptid",
+      "type": "string"
+    },
+    "machinePolicyReceiptDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Machinepolicyreceiptdigest",
+      "type": "string"
+    },
+    "activationReceiptDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Activationreceiptdigest",
+      "type": "string"
+    },
+    "traincheckResultDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Traincheckresultdigest",
+      "type": "string"
+    },
+    "traincheckReceiptFileDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Traincheckreceiptfiledigest",
+      "type": "string"
+    },
+    "frozenArtifactDigests": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "maxProperties": 32,
+      "minProperties": 7,
+      "title": "Frozenartifactdigests",
+      "type": "object"
+    },
+    "authorizedAt": {
+      "format": "date-time",
+      "title": "Authorizedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "authorizationId",
+    "workItemId",
+    "candidateSha",
+    "candidateTreeSha",
+    "candidateManifestDigest",
+    "nativeValueAuthorizationDigest",
+    "machinePolicyReceiptId",
+    "machinePolicyReceiptDigest",
+    "activationReceiptDigest",
+    "traincheckResultDigest",
+    "traincheckReceiptFileDigest",
+    "frozenArtifactDigests",
+    "authorizedAt"
+  ],
+  "title": "FrozenReleaseEvidenceAuthorization",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/frozen-release-evidence-authorization.schema.json"
+}

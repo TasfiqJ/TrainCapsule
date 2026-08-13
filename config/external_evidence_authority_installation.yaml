@@ -1,0 +1,23 @@
+schemaVersion: "1"
+status: STAGED_NOT_INSTALLED
+brokerExecutable: /usr/local/bin/tcfactory-external-evidence-broker
+brokerPathUnit: /etc/systemd/system/traincapsule-external-evidence-authority.path
+brokerServiceUnit: /etc/systemd/system/traincapsule-external-evidence-authority.service
+stagedAuthorityRoot: /var/lib/traincapsule-external-evidence/staged-authority
+publicKey: /etc/traincapsule-factory/external-evidence/authority.pub
+monotonicLedger: /var/lib/traincapsule-external-evidence-authority/authority-ledger.json
+runtimeEnvironment:
+  TCF_EXTERNAL_EVIDENCE_ROOT: /var/lib/traincapsule-external-evidence/receipts
+  TCF_EXTERNAL_EVIDENCE_PUBLIC_KEY: /etc/traincapsule-factory/external-evidence/authority.pub
+  TCF_EXTERNAL_EVIDENCE_AUTHORITY_STATE: /var/lib/traincapsule-external-evidence-authority/authority-ledger.json
+ownership:
+  brokerUser: root
+  controllerLedgerAccess: read-only
+  controllerMayPromote: false
+activationRequires:
+  - root-owned non-writable staged authority files
+  - detached Ed25519 verification
+  - successful monotonic broker promotion
+  - enabled root-owned broker path unit for automatic signed snapshot promotion
+  - PathExists genesis trigger when signed authority files predate path activation
+  - explicit installation outside the repository

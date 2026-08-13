@@ -29,6 +29,10 @@ def inventory() -> str:
         "",
         f"Compared with `{BASE_SHA}`: **{len(records)} paths**.",
         "",
+        "This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing",
+        "report must bind acceptance to an immutable candidate SHA and independent test/receipt",
+        "artifacts.",
+        "",
         "| Change | Path |",
         "|---|---|",
     ]

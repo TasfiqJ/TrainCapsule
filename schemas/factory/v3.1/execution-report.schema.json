@@ -1,0 +1,290 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "EvidenceMode": {
+      "enum": [
+        "SIMULATED",
+        "CONTROLLED_VALIDATED",
+        "LIVE_VALIDATED"
+      ],
+      "title": "EvidenceMode",
+      "type": "string"
+    },
+    "ExecutionOutcome": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "BLOCKED",
+        "UNKNOWN"
+      ],
+      "title": "ExecutionOutcome",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    },
+    "OutputDeclarationV31": {
+      "additionalProperties": false,
+      "properties": {
+        "contentDigest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "kind": {
+          "$ref": "#/$defs/OutputKind"
+        },
+        "maximumBytes": {
+          "maximum": 10000000000,
+          "minimum": 1,
+          "title": "Maximumbytes",
+          "type": "integer"
+        },
+        "mediaType": {
+          "maxLength": 127,
+          "minLength": 3,
+          "title": "Mediatype",
+          "type": "string"
+        },
+        "outputId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "path": {
+          "$ref": "#/$defs/RelativePath"
+        },
+        "producerWorkItemId": {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "title": "Producerworkitemid",
+          "type": "string"
+        },
+        "required": {
+          "title": "Required",
+          "type": "boolean"
+        },
+        "retentionDays": {
+          "maximum": 3650,
+          "minimum": 1,
+          "title": "Retentiondays",
+          "type": "integer"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "outputId",
+        "path",
+        "kind",
+        "mediaType",
+        "required",
+        "maximumBytes",
+        "producerWorkItemId",
+        "retentionDays"
+      ],
+      "title": "OutputDeclarationV31",
+      "type": "object"
+    },
+    "OutputKind": {
+      "enum": [
+        "FILE",
+        "DIRECTORY_MANIFEST",
+        "REPORT",
+        "RECEIPT",
+        "SCHEMA"
+      ],
+      "title": "OutputKind",
+      "type": "string"
+    },
+    "RelativePath": {
+      "maxLength": 512,
+      "minLength": 1,
+      "pattern": "^[^/].*$",
+      "type": "string"
+    },
+    "SessionReferenceV31": {
+      "additionalProperties": false,
+      "properties": {
+        "backend": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Backend",
+          "type": "string"
+        },
+        "endedAt": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Endedat"
+        },
+        "provider": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Provider",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "sessionId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "startedAt": {
+          "format": "date-time",
+          "title": "Startedat",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/SessionState"
+        },
+        "taskPacketDigest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "transcriptDigest": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Digest"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "workItemId": {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "title": "Workitemid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "sessionId",
+        "workItemId",
+        "provider",
+        "backend",
+        "taskPacketDigest",
+        "state",
+        "startedAt"
+      ],
+      "title": "SessionReferenceV31",
+      "type": "object"
+    },
+    "SessionState": {
+      "enum": [
+        "STARTED",
+        "RUNNING",
+        "COMPLETED",
+        "FAILED",
+        "CANCELLED"
+      ],
+      "title": "SessionState",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/execution-report.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "attempt": {
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Attempt",
+      "type": "integer"
+    },
+    "commandDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "evidenceMode": {
+      "$ref": "#/$defs/EvidenceMode"
+    },
+    "executionId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "exitCode": {
+      "maximum": 255,
+      "minimum": 0,
+      "title": "Exitcode",
+      "type": "integer"
+    },
+    "finishedAt": {
+      "format": "date-time",
+      "title": "Finishedat",
+      "type": "string"
+    },
+    "maximumAttempts": {
+      "maximum": 100,
+      "minimum": 1,
+      "title": "Maximumattempts",
+      "type": "integer"
+    },
+    "outcome": {
+      "$ref": "#/$defs/ExecutionOutcome"
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/OutputDeclarationV31"
+      },
+      "maxItems": 64,
+      "title": "Outputs",
+      "type": "array"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "session": {
+      "$ref": "#/$defs/SessionReferenceV31"
+    },
+    "startedAt": {
+      "format": "date-time",
+      "title": "Startedat",
+      "type": "string"
+    },
+    "stderrArtifactDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "stdoutArtifactDigest": {
+      "$ref": "#/$defs/Digest"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "executionId",
+    "session",
+    "evidenceMode",
+    "commandDigest",
+    "startedAt",
+    "finishedAt",
+    "exitCode",
+    "outcome",
+    "attempt",
+    "maximumAttempts",
+    "stdoutArtifactDigest",
+    "stderrArtifactDigest"
+  ],
+  "title": "ExecutionReportV31",
+  "type": "object"
+}

@@ -1,0 +1,179 @@
+{
+  "$defs": {
+    "CorrelationField": {
+      "enum": [
+        "PRODUCT_LINEAGE",
+        "CUSTOMER",
+        "FAMILY",
+        "OFFER",
+        "PACK"
+      ],
+      "title": "CorrelationField",
+      "type": "string"
+    },
+    "EvidenceType": {
+      "enum": [
+        "CUSTOMER_CONVERSATION",
+        "INCIDENT_ARCHIVE_ACCESS",
+        "PAID_PREFLIGHT",
+        "PAID_PILOT",
+        "DECISION_CHANGED",
+        "SECOND_PAID_ACTION",
+        "INDEPENDENT_OPERATOR",
+        "UPSTREAM_ACCEPTANCE",
+        "PROVIDER_ACCEPTANCE",
+        "INCIDENT_TIMELINE",
+        "UPCOMING_CHANGE",
+        "PILOT_CANDIDATE",
+        "CUSTOMER_AUTHORIZATION",
+        "SECOND_ACTION_COMMITMENT",
+        "GPU_EXECUTION",
+        "SAME_FAMILY_CASE",
+        "SUPPORT_ACCEPTANCE",
+        "DELIVERY_ECONOMICS"
+      ],
+      "title": "EvidenceType",
+      "type": "string"
+    },
+    "MilestoneExitCriterionContract": {
+      "additionalProperties": false,
+      "description": "One exact source-authority exit criterion and its typed evidence closure.",
+      "properties": {
+        "criterionId": {
+          "pattern": "^M[0-9]+_[A-Z0-9_]+-EXIT-[0-9]{2}$",
+          "title": "Criterionid",
+          "type": "string"
+        },
+        "criterionDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Criteriondigest",
+          "type": "string"
+        },
+        "requiredWorkItemIds": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Requiredworkitemids",
+          "type": "array"
+        },
+        "requiredExternalEvidenceTypes": {
+          "items": {
+            "$ref": "#/$defs/EvidenceType"
+          },
+          "title": "Requiredexternalevidencetypes",
+          "type": "array"
+        },
+        "requiredSemanticCounts": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "propertyNames": {
+            "$ref": "#/$defs/SemanticEvidence"
+          },
+          "title": "Requiredsemanticcounts",
+          "type": "object"
+        },
+        "machinePolicyRequired": {
+          "title": "Machinepolicyrequired",
+          "type": "boolean"
+        },
+        "requiredCorrelationFields": {
+          "items": {
+            "$ref": "#/$defs/CorrelationField"
+          },
+          "title": "Requiredcorrelationfields",
+          "type": "array"
+        }
+      },
+      "required": [
+        "criterionId",
+        "criterionDigest",
+        "requiredWorkItemIds",
+        "machinePolicyRequired"
+      ],
+      "title": "MilestoneExitCriterionContract",
+      "type": "object"
+    },
+    "SemanticEvidence": {
+      "enum": [
+        "DETERMINISTIC_ARTIFACT",
+        "CANDIDATE_MANIFEST",
+        "INDEPENDENT_REVIEW",
+        "MACHINE_POLICY_DECISION",
+        "NATIVE_VALUE_AUTHORIZATION",
+        "REACHABLE_ACCOUNT",
+        "ATTRIBUTABLE_SOURCE",
+        "TRAINCHECK_INCIDENT_DIFFERENTIAL",
+        "SUPPORT_POLICY",
+        "DELIVERY_ECONOMICS",
+        "THIRD_SAME_FAMILY_CASE",
+        "LEGAL_REDUCTION_VERIFIED",
+        "ILLEGAL_REDUCTION_REJECTED",
+        "CUSTOMER_DECISION_CHANGED",
+        "CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT"
+      ],
+      "title": "SemanticEvidence",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "milestoneId": {
+      "pattern": "^M[0-9]+_[A-Z0-9_]+$",
+      "title": "Milestoneid",
+      "type": "string"
+    },
+    "roadmapEvidenceDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Roadmapevidencedigest",
+      "type": "string"
+    },
+    "requiredExternalEvidenceTypes": {
+      "items": {
+        "$ref": "#/$defs/EvidenceType"
+      },
+      "title": "Requiredexternalevidencetypes",
+      "type": "array"
+    },
+    "requiredSemanticCounts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/SemanticEvidence"
+      },
+      "title": "Requiredsemanticcounts",
+      "type": "object"
+    },
+    "machinePolicyRequired": {
+      "title": "Machinepolicyrequired",
+      "type": "boolean"
+    },
+    "allowUnrelatedFutureLanesWhileExternalWait": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Allowunrelatedfuturelaneswhileexternalwait",
+      "type": "array"
+    },
+    "exitCriteria": {
+      "items": {
+        "$ref": "#/$defs/MilestoneExitCriterionContract"
+      },
+      "minItems": 1,
+      "title": "Exitcriteria",
+      "type": "array"
+    }
+  },
+  "required": [
+    "milestoneId",
+    "roadmapEvidenceDigest",
+    "machinePolicyRequired",
+    "exitCriteria"
+  ],
+  "title": "MilestoneEvidenceContract",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/milestone-evidence-contract.schema.json"
+}

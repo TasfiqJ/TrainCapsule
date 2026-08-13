@@ -1,0 +1,124 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    },
+    "RuntimeEventKind": {
+      "enum": [
+        "STARTED",
+        "STOPPED",
+        "WORK_ITEM_TRANSITION",
+        "CHECKPOINTED",
+        "POLICY_DECIDED",
+        "PUBLICATION_TRANSITION",
+        "EXTERNAL_WAIT",
+        "HARD_STUCK"
+      ],
+      "title": "RuntimeEventKind",
+      "type": "string"
+    },
+    "RuntimeMode": {
+      "enum": [
+        "STOPPED",
+        "READ_ONLY",
+        "SIMULATION",
+        "CANARY",
+        "LIVE"
+      ],
+      "title": "RuntimeMode",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/runtime-event.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "currentState": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Currentstate",
+      "type": "string"
+    },
+    "eventId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "evidenceDigests": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 128,
+      "title": "Evidencedigests",
+      "type": "array"
+    },
+    "kind": {
+      "$ref": "#/$defs/RuntimeEventKind"
+    },
+    "mode": {
+      "$ref": "#/$defs/RuntimeMode"
+    },
+    "occurredAt": {
+      "format": "date-time",
+      "title": "Occurredat",
+      "type": "string"
+    },
+    "previousState": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Previousstate"
+    },
+    "reason": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Reason",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "sequence": {
+      "minimum": 1,
+      "title": "Sequence",
+      "type": "integer"
+    },
+    "workItemId": {
+      "anyOf": [
+        {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Workitemid"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "eventId",
+    "sequence",
+    "occurredAt",
+    "kind",
+    "mode",
+    "currentState",
+    "reason"
+  ],
+  "title": "RuntimeEventV31",
+  "type": "object"
+}

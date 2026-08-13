@@ -1,0 +1,316 @@
+{
+  "$defs": {
+    "CandidateManifest": {
+      "additionalProperties": false,
+      "properties": {
+        "baseSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Basesha",
+          "type": "string"
+        },
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "candidateTreeSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatetreesha",
+          "type": "string"
+        },
+        "checkpointDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Checkpointdigest",
+          "type": "string"
+        },
+        "contextDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contextdigest",
+          "type": "string"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "title": "Createdat",
+          "type": "string"
+        },
+        "executor": {
+          "$ref": "#/$defs/ExecutorIdentity"
+        },
+        "externalEvidence": {
+          "items": {
+            "$ref": "#/$defs/ExternalEvidenceBinding"
+          },
+          "title": "Externalevidence",
+          "type": "array"
+        },
+        "findings": {
+          "items": {
+            "$ref": "#/$defs/FindingBinding"
+          },
+          "title": "Findings",
+          "type": "array"
+        },
+        "gates": {
+          "items": {
+            "$ref": "#/$defs/GateBinding"
+          },
+          "title": "Gates",
+          "type": "array"
+        },
+        "manifestVersion": {
+          "default": 3,
+          "maximum": 3,
+          "minimum": 3,
+          "title": "Manifestversion",
+          "type": "integer"
+        },
+        "packetDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Packetdigest",
+          "type": "string"
+        },
+        "releaseDecision": {
+          "$ref": "#/$defs/ReleaseDecision"
+        },
+        "stageOutputs": {
+          "items": {
+            "$ref": "#/$defs/StageArtifactBinding"
+          },
+          "title": "Stageoutputs",
+          "type": "array"
+        },
+        "workItemId": {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "title": "Workitemid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "baseSha",
+        "candidateSha",
+        "candidateTreeSha",
+        "workItemId",
+        "packetDigest",
+        "contextDigest",
+        "executor",
+        "stageOutputs",
+        "gates",
+        "findings",
+        "externalEvidence",
+        "checkpointDigest",
+        "releaseDecision",
+        "createdAt"
+      ],
+      "title": "CandidateManifest",
+      "type": "object"
+    },
+    "ExecutorIdentity": {
+      "additionalProperties": false,
+      "properties": {
+        "adapter": {
+          "minLength": 1,
+          "title": "Adapter",
+          "type": "string"
+        },
+        "backend": {
+          "minLength": 1,
+          "title": "Backend",
+          "type": "string"
+        },
+        "capabilityDigest": {
+          "default": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Capabilitydigest",
+          "type": "string"
+        },
+        "executorSessionRef": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Executorsessionref"
+        },
+        "model": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Model"
+        },
+        "sessionId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sessionid"
+        }
+      },
+      "required": [
+        "backend",
+        "adapter"
+      ],
+      "title": "ExecutorIdentity",
+      "type": "object"
+    },
+    "ExternalEvidenceBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "receiptId": {
+          "pattern": "^XREC-[A-Z0-9_-]+$",
+          "title": "Receiptid",
+          "type": "string"
+        },
+        "recordDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Recorddigest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "receiptId",
+        "recordDigest"
+      ],
+      "title": "ExternalEvidenceBinding",
+      "type": "object"
+    },
+    "FindingBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "artifactDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Artifactdigest",
+          "type": "string"
+        },
+        "disposition": {
+          "minLength": 1,
+          "title": "Disposition",
+          "type": "string"
+        },
+        "fingerprint": {
+          "minLength": 1,
+          "title": "Fingerprint",
+          "type": "string"
+        }
+      },
+      "required": [
+        "fingerprint",
+        "disposition",
+        "artifactDigest"
+      ],
+      "title": "FindingBinding",
+      "type": "object"
+    },
+    "GateBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "evidenceDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Evidencedigest",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "result": {
+          "minLength": 1,
+          "title": "Result",
+          "type": "string"
+        },
+        "version": {
+          "minLength": 1,
+          "title": "Version",
+          "type": "string"
+        }
+      },
+      "required": [
+        "name",
+        "version",
+        "result",
+        "evidenceDigest"
+      ],
+      "title": "GateBinding",
+      "type": "object"
+    },
+    "ReleaseDecision": {
+      "enum": [
+        "NOT_EVALUATED",
+        "HOLD",
+        "APPROVED_FOR_AUTOMATED_PULL_REQUEST",
+        "PULL_REQUEST_PENDING_REQUIRED_CHECKS",
+        "MERGED_MAIN_VERIFIED",
+        "REJECTED"
+      ],
+      "title": "ReleaseDecision",
+      "type": "string"
+    },
+    "StageArtifactBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Digest",
+          "type": "string"
+        },
+        "name": {
+          "minLength": 1,
+          "title": "Name",
+          "type": "string"
+        },
+        "stage": {
+          "minLength": 1,
+          "title": "Stage",
+          "type": "string"
+        }
+      },
+      "required": [
+        "stage",
+        "name",
+        "digest"
+      ],
+      "title": "StageArtifactBinding",
+      "type": "object"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/migrated-candidate-manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "migratedFromSchemaVersion": {
+      "const": "3",
+      "title": "Migratedfromschemaversion",
+      "type": "string"
+    },
+    "payload": {
+      "$ref": "#/$defs/CandidateManifest"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "migratedFromSchemaVersion",
+    "payload"
+  ],
+  "title": "MigratedCandidateManifestV31",
+  "type": "object"
+}

@@ -1,0 +1,16 @@
+[Unit]
+Description=Watch staged TrainCapsule external-evidence authority snapshots
+After=local-fs.target
+
+[Path]
+# The privileged installer explicitly brokers the already-staged snapshot
+# before enabling this watcher.  Watching only changes avoids an endless
+# PathExists -> successful oneshot -> PathExists retrigger loop.
+PathChanged=/var/lib/traincapsule-external-evidence/staged-authority/revocation-list.json
+PathChanged=/var/lib/traincapsule-external-evidence/staged-authority/revocation-list.json.sig
+PathChanged=/var/lib/traincapsule-external-evidence/staged-authority/authority-anchor.json
+PathChanged=/var/lib/traincapsule-external-evidence/staged-authority/authority-anchor.json.sig
+Unit=traincapsule-external-evidence-authority.service
+
+[Install]
+WantedBy=multi-user.target

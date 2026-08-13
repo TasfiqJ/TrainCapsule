@@ -1,0 +1,431 @@
+{
+  "schemaVersion": 1,
+  "reportId": "TRAINCAPSULE_V3_1_ZH_PHASE_0_BASELINE",
+  "recordedAt": "2026-08-12T12:20:11Z",
+  "startingState": {
+    "repositoryRoot": "/home/jasim/projects/traincapsule",
+    "repository": "TasfiqJ/TrainCapsule",
+    "startingBranch": "main",
+    "startingLocalHead": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
+    "startingOriginMain": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
+    "ahead": 0,
+    "behind": 0,
+    "diverged": false,
+    "trackedDirtyPaths": [],
+    "untrackedPaths": [
+      "TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12.zip.sha256:Zone.Identifier",
+      "TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12.zip:Zone.Identifier",
+      "TrainCapsule_Codex_V3_1_ZH_Full_Remediation_Package_2026-08-12/",
+      "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11.zip",
+      "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11.zip:Zone.Identifier",
+      "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/",
+      "factory/roadmap/migrations/v2_to_v3.yaml.previous"
+    ],
+    "localOnlyCommits": [],
+    "stashes": [],
+    "worktrees": [
+      {
+        "path": "/home/jasim/projects/traincapsule",
+        "head": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
+        "branch": "codex/traincapsule-v3-1-zh-hardening"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule-fable-routing",
+        "head": "f0224d62adc584aadfff72b77acd91b19e1afd8c",
+        "branch": "factory/fable-routing"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule-factory-redesign",
+        "head": "e6f364723f304c887a10d7729d772eb7d88a4020",
+        "branch": "codex/factory-recovery-redesign"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule-hardening-20260811",
+        "head": "a3e94990f9dec9657023fe3be3193eaa0078f16d",
+        "detached": true
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/DEMO-001-20260810T072035Z-builder-a2",
+        "head": "8c5bfb335e97b63d526c81f906bacbdab40200cc",
+        "branch": "factory-DEMO-001-20260810T072035Z-builder-a2"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/DEMO-001-20260810T072630Z-adversary-a1",
+        "head": "8114297d8719420c5de3e0c5cf538abd464beb5d",
+        "branch": "factory-DEMO-001-20260810T072630Z-adversary-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/DEMO-001-20260810T073451Z-builder-a2",
+        "head": "cb5c5f376ea4f4cdeb4486d50189351b68c1cf8f",
+        "branch": "factory-DEMO-001-20260810T073451Z-builder-a2"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/DEMO-001-20260810T074119Z-private-gate-a1",
+        "head": "de644e032be0623e997e59380325c61f95765ff3",
+        "branch": "factory-DEMO-001-20260810T074119Z-private-gate-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/DEMO-001-20260810T080625Z-builder-a1",
+        "head": "7bdab787deb10262eb5ae89d5f37c14f6ef4b2cf",
+        "branch": "factory-DEMO-001-20260810T080625Z-builder-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/DEMO-001-20260810T083854Z-builder-a1",
+        "head": "13b2f7c98cccef35b966530aa2a9dcaccf14bf3e",
+        "branch": "factory-DEMO-001-20260810T083854Z-builder-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/FACTORY_REPAIR_20260810T150515Z_3-20260810T150515Z-recovery-a1",
+        "head": "b57981d6fc8c4a56a20c06516c762a2273ecc30b",
+        "branch": "factory-FACTORY_REPAIR_20260810T150515Z_3-20260810T150515Z-recovery-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/FACTORY_REPAIR_20260810T161936Z_1-20260810T161936Z-factory_repair-a1",
+        "head": "e25777ebb4771120689640a1c2368d9cd3e8f998",
+        "branch": "factory-FACTORY_REPAIR_20260810T161936Z_1-20260810T161936Z-factory_repair-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/FACTORY_REPAIR_20260810T163734Z_1-20260810T163734Z-factory_repair-a6",
+        "head": "0ff0cf5be675d02439bcb0f34fc7b94d5bd504af",
+        "branch": "factory-FACTORY_REPAIR_20260810T163734Z_1-20260810T163734Z-factory_repair-a6"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/FACTORY_REPAIR_20260810T224818Z_1-20260810T224818Z-factory_repair-a2",
+        "head": "c1dc5320e46434a1c076a95f60a33612ff3b610a",
+        "branch": "factory-FACTORY_REPAIR_20260810T224818Z_1-20260810T224818Z-factory_repair-a2"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/FACTORY_REPAIR_20260811T011224Z_1-20260811T011224Z-factory_repair-a2",
+        "head": "df0f7defe01393bea9d864f4f56d81a403fa72bb",
+        "branch": "factory-FACTORY_REPAIR_20260811T011224Z_1-20260811T011224Z-factory_repair-a2"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/FACTORY_REPAIR_20260811T134744Z_1-20260811T134744Z-factory_repair-a1",
+        "head": "e9f9306018fd9e228b61540c811978f6fb1c098f",
+        "branch": "factory-FACTORY_REPAIR_20260811T134744Z_1-20260811T134744Z-factory_repair-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/PLAN_T002_R5-20260811T032133Z-planner-a2",
+        "head": "6e544c97a9d8ba49259fff43d97da6023c747ff6",
+        "branch": "factory-PLAN_T002_R5-20260811T032133Z-planner-a2"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/T001-20260810T094258Z-research-a1",
+        "head": "2a56fcd8b8c73bcb4da6b8e34bb9a2c4af705c48",
+        "branch": "factory-T001-20260810T094258Z-research-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/T001-20260810T171946Z-research-a2",
+        "head": "49a15f2842dcf12c3a79b7ecf1322ce7ae7db52b",
+        "branch": "factory-T001-20260810T171946Z-research-a2"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/T001-20260810T223549Z-private-gate-a1",
+        "head": "df560b9702aab9881b34a09e3051be4baccc8166",
+        "branch": "factory-T001-20260810T223549Z-private-gate-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/T002-20260811T003507Z-research-a2",
+        "head": "c08f70d6516dc4395d51e3a9ae1859ef58ea20c0",
+        "branch": "factory-T002-20260811T003507Z-research-a2"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/T002-20260811T010736Z-research-a1",
+        "head": "b05c8b5033f78d3be3e2812a8365dc42cd84b387",
+        "branch": "factory-T002-20260811T010736Z-research-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/T002-20260811T030911Z-research-a1",
+        "head": "193ff2b98aabfebb07e3a55af44e33287a634495",
+        "branch": "factory-T002-20260811T030911Z-research-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/T002-20260811T033123Z-research-a1",
+        "head": "5fba95beb17e7f5e6e254f0f881d6b3f99659290",
+        "branch": "factory-T002-20260811T033123Z-research-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/T002-20260811T034025Z-research-a1",
+        "head": "d28b1d5d69225b7bfab8a415ea77590160f5ead9",
+        "branch": "factory-T002-20260811T034025Z-research-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/T002-20260811T034617Z-adversary-a3",
+        "head": "fee3b378e8a50365812d14c26c0f0509e43869a1",
+        "branch": "factory-T002-20260811T034617Z-adversary-a3"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/T002-20260811T045707Z-adversary-a1",
+        "head": "91fca9cb277921688605b837e9ae64eadadc3144",
+        "branch": "factory-T002-20260811T045707Z-adversary-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/T002-20260811T144418Z-research-a1",
+        "head": "24ec9c8fcfe52bec04bd6c10e32ddf1ac76bed22",
+        "branch": "factory-T002-20260811T144418Z-research-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/T002-20260811T170548Z-research-a1",
+        "head": "7c898ddedf85f50ab6fcf4e6e62e88f06e01e931",
+        "branch": "factory-T002-20260811T170548Z-research-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/T002-20260811T171321Z-research-a1",
+        "head": "434fcfabf6b12268740cd92c3f290611ddb1aec7",
+        "branch": "factory-T002-20260811T171321Z-research-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/V3-MKT-001-v3-mkt-001-20260812T050240Z-owner-a1",
+        "head": "26c855efbe9178066a10c8981c32bf5b2a07a6c6",
+        "branch": "factory-V3-MKT-001-v3-mkt-001-20260812T050240Z-owner-a1"
+      },
+      {
+        "path": "/home/jasim/projects/traincapsule/factory/worktrees/V3-MKT-002-v3-mkt-002-20260812T050753Z-owner-a1",
+        "head": "26c855efbe9178066a10c8981c32bf5b2a07a6c6",
+        "branch": "factory-V3-MKT-002-v3-mkt-002-20260812T050753Z-owner-a1"
+      }
+    ]
+  },
+  "preservation": {
+    "archivePath": "/home/jasim/projects/traincapsule-preservation-20260812T122011Z.tar.gz",
+    "sha256": "037398dc1f42e8f9f79bb3d8e74ca6f05a05204957402a445cd0241ebfca8381",
+    "sourceInputsUnchanged": true
+  },
+  "safetyRef": {
+    "name": "safety/traincapsule-pre-v3-1-zh-hardening-20260812T122011Z",
+    "tagObjectSha": "2c613785595950c15cdf63c5b26ffd387f41cc88",
+    "peeledCommitSha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
+    "existsLocally": true,
+    "existsOnOrigin": true
+  },
+  "workingBranch": {
+    "name": "codex/traincapsule-v3-1-zh-hardening",
+    "startingSha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
+    "originTrackingRef": "origin/codex/traincapsule-v3-1-zh-hardening",
+    "pushedBeforeImplementation": true
+  },
+  "activeAuthority": {
+    "generation": "v3-2026-08-11",
+    "manifestPath": "docs/source-of-truth/v3-2026-08-11/FINAL_MANIFEST_V3.json",
+    "manifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c",
+    "v31Installed": false,
+    "conflict": "Active V3 owner directives still require direct-main/no-PR publication. V3.1-ZH requires automated PR-only publication and supersedes those rules only after Phase 1 is installed coherently."
+  },
+  "runtime": {
+    "runtimeRoot": "/home/jasim/projects/traincapsule/factory/state",
+    "controllerProcessPresent": false,
+    "githubRunnerProcess": {
+      "present": true,
+      "pid": 22781,
+      "command": "/home/jasim/.local/share/traincapsule-actions-runner/bin/Runner.Listener run"
+    },
+    "controls": {
+      "STOP": "PRESENT",
+      "PAUSE": "ABSENT",
+      "HARD_STUCK": "ABSENT"
+    },
+    "activeMilestone": "M1_NATIVE_PREFLIGHT",
+    "currentWorkItem": {
+      "workItemId": "V3-COMP-001",
+      "lane": "COMPETITOR",
+      "status": "READY"
+    },
+    "v3QueueCounts": {
+      "PROPOSED": 61,
+      "READY": 1,
+      "WAITING_EXTERNAL": 12,
+      "BLOCKED_TECHNICAL": 2,
+      "PASSED_ENGINEERING": 13
+    },
+    "v2QueueArtifacts": [
+      "factory/queue/paused/T002.pause.json",
+      "factory/queue/paused/T002.yaml",
+      "factory/queue/done/T001.yaml"
+    ],
+    "claims": [],
+    "leases": [],
+    "v3Checkpoints": [
+      "factory/state/pipelines/V3-MKT-001.json",
+      "factory/state/pipelines/V3-MKT-002.json"
+    ],
+    "publicationTransactions": [],
+    "externalBlockers": [
+      "V3-MKT-003",
+      "V3-MKT-004",
+      "V3-MKT-005",
+      "V3-MKT-006",
+      "V3-MKT-007"
+    ],
+    "interventionMode": "NONE",
+    "restartBudget": {
+      "used": 0,
+      "maximum": 3,
+      "remaining": 3,
+      "hardStuck": false
+    }
+  },
+  "windowsTasks": [
+    {
+      "name": "TrainCapsule Automatic Activation",
+      "enabled": true,
+      "state": "Ready",
+      "lastTaskResult": 20
+    },
+    {
+      "name": "TrainCapsule Calibration Recovery",
+      "enabled": true,
+      "state": "Ready",
+      "lastTaskResult": 4294967295
+    },
+    {
+      "name": "TrainCapsule GitHub Runner",
+      "enabled": true,
+      "state": "Ready",
+      "lastTaskResult": 4294967295
+    },
+    {
+      "name": "TrainCapsule Lights-Out Autopilot",
+      "enabled": false,
+      "state": "Disabled",
+      "lastTaskResult": 0
+    }
+  ],
+  "credentialsAndMachineAuthority": {
+    "claudeCredentialRoute": "AUTHENTICATED",
+    "priorPrivateGateRoot": "/var/lib/traincapsule-factory/private-gates",
+    "priorPrivateGateHealth": "PASS",
+    "independentV31VerifierServicePresent": false,
+    "v31ActivationReceiptPresent": false
+  },
+  "github": {
+    "visibility": "PUBLIC",
+    "defaultBranch": "main",
+    "rulesets": [],
+    "mainProtected": false,
+    "pullRequest": null,
+    "hostedBaselineRuns": [
+      {
+        "id": 31594365858,
+        "name": "TrainCapsule / Packaging install",
+        "conclusion": "success"
+      },
+      {
+        "id": 31594365953,
+        "name": "TrainCapsule / Factory quality",
+        "conclusion": "success"
+      },
+      {
+        "id": 31594365846,
+        "name": "TrainCapsule / Docs and schemas",
+        "conclusion": "success"
+      },
+      {
+        "id": 31594365965,
+        "name": "TrainCapsule / Security",
+        "conclusion": "success"
+      },
+      {
+        "id": 31594365811,
+        "name": "TrainCapsule / Product unit",
+        "conclusion": "success"
+      },
+      {
+        "id": 31594365841,
+        "name": "TrainCapsule / Product contract",
+        "conclusion": "success"
+      },
+      {
+        "id": 31594365923,
+        "name": "TrainCapsule / Source freshness",
+        "conclusion": "success"
+      },
+      {
+        "id": 31594365862,
+        "name": "TrainCapsule / Source-of-truth integrity",
+        "conclusion": "success"
+      }
+    ]
+  },
+  "baselineQuality": {
+    "subjectSha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
+    "localFullSuite": {
+      "result": "PASS",
+      "pytestPassed": 599,
+      "ruff": "PASS",
+      "pyrightErrors": 0,
+      "schemas": 45,
+      "roadmapItems": 109,
+      "legacyMappings": 124
+    },
+    "transcriptPath": "docs/migrations/evidence/transcripts/V3-MIG-020-01-complete-pre-evidence-acceptance.json",
+    "transcriptSha256": "27e702f6049e9ff02ce33e3151ec951e14d5e529e355c3b81c92a4c4c1a19811",
+    "hostedExactShaChecks": 8
+  },
+  "commands": [
+    {
+      "id": "verify-package-checksums",
+      "exitCode": 0,
+      "result": "PASS",
+      "summary": "43/43 declared payload digests match"
+    },
+    {
+      "id": "fetch-origin",
+      "exitCode": 0,
+      "result": "PASS",
+      "summary": "Remote refs fetched without checkout mutation"
+    },
+    {
+      "id": "create-and-push-safety-tag",
+      "exitCode": 0,
+      "result": "PASS",
+      "summary": "Annotated tag peels to exact baseline SHA"
+    },
+    {
+      "id": "create-and-push-hardening-branch",
+      "exitCode": 0,
+      "result": "PASS",
+      "summary": "Branch tracks origin at exact baseline SHA"
+    },
+    {
+      "id": "baseline-full-quality",
+      "exitCode": 0,
+      "result": "PASS",
+      "summary": "599 tests and all local gates passed"
+    },
+    {
+      "id": "baseline-hosted-exact-sha",
+      "exitCode": 0,
+      "result": "PASS",
+      "summary": "All eight hosted workflows passed at exact baseline SHA"
+    },
+    {
+      "id": "read-only-runtime-status",
+      "exitCode": 0,
+      "result": "PASS",
+      "summary": "Controller stopped; queue and milestone captured without mutation"
+    },
+    {
+      "id": "github-ruleset-inspection",
+      "exitCode": 0,
+      "result": "PASS_WITH_BLOCKER",
+      "summary": "No rulesets and main is unprotected"
+    }
+  ],
+  "phase0MutationBoundary": {
+    "controllerMutations": 0,
+    "runtimeControlChanges": 0,
+    "repositoryImplementationChanges": 0,
+    "allowedChanges": [
+      "durable Phase-0 reports",
+      "safety tag",
+      "hardening branch"
+    ],
+    "controllerRemainsStopped": true
+  },
+  "rollback": {
+    "exactStartingCommit": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
+    "readOnlyVerificationCommand": "git diff --exit-code safety/traincapsule-pre-v3-1-zh-hardening-20260812T122011Z^{tree} 1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface^{tree}",
+    "recoverableWorktreeCommand": "git worktree add /home/jasim/projects/traincapsule-v3-1-zh-rollback safety/traincapsule-pre-v3-1-zh-hardening-20260812T122011Z",
+    "safeStopAction": "Retain factory/state/STOP, disable the product-controller task, preserve all evidence and worktrees, and do not merge."
+  }
+}

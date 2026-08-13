@@ -1,0 +1,342 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "GitSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    },
+    "PRPublicationPhase": {
+      "enum": [
+        "PREPARED",
+        "BRANCH_PUSHED",
+        "PR_OPEN",
+        "CHECKS_PENDING",
+        "POLICY_PENDING",
+        "READY_TO_MERGE",
+        "AUTO_MERGE_REQUESTED",
+        "MERGED",
+        "MAIN_VERIFIED",
+        "INVARIANTS_VERIFIED",
+        "REVERT_REQUIRED",
+        "REVERT_BRANCH_PUSHED",
+        "REVERT_PR_OPEN",
+        "REVERT_CHECKS_PENDING",
+        "REVERT_POLICY_PENDING",
+        "REVERT_MERGE_REQUESTED",
+        "FAILED",
+        "REVERTED",
+        "HARD_STUCK"
+      ],
+      "title": "PRPublicationPhase",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/pr-publication-transaction.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "attempt": {
+      "maximum": 20,
+      "minimum": 1,
+      "title": "Attempt",
+      "type": "integer"
+    },
+    "automatedMerge": {
+      "const": true,
+      "default": true,
+      "title": "Automatedmerge",
+      "type": "boolean"
+    },
+    "baseBranch": {
+      "const": "main",
+      "default": "main",
+      "title": "Basebranch",
+      "type": "string"
+    },
+    "baseSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "candidateBranch": {
+      "pattern": "^[A-Za-z0-9](?:[A-Za-z0-9._/-]{0,126}[A-Za-z0-9])?$",
+      "title": "Candidatebranch",
+      "type": "string"
+    },
+    "candidateManifestDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Digest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "candidateSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "candidateTreeSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "createdAt": {
+      "format": "date-time",
+      "title": "Createdat",
+      "type": "string"
+    },
+    "failureReason": {
+      "anyOf": [
+        {
+          "maxLength": 2000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Failurereason"
+    },
+    "idempotencyReceipts": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxProperties": 32,
+      "propertyNames": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "title": "Idempotencyreceipts",
+      "type": "object"
+    },
+    "machinePolicyReceiptDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Digest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "machinePolicyReceiptId": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Identifier"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "maximumAttempts": {
+      "maximum": 20,
+      "minimum": 1,
+      "title": "Maximumattempts",
+      "type": "integer"
+    },
+    "mergeQueueEntryId": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Identifier"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "mergedMainSha": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GitSha"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "mergedMainTreeSha": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GitSha"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "phase": {
+      "$ref": "#/$defs/PRPublicationPhase"
+    },
+    "pullRequestNumber": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pullrequestnumber"
+    },
+    "pullRequestUrl": {
+      "anyOf": [
+        {
+          "pattern": "^https://github\\.com/.+/pull/[1-9][0-9]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Pullrequesturl"
+    },
+    "requiredCheckDigests": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxProperties": 64,
+      "propertyNames": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "title": "Requiredcheckdigests",
+      "type": "object"
+    },
+    "requiredHumanApprovals": {
+      "const": 0,
+      "default": 0,
+      "title": "Requiredhumanapprovals",
+      "type": "integer"
+    },
+    "revertBranch": {
+      "anyOf": [
+        {
+          "maxLength": 128,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Revertbranch"
+    },
+    "revertMachinePolicyReceiptDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Digest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "revertMachinePolicyReceiptId": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Identifier"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "revertPullRequestNumber": {
+      "anyOf": [
+        {
+          "minimum": 1,
+          "type": "integer"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Revertpullrequestnumber"
+    },
+    "revertPullRequestUrl": {
+      "anyOf": [
+        {
+          "pattern": "^https://github\\.com/.+/pull/[1-9][0-9]*$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Revertpullrequesturl"
+    },
+    "revertSha": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GitSha"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "revertedMainSha": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/GitSha"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "transactionId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "updatedAt": {
+      "format": "date-time",
+      "title": "Updatedat",
+      "type": "string"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "transactionId",
+    "workItemId",
+    "candidateBranch",
+    "baseSha",
+    "candidateSha",
+    "candidateTreeSha",
+    "phase",
+    "attempt",
+    "maximumAttempts",
+    "createdAt",
+    "updatedAt"
+  ],
+  "title": "PRPublicationTransactionV31",
+  "type": "object"
+}

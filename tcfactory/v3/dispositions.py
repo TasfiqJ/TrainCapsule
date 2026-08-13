@@ -19,6 +19,7 @@ class DispositionRecord(V3Model):
     evidence_refs: list[str]
     decided_by: OwnerType
     decided_at: datetime
+
     @model_validator(mode="after")
     def require_decision_evidence(self) -> DispositionRecord:
         if self.previous is self.decision:

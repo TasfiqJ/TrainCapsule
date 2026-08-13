@@ -109,7 +109,7 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
     marker = MigrationCompleteMarker(
         completed_sha=current_sha(repo_root),
         source_manifest_sha256=sha256_file(repo_root / config.source_of_truth.manifest),
-        owner_directives_sha256=sha256_file(repo_root / "config/owner_directives.yaml"),
+        active_generation_sha256=sha256_file(repo_root / "config/active_generation.yaml"),
         acceptance_work_items={f"V3-MIG-{number:03d}": "COMPLETED" for number in range(16, 21)},
         acceptance_evidence_digests={
             f"V3-MIG-{number:03d}": "sha256:" + "a" * 64 for number in range(16, 21)
@@ -131,11 +131,19 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
             return BackendRouteState.AUTHENTICATED
 
     monkeypatch.setattr("tcfactory.supervisor.ClaudeCredentialProvider", AuthenticatedProvider)
-
-    result = run_startup_preflight(repo_root)
-    assert result["ready"] is True
-    assert result["credentials"] == "AUTHENTICATED"
-    assert result["legacyMigrationRecords"] == 124
+    monkeypatch.setattr("tcfactory.supervisor.validate_publication_installation", lambda *_: None)
+    monkeypatch.setattr(
+        "tcfactory.supervisor.validate_controller_activation",
+        lambda **_: "sha256:" + "b" * 64,
+    )
+    monkeypatch.setattr(
+        "tcfactory.v3.activation.validate_activation_control_state", lambda **_: None
+    )
+    monkeypatch.setattr(
+        "tcfactory.supervisor.validate_repository_release_controls",
+        lambda **_: {"status": "PASS", "rulesDigest": "sha256:" + "c" * 64},
+    )
+    monkeypatch.setattr("tcfactory.supervisor.reconcile_publications", lambda **_: [])
 
     def reject_private_gate(*_args: object, **_kwargs: object) -> tuple[Path, Path]:
         raise PrivateGateVerificationError("mandatory gate missing")
@@ -153,65 +161,64 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
     paths.stop.write_text("stop\n", encoding="utf-8")
     with pytest.raises(RuntimeError, match="durable STOP"):
         run_startup_preflight(repo_root)
+    paths.stop.unlink()
+
+    result = run_startup_preflight(repo_root)
+    assert result["ready"] is True
+    assert result["publicationRecovery"] == {
+        "status": "RECONCILED",
+        "transactions": 0,
+        "phases": [],
+        "repositoryControls": {
+            "status": "PASS",
+            "rulesDigest": "sha256:" + "c" * 64,
+        },
+        "activationReceiptDigest": "sha256:" + "b" * 64,
+    }
 
 
 def test_startup_reconciles_publication_before_exact_sha_marker(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
     repo_root = Path(__file__).resolve().parents[1]
-    paths = _patch_policy(monkeypatch, repo_root, tmp_path)
-    config = load_factory_v3(repo_root / "config/factory.yaml")
-    from tcfactory.gitops import current_sha
-
-    marker = MigrationCompleteMarker(
-        completed_sha=current_sha(repo_root),
-        source_manifest_sha256=sha256_file(repo_root / config.source_of_truth.manifest),
-        owner_directives_sha256=sha256_file(repo_root / "config/owner_directives.yaml"),
-        acceptance_work_items={f"V3-MIG-{number:03d}": "COMPLETED" for number in range(16, 21)},
-        acceptance_evidence_digests={
-            f"V3-MIG-{number:03d}": "sha256:" + "a" * 64 for number in range(16, 21)
-        },
-        completed_at=datetime(2026, 8, 11, 21, 0, tzinfo=UTC),
-    )
-    events: list[str] = []
-
-    class RecoveringPublisher:
-        def __init__(self, **_: object) -> None:
-            pass
-
-        def reconcile_pending(self) -> dict[str, object]:
-            events.append("publication")
-            return {"status": "VERIFIED"}
-
-    class AuthenticatedProvider:
-        def __init__(self, *, require_long_lived_token: bool = False) -> None:
-            assert require_long_lived_token
-
-        def state(self) -> BackendRouteState:
-            return BackendRouteState.AUTHENTICATED
-
-    def verify_marker(*_: object) -> MigrationCompleteMarker:
-        events.append("marker")
-        return marker
-
+    _patch_policy(monkeypatch, repo_root, tmp_path)
+    calls: list[str] = []
     monkeypatch.setattr("tcfactory.supervisor._verify_source_integrity", lambda _: None)
     monkeypatch.setattr(
         "tcfactory.supervisor.verify_legacy_queue_archive_receipt", lambda *_, **__: {}
     )
-    monkeypatch.setattr("tcfactory.supervisor.MainOnlyPublisher", RecoveringPublisher)
-    monkeypatch.setattr("tcfactory.supervisor._verify_migration_marker", verify_marker)
-    monkeypatch.setattr("tcfactory.supervisor.ClaudeCredentialProvider", AuthenticatedProvider)
-    result = run_startup_preflight(repo_root)
-    assert events == ["publication", "marker"]
-    assert result["publicationRecovery"] == {"status": "VERIFIED"}
-    assert not paths.stop.exists()
+    monkeypatch.setattr("tcfactory.supervisor.validate_publication_installation", lambda *_: None)
+    monkeypatch.setattr(
+        "tcfactory.supervisor.validate_controller_activation",
+        lambda **_: "sha256:" + "b" * 64,
+    )
+    monkeypatch.setattr(
+        "tcfactory.v3.activation.validate_activation_control_state", lambda **_: None
+    )
+    monkeypatch.setattr(
+        "tcfactory.supervisor.validate_repository_release_controls",
+        lambda **_: {"status": "PASS"},
+    )
+    monkeypatch.setattr(
+        "tcfactory.supervisor.reconcile_publications",
+        lambda **_: calls.append("reconcile") or [],
+    )
+
+    def reject_marker(*_: object) -> None:
+        calls.append("marker")
+        raise RuntimeError("exact-SHA marker intentionally unavailable")
+
+    monkeypatch.setattr("tcfactory.supervisor._verify_migration_marker", reject_marker)
+    with pytest.raises(RuntimeError, match="exact-SHA marker intentionally unavailable"):
+        run_startup_preflight(repo_root)
+    assert calls == ["reconcile", "marker"]
 
 
 def test_v3_status_exposes_required_operator_fields() -> None:
     repo_root = Path(__file__).resolve().parents[1]
     status = build_runtime_status(repo_root)
 
-    assert status["activeMilestone"] == "M1_NATIVE_PREFLIGHT"
+    assert status["activeMilestone"] == "M0_FACTORY_MIGRATED"
     assert set(status["currentWorkItem"]) == {"workItemId", "lane", "status"}
     assert set(status["retryBudget"]) == {
         "planAttemptsRemaining",

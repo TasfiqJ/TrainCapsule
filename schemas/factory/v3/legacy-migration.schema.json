@@ -10,6 +10,33 @@
       "title": "LegacyDisposition",
       "type": "string"
     },
+    "LegacyEvidenceFile": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "mode": {
+          "pattern": "^[0-7]{4}$",
+          "title": "Mode",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        }
+      },
+      "required": [
+        "path",
+        "mode",
+        "sha256"
+      ],
+      "title": "LegacyEvidenceFile",
+      "type": "object"
+    },
     "LegacyMapRecord": {
       "additionalProperties": false,
       "properties": {
@@ -130,13 +157,28 @@
       },
       "title": "Records",
       "type": "array"
+    },
+    "preservedEvidenceInventory": {
+      "items": {
+        "$ref": "#/$defs/LegacyEvidenceFile"
+      },
+      "minItems": 1,
+      "title": "Preservedevidenceinventory",
+      "type": "array"
+    },
+    "preservedEvidenceInventoryDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Preservedevidenceinventorydigest",
+      "type": "string"
     }
   },
   "required": [
     "migrationBaseSha",
     "sourceLedgerDigest",
     "sourcePolicyRef",
-    "records"
+    "records",
+    "preservedEvidenceInventory",
+    "preservedEvidenceInventoryDigest"
   ],
   "title": "LegacyMigrationMap",
   "type": "object",

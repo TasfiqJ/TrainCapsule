@@ -1,6 +1,9 @@
 name: TrainCapsule / Product contract
 
 on:
+  pull_request:
+    branches: [main]
+  merge_group:
   push:
     branches: [main]
   workflow_dispatch:
@@ -14,6 +17,7 @@ concurrency:
 
 jobs:
   product-contract:
+    name: TrainCapsule / Product contract
     runs-on: ${{ fromJSON(vars.TRAINCAPSULE_CI_RUNNER || '["ubuntu-latest"]') }}
     timeout-minutes: 20
     steps:

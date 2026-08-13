@@ -39,9 +39,35 @@
         "AUTHENTICATED",
         "AUTH_EXPIRED",
         "QUOTA_WAIT",
+        "INFRASTRUCTURE",
+        "TIMEOUT",
         "ROUTE_REFUSED"
       ],
       "title": "BackendRouteState",
+      "type": "string"
+    },
+    "BackendTerminalDisposition": {
+      "enum": [
+        "COMPLETED",
+        "FAILED",
+        "TIMEOUT",
+        "AUTH_EXPIRED",
+        "QUOTA_WAIT",
+        "INFRASTRUCTURE",
+        "CANCELLED",
+        "ROUTE_REFUSED"
+      ],
+      "title": "BackendTerminalDisposition",
+      "type": "string"
+    },
+    "ExecutionEvidenceMode": {
+      "enum": [
+        "SIMULATION",
+        "CONTROLLED_VALIDATION",
+        "LIVE_VALIDATION",
+        "EXTERNAL_VALIDATION"
+      ],
+      "title": "ExecutionEvidenceMode",
       "type": "string"
     },
     "SessionState": {
@@ -137,6 +163,25 @@
       "title": "Redactedsummary",
       "type": "string"
     },
+    "evidenceMode": {
+      "$ref": "#/$defs/ExecutionEvidenceMode"
+    },
+    "terminalDisposition": {
+      "$ref": "#/$defs/BackendTerminalDisposition"
+    },
+    "terminalRecordDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Terminalrecorddigest"
+    },
     "errorState": {
       "anyOf": [
         {
@@ -155,7 +200,9 @@
     "verdict",
     "artifactDigests",
     "usage",
-    "redactedSummary"
+    "redactedSummary",
+    "evidenceMode",
+    "terminalDisposition"
   ],
   "title": "AgentRunResult",
   "type": "object",

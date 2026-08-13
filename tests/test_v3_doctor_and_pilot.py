@@ -14,6 +14,22 @@ from tcfactory.v3.pilot import create_pilot_metadata, load_pilot_metadata
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _copy_active_authority(destination: Path) -> None:
+    shutil.copytree(ROOT / "config", destination / "config")
+    shutil.copytree(ROOT / "docs/source-of-truth", destination / "docs/source-of-truth")
+    shutil.copytree(
+        ROOT / "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11",
+        destination / "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11",
+    )
+    (destination / "docs").mkdir(exist_ok=True)
+    shutil.copy2(ROOT / "docs/CONTEXT_INDEX.yaml", destination / "docs/CONTEXT_INDEX.yaml")
+    (destination / "scripts").mkdir()
+    shutil.copy2(
+        ROOT / "scripts/generate_v3_1_zh_source.py",
+        destination / "scripts/generate_v3_1_zh_source.py",
+    )
+
+
 def _copy_package_contracts(destination: Path) -> None:
     for source in sorted((ROOT / "packages").glob("traincapsule-*")):
         target = destination / "packages" / source.name
@@ -48,9 +64,7 @@ def test_doctor_rejects_broken_product_entry_point_and_schema(tmp_path: Path) ->
 
 
 def test_pilot_metadata_is_content_addressed_and_never_evidence(tmp_path: Path) -> None:
-    directives = tmp_path / "config/owner_directives.yaml"
-    directives.parent.mkdir(parents=True)
-    directives.write_text("version: 3\n", encoding="utf-8")
+    _copy_active_authority(tmp_path)
     created = datetime(2026, 8, 11, 12, 0, tzinfo=UTC)
 
     path = create_pilot_metadata(tmp_path, "pilot-001", created_at=created)
@@ -72,8 +86,6 @@ def test_pilot_metadata_is_content_addressed_and_never_evidence(tmp_path: Path) 
 
 
 def test_pilot_id_cannot_escape_local_state(tmp_path: Path) -> None:
-    directives = tmp_path / "config/owner_directives.yaml"
-    directives.parent.mkdir(parents=True)
-    directives.write_text("version: 3\n", encoding="utf-8")
+    _copy_active_authority(tmp_path)
     with pytest.raises(ValidationError):
         create_pilot_metadata(tmp_path, "../../escape")

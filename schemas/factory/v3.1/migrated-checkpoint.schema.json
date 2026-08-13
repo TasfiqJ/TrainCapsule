@@ -1,0 +1,576 @@
+{
+  "$defs": {
+    "AgentSession": {
+      "additionalProperties": false,
+      "properties": {
+        "backend": {
+          "title": "Backend",
+          "type": "string"
+        },
+        "requestId": {
+          "title": "Requestid",
+          "type": "string"
+        },
+        "sessionRef": {
+          "pattern": "^ASESS-[A-Z0-9_-]+$",
+          "title": "Sessionref",
+          "type": "string"
+        },
+        "startedAt": {
+          "title": "Startedat",
+          "type": "string"
+        },
+        "state": {
+          "$ref": "#/$defs/SessionState"
+        }
+      },
+      "required": [
+        "sessionRef",
+        "backend",
+        "requestId",
+        "state",
+        "startedAt"
+      ],
+      "title": "AgentSession",
+      "type": "object"
+    },
+    "BackendRouteState": {
+      "enum": [
+        "AUTHENTICATED",
+        "AUTH_EXPIRED",
+        "QUOTA_WAIT",
+        "INFRASTRUCTURE",
+        "TIMEOUT",
+        "ROUTE_REFUSED"
+      ],
+      "title": "BackendRouteState",
+      "type": "string"
+    },
+    "CheckpointBudget": {
+      "additionalProperties": false,
+      "properties": {
+        "maxTurns": {
+          "maximum": 200,
+          "minimum": 1,
+          "title": "Maxturns",
+          "type": "integer"
+        },
+        "maxWallTimeSeconds": {
+          "maximum": 14400,
+          "minimum": 1,
+          "title": "Maxwalltimeseconds",
+          "type": "integer"
+        },
+        "planAttemptsRemaining": {
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Planattemptsremaining",
+          "type": "integer"
+        },
+        "repairCyclesRemaining": {
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Repaircyclesremaining",
+          "type": "integer"
+        },
+        "restartsRemaining": {
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Restartsremaining",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "maxTurns",
+        "maxWallTimeSeconds",
+        "planAttemptsRemaining",
+        "repairCyclesRemaining",
+        "restartsRemaining"
+      ],
+      "title": "CheckpointBudget",
+      "type": "object"
+    },
+    "ExecutionEvidenceMode": {
+      "enum": [
+        "SIMULATION",
+        "CONTROLLED_VALIDATION",
+        "LIVE_VALIDATION",
+        "EXTERNAL_VALIDATION"
+      ],
+      "title": "ExecutionEvidenceMode",
+      "type": "string"
+    },
+    "Lane": {
+      "enum": [
+        "PRODUCT",
+        "MARKET",
+        "COMPETITOR",
+        "TRUST",
+        "FACTORY"
+      ],
+      "title": "Lane",
+      "type": "string"
+    },
+    "SessionState": {
+      "enum": [
+        "STARTED",
+        "RUNNING",
+        "COMPLETED",
+        "FAILED",
+        "CANCELLED"
+      ],
+      "title": "SessionState",
+      "type": "string"
+    },
+    "V3Checkpoint": {
+      "additionalProperties": false,
+      "properties": {
+        "active": {
+          "title": "Active",
+          "type": "boolean"
+        },
+        "activeRole": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Activerole"
+        },
+        "approvalState": {
+          "title": "Approvalstate",
+          "type": "string"
+        },
+        "artifactRoot": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifactroot"
+        },
+        "backendRecheckAttempts": {
+          "default": 0,
+          "maximum": 8,
+          "minimum": 0,
+          "title": "Backendrecheckattempts",
+          "type": "integer"
+        },
+        "backendRechecksRemaining": {
+          "default": 3,
+          "maximum": 8,
+          "minimum": 0,
+          "title": "Backendrechecksremaining",
+          "type": "integer"
+        },
+        "backendResumeAt": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Backendresumeat"
+        },
+        "backendSession": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/AgentSession"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "backendSessionRef": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Backendsessionref"
+        },
+        "backendTerminalRecordDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Backendterminalrecorddigest"
+        },
+        "backendWaitState": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/BackendRouteState"
+            },
+            {
+              "const": "PUBLICATION_PENDING",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Backendwaitstate"
+        },
+        "budget": {
+          "$ref": "#/$defs/CheckpointBudget"
+        },
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "candidateWorktree": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Candidateworktree"
+        },
+        "circuitBreakerReason": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Circuitbreakerreason"
+        },
+        "completedRoles": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Completedroles",
+          "type": "array"
+        },
+        "contextDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contextdigest",
+          "type": "string"
+        },
+        "createdAt": {
+          "format": "date-time",
+          "title": "Createdat",
+          "type": "string"
+        },
+        "executionEvidenceMode": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ExecutionEvidenceMode"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "findingFingerprints": {
+          "additionalProperties": {
+            "type": "integer"
+          },
+          "title": "Findingfingerprints",
+          "type": "object"
+        },
+        "generation": {
+          "minimum": 1,
+          "title": "Generation",
+          "type": "integer"
+        },
+        "handoffDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Handoffdigest"
+        },
+        "handoffPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Handoffpath"
+        },
+        "lane": {
+          "$ref": "#/$defs/Lane"
+        },
+        "milestone": {
+          "pattern": "^M[0-9]+_[A-Z0-9_]+$",
+          "title": "Milestone",
+          "type": "string"
+        },
+        "publicationAuthorizationEnvelopeDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publicationauthorizationenvelopedigest"
+        },
+        "publicationAuthorizationEnvelopePath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publicationauthorizationenvelopepath"
+        },
+        "publicationCandidateTreeSha": {
+          "anyOf": [
+            {
+              "pattern": "^[0-9a-f]{40}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publicationcandidatetreesha"
+        },
+        "publicationCheckpointDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publicationcheckpointdigest"
+        },
+        "publicationExpectedMachinePolicyReceiptDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publicationexpectedmachinepolicyreceiptdigest"
+        },
+        "publicationExpectedMachinePolicyReceiptId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publicationexpectedmachinepolicyreceiptid"
+        },
+        "publicationGateDigests": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Publicationgatedigests",
+          "type": "object"
+        },
+        "publicationManifestDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publicationmanifestdigest"
+        },
+        "publicationManifestPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publicationmanifestpath"
+        },
+        "publicationPacketDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publicationpacketdigest"
+        },
+        "publicationTransactionId": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Publicationtransactionid"
+        },
+        "schemaVersion": {
+          "default": 3,
+          "maximum": 3,
+          "minimum": 3,
+          "title": "Schemaversion",
+          "type": "integer"
+        },
+        "sourceDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Sourcedigest",
+          "type": "string"
+        },
+        "stageArtifactDigests": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Stageartifactdigests",
+          "type": "object"
+        },
+        "stageArtifactPaths": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "title": "Stageartifactpaths",
+          "type": "object"
+        },
+        "stageAttempt": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Stageattempt",
+          "type": "integer"
+        },
+        "updatedAt": {
+          "format": "date-time",
+          "title": "Updatedat",
+          "type": "string"
+        },
+        "valueFailureCount": {
+          "default": 0,
+          "minimum": 0,
+          "title": "Valuefailurecount",
+          "type": "integer"
+        },
+        "valueRedesignsRemaining": {
+          "default": 0,
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Valueredesignsremaining",
+          "type": "integer"
+        },
+        "workItemId": {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "title": "Workitemid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "generation",
+        "workItemId",
+        "lane",
+        "milestone",
+        "budget",
+        "contextDigest",
+        "sourceDigest",
+        "candidateSha",
+        "approvalState",
+        "active",
+        "createdAt",
+        "updatedAt"
+      ],
+      "title": "V3Checkpoint",
+      "type": "object"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/migrated-checkpoint.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "migratedFromSchemaVersion": {
+      "const": "3",
+      "title": "Migratedfromschemaversion",
+      "type": "string"
+    },
+    "payload": {
+      "$ref": "#/$defs/V3Checkpoint"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "migratedFromSchemaVersion",
+    "payload"
+  ],
+  "title": "MigratedCheckpointV31",
+  "type": "object"
+}

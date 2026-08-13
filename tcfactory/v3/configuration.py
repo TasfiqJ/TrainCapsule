@@ -3,7 +3,6 @@
 from __future__ import annotations
 
 import os
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Literal, cast
 
@@ -13,13 +12,18 @@ from tcfactory.util import sha256_file
 from tcfactory.v3.base import V3Model
 from tcfactory.v3.enums import CommercialMaturity, EvidenceType
 from tcfactory.v3.scheduler import SchedulerConfig
+from tcfactory.v3.source_authority import (
+    ActiveGenerationConfig,
+    validate_active_source_generation,
+)
 from tcfactory.yamlutil import load_yaml
 
 
 class RepositoryPolicy(V3Model):
     base_branch: Literal["main"]
-    release_mode: Literal["owner_directed_main_only"]
-    direct_main_push: Literal[True]
+    release_mode: Literal["AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"]
+    direct_main_push: Literal[False]
+    candidate_branch_prefix: Literal["factory/"]
     require_clean_base: bool
     candidate_manifest_required: Literal[True]
 
@@ -34,6 +38,7 @@ class ExecutionPolicy(V3Model):
 
 
 class SourceOfTruthPolicy(V3Model):
+    active_generation: Literal["config/active_generation.yaml"]
     active_bundle: str
     manifest: str
     context_index: str
@@ -62,24 +67,35 @@ class RuntimePolicy(V3Model):
 
 
 class ReleasePolicy(V3Model):
-    publication_branch: Literal["main"]
-    non_main_pushes_forbidden: Literal[True]
-    pull_request_dependency_forbidden: Literal[True]
-    monitor_hosted_main_checks: Literal[True]
-    automatic_revert_and_quarantine: Literal[True]
-    require_candidate_sha_match: Literal[True]
+    direct_main_push_forbidden: Literal[True]
+    automated_pull_request_required: Literal[True]
+    exact_head_sha_checks_required: Literal[True]
+    independent_machine_policy_receipt_required: Literal[True]
+    merge_queue_or_auto_merge_required: Literal[True]
+    exact_merged_main_verification_required: Literal[True]
+    publisher_capability: Literal["AUTOMATED_PR_V31_READY"]
 
 
 class OperatorPolicy(V3Model):
     zero_human_operation: Literal[True]
     policy_gate_mode: Literal["deterministic_machine_policy"]
-    owner_directed_deviation_record: str = Field(min_length=1)
+    active_authority_manifest: Literal[
+        "docs/source-of-truth/v3.1-zh-2026-08-12/FINAL_MANIFEST_V3_1_ZH.json"
+    ]
     external_truth_remains_receipt_bound: Literal[True]
     synthetic_commercial_evidence_forbidden: Literal[True]
 
 
+class LegacyConfigCompatibility(V3Model):
+    input_version: Literal[3]
+    disposition: Literal["READ_ONLY_LOSSLESS_ADAPTER"]
+    allowed_inputs: list[str] = Field(min_length=1)
+    reject_undeclared_inputs: Literal[True]
+
+
 class FactoryV3Config(V3Model):
-    version: int = Field(default=3, ge=3, le=3)
+    schema_version: Literal["3.1"]
+    generation_id: Literal["traincapsule-v3.1-zh-2026-08-12"]
     allow_paid_usage: Literal[False] = False
     repository: RepositoryPolicy
     execution: ExecutionPolicy
@@ -88,71 +104,11 @@ class FactoryV3Config(V3Model):
     runtime: RuntimePolicy
     release: ReleasePolicy
     operator_policy: OperatorPolicy
-
-
-class OwnerDirectives(V3Model):
-    version: Literal[3]
-    authority: Literal["repository_owner"]
-    recorded_at: datetime
-    directives: dict[str, object]
-    safety_contract: dict[str, object]
-    deviations_from_bundle: list[dict[str, str]]
-
-    @model_validator(mode="after")
-    def require_unattended_main_only(self) -> OwnerDirectives:
-        required = {
-            "unattendedOperation": "REQUIRED",
-            "humanIntervention": "FORBIDDEN",
-            "publicationBranch": "main",
-            "nonMainPushes": "FORBIDDEN",
-            "pullRequestDependency": "FORBIDDEN",
-            "externalEvidencePolicy": "NEVER_FABRICATE",
-            "missingEvidenceResult": "UNKNOWN",
-            "scopedBlockersDoNotStopIndependentLanes": True,
-        }
-        if self.directives != required:
-            raise ValueError("owner directives differ from the exact unattended main-only contract")
-        pre = self.safety_contract.get("prePromotion")
-        post = self.safety_contract.get("postPush")
-        if not isinstance(pre, dict) or not all(
-            cast(dict[str, object], pre).get(name) is True
-            for name in (
-                "requireExactCandidateSha",
-                "requireDeterministicLocalGates",
-                "requirePrivateGatesWhenConfigured",
-                "requireMachinePolicyReceipt",
-            )
-        ):
-            raise ValueError("owner pre-promotion safety contract is incomplete")
-        if not isinstance(post, dict) or not all(
-            cast(dict[str, object], post).get(name) is True
-            for name in (
-                "monitorRequiredMainChecks",
-                "autoRevertFailedPromotion",
-                "quarantineFailedCandidate",
-                "finiteRetryBudgetRequired",
-            )
-        ):
-            raise ValueError("owner post-push safety contract is incomplete")
-        return self
-
-
-class OwnerOverridePolicy(V3Model):
-    version: Literal[3]
-    decision_id: Literal["OWNER-ZERO-HUMAN-20260811"]
-    authority: Literal["explicit repository owner direction in Codex task"]
-    effective_date: Literal["2026-08-11"]
-    decision: str = Field(min_length=1)
-    replaces: list[str] = Field(min_length=1)
-    machine_replacement: list[str] = Field(min_length=1)
-    publication_policy: dict[str, str]
-    unchanged_truth_boundaries: list[str] = Field(min_length=1)
-    canonical_owner_directives: Literal["config/owner_directives.yaml"]
-    canonical_owner_directives_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    compatibility: LegacyConfigCompatibility
 
 
 class ValidatedRuntimeSource(V3Model):
-    version: Literal[3] = 3
+    schema_version: Literal["3.1"] = "3.1"
     path: str
     sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
 
@@ -166,17 +122,6 @@ class ContextRoutingConfig(V3Model):
     reject_role_mismatch: Literal[True]
     reject_stale_current_facts: Literal[True]
     role_default_groups: dict[str, list[str]] = Field(min_length=1)
-
-
-class DisabledHumanApprovalConfig(V3Model):
-    version: Literal[3]
-    enabled: Literal[False]
-    runtime_states: list[str] = Field(max_length=0)
-    trusted_root_environment_variable: None
-    replacement: Literal["OWNER_DIRECTED_MACHINE_POLICY_RECEIPT"]
-    missing_policy_disposition: Literal["BLOCKED_POLICY"]
-    external_fact_disposition: Literal["WAITING_EXTERNAL"]
-    fabrication_forbidden: Literal[True]
 
 
 class PlanningAutonomy(V3Model):
@@ -341,27 +286,20 @@ def validate_v3_configuration(repo_root: Path) -> dict[str, V3Model]:
     present = sorted(name for name in PROTECTED_ENVIRONMENT_OVERRIDES if os.getenv(name))
     if present:
         raise ValueError(f"protected V3 environment overrides are forbidden: {present}")
-    owner_directives_path = repo_root / "config/owner_directives.yaml"
-    override_path = repo_root / "factory/policy/ZERO_HUMAN_OPERATION_OVERRIDE.json"
-    owner_directives = OwnerDirectives.model_validate(load_yaml(owner_directives_path))
     from tcfactory.claude_features import load_claude_features
     from tcfactory.config import load_roles
     from tcfactory.github_sync import load_github_config
     from tcfactory.risk import load_risk_profiles
-    from tcfactory.util import read_json
 
     roles = load_roles(repo_root / "config/roles.yaml")
     claude_features = load_claude_features(repo_root / "config/claude_features.yaml")
     risk_profiles = load_risk_profiles(repo_root / "config/risk_profiles.yaml")
     if claude_features.version != 3 or risk_profiles.get("version") != 3:
         raise ValueError("Claude feature and risk configuration must declare version 3")
-    load_github_config(repo_root / "config/github.yaml")
+    github = load_github_config(repo_root / "config/github.yaml")
     context_index = load_yaml(repo_root / "docs/CONTEXT_INDEX.yaml")
-    if context_index.get("version") != 3 or not isinstance(context_index.get("groups"), dict):
-        raise ValueError("V3 context index is missing or invalid")
-    override = OwnerOverridePolicy.model_validate(read_json(override_path, {}))
-    if override.canonical_owner_directives_sha256 != sha256_file(owner_directives_path):
-        raise ValueError("owner override policy does not match canonical owner directives")
+    if context_index.get("version") != 4 or not isinstance(context_index.get("groups"), dict):
+        raise ValueError("V3.1-ZH context index is missing or invalid")
     context_policy = ContextRoutingConfig.model_validate(
         load_yaml(repo_root / "config/context.yaml")
     )
@@ -379,12 +317,25 @@ def validate_v3_configuration(repo_root: Path) -> dict[str, V3Model]:
             group = cast(dict[str, object], raw_group)
             include = group.get("includeRoles")
             exclude = group.get("excludeRoles")
-            if not isinstance(include, list) or role not in include or (
-                isinstance(exclude, list) and role in exclude
+            if (
+                not isinstance(include, list)
+                or role not in include
+                or (isinstance(exclude, list) and role in exclude)
             ):
                 raise ValueError(f"context group {group_name} is not authorized for role {role}")
+    factory = load_factory_v3(repo_root / "config/factory.yaml")
+    active_source = validate_active_source_generation(repo_root)
+    active_generation = ActiveGenerationConfig.model_validate(
+        load_yaml(repo_root / factory.source_of_truth.active_generation)
+    )
+    if factory.source_of_truth.active_bundle != active_source.source_root or (
+        factory.source_of_truth.manifest != active_source.manifest_path
+    ):
+        raise ValueError("factory source paths differ from the canonical active generation")
     loaded: dict[str, V3Model] = {
-        "factory": load_factory_v3(repo_root / "config/factory.yaml"),
+        "factory": factory,
+        "activeGeneration": active_generation,
+        "activeSource": active_source,
         "autonomy": load_autonomy_v3(repo_root / "config/autonomy.yaml"),
         "scheduler": load_scheduler_v3(repo_root / "config/scheduler.yaml"),
         "executors": load_executors_v3(repo_root / "config/executors.yaml"),
@@ -398,14 +349,9 @@ def validate_v3_configuration(repo_root: Path) -> dict[str, V3Model]:
             load_yaml(repo_root / "config/milestones.yaml")
         ),
         "contextPolicy": context_policy,
-        "humanApprovalDisabled": DisabledHumanApprovalConfig.model_validate(
-            load_yaml(repo_root / "config/human_approval.yaml")
-        ),
-        "ownerDirectives": owner_directives,
-        "ownerOverridePolicy": override,
+        "github": github,
     }
     for name, relative in {
-        "github": "config/github.yaml",
         "roles": "config/roles.yaml",
         "contextIndex": "docs/CONTEXT_INDEX.yaml",
         "riskProfiles": "config/risk_profiles.yaml",
@@ -414,9 +360,20 @@ def validate_v3_configuration(repo_root: Path) -> dict[str, V3Model]:
         loaded[name] = ValidatedRuntimeSource(
             path=relative, sha256=sha256_file(repo_root / relative)
         )
-    versions = {int(cast(Any, value).version) for value in loaded.values()}
-    if versions != {3}:
-        raise ValueError(f"mixed or legacy normal-operation configuration: {sorted(versions)}")
+    compatibility_inputs = {
+        "autonomy": "config/autonomy.yaml",
+        "scheduler": "config/scheduler.yaml",
+        "executors": "config/executors.yaml",
+        "externalEvidence": "config/external_evidence.yaml",
+        "commercialMaturity": "config/commercial_maturity.yaml",
+        "milestones": "config/milestones.yaml",
+        "contextPolicy": "config/context.yaml",
+    }
+    if set(factory.compatibility.allowed_inputs) != set(compatibility_inputs.values()):
+        raise ValueError("V3 compatibility inputs differ from the explicit lossless adapter set")
+    legacy_versions = {name: cast(Any, loaded[name]).version for name in compatibility_inputs}
+    if set(legacy_versions.values()) != {factory.compatibility.input_version}:
+        raise ValueError(f"legacy compatibility input version mismatch: {legacy_versions}")
     return loaded
 
 
@@ -442,12 +399,16 @@ def explain_v3_config_field(repo_root: Path, dotted_field: str) -> dict[str, obj
         "externalEvidence": "external_evidence.yaml",
         "commercialMaturity": "commercial_maturity.yaml",
         "milestones": "milestones.yaml",
-        "ownerDirectives": "owner_directives.yaml",
+        "activeGeneration": "active_generation.yaml",
     }
     return {
         "field": dotted_field,
         "value": value,
-        "source": str(repo_root / "config" / file_names[root_name]),
+        "source": (
+            str(repo_root / "config" / file_names[root_name])
+            if root_name in file_names
+            else str(repo_root / "config/active_generation.yaml")
+        ),
         "environmentOverride": None,
         "protected": dotted_field.startswith(
             (

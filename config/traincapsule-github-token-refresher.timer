@@ -1,0 +1,9 @@
+[Timer]
+OnBootSec=1m
+OnCalendar=*-*-* *:00/30:00
+RandomizedDelaySec=2m
+Persistent=true
+Unit=traincapsule-github-token-refresher.service
+
+[Install]
+WantedBy=multi-user.target

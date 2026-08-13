@@ -1,0 +1,119 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "3.1",
+      "default": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "workItemId": {
+      "const": "V3-PROD-029",
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "evidenceBasisSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Evidencebasissha",
+      "type": "string"
+    },
+    "sourceAuthorityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourceauthoritydigest",
+      "type": "string"
+    },
+    "productLineageDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Productlineagedigest",
+      "type": "string"
+    },
+    "packId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Packid",
+      "type": "string"
+    },
+    "familyIdentityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Familyidentitydigest",
+      "type": "string"
+    },
+    "packIdentityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Packidentitydigest",
+      "type": "string"
+    },
+    "supportedVersions": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Supportedversions",
+      "type": "array"
+    },
+    "supportedScope": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Supportedscope",
+      "type": "array"
+    },
+    "upgradeRules": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Upgraderules",
+      "type": "array"
+    },
+    "deprecationRules": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Deprecationrules",
+      "type": "array"
+    },
+    "rollbackRules": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Rollbackrules",
+      "type": "array"
+    },
+    "explicitExclusions": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Explicitexclusions",
+      "type": "array"
+    }
+  },
+  "required": [
+    "workItemId",
+    "evidenceBasisSha",
+    "sourceAuthorityDigest",
+    "productLineageDigest",
+    "packId",
+    "familyIdentityDigest",
+    "packIdentityDigest",
+    "supportedVersions",
+    "supportedScope",
+    "upgradeRules",
+    "deprecationRules",
+    "rollbackRules",
+    "explicitExclusions"
+  ],
+  "title": "SupportPolicyEvidence",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/support-policy-evidence.schema.json"
+}

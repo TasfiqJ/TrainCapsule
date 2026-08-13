@@ -1,0 +1,20 @@
+[build-system]
+requires = ["hatchling>=1.26"]
+build-backend = "hatchling.build"
+
+[project]
+name = "traincapsule-mandatory-canary-runner"
+version = "3.1.0"
+description = "Root-owned isolated TrainCapsule mandatory canary runner"
+requires-python = ">=3.12"
+dependencies = ["pydantic>=2.8"]
+
+[project.scripts]
+traincapsule-v31-run-canary = "traincapsule_canary_runner.cli:main"
+traincapsule-v31-canary-mechanism = "traincapsule_canary_runner.mechanisms:main"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/traincapsule_canary_runner"]
+
+[tool.hatch.build.targets.wheel.force-include]
+"policy/runner-policy.template.json" = "traincapsule_canary_runner/runner-policy.template.json"

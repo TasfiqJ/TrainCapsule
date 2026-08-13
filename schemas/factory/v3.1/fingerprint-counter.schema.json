@@ -1,0 +1,67 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "FingerprintDisposition": {
+      "enum": [
+        "NEW",
+        "KNOWN",
+        "REPEATED",
+        "HARD_STUCK"
+      ],
+      "title": "FingerprintDisposition",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/fingerprint-counter.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "count": {
+      "maximum": 1000,
+      "minimum": 1,
+      "title": "Count",
+      "type": "integer"
+    },
+    "disposition": {
+      "$ref": "#/$defs/FingerprintDisposition"
+    },
+    "fingerprint": {
+      "$ref": "#/$defs/Digest"
+    },
+    "firstSeenAt": {
+      "format": "date-time",
+      "title": "Firstseenat",
+      "type": "string"
+    },
+    "lastSeenAt": {
+      "format": "date-time",
+      "title": "Lastseenat",
+      "type": "string"
+    },
+    "maximumOccurrences": {
+      "maximum": 1000,
+      "minimum": 1,
+      "title": "Maximumoccurrences",
+      "type": "integer"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "fingerprint",
+    "count",
+    "maximumOccurrences",
+    "disposition",
+    "firstSeenAt",
+    "lastSeenAt"
+  ],
+  "title": "FingerprintCounterV31",
+  "type": "object"
+}

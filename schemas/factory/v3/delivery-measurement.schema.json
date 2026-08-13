@@ -1,0 +1,66 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "3.1",
+      "default": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "phase": {
+      "enum": [
+        "ORIGINAL",
+        "PROPOSED"
+      ],
+      "title": "Phase",
+      "type": "string"
+    },
+    "customerIdentityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Customeridentitydigest",
+      "type": "string"
+    },
+    "offerIdentityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Offeridentitydigest",
+      "type": "string"
+    },
+    "setupMinutes": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "title": "Setupminutes",
+      "type": "integer"
+    },
+    "deliveryMinutes": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "title": "Deliveryminutes",
+      "type": "integer"
+    },
+    "costMicrousd": {
+      "maximum": 1000000000000000,
+      "minimum": 0,
+      "title": "Costmicrousd",
+      "type": "integer"
+    },
+    "revenueMicrousd": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000000000000,
+      "title": "Revenuemicrousd",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "phase",
+    "customerIdentityDigest",
+    "offerIdentityDigest",
+    "setupMinutes",
+    "deliveryMinutes",
+    "costMicrousd",
+    "revenueMicrousd"
+  ],
+  "title": "DeliveryMeasurement",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/delivery-measurement.schema.json"
+}

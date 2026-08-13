@@ -56,9 +56,7 @@ def usage_health(path: Path) -> dict[str, Any]:
     for raw_run in runs:
         if not isinstance(raw_run, dict):
             continue
-        raw_charge = cast(dict[str, object], raw_run).get(
-            "actual_subscription_charge_usd", 0.0
-        )
+        raw_charge = cast(dict[str, object], raw_run).get("actual_subscription_charge_usd", 0.0)
         if isinstance(raw_charge, (int, float)) and not isinstance(raw_charge, bool):
             actual_subscription_charge += float(raw_charge)
     denominator = total_usage or total_cost or sum(value["stages"] for value in by_family.values())
@@ -73,10 +71,7 @@ def usage_health(path: Path) -> dict[str, Any]:
         )
         return value / denominator if denominator else 0.0
 
-    shares = {
-        family: share(family)
-        for family in ("haiku", "sonnet", "opus", "fable", "other")
-    }
+    shares = {family: share(family) for family in ("haiku", "sonnet", "opus", "fable", "other")}
     status = "healthy"
     if runs and shares["fable"] > 0.25:
         status = "fable-heavy"

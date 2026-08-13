@@ -23,9 +23,9 @@
       "title": "Sourcemanifestsha256",
       "type": "string"
     },
-    "ownerDirectivesSha256": {
+    "activeGenerationSha256": {
       "pattern": "^[0-9a-f]{64}$",
-      "title": "Ownerdirectivessha256",
+      "title": "Activegenerationsha256",
       "type": "string"
     },
     "milestone": {
@@ -57,7 +57,7 @@
   "required": [
     "completedSha",
     "sourceManifestSha256",
-    "ownerDirectivesSha256",
+    "activeGenerationSha256",
     "acceptanceWorkItems",
     "acceptanceEvidenceDigests",
     "completedAt"

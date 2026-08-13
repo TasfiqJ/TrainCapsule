@@ -1,0 +1,216 @@
+{
+  "$defs": {
+    "SourceCoverageEvidence": {
+      "additionalProperties": false,
+      "properties": {
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "sourceHeadingCount": {
+          "minimum": 1,
+          "title": "Sourceheadingcount",
+          "type": "integer"
+        },
+        "mappedHeadingCount": {
+          "minimum": 1,
+          "title": "Mappedheadingcount",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "path",
+        "sha256",
+        "sourceHeadingCount",
+        "mappedHeadingCount"
+      ],
+      "title": "SourceCoverageEvidence",
+      "type": "object"
+    },
+    "SourceManifestDocument": {
+      "additionalProperties": false,
+      "properties": {
+        "logicalId": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._-]{1,127}$",
+          "title": "Logicalid",
+          "type": "string"
+        },
+        "path": {
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "sha256": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sha256",
+          "type": "string"
+        },
+        "authorityClass": {
+          "minLength": 1,
+          "title": "Authorityclass",
+          "type": "string"
+        },
+        "sections": {
+          "items": {
+            "$ref": "#/$defs/SourceManifestSection"
+          },
+          "minItems": 1,
+          "title": "Sections",
+          "type": "array"
+        },
+        "generationId": {
+          "minLength": 1,
+          "title": "Generationid",
+          "type": "string"
+        },
+        "derivedFrom": {
+          "minLength": 1,
+          "title": "Derivedfrom",
+          "type": "string"
+        },
+        "required": {
+          "const": true,
+          "title": "Required",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "logicalId",
+        "path",
+        "sha256",
+        "authorityClass",
+        "sections",
+        "generationId",
+        "derivedFrom",
+        "required"
+      ],
+      "title": "SourceManifestDocument",
+      "type": "object"
+    },
+    "SourceManifestIntegrity": {
+      "additionalProperties": false,
+      "properties": {
+        "algorithm": {
+          "const": "sha256",
+          "title": "Algorithm",
+          "type": "string"
+        },
+        "documentCount": {
+          "maximum": 64,
+          "minimum": 1,
+          "title": "Documentcount",
+          "type": "integer"
+        },
+        "generatorPath": {
+          "const": "scripts/generate_v3_1_zh_source.py",
+          "title": "Generatorpath",
+          "type": "string"
+        },
+        "manifestSelfIncluded": {
+          "const": false,
+          "title": "Manifestselfincluded",
+          "type": "boolean"
+        }
+      },
+      "required": [
+        "algorithm",
+        "documentCount",
+        "generatorPath",
+        "manifestSelfIncluded"
+      ],
+      "title": "SourceManifestIntegrity",
+      "type": "object"
+    },
+    "SourceManifestSection": {
+      "additionalProperties": false,
+      "properties": {
+        "heading": {
+          "minLength": 1,
+          "title": "Heading",
+          "type": "string"
+        },
+        "level": {
+          "maximum": 6,
+          "minimum": 1,
+          "title": "Level",
+          "type": "integer"
+        },
+        "sectionId": {
+          "minLength": 1,
+          "title": "Sectionid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "heading",
+        "level",
+        "sectionId"
+      ],
+      "title": "SourceManifestSection",
+      "type": "object"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": 1,
+      "title": "Schemaversion",
+      "type": "integer"
+    },
+    "generationId": {
+      "minLength": 1,
+      "title": "Generationid",
+      "type": "string"
+    },
+    "generatedAt": {
+      "format": "date-time",
+      "title": "Generatedat",
+      "type": "string"
+    },
+    "authorityModel": {
+      "additionalProperties": true,
+      "title": "Authoritymodel",
+      "type": "object"
+    },
+    "supersession": {
+      "additionalProperties": true,
+      "title": "Supersession",
+      "type": "object"
+    },
+    "documents": {
+      "items": {
+        "$ref": "#/$defs/SourceManifestDocument"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Documents",
+      "type": "array"
+    },
+    "coverageEvidence": {
+      "$ref": "#/$defs/SourceCoverageEvidence"
+    },
+    "integrity": {
+      "$ref": "#/$defs/SourceManifestIntegrity"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generationId",
+    "generatedAt",
+    "authorityModel",
+    "supersession",
+    "documents",
+    "coverageEvidence",
+    "integrity"
+  ],
+  "title": "SourceGenerationManifest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/source-generation-manifest.schema.json"
+}

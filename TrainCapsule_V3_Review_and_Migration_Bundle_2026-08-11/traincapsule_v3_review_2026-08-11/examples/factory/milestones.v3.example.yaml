@@ -1,0 +1,69 @@
+version: 3
+milestones:
+  - milestoneId: M0_FACTORY_MIGRATED
+    type: TRUST
+    status: ACTIVE
+    entryCriteria:
+      - current controller paused
+      - baseline and state snapshot recorded
+    exitCriteria:
+      - V3 source integrity passes
+      - lane scheduler passes simulations
+      - all retry and restart limits are finite
+      - human and external evidence states reject AI fabrication
+      - pull-request release mode is active
+      - rollback rehearsal passes
+      - source migration has qualified human approval
+    requiredEvidence:
+      - migration manifest
+      - test matrix
+      - signed source-migration approval
+    forbiddenClaims:
+      - product complete
+      - commercially validated
+      - customer approved
+    humanApprovalRequired: true
+
+  - milestoneId: M1_NATIVE_PREFLIGHT
+    type: ENGINEERING
+    status: PROPOSED
+    entryCriteria:
+      - M0_FACTORY_MIGRATED completed
+    exitCriteria:
+      - product packages install locally
+      - Flight Recorder fixture imports
+      - workload and environment identity verify
+      - native findings remain attributed
+      - evidence completeness reports missing and conflicting states
+      - eligibility returns all bounded terminal states
+      - install-to-preflight journey passes
+    requiredEvidence:
+      - controlled fixtures
+      - current native capability baseline
+    forbiddenClaims:
+      - real incident reproduced
+      - paid demand
+      - native advantage demonstrated
+    humanApprovalRequired: false
+
+  - milestoneId: M4_PAID_PILOT
+    type: COMMERCIAL
+    status: WAITING_EXTERNAL
+    entryCriteria:
+      - paid engagement receipt
+      - named incident and candidate change
+      - local execution authority
+      - second execution included
+    exitCriteria:
+      - bounded customer decision issued
+      - customer value receipt
+      - reusable contract installed
+      - second action scheduled
+    requiredEvidence:
+      - trusted paid pilot receipt
+      - customer decision/value receipt
+      - human claim approval
+    forbiddenClaims:
+      - universal safety
+      - guaranteed root cause
+    humanApprovalRequired: true

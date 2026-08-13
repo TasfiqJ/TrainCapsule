@@ -1,0 +1,71 @@
+{
+  "$defs": {
+    "ExecutionVerdict": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "BLOCKED",
+        "UNKNOWN"
+      ],
+      "title": "ExecutionVerdict",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/task-result-artifact.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "evidenceDigests": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 128,
+      "minItems": 1,
+      "title": "Evidencedigests",
+      "type": "array"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "title": "Limitations",
+      "type": "array"
+    },
+    "requestId": {
+      "pattern": "^AREQ-[A-Z0-9_-]+$",
+      "title": "Requestid",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "summary": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Summary",
+      "type": "string"
+    },
+    "verdict": {
+      "$ref": "#/$defs/ExecutionVerdict"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "workItemId",
+    "requestId",
+    "verdict",
+    "evidenceDigests",
+    "summary",
+    "limitations"
+  ],
+  "title": "TaskResultArtifactV31",
+  "type": "object"
+}

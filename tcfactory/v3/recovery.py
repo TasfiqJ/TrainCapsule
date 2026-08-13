@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import json
 import os
 from datetime import datetime
@@ -38,12 +39,8 @@ class FindingCounter(V3Model):
             fingerprint=fingerprint,
             count=count,
             blocked=exhausted,
-            status=(
-                WorkStatus.BLOCKED_TECHNICAL if exhausted else WorkStatus.RUNNING
-            ),
-            proposed_dispositions=(
-                [Disposition.NARROW, Disposition.REPLACE] if exhausted else []
-            ),
+            status=(WorkStatus.BLOCKED_TECHNICAL if exhausted else WorkStatus.RUNNING),
+            proposed_dispositions=([Disposition.NARROW, Disposition.REPLACE] if exhausted else []),
             machine_policy_review_proposed=exhausted,
         )
 
@@ -53,6 +50,68 @@ class ValueRedesignDecision(V3Model):
     redesigns_remaining: int = Field(ge=0)
     status: WorkStatus
     append_implementation_tasks: bool = False
+
+
+class ValueRedesignProposal(V3Model):
+    proposal_id: str = Field(pattern=r"^VRP-[A-F0-9]{24}$")
+    work_item_id: str = Field(pattern=r"^V3-[A-Z]+-[0-9]{3}$")
+    failure_count: int = Field(ge=1)
+    redesigns_remaining: int = Field(ge=0)
+    target_status: WorkStatus
+    reasons: list[str] = Field(min_length=1)
+    candidate_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    source_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    context_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    created_at: datetime
+    roadmap_mutation_authorized: bool = False
+
+
+def write_value_redesign_proposal(
+    *,
+    proposal_root: Path,
+    work_item_id: str,
+    decision: ValueRedesignDecision,
+    reasons: list[str],
+    candidate_sha: str,
+    source_digest: str,
+    context_digest: str,
+    created_at: datetime,
+) -> Path:
+    """Persist a content-bound proposal; it never mutates the active roadmap."""
+
+    identity = hashlib.sha256(
+        (
+            f"{work_item_id}\n{decision.failure_count}\n{candidate_sha}\n"
+            f"{source_digest}\n{context_digest}\n{'|'.join(sorted(reasons))}\n"
+        ).encode()
+    ).hexdigest()[:24].upper()
+    proposal = ValueRedesignProposal(
+        proposal_id=f"VRP-{identity}",
+        work_item_id=work_item_id,
+        failure_count=decision.failure_count,
+        redesigns_remaining=decision.redesigns_remaining,
+        target_status=decision.status,
+        reasons=reasons,
+        candidate_sha=candidate_sha,
+        source_digest=source_digest,
+        context_digest=context_digest,
+        created_at=created_at,
+    )
+    path = proposal_root / work_item_id / f"{proposal.proposal_id}.json"
+    path.parent.mkdir(parents=True, exist_ok=True)
+    rendered = json.dumps(
+        proposal.model_dump(mode="json", by_alias=True),
+        indent=2,
+        sort_keys=True,
+    ) + "\n"
+    if path.exists():
+        if path.read_text(encoding="utf-8") != rendered:
+            raise ValueError("value redesign proposal identity collision")
+        return path
+    temporary = path.parent / f".{path.name}.{uuid4().hex}.tmp"
+    temporary.write_text(rendered, encoding="utf-8", newline="\n")
+    os.replace(temporary, path)
+    return path
 
 
 def value_redesign_failure(

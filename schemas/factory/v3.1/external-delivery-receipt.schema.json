@@ -1,0 +1,65 @@
+{
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/external-delivery-receipt.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actionDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Actiondigest",
+      "type": "string"
+    },
+    "backendDeliveryId": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Backenddeliveryid",
+      "type": "string"
+    },
+    "backendId": {
+      "title": "Backendid",
+      "type": "string"
+    },
+    "deliveredAt": {
+      "format": "date-time",
+      "title": "Deliveredat",
+      "type": "string"
+    },
+    "deliveryDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Deliverydigest",
+      "type": "string"
+    },
+    "deliveryGenerationId": {
+      "pattern": "^[0-9a-f]{32}$",
+      "title": "Deliverygenerationid",
+      "type": "string"
+    },
+    "idempotencyKey": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Idempotencykey",
+      "type": "string"
+    },
+    "payloadDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Payloaddigest",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "backendId",
+    "backendDeliveryId",
+    "actionDigest",
+    "payloadDigest",
+    "idempotencyKey",
+    "deliveryGenerationId",
+    "deliveredAt",
+    "deliveryDigest"
+  ],
+  "title": "ExternalDeliveryReceipt",
+  "type": "object"
+}

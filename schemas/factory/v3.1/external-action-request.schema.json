@@ -1,0 +1,91 @@
+{
+  "$defs": {
+    "ExternalActionChannel": {
+      "enum": [
+        "EMAIL",
+        "CRM",
+        "CALENDAR"
+      ],
+      "title": "ExternalActionChannel",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/external-action-request.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actionId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Actionid",
+      "type": "string"
+    },
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "channel": {
+      "$ref": "#/$defs/ExternalActionChannel"
+    },
+    "machinePolicyReceiptDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Machinepolicyreceiptdigest",
+      "type": "string"
+    },
+    "machinePolicyReceiptId": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Machinepolicyreceiptid",
+      "type": "string"
+    },
+    "recipient": {
+      "maxLength": 320,
+      "minLength": 1,
+      "title": "Recipient",
+      "type": "string"
+    },
+    "requestedAt": {
+      "format": "date-time",
+      "title": "Requestedat",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "templateId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Templateid",
+      "type": "string"
+    },
+    "variables": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "maxProperties": 64,
+      "title": "Variables",
+      "type": "object"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "actionId",
+    "workItemId",
+    "candidateSha",
+    "channel",
+    "recipient",
+    "templateId",
+    "variables",
+    "machinePolicyReceiptId",
+    "machinePolicyReceiptDigest",
+    "requestedAt"
+  ],
+  "title": "ExternalActionRequest",
+  "type": "object"
+}

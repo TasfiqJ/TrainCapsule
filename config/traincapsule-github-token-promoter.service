@@ -1,0 +1,17 @@
+[Unit]
+Description=TrainCapsule root GitHub App token promotion broker
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/libexec/traincapsule-github-token-refresher promote
+NoNewPrivileges=yes
+PrivateTmp=yes
+PrivateNetwork=yes
+ProtectSystem=strict
+ProtectHome=yes
+ReadOnlyPaths=/etc/traincapsule-canary-runner/github-token-refresher.json
+ReadOnlyPaths=/var/lib/traincapsule-github-token/outbox
+ReadWritePaths=/var/lib/traincapsule-canary-secrets
+InaccessiblePaths=/var/lib/traincapsule-verifier/private

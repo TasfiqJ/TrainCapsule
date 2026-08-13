@@ -1,242 +1,128 @@
-# pyright: reportUnknownLambdaType=false, reportUnknownArgumentType=false
-
 from __future__ import annotations
 
 import subprocess
-from datetime import UTC, datetime
 from pathlib import Path
-from types import SimpleNamespace
 
 import pytest
+from pydantic import ValidationError
 
 import tcfactory.github_sync as github_sync
-from tcfactory.github_sync import (
-    GitHubConfig,
-    GitHubSyncError,
-    MainOnlyPublisher,
-    RequiredWorkflow,
-    RequiredWorkflowStatus,
-    push_main_with_retry,
+import tcfactory.v3.publication as publication
+from tcfactory.github_sync import GitHubConfig, load_github_config
+from tcfactory.v3.publication import (
+    ExternalReceiptAuthorizer,
+    GhPublicationClient,
+    PublicationError,
+    trusted_external_path,
 )
-from tcfactory.util import sha256_file, write_json
-from tcfactory.v3.candidate_manifest import (
-    CandidateManifest,
-    ExecutorIdentity,
-    GateBinding,
-)
-from tcfactory.v3.enums import ReleaseDecision
-from tcfactory.v3.private_gate import PrivateGateVerificationError
 
-BASE = "a" * 40
 CANDIDATE = "b" * 40
-DIGEST = "sha256:" + "c" * 64
 
 
-def _passed_status() -> RequiredWorkflowStatus:
-    config = GitHubConfig(enabled=True)
-    return RequiredWorkflowStatus(
-        candidate_sha=CANDIDATE,
-        status="pass",
-        workflows=[
-            RequiredWorkflow(name=name, status="completed", conclusion="success")
-            for name in config.remote_ci.required_workflows
-        ],
-    )
+def test_direct_main_publication_surfaces_do_not_exist() -> None:
+    assert not hasattr(github_sync, "push_main_with_retry")
+    assert not hasattr(github_sync, "MainOnlyPublisher")
+    assert not hasattr(github_sync, "MainPublicationTransaction")
+    source = Path(github_sync.__file__).read_text(encoding="utf-8")
+    assert "fast_forward_main" not in source
+    assert ":refs/heads/main" not in source
 
 
-def test_non_main_push_and_pr_surfaces_do_not_exist() -> None:
-    assert not hasattr(github_sync, "push_release_branch_with_retry")
-    assert not hasattr(github_sync, "prepare_release_pull_request")
-    assert not hasattr(github_sync, "run_remote_ci")
-
-
-def test_private_gate_uses_fixed_controller_owned_path(
-    monkeypatch: pytest.MonkeyPatch,
+def test_candidate_push_rejects_main_force_tags_and_symbolic_sources(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    monkeypatch.setenv("TCF_PRIVATE_GATE_RUNNER", "/attacker/controlled")
-    assert Path("/var/lib/traincapsule-factory/private-gates/run_private_gate.sh") == (
-        github_sync.CONTROLLER_PRIVATE_GATE
-    )
-    assert "TCF_PRIVATE_GATE_RUNNER" not in github_sync.CONTROLLER_PRIVATE_GATE.as_posix()
-
-
-def test_push_helper_accepts_only_exact_sha_to_main(monkeypatch: pytest.MonkeyPatch) -> None:
-    config = GitHubConfig(enabled=True, retry_attempts=1, retry_backoff_seconds=1)
-    for refspec in ("candidate:refs/heads/main", f"{CANDIDATE}:refs/heads/dev"):
-        with pytest.raises(GitHubSyncError, match="exact-SHA main"):
-            push_main_with_retry(Path("."), config, refspec)
     observed: list[list[str]] = []
 
     def fake_run(args: list[str], **_: object) -> subprocess.CompletedProcess[str]:
         observed.append(args)
         return subprocess.CompletedProcess(args, 0, "ok", "")
 
-    monkeypatch.setattr(github_sync, "run_command", fake_run)
-    push_main_with_retry(Path("."), config, f"{CANDIDATE}:refs/heads/main")
+    monkeypatch.setattr(publication, "run_command", fake_run)
+    client = GhPublicationClient(
+        tmp_path,
+        remote="origin",
+        repository="TasfiqJ/TrainCapsule",
+        branch_prefix="factory/",
+    )
+    for branch in ("main", "refs/tags/release", "factory/../main", "other/candidate"):
+        with pytest.raises(PublicationError):
+            client.push_candidate_branch(sha=CANDIDATE, branch=branch)
+    with pytest.raises(PublicationError, match="exact commit SHA"):
+        client.push_candidate_branch(sha="HEAD", branch="factory/v3-rel-001/candidate")
+    client.push_candidate_branch(sha=CANDIDATE, branch="factory/v3-rel-001/candidate")
     assert observed == [
-        ["git", "push", "--porcelain", "origin", f"{CANDIDATE}:refs/heads/main"]
+        [
+            "git",
+            "push",
+            "--porcelain",
+            "origin",
+            f"{CANDIDATE}:refs/heads/factory/v3-rel-001/candidate",
+        ]
     ]
 
 
-def test_candidate_preparation_fails_closed_without_private_gate(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    repo = tmp_path / "repo"
-    candidate = tmp_path / "candidate"
-    repo.mkdir()
-    candidate.mkdir()
-    publisher = MainOnlyPublisher(
-        repo_root=repo,
-        config=GitHubConfig(enabled=True),
-        receipt_root=tmp_path / "receipts",
-        quarantine_root=tmp_path / "quarantine",
-        local_gate_command=("true",),
-    )
-    monkeypatch.setattr(github_sync, "current_sha", lambda *_args, **_kwargs: CANDIDATE)
-    monkeypatch.setattr(
-        github_sync,
-        "run_command",
-        lambda args, **_kwargs: subprocess.CompletedProcess(args, 0, "pass", ""),
-    )
-
-    def missing(*_args: object, **_kwargs: object) -> tuple[Path, Path]:
-        raise PrivateGateVerificationError("missing trusted runner")
-
-    monkeypatch.setattr(github_sync, "validate_private_gate_installation", missing)
-    with pytest.raises(GitHubSyncError, match="mandatory private"):
-        publisher.prepare_candidate(
-            item=SimpleNamespace(work_item_id="V3-NEG-001"),
-            candidate_sha=CANDIDATE,
-            candidate_worktree=candidate,
-        )
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("directMainPush", True),
+        ("releaseMode", "owner_directed_main_only"),
+        ("publisherCapability", "PENDING_PHASE_4"),
+        ("candidateBranchPrefix", "main"),
+    ],
+)
+def test_v31_config_rejects_legacy_or_unproven_release_modes(field: str, value: object) -> None:
+    root = Path(__file__).resolve().parents[1]
+    payload = load_github_config(root / "config/github.yaml").model_dump(mode="json", by_alias=True)
+    payload[field] = value
+    with pytest.raises(ValidationError):
+        GitHubConfig.model_validate(payload)
 
 
-def test_main_only_publisher_binds_gates_and_publishes_exact_sha(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    repo = tmp_path / "repo"
-    candidate_tree = tmp_path / "candidate"
-    repo.mkdir()
-    candidate_tree.mkdir()
-    (repo / "config").mkdir()
-    (repo / "factory/state").mkdir(parents=True)
-    (repo / "config/owner_directives.yaml").write_text("version: 3\n", encoding="utf-8")
-    gate = candidate_tree / "gate.sh"
-    gate.write_text("#!/usr/bin/env bash\nexit 0\n", encoding="utf-8")
-    gate.chmod(0o755)
-    config = GitHubConfig(enabled=True, retry_attempts=1, retry_backoff_seconds=1)
-    publisher = MainOnlyPublisher(
-        repo_root=repo,
-        config=config,
-        receipt_root=repo / "factory/state/receipts",
-        quarantine_root=repo / "factory/state/quarantine",
-        local_gate_command=("bash", "gate.sh"),
-    )
-    trusted_runner = tmp_path / "trusted-private-gate"
-    trusted_key = tmp_path / "trusted-public-key.pem"
-    trusted_runner.write_text("private runner\n", encoding="utf-8")
-    trusted_key.write_text("public key\n", encoding="utf-8")
-    monkeypatch.setattr(github_sync, "CONTROLLER_PRIVATE_GATE", trusted_runner)
-    monkeypatch.setattr(github_sync, "CONTROLLER_PRIVATE_GATE_KEY", trusted_key)
-    monkeypatch.setattr(
-        github_sync,
-        "validate_private_gate_installation",
-        lambda *_args, **_kwargs: (trusted_runner, trusted_key),
-    )
-    item = SimpleNamespace(work_item_id="V3-MIG-019")
-    monkeypatch.setattr(github_sync, "current_branch", lambda _: "main")
+def test_required_check_roster_cannot_omit_independent_policy() -> None:
+    root = Path(__file__).resolve().parents[1]
+    payload = load_github_config(root / "config/github.yaml").model_dump(mode="json", by_alias=True)
+    remote = payload["remoteCi"]
+    assert isinstance(remote, dict)
+    remote["requiredWorkflows"] = ["TrainCapsule / Factory quality"]
+    remote["trustedCheckAppIds"] = {"TrainCapsule / Factory quality": 15368}
+    with pytest.raises(ValidationError, match="machine-policy"):
+        GitHubConfig.model_validate(payload)
 
-    state = {"local": BASE, "remote": BASE}
 
-    def fake_sha(path: Path, ref: str | None = None) -> str:
-        if path.resolve() == candidate_tree.resolve() or ref not in {None, "main"}:
-            return CANDIDATE
-        return state["local"]
+def test_release_rules_require_pr_controls_without_merge_deadlocking_update() -> None:
+    valid = {"required_status_checks", "pull_request", "non_fast_forward", "deletion"}
+    github_sync.validate_release_rule_types(valid)
+    with pytest.raises(github_sync.GitHubSyncError, match="would block.*PR merges"):
+        github_sync.validate_release_rule_types(valid | {"update"})
+    with pytest.raises(github_sync.GitHubSyncError, match="missing required release controls"):
+        github_sync.validate_release_rule_types({"non_fast_forward", "deletion"})
 
-    monkeypatch.setattr(github_sync, "current_sha", fake_sha)
-    monkeypatch.setattr(github_sync, "validate_github_ready", lambda *_: {})
-    monkeypatch.setattr(github_sync, "_pre_push_checks", lambda *_: None)
-    monkeypatch.setattr(github_sync, "_ensure_no_divergence", lambda *_: None)
-    monkeypatch.setattr(
-        github_sync,
-        "fast_forward_main",
-        lambda *_args, **_kwargs: state.update(local=CANDIDATE),
-    )
-    monkeypatch.setattr(
-        github_sync, "_remote_branch_sha", lambda *_args, **_kwargs: state["remote"]
-    )
-    monkeypatch.setattr(github_sync, "required_workflow_status", lambda *_args: _passed_status())
-    monkeypatch.setattr(
-        github_sync,
-        "wait_for_remote_ci",
-        lambda *_args, **_kwargs: _passed_status().model_dump(mode="json", by_alias=True),
-    )
-    pushes: list[list[str]] = []
 
-    def fake_run(args: list[str], **_: object) -> subprocess.CompletedProcess[str]:
-        if args[:2] == ["git", "push"]:
-            pushes.append(args)
-            state["remote"] = args[-1].split(":", 1)[0]
-        return subprocess.CompletedProcess(args, 0, "gate-output", "")
-
-    monkeypatch.setattr(github_sync, "run_command", fake_run)
-
-    def fake_private_gate(**arguments: object) -> SimpleNamespace:
-        receipt_path = Path(str(arguments["receipt_path"]))
-        signature_path = Path(str(arguments["signature_path"]))
-        receipt_path.write_text('{"signed":true}\n', encoding="utf-8")
-        signature_path.write_bytes(b"signed")
-        stdout_path = receipt_path.with_name("private-result.txt")
-        stdout_path.write_text("private gate passed\n", encoding="utf-8")
-        return SimpleNamespace(passed=True, stdout_path=str(stdout_path))
-
-    monkeypatch.setattr(github_sync, "run_private_gate", fake_private_gate)
-    monkeypatch.setattr(
-        github_sync,
-        "verify_private_gate_receipt",
-        lambda **_kwargs: SimpleNamespace(
-            runner_digest="sha256:" + "d" * 64,
-            runner_version="3.0.0",
-        ),
-    )
-    gate_paths = publisher.prepare_candidate(
-        item=item, candidate_sha=CANDIDATE, candidate_worktree=candidate_tree
-    )
-    gate_digests = {
-        name: f"sha256:{sha256_file(path)}" for name, path in gate_paths.items()
+def test_pull_request_observation_cannot_launder_a_non_main_base() -> None:
+    raw: dict[str, object] = {
+        "number": 1,
+        "url": "https://github.com/TasfiqJ/TrainCapsule/pull/1",
+        "state": "OPEN",
+        "isDraft": True,
+        "headRefName": "factory/v3-rel-001/candidate",
+        "headRefOid": CANDIDATE,
+        "baseRefName": "attacker-controlled-base",
+        "baseRefOid": "a" * 40,
+        "mergedAt": None,
+        "mergeCommit": None,
+        "autoMergeRequest": None,
     }
-    manifest = CandidateManifest(
-        base_sha=BASE,
-        candidate_sha=CANDIDATE,
-        work_item_id=item.work_item_id,
-        packet_digest=DIGEST,
-        context_digest=DIGEST,
-        executor=ExecutorIdentity(backend="fake", adapter="test"),
-        stage_outputs=[],
-        gates=[
-            GateBinding(name=name, version="3", result="PASS", evidence_digest=digest)
-            for name, digest in gate_digests.items()
-        ],
-        findings=[],
-        external_evidence=[],
-        checkpoint_digest=DIGEST,
-        release_decision=ReleaseDecision.APPROVED_FOR_MAIN_PROMOTION,
-        created_at=datetime.now(UTC),
-    )
-    manifest_path = repo / "manifest.json"
-    write_json(manifest_path, manifest.model_dump(mode="json", by_alias=True))
-    result = publisher.publish(
-        item=item,
-        candidate_ref="candidate-ref",
-        candidate_sha=CANDIDATE,
-        candidate_worktree=candidate_tree,
-        candidate_manifest_path=manifest_path,
-        packet_digest=DIGEST,
-        source_digest=DIGEST,
-        context_digest=DIGEST,
-        checkpoint_digest=DIGEST,
-        gate_digests=gate_digests,
-    )
-    assert result["status"] == "PUBLISHED_MAIN_VERIFIED"
-    assert pushes == [["git", "push", "origin", f"{CANDIDATE}:refs/heads/main"]]
-    assert all("refs/heads/main" in " ".join(command) for command in pushes)
+    with pytest.raises(PublicationError, match="invalid types"):
+        GhPublicationClient._pr(raw)  # pyright: ignore[reportPrivateUsage]
+
+
+def test_external_verifier_paths_reject_symlink_substitution(tmp_path: Path) -> None:
+    executable_link = tmp_path / "verifier"
+    executable_link.symlink_to("/usr/bin/true")
+    with pytest.raises(PublicationError, match="symlink"):
+        ExternalReceiptAuthorizer(executable_link)
+
+    receipt_root = tmp_path / "receipts"
+    receipt_root.symlink_to(tmp_path, target_is_directory=True)
+    with pytest.raises(PublicationError, match="symlink"):
+        trusted_external_path(receipt_root, directory=True, label="receipt root")

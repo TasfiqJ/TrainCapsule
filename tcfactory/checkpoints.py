@@ -4,10 +4,11 @@ import json
 import os
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Any, cast
+from typing import Any, Literal, cast
 
 from pydantic import Field
 
+from .backends.base import AgentSession, BackendRouteState, ExecutionEvidenceMode
 from .models import PipelineCheckpoint, PipelineState
 from .util import atomic_write_text, read_json
 from .v3.base import DIGEST_PATTERN, SHA_PATTERN, V3Model, sha256_digest
@@ -33,6 +34,16 @@ class V3Checkpoint(V3Model):
     lane: Lane
     milestone: str = Field(pattern=r"^M[0-9]+_[A-Z0-9_]+$")
     backend_session_ref: str | None = None
+    backend_session: AgentSession | None = None
+    active_role: str | None = None
+    stage_attempt: int = Field(default=0, ge=0)
+    handoff_path: str | None = None
+    handoff_digest: str | None = Field(default=None, pattern=DIGEST_PATTERN.pattern)
+    candidate_worktree: str | None = None
+    artifact_root: str | None = None
+    completed_roles: list[str] = Field(default_factory=list[str])
+    stage_artifact_digests: dict[str, str] = Field(default_factory=dict[str, str])
+    stage_artifact_paths: dict[str, str] = Field(default_factory=dict[str, str])
     budget: CheckpointBudget
     context_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     source_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
@@ -40,6 +51,39 @@ class V3Checkpoint(V3Model):
     approval_state: str
     circuit_breaker_reason: str | None = None
     finding_fingerprints: dict[str, int] = Field(default_factory=dict[str, int])
+    value_failure_count: int = Field(default=0, ge=0)
+    value_redesigns_remaining: int = Field(default=0, ge=0, le=3)
+    backend_wait_state: BackendRouteState | Literal["PUBLICATION_PENDING"] | None = None
+    backend_resume_at: datetime | None = None
+    backend_rechecks_remaining: int = Field(default=3, ge=0, le=8)
+    backend_recheck_attempts: int = Field(default=0, ge=0, le=8)
+    backend_terminal_record_digest: str | None = Field(
+        default=None, pattern=DIGEST_PATTERN.pattern
+    )
+    execution_evidence_mode: ExecutionEvidenceMode | None = None
+    publication_transaction_id: str | None = None
+    publication_manifest_path: str | None = None
+    publication_manifest_digest: str | None = Field(
+        default=None, pattern=DIGEST_PATTERN.pattern
+    )
+    publication_candidate_tree_sha: str | None = Field(
+        default=None, pattern=SHA_PATTERN.pattern
+    )
+    publication_checkpoint_digest: str | None = Field(
+        default=None, pattern=DIGEST_PATTERN.pattern
+    )
+    publication_packet_digest: str | None = Field(
+        default=None, pattern=DIGEST_PATTERN.pattern
+    )
+    publication_gate_digests: dict[str, str] = Field(default_factory=dict[str, str])
+    publication_expected_machine_policy_receipt_id: str | None = None
+    publication_expected_machine_policy_receipt_digest: str | None = Field(
+        default=None, pattern=DIGEST_PATTERN.pattern
+    )
+    publication_authorization_envelope_path: str | None = None
+    publication_authorization_envelope_digest: str | None = Field(
+        default=None, pattern=DIGEST_PATTERN.pattern
+    )
     active: bool
     created_at: datetime
     updated_at: datetime
@@ -107,8 +151,7 @@ class CheckpointStore:
         path = self.path_for(checkpoint.task_id)
         payload = checkpoint.model_dump(mode="json")
         rendered = (
-            json.dumps(_envelope(payload, "legacy-pipeline"), indent=2, sort_keys=True)
-            + "\n"
+            json.dumps(_envelope(payload, "legacy-pipeline"), indent=2, sort_keys=True) + "\n"
         )
         atomic_write_text(path, rendered, keep_previous=True)
         return path
@@ -131,8 +174,7 @@ class CheckpointStore:
         atomic_write_text(path, previous.read_text(encoding="utf-8"))
         raw: object = read_json(path, None)
         is_v3 = (
-            isinstance(raw, dict)
-            and cast(dict[str, Any], raw).get("recordKind") == "v3-work-item"
+            isinstance(raw, dict) and cast(dict[str, Any], raw).get("recordKind") == "v3-work-item"
         )
         loaded = self.load_v3(task_id) if is_v3 else self.load(task_id)
         if loaded is None:

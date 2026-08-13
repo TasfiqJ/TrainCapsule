@@ -295,15 +295,15 @@ def apply_risk_profile(
         stages.append(
             with_working_token_reserve(
                 _apply_stage_profile(
-                Stage(
-                    role=RoleName.ADVERSARY,
-                    read_only=True,
-                    require_changes=False,
-                    forbidden_paths=["**"],
-                    allowed_domains=list(owner.allowed_domains),
-                    machine_gates=[],
-                    context_keys=item.context_keys,
-                ),
+                    Stage(
+                        role=RoleName.ADVERSARY,
+                        read_only=True,
+                        require_changes=False,
+                        forbidden_paths=["**"],
+                        allowed_domains=list(owner.allowed_domains),
+                        machine_gates=[],
+                        context_keys=item.context_keys,
+                    ),
                     profile,
                     context_chars,
                 ),
@@ -313,9 +313,7 @@ def apply_risk_profile(
 
     # Machine gates run after mutations, not again after every read-only opinion. A repair
     # uses the same owner role and therefore reruns the exact gates on the changed candidate.
-    owner_gates = [
-        gate.model_copy(update={"stages": [owner.role]}) for gate in packet.gates
-    ]
+    owner_gates = [gate.model_copy(update={"stages": [owner.role]}) for gate in packet.gates]
 
     repair_models = [owner.model or "sonnet"]
 

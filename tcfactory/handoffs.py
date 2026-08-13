@@ -26,9 +26,7 @@ class V3HandoffPayload(V3Model):
     candidate_sha: str = Field(pattern=SHA_PATTERN.pattern)
     source_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     context_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
-    candidate_manifest_digest: str | None = Field(
-        default=None, pattern=DIGEST_PATTERN.pattern
-    )
+    candidate_manifest_digest: str | None = Field(default=None, pattern=DIGEST_PATTERN.pattern)
     backend_session_ref: str | None = None
     next_authorized_transition: str = Field(min_length=1)
     findings: list[dict[str, str]]

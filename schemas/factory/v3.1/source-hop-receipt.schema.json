@@ -1,0 +1,43 @@
+{
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/source-hop-receipt.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "peerAddress": {
+      "title": "Peeraddress",
+      "type": "string"
+    },
+    "resolvedPublicAddresses": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 32,
+      "minItems": 1,
+      "title": "Resolvedpublicaddresses",
+      "type": "array"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "url": {
+      "title": "Url",
+      "type": "string"
+    },
+    "urlDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Urldigest",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "url",
+    "urlDigest",
+    "resolvedPublicAddresses",
+    "peerAddress"
+  ],
+  "title": "SourceHopReceipt",
+  "type": "object"
+}

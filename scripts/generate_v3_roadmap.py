@@ -31,8 +31,8 @@ from tcfactory.v3.retry_policy import RetryPolicy
 from tcfactory.v3.work_items import WorkItem, WorkItemCollection
 
 SOURCE: Final = ROOT / (
-    "docs/source-of-truth/v3-2026-08-11/"
-    "12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md"
+    "docs/source-of-truth/v3.1-zh-2026-08-12/"
+    "12_GATE_BASED_ROADMAP_AND_BACKLOG_V3_1_ZH.md"
 )
 OUTPUT: Final = ROOT / "factory/roadmap/work_items.yaml"
 ROW = re.compile(
@@ -53,10 +53,16 @@ MILESTONE_IDS: Final = {
     6: "M6_COMMERCIALLY_SUPPORTED_PACK",
 }
 M0_ENGINEERING_STATE: Final = {
-    f"V3-MIG-{number:03d}": WorkStatus.COMPLETED for number in range(1, 21)
+    **{f"V3-MIG-{number:03d}": WorkStatus.COMPLETED for number in range(1, 12)},
+    "V3-MIG-012": WorkStatus.PROPOSED,
+    **{f"V3-MIG-{number:03d}": WorkStatus.PROPOSED for number in range(13, 16)},
+    "V3-MIG-016": WorkStatus.BLOCKED_POLICY,
+    **{f"V3-MIG-{number:03d}": WorkStatus.PROPOSED for number in range(17, 21)},
 }
 M0_ACCEPTANCE_EVIDENCE: Final = {
-    f"V3-MIG-{number:03d}": f"docs/migrations/evidence/V3-MIG-{number:03d}.json"
+    f"V3-MIG-{number:03d}": (
+        f"docs/migrations/evidence/v3.1-zh/V3-MIG-{number:03d}.json"
+    )
     for number in range(16, 21)
 }
 IMPLEMENTED_M1_ITEMS: Final = {
@@ -87,26 +93,9 @@ OUTSIDE_FACT_WORK_ITEMS: Final = {
 
 
 def _zero_human_text(value: str) -> str:
-    """Apply the owner-directed machine-policy override to generated roadmap text."""
+    """Return authoritative V3.1 table text without local policy rewrites."""
 
-    replacements = (
-        (r"founder/human", "machine-policy"),
-        (r"human-approval", "machine-policy"),
-        (r"qualified human", "independent machine-policy"),
-        (r"human review", "machine-policy verification"),
-        (r"human approve", "machine policy authorizes"),
-        (r"signed source-migration approval", "digest-bound source-migration policy receipt"),
-        (r"signed approval", "digest-bound machine-policy receipt"),
-        (
-            r"change release path from direct main to draft PR",
-            "enforce exact-SHA main-only release",
-        ),
-        (r"PR dry run", "main-only publication recovery rehearsal"),
-    )
-    transformed = value
-    for pattern, replacement in replacements:
-        transformed = re.sub(pattern, replacement, transformed, flags=re.IGNORECASE)
-    return transformed
+    return value
 
 
 class SourceRow:
@@ -174,6 +163,7 @@ def _range_dependencies(
         item.work_item_id
         for item in milestone_rows
         if item.work_item_id.startswith(prefix + "-")
+        and item.work_item_id != row.work_item_id
         and start <= int(item.work_item_id.rsplit("-", 1)[1]) <= end
     ]
     if same_prefix:
@@ -298,16 +288,24 @@ def _maturity(row: SourceRow) -> MaturityTarget:
     if row.milestone_number == 2:
         return MaturityTarget(
             engineering=EngineeringMaturity.EXTERNAL_VALIDATED,
-            commercial=CommercialMaturity.NATIVE_ADVANTAGE_DEMONSTRATED,
+            commercial=(
+                CommercialMaturity.NATIVE_ADVANTAGE_DEMONSTRATED
+                if row.work_item_id == "V3-COMP-005"
+                else CommercialMaturity.NATIVE_ADVANTAGE_UNPROVEN
+            ),
         )
     if row.milestone_number in {3, 4, 5}:
         return MaturityTarget(
             engineering=EngineeringMaturity.EXTERNAL_VALIDATED,
-            commercial=CommercialMaturity.EXTERNAL_VALUE_DEMONSTRATED,
+            commercial=(
+                CommercialMaturity.EXTERNAL_VALUE_DEMONSTRATED
+                if row.work_item_id in {"V3-PILOT-011", "V3-REPEAT-005"}
+                else CommercialMaturity.NATIVE_ADVANTAGE_UNPROVEN
+            ),
         )
     return MaturityTarget(
         engineering=EngineeringMaturity.EXTERNAL_VALIDATED,
-        commercial=CommercialMaturity.COMMERCIALLY_SUPPORTED,
+        commercial=CommercialMaturity.NATIVE_ADVANTAGE_UNPROVEN,
     )
 
 
@@ -334,7 +332,8 @@ def build_collection() -> WorkItemCollection:
                 f"unresolved dependencies for {row.work_item_id}: {sorted(missing)} "
                 f"from {row.depends!r}"
             )
-        nonautomatable = kind is WorkKind.EXTERNAL_EVIDENCE
+        machine_policy_review = kind is WorkKind.MACHINE_POLICY_REVIEW
+        nonautomatable = kind is WorkKind.EXTERNAL_EVIDENCE or machine_policy_review
         items.append(
             WorkItem(
                 work_item_id=row.work_item_id,
@@ -363,6 +362,8 @@ def build_collection() -> WorkItemCollection:
                 owner_type=(
                     OwnerType.EXTERNAL_PARTY
                     if kind is WorkKind.EXTERNAL_EVIDENCE
+                    else OwnerType.MACHINE_POLICY_AUTHORITY
+                    if machine_policy_review
                     else OwnerType.AI
                 ),
                 automatable=not nonautomatable,
@@ -378,6 +379,7 @@ def build_collection() -> WorkItemCollection:
                     WorkKind.EXTERNAL_EVIDENCE,
                     WorkKind.COMMERCIAL_EXPERIMENT,
                 },
+                machine_policy_receipt_required=machine_policy_review,
                 retry_policy=RetryPolicy(
                     max_plan_attempts=0 if nonautomatable else 2,
                     max_candidate_repair_cycles=0 if nonautomatable else 3,
@@ -385,7 +387,7 @@ def build_collection() -> WorkItemCollection:
             )
         )
     return WorkItemCollection(
-        active_milestone="M1_NATIVE_PREFLIGHT",
+        active_milestone="M0_FACTORY_MIGRATED",
         work_items=items,
     )
 

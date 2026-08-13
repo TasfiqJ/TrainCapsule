@@ -1,0 +1,9 @@
+[Unit]
+Description=Watch attested TrainCapsule refresh completions
+
+[Path]
+PathChanged=/var/lib/traincapsule-verifier/deployment-refresh-journal/completions
+Unit=traincapsule-deployment-refresh-completion.service
+
+[Install]
+WantedBy=multi-user.target

@@ -171,9 +171,7 @@ def _load_evidence(repo_root: Path, contract: ValueContract) -> ValueEvidence:
     return evidence
 
 
-def _load_external_evidence(
-    repo_root: Path, task: TaskPacket
-) -> tuple[ValueEvidence, Path, Path]:
+def _load_external_evidence(repo_root: Path, task: TaskPacket) -> tuple[ValueEvidence, Path, Path]:
     """Load a maintainer-controlled receipt that is outside the candidate repository.
 
     External adoption, payment, and maintainer confirmation are facts the autonomous
@@ -245,9 +243,7 @@ def _assert_privileged_read_only(path: Path) -> None:
             )
 
 
-def _verify_external_receipt_signature(
-    *, receipt: Path, signature: Path, public_key: Path
-) -> None:
+def _verify_external_receipt_signature(*, receipt: Path, signature: Path, public_key: Path) -> None:
     """Verify an Ed25519 detached signature using the launcher-pinned public key."""
 
     key_type = subprocess.run(
@@ -372,9 +368,7 @@ def _verify_measured_evidence(
     if changed.returncode != 0:
         raise ValueGateError("Cannot enumerate the candidate surface covered by value evidence")
     changed_paths = {
-        value.decode("utf-8", errors="strict")
-        for value in changed.stdout.split(b"\0")
-        if value
+        value.decode("utf-8", errors="strict") for value in changed.stdout.split(b"\0") if value
     }
     evidence_path = contract.evidence_path or ""
     uncovered = sorted(changed_paths - {evidence_path} - set(evidence.artifact_hashes))
@@ -523,8 +517,7 @@ def evaluate_value_contract(
             evidence = _load_evidence(repo_root, contract)
             if evidence.task_id != task.task_id:
                 raise ValueGateError(
-                    f"Value evidence task_id={evidence.task_id!r} does not match "
-                    f"{task.task_id!r}"
+                    f"Value evidence task_id={evidence.task_id!r} does not match {task.task_id!r}"
                 )
             _verify_measured_evidence(
                 repo_root=repo_root,
@@ -558,7 +551,7 @@ def evaluate_value_contract(
                         for name in failed_conditions
                     ],
                     "Commercial willingness to pay remains unproven until external "
-                    "revealed-preference evidence exists."
+                    "revealed-preference evidence exists.",
                 ],
                 redesign_actions=(
                     []

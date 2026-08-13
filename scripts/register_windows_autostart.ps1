@@ -3,6 +3,9 @@ param(
     [string]$WslDistribution = $env:TCF_WSL_DISTRIBUTION,
     [string]$FactoryRuntimePath = "scripts/windows_task_entrypoint.sh",
     [string]$TaskName = "TrainCapsule Lights-Out Autopilot",
+    [string]$ActivationRuntimePath = "scripts/windows_activation_entrypoint.sh",
+    [string]$ActivationTaskName = "TrainCapsule Automatic Activation",
+    [string]$ControllerPrincipal = "traincapsule-controller",
     [switch]$StartNow
 )
 
@@ -14,7 +17,13 @@ if (-not (Test-Path $Wsl)) {
 if ([string]::IsNullOrWhiteSpace($RepoPath)) {
     throw "Specify -RepoPath or set TCF_REPO_PATH."
 }
-foreach ($Value in @($RepoPath, $WslDistribution, $FactoryRuntimePath, $TaskName)) {
+foreach ($Value in @(
+    $RepoPath,
+    $WslDistribution,
+    $FactoryRuntimePath,
+    $TaskName,
+    $ControllerPrincipal
+)) {
     if ($Value -match "[`r`n`0]") {
         throw "Registration parameters may not contain control characters."
     }
@@ -28,6 +37,10 @@ else {
 if ($RepoPath.Contains("'") -or $Runtime.Contains("'")) {
     throw "RepoPath and FactoryRuntimePath may not contain apostrophes."
 }
+$ActivationRuntime = $RepoPath.TrimEnd("/") + "/" + $ActivationRuntimePath.TrimStart("/")
+if ($ActivationRuntime.Contains("'") -or $ActivationTaskName -match "[`r`n`0]") {
+    throw "Activation runtime and task name must be normalized."
+}
 
 $ValidationArguments = @()
 if (-not [string]::IsNullOrWhiteSpace($WslDistribution)) {
@@ -37,6 +50,15 @@ $ValidationArguments += @("--", "test", "-x", $Runtime)
 & $Wsl @ValidationArguments
 if ($LASTEXITCODE -ne 0) {
     throw "The executable factory runtime was not found at $Runtime."
+}
+$ActivationValidationArguments = @()
+if (-not [string]::IsNullOrWhiteSpace($WslDistribution)) {
+    $ActivationValidationArguments += @("-d", $WslDistribution)
+}
+$ActivationValidationArguments += @("--", "test", "-x", $ActivationRuntime)
+& $Wsl @ActivationValidationArguments
+if ($LASTEXITCODE -ne 0) {
+    throw "The executable stopped-state activation runtime was not found."
 }
 
 $LinuxCommand = "cd '$RepoPath' && exec '$Runtime'"
@@ -57,6 +79,15 @@ $EncodedLauncher = [Convert]::ToBase64String(
 $PowerShell = Join-Path $PSHOME "powershell.exe"
 $PowerShellArguments = "-NoProfile -NonInteractive -WindowStyle Hidden -EncodedCommand $EncodedLauncher"
 $TaskAction = New-ScheduledTaskAction -Execute $PowerShell -Argument $PowerShellArguments
+$ActivationCommand = "cd '$RepoPath' && exec '$ActivationRuntime'"
+$ActivationArguments = `
+    "$DistributionArguments-u `"$ControllerPrincipal`" -- bash -lc `"$ActivationCommand`""
+$ActivationEncoded = [Convert]::ToBase64String(
+    [Text.Encoding]::Unicode.GetBytes("& '$Wsl' $ActivationArguments")
+)
+$ActivationAction = New-ScheduledTaskAction `
+    -Execute $PowerShell `
+    -Argument "-NoProfile -NonInteractive -WindowStyle Hidden -EncodedCommand $ActivationEncoded"
 
 $WindowsIdentity = [System.Security.Principal.WindowsIdentity]::GetCurrent().Name
 if ([string]::IsNullOrWhiteSpace($WindowsIdentity)) {
@@ -69,6 +100,11 @@ $RecoveryTrigger = New-ScheduledTaskTrigger `
     -RepetitionInterval (New-TimeSpan -Minutes 15) `
     -RepetitionDuration (New-TimeSpan -Days 3650)
 $Triggers = @($LogonTrigger, $RecoveryTrigger)
+$ActivationTrigger = New-ScheduledTaskTrigger `
+    -Once `
+    -At (Get-Date).AddMinutes(1) `
+    -RepetitionInterval (New-TimeSpan -Minutes 5) `
+    -RepetitionDuration (New-TimeSpan -Days 3650)
 $Principal = New-ScheduledTaskPrincipal `
     -UserId $WindowsIdentity `
     -LogonType Interactive `
@@ -90,6 +126,27 @@ if ($null -eq $ExistingTask) {
         -Principal $Principal `
         -Settings $Settings `
         -Description $Description | Out-Null
+}
+
+$ExistingActivationTask = Get-ScheduledTask `
+    -TaskName $ActivationTaskName `
+    -ErrorAction SilentlyContinue
+if ($null -eq $ExistingActivationTask) {
+    Register-ScheduledTask `
+        -TaskName $ActivationTaskName `
+        -Action $ActivationAction `
+        -Trigger $ActivationTrigger `
+        -Principal $Principal `
+        -Settings $Settings `
+        -Description "Runs only stopped-state canaries and activation request staging." | Out-Null
+}
+else {
+    Set-ScheduledTask `
+        -TaskName $ActivationTaskName `
+        -Action $ActivationAction `
+        -Trigger $ActivationTrigger `
+        -Principal $Principal `
+        -Settings $Settings | Out-Null
 }
 else {
     Set-ScheduledTask `

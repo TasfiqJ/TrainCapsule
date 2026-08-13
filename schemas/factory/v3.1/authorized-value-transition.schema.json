@@ -1,0 +1,128 @@
+{
+  "$defs": {
+    "CommercialState": {
+      "enum": [
+        "NOT_EVALUATED",
+        "NATIVE_ADVANTAGE_UNPROVEN",
+        "PILOT_ELIGIBLE",
+        "COMMERCIALLY_SUPPORTED",
+        "WITHDRAWN"
+      ],
+      "title": "CommercialState",
+      "type": "string"
+    },
+    "TechnicalState": {
+      "enum": [
+        "NOT_EVALUATED",
+        "FAILED",
+        "PASSED"
+      ],
+      "title": "TechnicalState",
+      "type": "string"
+    },
+    "WorkStatus": {
+      "enum": [
+        "PROPOSED",
+        "READY",
+        "QUEUED",
+        "RUNNING",
+        "PAUSED_QUOTA",
+        "PAUSED_BACKEND",
+        "WAITING_EXTERNAL",
+        "BLOCKED_TECHNICAL",
+        "BLOCKED_POLICY",
+        "PASSED_ENGINEERING",
+        "REJECTED_VALUE",
+        "NATIVE_SUFFICIENT",
+        "DEFERRED",
+        "SUPERSEDED",
+        "CANCELLED",
+        "COMPLETED"
+      ],
+      "title": "WorkStatus",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/authorized-value-transition.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allowedClaims": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Allowedclaims",
+      "type": "array"
+    },
+    "benchmarkDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Benchmarkdigest",
+      "type": "string"
+    },
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "candidateTreeSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatetreesha",
+      "type": "string"
+    },
+    "commercialCeiling": {
+      "$ref": "#/$defs/CommercialState"
+    },
+    "forbiddenClaims": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "title": "Forbiddenclaims",
+      "type": "array"
+    },
+    "machineReceiptDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Machinereceiptdigest",
+      "type": "string"
+    },
+    "resultingStatus": {
+      "$ref": "#/$defs/WorkStatus"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "technicalCeiling": {
+      "$ref": "#/$defs/TechnicalState"
+    },
+    "valueResultDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Valueresultdigest",
+      "type": "string"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "workItemId",
+    "candidateSha",
+    "candidateTreeSha",
+    "benchmarkDigest",
+    "valueResultDigest",
+    "machineReceiptDigest",
+    "resultingStatus",
+    "technicalCeiling",
+    "commercialCeiling",
+    "allowedClaims",
+    "forbiddenClaims"
+  ],
+  "title": "AuthorizedValueTransitionV31",
+  "type": "object"
+}

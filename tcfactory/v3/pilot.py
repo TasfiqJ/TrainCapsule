@@ -6,7 +6,6 @@ act as customer evidence, a commercial decision, or a release approval.
 
 from __future__ import annotations
 
-import hashlib
 import os
 from datetime import UTC, datetime
 from pathlib import Path
@@ -16,6 +15,7 @@ from pydantic import Field
 
 from tcfactory.util import read_json
 from tcfactory.v3.base import V3Model
+from tcfactory.v3.source_authority import validate_active_source_generation
 
 
 class PilotMetadata(V3Model):
@@ -27,13 +27,12 @@ class PilotMetadata(V3Model):
     decision_authority: Literal["NONE"] = "NONE"
     external_evidence_refs: list[str] = Field(default_factory=list, max_length=0)
     automatic_promotion: Literal[False] = False
-    owner_directives_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    authority_manifest_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     created_at: datetime
 
 
-def _owner_directives_digest(repo_root: Path) -> str:
-    content = (repo_root / "config/owner_directives.yaml").read_bytes()
-    return f"sha256:{hashlib.sha256(content).hexdigest()}"
+def _authority_manifest_digest(repo_root: Path) -> str:
+    return f"sha256:{validate_active_source_generation(repo_root).manifest_digest}"
 
 
 def pilot_root(repo_root: Path) -> Path:
@@ -48,7 +47,7 @@ def create_pilot_metadata(
 ) -> Path:
     record = PilotMetadata(
         pilot_id=pilot_id,
-        owner_directives_digest=_owner_directives_digest(repo_root),
+        authority_manifest_digest=_authority_manifest_digest(repo_root),
         created_at=created_at or datetime.now(UTC),
     )
     directory = pilot_root(repo_root) / record.pilot_id
@@ -72,7 +71,7 @@ def load_pilot_metadata(repo_root: Path, pilot_id: str) -> tuple[Path, PilotMeta
     # Model validation is also the path-traversal boundary for pilot_id.
     probe = PilotMetadata(
         pilot_id=pilot_id,
-        owner_directives_digest=_owner_directives_digest(repo_root),
+        authority_manifest_digest=_authority_manifest_digest(repo_root),
         created_at=datetime.now(UTC),
     )
     directory = pilot_root(repo_root) / probe.pilot_id
@@ -84,8 +83,8 @@ def load_pilot_metadata(repo_root: Path, pilot_id: str) -> tuple[Path, PilotMeta
     expected_name = record.canonical_digest().removeprefix("sha256:") + ".json"
     if path.name != expected_name:
         raise ValueError("pilot metadata content-address does not match its payload")
-    if record.owner_directives_digest != _owner_directives_digest(repo_root):
-        raise ValueError("pilot metadata is stale for the active owner directives")
+    if record.authority_manifest_digest != _authority_manifest_digest(repo_root):
+        raise ValueError("pilot metadata is stale for the active authority manifest")
     return path, record
 
 

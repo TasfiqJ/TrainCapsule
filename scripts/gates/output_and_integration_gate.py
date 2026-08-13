@@ -1,8 +1,10 @@
 from __future__ import annotations
 
+import ast
 import re
 import subprocess
 import sys
+from pathlib import Path
 from typing import cast
 
 from gate_common import ROOT, require_patterns, task_payload
@@ -21,6 +23,78 @@ PLACEHOLDERS = (
     re.compile(r"\bplaceholder\s+implementation\b", re.IGNORECASE),
     re.compile(r"return\s+['\"]TODO['\"]", re.IGNORECASE),
 )
+
+
+def _v31_repository_violations(repository_root: Path) -> list[str]:
+    roots = (
+        repository_root / "tcfactory",
+        repository_root / "verifier/src/traincapsule_verifier",
+    )
+    violations: list[str] = []
+    for root in roots:
+        for path in root.rglob("*.py"):
+            relative = path.relative_to(repository_root).as_posix()
+            source = path.read_text(encoding="utf-8", errors="strict")
+            try:
+                tree = ast.parse(source, filename=relative)
+            except SyntaxError as exc:
+                violations.append(f"{relative}:invalid-syntax:{exc.lineno}")
+                continue
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Raise) and isinstance(node.exc, (ast.Name, ast.Call)):
+                    name = node.exc.id if isinstance(node.exc, ast.Name) else (
+                        node.exc.func.id if isinstance(node.exc.func, ast.Name) else ""
+                    )
+                    if name == "NotImplementedError":
+                        violations.append(f"{relative}:NotImplementedError:{node.lineno}")
+                if (
+                    isinstance(node, ast.Return)
+                    and isinstance(node.value, ast.Constant)
+                    and isinstance(node.value.value, str)
+                    and node.value.value.strip().upper() in {"TODO", "PLACEHOLDER"}
+                ):
+                    violations.append(f"{relative}:placeholder-return:{node.lineno}")
+    reachability = {
+        repository_root / "tcfactory/v3/controller.py": (
+            "tcfactory.v3.task_compiler_v31",
+            "tcfactory.v3.external_actions",
+            "tcfactory.v3.native_value_runtime",
+        ),
+        repository_root / "tcfactory/cli.py": (
+            ".v3.activation",
+            ".v3.canaries",
+        ),
+        repository_root / "verifier/src/traincapsule_verifier/bootstrap.py": (
+            "traincapsule-verifier-request-broker",
+            "traincapsule-verifier-issuer",
+            "traincapsule-verifier-broker",
+        ),
+        repository_root / "verifier/src/traincapsule_verifier/issuer_service.py": (
+            "issue_receipt",
+        ),
+    }
+    for path, required in reachability.items():
+        source = path.read_text(encoding="utf-8", errors="strict")
+        for needle in required:
+            if needle not in source:
+                violations.append(
+                    f"{path.relative_to(repository_root).as_posix()}:dead-sidecar:{needle}"
+                )
+    return violations
+
+
+def _run_v31_repository_gate() -> int:
+    """Reject executable placeholders and known dead V3.1 runtime sidecars."""
+
+    violations = _v31_repository_violations(ROOT)
+    if violations:
+        print(
+            "V3.1 output/integration violations: " + ", ".join(sorted(violations)),
+            file=sys.stderr,
+        )
+        return 1
+    print("PASS V3.1: production code has no executable placeholders or dead critical sidecars")
+    return 0
 
 
 def _run_generic_research_evidence_gate(
@@ -133,8 +207,13 @@ def _run_generic_research_evidence_gate(
 
 
 def main() -> int:
+    if sys.argv[1:] == ["--repository-v31"]:
+        return _run_v31_repository_gate()
     if len(sys.argv) not in {2, 3}:
-        print("usage: output_and_integration_gate.py TASK_ID [CHECK]", file=sys.stderr)
+        print(
+            "usage: output_and_integration_gate.py TASK_ID [CHECK] | --repository-v31",
+            file=sys.stderr,
+        )
         return 2
     task_id = sys.argv[1]
     check = sys.argv[2] if len(sys.argv) == 3 else "all"

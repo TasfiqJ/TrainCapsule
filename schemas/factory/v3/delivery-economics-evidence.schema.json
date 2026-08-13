@@ -1,0 +1,125 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "3.1",
+      "default": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "workItemId": {
+      "const": "V3-REPEAT-006",
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "evidenceBasisSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Evidencebasissha",
+      "type": "string"
+    },
+    "sourceAuthorityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourceauthoritydigest",
+      "type": "string"
+    },
+    "productLineageDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Productlineagedigest",
+      "type": "string"
+    },
+    "sourceRecordDigests": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 2,
+      "minItems": 2,
+      "title": "Sourcerecorddigests",
+      "type": "array"
+    },
+    "signedExternalReceiptDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Signedexternalreceiptdigest",
+      "type": "string"
+    },
+    "customerIdentityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Customeridentitydigest",
+      "type": "string"
+    },
+    "offerIdentityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Offeridentitydigest",
+      "type": "string"
+    },
+    "originalSetupMinutes": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000,
+      "title": "Originalsetupminutes",
+      "type": "integer"
+    },
+    "proposedSetupMinutes": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "title": "Proposedsetupminutes",
+      "type": "integer"
+    },
+    "originalDeliveryMinutes": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000,
+      "title": "Originaldeliveryminutes",
+      "type": "integer"
+    },
+    "proposedDeliveryMinutes": {
+      "maximum": 1000000,
+      "minimum": 0,
+      "title": "Proposeddeliveryminutes",
+      "type": "integer"
+    },
+    "originalCostMicrousd": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000000000000,
+      "title": "Originalcostmicrousd",
+      "type": "integer"
+    },
+    "proposedCostMicrousd": {
+      "maximum": 1000000000000000,
+      "minimum": 0,
+      "title": "Proposedcostmicrousd",
+      "type": "integer"
+    },
+    "originalMarginBasisPoints": {
+      "maximum": 10000,
+      "minimum": -10000,
+      "title": "Originalmarginbasispoints",
+      "type": "integer"
+    },
+    "proposedMarginBasisPoints": {
+      "maximum": 10000,
+      "minimum": -10000,
+      "title": "Proposedmarginbasispoints",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "workItemId",
+    "evidenceBasisSha",
+    "sourceAuthorityDigest",
+    "productLineageDigest",
+    "sourceRecordDigests",
+    "signedExternalReceiptDigest",
+    "customerIdentityDigest",
+    "offerIdentityDigest",
+    "originalSetupMinutes",
+    "proposedSetupMinutes",
+    "originalDeliveryMinutes",
+    "proposedDeliveryMinutes",
+    "originalCostMicrousd",
+    "proposedCostMicrousd",
+    "originalMarginBasisPoints",
+    "proposedMarginBasisPoints"
+  ],
+  "title": "DeliveryEconomicsEvidence",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/delivery-economics-evidence.schema.json"
+}

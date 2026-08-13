@@ -5,6 +5,8 @@
         "AUTHENTICATED",
         "AUTH_EXPIRED",
         "QUOTA_WAIT",
+        "INFRASTRUCTURE",
+        "TIMEOUT",
         "ROUTE_REFUSED"
       ],
       "title": "BackendRouteState",

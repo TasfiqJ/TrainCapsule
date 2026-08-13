@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reject active human/PR release gates superseded by the owner deviation."""
+"""Reject human intervention and direct-main publication in active V3.1 policy."""
 
 from __future__ import annotations
 
@@ -8,6 +8,10 @@ import sys
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
+if str(ROOT) not in sys.path:
+    sys.path.insert(0, str(ROOT))
+
+from tcfactory.v3.source_authority import validate_active_source_generation  # noqa: E402
 
 ACTIVE_DIRECTORY_PATTERNS = (
     "prompts/**/*.md",
@@ -28,7 +32,6 @@ ACTIVE_DIRECTORY_PATTERNS = (
 ACTIVE_FILES = (
     "README.md",
     "docs/CONTEXT_INDEX.yaml",
-    "docs/source-of-truth/v3-2026-08-11/README.md",
     "tcfactory/completion.py",
     "tcfactory/context.py",
     "tcfactory/github_sync.py",
@@ -36,6 +39,11 @@ ACTIVE_FILES = (
     "tcfactory/supervisor.py",
 )
 SELF_PATH = "scripts/gates/active_policy_integrity.py"
+NON_RUNTIME_GENERATORS = {"scripts/generate_v3_1_zh_source.py"}
+HISTORICAL_POLICY_FILES = {
+    "config/owner_directives.yaml",
+    "factory/policy/ZERO_HUMAN_OPERATION_OVERRIDE.json",
+}
 ALLOWED_EXACT_LINES: dict[str, set[str]] = {
     "tcfactory/context.py": {
         '                "supersedes human-approval and PR-first clauses only",'
@@ -49,15 +57,18 @@ FORBIDDEN = (
     ("human milestone enum", re.compile(r"\bMilestoneStatus\.WAITING_HUMAN\b")),
     ("human finding owner", re.compile(r"ownerClass[^\n]{0,80}\bHUMAN\b", re.IGNORECASE)),
     (
-        "PR-only release",
+        "enabled direct-main release",
         re.compile(
-            r"(?:draft[- ]pull[- ]request|pull[- ]request|\bPR)[- ]only|\bPR-first\b",
+            r"owner_directed_main_only|directMainPush\s*:\s*true|"
+            r"direct_main_push\s*:\s*Literal\[True\]|PUBLISH_MAIN_ONLY|"
+            r"\bmain[- ]only\b|\bdirect(?:ly)?[- ]to[- ]main\b|"
+            r"pull requests? (?:are|is) forbidden|PR[- ]forbidden",
             re.IGNORECASE,
         ),
     ),
     (
-        "required pull request",
-        re.compile(r"pull requests?\s+(?:are|is|remain)\s+required", re.IGNORECASE),
+        "pull-request bypass",
+        re.compile(r"\b(?:no|without)[-_ ](?:pull[-_ ]request|PR)\b", re.IGNORECASE),
     ),
     (
         "required human approval",
@@ -74,25 +85,23 @@ class ActivePolicyError(RuntimeError):
 
 def active_policy_files(repo_root: Path) -> list[Path]:
     paths = {repo_root / relative for relative in ACTIVE_FILES}
+    validate_active_source_generation(repo_root)
     for pattern in ACTIVE_DIRECTORY_PATTERNS:
         paths.update(repo_root.glob(pattern))
     return sorted(
         path
         for path in paths
-        if path.is_file() and path.relative_to(repo_root).as_posix() != SELF_PATH
+        if path.is_file()
+        and path.relative_to(repo_root).as_posix()
+        not in {SELF_PATH, *NON_RUNTIME_GENERATORS, *HISTORICAL_POLICY_FILES}
     )
 
 
 def validate_active_policy(repo_root: Path) -> int:
-    owner = (repo_root / "config/owner_directives.yaml").read_text(encoding="utf-8")
-    for required in (
-        "humanIntervention: FORBIDDEN",
-        "publicationBranch: main",
-        "nonMainPushes: FORBIDDEN",
-        "pullRequestDependency: FORBIDDEN",
-    ):
-        if required not in owner:
-            raise ActivePolicyError(f"owner deviation is missing {required}")
+    active_source = validate_active_source_generation(repo_root)
+    manifest = (repo_root / active_source.manifest_path).read_text(encoding="utf-8")
+    if active_source.generation_id not in manifest:
+        raise ActivePolicyError("active policy manifest does not declare its generation")
 
     violations: list[str] = []
     scanned = active_policy_files(repo_root)
@@ -120,7 +129,7 @@ def main() -> int:
     except (OSError, ValueError, ActivePolicyError) as exc:
         print(f"FAIL: {exc}", file=sys.stderr)
         return 1
-    print(f"PASS: {count} active policy files contain no human/PR release dependency")
+    print(f"PASS: {count} active policy files contain no human or direct-main dependency")
     return 0
 
 

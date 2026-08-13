@@ -1,264 +1,491 @@
 from __future__ import annotations
 
-# pyright: reportPrivateUsage=false, reportUnknownLambdaType=false, reportUnknownArgumentType=false
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Literal
+from types import SimpleNamespace
+from typing import Literal, cast
 
 import pytest
 
-import tcfactory.github_sync as github_sync
-from tcfactory.github_sync import (
-    GitHubConfig,
-    MainOnlyMachineReceipt,
-    MainOnlyPublisher,
-    MainPublicationTransaction,
+from tcfactory.github_sync import GitHubConfig, load_github_config
+from tcfactory.util import read_json
+from tcfactory.v3.candidate_freeze import CandidateFreezeError, FrozenCandidate
+from tcfactory.v3.publication import (
+    AuthorizedReceipt,
+    AutomatedPRPublisher,
+    CheckObservation,
+    PublicationError,
     PublicationPhase,
-    RemoteCIFailure,
-    RequiredWorkflow,
-    RequiredWorkflowStatus,
+    PublicationTransaction,
+    PublicCheckAuthorization,
+    PullRequestObservation,
 )
-from tcfactory.util import read_json, sha256_file, write_json
 
 BASE = "a" * 40
 CANDIDATE = "b" * 40
-REVERT = "c" * 40
-UNKNOWN = "d" * 40
-DIGEST = "sha256:" + "e" * 64
+CANDIDATE_TREE = "c" * 40
+MERGED = "d" * 40
+MERGED_TREE = "e" * 40
+DIGEST = "sha256:" + "f" * 64
+NOW = datetime(2026, 8, 12, 12, 0, tzinfo=UTC)
 
 
-def _workflow(
-    status: Literal["pending", "pass", "fail"] = "pass",
-) -> RequiredWorkflowStatus:
-    return RequiredWorkflowStatus(
-        candidate_sha=CANDIDATE,
-        status=status,
-        workflows=[
-            RequiredWorkflow(
-                name="TrainCapsule / Factory quality",
-                status="completed" if status != "pending" else "in_progress",
-                conclusion=(
-                    "success" if status == "pass" else "failure" if status == "fail" else None
-                ),
+def _config() -> GitHubConfig:
+    root = Path(__file__).resolve().parents[1]
+    payload = load_github_config(root / "config/github.yaml").model_dump(mode="json", by_alias=True)
+    remote = payload["remoteCi"]
+    assert isinstance(remote, dict)
+    ids = cast(dict[str, object], remote["trustedCheckAppIds"])
+    assert isinstance(ids, dict)
+    remote["trustedCheckAppIds"] = {name: 15368 for name in ids}
+    remote["postMergeRequiredWorkflows"] = [
+        name for name in ids if name != "TrainCapsule / Machine policy"
+    ]
+    remote["pollSeconds"] = 5
+    return GitHubConfig.model_validate(payload)
+
+
+class StubAuthorizer:
+    def __init__(self) -> None:
+        self.reject = False
+        self.calls: list[str] = []
+
+    def authorize(
+        self,
+        receipt_path: Path,
+        *,
+        candidate_sha: str,
+        candidate_tree_sha: str,
+        base_sha: str,
+        work_item_id: str,
+        candidate_manifest_digest: str,
+    ) -> AuthorizedReceipt:
+        del receipt_path, candidate_tree_sha, base_sha, work_item_id, candidate_manifest_digest
+        self.calls.append(candidate_sha)
+        if self.reject:
+            raise PublicationError("receipt is expired or revoked")
+        authorization = PublicCheckAuthorization(
+            check_name="TrainCapsule / Machine policy",
+            candidate_sha=candidate_sha,
+            conclusion="success",
+            receipt_id="RECEIPT:POLICY:001",
+            receipt_digest=DIGEST,
+        )
+        return cast(AuthorizedReceipt, SimpleNamespace(authorization=authorization))
+
+
+class MemoryGitHub:
+    def __init__(self, config: GitHubConfig) -> None:
+        self.config = config
+        self.branches: dict[str, str] = {"main": BASE}
+        self.anchor_main = BASE
+        self.prs: dict[int, PullRequestObservation] = {}
+        self.created_prs = 0
+        self.pushes = 0
+        self.ready_calls = 0
+        self.merge_calls = 0
+        self.closed: list[int] = []
+        self.check_state = "success"
+        self.post_merge_state = "success"
+        self.fail_after_push_once = False
+        self.fail_after_create_once = False
+        self.trees = {
+            BASE: "1" * 40,
+            CANDIDATE: CANDIDATE_TREE,
+            MERGED: MERGED_TREE,
+        }
+
+    def remote_branch_sha(self, branch: str) -> str | None:
+        return self.branches.get(branch)
+
+    def push_candidate_branch(self, *, sha: str, branch: str) -> None:
+        assert branch != "main"
+        self.pushes += 1
+        self.branches[branch] = sha
+        if self.fail_after_push_once:
+            self.fail_after_push_once = False
+            raise PublicationError("simulated crash after branch push")
+
+    def find_pull_request(
+        self, *, head_branch: str, base_branch: str, marker: str
+    ) -> PullRequestObservation | None:
+        del base_branch, marker
+        return next((pr for pr in self.prs.values() if pr.head_branch == head_branch), None)
+
+    def create_draft_pull_request(
+        self, *, head_branch: str, base_branch: str, title: str, body: str
+    ) -> PullRequestObservation:
+        del title, body
+        self.created_prs += 1
+        number = len(self.prs) + 1
+        pr = PullRequestObservation(
+            number=number,
+            url=f"https://github.com/TasfiqJ/TrainCapsule/pull/{number}",
+            base_branch=cast(Literal["main"], base_branch),
+            base_sha=self.branches[base_branch],
+            head_branch=head_branch,
+            head_sha=self.branches[head_branch],
+            state="OPEN",
+            is_draft=True,
+        )
+        self.prs[number] = pr
+        if self.fail_after_create_once:
+            self.fail_after_create_once = False
+            raise PublicationError("simulated crash after PR creation")
+        return pr
+
+    def pull_request(self, number: int) -> PullRequestObservation:
+        return self.prs[number]
+
+    def checks(self, *, sha: str, pull_request_number: int | None) -> list[CheckObservation]:
+        state = self.post_merge_state if pull_request_number is None else self.check_state
+        event = "push" if pull_request_number is None else "pull_request"
+        conclusion = None if state == "pending" else state
+        status = "in_progress" if state == "pending" else "completed"
+        return [
+            CheckObservation(
+                name=name,
+                head_sha=sha,
+                app_id=cast(int, app_id),
+                event=event,
+                status=status,
+                conclusion=conclusion,
             )
-        ],
-    )
+            for name, app_id in self.config.remote_ci.trusted_check_app_ids.items()
+        ]
+
+    def mark_ready(self, *, number: int, expected_head_sha: str) -> None:
+        pr = self.prs[number]
+        assert pr.head_sha == expected_head_sha
+        self.ready_calls += 1
+        self.prs[number] = pr.model_copy(update={"is_draft": False})
+
+    def enable_auto_merge(self, *, number: int, expected_head_sha: str) -> None:
+        pr = self.prs[number]
+        assert pr.head_sha == expected_head_sha
+        self.merge_calls += 1
+        self.prs[number] = pr.model_copy(update={"auto_merge_enabled": True})
+
+    def close_pull_request(self, *, number: int, reason: str) -> None:
+        del reason
+        self.closed.append(number)
+        self.prs[number] = self.prs[number].model_copy(update={"state": "CLOSED"})
+
+    def commit_tree_sha(self, sha: str) -> str:
+        return self.trees[sha]
+
+    def create_revert_commit(self, *, merged_sha: str, base_sha: str, message: str) -> str:
+        del merged_sha, base_sha, message
+        revert = "9" * 40
+        self.trees[revert] = self.trees[BASE]
+        return revert
+
+    def merge(self, number: int, sha: str = MERGED) -> None:
+        self.trees.setdefault(sha, MERGED_TREE)
+        self.prs[number] = self.prs[number].model_copy(
+            update={"state": "MERGED", "merged_sha": sha, "is_draft": False}
+        )
+        self.branches["main"] = sha
+
+    def advance_anchor(self, sha: str) -> None:
+        self.anchor_main = sha
 
 
-def _publisher(tmp_path: Path) -> MainOnlyPublisher:
-    repo = tmp_path / "repo"
-    (repo / "config").mkdir(parents=True)
-    (repo / "docs/source-of-truth/v3-2026-08-11").mkdir(parents=True)
-    (repo / "config/owner_directives.yaml").write_text("version: 3\n", encoding="utf-8")
-    manifest = repo / "docs/source-of-truth/v3-2026-08-11/FINAL_MANIFEST_V3.json"
-    manifest.write_text("{}\n", encoding="utf-8")
-    state = repo / "factory/state"
-    state.mkdir(parents=True)
-    write_json(
-        state / "MIGRATION_COMPLETE_V3.json",
-        {
-            "version": 3,
-            "status": "COMPLETE",
-            "completedSha": BASE,
-            "sourceManifestSha256": sha256_file(manifest),
-            "ownerDirectivesSha256": sha256_file(repo / "config/owner_directives.yaml"),
-        },
-    )
-    return MainOnlyPublisher(
-        repo_root=repo,
-        config=GitHubConfig(enabled=True, retry_attempts=1, retry_backoff_seconds=1),
-        receipt_root=state / "machine-policy-receipts",
-        quarantine_root=state / "quarantine",
-        local_gate_command=("true",),
-    )
-
-
-def _transaction(
-    publisher: MainOnlyPublisher,
-    phase: PublicationPhase,
-    *,
-    revert_sha: str | None = None,
-) -> MainPublicationTransaction:
-    now = datetime.now(UTC)
-    receipt_path = publisher.receipt_root / "V3-MIG-019-bbbbbbbbbbbb.json"
-    receipt = MainOnlyMachineReceipt(
-        work_item_id="V3-MIG-019",
+def _transaction() -> PublicationTransaction:
+    return PublicationTransaction(
+        transaction_id="PRPUB-V3_REL_001-BBBBBBBBBBBB",
+        work_item_id="V3-REL-001",
         base_sha=BASE,
         candidate_sha=CANDIDATE,
+        candidate_tree_sha=CANDIDATE_TREE,
+        candidate_worktree="/virtual/frozen-candidate",
+        candidate_branch="factory/v3-rel-001/bbbbbbbbbbbb",
         candidate_manifest_digest=DIGEST,
-        packet_digest=DIGEST,
-        source_digest=DIGEST,
-        context_digest=DIGEST,
-        checkpoint_digest=DIGEST,
-        gate_digests={"deterministic-local": DIGEST},
-        owner_directives_digest=DIGEST,
-        local_gate_evidence={"candidateSha": CANDIDATE},
-        private_gate_evidence={},
-        created_at=now,
-        retry_budget=1,
-    )
-    transaction = MainPublicationTransaction(
-        transaction_id="MPUB-V3_MIG_019-BBBBBBBBBBBB",
-        work_item_id="V3-MIG-019",
-        base_sha=BASE,
-        candidate_sha=CANDIDATE,
-        phase=phase,
-        receipt_path=str(receipt_path),
-        machine_receipt=receipt,
-        revert_sha=revert_sha,
-        failure_reason="hosted checks failed" if phase.startswith("REVERT") else None,
-        created_at=now,
-        updated_at=now,
-    )
-    return publisher._save_transaction(transaction)
-
-
-def _runtime(
-    publisher: MainOnlyPublisher,
-    monkeypatch: pytest.MonkeyPatch,
-    *,
-    local: str,
-    remote: str,
-    hosted: Literal["pending", "pass", "fail"] = "pass",
-) -> tuple[dict[str, str], list[str]]:
-    state = {"local": local, "remote": remote}
-    effects: list[str] = []
-
-    def current(_repo: Path, ref: str | None = None) -> str:
-        if ref and ref.endswith("^{tree}"):
-            return "f" * 40 if ref.startswith(CANDIDATE) else "0" * 40
-        return state["local"]
-
-    monkeypatch.setattr(github_sync, "current_sha", current)
-    monkeypatch.setattr(
-        github_sync, "_remote_branch_sha", lambda *_args, **_kwargs: state["remote"]
+        phase=PublicationPhase.PREPARED,
+        created_at=NOW,
+        updated_at=NOW,
     )
 
-    def promote(*_args: object, **_kwargs: object) -> None:
-        effects.append("promote")
-        state["local"] = CANDIDATE
 
-    monkeypatch.setattr(github_sync, "fast_forward_main", promote)
-
-    def push(sha: str) -> None:
-        effects.append(f"push:{sha}")
-        state["remote"] = sha
-
-    monkeypatch.setattr(publisher, "_push_main", push)
-    monkeypatch.setattr(
-        github_sync,
-        "required_workflow_status",
-        lambda *_args, **_kwargs: _workflow("pending" if hosted == "pending" else hosted),
-    )
-
-    def wait(*_args: object, **_kwargs: object) -> dict[str, object]:
-        effects.append("hosted-poll")
-        if hosted == "fail":
-            raise RemoteCIFailure("hosted checks failed")
-        return _workflow("pass").model_dump(mode="json", by_alias=True)
-
-    monkeypatch.setattr(github_sync, "wait_for_remote_ci", wait)
-    return state, effects
-
-
-@pytest.mark.parametrize(
-    ("phase", "local", "remote", "expected_effects"),
-    [
-        ("PREPARED", BASE, BASE, ["promote", f"push:{CANDIDATE}", "hosted-poll"]),
-        ("LOCAL_PROMOTED", CANDIDATE, BASE, [f"push:{CANDIDATE}", "hosted-poll"]),
-        ("LOCAL_PROMOTED", CANDIDATE, CANDIDATE, ["hosted-poll"]),
-        ("REMOTE_PUSHED", CANDIDATE, CANDIDATE, ["hosted-poll"]),
-        ("HOSTED_PENDING", CANDIDATE, CANDIDATE, ["hosted-poll"]),
-    ],
-)
-def test_recovery_resumes_every_candidate_publication_crash_window(
+def _publisher(
     tmp_path: Path,
-    monkeypatch: pytest.MonkeyPatch,
-    phase: PublicationPhase,
-    local: str,
-    remote: str,
-    expected_effects: list[str],
-) -> None:
-    publisher = _publisher(tmp_path)
-    transaction = _transaction(publisher, phase)
-    state, effects = _runtime(publisher, monkeypatch, local=local, remote=remote, hosted="pass")
-    completed = publisher.reconcile_transaction(transaction)
-    assert completed.phase == "VERIFIED"
-    assert state == {"local": CANDIDATE, "remote": CANDIDATE}
-    assert effects == expected_effects
-    metadata = read_json(publisher._metadata_path(), {})
-    assert metadata["status"] == "PUBLISHED_MAIN_VERIFIED"
-    marker = read_json(publisher.quarantine_root.parent / "MIGRATION_COMPLETE_V3.json", {})
-    assert marker["completedSha"] == CANDIDATE
-
-
-def test_recovery_resumes_failed_hosted_checks_and_revert_push(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    publisher = _publisher(tmp_path)
-    transaction = _transaction(publisher, "HOSTED_PENDING")
-    state, effects = _runtime(
-        publisher,
-        monkeypatch,
-        local=CANDIDATE,
-        remote=CANDIDATE,
-        hosted="fail",
+) -> tuple[AutomatedPRPublisher, MemoryGitHub, StubAuthorizer]:
+    config = _config()
+    client = MemoryGitHub(config)
+    authorizer = StubAuthorizer()
+    publisher = AutomatedPRPublisher(
+        repo_root=tmp_path,
+        config=config,
+        transaction_root=tmp_path / "transactions",
+        receipt_root=tmp_path / "external-receipts",
+        quarantine_root=tmp_path / "quarantine",
+        client=client,
+        receipt_authorizer=authorizer,
+        local_gate_command=("true",),
+        clock=lambda: NOW,
+        candidate_freezer=lambda _path, sha, tree: FrozenCandidate(
+            candidate_sha=sha, candidate_tree_sha=tree
+        ),
+        anchor_main_observer=lambda: client.anchor_main,
     )
-
-    def create_revert(_transaction: MainPublicationTransaction) -> str:
-        effects.append("local-revert")
-        state["local"] = REVERT
-        return REVERT
-
-    monkeypatch.setattr(publisher, "_create_local_revert", create_revert)
-    monkeypatch.setattr(publisher, "_assert_revert_tree", lambda *_args: None)
-    completed = publisher.reconcile_transaction(transaction)
-    assert completed.phase == "REVERTED"
-    assert completed.revert_sha == REVERT
-    assert state == {"local": REVERT, "remote": REVERT}
-    assert effects == ["hosted-poll", "local-revert", f"push:{REVERT}"]
-    assert read_json(publisher._metadata_path(), {})["status"] == "REVERTED_AND_QUARANTINED"
-    marker = read_json(publisher.quarantine_root.parent / "MIGRATION_COMPLETE_V3.json", {})
-    assert marker["completedSha"] == REVERT
+    return publisher, client, authorizer
 
 
-def test_recovery_resumes_after_local_revert_before_remote_push(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+def _advance_to_auto_merge(
+    publisher: AutomatedPRPublisher, tx: PublicationTransaction
+) -> PublicationTransaction:
+    tx = publisher.reconcile_transaction(tx)
+    assert tx.phase is PublicationPhase.AUTO_MERGE_REQUESTED
+    return tx
+
+
+def test_exact_candidate_pr_checks_receipt_merge_and_post_merge_invariants(
+    tmp_path: Path,
 ) -> None:
-    publisher = _publisher(tmp_path)
-    transaction = _transaction(publisher, "REVERT_LOCAL", revert_sha=REVERT)
-    state, effects = _runtime(publisher, monkeypatch, local=REVERT, remote=CANDIDATE, hosted="fail")
-    monkeypatch.setattr(publisher, "_assert_revert_tree", lambda *_args: None)
-    completed = publisher.reconcile_transaction(transaction)
-    assert completed.phase == "REVERTED"
-    assert state["remote"] == REVERT
-    assert effects == [f"push:{REVERT}"]
+    publisher, client, authorizer = _publisher(tmp_path)
+    tx = _advance_to_auto_merge(publisher, _transaction())
+    assert client.branches[tx.candidate_branch] == CANDIDATE
+    assert client.created_prs == 1
+    assert client.ready_calls == client.merge_calls == 1
+    assert authorizer.calls == [CANDIDATE]
+    assert tx.pull_request_number is not None
+    client.merge(tx.pull_request_number)
+    tx = publisher.reconcile_transaction(tx)
+    assert tx.phase is PublicationPhase.MERGED
+    client.advance_anchor(MERGED)
+    tx = publisher.reconcile_transaction(tx)
+    assert tx.phase is PublicationPhase.INVARIANTS_VERIFIED
+    assert tx.merged_main_sha == MERGED
+    assert client.branches["main"] == MERGED
 
 
-def test_terminal_reconciliation_is_idempotent(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    publisher = _publisher(tmp_path)
-    _transaction(publisher, "VERIFIED")
-    _, effects = _runtime(publisher, monkeypatch, local=CANDIDATE, remote=CANDIDATE, hosted="pass")
-    first = publisher.reconcile_pending()
-    second = publisher.reconcile_pending()
-    assert first["status"] == second["status"] == "VERIFIED"
-    assert effects == []
+def test_candidate_freeze_failure_prevents_branch_push_side_effect(tmp_path: Path) -> None:
+    publisher, client, _ = _publisher(tmp_path)
+    observations = 0
+
+    def fail_before_push(_path: Path, sha: str, tree: str) -> FrozenCandidate:
+        nonlocal observations
+        observations += 1
+        if observations == 1:
+            raise CandidateFreezeError("candidate became dirty")
+        return FrozenCandidate(candidate_sha=sha, candidate_tree_sha=tree)
+
+    publisher.candidate_freezer = fail_before_push
+
+    with pytest.raises(PublicationError, match="HARD_STUCK"):
+        publisher.reconcile_transaction(_transaction())
+
+    assert CANDIDATE not in client.branches.values()
+    assert client.created_prs == 0
 
 
-def test_ambiguous_recovery_fails_closed_and_persists_hard_stuck(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
-) -> None:
-    publisher = _publisher(tmp_path)
-    transaction = _transaction(publisher, "PREPARED")
-    _runtime(publisher, monkeypatch, local=UNKNOWN, remote=BASE)
-    with pytest.raises(RemoteCIFailure, match="ambiguous PREPARED"):
-        publisher.reconcile_transaction(transaction)
-    saved = MainPublicationTransaction.model_validate(
-        read_json(publisher._transaction_path(CANDIDATE), {})
+def test_candidate_freeze_failure_prevents_merge_authorization(tmp_path: Path) -> None:
+    publisher, client, _ = _publisher(tmp_path)
+    client.prs[1] = PullRequestObservation(
+        number=1,
+        url="https://github.com/TasfiqJ/TrainCapsule/pull/1",
+        base_sha=BASE,
+        head_branch="factory/v3-rel-001/bbbbbbbbbbbb",
+        head_sha=CANDIDATE,
+        state="OPEN",
+        is_draft=True,
     )
-    assert saved.phase == "HARD_STUCK"
-    state_root = publisher.quarantine_root.parent
-    assert (state_root / "HARD_STUCK.json").is_file()
-    assert (state_root / "STOP").is_file()
+    tx = _transaction().model_copy(
+        update={
+            "phase": PublicationPhase.READY_TO_MERGE,
+            "pull_request_number": 1,
+            "pull_request_url": "https://github.com/TasfiqJ/TrainCapsule/pull/1",
+        }
+    )
+    tx = PublicationTransaction.model_validate(tx.model_dump(mode="python"))
+    def fail_before_merge(_path: Path, _sha: str, _tree: str) -> FrozenCandidate:
+        raise CandidateFreezeError("candidate became dirty")
+
+    publisher.candidate_freezer = fail_before_merge
+
+    with pytest.raises(PublicationError, match="HARD_STUCK"):
+        publisher.reconcile_transaction(tx)
+
+    assert client.ready_calls == client.merge_calls == 0
+
+
+def test_candidate_mutation_after_mark_ready_still_prevents_auto_merge(tmp_path: Path) -> None:
+    publisher, client, _ = _publisher(tmp_path)
+    client.prs[1] = PullRequestObservation(
+        number=1,
+        url="https://github.com/TasfiqJ/TrainCapsule/pull/1",
+        base_sha=BASE,
+        head_branch="factory/v3-rel-001/bbbbbbbbbbbb",
+        head_sha=CANDIDATE,
+        state="OPEN",
+        is_draft=True,
+    )
+    tx = PublicationTransaction.model_validate(
+        _transaction()
+        .model_copy(
+            update={
+                "phase": PublicationPhase.READY_TO_MERGE,
+                "pull_request_number": 1,
+                "pull_request_url": "https://github.com/TasfiqJ/TrainCapsule/pull/1",
+            }
+        )
+        .model_dump(mode="python")
+    )
+    observations = 0
+
+    def fail_after_ready(_path: Path, sha: str, tree: str) -> FrozenCandidate:
+        nonlocal observations
+        observations += 1
+        if observations == 2:
+            raise CandidateFreezeError("candidate changed after ready transition")
+        return FrozenCandidate(candidate_sha=sha, candidate_tree_sha=tree)
+
+    publisher.candidate_freezer = fail_after_ready
+
+    with pytest.raises(PublicationError, match="HARD_STUCK"):
+        publisher.reconcile_transaction(tx)
+
+    assert client.ready_calls == 1
+    assert client.merge_calls == 0
+
+
+def test_wrong_sha_stale_event_or_spoofed_app_never_satisfies_checks(
+    tmp_path: Path,
+) -> None:
+    publisher, client, _ = _publisher(tmp_path)
+    tx = publisher.reconcile_transaction(_transaction())
+    assert tx.phase is PublicationPhase.AUTO_MERGE_REQUESTED
+    tx = tx.model_copy(update={"phase": PublicationPhase.CHECKS_PENDING})
+    original = client.checks
+
+    def hostile_checks(*, sha: str, pull_request_number: int | None) -> list[CheckObservation]:
+        checks = original(sha=sha, pull_request_number=pull_request_number)
+        return [
+            check.model_copy(
+                update={
+                    "head_sha": BASE,
+                    "event": "push",
+                    "app_id": check.app_id + 1,
+                }
+            )
+            for check in checks
+        ]
+
+    client.checks = hostile_checks  # type: ignore[method-assign]
+    pending = publisher.reconcile_transaction(tx)
+    assert pending.phase is PublicationPhase.CHECKS_PENDING
+    assert client.merge_calls == 1
+
+
+def test_failed_check_or_revoked_receipt_closes_pr_before_main(tmp_path: Path) -> None:
+    publisher, client, authorizer = _publisher(tmp_path)
+    client.check_state = "failure"
+    failed = publisher.reconcile_transaction(_transaction())
+    assert failed.phase is PublicationPhase.FAILED
+    assert client.branches["main"] == BASE
+    assert client.closed == [1]
+
+    publisher, client, authorizer = _publisher(tmp_path / "revoked")
+    authorizer.reject = True
+    failed = publisher.reconcile_transaction(_transaction())
+    assert failed.phase is PublicationPhase.FAILED
+    assert "expired or revoked" in cast(str, failed.failure_reason)
+    assert client.branches["main"] == BASE
+
+
+def test_phase11_receipt_mismatch_is_rejected_before_publication_side_effects(
+    tmp_path: Path,
+) -> None:
+    publisher, client, authorizer = _publisher(tmp_path)
+    tx = _transaction().model_copy(
+        update={
+            "expected_machine_policy_receipt_id": "RECEIPT:VALUE:EXPECTED",
+            "expected_machine_policy_receipt_digest": "sha256:" + "0" * 64,
+        }
+    )
+    rejected = publisher.reconcile_transaction(tx)
+    assert rejected.phase is PublicationPhase.FAILED
+    assert "pre-authorized Phase 11" in cast(str, rejected.failure_reason)
+    assert authorizer.calls == [CANDIDATE]
+    assert client.pushes == 0
+    assert client.created_prs == 0
+    assert client.ready_calls == client.merge_calls == 0
+    assert client.branches == {"main": BASE}
+
+
+@pytest.mark.parametrize("crash_point", ["push", "pull-request"])
+def test_crash_recovery_reconciles_side_effect_without_duplicate(
+    tmp_path: Path, crash_point: str
+) -> None:
+    publisher, client, _ = _publisher(tmp_path)
+    tx = _transaction()
+    if crash_point == "push":
+        client.fail_after_push_once = True
+    else:
+        client.fail_after_create_once = True
+    with pytest.raises(PublicationError, match="simulated crash"):
+        publisher.reconcile_transaction(tx)
+    transaction_path = tmp_path / "transactions" / f"{CANDIDATE}.json"
+    persisted = read_json(transaction_path, {})
+    if persisted:
+        tx = PublicationTransaction.model_validate(persisted)
+    recovered = publisher.reconcile_transaction(tx)
+    assert recovered.phase is PublicationPhase.AUTO_MERGE_REQUESTED
+    assert client.pushes == 1
+    assert client.created_prs == 1
+
+
+def test_branch_collision_and_merged_main_mismatch_are_hard_stuck(tmp_path: Path) -> None:
+    publisher, client, _ = _publisher(tmp_path)
+    tx = _transaction()
+    client.branches[tx.candidate_branch] = BASE
+    with pytest.raises(PublicationError, match="HARD_STUCK"):
+        publisher.reconcile_transaction(tx)
+    persisted = PublicationTransaction.model_validate(
+        read_json(tmp_path / "transactions" / f"{CANDIDATE}.json", {})
+    )
+    assert persisted.phase is PublicationPhase.HARD_STUCK
+
+    publisher, client, _ = _publisher(tmp_path / "merge-mismatch")
+    tx = _advance_to_auto_merge(publisher, _transaction())
+    assert tx.pull_request_number is not None
+    client.merge(tx.pull_request_number)
+    client.branches["main"] = BASE
+    with pytest.raises(PublicationError, match="HARD_STUCK"):
+        publisher.reconcile_transaction(tx)
+
+
+def test_base_drift_closes_candidate_without_merge(tmp_path: Path) -> None:
+    publisher, client, _ = _publisher(tmp_path)
+    tx = _transaction()
+    client.branches["main"] = "7" * 40
+    failed = publisher.reconcile_transaction(tx)
+    assert failed.phase is PublicationPhase.FAILED
+    assert client.created_prs == 0
+    assert client.merge_calls == 0
+
+
+def test_post_merge_failure_uses_a_second_verified_pr_not_main_push(tmp_path: Path) -> None:
+    publisher, client, _ = _publisher(tmp_path)
+    tx = _advance_to_auto_merge(publisher, _transaction())
+    assert tx.pull_request_number is not None
+    client.merge(tx.pull_request_number)
+    client.post_merge_state = "failure"
+    tx = publisher.reconcile_transaction(tx)
+    assert tx.phase is PublicationPhase.MERGED
+    client.advance_anchor(MERGED)
+    tx = publisher.reconcile_transaction(tx)
+    assert tx.phase is PublicationPhase.REVERT_MERGE_REQUESTED
+    assert tx.revert_pull_request_number is not None
+    assert client.created_prs == 2
+    assert all(branch != "main" for branch in client.branches if branch != "main")
+    revert_pr = tx.revert_pull_request_number
+    revert_merge = "8" * 40
+    client.trees[revert_merge] = client.trees[BASE]
+    client.merge(revert_pr, revert_merge)
+    tx = publisher.reconcile_transaction(tx)
+    assert tx.phase is PublicationPhase.REVERT_MERGE_REQUESTED
+    client.advance_anchor(revert_merge)
+    tx = publisher.reconcile_transaction(tx)
+    assert tx.phase is PublicationPhase.REVERTED
+    assert client.branches["main"] == revert_merge

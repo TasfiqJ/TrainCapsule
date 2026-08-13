@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import shutil
 from collections import Counter
 from pathlib import Path
@@ -18,6 +19,7 @@ from tcfactory.feature_ledger import load_feature_ledger
 from tcfactory.util import sha256_file
 from tcfactory.v3.enums import WorkStatus
 from tcfactory.v3.migrations import (
+    LEGACY_ARCHIVE_V3_STATE_DIRECTORIES,
     LegacyDisposition,
     LegacyMigrationMap,
     load_installed_legacy_migration,
@@ -28,6 +30,15 @@ from tcfactory.v3.work_items import WorkItemCollection
 from tcfactory.yamlutil import load_yaml
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def _ignore_untracked_runtime_evidence(
+    directory: str, names: list[str]
+) -> set[str]:
+    ignored = {".git", ".venv", "worktrees"}.intersection(names)
+    if Path(directory).as_posix().endswith("/factory/artifacts"):
+        ignored.update({"T001", "T002"}.intersection(names))
+    return ignored
 
 
 def test_all_124_legacy_entries_and_statuses_are_preserved_exactly() -> None:
@@ -84,6 +95,58 @@ def test_mapping_is_explicit_bounded_and_never_resumes_t002() -> None:
         "factory/feature_ledger.yaml" in record.evidence_preserved
         for record in migration.records
     )
+    inventory = {item.path: item for item in migration.preserved_evidence_inventory}
+    for relative in (
+        "tasks/T002.yaml",
+        "specs/tasks/T002.md",
+        "factory/recovery/task-packets/T002-r1.yaml",
+    ):
+        if (ROOT / relative).is_file():
+            assert inventory[relative].sha256 == sha256_file(ROOT / relative)
+
+
+def test_preserved_evidence_inventory_detects_byte_tamper(tmp_path: Path) -> None:
+    copied = tmp_path / "repo"
+    shutil.copytree(ROOT, copied, ignore=shutil.ignore_patterns(".git", ".venv", "worktrees"))
+    target = copied / "specs/tasks/T002.md"
+    target.write_bytes(target.read_bytes() + b"\ntampered\n")
+    with pytest.raises(ValueError, match="byte digest mismatch|stale"):
+        verify_installed(copied)
+
+
+def test_ignored_runtime_evidence_is_reproducible_in_clean_checkout(
+    tmp_path: Path,
+) -> None:
+    copied = tmp_path / "repo"
+    shutil.copytree(
+        ROOT,
+        copied,
+        ignore=_ignore_untracked_runtime_evidence,
+    )
+    assert not (copied / "factory/artifacts/T001").exists()
+    assert not (copied / "factory/artifacts/T002").exists()
+    assert build_mapping(copied) == build_mapping(ROOT)
+    verify_installed(copied)
+
+
+def test_ignored_runtime_evidence_manifest_rejects_digest_tamper(
+    tmp_path: Path,
+) -> None:
+    copied = tmp_path / "repo"
+    shutil.copytree(
+        ROOT,
+        copied,
+        ignore=_ignore_untracked_runtime_evidence,
+    )
+    manifest = (
+        copied
+        / "factory/roadmap/migrations/v2_runtime_evidence_manifest.json"
+    )
+    payload = json.loads(manifest.read_text(encoding="utf-8"))
+    payload["inventory"][0]["sha256"] = "0" * 64
+    manifest.write_text(json.dumps(payload, indent=2) + "\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="manifest digest mismatch"):
+        build_mapping(copied)
 
 
 def test_mapping_targets_only_existing_v3_work_and_legacy_ids_never_enter_graph() -> None:
@@ -140,10 +203,8 @@ def test_non_resuming_queue_archive_receipt_is_fully_verifiable() -> None:
     state_directories = receipt["v3StateDirectories"]
     assert isinstance(files, list) and len(cast(list[object], files)) == 3
     assert isinstance(state_directories, list)
-    assert set(cast(list[str], state_directories)) == {
-        *(status.value.lower() for status in WorkStatus),
-        "waiting_human",  # historical V2 archive namespace; never a V3 runtime state
-    }
+    assert cast(list[str], state_directories) == list(LEGACY_ARCHIVE_V3_STATE_DIRECTORIES)
+    assert WorkStatus.PAUSED_BACKEND.value.lower() not in cast(list[str], state_directories)
 
 
 def test_tracked_queue_receipts_verify_in_a_clean_checkout(tmp_path: Path) -> None:

@@ -1,0 +1,18 @@
+[Unit]
+Description=Claim untrusted TrainCapsule deployment update proposals
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/libexec/traincapsule-deployment-refresh --claim-only --apply --confirm APPLY_DEPLOYMENT_REFRESH
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectHome=yes
+ProtectSystem=strict
+ReadOnlyPaths=/var/lib/traincapsule-runtime/deployment-update-handoffs
+ReadWritePaths=/var/lib/traincapsule-verifier/deployment-refresh-claims
+CapabilityBoundingSet=CAP_DAC_READ_SEARCH CAP_CHOWN CAP_FOWNER
+RestrictAddressFamilies=AF_UNIX
+SystemCallFilter=@system-service
+UMask=0077

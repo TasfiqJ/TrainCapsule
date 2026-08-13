@@ -3,16 +3,20 @@
 from __future__ import annotations
 
 from collections.abc import Mapping
+from datetime import datetime
 from enum import StrEnum
 from fnmatch import fnmatchcase
 from pathlib import PurePosixPath
 from typing import Literal
 
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from tcfactory.v3.base import DIGEST_PATTERN, SHA_PATTERN, V3Model
-from tcfactory.v3.enums import PolicyScope, WorkStatus
-from tcfactory.v3.external_evidence import TrustedEvidenceRecord
+from tcfactory.v3.enums import PolicyScope, SignatureAlgorithm, WorkStatus
+from tcfactory.v3.external_evidence import (
+    EvidenceSignature,
+    TrustedEvidenceRecord,
+)
 
 
 class FindingOwner(StrEnum):
@@ -112,39 +116,79 @@ class GateDecision(V3Model):
 
 
 class MachinePolicyGateReceipt(V3Model):
-    policy: Literal["OWNER_DIRECTED_ZERO_HUMAN"] = "OWNER_DIRECTED_ZERO_HUMAN"
+    policy: Literal["V3_1_ZH_MACHINE_POLICY"] = "V3_1_ZH_MACHINE_POLICY"
+    issuer: Literal["INDEPENDENT_MACHINE_POLICY_VERIFIER"]
+    scope: PolicyScope
     candidate_sha: str = Field(pattern=SHA_PATTERN.pattern)
     artifact_digests: dict[str, str]
-    owner_directives_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    authority_manifest_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
+    issued_at: datetime
+    expires_at: datetime
+    nonce: str = Field(min_length=16)
+    revocation_epoch: int = Field(ge=0)
+    signature: EvidenceSignature
+
+    @model_validator(mode="after")
+    def validate_window(self) -> MachinePolicyGateReceipt:
+        if self.expires_at <= self.issued_at:
+            raise ValueError("machine-policy receipt expiry must follow issuance")
+        return self
+
+
+class TrustedMachinePolicyRecord(V3Model):
+    """Verification result produced only by the independent Phase 3 boundary."""
+
+    receipt: MachinePolicyGateReceipt
+    signature_valid: bool
+    issuer_authorized: bool
+    source_agent_writable: bool
+    nonce_fresh: bool
+    revoked: bool
+
+    def require_trusted(self, *, now: datetime) -> MachinePolicyGateReceipt:
+        if self.source_agent_writable:
+            raise ValueError("machine-policy receipt is agent-writable")
+        if not self.signature_valid or not self.issuer_authorized:
+            raise ValueError("machine-policy receipt signature or issuer is invalid")
+        if self.receipt.signature.algorithm is not SignatureAlgorithm.ED25519:
+            raise ValueError("machine-policy receipt must use Ed25519")
+        if not self.nonce_fresh or self.revoked:
+            raise ValueError("machine-policy receipt nonce is replayed or revoked")
+        if self.receipt.issued_at > now or self.receipt.expires_at <= now:
+            raise ValueError("machine-policy receipt is not currently valid")
+        return self.receipt
 
 
 def evaluate_machine_policy_gate(
-    receipt: MachinePolicyGateReceipt | None,
+    record: TrustedMachinePolicyRecord | None,
     *,
     scope: PolicyScope,
     candidate_sha: str,
     artifact_digests: Mapping[str, str],
-    owner_directives_digest: str,
+    authority_manifest_digest: str,
+    now: datetime,
 ) -> GateDecision:
-    del scope
-    if receipt is None:
+    if record is None:
         return GateDecision(
             passed=False,
             state=WorkStatus.BLOCKED_POLICY,
             authority_ref=None,
             reason="candidate-bound machine policy receipt is required",
         )
+    receipt = record.require_trusted(now=now)
+    if receipt.scope is not scope:
+        raise ValueError("machine policy receipt scope mismatch")
     if receipt.candidate_sha != candidate_sha:
         raise ValueError("machine policy receipt candidate SHA mismatch")
     if receipt.artifact_digests != dict(artifact_digests):
         raise ValueError("machine policy receipt artifact digests mismatch")
-    if receipt.owner_directives_digest != owner_directives_digest:
-        raise ValueError("machine policy receipt owner-directive digest mismatch")
+    if receipt.authority_manifest_digest != authority_manifest_digest:
+        raise ValueError("machine policy receipt authority-manifest digest mismatch")
     return GateDecision(
         passed=True,
         state=WorkStatus.PASSED_ENGINEERING,
-        authority_ref=receipt.owner_directives_digest,
-        reason="deterministic owner-directed machine policy matches exact candidate",
+        authority_ref=receipt.authority_manifest_digest,
+        reason="deterministic V3.1-ZH machine policy matches exact candidate",
     )
 
 

@@ -1,0 +1,93 @@
+{
+  "$defs": {
+    "InterviewQuestion": {
+      "additionalProperties": false,
+      "properties": {
+        "disallowedInference": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Disallowedinference",
+          "type": "string"
+        },
+        "evidenceTarget": {
+          "maxLength": 500,
+          "minLength": 1,
+          "title": "Evidencetarget",
+          "type": "string"
+        },
+        "prompt": {
+          "maxLength": 1000,
+          "minLength": 1,
+          "title": "Prompt",
+          "type": "string"
+        },
+        "questionId": {
+          "pattern": "^Q-[0-9]{3}$",
+          "title": "Questionid",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "questionId",
+        "prompt",
+        "evidenceTarget",
+        "disallowedInference"
+      ],
+      "title": "InterviewQuestion",
+      "type": "object"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/discovery-interview-guide.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allowsSyntheticAnswers": {
+      "default": false,
+      "title": "Allowssyntheticanswers",
+      "type": "boolean"
+    },
+    "guideId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Guideid",
+      "type": "string"
+    },
+    "questions": {
+      "items": {
+        "$ref": "#/$defs/InterviewQuestion"
+      },
+      "maxItems": 32,
+      "minItems": 8,
+      "title": "Questions",
+      "type": "array"
+    },
+    "requiredExternalReceipt": {
+      "default": true,
+      "title": "Requiredexternalreceipt",
+      "type": "boolean"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "sourceGenerationDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourcegenerationdigest",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "guideId",
+    "sourceGenerationDigest",
+    "questions"
+  ],
+  "title": "DiscoveryInterviewGuide",
+  "type": "object"
+}

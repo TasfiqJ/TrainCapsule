@@ -1,14 +1,15 @@
 from __future__ import annotations
 
 import json
-from dataclasses import asdict, is_dataclass, replace
-from datetime import UTC, datetime
+from dataclasses import replace
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any, cast
 
 from claude_agent_sdk import SandboxSettings, SettingSource
 
 from .auth import assert_max_oauth_only, sanitized_agent_environment
+from .backends.base import BashCommandRule, TranscriptRetention
 from .claude_features import (
     build_session_feature_plan,
     load_claude_features,
@@ -36,10 +37,11 @@ from .quota import (
     classify_stage_failure,
     disposition_from_rate_limit_info,
 )
-from .util import write_json
+from .util import redact_sensitive, write_json
 
 MIN_CLAUDE_TASK_BUDGET_TOKENS = 20_000
 REPORT_CONTINUATION_MAX_TURNS = 4
+BACKEND_EVENT_RETENTION_DAYS = 30
 
 
 def subprocess_env_scrub_value(*, read_only: bool) -> str:
@@ -102,15 +104,96 @@ def select_result_message[T](current: T | None, candidate: T) -> T:
     return current
 
 
-def _message_to_json(message: object) -> dict[str, Any]:
-    if is_dataclass(message) and not isinstance(message, type):
-        data = asdict(message)
-    elif hasattr(message, "__dict__"):
-        data = dict(vars(message))
-    else:
-        data = {"repr": repr(message)}
-    data["_type"] = type(message).__name__
-    return data
+def redacted_event_summary(message: object) -> dict[str, object]:
+    """Retain only bounded event metadata, never provider message payloads."""
+
+    summary: dict[str, object] = {
+        "eventType": type(message).__name__,
+        "evidenceMode": "LIVE_VALIDATION",
+    }
+    for source, target in (
+        ("subtype", "subtype"),
+        ("terminal_reason", "terminalReason"),
+        ("num_turns", "numTurns"),
+        ("duration_ms", "durationMs"),
+    ):
+        value = getattr(message, source, None)
+        if isinstance(value, (str, int, float, bool)) or value is None:
+            summary[target] = value
+    return summary
+
+
+def expire_redacted_event_summaries(
+    artifact_root: Path,
+    *,
+    now: datetime | None = None,
+    retention_days: int = BACKEND_EVENT_RETENTION_DAYS,
+) -> list[Path]:
+    """Enforce bounded retention for metadata-only provider event summaries."""
+
+    if retention_days < 1 or retention_days > 365:
+        raise ValueError("backend event retention must be between 1 and 365 days")
+    root = artifact_root.resolve()
+    if not root.is_dir():
+        return []
+    cutoff = (now or datetime.now(UTC)) - timedelta(days=retention_days)
+    removed: list[Path] = []
+    retained_names = {
+        "backend-events-redacted.jsonl",
+        "backend-stderr-redacted.log",
+        "session-events.jsonl",
+    }
+    paths = sorted(
+        path
+        for name in retained_names
+        for path in root.rglob(name)
+    )
+    for path in paths:
+        resolved = path.resolve()
+        try:
+            resolved.relative_to(root)
+        except ValueError as exc:
+            raise RuntimeError("backend event retention path escaped its artifact root") from exc
+        if path.is_symlink() or not path.is_file():
+            continue
+        modified = datetime.fromtimestamp(path.stat().st_mtime, tz=UTC)
+        if modified < cutoff:
+            path.unlink()
+            removed.append(path)
+    return removed
+
+
+def resolve_sdk_tools(
+    configured_tools: list[str],
+    feature_tools: list[str],
+    *,
+    work_until_done: bool,
+    read_only: bool,
+    strict_tool_allowlist: bool,
+) -> list[str]:
+    """Resolve provider tools without expanding a strict backend-neutral request."""
+
+    tools = list(configured_tools)
+    if strict_tool_allowlist:
+        return tools
+    if work_until_done and not read_only:
+        for normal_tool in (
+            "Read",
+            "Grep",
+            "Glob",
+            "Write",
+            "Edit",
+            "Bash",
+            "WebFetch",
+            "WebSearch",
+            "Agent",
+        ):
+            if normal_tool not in tools:
+                tools.append(normal_tool)
+    for tool in feature_tools:
+        if tool not in tools:
+            tools.append(tool)
+    return tools
 
 
 async def run_agent_stage(
@@ -133,6 +216,9 @@ async def run_agent_stage(
     peer_messaging_override: bool | None = None,
     system_prompt_override: str | None = None,
     task_prompt_override: str | None = None,
+    bash_allowlist: list[BashCommandRule] | None = None,
+    transcript_retention: TranscriptRetention = TranscriptRetention.REDACTED_SUMMARY,
+    strict_tool_allowlist: bool = False,
 ) -> StageResult:
     if config.auth_mode == "max_oauth_only":
         try:
@@ -150,8 +236,8 @@ async def run_agent_stage(
         ) from exc
 
     artifact_dir.mkdir(parents=True, exist_ok=True)
-    transcript_path = artifact_dir / "transcript.jsonl"
-    stderr_path = artifact_dir / "claude-stderr.log"
+    event_summary_path = artifact_dir / "backend-events-redacted.jsonl"
+    stderr_path = artifact_dir / "backend-stderr-redacted.log"
 
     features = load_claude_features(config.resolve(repo_root, config.claude_features_path))
     feature_plan = build_session_feature_plan(
@@ -220,34 +306,23 @@ async def run_agent_stage(
             stage.task_budget_tokens or role_config.task_budget_tokens
         )
     )
-    tools = list(stage.tools if stage.tools is not None else role_config.tools)
-    if config.work_until_done and not read_only:
-        for normal_tool in (
-            "Read",
-            "Grep",
-            "Glob",
-            "Write",
-            "Edit",
-            "Bash",
-            "WebFetch",
-            "WebSearch",
-            "Agent",
-        ):
-            if normal_tool not in tools:
-                tools.append(normal_tool)
-    for tool in feature_plan.tools:
-        if tool not in tools:
-            tools.append(tool)
+    tools = resolve_sdk_tools(
+        list(stage.tools if stage.tools is not None else role_config.tools),
+        list(feature_plan.tools),
+        work_until_done=config.work_until_done,
+        read_only=read_only,
+        strict_tool_allowlist=strict_tool_allowlist,
+    )
     disallowed_tools = (
         stage.disallowed_tools
         if stage.disallowed_tools is not None
         else role_config.disallowed_tools
     )
-    if feature_plan.peer_messaging:
+    if feature_plan.peer_messaging and not strict_tool_allowlist:
         disallowed_tools = [
             tool for tool in disallowed_tools if tool not in {"ListAgents", "SendMessage"}
         ]
-    if config.work_until_done and not read_only:
+    if config.work_until_done and not read_only and not strict_tool_allowlist:
         disallowed_tools = [tool for tool in disallowed_tools if tool != "Agent"]
     permission_mode = stage.permission_mode or role_config.permission_mode
 
@@ -303,6 +378,13 @@ async def run_agent_stage(
             "TCF_ALLOWED_PATHS_JSON": json.dumps(allowed_paths),
             "TCF_FORBIDDEN_PATHS_JSON": json.dumps(forbidden_paths),
             "TCF_ALLOWED_DOMAINS_JSON": json.dumps(allowed_domains),
+            "TCF_BASH_RULES_JSON": json.dumps(
+                [
+                    rule.model_dump(mode="json", by_alias=True)
+                    for rule in (bash_allowlist or [])
+                ],
+                sort_keys=True,
+            ),
             "TCF_NETWORK_MODE": task.security.network_default,
             "TCF_READ_ONLY": "1" if read_only else "0",
             "TCF_RISK_TIER": task.risk_tier.value,
@@ -450,9 +532,10 @@ async def run_agent_stage(
     )
 
     def stderr_sink(line: str) -> None:
+        safe_line = redact_sensitive(line)
         with stderr_path.open("a", encoding="utf-8") as handle:
-            handle.write(line)
-            if not line.endswith("\n"):
+            handle.write(safe_line)
+            if not safe_line.endswith("\n"):
                 handle.write("\n")
 
     setting_sources: list[SettingSource] = (
@@ -500,8 +583,9 @@ async def run_agent_stage(
     machine_limit = None
     try:
         async for message in query(prompt=prompt, options=options):
-            with transcript_path.open("a", encoding="utf-8") as handle:
-                handle.write(json.dumps(_message_to_json(message), default=str) + "\n")
+            if transcript_retention is TranscriptRetention.REDACTED_SUMMARY:
+                with event_summary_path.open("a", encoding="utf-8") as handle:
+                    handle.write(json.dumps(redacted_event_summary(message)) + "\n")
             write_heartbeat(
                 config.resolve(repo_root, config.heartbeat_path),
                 component="claude_runner",
@@ -554,8 +638,9 @@ async def run_agent_stage(
                 prompt=continuation_prompt,
                 options=continuation_options,
             ):
-                with transcript_path.open("a", encoding="utf-8") as handle:
-                    handle.write(json.dumps(_message_to_json(message), default=str) + "\n")
+                if transcript_retention is TranscriptRetention.REDACTED_SUMMARY:
+                    with event_summary_path.open("a", encoding="utf-8") as handle:
+                        handle.write(json.dumps(redacted_event_summary(message)) + "\n")
                 write_heartbeat(
                     config.resolve(repo_root, config.heartbeat_path),
                     component="claude_runner",

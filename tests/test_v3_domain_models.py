@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -82,7 +82,12 @@ def _receipt(
             "evidenceType": evidence_type,
             "subjectId": "V3-PROD-001",
             "issuer": {"id": "customer-1", "authority": "budget-owner"},
+            "issuedAt": NOW,
             "observedAt": NOW,
+            "expiresAt": NOW + timedelta(days=30),
+            "revocationEpoch": 1,
+            "revoked": False,
+            "nonce": "c" * 32,
             "candidateOrOfferIdentity": "sha256:" + "1" * 64,
             "outcome": "The bounded decision changed.",
             "artifacts": [
@@ -185,15 +190,16 @@ def test_commercial_completion_requires_trusted_attributable_evidence() -> None:
         active_milestone="M1_NATIVE_PREFLIGHT",
         work_items=[completed],
     )
-    collection.validate_completion_evidence(
-        {
-            "XREC-PAID-PILOT-1": TrustedEvidenceRecord(
-                receipt=_receipt(),
-                signature_valid=True,
-                source_agent_writable=False,
-            )
-        }
-    )
+    with pytest.raises(ValueError, match="exceeds trusted evidence"):
+        collection.validate_completion_evidence(
+            {
+                "XREC-PAID-PILOT-1": TrustedEvidenceRecord(
+                    receipt=_receipt(),
+                    signature_valid=True,
+                    source_agent_writable=False,
+                )
+            }
+        )
     with pytest.raises(ValueError, match="synthetic evidence"):
         collection.validate_completion_evidence(
             {
@@ -257,6 +263,7 @@ def test_candidate_manifest_rejects_artifact_substitution() -> None:
             "manifestVersion": 3,
             "baseSha": "1" * 40,
             "candidateSha": "2" * 40,
+            "candidateTreeSha": "3" * 40,
             "workItemId": "V3-PROD-001",
             "packetDigest": sha256_digest(artifacts["packet"]),
             "contextDigest": sha256_digest(artifacts["context"]),
@@ -291,9 +298,7 @@ def test_candidate_manifest_rejects_artifact_substitution() -> None:
             "externalEvidence": [
                 {
                     "receiptId": "XREC-PAID-PILOT-1",
-                    "recordDigest": sha256_digest(
-                        artifacts["external:XREC-PAID-PILOT-1"]
-                    ),
+                    "recordDigest": sha256_digest(artifacts["external:XREC-PAID-PILOT-1"]),
                 }
             ],
             "checkpointDigest": sha256_digest(artifacts["checkpoint"]),
@@ -306,6 +311,10 @@ def test_candidate_manifest_rejects_artifact_substitution() -> None:
     substituted["stage:builder:report"] = b"different report"
     with pytest.raises(ValueError, match="digest mismatch"):
         manifest.verify_artifacts(substituted)
+    nonexistent = dict(artifacts)
+    nonexistent.pop("external:XREC-PAID-PILOT-1")
+    with pytest.raises(ValueError, match="bound artifact set mismatch"):
+        manifest.verify_artifacts(nonexistent)
     assert manifest.canonical_digest() == manifest.model_copy().canonical_digest()
 
 

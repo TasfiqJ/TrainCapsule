@@ -20,9 +20,7 @@ _SENSITIVE_KEY = re.compile(
 _SENSITIVE_VALUE = re.compile(
     r"(?i)(?:bearer\s+|(?:sk|ghp|github_pat|oauth)[-_])[A-Za-z0-9._-]{8,}"
 )
-_SENSITIVE_ACCOUNT = re.compile(
-    r"(?i)\b(?:account|organization|tenant)[_-]?id\s*[:=]\s*[^\s,;]+"
-)
+_SENSITIVE_ACCOUNT = re.compile(r"(?i)\b(?:account|organization|tenant)[_-]?id\s*[:=]\s*[^\s,;]+")
 _SENSITIVE_PATH = re.compile(
     r"(?i)(?:[/\\][^\s'\"]*)?(?:claude-oauth-token|controller-secret|private-gate)"
     r"(?:[^\s'\"]*)"

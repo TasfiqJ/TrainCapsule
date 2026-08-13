@@ -1,0 +1,123 @@
+{
+  "$defs": {
+    "EvidenceAuthority": {
+      "enum": [
+        "CONTROLLER",
+        "INDEPENDENT_REVIEWER",
+        "INDEPENDENT_MACHINE_POLICY",
+        "TRUSTED_EXTERNAL",
+        "LIVE_GPU_RUNNER"
+      ],
+      "title": "EvidenceAuthority",
+      "type": "string"
+    },
+    "EvidenceGrade": {
+      "enum": [
+        "DETERMINISTIC",
+        "CONTROLLED",
+        "LIVE",
+        "EXTERNAL"
+      ],
+      "title": "EvidenceGrade",
+      "type": "string"
+    },
+    "EvidenceType": {
+      "enum": [
+        "CUSTOMER_CONVERSATION",
+        "INCIDENT_ARCHIVE_ACCESS",
+        "PAID_PREFLIGHT",
+        "PAID_PILOT",
+        "DECISION_CHANGED",
+        "SECOND_PAID_ACTION",
+        "INDEPENDENT_OPERATOR",
+        "UPSTREAM_ACCEPTANCE",
+        "PROVIDER_ACCEPTANCE",
+        "INCIDENT_TIMELINE",
+        "UPCOMING_CHANGE",
+        "PILOT_CANDIDATE",
+        "CUSTOMER_AUTHORIZATION",
+        "SECOND_ACTION_COMMITMENT",
+        "GPU_EXECUTION",
+        "SAME_FAMILY_CASE",
+        "SUPPORT_ACCEPTANCE",
+        "DELIVERY_ECONOMICS"
+      ],
+      "title": "EvidenceType",
+      "type": "string"
+    },
+    "SemanticEvidence": {
+      "enum": [
+        "DETERMINISTIC_ARTIFACT",
+        "CANDIDATE_MANIFEST",
+        "INDEPENDENT_REVIEW",
+        "MACHINE_POLICY_DECISION",
+        "NATIVE_VALUE_AUTHORIZATION",
+        "REACHABLE_ACCOUNT",
+        "ATTRIBUTABLE_SOURCE",
+        "TRAINCHECK_INCIDENT_DIFFERENTIAL",
+        "SUPPORT_POLICY",
+        "DELIVERY_ECONOMICS",
+        "THIRD_SAME_FAMILY_CASE",
+        "LEGAL_REDUCTION_VERIFIED",
+        "ILLEGAL_REDUCTION_REJECTED",
+        "CUSTOMER_DECISION_CHANGED",
+        "CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT"
+      ],
+      "title": "SemanticEvidence",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "description": "Controller-derived evidence facts; candidate text cannot populate this record.",
+  "properties": {
+    "grade": {
+      "$ref": "#/$defs/EvidenceGrade"
+    },
+    "authorities": {
+      "items": {
+        "$ref": "#/$defs/EvidenceAuthority"
+      },
+      "minItems": 1,
+      "title": "Authorities",
+      "type": "array"
+    },
+    "semanticCounts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/SemanticEvidence"
+      },
+      "title": "Semanticcounts",
+      "type": "object"
+    },
+    "externalTypeCounts": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/EvidenceType"
+      },
+      "title": "Externaltypecounts",
+      "type": "object"
+    },
+    "priorEvidence": {
+      "additionalProperties": {
+        "items": {
+          "$ref": "#/$defs/SemanticEvidence"
+        },
+        "type": "array"
+      },
+      "title": "Priorevidence",
+      "type": "object"
+    }
+  },
+  "required": [
+    "grade",
+    "authorities"
+  ],
+  "title": "CompletionEvidenceObservation",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/completion-evidence-observation.schema.json"
+}

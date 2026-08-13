@@ -1,0 +1,84 @@
+{
+  "$defs": {
+    "ExternalActionChannel": {
+      "enum": [
+        "EMAIL",
+        "CRM",
+        "CALENDAR"
+      ],
+      "title": "ExternalActionChannel",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/external-action-payload.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actionDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Actiondigest",
+      "type": "string"
+    },
+    "actionId": {
+      "title": "Actionid",
+      "type": "string"
+    },
+    "backendId": {
+      "title": "Backendid",
+      "type": "string"
+    },
+    "body": {
+      "maxLength": 16000,
+      "minLength": 1,
+      "title": "Body",
+      "type": "string"
+    },
+    "channel": {
+      "$ref": "#/$defs/ExternalActionChannel"
+    },
+    "credentialReference": {
+      "title": "Credentialreference",
+      "type": "string"
+    },
+    "deliveryGenerationId": {
+      "pattern": "^[0-9a-f]{32}$",
+      "title": "Deliverygenerationid",
+      "type": "string"
+    },
+    "idempotencyKey": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Idempotencykey",
+      "type": "string"
+    },
+    "recipient": {
+      "title": "Recipient",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "subject": {
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Subject",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "actionId",
+    "actionDigest",
+    "backendId",
+    "channel",
+    "recipient",
+    "subject",
+    "body",
+    "credentialReference",
+    "idempotencyKey",
+    "deliveryGenerationId"
+  ],
+  "title": "ExternalActionPayload",
+  "type": "object"
+}

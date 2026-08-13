@@ -6,11 +6,12 @@ from pathlib import Path
 from typing import Any, Literal, cast
 
 from .checkpoints import CheckpointError, CheckpointStore, V3Checkpoint
-from .github_sync import GitHubReleaseMetadata, load_github_config
+from .github_sync import GitHubReleaseMetadata, load_github_config, publication_metadata
 from .supervisor import supervisor_status
 from .util import read_json
 from .v3.configuration import load_factory_v3
 from .v3.milestone_runtime import load_milestone_state
+from .v3.publication import PublicationTransaction
 from .v3.queue import V3Queue
 from .v3.runtime_paths import V3RuntimePaths, resolve_v3_runtime_paths
 from .v3.work_items import WorkItem, WorkItemCollection
@@ -40,30 +41,24 @@ def _checkpoint(paths: V3RuntimePaths, work_item_id: str) -> V3Checkpoint | None
 
 def _release_metadata(repo_root: Path) -> GitHubReleaseMetadata | None:
     config = load_github_config(repo_root / "config" / "github.yaml")
-    path = Path(config.release_metadata_path)
-    if not path.is_absolute():
-        path = repo_root / path
-    if not path.is_file():
+    paths = resolve_v3_runtime_paths(repo_root)
+    root = paths.state_root / config.transaction_path
+    candidates = sorted(root.glob("*.json"), key=lambda path: path.stat().st_mtime)
+    if not candidates:
         return None
-    try:
-        return GitHubReleaseMetadata.model_validate(read_json(path, {}))
-    except ValueError:
-        return None
+    transaction = PublicationTransaction.model_validate(read_json(candidates[-1], {}))
+    return publication_metadata(transaction)
 
 
 def _ci_rollup(
     release: GitHubReleaseMetadata | None, names: set[str]
 ) -> Literal["NOT_RUN", "PENDING", "PASS", "FAIL"]:
+    del names
     if release is None:
         return "NOT_RUN"
-    checks = [
-        check for check in release.required_workflow_status.workflows if check.name in names
-    ]
-    if len(checks) != len(names):
-        return "PENDING"
-    if any(check.status == "completed" and check.conclusion != "success" for check in checks):
+    if release.status in {"REJECTED_BEFORE_MAIN", "HARD_STUCK"}:
         return "FAIL"
-    if all(check.status == "completed" and check.conclusion == "success" for check in checks):
+    if release.status in {"MERGED_MAIN_VERIFIED", "REVERTED_MAIN_VERIFIED"}:
         return "PASS"
     return "PENDING"
 
@@ -76,13 +71,19 @@ def build_runtime_status(repo_root: Path) -> dict[str, Any]:
     )
     milestone_state = load_milestone_state(paths.milestone_state)
     if milestone_state is not None:
-        roadmap = roadmap.model_copy(
-            update={"active_milestone": milestone_state.active_milestone}
-        )
+        roadmap = roadmap.model_copy(update={"active_milestone": milestone_state.active_milestone})
     queue = V3Queue(paths.queue)
-    runtime_items = (
-        {item.work_item_id: item for item in queue.items()} if paths.queue.exists() else {}
-    )
+    compatibility: list[dict[str, object]] = []
+    if paths.queue.exists():
+        authoritative = {item.work_item_id: item for item in roadmap.work_items}
+        queue_items, migrations = queue.compatible_items(authoritative)
+        runtime_items = {item.work_item_id: item for item in queue_items}
+        compatibility = [
+            cast(dict[str, object], item.model_dump(mode="json", by_alias=True))
+            for item in migrations
+        ]
+    else:
+        runtime_items = {}
     runtime_roadmap = roadmap.model_copy(
         update={
             "work_items": [
@@ -109,6 +110,21 @@ def build_runtime_status(repo_root: Path) -> dict[str, Any]:
             "repairCyclesRemaining": checkpoint.budget.repair_cycles_remaining,
             "candidateRestartsRemaining": checkpoint.budget.restarts_remaining,
         }
+    lane_counts: dict[str, dict[str, int]] = {}
+    for lane in sorted({item.lane.value for item in runtime_roadmap.work_items}):
+        lane_items = [item for item in runtime_roadmap.work_items if item.lane.value == lane]
+        lane_counts[lane] = {
+            status: sum(item.status.value == status for item in lane_items)
+            for status in sorted({item.status.value for item in lane_items})
+        }
+    external_blockers = [
+        item.work_item_id for item in active if item.status.value == "WAITING_EXTERNAL"
+    ]
+    machine_policy_blockers = [
+        item.work_item_id
+        for item in active
+        if item.status.value == "BLOCKED_POLICY" or item.machine_policy_receipt_required
+    ]
     factory_names = {
         "TrainCapsule / Factory quality",
         "TrainCapsule / Security",
@@ -125,6 +141,7 @@ def build_runtime_status(repo_root: Path) -> dict[str, Any]:
         dict[str, Any],
         {
             "activeMilestone": runtime_roadmap.active_milestone,
+            "queuePolicyCompatibility": compatibility,
             "currentWorkItem": {
                 "workItemId": current.work_item_id,
                 "lane": current.lane.value,
@@ -133,15 +150,24 @@ def build_runtime_status(repo_root: Path) -> dict[str, Any]:
             "retryBudget": retry_budget,
             "restartBudget": supervisor_status(repo_root),
             "interventionMode": "NONE",
-            "externalBlockers": [
-                item.work_item_id for item in active if item.status.value == "WAITING_EXTERNAL"
-            ],
+            "externalBlockers": external_blockers,
+            "machinePolicyBlockers": machine_policy_blockers,
+            "scopedBlockers": {
+                "externalEvidence": external_blockers,
+                "machinePolicy": machine_policy_blockers,
+            },
             "queueRoot": str(paths.queue),
+            "laneCounts": lane_counts,
             "queueCounts": {
                 status: sum(item.status.value == status for item in runtime_items.values())
                 for status in sorted({item.status.value for item in runtime_items.values()})
             },
             "candidateSha": candidate_sha,
+            "checkpointGeneration": checkpoint.generation if checkpoint is not None else None,
+            "findingFingerprints": (
+                dict(checkpoint.finding_fingerprints) if checkpoint is not None else {}
+            ),
+            "candidateSalvageAvailable": bool(checkpoint is not None and checkpoint.candidate_sha),
             "factoryCi": _ci_rollup(release, factory_names),
             "productCi": _ci_rollup(release, product_names),
             "lastMainPublication": (

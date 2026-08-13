@@ -1,0 +1,98 @@
+{
+  "$defs": {
+    "PostActivationObservationId": {
+      "enum": [
+        "complete_autonomous_cycle",
+        "idle_cycle",
+        "external_wait_isolated_cycle",
+        "service_restart",
+        "next_work_scheduling",
+        "no_direct_main_push",
+        "no_human_click"
+      ],
+      "title": "PostActivationObservationId",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/post-activation-observation.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "description": "Durable external observation of the exact required live autonomy sequence.",
+  "properties": {
+    "activationReceiptDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Activationreceiptdigest",
+      "type": "string"
+    },
+    "activationReceiptId": {
+      "maxLength": 128,
+      "minLength": 3,
+      "title": "Activationreceiptid",
+      "type": "string"
+    },
+    "completedAt": {
+      "format": "date-time",
+      "title": "Completedat",
+      "type": "string"
+    },
+    "evidenceArtifacts": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/PostActivationObservationId"
+      },
+      "title": "Evidenceartifacts",
+      "type": "object"
+    },
+    "evidenceDigests": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/PostActivationObservationId"
+      },
+      "title": "Evidencedigests",
+      "type": "object"
+    },
+    "exactMainSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Exactmainsha",
+      "type": "string"
+    },
+    "exactTreeSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Exacttreesha",
+      "type": "string"
+    },
+    "observationId": {
+      "pattern": "^OBS-[A-Z0-9_-]{8,160}$",
+      "title": "Observationid",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "startedAt": {
+      "format": "date-time",
+      "title": "Startedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "observationId",
+    "activationReceiptId",
+    "activationReceiptDigest",
+    "exactMainSha",
+    "exactTreeSha",
+    "evidenceArtifacts",
+    "evidenceDigests",
+    "startedAt",
+    "completedAt"
+  ],
+  "title": "PostActivationObservation",
+  "type": "object"
+}

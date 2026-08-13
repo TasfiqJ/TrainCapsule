@@ -1,0 +1,268 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/work-item-v3.json",
+  "title": "TrainCapsule V3 Work Item",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "version",
+    "workItemId",
+    "title",
+    "lane",
+    "kind",
+    "milestone",
+    "decisionContribution",
+    "customerOutcome",
+    "dependsOn",
+    "softDependsOn",
+    "blocksCommercialRelease",
+    "priority",
+    "riskTier",
+    "maturityTarget",
+    "disposition",
+    "status",
+    "ownerType",
+    "automatable",
+    "evidenceRequired",
+    "externalReceiptRequired",
+    "humanApprovalRequired",
+    "retryPolicy"
+  ],
+  "properties": {
+    "version": {
+      "const": 3
+    },
+    "workItemId": {
+      "type": "string",
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$"
+    },
+    "title": {
+      "type": "string",
+      "minLength": 1
+    },
+    "lane": {
+      "enum": [
+        "PRODUCT",
+        "MARKET",
+        "COMPETITOR",
+        "TRUST",
+        "FACTORY"
+      ]
+    },
+    "kind": {
+      "enum": [
+        "CODE",
+        "SPECIFICATION",
+        "RESEARCH",
+        "CONTROLLED_EXPERIMENT",
+        "EXTERNAL_EVIDENCE",
+        "HUMAN_REVIEW",
+        "COMMERCIAL_EXPERIMENT",
+        "MAINTENANCE",
+        "MIGRATION"
+      ]
+    },
+    "milestone": {
+      "type": "string"
+    },
+    "decisionContribution": {
+      "type": "string",
+      "minLength": 1
+    },
+    "customerOutcome": {
+      "type": "string"
+    },
+    "dependsOn": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "softDependsOn": {
+      "type": "array",
+      "uniqueItems": true,
+      "items": {
+        "type": "string"
+      }
+    },
+    "blocksCommercialRelease": {
+      "type": "boolean"
+    },
+    "priority": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 100
+    },
+    "riskTier": {
+      "type": "string"
+    },
+    "maturityTarget": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "engineering",
+        "commercial"
+      ],
+      "properties": {
+        "engineering": {
+          "enum": [
+            "DESIGN_ONLY",
+            "IMPLEMENTED_EXPERIMENTAL",
+            "CONTROLLED_VALIDATED",
+            "EXTERNAL_VALIDATED",
+            "DEPRECATED"
+          ]
+        },
+        "commercial": {
+          "enum": [
+            "NOT_EVALUATED",
+            "NATIVE_ADVANTAGE_UNPROVEN",
+            "NATIVE_ADVANTAGE_DEMONSTRATED",
+            "EXTERNAL_VALUE_DEMONSTRATED",
+            "COMMERCIALLY_SUPPORTED",
+            "WITHDRAWN"
+          ]
+        }
+      }
+    },
+    "disposition": {
+      "enum": [
+        "KEEP",
+        "INTEGRATE_EXISTING_BACKEND",
+        "UPSTREAM",
+        "NARROW",
+        "REPLACE",
+        "PAUSE",
+        "STOP",
+        "NOT_REVIEWED"
+      ]
+    },
+    "status": {
+      "enum": [
+        "PROPOSED",
+        "READY",
+        "QUEUED",
+        "RUNNING",
+        "PAUSED_QUOTA",
+        "WAITING_EXTERNAL",
+        "WAITING_HUMAN",
+        "BLOCKED_TECHNICAL",
+        "BLOCKED_POLICY",
+        "PASSED_ENGINEERING",
+        "REJECTED_VALUE",
+        "NATIVE_SUFFICIENT",
+        "DEFERRED",
+        "SUPERSEDED",
+        "CANCELLED",
+        "COMPLETED"
+      ]
+    },
+    "ownerType": {
+      "enum": [
+        "AI",
+        "FOUNDER",
+        "HUMAN_REVIEWER",
+        "CUSTOMER",
+        "EXTERNAL_PARTY"
+      ]
+    },
+    "automatable": {
+      "type": "boolean"
+    },
+    "packetPath": {
+      "type": [
+        "string",
+        "null"
+      ]
+    },
+    "evidenceRequired": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "externalReceiptRequired": {
+      "type": "boolean"
+    },
+    "humanApprovalRequired": {
+      "type": "boolean"
+    },
+    "retryPolicy": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "maxPlanAttempts",
+        "maxCandidateRepairCycles"
+      ],
+      "properties": {
+        "maxPlanAttempts": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 5
+        },
+        "maxCandidateRepairCycles": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 10
+        }
+      }
+    },
+    "createdAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    },
+    "updatedAt": {
+      "type": [
+        "string",
+        "null"
+      ],
+      "format": "date-time"
+    }
+  },
+  "allOf": [
+    {
+      "if": {
+        "properties": {
+          "kind": {
+            "enum": [
+              "EXTERNAL_EVIDENCE",
+              "HUMAN_REVIEW"
+            ]
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "automatable": {
+            "const": false
+          }
+        }
+      }
+    },
+    {
+      "if": {
+        "properties": {
+          "ownerType": {
+            "const": "AI"
+          }
+        }
+      },
+      "then": {
+        "not": {
+          "properties": {
+            "kind": {
+              "enum": [
+                "EXTERNAL_EVIDENCE",
+                "HUMAN_REVIEW"
+              ]
+            }
+          }
+        }
+      }
+    }
+  ]
+}

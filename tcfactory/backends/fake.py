@@ -10,6 +10,8 @@ from tcfactory.backends.base import (
     AgentSession,
     AgentTaskRequest,
     BackendRouteState,
+    BackendTerminalDisposition,
+    ExecutionEvidenceMode,
     Handoff,
     SessionState,
     TranscriptRetention,
@@ -27,12 +29,12 @@ class FakeBackend:
         return AgentCapabilityReport(
             backend="fake",
             structured_output=True,
-            resume=True,
+            resume=False,
             cancellation=True,
-            sandbox=True,
+            sandbox=False,
             network_denial=True,
             transcript_retention=TranscriptRetention.NONE,
-            allowed_tools=["Read", "Bash"],
+            allowed_tools=[],
         )
 
     def start(self, request: AgentTaskRequest) -> AgentSession:
@@ -65,6 +67,8 @@ class FakeBackend:
             artifact_digests=handoff.artifact_digests,
             usage=self.usage_state(),
             redacted_summary="deterministic fake backend result",
+            evidence_mode=ExecutionEvidenceMode.SIMULATION,
+            terminal_disposition=BackendTerminalDisposition.COMPLETED,
         )
 
     def cancel(self, session: AgentSession) -> None:
@@ -97,4 +101,6 @@ class FakeBackend:
             artifact_digests={},
             usage=self.usage_state(),
             redacted_summary="deterministic fake backend result",
+            evidence_mode=ExecutionEvidenceMode.SIMULATION,
+            terminal_disposition=BackendTerminalDisposition.COMPLETED,
         )

@@ -1,0 +1,33 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "executable": {
+      "pattern": "^/usr/libexec/traincapsule-canary-[a-z0-9_-]+$",
+      "title": "Executable",
+      "type": "string"
+    },
+    "executableDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Executabledigest",
+      "type": "string"
+    },
+    "networkAllowed": {
+      "title": "Networkallowed",
+      "type": "boolean"
+    },
+    "timeoutSeconds": {
+      "maximum": 14400,
+      "minimum": 1,
+      "title": "Timeoutseconds",
+      "type": "integer"
+    }
+  },
+  "required": [
+    "executable",
+    "executableDigest",
+    "timeoutSeconds",
+    "networkAllowed"
+  ],
+  "title": "MechanismPolicy",
+  "type": "object"
+}

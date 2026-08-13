@@ -1,0 +1,302 @@
+{
+  "$defs": {
+    "BashCommandRuleV31": {
+      "additionalProperties": false,
+      "properties": {
+        "argumentPrefix": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Argumentprefix",
+          "type": "array"
+        },
+        "executable": {
+          "enum": [
+            "git",
+            "uv"
+          ],
+          "title": "Executable",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "executable",
+        "argumentPrefix"
+      ],
+      "title": "BashCommandRuleV31",
+      "type": "object"
+    },
+    "EvidenceClass": {
+      "enum": [
+        "ENGINEERING",
+        "RESEARCH",
+        "TRUST",
+        "FACTORY"
+      ],
+      "title": "EvidenceClass",
+      "type": "string"
+    },
+    "Lane": {
+      "enum": [
+        "PRODUCT",
+        "MARKET",
+        "COMPETITOR",
+        "TRUST",
+        "FACTORY"
+      ],
+      "title": "Lane",
+      "type": "string"
+    },
+    "OutputDeclarationV31": {
+      "additionalProperties": false,
+      "properties": {
+        "contentDigestRequired": {
+          "title": "Contentdigestrequired",
+          "type": "boolean"
+        },
+        "evidenceClass": {
+          "$ref": "#/$defs/EvidenceClass"
+        },
+        "externalAuthorityRequired": {
+          "title": "Externalauthorityrequired",
+          "type": "boolean"
+        },
+        "maximumBytes": {
+          "maximum": 100000000,
+          "minimum": 1,
+          "title": "Maximumbytes",
+          "type": "integer"
+        },
+        "mutatingOwner": {
+          "enum": [
+            "CANDIDATE_AGENT",
+            "CONTROLLER"
+          ],
+          "title": "Mutatingowner",
+          "type": "string"
+        },
+        "outputId": {
+          "pattern": "^OUT:V3:[A-Z]+:[0-9]{3}:[A-Z_]+$",
+          "title": "Outputid",
+          "type": "string"
+        },
+        "path": {
+          "maxLength": 512,
+          "minLength": 1,
+          "title": "Path",
+          "type": "string"
+        },
+        "readers": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 16,
+          "minItems": 1,
+          "title": "Readers",
+          "type": "array"
+        },
+        "required": {
+          "title": "Required",
+          "type": "boolean"
+        },
+        "schemaId": {
+          "pattern": "^traincapsule\\.v3\\.1\\.[a-z0-9.-]+$",
+          "title": "Schemaid",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "outputId",
+        "path",
+        "schemaId",
+        "required",
+        "evidenceClass",
+        "mutatingOwner",
+        "readers",
+        "contentDigestRequired",
+        "externalAuthorityRequired",
+        "maximumBytes"
+      ],
+      "title": "OutputDeclarationV31",
+      "type": "object"
+    },
+    "ToolPolicyV31": {
+      "additionalProperties": false,
+      "properties": {
+        "allowedTools": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Allowedtools",
+          "type": "array"
+        },
+        "bashRules": {
+          "items": {
+            "$ref": "#/$defs/BashCommandRuleV31"
+          },
+          "maxItems": 16,
+          "title": "Bashrules",
+          "type": "array"
+        },
+        "mutatingOwner": {
+          "title": "Mutatingowner",
+          "type": "boolean"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "mutatingOwner",
+        "allowedTools",
+        "bashRules"
+      ],
+      "title": "ToolPolicyV31",
+      "type": "object"
+    },
+    "WorkKind": {
+      "enum": [
+        "CODE",
+        "SPECIFICATION",
+        "RESEARCH",
+        "CONTROLLED_EXPERIMENT",
+        "EXTERNAL_EVIDENCE",
+        "MACHINE_POLICY_REVIEW",
+        "COMMERCIAL_EXPERIMENT",
+        "MAINTENANCE",
+        "MIGRATION"
+      ],
+      "title": "WorkKind",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/compiled-task-contract.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allowedWritePaths": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 32,
+      "minItems": 1,
+      "title": "Allowedwritepaths",
+      "type": "array"
+    },
+    "contextDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Contextdigest",
+      "type": "string"
+    },
+    "contractDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Contractdigest",
+      "type": "string"
+    },
+    "forbiddenPaths": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Forbiddenpaths",
+      "type": "array"
+    },
+    "lane": {
+      "$ref": "#/$defs/Lane"
+    },
+    "mutatingTools": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ToolPolicyV31"
+        },
+        {
+          "type": "null"
+        }
+      ]
+    },
+    "mutatingWorkItem": {
+      "title": "Mutatingworkitem",
+      "type": "boolean"
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/OutputDeclarationV31"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Outputs",
+      "type": "array"
+    },
+    "readOnlyTools": {
+      "$ref": "#/$defs/ToolPolicyV31"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "sourceDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourcedigest",
+      "type": "string"
+    },
+    "sourceGenerationId": {
+      "maxLength": 128,
+      "minLength": 1,
+      "title": "Sourcegenerationid",
+      "type": "string"
+    },
+    "taskPacketDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Taskpacketdigest",
+      "type": "string"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "workKind": {
+      "$ref": "#/$defs/WorkKind"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "workItemId",
+    "lane",
+    "workKind",
+    "taskPacketDigest",
+    "sourceGenerationId",
+    "sourceDigest",
+    "contextDigest",
+    "allowedWritePaths",
+    "forbiddenPaths",
+    "mutatingWorkItem",
+    "outputs",
+    "readOnlyTools",
+    "mutatingTools",
+    "contractDigest"
+  ],
+  "title": "CompiledTaskContractV31",
+  "type": "object"
+}

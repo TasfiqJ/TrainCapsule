@@ -1,0 +1,107 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "3.1",
+      "default": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "workItemId": {
+      "const": "V3-TRUST-005",
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "candidateTreeSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatetreesha",
+      "type": "string"
+    },
+    "rawArtifactRosterDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Rawartifactrosterdigest",
+      "type": "string"
+    },
+    "oracleExecutableDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Oracleexecutabledigest",
+      "type": "string"
+    },
+    "legalReductionArtifactDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Legalreductionartifactdigest",
+      "type": "string"
+    },
+    "legalReductionVerdict": {
+      "const": "VERIFIED",
+      "title": "Legalreductionverdict",
+      "type": "string"
+    },
+    "illegalReductionArtifactDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Illegalreductionartifactdigest",
+      "type": "string"
+    },
+    "illegalReductionVerdict": {
+      "const": "REJECTED",
+      "title": "Illegalreductionverdict",
+      "type": "string"
+    },
+    "oracleResultDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Oracleresultdigest",
+      "type": "string"
+    },
+    "receiptId": {
+      "pattern": "^REDUCE-[A-Z0-9_-]{8,128}$",
+      "title": "Receiptid",
+      "type": "string"
+    },
+    "issuedAt": {
+      "format": "date-time",
+      "title": "Issuedat",
+      "type": "string"
+    },
+    "expiresAt": {
+      "format": "date-time",
+      "title": "Expiresat",
+      "type": "string"
+    },
+    "nonce": {
+      "pattern": "^[0-9a-f]{32,128}$",
+      "title": "Nonce",
+      "type": "string"
+    },
+    "signature": {
+      "pattern": "^[0-9a-f]{128}$",
+      "title": "Signature",
+      "type": "string"
+    }
+  },
+  "required": [
+    "workItemId",
+    "candidateSha",
+    "candidateTreeSha",
+    "rawArtifactRosterDigest",
+    "oracleExecutableDigest",
+    "legalReductionArtifactDigest",
+    "legalReductionVerdict",
+    "illegalReductionArtifactDigest",
+    "illegalReductionVerdict",
+    "oracleResultDigest",
+    "receiptId",
+    "issuedAt",
+    "expiresAt",
+    "nonce",
+    "signature"
+  ],
+  "title": "ReductionOracleDecision",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/reduction-oracle-decision.schema.json"
+}

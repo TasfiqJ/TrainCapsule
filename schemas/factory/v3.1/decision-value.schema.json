@@ -1,0 +1,119 @@
+{
+  "$defs": {
+    "DecisionValueDisposition": {
+      "enum": [
+        "NATIVE_WORKFLOW_SUFFICIENT",
+        "NO_INCREMENTAL_DECISION_VALUE",
+        "TECHNICALLY_VALID_BUT_NOT_ECONOMIC",
+        "INCREMENTAL_DECISION_VALUE_DEMONSTRATED",
+        "EXTERNAL_EVIDENCE_REQUIRED",
+        "UNKNOWN"
+      ],
+      "title": "DecisionValueDisposition",
+      "type": "string"
+    },
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "ValueState": {
+      "enum": [
+        "NOT_EVALUATED",
+        "REJECTED",
+        "NATIVE_SUFFICIENT",
+        "INCREMENTAL_VALUE"
+      ],
+      "title": "ValueState",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/decision-value.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "decisionChanged": {
+      "title": "Decisionchanged",
+      "type": "boolean"
+    },
+    "disposition": {
+      "$ref": "#/$defs/DecisionValueDisposition"
+    },
+    "evaluated": {
+      "const": true,
+      "default": true,
+      "title": "Evaluated",
+      "type": "boolean"
+    },
+    "evidenceRefs": {
+      "items": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxItems": 64,
+      "minItems": 1,
+      "title": "Evidencerefs",
+      "type": "array"
+    },
+    "nativeBenchmarkDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "originalExperimentCost": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000000,
+      "title": "Originalexperimentcost",
+      "type": "number"
+    },
+    "originalExperimentMinutes": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000,
+      "title": "Originalexperimentminutes",
+      "type": "number"
+    },
+    "proposedExperimentCost": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000000,
+      "title": "Proposedexperimentcost",
+      "type": "number"
+    },
+    "proposedExperimentMinutes": {
+      "exclusiveMinimum": 0,
+      "maximum": 1000000,
+      "title": "Proposedexperimentminutes",
+      "type": "number"
+    },
+    "rationale": {
+      "maxLength": 4000,
+      "minLength": 1,
+      "title": "Rationale",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "valueState": {
+      "$ref": "#/$defs/ValueState"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "workItemId",
+    "disposition",
+    "nativeBenchmarkDigest",
+    "evidenceRefs",
+    "originalExperimentCost",
+    "proposedExperimentCost",
+    "originalExperimentMinutes",
+    "proposedExperimentMinutes",
+    "decisionChanged",
+    "rationale",
+    "valueState"
+  ],
+  "title": "DecisionValueResultV31",
+  "type": "object"
+}

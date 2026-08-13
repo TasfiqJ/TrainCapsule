@@ -1,0 +1,101 @@
+{
+  "$defs": {
+    "FindingOwner": {
+      "enum": [
+        "PRODUCT",
+        "FACTORY",
+        "EXTERNAL",
+        "MACHINE_POLICY"
+      ],
+      "title": "FindingOwner",
+      "type": "string"
+    },
+    "V3Finding": {
+      "additionalProperties": false,
+      "properties": {
+        "advisory": {
+          "default": false,
+          "title": "Advisory",
+          "type": "boolean"
+        },
+        "artifactDigest": {
+          "anyOf": [
+            {
+              "pattern": "^sha256:[0-9a-f]{64}$",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifactdigest"
+        },
+        "artifactPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Artifactpath"
+        },
+        "declaredOwner": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/FindingOwner"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "findingId": {
+          "pattern": "^FIND-[A-Z0-9_-]+$",
+          "title": "Findingid",
+          "type": "string"
+        },
+        "summary": {
+          "minLength": 1,
+          "title": "Summary",
+          "type": "string"
+        }
+      },
+      "required": [
+        "findingId",
+        "summary"
+      ],
+      "title": "V3Finding",
+      "type": "object"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/migrated-finding.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "migratedFromSchemaVersion": {
+      "const": "3",
+      "title": "Migratedfromschemaversion",
+      "type": "string"
+    },
+    "payload": {
+      "$ref": "#/$defs/V3Finding"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "migratedFromSchemaVersion",
+    "payload"
+  ],
+  "title": "MigratedFindingV31",
+  "type": "object"
+}

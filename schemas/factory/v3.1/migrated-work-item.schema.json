@@ -1,0 +1,375 @@
+{
+  "$defs": {
+    "CommercialMaturity": {
+      "enum": [
+        "NOT_EVALUATED",
+        "NATIVE_ADVANTAGE_UNPROVEN",
+        "NATIVE_ADVANTAGE_DEMONSTRATED",
+        "EXTERNAL_VALUE_DEMONSTRATED",
+        "COMMERCIALLY_SUPPORTED",
+        "WITHDRAWN"
+      ],
+      "title": "CommercialMaturity",
+      "type": "string"
+    },
+    "Disposition": {
+      "enum": [
+        "KEEP",
+        "INTEGRATE_EXISTING_BACKEND",
+        "UPSTREAM",
+        "NARROW",
+        "REPLACE",
+        "PAUSE",
+        "STOP",
+        "NOT_REVIEWED"
+      ],
+      "title": "Disposition",
+      "type": "string"
+    },
+    "EngineeringMaturity": {
+      "enum": [
+        "DESIGN_ONLY",
+        "IMPLEMENTED_EXPERIMENTAL",
+        "CONTROLLED_VALIDATED",
+        "EXTERNAL_VALIDATED",
+        "DEPRECATED"
+      ],
+      "title": "EngineeringMaturity",
+      "type": "string"
+    },
+    "Lane": {
+      "enum": [
+        "PRODUCT",
+        "MARKET",
+        "COMPETITOR",
+        "TRUST",
+        "FACTORY"
+      ],
+      "title": "Lane",
+      "type": "string"
+    },
+    "MaturityTarget": {
+      "additionalProperties": false,
+      "properties": {
+        "commercial": {
+          "$ref": "#/$defs/CommercialMaturity"
+        },
+        "engineering": {
+          "$ref": "#/$defs/EngineeringMaturity"
+        }
+      },
+      "required": [
+        "engineering",
+        "commercial"
+      ],
+      "title": "MaturityTarget",
+      "type": "object"
+    },
+    "OwnerType": {
+      "enum": [
+        "AI",
+        "MACHINE_POLICY_AUTHORITY",
+        "CUSTOMER",
+        "EXTERNAL_PARTY"
+      ],
+      "title": "OwnerType",
+      "type": "string"
+    },
+    "RetryPolicy": {
+      "additionalProperties": false,
+      "description": "Zero means no attempts; it never means unlimited.",
+      "properties": {
+        "maxCandidateRepairCycles": {
+          "maximum": 10,
+          "minimum": 0,
+          "title": "Maxcandidaterepaircycles",
+          "type": "integer"
+        },
+        "maxCandidateRestarts": {
+          "default": 1,
+          "maximum": 3,
+          "minimum": 0,
+          "title": "Maxcandidaterestarts",
+          "type": "integer"
+        },
+        "maxPlanAttempts": {
+          "maximum": 5,
+          "minimum": 0,
+          "title": "Maxplanattempts",
+          "type": "integer"
+        },
+        "maxSameFindingRepeats": {
+          "default": 2,
+          "maximum": 5,
+          "minimum": 1,
+          "title": "Maxsamefindingrepeats",
+          "type": "integer"
+        }
+      },
+      "required": [
+        "maxPlanAttempts",
+        "maxCandidateRepairCycles"
+      ],
+      "title": "RetryPolicy",
+      "type": "object"
+    },
+    "RiskTier": {
+      "enum": [
+        "MECHANICAL",
+        "STANDARD",
+        "INTEGRATION",
+        "TRUST_CORE",
+        "EXTERNAL"
+      ],
+      "title": "RiskTier",
+      "type": "string"
+    },
+    "WorkItem": {
+      "additionalProperties": false,
+      "properties": {
+        "automatable": {
+          "title": "Automatable",
+          "type": "boolean"
+        },
+        "blocksCommercialRelease": {
+          "title": "Blockscommercialrelease",
+          "type": "boolean"
+        },
+        "createdAt": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Createdat"
+        },
+        "customerOutcome": {
+          "title": "Customeroutcome",
+          "type": "string"
+        },
+        "decisionContribution": {
+          "minLength": 1,
+          "title": "Decisioncontribution",
+          "type": "string"
+        },
+        "dependsOn": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Dependson",
+          "type": "array"
+        },
+        "disposition": {
+          "$ref": "#/$defs/Disposition"
+        },
+        "evidenceRequired": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Evidencerequired",
+          "type": "array"
+        },
+        "externalEvidenceRefs": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Externalevidencerefs",
+          "type": "array"
+        },
+        "externalReceiptRequired": {
+          "title": "Externalreceiptrequired",
+          "type": "boolean"
+        },
+        "kind": {
+          "$ref": "#/$defs/WorkKind"
+        },
+        "lane": {
+          "$ref": "#/$defs/Lane"
+        },
+        "machinePolicyReceiptRequired": {
+          "default": false,
+          "title": "Machinepolicyreceiptrequired",
+          "type": "boolean"
+        },
+        "maturityTarget": {
+          "$ref": "#/$defs/MaturityTarget"
+        },
+        "milestone": {
+          "pattern": "^M[0-9]+_[A-Z0-9_]+$",
+          "title": "Milestone",
+          "type": "string"
+        },
+        "ownerType": {
+          "$ref": "#/$defs/OwnerType"
+        },
+        "packetPath": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Packetpath"
+        },
+        "priority": {
+          "maximum": 100,
+          "minimum": 0,
+          "title": "Priority",
+          "type": "integer"
+        },
+        "retryPolicy": {
+          "$ref": "#/$defs/RetryPolicy"
+        },
+        "riskTier": {
+          "$ref": "#/$defs/RiskTier"
+        },
+        "softDependsOn": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Softdependson",
+          "type": "array"
+        },
+        "sourceDependencyExpression": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Sourcedependencyexpression"
+        },
+        "status": {
+          "$ref": "#/$defs/WorkStatus"
+        },
+        "title": {
+          "minLength": 1,
+          "title": "Title",
+          "type": "string"
+        },
+        "updatedAt": {
+          "anyOf": [
+            {
+              "format": "date-time",
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Updatedat"
+        },
+        "version": {
+          "default": 3,
+          "maximum": 3,
+          "minimum": 3,
+          "title": "Version",
+          "type": "integer"
+        },
+        "workItemId": {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "title": "Workitemid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "workItemId",
+        "title",
+        "lane",
+        "kind",
+        "milestone",
+        "decisionContribution",
+        "customerOutcome",
+        "dependsOn",
+        "softDependsOn",
+        "blocksCommercialRelease",
+        "priority",
+        "riskTier",
+        "maturityTarget",
+        "disposition",
+        "status",
+        "ownerType",
+        "automatable",
+        "evidenceRequired",
+        "externalReceiptRequired",
+        "retryPolicy"
+      ],
+      "title": "WorkItem",
+      "type": "object"
+    },
+    "WorkKind": {
+      "enum": [
+        "CODE",
+        "SPECIFICATION",
+        "RESEARCH",
+        "CONTROLLED_EXPERIMENT",
+        "EXTERNAL_EVIDENCE",
+        "MACHINE_POLICY_REVIEW",
+        "COMMERCIAL_EXPERIMENT",
+        "MAINTENANCE",
+        "MIGRATION"
+      ],
+      "title": "WorkKind",
+      "type": "string"
+    },
+    "WorkStatus": {
+      "enum": [
+        "PROPOSED",
+        "READY",
+        "QUEUED",
+        "RUNNING",
+        "PAUSED_QUOTA",
+        "PAUSED_BACKEND",
+        "WAITING_EXTERNAL",
+        "BLOCKED_TECHNICAL",
+        "BLOCKED_POLICY",
+        "PASSED_ENGINEERING",
+        "REJECTED_VALUE",
+        "NATIVE_SUFFICIENT",
+        "DEFERRED",
+        "SUPERSEDED",
+        "CANCELLED",
+        "COMPLETED"
+      ],
+      "title": "WorkStatus",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/migrated-work-item.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "migratedFromSchemaVersion": {
+      "const": "3",
+      "title": "Migratedfromschemaversion",
+      "type": "string"
+    },
+    "payload": {
+      "$ref": "#/$defs/WorkItem"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "migratedFromSchemaVersion",
+    "payload"
+  ],
+  "title": "MigratedWorkItemV31",
+  "type": "object"
+}

@@ -26,30 +26,48 @@ from tcfactory.backends.base import (
 from tcfactory.checkpoints import V3Checkpoint
 from tcfactory.completion import MilestoneCompletionDecision
 from tcfactory.context import V3ContextManifest
-from tcfactory.github_sync import (
-    GitHubConfig,
-    GitHubReleaseMetadata,
-    MainOnlyMachineReceipt,
-    MainPublicationTransaction,
-)
+from tcfactory.github_sync import GitHubConfig
 from tcfactory.handoffs import V3Handoff
 from tcfactory.supervisor import MigrationCompleteMarker, SupervisorState
 from tcfactory.v3.base import json_schema_for
 from tcfactory.v3.candidate_manifest import CandidateManifest
+from tcfactory.v3.completion_artifacts import (
+    DeliveryEconomicsEvidence,
+    FrozenReleaseEvidenceAuthorization,
+    ReductionBoundaryEvidence,
+    SupportPolicyEvidence,
+    ThirdSameFamilyCaseEvidence,
+)
+from tcfactory.v3.completion_policy import (
+    CompletionEvidenceObservation,
+    CompletionEvidencePolicy,
+    MilestoneEvidenceContract,
+    WorkItemEvidenceContract,
+)
+from tcfactory.v3.completion_verification import (
+    DeliveryMeasurement,
+    ReductionCandidateInput,
+    ReductionOracleDecision,
+)
 from tcfactory.v3.configuration import (
     AutonomyV3Config,
     CommercialMaturityConfig,
     ContextRoutingConfig,
-    DisabledHumanApprovalConfig,
     ExecutorConfig,
     ExternalEvidenceConfig,
     FactoryV3Config,
     MilestonePolicyConfig,
-    OwnerDirectives,
-    OwnerOverridePolicy,
 )
 from tcfactory.v3.dispositions import DispositionLedger
-from tcfactory.v3.external_evidence import ExternalEvidenceReceipt
+from tcfactory.v3.external_evidence import (
+    ExternalEvidenceAuthorityAnchor,
+    ExternalEvidenceReceipt,
+    ExternalEvidenceRevocationList,
+)
+from tcfactory.v3.external_evidence_authority import (
+    ExternalEvidenceAuthorityLedger,
+    ExternalEvidenceAuthorityState,
+)
 from tcfactory.v3.migration_evidence import MigrationEvidenceDocument
 from tcfactory.v3.migrations import LegacyMigrationMap
 from tcfactory.v3.milestone_runtime import (
@@ -65,11 +83,25 @@ from tcfactory.v3.private_gate import PrivateGateReceipt
 from tcfactory.v3.recovery import FindingCounter, HardStuckRecord
 from tcfactory.v3.retry_policy import RetryPolicy
 from tcfactory.v3.scheduler import SchedulerConfig
+from tcfactory.v3.source_authority import (
+    ActiveGenerationConfig,
+    ActiveSourceGeneration,
+    SourceGenerationManifest,
+    StaleSourceProposal,
+)
+from tcfactory.v3.traincheck_differential import (
+    IncidentContract,
+    IncidentInvariantObservation,
+    TrainCheckDifferentialRequest,
+    TrainCheckDifferentialResult,
+)
 from tcfactory.v3.work_items import WorkItem, WorkItemCollection
 from tcfactory.value import DecisionValueResult
 
 SCHEMA_ROOT: Final = ROOT / "schemas/factory/v3"
 SCHEMAS: Final[dict[str, type[BaseModel]]] = {
+    "active-generation.schema.json": ActiveGenerationConfig,
+    "active-source-generation.schema.json": ActiveSourceGeneration,
     "agent-capabilities.schema.json": AgentCapabilityReport,
     "agent-run-result.schema.json": AgentRunResult,
     "agent-task-request.schema.json": AgentTaskRequest,
@@ -77,44 +109,60 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "candidate-manifest.schema.json": CandidateManifest,
     "checkpoint.schema.json": V3Checkpoint,
     "commercial-maturity-config.schema.json": CommercialMaturityConfig,
+    "completion-evidence-observation.schema.json": CompletionEvidenceObservation,
+    "completion-evidence-policy.schema.json": CompletionEvidencePolicy,
+    "delivery-economics-evidence.schema.json": DeliveryEconomicsEvidence,
+    "delivery-measurement.schema.json": DeliveryMeasurement,
+    "reduction-candidate-input.schema.json": ReductionCandidateInput,
+    "reduction-oracle-decision.schema.json": ReductionOracleDecision,
+    "frozen-release-evidence-authorization.schema.json": (FrozenReleaseEvidenceAuthorization),
     "context-policy-config.schema.json": ContextRoutingConfig,
     "dispositions.schema.json": DispositionLedger,
     "executors-config.schema.json": ExecutorConfig,
     "external-evidence-config.schema.json": ExternalEvidenceConfig,
+    "external-evidence-authority-anchor.schema.json": ExternalEvidenceAuthorityAnchor,
+    "external-evidence-authority-ledger.schema.json": ExternalEvidenceAuthorityLedger,
+    "external-evidence-authority-state.schema.json": ExternalEvidenceAuthorityState,
     "external-evidence-receipt.schema.json": ExternalEvidenceReceipt,
+    "external-evidence-revocation-list.schema.json": ExternalEvidenceRevocationList,
     "factory-config.schema.json": FactoryV3Config,
     "finding.schema.json": V3Finding,
     "finding-counter.schema.json": FindingCounter,
     "hard-stuck.schema.json": HardStuckRecord,
-    "human-approval-disabled-config.schema.json": DisabledHumanApprovalConfig,
-    "owner-directives.schema.json": OwnerDirectives,
-    "owner-override-policy.schema.json": OwnerOverridePolicy,
     "github-config.schema.json": GitHubConfig,
-    "main-publication.schema.json": GitHubReleaseMetadata,
-    "main-policy-receipt.schema.json": MainOnlyMachineReceipt,
-    "main-publication-transaction.schema.json": MainPublicationTransaction,
     "handoff.schema.json": V3Handoff,
     "legacy-migration.schema.json": LegacyMigrationMap,
     "milestones.schema.json": MilestoneRoadmap,
     "migration-complete-marker.schema.json": MigrationCompleteMarker,
     "migration-evidence.schema.json": MigrationEvidenceDocument,
     "milestone-completion.schema.json": MilestoneCompletionDecision,
+    "milestone-evidence-contract.schema.json": MilestoneEvidenceContract,
     "milestone-completion-receipt.schema.json": MilestoneCompletionReceipt,
     "milestone-runtime-state.schema.json": MilestoneRuntimeState,
     "milestone-advance-transaction.schema.json": MilestoneAdvanceTransaction,
     "work-item-completion-evidence.schema.json": WorkItemCompletionEvidence,
+    "work-item-evidence-contract.schema.json": WorkItemEvidenceContract,
     "milestone-policy-config.schema.json": MilestonePolicyConfig,
     "retry-policy.schema.json": RetryPolicy,
     "private-gate-receipt.schema.json": PrivateGateReceipt,
+    "reduction-boundary-evidence.schema.json": ReductionBoundaryEvidence,
     "release-candidate.schema.json": ReleaseCandidate,
     "scheduler.schema.json": SchedulerConfig,
     "supervisor-state.schema.json": SupervisorState,
+    "support-policy-evidence.schema.json": SupportPolicyEvidence,
+    "source-generation-manifest.schema.json": SourceGenerationManifest,
+    "source-wedge-proposal.schema.json": StaleSourceProposal,
     "work-item-v3.schema.json": WorkItem,
     "work-items.schema.json": WorkItemCollection,
     "task-packet.schema.json": V3TaskPacket,
     "usage-state.schema.json": UsageState,
     "context-manifest.schema.json": V3ContextManifest,
     "decision-value.schema.json": DecisionValueResult,
+    "incident-contract.schema.json": IncidentContract,
+    "incident-invariant-observation.schema.json": IncidentInvariantObservation,
+    "traincheck-differential-request.schema.json": TrainCheckDifferentialRequest,
+    "traincheck-differential-result.schema.json": TrainCheckDifferentialResult,
+    "third-same-family-case-evidence.schema.json": ThirdSameFamilyCaseEvidence,
 }
 
 

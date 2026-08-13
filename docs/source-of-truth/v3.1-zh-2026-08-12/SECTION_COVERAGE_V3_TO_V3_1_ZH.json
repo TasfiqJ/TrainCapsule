@@ -1,0 +1,4165 @@
+{
+  "documents": [
+    {
+      "logicalId": "TC.V3_1_ZH.GENERATION_INDEX",
+      "mappedHeadingCount": 1,
+      "mappings": [
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "TrainCapsule V3 source of truth",
+          "sourceLine": 1,
+          "targetHeading": "TrainCapsule V3.1-ZH source generation",
+          "targetLine": 1,
+          "targetSectionId": "traincapsule-v3-1-zh-source-generation"
+        }
+      ],
+      "sourceHeadingCount": 1,
+      "sourcePath": "docs/source-of-truth/v3-2026-08-11/README.md",
+      "sourceSha256": "ac9b26a200926d6a26bfcb58ec815e930d1a88d30da708882059342ae47d73fa",
+      "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/README.md",
+      "targetSha256": "801633926515a037506add0f661b19e20cc6afccc2fcef5818be398b21a25b6f"
+    },
+    {
+      "logicalId": "TC.V3_1_ZH.EXECUTIVE_DECISION",
+      "mappedHeadingCount": 34,
+      "mappings": [
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "00 — Executive Build Decision V3",
+          "sourceLine": 1,
+          "targetHeading": "00 — Executive Build Decision V3.1-ZH",
+          "targetLine": 1,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "00.1 Final decision",
+          "sourceLine": 15,
+          "targetHeading": "00.1 Final decision",
+          "targetLine": 64,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-1-final-decision"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "00.2 The product being built",
+          "sourceLine": 29,
+          "targetHeading": "00.2 The product being built",
+          "targetLine": 78,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-2-the-product-being-built"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "00.3 The first paid offer",
+          "sourceLine": 64,
+          "targetHeading": "00.3 The first paid offer",
+          "targetLine": 113,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-3-the-first-paid-offer"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Incident-to-Change Qualification Pilot",
+          "sourceLine": 66,
+          "targetHeading": "Incident-to-Change Qualification Pilot",
+          "targetLine": 115,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-3-the-first-paid-offer-incident-to-change-qualification-pilot"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "00.4 Why the change is necessary",
+          "sourceLine": 96,
+          "targetHeading": "00.4 Why the change is necessary",
+          "targetLine": 145,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-4-why-the-change-is-necessary"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "00.5 Product boundary",
+          "sourceLine": 110,
+          "targetHeading": "00.5 Product boundary",
+          "targetLine": 159,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-5-product-boundary"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Stable trust core to retain",
+          "sourceLine": 112,
+          "targetHeading": "Stable trust core to retain",
+          "targetLine": 161,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-5-product-boundary-stable-trust-core-to-retain"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "V1 commercial slice",
+          "sourceLine": 129,
+          "targetHeading": "V1 commercial slice",
+          "targetLine": 178,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-5-product-boundary-v1-commercial-slice"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Deferred until evidence gates",
+          "sourceLine": 146,
+          "targetHeading": "Deferred until evidence gates",
+          "targetLine": 195,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-5-product-boundary-deferred-until-evidence-gates"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "00.6 Initial customer",
+          "sourceLine": 165,
+          "targetHeading": "00.6 Initial customer",
+          "targetLine": 214,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-6-initial-customer"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "00.7 Competitive posture",
+          "sourceLine": 187,
+          "targetHeading": "00.7 Competitive posture",
+          "targetLine": 236,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-7-competitive-posture"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "00.8 Complete-substitute gate",
+          "sourceLine": 214,
+          "targetHeading": "00.8 Complete-substitute gate",
+          "targetLine": 263,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-8-complete-substitute-gate"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "00.9 Maturity model",
+          "sourceLine": 239,
+          "targetHeading": "00.9 Maturity model",
+          "targetLine": 288,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-9-maturity-model"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "00.10 Human authority",
+          "sourceLine": 262,
+          "targetHeading": "00.10 Independent machine authority",
+          "targetLine": 311,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-10-independent-machine-authority"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "00.11 Engineering-factory doctrine",
+          "sourceLine": 294,
+          "targetHeading": "00.11 Engineering-factory doctrine",
+          "targetLine": 343,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-11-engineering-factory-doctrine"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "00.12 Parallel lanes",
+          "sourceLine": 327,
+          "targetHeading": "00.12 Parallel lanes",
+          "targetLine": 376,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-12-parallel-lanes"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Lane A — Product and commercial slice",
+          "sourceLine": 329,
+          "targetHeading": "Lane A — Product and commercial slice",
+          "targetLine": 378,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-12-parallel-lanes-lane-a-product-and-commercial-slice"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Lane B — Market evidence",
+          "sourceLine": 333,
+          "targetHeading": "Lane B — Market evidence",
+          "targetLine": 382,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-12-parallel-lanes-lane-b-market-evidence"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Lane C — Native and competitor baseline",
+          "sourceLine": 344,
+          "targetHeading": "Lane C — Native and competitor baseline",
+          "targetLine": 393,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-12-parallel-lanes-lane-c-native-and-competitor-baseline"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Lane D — Trust validation",
+          "sourceLine": 352,
+          "targetHeading": "Lane D — Trust validation",
+          "targetLine": 401,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-12-parallel-lanes-lane-d-trust-validation"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "00.13 Milestone gates",
+          "sourceLine": 362,
+          "targetHeading": "00.13 Milestone gates",
+          "targetLine": 411,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "M0 — Factory migrated",
+          "sourceLine": 364,
+          "targetHeading": "M0 — Factory migrated",
+          "targetLine": 413,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m0-factory-migrated"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "M1 — Native baseline and eligibility",
+          "sourceLine": 374,
+          "targetHeading": "M1 — Native baseline and eligibility",
+          "targetLine": 423,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m1-native-baseline-and-eligibility"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "M2 — Controlled qualification slice",
+          "sourceLine": 383,
+          "targetHeading": "M2 — Controlled qualification slice",
+          "targetLine": 432,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m2-controlled-qualification-slice"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "M3 — External preflight readiness",
+          "sourceLine": 394,
+          "targetHeading": "M3 — External preflight readiness",
+          "targetLine": 443,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m3-external-preflight-readiness"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "M4 — Paid pilot",
+          "sourceLine": 403,
+          "targetHeading": "M4 — Paid pilot",
+          "targetLine": 452,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m4-paid-pilot"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "M5 — Paid repeat",
+          "sourceLine": 412,
+          "targetHeading": "M5 — Paid repeat",
+          "targetLine": 461,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m5-paid-repeat"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "M6 — Commercially supported pack",
+          "sourceLine": 418,
+          "targetHeading": "M6 — Commercially supported pack",
+          "targetLine": 467,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-13-milestone-gates-m6-commercially-supported-pack"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "00.14 Proof requirements before expansion",
+          "sourceLine": 427,
+          "targetHeading": "00.14 Proof requirements before expansion",
+          "targetLine": 476,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-14-proof-requirements-before-expansion"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "00.15 Kill and replacement rules",
+          "sourceLine": 442,
+          "targetHeading": "00.15 Kill and replacement rules",
+          "targetLine": 491,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-15-kill-and-replacement-rules"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "00.16 Commercial hypotheses",
+          "sourceLine": 459,
+          "targetHeading": "00.16 Commercial hypotheses",
+          "targetLine": 508,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-16-commercial-hypotheses"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "00.17 External message",
+          "sourceLine": 482,
+          "targetHeading": "00.17 External message",
+          "targetLine": 531,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-17-external-message"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "00.18 Final authorization",
+          "sourceLine": 498,
+          "targetHeading": "00.18 Final authorization",
+          "targetLine": 547,
+          "targetSectionId": "00-executive-build-decision-v3-1-zh-00-18-final-authorization"
+        }
+      ],
+      "sourceHeadingCount": 34,
+      "sourcePath": "docs/source-of-truth/v3-2026-08-11/00_EXECUTIVE_BUILD_DECISION_V3.md",
+      "sourceSha256": "292e0b1d7e3a6225db7ed70dae67cb7557cef2a5e91081bd7149f827a120d484",
+      "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/00_EXECUTIVE_BUILD_DECISION_V3_1_ZH.md",
+      "targetSha256": "3ba7bba9f99692634eafadc41b6fef3a45d77523fc4fb4cae07ebe8a832fbfa1"
+    },
+    {
+      "logicalId": "TC.V3_1_ZH.PRODUCT_REQUIREMENTS",
+      "mappedHeadingCount": 61,
+      "mappings": [
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "03 — Product Strategy and Requirements V3",
+          "sourceLine": 1,
+          "targetHeading": "03 — Product Strategy and Requirements V3.1-ZH",
+          "targetLine": 1,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.1 Product definition",
+          "sourceLine": 3,
+          "targetHeading": "03.1 Product definition",
+          "targetLine": 52,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-1-product-definition"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.2 Primary job to be done",
+          "sourceLine": 11,
+          "targetHeading": "03.2 Primary job to be done",
+          "targetLine": 60,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-2-primary-job-to-be-done"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "03.3 Buyer, user, and decision owner",
+          "sourceLine": 38,
+          "targetHeading": "03.3 Buyer, user, and decision owner",
+          "targetLine": 87,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-3-buyer-user-and-decision-owner"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Economic buyer",
+          "sourceLine": 40,
+          "targetHeading": "Economic buyer",
+          "targetLine": 89,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-3-buyer-user-and-decision-owner-economic-buyer"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Primary user",
+          "sourceLine": 51,
+          "targetHeading": "Primary user",
+          "targetLine": 100,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-3-buyer-user-and-decision-owner-primary-user"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Decision owner",
+          "sourceLine": 59,
+          "targetHeading": "Decision owner",
+          "targetLine": 108,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-3-buyer-user-and-decision-owner-decision-owner"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.4 Ideal customer profile",
+          "sourceLine": 72,
+          "targetHeading": "03.4 Ideal customer profile",
+          "targetLine": 121,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-4-ideal-customer-profile"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Required characteristics",
+          "sourceLine": 74,
+          "targetHeading": "Required characteristics",
+          "targetLine": 123,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-4-ideal-customer-profile-required-characteristics"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Positive signals",
+          "sourceLine": 85,
+          "targetHeading": "Positive signals",
+          "targetLine": 134,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-4-ideal-customer-profile-positive-signals"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Disqualifiers",
+          "sourceLine": 96,
+          "targetHeading": "Disqualifiers",
+          "targetLine": 145,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-4-ideal-customer-profile-disqualifiers"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.5 First commercial offer",
+          "sourceLine": 109,
+          "targetHeading": "03.5 First commercial offer",
+          "targetLine": 158,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Name",
+          "sourceLine": 111,
+          "targetHeading": "Name",
+          "targetLine": 160,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer-name"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Entry conditions",
+          "sourceLine": 115,
+          "targetHeading": "Entry conditions",
+          "targetLine": 164,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer-entry-conditions"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Pilot phases",
+          "sourceLine": 130,
+          "targetHeading": "Pilot phases",
+          "targetLine": 179,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer-pilot-phases"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Phase 1 — Paid preflight",
+          "sourceLine": 132,
+          "targetHeading": "Phase 1 — Paid preflight",
+          "targetLine": 181,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer-pilot-phases-phase-1-paid-preflight"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Phase 2 — Qualification build and execution",
+          "sourceLine": 156,
+          "targetHeading": "Phase 2 — Qualification build and execution",
+          "targetLine": 205,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer-pilot-phases-phase-2-qualification-build-and-execution"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Phase 3 — Included or scheduled second execution",
+          "sourceLine": 170,
+          "targetHeading": "Phase 3 — Included or scheduled second execution",
+          "targetLine": 219,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-5-first-commercial-offer-pilot-phases-phase-3-included-or-scheduled-second-execution"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.6 Product workflow",
+          "sourceLine": 179,
+          "targetHeading": "03.6 Product workflow",
+          "targetLine": 228,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-6-product-workflow"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "03.7 Product outputs",
+          "sourceLine": 197,
+          "targetHeading": "03.7 Product outputs",
+          "targetLine": 246,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Incident Intake Record",
+          "sourceLine": 199,
+          "targetHeading": "Incident Intake Record",
+          "targetLine": 248,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-incident-intake-record"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Workload Identity Lock",
+          "sourceLine": 214,
+          "targetHeading": "Workload Identity Lock",
+          "targetLine": 263,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-workload-identity-lock"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Evidence Inventory",
+          "sourceLine": 231,
+          "targetHeading": "Evidence Inventory",
+          "targetLine": 280,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-evidence-inventory"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Native Findings Record",
+          "sourceLine": 246,
+          "targetHeading": "Native Findings Record",
+          "targetLine": 295,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-native-findings-record"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Experiment Specification",
+          "sourceLine": 259,
+          "targetHeading": "Experiment Specification",
+          "targetLine": 308,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-experiment-specification"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Reduction Faithfulness Record",
+          "sourceLine": 276,
+          "targetHeading": "Reduction Faithfulness Record",
+          "targetLine": 325,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-reduction-faithfulness-record"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Recovery Assurance Record",
+          "sourceLine": 290,
+          "targetHeading": "Recovery Assurance Record",
+          "targetLine": 339,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-recovery-assurance-record"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Qualification Decision",
+          "sourceLine": 306,
+          "targetHeading": "Qualification Decision",
+          "targetLine": 355,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-qualification-decision"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Workload Incident Contract",
+          "sourceLine": 340,
+          "targetHeading": "Workload Incident Contract",
+          "targetLine": 389,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-7-product-outputs-workload-incident-contract"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.8 Initial incident pack",
+          "sourceLine": 356,
+          "targetHeading": "03.8 Initial incident pack",
+          "targetLine": 405,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-8-initial-incident-pack"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`PRE_COLLECTIVE_LIFECYCLE_CONTRACT_V1`",
+          "sourceLine": 358,
+          "targetHeading": "`PRE_COLLECTIVE_LIFECYCLE_CONTRACT_V1`",
+          "targetLine": 407,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-8-initial-incident-pack-pre-collective-lifecycle-contract-v1"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Native baseline",
+          "sourceLine": 374,
+          "targetHeading": "Native baseline",
+          "targetLine": 423,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-8-initial-incident-pack-native-baseline"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Incremental product requirement",
+          "sourceLine": 385,
+          "targetHeading": "Incremental product requirement",
+          "targetLine": 434,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-8-initial-incident-pack-incremental-product-requirement"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "V1 legal-reduction classes",
+          "sourceLine": 397,
+          "targetHeading": "V1 legal-reduction classes",
+          "targetLine": 446,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-8-initial-incident-pack-v1-legal-reduction-classes"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "V1 prohibited reductions",
+          "sourceLine": 418,
+          "targetHeading": "V1 prohibited reductions",
+          "targetLine": 467,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-8-initial-incident-pack-v1-prohibited-reductions"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "03.9 Checkpoint pack policy",
+          "sourceLine": 428,
+          "targetHeading": "03.9 Checkpoint pack policy",
+          "targetLine": 477,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-9-checkpoint-pack-policy"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.10 Open and paid boundary",
+          "sourceLine": 449,
+          "targetHeading": "03.10 Open and paid boundary",
+          "targetLine": 498,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-10-open-and-paid-boundary"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Open or freely accessible eligibility layer",
+          "sourceLine": 451,
+          "targetHeading": "Open or freely accessible eligibility layer",
+          "targetLine": 500,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-10-open-and-paid-boundary-open-or-freely-accessible-eligibility-layer"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Paid outcome",
+          "sourceLine": 470,
+          "targetHeading": "Paid outcome",
+          "targetLine": 519,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-10-open-and-paid-boundary-paid-outcome"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "03.11 Productized service posture",
+          "sourceLine": 484,
+          "targetHeading": "03.11 Productized service posture",
+          "targetLine": 533,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-11-productized-service-posture"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "03.12 Complete-substitute differential benchmark",
+          "sourceLine": 519,
+          "targetHeading": "03.12 Complete-substitute differential benchmark",
+          "targetLine": 568,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-12-complete-substitute-differential-benchmark"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Baseline A — Native only",
+          "sourceLine": 523,
+          "targetHeading": "Baseline A — Native only",
+          "targetLine": 572,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-12-complete-substitute-differential-benchmark-baseline-a-native-only"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Baseline B — Native plus provider/vendor",
+          "sourceLine": 527,
+          "targetHeading": "Baseline B — Native plus provider/vendor",
+          "targetLine": 576,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-12-complete-substitute-differential-benchmark-baseline-b-native-plus-provider-vendor"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Baseline C — Native plus internal engineer and approved agent",
+          "sourceLine": 531,
+          "targetHeading": "Baseline C — Native plus internal engineer and approved agent",
+          "targetLine": 580,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-12-complete-substitute-differential-benchmark-baseline-c-native-plus-internal-engineer-and-approved-agent"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Candidate — TrainCapsule",
+          "sourceLine": 535,
+          "targetHeading": "Candidate — TrainCapsule",
+          "targetLine": 584,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-12-complete-substitute-differential-benchmark-candidate-traincapsule"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.13 Product maturity",
+          "sourceLine": 554,
+          "targetHeading": "03.13 Product maturity",
+          "targetLine": 603,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-13-product-maturity"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.14 Required nonfunctional properties",
+          "sourceLine": 578,
+          "targetHeading": "03.14 Required nonfunctional properties",
+          "targetLine": 627,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-14-required-nonfunctional-properties"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Truth",
+          "sourceLine": 580,
+          "targetHeading": "Truth",
+          "targetLine": 629,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-14-required-nonfunctional-properties-truth"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Security",
+          "sourceLine": 587,
+          "targetHeading": "Security",
+          "targetLine": 636,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-14-required-nonfunctional-properties-security"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Reproducibility",
+          "sourceLine": 597,
+          "targetHeading": "Reproducibility",
+          "targetLine": 646,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-14-required-nonfunctional-properties-reproducibility"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Usability",
+          "sourceLine": 606,
+          "targetHeading": "Usability",
+          "targetLine": 655,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-14-required-nonfunctional-properties-usability"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Performance",
+          "sourceLine": 618,
+          "targetHeading": "Performance",
+          "targetLine": 667,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-14-required-nonfunctional-properties-performance"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.15 Pilot success contract",
+          "sourceLine": 631,
+          "targetHeading": "03.15 Pilot success contract",
+          "targetLine": 680,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-15-pilot-success-contract"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.16 Product metrics",
+          "sourceLine": 660,
+          "targetHeading": "03.16 Product metrics",
+          "targetLine": 709,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-16-product-metrics"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "North-star commercial metric",
+          "sourceLine": 662,
+          "targetHeading": "North-star commercial metric",
+          "targetLine": 711,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-16-product-metrics-north-star-commercial-metric"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Supporting metrics",
+          "sourceLine": 668,
+          "targetHeading": "Supporting metrics",
+          "targetLine": 717,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-16-product-metrics-supporting-metrics"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Anti-metrics",
+          "sourceLine": 686,
+          "targetHeading": "Anti-metrics",
+          "targetLine": 735,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-16-product-metrics-anti-metrics"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.17 Discovery requirements",
+          "sourceLine": 700,
+          "targetHeading": "03.17 Discovery requirements",
+          "targetLine": 749,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-17-discovery-requirements"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.18 Scope dispositions",
+          "sourceLine": 727,
+          "targetHeading": "03.18 Scope dispositions",
+          "targetLine": 776,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-18-scope-dispositions"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "03.19 Claims policy",
+          "sourceLine": 743,
+          "targetHeading": "03.19 Claims policy",
+          "targetLine": 792,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-19-claims-policy"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "03.20 Definition of product success",
+          "sourceLine": 766,
+          "targetHeading": "03.20 Definition of product success",
+          "targetLine": 815,
+          "targetSectionId": "03-product-strategy-and-requirements-v3-1-zh-03-20-definition-of-product-success"
+        }
+      ],
+      "sourceHeadingCount": 61,
+      "sourcePath": "docs/source-of-truth/v3-2026-08-11/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3.md",
+      "sourceSha256": "a1e4ab535d13296512e1a4f7385aee32b08bd9a297e5e9f0452c12a3a97678b3",
+      "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3_1_ZH.md",
+      "targetSha256": "efc721763e42b9e8c664ffc67d64526c56f1365f29ce15b95e5362249580f912"
+    },
+    {
+      "logicalId": "TC.V3_1_ZH.TECHNICAL_ARCHITECTURE",
+      "mappedHeadingCount": 51,
+      "mappings": [
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "04 — Technical Architecture V3",
+          "sourceLine": 1,
+          "targetHeading": "04 — Technical Architecture V3.1-ZH",
+          "targetLine": 1,
+          "targetSectionId": "04-technical-architecture-v3-1-zh"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.1 Architectural objective",
+          "sourceLine": 3,
+          "targetHeading": "04.1 Architectural objective",
+          "targetLine": 52,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-1-architectural-objective"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "04.2 Architecture doctrine",
+          "sourceLine": 13,
+          "targetHeading": "04.2 Architecture doctrine",
+          "targetLine": 62,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-2-architecture-doctrine"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.3 Initial supported envelope",
+          "sourceLine": 30,
+          "targetHeading": "04.3 Initial supported envelope",
+          "targetLine": 79,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-3-initial-supported-envelope"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Supported in the first commercial slice",
+          "sourceLine": 32,
+          "targetHeading": "Supported in the first commercial slice",
+          "targetLine": 81,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-3-initial-supported-envelope-supported-in-the-first-commercial-slice"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Explicitly unsupported until evidence authorizes expansion",
+          "sourceLine": 49,
+          "targetHeading": "Explicitly unsupported until evidence authorizes expansion",
+          "targetLine": 98,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-3-initial-supported-envelope-explicitly-unsupported-until-evidence-authorizes-expansion"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.4 Repository layout",
+          "sourceLine": 69,
+          "targetHeading": "04.4 Repository layout",
+          "targetLine": 118,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-4-repository-layout"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "04.5 Bounded V1 component map",
+          "sourceLine": 107,
+          "targetHeading": "04.5 Bounded V1 component map",
+          "targetLine": 156,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-5-bounded-v1-component-map"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "04.6 Core domain objects",
+          "sourceLine": 152,
+          "targetHeading": "04.6 Core domain objects",
+          "targetLine": 201,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`WorkloadIdentity`",
+          "sourceLine": 156,
+          "targetHeading": "`WorkloadIdentity`",
+          "targetLine": 205,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-workloadidentity"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`EnvironmentIdentity`",
+          "sourceLine": 188,
+          "targetHeading": "`EnvironmentIdentity`",
+          "targetLine": 237,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-environmentidentity"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`EvidenceArtifact`",
+          "sourceLine": 215,
+          "targetHeading": "`EvidenceArtifact`",
+          "targetLine": 264,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-evidenceartifact"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`NativeFinding`",
+          "sourceLine": 237,
+          "targetHeading": "`NativeFinding`",
+          "targetLine": 286,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-nativefinding"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`IncidentCase`",
+          "sourceLine": 253,
+          "targetHeading": "`IncidentCase`",
+          "targetLine": 302,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-incidentcase"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`EvidenceCompletenessReport`",
+          "sourceLine": 277,
+          "targetHeading": "`EvidenceCompletenessReport`",
+          "targetLine": 326,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-evidencecompletenessreport"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`ExperimentHypothesis`",
+          "sourceLine": 288,
+          "targetHeading": "`ExperimentHypothesis`",
+          "targetLine": 337,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-experimenthypothesis"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`ReductionStep`",
+          "sourceLine": 303,
+          "targetHeading": "`ReductionStep`",
+          "targetLine": 352,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-reductionstep"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`FaithfulnessContract`",
+          "sourceLine": 320,
+          "targetHeading": "`FaithfulnessContract`",
+          "targetLine": 369,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-faithfulnesscontract"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`RecoveryProperty`",
+          "sourceLine": 342,
+          "targetHeading": "`RecoveryProperty`",
+          "targetLine": 391,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-recoveryproperty"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "`ExperimentContract`",
+          "sourceLine": 361,
+          "targetHeading": "`ExperimentContract`",
+          "targetLine": 410,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-experimentcontract"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`ExecutionRecord`",
+          "sourceLine": 385,
+          "targetHeading": "`ExecutionRecord`",
+          "targetLine": 434,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-executionrecord"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "`QualificationDecision`",
+          "sourceLine": 403,
+          "targetHeading": "`QualificationDecision`",
+          "targetLine": 452,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-6-core-domain-objects-qualificationdecision"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.7 Stable backend interfaces",
+          "sourceLine": 450,
+          "targetHeading": "04.7 Stable backend interfaces",
+          "targetLine": 499,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-7-stable-backend-interfaces"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.8 Initial native integration",
+          "sourceLine": 489,
+          "targetHeading": "04.8 Initial native integration",
+          "targetLine": 538,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-8-initial-native-integration"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "04.9 Eligibility engine",
+          "sourceLine": 514,
+          "targetHeading": "04.9 Eligibility engine",
+          "targetLine": 563,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-9-eligibility-engine"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.10 Pack-specific experiment planner",
+          "sourceLine": 549,
+          "targetHeading": "04.10 Pack-specific experiment planner",
+          "targetLine": 598,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-10-pack-specific-experiment-planner"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.11 Runner architecture",
+          "sourceLine": 576,
+          "targetHeading": "04.11 Runner architecture",
+          "targetLine": 625,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-11-runner-architecture"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.12 Baseline/candidate comparison",
+          "sourceLine": 610,
+          "targetHeading": "04.12 Baseline/candidate comparison",
+          "targetLine": 659,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-12-baseline-candidate-comparison"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.13 Recovery Assurance",
+          "sourceLine": 636,
+          "targetHeading": "04.13 Recovery Assurance",
+          "targetLine": 685,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-13-recovery-assurance"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "04.14 Incident contract registry",
+          "sourceLine": 668,
+          "targetHeading": "04.14 Incident contract registry",
+          "targetLine": 717,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-14-incident-contract-registry"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.15 Local report viewer",
+          "sourceLine": 698,
+          "targetHeading": "04.15 Local report viewer",
+          "targetLine": 747,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-15-local-report-viewer"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "04.16 Human approval boundary",
+          "sourceLine": 717,
+          "targetHeading": "04.16 Independent machine authorization boundary",
+          "targetLine": 766,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-16-independent-machine-authorization-boundary"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.17 Security architecture",
+          "sourceLine": 747,
+          "targetHeading": "04.17 Security architecture",
+          "targetLine": 796,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-17-security-architecture"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Threats in V1",
+          "sourceLine": 749,
+          "targetHeading": "Threats in V1",
+          "targetLine": 798,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-17-security-architecture-threats-in-v1"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Required controls",
+          "sourceLine": 764,
+          "targetHeading": "Required controls",
+          "targetLine": 813,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-17-security-architecture-required-controls"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "04.18 Observability and supportability",
+          "sourceLine": 783,
+          "targetHeading": "04.18 Observability and supportability",
+          "targetLine": 832,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-18-observability-and-supportability"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "04.19 Product CLI",
+          "sourceLine": 806,
+          "targetHeading": "04.19 Product CLI",
+          "targetLine": 855,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-19-product-cli"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "04.20 Exit-code contract",
+          "sourceLine": 833,
+          "targetHeading": "04.20 Exit-code contract",
+          "targetLine": 882,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-20-exit-code-contract"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "04.21 Testing architecture",
+          "sourceLine": 856,
+          "targetHeading": "04.21 Testing architecture",
+          "targetLine": 905,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Unit tests",
+          "sourceLine": 858,
+          "targetHeading": "Unit tests",
+          "targetLine": 907,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture-unit-tests"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Contract tests",
+          "sourceLine": 870,
+          "targetHeading": "Contract tests",
+          "targetLine": 919,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture-contract-tests"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Controlled integration tests",
+          "sourceLine": 878,
+          "targetHeading": "Controlled integration tests",
+          "targetLine": 927,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture-controlled-integration-tests"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Adversarial tests",
+          "sourceLine": 891,
+          "targetHeading": "Adversarial tests",
+          "targetLine": 940,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture-adversarial-tests"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Journey tests",
+          "sourceLine": 906,
+          "targetHeading": "Journey tests",
+          "targetLine": 955,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture-journey-tests"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "External tests",
+          "sourceLine": 917,
+          "targetHeading": "External tests",
+          "targetLine": 966,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-21-testing-architecture-external-tests"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.22 Performance budgets",
+          "sourceLine": 927,
+          "targetHeading": "04.22 Performance budgets",
+          "targetLine": 976,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-22-performance-budgets"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.23 Packaging and deployment",
+          "sourceLine": 941,
+          "targetHeading": "04.23 Packaging and deployment",
+          "targetLine": 990,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-23-packaging-and-deployment"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.24 Maturity controls",
+          "sourceLine": 966,
+          "targetHeading": "04.24 Maturity controls",
+          "targetLine": 1015,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-24-maturity-controls"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "04.25 Deferred architecture register",
+          "sourceLine": 1004,
+          "targetHeading": "04.25 Deferred architecture register",
+          "targetLine": 1053,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-25-deferred-architecture-register"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "04.26 Migration from the present repository",
+          "sourceLine": 1029,
+          "targetHeading": "04.26 Migration from the present repository",
+          "targetLine": 1078,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-26-migration-from-the-present-repository"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "04.27 V1 completion definition",
+          "sourceLine": 1044,
+          "targetHeading": "04.27 V1 completion definition",
+          "targetLine": 1093,
+          "targetSectionId": "04-technical-architecture-v3-1-zh-04-27-v1-completion-definition"
+        }
+      ],
+      "sourceHeadingCount": 51,
+      "sourcePath": "docs/source-of-truth/v3-2026-08-11/04_TECHNICAL_ARCHITECTURE_V3.md",
+      "sourceSha256": "bdfcbbdcc9a3a5db534017fbde84cbf5e29b4941c2c753327c5fd62f34f7ff2f",
+      "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/04_TECHNICAL_ARCHITECTURE_V3_1_ZH.md",
+      "targetSha256": "d66e62e4ef190a96f14108a5fcfb1817f2120095196b6882f6237728dbfb2cd8"
+    },
+    {
+      "logicalId": "TC.V3_1_ZH.TRUST_SPECIFICATION",
+      "mappedHeadingCount": 60,
+      "mappings": [
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05 — Trust, Replay, Reduction, Recovery, and Incident Contract Specification V3",
+          "sourceLine": 1,
+          "targetHeading": "05 — Trust, Replay, Reduction, Recovery, and Capsule Specification V3.1-ZH",
+          "targetLine": 1,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05.1 Purpose",
+          "sourceLine": 3,
+          "targetHeading": "05.1 Purpose",
+          "targetLine": 52,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-1-purpose"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.2 Truth model",
+          "sourceLine": 25,
+          "targetHeading": "05.2 Truth model",
+          "targetLine": 74,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-2-truth-model"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Technical execution state",
+          "sourceLine": 29,
+          "targetHeading": "Technical execution state",
+          "targetLine": 78,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-2-truth-model-technical-execution-state"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Epistemic claim class",
+          "sourceLine": 42,
+          "targetHeading": "Epistemic claim class",
+          "targetLine": 91,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-2-truth-model-epistemic-claim-class"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Operational decision",
+          "sourceLine": 55,
+          "targetHeading": "Operational decision",
+          "targetLine": 104,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-2-truth-model-operational-decision"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Commercial maturity",
+          "sourceLine": 66,
+          "targetHeading": "Commercial maturity",
+          "targetLine": 115,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-2-truth-model-commercial-maturity"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.3 Evidence provenance",
+          "sourceLine": 85,
+          "targetHeading": "05.3 Evidence provenance",
+          "targetLine": 134,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-3-evidence-provenance"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.4 Evidence completeness",
+          "sourceLine": 128,
+          "targetHeading": "05.4 Evidence completeness",
+          "targetLine": 177,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-4-evidence-completeness"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.5 Identity law",
+          "sourceLine": 157,
+          "targetHeading": "05.5 Identity law",
+          "targetLine": 206,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-5-identity-law"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Workload identity",
+          "sourceLine": 161,
+          "targetHeading": "Workload identity",
+          "targetLine": 210,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-5-identity-law-workload-identity"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Environment identity",
+          "sourceLine": 175,
+          "targetHeading": "Environment identity",
+          "targetLine": 224,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-5-identity-law-environment-identity"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Identity strength",
+          "sourceLine": 191,
+          "targetHeading": "Identity strength",
+          "targetLine": 240,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-5-identity-law-identity-strength"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Drift",
+          "sourceLine": 203,
+          "targetHeading": "Drift",
+          "targetLine": 252,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-5-identity-law-drift"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05.6 Native baseline law",
+          "sourceLine": 214,
+          "targetHeading": "05.6 Native baseline law",
+          "targetLine": 263,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-6-native-baseline-law"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.7 Observed boundary",
+          "sourceLine": 241,
+          "targetHeading": "05.7 Observed boundary",
+          "targetLine": 290,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-7-observed-boundary"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.8 Hypothesis discipline",
+          "sourceLine": 279,
+          "targetHeading": "05.8 Hypothesis discipline",
+          "targetLine": 328,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-8-hypothesis-discipline"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.9 Experiment plan requirements",
+          "sourceLine": 313,
+          "targetHeading": "05.9 Experiment plan requirements",
+          "targetLine": 362,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-9-experiment-plan-requirements"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05.10 Reduction law",
+          "sourceLine": 335,
+          "targetHeading": "05.10 Reduction law",
+          "targetLine": 384,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-10-reduction-law"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Registered operators",
+          "sourceLine": 339,
+          "targetHeading": "Registered operators",
+          "targetLine": 388,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-10-reduction-law-registered-operators"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Legal reduction states",
+          "sourceLine": 352,
+          "targetHeading": "Legal reduction states",
+          "targetLine": 401,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-10-reduction-law-legal-reduction-states"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Monotonic truth rule",
+          "sourceLine": 365,
+          "targetHeading": "Monotonic truth rule",
+          "targetLine": 414,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-10-reduction-law-monotonic-truth-rule"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Negative controls",
+          "sourceLine": 385,
+          "targetHeading": "Negative controls",
+          "targetLine": 434,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-10-reduction-law-negative-controls"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Economic limit",
+          "sourceLine": 389,
+          "targetHeading": "Economic limit",
+          "targetLine": 438,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-10-reduction-law-economic-limit"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.11 Faithfulness dimensions",
+          "sourceLine": 393,
+          "targetHeading": "05.11 Faithfulness dimensions",
+          "targetLine": 442,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-11-faithfulness-dimensions"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.12 Replay and evidence tiers",
+          "sourceLine": 429,
+          "targetHeading": "05.12 Replay and evidence tiers",
+          "targetLine": 478,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Tier E0 — Evidence-only reconstruction",
+          "sourceLine": 433,
+          "targetHeading": "Tier E0 — Evidence-only reconstruction",
+          "targetLine": 482,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers-tier-e0-evidence-only-reconstruction"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Tier E1 — Structural execution",
+          "sourceLine": 449,
+          "targetHeading": "Tier E1 — Structural execution",
+          "targetLine": 498,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers-tier-e1-structural-execution"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Tier E2 — Source/substitute execution",
+          "sourceLine": 457,
+          "targetHeading": "Tier E2 — Source/substitute execution",
+          "targetLine": 506,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers-tier-e2-source-substitute-execution"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Tier E3 — Deterministic bounded replay",
+          "sourceLine": 463,
+          "targetHeading": "Tier E3 — Deterministic bounded replay",
+          "targetLine": 512,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers-tier-e3-deterministic-bounded-replay"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Tier E4 — Statistical reproduction",
+          "sourceLine": 469,
+          "targetHeading": "Tier E4 — Statistical reproduction",
+          "targetLine": 518,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers-tier-e4-statistical-reproduction"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Tier E5 — Scale-faithful execution",
+          "sourceLine": 475,
+          "targetHeading": "Tier E5 — Scale-faithful execution",
+          "targetLine": 524,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-12-replay-and-evidence-tiers-tier-e5-scale-faithful-execution"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05.13 Oracle specification",
+          "sourceLine": 483,
+          "targetHeading": "05.13 Oracle specification",
+          "targetLine": 532,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-13-oracle-specification"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05.14 Recovery Assurance specification",
+          "sourceLine": 520,
+          "targetHeading": "05.14 Recovery Assurance specification",
+          "targetLine": 569,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-14-recovery-assurance-specification"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Property contract",
+          "sourceLine": 524,
+          "targetHeading": "Property contract",
+          "targetLine": 573,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-14-recovery-assurance-specification-property-contract"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Result",
+          "sourceLine": 540,
+          "targetHeading": "Result",
+          "targetLine": 589,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-14-recovery-assurance-specification-result"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Aggregation",
+          "sourceLine": 551,
+          "targetHeading": "Aggregation",
+          "targetLine": 600,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-14-recovery-assurance-specification-aggregation"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Reference acquisition",
+          "sourceLine": 561,
+          "targetHeading": "Reference acquisition",
+          "targetLine": 610,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-14-recovery-assurance-specification-reference-acquisition"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05.15 Baseline/candidate qualification",
+          "sourceLine": 573,
+          "targetHeading": "05.15 Baseline/candidate qualification",
+          "targetLine": 622,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-15-baseline-candidate-qualification"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Valid comparison",
+          "sourceLine": 577,
+          "targetHeading": "Valid comparison",
+          "targetLine": 626,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-15-baseline-candidate-qualification-valid-comparison"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Decision matrix",
+          "sourceLine": 591,
+          "targetHeading": "Decision matrix",
+          "targetLine": 640,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-15-baseline-candidate-qualification-decision-matrix"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Required report content",
+          "sourceLine": 603,
+          "targetHeading": "Required report content",
+          "targetLine": 652,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-15-baseline-candidate-qualification-required-report-content"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.16 Applicability envelope",
+          "sourceLine": 618,
+          "targetHeading": "05.16 Applicability envelope",
+          "targetLine": 667,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-16-applicability-envelope"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05.17 Expiry, revocation, and requalification",
+          "sourceLine": 639,
+          "targetHeading": "05.17 Expiry, revocation, and requalification",
+          "targetLine": 688,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-17-expiry-revocation-and-requalification"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.18 Native-equivalence and complete-substitute test",
+          "sourceLine": 663,
+          "targetHeading": "05.18 Native-equivalence and complete-substitute test",
+          "targetLine": 712,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-18-native-equivalence-and-complete-substitute-test"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.19 Commercial truth specification",
+          "sourceLine": 697,
+          "targetHeading": "05.19 Commercial truth specification",
+          "targetLine": 746,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-19-commercial-truth-specification"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05.20 Human authority",
+          "sourceLine": 728,
+          "targetHeading": "05.20 Independent machine authority",
+          "targetLine": 777,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-20-independent-machine-authority"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Qualification of reviewer",
+          "sourceLine": 745,
+          "targetHeading": "Qualification of independent verifier policy and private oracles",
+          "targetLine": 794,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-20-independent-machine-authority-qualification-of-independent-verifier-policy-and-private-oracles"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05.21 AI role boundaries",
+          "sourceLine": 757,
+          "targetHeading": "05.21 AI role boundaries",
+          "targetLine": 806,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-21-ai-role-boundaries"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.22 Claim language policy",
+          "sourceLine": 784,
+          "targetHeading": "05.22 Claim language policy",
+          "targetLine": 833,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-22-claim-language-policy"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Permitted examples",
+          "sourceLine": 786,
+          "targetHeading": "Permitted examples",
+          "targetLine": 835,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-22-claim-language-policy-permitted-examples"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Prohibited examples without broader evidence",
+          "sourceLine": 793,
+          "targetHeading": "Prohibited examples without broader evidence",
+          "targetLine": 842,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-22-claim-language-policy-prohibited-examples-without-broader-evidence"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.23 Security and privacy truth",
+          "sourceLine": 804,
+          "targetHeading": "05.23 Security and privacy truth",
+          "targetLine": 853,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-23-security-and-privacy-truth"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.24 Dispute and correction process",
+          "sourceLine": 820,
+          "targetHeading": "05.24 Dispute and correction process",
+          "targetLine": 869,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-24-dispute-and-correction-process"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05.25 Pack release requirements",
+          "sourceLine": 838,
+          "targetHeading": "05.25 Pack release requirements",
+          "targetLine": 887,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-25-pack-release-requirements"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.26 Initial pack: pre-collective lifecycle",
+          "sourceLine": 857,
+          "targetHeading": "05.26 Initial pack: pre-collective lifecycle",
+          "targetLine": 906,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-26-initial-pack-pre-collective-lifecycle"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "05.27 Checkpoint/resume reference pack policy",
+          "sourceLine": 883,
+          "targetHeading": "05.27 Checkpoint/resume reference pack policy",
+          "targetLine": 932,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-27-checkpoint-resume-reference-pack-policy"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05.28 Verification artifacts",
+          "sourceLine": 907,
+          "targetHeading": "05.28 Verification artifacts",
+          "targetLine": 956,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-28-verification-artifacts"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05.29 Minimum external verifier",
+          "sourceLine": 935,
+          "targetHeading": "05.29 Minimum external verifier",
+          "targetLine": 984,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-29-minimum-external-verifier"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "05.30 Trust stop conditions",
+          "sourceLine": 957,
+          "targetHeading": "05.30 Trust stop conditions",
+          "targetLine": 1006,
+          "targetSectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-30-trust-stop-conditions"
+        }
+      ],
+      "sourceHeadingCount": 60,
+      "sourcePath": "docs/source-of-truth/v3-2026-08-11/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3.md",
+      "sourceSha256": "3a521fdc41c8ff1a0378a8666a1a45a6fd83addce2420ab38dc1d6417c0c0d0c",
+      "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3_1_ZH.md",
+      "targetSha256": "1e308439213ed94d6190db975b5a2cd61c2b5784fc39942e4e48a8cb16ae72a5"
+    },
+    {
+      "logicalId": "TC.V3_1_ZH.COMMERCIAL_MODEL",
+      "mappedHeadingCount": 63,
+      "mappings": [
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "06 — Commercial Model, Go-to-Market, and Validation Plan V3",
+          "sourceLine": 1,
+          "targetHeading": "06 — Commercial Model, Go-to-Market, and Validation Plan V3.1-ZH",
+          "targetLine": 1,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.1 Commercial objective",
+          "sourceLine": 3,
+          "targetHeading": "06.1 Commercial objective",
+          "targetLine": 52,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-1-commercial-objective"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.2 Initial positioning",
+          "sourceLine": 13,
+          "targetHeading": "06.2 Initial positioning",
+          "targetLine": 62,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-2-initial-positioning"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Category",
+          "sourceLine": 15,
+          "targetHeading": "Category",
+          "targetLine": 64,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-2-initial-positioning-category"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Primary message",
+          "sourceLine": 19,
+          "targetHeading": "Primary message",
+          "targetLine": 68,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-2-initial-positioning-primary-message"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Supporting message",
+          "sourceLine": 23,
+          "targetHeading": "Supporting message",
+          "targetLine": 72,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-2-initial-positioning-supporting-message"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Do not lead with",
+          "sourceLine": 27,
+          "targetHeading": "Do not lead with",
+          "targetLine": 76,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-2-initial-positioning-do-not-lead-with"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "06.3 Initial buyer and user",
+          "sourceLine": 40,
+          "targetHeading": "06.3 Initial buyer and user",
+          "targetLine": 89,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-3-initial-buyer-and-user"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Economic buyer",
+          "sourceLine": 42,
+          "targetHeading": "Economic buyer",
+          "targetLine": 91,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-3-initial-buyer-and-user-economic-buyer"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Primary user",
+          "sourceLine": 54,
+          "targetHeading": "Primary user",
+          "targetLine": 103,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-3-initial-buyer-and-user-primary-user"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Supporting users",
+          "sourceLine": 58,
+          "targetHeading": "Supporting users",
+          "targetLine": 107,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-3-initial-buyer-and-user-supporting-users"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.4 Ideal customer profile",
+          "sourceLine": 67,
+          "targetHeading": "06.4 Ideal customer profile",
+          "targetLine": 116,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-4-ideal-customer-profile"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Strong entry situations",
+          "sourceLine": 82,
+          "targetHeading": "Strong entry situations",
+          "targetLine": 131,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-4-ideal-customer-profile-strong-entry-situations"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Poor first customers",
+          "sourceLine": 92,
+          "targetHeading": "Poor first customers",
+          "targetLine": 141,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-4-ideal-customer-profile-poor-first-customers"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.5 Account qualification score",
+          "sourceLine": 103,
+          "targetHeading": "06.5 Account qualification score",
+          "targetLine": 152,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-5-account-qualification-score"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.6 Offer ladder",
+          "sourceLine": 129,
+          "targetHeading": "06.6 Offer ladder",
+          "targetLine": 178,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-6-offer-ladder"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Offer 1 — Paid Qualification Preflight",
+          "sourceLine": 131,
+          "targetHeading": "Offer 1 — Paid Qualification Preflight",
+          "targetLine": 180,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-6-offer-ladder-offer-1-paid-qualification-preflight"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Offer 2 — Incident-to-Change Qualification Pilot",
+          "sourceLine": 156,
+          "targetHeading": "Offer 2 — Incident-to-Change Qualification Pilot",
+          "targetLine": 205,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-6-offer-ladder-offer-2-incident-to-change-qualification-pilot"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Offer 3 — Additional Qualification Event",
+          "sourceLine": 190,
+          "targetHeading": "Offer 3 — Additional Qualification Event",
+          "targetLine": 239,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-6-offer-ladder-offer-3-additional-qualification-event"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Offer 4 — Protected Workload Agreement",
+          "sourceLine": 202,
+          "targetHeading": "Offer 4 — Protected Workload Agreement",
+          "targetLine": 251,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-6-offer-ladder-offer-4-protected-workload-agreement"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Offer 5 — Provider or Platform Integration",
+          "sourceLine": 224,
+          "targetHeading": "Offer 5 — Provider or Platform Integration",
+          "targetLine": 273,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-6-offer-ladder-offer-5-provider-or-platform-integration"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "06.7 Initial engagement contract",
+          "sourceLine": 244,
+          "targetHeading": "06.7 Initial engagement contract",
+          "targetLine": 293,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-7-initial-engagement-contract"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "06.8 Productized expert service",
+          "sourceLine": 273,
+          "targetHeading": "06.8 Productized expert service",
+          "targetLine": 322,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-8-productized-expert-service"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Productization test",
+          "sourceLine": 296,
+          "targetHeading": "Productization test",
+          "targetLine": 345,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-8-productized-expert-service-productization-test"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "06.9 Open-source and free entry surface",
+          "sourceLine": 310,
+          "targetHeading": "06.9 Open-source and free entry surface",
+          "targetLine": 359,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-9-open-source-and-free-entry-surface"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.10 Complete-substitute benchmark",
+          "sourceLine": 335,
+          "targetHeading": "06.10 Complete-substitute benchmark",
+          "targetLine": 384,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-10-complete-substitute-benchmark"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Commercially weak outcomes",
+          "sourceLine": 361,
+          "targetHeading": "Commercially weak outcomes",
+          "targetLine": 410,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-10-complete-substitute-benchmark-commercially-weak-outcomes"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Commercially promising outcome",
+          "sourceLine": 371,
+          "targetHeading": "Commercially promising outcome",
+          "targetLine": 420,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-10-complete-substitute-benchmark-commercially-promising-outcome"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.11 Discovery program",
+          "sourceLine": 379,
+          "targetHeading": "06.11 Discovery program",
+          "targetLine": 428,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-11-discovery-program"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Initial evidence targets",
+          "sourceLine": 383,
+          "targetHeading": "Initial evidence targets",
+          "targetLine": 432,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-11-discovery-program-initial-evidence-targets"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Conversation requirements",
+          "sourceLine": 396,
+          "targetHeading": "Conversation requirements",
+          "targetLine": 445,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-11-discovery-program-conversation-requirements"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Interview questions",
+          "sourceLine": 416,
+          "targetHeading": "Interview questions",
+          "targetLine": 465,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-11-discovery-program-interview-questions"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "06.12 Reachable-account map",
+          "sourceLine": 434,
+          "targetHeading": "06.12 Reachable-account map",
+          "targetLine": 483,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-12-reachable-account-map"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.13 Design partner structure",
+          "sourceLine": 469,
+          "targetHeading": "06.13 Design partner structure",
+          "targetLine": 518,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-13-design-partner-structure"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.14 Sales sequence",
+          "sourceLine": 494,
+          "targetHeading": "06.14 Sales sequence",
+          "targetLine": 543,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-14-sales-sequence"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Initial outreach message",
+          "sourceLine": 507,
+          "targetHeading": "Initial outreach message",
+          "targetLine": 556,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-14-sales-sequence-initial-outreach-message"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.15 Proof hierarchy",
+          "sourceLine": 517,
+          "targetHeading": "06.15 Proof hierarchy",
+          "targetLine": 566,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-15-proof-hierarchy"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "06.16 Validation gates",
+          "sourceLine": 535,
+          "targetHeading": "06.16 Validation gates",
+          "targetLine": 584,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Gate C0 — Problem access",
+          "sourceLine": 537,
+          "targetHeading": "Gate C0 — Problem access",
+          "targetLine": 586,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c0-problem-access"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Gate C1 — Native gap",
+          "sourceLine": 553,
+          "targetHeading": "Gate C1 — Native gap",
+          "targetLine": 602,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c1-native-gap"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Gate C2 — Paid pilot",
+          "sourceLine": 561,
+          "targetHeading": "Gate C2 — Paid pilot",
+          "targetLine": 610,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c2-paid-pilot"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Gate C3 — External value",
+          "sourceLine": 570,
+          "targetHeading": "Gate C3 — External value",
+          "targetLine": 619,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c3-external-value"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Gate C4 — Repeat",
+          "sourceLine": 579,
+          "targetHeading": "Gate C4 — Repeat",
+          "targetLine": 628,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c4-repeat"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Gate C5 — Productization",
+          "sourceLine": 587,
+          "targetHeading": "Gate C5 — Productization",
+          "targetLine": 636,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c5-productization"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Gate C6 — Annual product",
+          "sourceLine": 597,
+          "targetHeading": "Gate C6 — Annual product",
+          "targetLine": 646,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-16-validation-gates-gate-c6-annual-product"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "06.17 Stop and pivot rules",
+          "sourceLine": 606,
+          "targetHeading": "06.17 Stop and pivot rules",
+          "targetLine": 655,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-17-stop-and-pivot-rules"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.18 Pricing experiments",
+          "sourceLine": 624,
+          "targetHeading": "06.18 Pricing experiments",
+          "targetLine": 673,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-18-pricing-experiments"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.19 Internal revenue hypothesis",
+          "sourceLine": 658,
+          "targetHeading": "06.19 Internal revenue hypothesis",
+          "targetLine": 707,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-19-internal-revenue-hypothesis"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "06.20 Unit economics",
+          "sourceLine": 685,
+          "targetHeading": "06.20 Unit economics",
+          "targetLine": 734,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-20-unit-economics"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.21 Commercial data model",
+          "sourceLine": 713,
+          "targetHeading": "06.21 Commercial data model",
+          "targetLine": 762,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-21-commercial-data-model"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.22 Case-study strategy",
+          "sourceLine": 733,
+          "targetHeading": "06.22 Case-study strategy",
+          "targetLine": 782,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-22-case-study-strategy"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.23 Competitive strategy",
+          "sourceLine": 756,
+          "targetHeading": "06.23 Competitive strategy",
+          "targetLine": 805,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-23-competitive-strategy"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Against native framework tools",
+          "sourceLine": 758,
+          "targetHeading": "Against native framework tools",
+          "targetLine": 807,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-23-competitive-strategy-against-native-framework-tools"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Against cloud/platform bundles",
+          "sourceLine": 762,
+          "targetHeading": "Against cloud/platform bundles",
+          "targetLine": 811,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-23-competitive-strategy-against-cloud-platform-bundles"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Against diagnosis/remediation vendors",
+          "sourceLine": 766,
+          "targetHeading": "Against diagnosis/remediation vendors",
+          "targetLine": 815,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-23-competitive-strategy-against-diagnosis-remediation-vendors"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Against deterministic replay systems",
+          "sourceLine": 770,
+          "targetHeading": "Against deterministic replay systems",
+          "targetLine": 819,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-23-competitive-strategy-against-deterministic-replay-systems"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Against internal scripts plus agents",
+          "sourceLine": 774,
+          "targetHeading": "Against internal scripts plus agents",
+          "targetLine": 823,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-23-competitive-strategy-against-internal-scripts-plus-agents"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "06.24 Trust as a sales asset",
+          "sourceLine": 789,
+          "targetHeading": "06.24 Trust as a sales asset",
+          "targetLine": 838,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-24-trust-as-a-sales-asset"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "06.25 Procurement and security package",
+          "sourceLine": 806,
+          "targetHeading": "06.25 Procurement and security package",
+          "targetLine": 855,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-25-procurement-and-security-package"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "06.26 Team plan",
+          "sourceLine": 828,
+          "targetHeading": "06.26 Team plan",
+          "targetLine": 877,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-26-team-plan"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "06.27 Founder operating cadence",
+          "sourceLine": 846,
+          "targetHeading": "06.27 Autonomous operating cadence",
+          "targetLine": 895,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-27-autonomous-operating-cadence"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.28 Company dashboard",
+          "sourceLine": 869,
+          "targetHeading": "06.28 Company dashboard",
+          "targetLine": 918,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-28-company-dashboard"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "06.29 Success definition",
+          "sourceLine": 898,
+          "targetHeading": "06.29 Success definition",
+          "targetLine": 947,
+          "targetSectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-29-success-definition"
+        }
+      ],
+      "sourceHeadingCount": 63,
+      "sourcePath": "docs/source-of-truth/v3-2026-08-11/06_COMMERCIAL_MODEL_AND_GTM_V3.md",
+      "sourceSha256": "21c204e3d2912d18dc30a456ca6694a1958a5490b2e9a593507a39bc326c5ace",
+      "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/06_COMMERCIAL_MODEL_AND_GTM_V3_1_ZH.md",
+      "targetSha256": "485c38a199b6317f9720bc1bb4eb43bf189e44b89f276c287d841da1b27a51a6"
+    },
+    {
+      "logicalId": "TC.V3_1_ZH.ROADMAP",
+      "mappedHeadingCount": 39,
+      "mappings": [
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "12 — Gate-Based Roadmap and Backlog V3",
+          "sourceLine": 1,
+          "targetHeading": "12 — Gate-Based Roadmap and Backlog V3.1-ZH",
+          "targetLine": 1,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "12.1 Roadmap principle",
+          "sourceLine": 3,
+          "targetHeading": "12.1 Roadmap principle",
+          "targetLine": 52,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-1-roadmap-principle"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "12.2 Milestone map",
+          "sourceLine": 20,
+          "targetHeading": "12.2 Milestone map",
+          "targetLine": 69,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-2-milestone-map"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "12.3 M0 — Factory and source-of-truth migration",
+          "sourceLine": 49,
+          "targetHeading": "12.3 M0 — Factory and source-of-truth migration",
+          "targetLine": 98,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-3-m0-factory-and-source-of-truth-migration"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Exit criteria",
+          "sourceLine": 51,
+          "targetHeading": "Exit criteria",
+          "targetLine": 100,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-3-m0-factory-and-source-of-truth-migration-exit-criteria"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Work items",
+          "sourceLine": 66,
+          "targetHeading": "Work items",
+          "targetLine": 115,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-3-m0-factory-and-source-of-truth-migration-work-items"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "M0 stop conditions",
+          "sourceLine": 91,
+          "targetHeading": "M0 stop conditions",
+          "targetLine": 140,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-3-m0-factory-and-source-of-truth-migration-m0-stop-conditions"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "12.4 M1 — Native preflight and problem access",
+          "sourceLine": 99,
+          "targetHeading": "12.4 M1 — Native preflight and problem access",
+          "targetLine": 148,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "M1 product exit criteria",
+          "sourceLine": 103,
+          "targetHeading": "M1 product exit criteria",
+          "targetLine": 152,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access-m1-product-exit-criteria"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "M1 market exit criteria",
+          "sourceLine": 113,
+          "targetHeading": "M1 market exit criteria",
+          "targetLine": 162,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access-m1-market-exit-criteria"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "M1 competitor exit criteria",
+          "sourceLine": 124,
+          "targetHeading": "M1 competitor exit criteria",
+          "targetLine": 173,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access-m1-competitor-exit-criteria"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "M1 trust exit criteria",
+          "sourceLine": 130,
+          "targetHeading": "M1 trust exit criteria",
+          "targetLine": 179,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access-m1-trust-exit-criteria"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Work items",
+          "sourceLine": 138,
+          "targetHeading": "Work items",
+          "targetLine": 187,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access-work-items"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "M1 decision",
+          "sourceLine": 168,
+          "targetHeading": "M1 decision",
+          "targetLine": 217,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-4-m1-native-preflight-and-problem-access-m1-decision"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "12.5 M2 — Controlled end-to-end qualification",
+          "sourceLine": 179,
+          "targetHeading": "12.5 M2 — Controlled end-to-end qualification",
+          "targetLine": 228,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-5-m2-controlled-end-to-end-qualification"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Exit criteria",
+          "sourceLine": 181,
+          "targetHeading": "Exit criteria",
+          "targetLine": 230,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-5-m2-controlled-end-to-end-qualification-exit-criteria"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Work items",
+          "sourceLine": 195,
+          "targetHeading": "Work items",
+          "targetLine": 244,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-5-m2-controlled-end-to-end-qualification-work-items"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "M2 stop conditions",
+          "sourceLine": 226,
+          "targetHeading": "M2 stop conditions",
+          "targetLine": 275,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-5-m2-controlled-end-to-end-qualification-m2-stop-conditions"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "12.6 M3 — External paid-preflight readiness",
+          "sourceLine": 235,
+          "targetHeading": "12.6 M3 — External paid-preflight readiness",
+          "targetLine": 284,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-6-m3-external-paid-preflight-readiness"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Exit criteria",
+          "sourceLine": 237,
+          "targetHeading": "Exit criteria",
+          "targetLine": 286,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-6-m3-external-paid-preflight-readiness-exit-criteria"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Work items",
+          "sourceLine": 245,
+          "targetHeading": "Work items",
+          "targetLine": 294,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-6-m3-external-paid-preflight-readiness-work-items"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "12.7 M4 — Paid Incident-to-Change Qualification Pilot",
+          "sourceLine": 259,
+          "targetHeading": "12.7 M4 — Paid Incident-to-Change Qualification Pilot",
+          "targetLine": 308,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-7-m4-paid-incident-to-change-qualification-pilot"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Entry criteria",
+          "sourceLine": 263,
+          "targetHeading": "Entry criteria",
+          "targetLine": 312,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-7-m4-paid-incident-to-change-qualification-pilot-entry-criteria"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Work items",
+          "sourceLine": 274,
+          "targetHeading": "Work items",
+          "targetLine": 323,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-7-m4-paid-incident-to-change-qualification-pilot-work-items"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "M4 successful outcome",
+          "sourceLine": 293,
+          "targetHeading": "M4 successful outcome",
+          "targetLine": 342,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-7-m4-paid-incident-to-change-qualification-pilot-m4-successful-outcome"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "12.8 M5 — Paid repeat",
+          "sourceLine": 303,
+          "targetHeading": "12.8 M5 — Paid repeat",
+          "targetLine": 352,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-8-m5-paid-repeat"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Exit criteria",
+          "sourceLine": 305,
+          "targetHeading": "Exit criteria",
+          "targetLine": 354,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-8-m5-paid-repeat-exit-criteria"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Work items",
+          "sourceLine": 314,
+          "targetHeading": "Work items",
+          "targetLine": 363,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-8-m5-paid-repeat-work-items"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "12.9 M6 — Commercially supported initial pack",
+          "sourceLine": 326,
+          "targetHeading": "12.9 M6 — Commercially supported initial pack",
+          "targetLine": 375,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-9-m6-commercially-supported-initial-pack"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Exit criteria",
+          "sourceLine": 328,
+          "targetHeading": "Exit criteria",
+          "targetLine": 377,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-9-m6-commercially-supported-initial-pack-exit-criteria"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Work items",
+          "sourceLine": 339,
+          "targetHeading": "Work items",
+          "targetLine": 388,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-9-m6-commercially-supported-initial-pack-work-items"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "12.10 Checkpoint pack roadmap",
+          "sourceLine": 352,
+          "targetHeading": "12.10 Checkpoint pack roadmap",
+          "targetLine": 401,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-10-checkpoint-pack-roadmap"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "12.11 Deferred platform backlog",
+          "sourceLine": 377,
+          "targetHeading": "12.11 Deferred platform backlog",
+          "targetLine": 426,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-11-deferred-platform-backlog"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "12.12 Legacy 124-task ledger disposition",
+          "sourceLine": 405,
+          "targetHeading": "12.12 Legacy 124-task ledger disposition",
+          "targetLine": 454,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-12-legacy-124-task-ledger-disposition"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "12.13 Operating cadence",
+          "sourceLine": 430,
+          "targetHeading": "12.13 Operating cadence",
+          "targetLine": 479,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-13-operating-cadence"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Daily automated",
+          "sourceLine": 432,
+          "targetHeading": "Daily automated",
+          "targetLine": 481,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-13-operating-cadence-daily-automated"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Weekly founder review",
+          "sourceLine": 440,
+          "targetHeading": "Weekly autonomous evidence review",
+          "targetLine": 489,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-13-operating-cadence-weekly-autonomous-evidence-review"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Monthly wedge review",
+          "sourceLine": 450,
+          "targetHeading": "Monthly wedge review",
+          "targetLine": 499,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-13-operating-cadence-monthly-wedge-review"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "12.14 Roadmap success criteria",
+          "sourceLine": 466,
+          "targetHeading": "12.14 Roadmap success criteria",
+          "targetLine": 515,
+          "targetSectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-14-roadmap-success-criteria"
+        }
+      ],
+      "sourceHeadingCount": 39,
+      "sourcePath": "docs/source-of-truth/v3-2026-08-11/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md",
+      "sourceSha256": "4a6c6c660581711ca44bbee7d43f37c2ce244c4f117c84ba1802c19385e5fb37",
+      "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3_1_ZH.md",
+      "targetSha256": "cc4b73358c85d80249999ffbf96c0fe723e6318e42d89e8a211e989eaef2729d"
+    },
+    {
+      "logicalId": "TC.V3_1_ZH.SOURCE_REGISTER",
+      "mappedHeadingCount": 30,
+      "mappings": [
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "13 — Current Source and Competitive Register V3",
+          "sourceLine": 1,
+          "targetHeading": "13 — Current Source and Competitive Register V3.1-ZH",
+          "targetLine": 1,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "13.1 Source classes",
+          "sourceLine": 9,
+          "targetHeading": "13.1 Source classes",
+          "targetLine": 58,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-1-source-classes"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "13.2 Current native and platform baselines",
+          "sourceLine": 21,
+          "targetHeading": "13.2 Current native and platform baselines",
+          "targetLine": 70,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-2-current-native-and-platform-baselines"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-PYTORCH-FR — PyTorch Flight Recorder",
+          "sourceLine": 23,
+          "targetHeading": "S-PYTORCH-FR — PyTorch Flight Recorder",
+          "targetLine": 72,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-2-current-native-and-platform-baselines-s-pytorch-fr-pytorch-flight-recorder"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-NVIDIA-AJR — NVIDIA Mission Control / Autonomous Job Recovery",
+          "sourceLine": 39,
+          "targetHeading": "S-NVIDIA-AJR — NVIDIA Mission Control / Autonomous Job Recovery",
+          "targetLine": 88,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-2-current-native-and-platform-baselines-s-nvidia-ajr-nvidia-mission-control-autonomous-job-recovery"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-AWS-HYPERPOD-RECOVERY — SageMaker HyperPod checkpointless in-process recovery",
+          "sourceLine": 55,
+          "targetHeading": "S-AWS-HYPERPOD-RECOVERY — SageMaker HyperPod checkpointless in-process recovery",
+          "targetLine": 104,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-2-current-native-and-platform-baselines-s-aws-hyperpod-recovery-sagemaker-hyperpod-checkpointless-in-process-recovery"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-COREWEAVE-MISSION-CONTROL — CoreWeave Mission Control",
+          "sourceLine": 70,
+          "targetHeading": "S-COREWEAVE-MISSION-CONTROL — CoreWeave Mission Control",
+          "targetLine": 119,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-2-current-native-and-platform-baselines-s-coreweave-mission-control-coreweave-mission-control"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "13.3 Direct and adjacent commercial competitors",
+          "sourceLine": 86,
+          "targetHeading": "13.3 Direct and adjacent commercial competitors",
+          "targetLine": 135,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-3-direct-and-adjacent-commercial-competitors"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-CHAMBER — Chamber",
+          "sourceLine": 88,
+          "targetHeading": "S-CHAMBER — Chamber",
+          "targetLine": 137,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-3-direct-and-adjacent-commercial-competitors-s-chamber-chamber"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-TEYON — Teyon",
+          "sourceLine": 108,
+          "targetHeading": "S-TEYON — Teyon",
+          "targetLine": 157,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-3-direct-and-adjacent-commercial-competitors-s-teyon-teyon"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-HARBOR — Harbor",
+          "sourceLine": 129,
+          "targetHeading": "S-HARBOR — Harbor",
+          "targetLine": 178,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-3-direct-and-adjacent-commercial-competitors-s-harbor-harbor"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-CALADRIUS — Caladrius",
+          "sourceLine": 145,
+          "targetHeading": "S-CALADRIUS — Caladrius",
+          "targetLine": 194,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-3-direct-and-adjacent-commercial-competitors-s-caladrius-caladrius"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "13.4 Research and open systems that absorb technical primitives",
+          "sourceLine": 160,
+          "targetHeading": "13.4 Research and open systems that absorb technical primitives",
+          "targetLine": 209,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-TRAINCHECK — TrainCheck",
+          "sourceLine": 162,
+          "targetHeading": "S-TRAINCHECK — TrainCheck",
+          "targetLine": 211,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-traincheck-traincheck"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-TRAINVERIFY — TrainVerify",
+          "sourceLine": 188,
+          "targetHeading": "S-TRAINVERIFY — TrainVerify",
+          "targetLine": 237,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-trainverify-trainverify"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-TTRACE — TTrace",
+          "sourceLine": 201,
+          "targetHeading": "S-TTRACE — TTrace",
+          "targetLine": 250,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-ttrace-ttrace"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-OPGUARD — OpGuard",
+          "sourceLine": 215,
+          "targetHeading": "S-OPGUARD — OpGuard",
+          "targetLine": 264,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-opguard-opguard"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-PRISMLLM — PrismLLM",
+          "sourceLine": 233,
+          "targetHeading": "S-PRISMLLM — PrismLLM",
+          "targetLine": 282,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-prismllm-prismllm"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-ARGUS — ARGUS",
+          "sourceLine": 248,
+          "targetHeading": "S-ARGUS — ARGUS",
+          "targetLine": 297,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-argus-argus"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-PERFTRACKER — PerfTracker",
+          "sourceLine": 263,
+          "targetHeading": "S-PERFTRACKER — PerfTracker",
+          "targetLine": 312,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-perftracker-perftracker"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-XPUTIMER — XPUTimer",
+          "sourceLine": 277,
+          "targetHeading": "S-XPUTIMER — XPUTimer",
+          "targetLine": 326,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-xputimer-xputimer"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-MEGASCALE — MegaScale",
+          "sourceLine": 288,
+          "targetHeading": "S-MEGASCALE — MegaScale",
+          "targetLine": 337,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-4-research-and-open-systems-that-absorb-technical-primitives-s-megascale-megascale"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "13.5 Engineering-factory sources",
+          "sourceLine": 298,
+          "targetHeading": "13.5 Engineering-factory sources",
+          "targetLine": 347,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-5-engineering-factory-sources"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-ANTHROPIC-MAX — Claude Code with Pro/Max",
+          "sourceLine": 300,
+          "targetHeading": "S-ANTHROPIC-MAX — Claude Code with Pro/Max",
+          "targetLine": 349,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-5-engineering-factory-sources-s-anthropic-max-claude-code-with-pro-max"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "S-ANTHROPIC-CLAUDE-CODE — Claude Code documentation",
+          "sourceLine": 312,
+          "targetHeading": "S-ANTHROPIC-CLAUDE-CODE — Claude Code documentation",
+          "targetLine": 361,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-5-engineering-factory-sources-s-anthropic-claude-code-claude-code-documentation"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "S-GITHUB-ACTIONS — GitHub Actions documentation",
+          "sourceLine": 320,
+          "targetHeading": "S-GITHUB-ACTIONS — GitHub Actions documentation",
+          "targetLine": 369,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-5-engineering-factory-sources-s-github-actions-github-actions-documentation"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "13.6 Capability matrix",
+          "sourceLine": 328,
+          "targetHeading": "13.6 Capability matrix",
+          "targetLine": 377,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-6-capability-matrix"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "13.7 Remaining public gap",
+          "sourceLine": 346,
+          "targetHeading": "13.7 Remaining public gap",
+          "targetLine": 395,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-7-remaining-public-gap"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "13.8 Monthly update procedure",
+          "sourceLine": 363,
+          "targetHeading": "13.8 Monthly update procedure",
+          "targetLine": 412,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-8-monthly-update-procedure"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "13.9 Claim rules",
+          "sourceLine": 387,
+          "targetHeading": "13.9 Claim rules",
+          "targetLine": 436,
+          "targetSectionId": "13-current-source-and-competitive-register-v3-1-zh-13-9-claim-rules"
+        }
+      ],
+      "sourceHeadingCount": 30,
+      "sourcePath": "docs/source-of-truth/v3-2026-08-11/13_SOURCE_REGISTER_V3.md",
+      "sourceSha256": "dcc37f38e4071bc19ccc7607ca100ee39f2808485daa564a7337adb117551cef",
+      "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/13_SOURCE_REGISTER_V3_1_ZH.md",
+      "targetSha256": "0fa8699ad2070cfd2093899e4b3eec17ed543a15c99f081bc5363c9a2e79280c"
+    },
+    {
+      "logicalId": "TC.V3_1_ZH.MASTER_BUILD_PROMPT",
+      "mappedHeadingCount": 31,
+      "mappings": [
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "14 — Claude Code Master Build Prompt V3",
+          "sourceLine": 1,
+          "targetHeading": "14 — Claude Code Master Build Prompt V3.1-ZH",
+          "targetLine": 1,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Mission",
+          "sourceLine": 3,
+          "targetHeading": "Mission",
+          "targetLine": 52,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-mission"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Authority",
+          "sourceLine": 15,
+          "targetHeading": "Authority",
+          "targetLine": 64,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-authority"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Product boundary",
+          "sourceLine": 34,
+          "targetHeading": "Product boundary",
+          "targetLine": 83,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-boundary"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Build now",
+          "sourceLine": 36,
+          "targetHeading": "Build now",
+          "targetLine": 85,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-boundary-build-now"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Do not build without a promoted work item",
+          "sourceLine": 58,
+          "targetHeading": "Do not build without a promoted work item",
+          "targetLine": 107,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-boundary-do-not-build-without-a-promoted-work-item"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Native-first rule",
+          "sourceLine": 76,
+          "targetHeading": "Native-first rule",
+          "targetLine": 125,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-native-first-rule"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Truth rules",
+          "sourceLine": 90,
+          "targetHeading": "Truth rules",
+          "targetLine": 139,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-truth-rules"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Human authority",
+          "sourceLine": 125,
+          "targetHeading": "Independent machine authority",
+          "targetLine": 174,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-independent-machine-authority"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Work-item protocol",
+          "sourceLine": 137,
+          "targetHeading": "Work-item protocol",
+          "targetLine": 186,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-work-item-protocol"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Planning",
+          "sourceLine": 154,
+          "targetHeading": "Planning",
+          "targetLine": 203,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-planning"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Implementation",
+          "sourceLine": 182,
+          "targetHeading": "Implementation",
+          "targetLine": 231,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-implementation"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Testing",
+          "sourceLine": 205,
+          "targetHeading": "Testing",
+          "targetLine": 254,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-testing"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Product-specific implementation rules",
+          "sourceLine": 226,
+          "targetHeading": "Product-specific implementation rules",
+          "targetLine": 275,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Identity",
+          "sourceLine": 228,
+          "targetHeading": "Identity",
+          "targetLine": 277,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-identity"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Evidence",
+          "sourceLine": 235,
+          "targetHeading": "Evidence",
+          "targetLine": 284,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-evidence"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Native findings",
+          "sourceLine": 242,
+          "targetHeading": "Native findings",
+          "targetLine": 291,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-native-findings"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Observed boundary",
+          "sourceLine": 248,
+          "targetHeading": "Observed boundary",
+          "targetLine": 297,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-observed-boundary"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Reduction",
+          "sourceLine": 254,
+          "targetHeading": "Reduction",
+          "targetLine": 303,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-reduction"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Runner",
+          "sourceLine": 262,
+          "targetHeading": "Runner",
+          "targetLine": 311,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-runner"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Recovery Assurance",
+          "sourceLine": 271,
+          "targetHeading": "Recovery Assurance",
+          "targetLine": 320,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-recovery-assurance"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Qualification",
+          "sourceLine": 277,
+          "targetHeading": "Qualification",
+          "targetLine": 326,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-product-specific-implementation-rules-qualification"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Factory-specific implementation rules",
+          "sourceLine": 285,
+          "targetHeading": "Factory-specific implementation rules",
+          "targetLine": 334,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-factory-specific-implementation-rules"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Finding format",
+          "sourceLine": 298,
+          "targetHeading": "Finding format",
+          "targetLine": 347,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-finding-format"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Research rules",
+          "sourceLine": 320,
+          "targetHeading": "Research rules",
+          "targetLine": 369,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-research-rules"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Security rules",
+          "sourceLine": 339,
+          "targetHeading": "Security rules",
+          "targetLine": 388,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-security-rules"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Git rules",
+          "sourceLine": 360,
+          "targetHeading": "Git rules",
+          "targetLine": 409,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-git-rules"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Completion output",
+          "sourceLine": 371,
+          "targetHeading": "Completion output",
+          "targetLine": 420,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-completion-output"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Stop conditions",
+          "sourceLine": 398,
+          "targetHeading": "Stop conditions",
+          "targetLine": 447,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-stop-conditions"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Current build order after V3 migration",
+          "sourceLine": 416,
+          "targetHeading": "Current build order after V3 migration",
+          "targetLine": 465,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-current-build-order-after-v3-migration"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Final operating principle",
+          "sourceLine": 435,
+          "targetHeading": "Final operating principle",
+          "targetLine": 484,
+          "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-final-operating-principle"
+        }
+      ],
+      "sourceHeadingCount": 31,
+      "sourcePath": "docs/source-of-truth/v3-2026-08-11/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md",
+      "sourceSha256": "d7377e6f1fe86a7a0a70d951ac11a47e717c6988ace97368567bcd343de6b0d5",
+      "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3_1_ZH.md",
+      "targetSha256": "ea2df9cc6e41c0e679c208ed8c2615c938f644711c25cea35052ee2cd865606d"
+    },
+    {
+      "logicalId": "TC.V3_1_ZH.FACTORY_LOOP",
+      "mappedHeadingCount": 106,
+      "mappings": [
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "TrainCapsule Autonomous Factory and Business Loop Redesign Specification",
+          "sourceLine": 1,
+          "targetHeading": "TrainCapsule Autonomous Factory and Business Loop Redesign Specification V3.1-ZH",
+          "targetLine": 1,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "1. Objective",
+          "sourceLine": 3,
+          "targetHeading": "1. Objective",
+          "targetLine": 52,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-1-objective"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "2. Current-system diagnosis",
+          "sourceLine": 11,
+          "targetHeading": "2. Current-system diagnosis",
+          "targetLine": 60,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-2-current-system-diagnosis"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "3. New separation of systems",
+          "sourceLine": 46,
+          "targetHeading": "3. New separation of systems",
+          "targetLine": 95,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-3-new-separation-of-systems"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "4. New source layout",
+          "sourceLine": 66,
+          "targetHeading": "4. New source layout",
+          "targetLine": 115,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-4-new-source-layout"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "5. Work-item model",
+          "sourceLine": 93,
+          "targetHeading": "5. Work-item model",
+          "targetLine": 142,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-5-work-item-model"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Status vocabulary",
+          "sourceLine": 128,
+          "targetHeading": "Status vocabulary",
+          "targetLine": 177,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-5-work-item-model-status-vocabulary"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Disposition vocabulary",
+          "sourceLine": 151,
+          "targetHeading": "Disposition vocabulary",
+          "targetLine": 200,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-5-work-item-model-disposition-vocabulary"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "6. Milestone model",
+          "sourceLine": 166,
+          "targetHeading": "6. Milestone model",
+          "targetLine": 215,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-6-milestone-model"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "7. Four-lane scheduler",
+          "sourceLine": 195,
+          "targetHeading": "7. Four-lane scheduler",
+          "targetLine": 244,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Lanes",
+          "sourceLine": 197,
+          "targetHeading": "Lanes",
+          "targetLine": 246,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-lanes"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "PRODUCT",
+          "sourceLine": 199,
+          "targetHeading": "PRODUCT",
+          "targetLine": 248,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-lanes-product"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "MARKET",
+          "sourceLine": 203,
+          "targetHeading": "MARKET",
+          "targetLine": 252,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-lanes-market"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "COMPETITOR",
+          "sourceLine": 207,
+          "targetHeading": "COMPETITOR",
+          "targetLine": 256,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-lanes-competitor"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "TRUST",
+          "sourceLine": 211,
+          "targetHeading": "TRUST",
+          "targetLine": 260,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-lanes-trust"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Lane independence",
+          "sourceLine": 217,
+          "targetHeading": "Lane independence",
+          "targetLine": 266,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-lane-independence"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Initial WIP policy",
+          "sourceLine": 221,
+          "targetHeading": "Initial WIP policy",
+          "targetLine": 270,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-7-four-lane-scheduler-initial-wip-policy"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "8. Scheduler score",
+          "sourceLine": 233,
+          "targetHeading": "8. Scheduler score",
+          "targetLine": 282,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-8-scheduler-score"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "9. Commercial gate behavior",
+          "sourceLine": 265,
+          "targetHeading": "9. Commercial gate behavior",
+          "targetLine": 314,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-9-commercial-gate-behavior"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Value outcomes",
+          "sourceLine": 297,
+          "targetHeading": "Value outcomes",
+          "targetLine": 346,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-9-commercial-gate-behavior-value-outcomes"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "10. Retry and recovery policy",
+          "sourceLine": 309,
+          "targetHeading": "10. Retry and recovery policy",
+          "targetLine": 358,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-10-retry-and-recovery-policy"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Planning",
+          "sourceLine": 313,
+          "targetHeading": "Planning",
+          "targetLine": 362,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-10-retry-and-recovery-policy-planning"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Implementation",
+          "sourceLine": 329,
+          "targetHeading": "Implementation",
+          "targetLine": 378,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-10-retry-and-recovery-policy-implementation"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Infrastructure recovery",
+          "sourceLine": 344,
+          "targetHeading": "Infrastructure recovery",
+          "targetLine": 393,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-10-retry-and-recovery-policy-infrastructure-recovery"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Value redesign",
+          "sourceLine": 359,
+          "targetHeading": "Value redesign",
+          "targetLine": 408,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-10-retry-and-recovery-policy-value-redesign"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Completion expansion",
+          "sourceLine": 374,
+          "targetHeading": "Completion expansion",
+          "targetLine": 423,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-10-retry-and-recovery-policy-completion-expansion"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "11. Task sizing",
+          "sourceLine": 384,
+          "targetHeading": "11. Task sizing",
+          "targetLine": 433,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-11-task-sizing"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Mechanical",
+          "sourceLine": 388,
+          "targetHeading": "Mechanical",
+          "targetLine": 437,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-11-task-sizing-mechanical"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Standard product",
+          "sourceLine": 396,
+          "targetHeading": "Standard product",
+          "targetLine": 445,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-11-task-sizing-standard-product"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Integration/trust",
+          "sourceLine": 404,
+          "targetHeading": "Integration/trust",
+          "targetLine": 453,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-11-task-sizing-integration-trust"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "12. Planner redesign",
+          "sourceLine": 414,
+          "targetHeading": "12. Planner redesign",
+          "targetLine": 463,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-12-planner-redesign"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Current failure mode",
+          "sourceLine": 416,
+          "targetHeading": "Current failure mode",
+          "targetLine": 465,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-12-planner-redesign-current-failure-mode"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Replacement",
+          "sourceLine": 420,
+          "targetHeading": "Replacement",
+          "targetLine": 469,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-12-planner-redesign-replacement"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Planner validation",
+          "sourceLine": 447,
+          "targetHeading": "Planner validation",
+          "targetLine": 496,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-12-planner-redesign-planner-validation"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Plan reuse",
+          "sourceLine": 460,
+          "targetHeading": "Plan reuse",
+          "targetLine": 509,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-12-planner-redesign-plan-reuse"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "13. Pipeline redesign",
+          "sourceLine": 464,
+          "targetHeading": "13. Pipeline redesign",
+          "targetLine": 513,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-13-pipeline-redesign"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Candidate lifecycle",
+          "sourceLine": 481,
+          "targetHeading": "Candidate lifecycle",
+          "targetLine": 530,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-13-pipeline-redesign-candidate-lifecycle"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Finding routing",
+          "sourceLine": 496,
+          "targetHeading": "Finding routing",
+          "targetLine": 545,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-13-pipeline-redesign-finding-routing"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Candidate preservation",
+          "sourceLine": 514,
+          "targetHeading": "Candidate preservation",
+          "targetLine": 563,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-13-pipeline-redesign-candidate-preservation"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "14. Completion redesign",
+          "sourceLine": 528,
+          "targetHeading": "14. Completion redesign",
+          "targetLine": 577,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-14-completion-redesign"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Deterministic completion",
+          "sourceLine": 532,
+          "targetHeading": "Deterministic completion",
+          "targetLine": 581,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-14-completion-redesign-deterministic-completion"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Review behavior",
+          "sourceLine": 544,
+          "targetHeading": "Review behavior",
+          "targetLine": 593,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-14-completion-redesign-review-behavior"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Expansion behavior",
+          "sourceLine": 553,
+          "targetHeading": "Expansion behavior",
+          "targetLine": 602,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-14-completion-redesign-expansion-behavior"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "15. Human approval state",
+          "sourceLine": 563,
+          "targetHeading": "15. Machine-policy authorization state",
+          "targetLine": 612,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-15-machine-policy-authorization-state"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Work-item state",
+          "sourceLine": 567,
+          "targetHeading": "Work-item state",
+          "targetLine": 616,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-15-machine-policy-authorization-state-work-item-state"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Approval scopes",
+          "sourceLine": 573,
+          "targetHeading": "Machine-policy authorization scopes",
+          "targetLine": 622,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-15-machine-policy-authorization-state-machine-policy-authorization-scopes"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Verification",
+          "sourceLine": 586,
+          "targetHeading": "Verification",
+          "targetLine": 635,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-15-machine-policy-authorization-state-verification"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "16. External evidence state",
+          "sourceLine": 594,
+          "targetHeading": "16. External evidence state",
+          "targetLine": 643,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-16-external-evidence-state"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "17. Agent backend abstraction",
+          "sourceLine": 629,
+          "targetHeading": "17. Agent backend abstraction",
+          "targetLine": 678,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-17-agent-backend-abstraction"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "18. Model and quota policy",
+          "sourceLine": 681,
+          "targetHeading": "18. Model and quota policy",
+          "targetLine": 730,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-18-model-and-quota-policy"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "19. Context redesign",
+          "sourceLine": 716,
+          "targetHeading": "19. Context redesign",
+          "targetLine": 765,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-19-context-redesign"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Context groups",
+          "sourceLine": 718,
+          "targetHeading": "Context groups",
+          "targetLine": 767,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-19-context-redesign-context-groups"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "20. Prompt redesign",
+          "sourceLine": 753,
+          "targetHeading": "20. Prompt redesign",
+          "targetLine": 802,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`prompts/global.md`",
+          "sourceLine": 755,
+          "targetHeading": "`prompts/global.md`",
+          "targetLine": 804,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign-prompts-global-md"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "`prompts/autonomous_planner.md`",
+          "sourceLine": 767,
+          "targetHeading": "`prompts/autonomous_planner.md`",
+          "targetLine": 816,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign-prompts-autonomous-planner-md"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`prompts/research.md`",
+          "sourceLine": 779,
+          "targetHeading": "`prompts/research.md`",
+          "targetLine": 828,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign-prompts-research-md"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`prompts/builder.md`",
+          "sourceLine": 789,
+          "targetHeading": "`prompts/builder.md`",
+          "targetLine": 838,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign-prompts-builder-md"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`prompts/adversary.md`",
+          "sourceLine": 800,
+          "targetHeading": "`prompts/adversary.md`",
+          "targetLine": 849,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign-prompts-adversary-md"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "New prompts",
+          "sourceLine": 804,
+          "targetHeading": "New prompts",
+          "targetLine": 853,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-20-prompt-redesign-new-prompts"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "21. Research-policy redesign",
+          "sourceLine": 814,
+          "targetHeading": "21. Research-policy redesign",
+          "targetLine": 863,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-21-research-policy-redesign"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "R0 — Stable repository fact",
+          "sourceLine": 818,
+          "targetHeading": "R0 — Stable repository fact",
+          "targetLine": 867,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-21-research-policy-redesign-r0-stable-repository-fact"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "R1 — Current official product fact",
+          "sourceLine": 822,
+          "targetHeading": "R1 — Current official product fact",
+          "targetLine": 871,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-21-research-policy-redesign-r1-current-official-product-fact"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "R2 — Technical design claim",
+          "sourceLine": 826,
+          "targetHeading": "R2 — Technical design claim",
+          "targetLine": 875,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-21-research-policy-redesign-r2-technical-design-claim"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "R3 — Commercial/market claim",
+          "sourceLine": 830,
+          "targetHeading": "R3 — Commercial/market claim",
+          "targetLine": 879,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-21-research-policy-redesign-r3-commercial-market-claim"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "22. Value-gate redesign",
+          "sourceLine": 836,
+          "targetHeading": "22. Value-gate redesign",
+          "targetLine": 885,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-22-value-gate-redesign"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Apply value gates to",
+          "sourceLine": 840,
+          "targetHeading": "Apply value gates to",
+          "targetLine": 889,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-22-value-gate-redesign-apply-value-gates-to"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Do not apply commercial value gates to",
+          "sourceLine": 849,
+          "targetHeading": "Do not apply commercial value gates to",
+          "targetLine": 898,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-22-value-gate-redesign-do-not-apply-commercial-value-gates-to"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Parent-milestone value",
+          "sourceLine": 860,
+          "targetHeading": "Parent-milestone value",
+          "targetLine": 909,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-22-value-gate-redesign-parent-milestone-value"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "23. Quality-policy redesign",
+          "sourceLine": 871,
+          "targetHeading": "23. Quality-policy redesign",
+          "targetLine": 920,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-23-quality-policy-redesign"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "24. Self-repair redesign",
+          "sourceLine": 894,
+          "targetHeading": "24. Self-repair redesign",
+          "targetLine": 943,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-24-self-repair-redesign"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "25. Startup and restart redesign",
+          "sourceLine": 935,
+          "targetHeading": "25. Startup and restart redesign",
+          "targetLine": 984,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-25-startup-and-restart-redesign"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Current behavior to remove",
+          "sourceLine": 937,
+          "targetHeading": "Current behavior to remove",
+          "targetLine": 986,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-25-startup-and-restart-redesign-current-behavior-to-remove"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Replacement",
+          "sourceLine": 941,
+          "targetHeading": "Replacement",
+          "targetLine": 990,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-25-startup-and-restart-redesign-replacement"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "26. Git and GitHub release redesign",
+          "sourceLine": 965,
+          "targetHeading": "26. Git and GitHub release redesign",
+          "targetLine": 1014,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-26-git-and-github-release-redesign"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Current risk",
+          "sourceLine": 967,
+          "targetHeading": "Current risk",
+          "targetLine": 1016,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-26-git-and-github-release-redesign-current-risk"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Replacement",
+          "sourceLine": 971,
+          "targetHeading": "Replacement",
+          "targetLine": 1020,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-26-git-and-github-release-redesign-replacement"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "27. CI redesign",
+          "sourceLine": 1007,
+          "targetHeading": "27. CI redesign",
+          "targetLine": 1056,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-27-ci-redesign"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "28. CLI and operator control",
+          "sourceLine": 1034,
+          "targetHeading": "28. CLI and operator control",
+          "targetLine": 1083,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-28-cli-and-operator-control"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "29. Configuration V3",
+          "sourceLine": 1060,
+          "targetHeading": "29. Configuration V3",
+          "targetLine": 1109,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-29-configuration-v3"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "`config/factory.yaml`",
+          "sourceLine": 1062,
+          "targetHeading": "`config/factory.yaml`",
+          "targetLine": 1111,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-29-configuration-v3-config-factory-yaml"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "`config/autonomy.yaml`",
+          "sourceLine": 1077,
+          "targetHeading": "`config/autonomy.yaml`",
+          "targetLine": 1126,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-29-configuration-v3-config-autonomy-yaml"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "New configuration",
+          "sourceLine": 1100,
+          "targetHeading": "New configuration",
+          "targetLine": 1149,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-29-configuration-v3-new-configuration"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "30. Data migrations",
+          "sourceLine": 1111,
+          "targetHeading": "30. Data migrations",
+          "targetLine": 1160,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-30-data-migrations"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "V1/V2 feature ledger to V3",
+          "sourceLine": 1115,
+          "targetHeading": "V1/V2 feature ledger to V3",
+          "targetLine": 1164,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-30-data-migrations-v1-v2-feature-ledger-to-v3"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Queue",
+          "sourceLine": 1125,
+          "targetHeading": "Queue",
+          "targetLine": 1174,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-30-data-migrations-queue"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Pipeline checkpoints",
+          "sourceLine": 1133,
+          "targetHeading": "Pipeline checkpoints",
+          "targetLine": 1182,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-30-data-migrations-pipeline-checkpoints"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "31. Required regression tests",
+          "sourceLine": 1139,
+          "targetHeading": "31. Required regression tests",
+          "targetLine": 1188,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Scheduler",
+          "sourceLine": 1141,
+          "targetHeading": "Scheduler",
+          "targetLine": 1190,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-scheduler"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Retry",
+          "sourceLine": 1150,
+          "targetHeading": "Retry",
+          "targetLine": 1199,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-retry"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "External truth",
+          "sourceLine": 1158,
+          "targetHeading": "External truth",
+          "targetLine": 1207,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-external-truth"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Human approval",
+          "sourceLine": 1165,
+          "targetHeading": "Independent machine-policy authorization",
+          "targetLine": 1214,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-independent-machine-policy-authorization"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Release",
+          "sourceLine": 1172,
+          "targetHeading": "Release",
+          "targetLine": 1221,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-release"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Context",
+          "sourceLine": 1179,
+          "targetHeading": "Context",
+          "targetLine": 1228,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-context"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Completion",
+          "sourceLine": 1185,
+          "targetHeading": "Completion",
+          "targetLine": 1234,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-31-required-regression-tests-completion"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "32. Migration execution order",
+          "sourceLine": 1191,
+          "targetHeading": "32. Migration execution order",
+          "targetLine": 1240,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Step 0 — Pause",
+          "sourceLine": 1193,
+          "targetHeading": "Step 0 — Pause",
+          "targetLine": 1242,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-0-pause"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Step 1 — Install V3 authority",
+          "sourceLine": 1200,
+          "targetHeading": "Step 1 — Install V3.1-ZH authority",
+          "targetLine": 1249,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-1-install-v3-1-zh-authority"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Step 2 — Add V3 schemas/models",
+          "sourceLine": 1207,
+          "targetHeading": "Step 2 — Add V3 schemas/models",
+          "targetLine": 1256,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-2-add-v3-schemas-models"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Step 3 — Implement scheduler and finite limits",
+          "sourceLine": 1217,
+          "targetHeading": "Step 3 — Implement scheduler and finite limits",
+          "targetLine": 1266,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-3-implement-scheduler-and-finite-limits"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Step 4 — Release and CI",
+          "sourceLine": 1226,
+          "targetHeading": "Step 4 — Release and CI",
+          "targetLine": 1275,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-4-release-and-ci"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Step 5 — Product skeleton",
+          "sourceLine": 1232,
+          "targetHeading": "Step 5 — Product skeleton",
+          "targetLine": 1281,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-5-product-skeleton"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Step 6 — Migrate roadmap",
+          "sourceLine": 1240,
+          "targetHeading": "Step 6 — Migrate roadmap",
+          "targetLine": 1289,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-6-migrate-roadmap"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Step 7 — Controlled validation",
+          "sourceLine": 1247,
+          "targetHeading": "Step 7 — Controlled validation",
+          "targetLine": 1296,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-7-controlled-validation"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Step 8 — Human review and re-enable",
+          "sourceLine": 1256,
+          "targetHeading": "Step 8 — Machine authorization and activation",
+          "targetLine": 1305,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-32-migration-execution-order-step-8-machine-authorization-and-activation"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "33. Definition of a healthy factory",
+          "sourceLine": 1264,
+          "targetHeading": "33. Definition of a healthy factory",
+          "targetLine": 1313,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-33-definition-of-a-healthy-factory"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "34. Factory success metric",
+          "sourceLine": 1290,
+          "targetHeading": "34. Factory success metric",
+          "targetLine": 1339,
+          "targetSectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-34-factory-success-metric"
+        }
+      ],
+      "sourceHeadingCount": 106,
+      "sourcePath": "docs/source-of-truth/v3-2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md",
+      "sourceSha256": "69500bdc0b9a42cd8bba6190912f5be3e2615189f0c8a9bd2f7c0b700f42cdc6",
+      "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/FACTORY_LOOP_REDESIGN_SPEC_V3_1_ZH.md",
+      "targetSha256": "7654d080165084aa7111712d8c655264458235202af2142ca0e7d495f3688bae"
+    },
+    {
+      "logicalId": "TC.V3_1_ZH.MIGRATION_PLAN",
+      "mappedHeadingCount": 28,
+      "mappings": [
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Source-of-Truth and Repository Migration Plan",
+          "sourceLine": 1,
+          "targetHeading": "Source-of-Truth Migration Plan V3.1-ZH",
+          "targetLine": 1,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "1. Purpose",
+          "sourceLine": 3,
+          "targetHeading": "1. Purpose",
+          "targetLine": 52,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-1-purpose"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "2. Baseline",
+          "sourceLine": 9,
+          "targetHeading": "2. Baseline",
+          "targetLine": 58,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-2-baseline"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "3. Migration safety rules",
+          "sourceLine": 28,
+          "targetHeading": "3. Migration safety rules",
+          "targetLine": 77,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-3-migration-safety-rules"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "4. New document bundle",
+          "sourceLine": 42,
+          "targetHeading": "4. New document bundle",
+          "targetLine": 91,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-4-new-document-bundle"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "5. New authority model",
+          "sourceLine": 70,
+          "targetHeading": "5. New authority model",
+          "targetLine": 119,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-5-new-authority-model"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "5.1 Normative product authority",
+          "sourceLine": 74,
+          "targetHeading": "5.1 Normative product authority",
+          "targetLine": 123,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-5-new-authority-model-5-1-normative-product-authority"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "5.2 Current factual authority",
+          "sourceLine": 89,
+          "targetHeading": "5.2 Current factual authority",
+          "targetLine": 138,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-5-new-authority-model-5-2-current-factual-authority"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "5.3 Advisory documents",
+          "sourceLine": 100,
+          "targetHeading": "5.3 Advisory documents",
+          "targetLine": 149,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-5-new-authority-model-5-3-advisory-documents"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "6. `SOURCE_PRECEDENCE.md` replacement",
+          "sourceLine": 104,
+          "targetHeading": "6. `SOURCE_PRECEDENCE.md` replacement",
+          "targetLine": 153,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-6-source-precedence-md-replacement"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "7. `docs/CONTEXT_INDEX.yaml` replacement",
+          "sourceLine": 118,
+          "targetHeading": "7. `docs/CONTEXT_INDEX.yaml` replacement",
+          "targetLine": 167,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-7-docs-context-index-yaml-replacement"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "8. Duplicate and manifest cleanup",
+          "sourceLine": 145,
+          "targetHeading": "8. Duplicate and manifest cleanup",
+          "targetLine": 194,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-8-duplicate-and-manifest-cleanup"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "9. Canonical hashing",
+          "sourceLine": 157,
+          "targetHeading": "9. Canonical hashing",
+          "targetLine": 206,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-9-canonical-hashing"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "10. Integrity gate",
+          "sourceLine": 188,
+          "targetHeading": "10. Integrity gate",
+          "targetLine": 246,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-10-integrity-gate"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "11. Product/factory package separation",
+          "sourceLine": 210,
+          "targetHeading": "11. Product/factory package separation",
+          "targetLine": 268,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-11-product-factory-package-separation"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "12. Legacy roadmap migration",
+          "sourceLine": 224,
+          "targetHeading": "12. Legacy roadmap migration",
+          "targetLine": 282,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-12-legacy-roadmap-migration"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "13. Queue and checkpoint migration",
+          "sourceLine": 253,
+          "targetHeading": "13. Queue and checkpoint migration",
+          "targetLine": 311,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-13-queue-and-checkpoint-migration"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "14. Configuration migration",
+          "sourceLine": 267,
+          "targetHeading": "14. Configuration migration",
+          "targetLine": 325,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-14-configuration-migration"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "15. Runtime state migration",
+          "sourceLine": 280,
+          "targetHeading": "15. Runtime state migration",
+          "targetLine": 338,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-15-runtime-state-migration"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "16. GitHub migration",
+          "sourceLine": 295,
+          "targetHeading": "16. GitHub migration",
+          "targetLine": 353,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-16-github-migration"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "17. CI migration",
+          "sourceLine": 306,
+          "targetHeading": "17. CI migration",
+          "targetLine": 364,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-17-ci-migration"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "18. Prompt migration",
+          "sourceLine": 321,
+          "targetHeading": "18. Prompt migration",
+          "targetLine": 379,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-18-prompt-migration"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "19. Verification plan",
+          "sourceLine": 344,
+          "targetHeading": "19. Verification plan",
+          "targetLine": 402,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-19-verification-plan"
+        },
+        {
+          "disposition": "PRESERVED",
+          "sourceHeading": "Static",
+          "sourceLine": 346,
+          "targetHeading": "Static",
+          "targetLine": 404,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-19-verification-plan-static"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Dynamic",
+          "sourceLine": 356,
+          "targetHeading": "Dynamic",
+          "targetLine": 414,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-19-verification-plan-dynamic"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "Adversarial",
+          "sourceLine": 370,
+          "targetHeading": "Adversarial",
+          "targetLine": 428,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-19-verification-plan-adversarial"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "20. Rollback",
+          "sourceLine": 381,
+          "targetHeading": "20. Rollback",
+          "targetLine": 439,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-20-rollback"
+        },
+        {
+          "disposition": "SUPERSEDED_POLICY",
+          "sourceHeading": "21. Final migration acceptance",
+          "sourceLine": 402,
+          "targetHeading": "21. Final migration acceptance",
+          "targetLine": 460,
+          "targetSectionId": "source-of-truth-migration-plan-v3-1-zh-21-final-migration-acceptance"
+        }
+      ],
+      "sourceHeadingCount": 28,
+      "sourcePath": "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/SOURCE_OF_TRUTH_MIGRATION_PLAN.md",
+      "sourceSha256": "cd1366cb9f9c10153d404388bb03a019603a91c5d800f051aacbc0bedc8a5157",
+      "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/SOURCE_OF_TRUTH_MIGRATION_PLAN_V3_1_ZH.md",
+      "targetSha256": "f07bc12885e1fdcca6251c17a4badc2439a921cbcdc23b39784ce17d5eb5266a"
+    }
+  ],
+  "generatedAt": "2026-08-12T00:00:00Z",
+  "generationId": "traincapsule-v3.1-zh-2026-08-12",
+  "rule": "Every immutable V3 heading maps in source order to preserved or explicitly superseded V3.1-ZH content.",
+  "schemaVersion": 1,
+  "totals": {
+    "mappedHeadingCount": 504,
+    "sourceHeadingCount": 504
+  }
+}

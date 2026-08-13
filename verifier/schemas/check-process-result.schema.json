@@ -1,0 +1,64 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/verifier/v3.1/check-process-result.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actionDigest": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Digest"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "eventId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "externalCheckId": {
+      "anyOf": [
+        {
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Externalcheckid"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "state": {
+      "enum": [
+        "PUBLISHED",
+        "ALREADY_PUBLISHED",
+        "WAITING_EXTERNAL_CHANNEL"
+      ],
+      "title": "State",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "state",
+    "eventId"
+  ],
+  "title": "CheckProcessResult",
+  "type": "object"
+}

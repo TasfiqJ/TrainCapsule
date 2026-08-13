@@ -1,0 +1,33 @@
+version: 1
+accounts:
+  - accountId: ACCOUNT-001
+    organization: REDACTED
+    segment: mid_market_ai_model_company
+    relationshipPath: founder_network
+    relevantWorkload: recurring multi_node_pytorch_training
+    knownIncident:
+      status: unverified
+      summary: null
+    plannedChange:
+      type: null
+      decisionDeadline: null
+    decisionOwner: null
+    technicalChampion: null
+    budgetOwner: null
+    nativeStack: []
+    privacyConstraint: unknown
+    qualificationScore:
+      incidentCost: 0
+      upcomingChange: 0
+      evidenceAccess: 0
+      experimentAuthority: 0
+      nativeGap: 0
+      privacyNeed: 0
+      repeatTrigger: 0
+      budgetOwner: 0
+      secondUsePath: 0
+      deliveryFit: 0
+      total: 0
+    nextEvidenceAction: identify a specific incident and upcoming decision
+    status: RESEARCH_ONLY
+    evidenceRefs: []

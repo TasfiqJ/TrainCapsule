@@ -1,0 +1,160 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/native-substitute-benchmark-v1.json",
+  "title": "NativeSubstituteBenchmark",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "benchmarkId",
+    "caseId",
+    "decision",
+    "nativeWorkflow",
+    "traincapsuleWorkflow",
+    "incrementalOutcome",
+    "valueState",
+    "evidenceRefs",
+    "limitations",
+    "reviewedAt"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": 1
+    },
+    "benchmarkId": {
+      "type": "string",
+      "pattern": "^NSB-[A-Z0-9_-]+$"
+    },
+    "caseId": {
+      "type": "string"
+    },
+    "decision": {
+      "type": "string",
+      "minLength": 1
+    },
+    "nativeWorkflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "components",
+        "versions",
+        "outcome",
+        "operatorEffort",
+        "executionCost",
+        "unresolvedDecision"
+      ],
+      "properties": {
+        "components": {
+          "type": "array",
+          "minItems": 1,
+          "items": {
+            "type": "string"
+          }
+        },
+        "versions": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string"
+          }
+        },
+        "outcome": {
+          "type": "string"
+        },
+        "operatorEffort": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "executionCost": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "unresolvedDecision": {
+          "type": [
+            "string",
+            "null"
+          ]
+        }
+      }
+    },
+    "traincapsuleWorkflow": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "version",
+        "outcome",
+        "operatorEffort",
+        "executionCost",
+        "retainedCustomerEffort"
+      ],
+      "properties": {
+        "version": {
+          "type": "string"
+        },
+        "outcome": {
+          "type": "string"
+        },
+        "operatorEffort": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "executionCost": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        },
+        "retainedCustomerEffort": {
+          "type": [
+            "number",
+            "null"
+          ],
+          "minimum": 0
+        }
+      }
+    },
+    "incrementalOutcome": {
+      "type": "string"
+    },
+    "valueState": {
+      "enum": [
+        "NATIVE_WORKFLOW_SUFFICIENT",
+        "NO_INCREMENTAL_DECISION_VALUE",
+        "TECHNICALLY_VALID_BUT_NOT_ECONOMIC",
+        "INCREMENTAL_DECISION_VALUE_DEMONSTRATED",
+        "EXTERNAL_EVIDENCE_REQUIRED"
+      ]
+    },
+    "evidenceRefs": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "items": {
+        "type": "string"
+      }
+    },
+    "reviewedAt": {
+      "type": "string",
+      "format": "date-time"
+    },
+    "externalReceiptRef": {
+      "type": [
+        "string",
+        "null"
+      ]
+    }
+  }
+}

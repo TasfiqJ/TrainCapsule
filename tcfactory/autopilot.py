@@ -1296,11 +1296,8 @@ async def _run_autopilot_inner(
                         )
                     )
                 )
-                if (
-                    not autonomy.auto_expand_roadmap
-                    or _finite_ceiling_exceeded(
-                        expansion_count, autonomy.max_completion_expansions
-                    )
+                if not autonomy.auto_expand_roadmap or _finite_ceiling_exceeded(
+                    expansion_count, autonomy.max_completion_expansions
                 ):
                     state.status = "blocked"
                     state.blocked_tasks = ["PRODUCT_COMPLETION"]
@@ -1352,9 +1349,7 @@ async def _run_autopilot_inner(
             if github_result.get("error"):
                 state.status = "waiting_github"
                 state.current_action = "finish exact-SHA main CI before product completion"
-                state.next_wake_at = _now() + timedelta(
-                    seconds=autonomy.hard_stuck_retry_seconds
-                )
+                state.next_wake_at = _now() + timedelta(seconds=autonomy.hard_stuck_retry_seconds)
                 state.last_event = (
                     "Product completion proof passed, but GitHub synchronization or required "
                     f"CI is still pending: {github_result.get('error')}"

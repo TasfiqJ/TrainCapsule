@@ -43,16 +43,18 @@ def test_checked_in_v3_configuration_is_finite_and_fail_closed() -> None:
     commercial = CommercialMaturityConfig.model_validate(
         load_yaml(ROOT / "config/commercial_maturity.yaml")
     )
-    milestones = MilestonePolicyConfig.model_validate(
-        load_yaml(ROOT / "config/milestones.yaml")
-    )
+    milestones = MilestonePolicyConfig.model_validate(load_yaml(ROOT / "config/milestones.yaml"))
 
     assert isinstance(factory, FactoryV3Config)
     assert isinstance(autonomy, AutonomyV3Config)
     assert isinstance(executors, ExecutorConfig)
     assert factory.allow_paid_usage is False
-    assert factory.repository.direct_main_push is True
-    assert factory.repository.release_mode == "owner_directed_main_only"
+    assert factory.schema_version == "3.1"
+    assert factory.repository.direct_main_push is False
+    assert (
+        factory.repository.release_mode == "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
+    )
+    assert factory.release.publisher_capability == "AUTOMATED_PR_V31_READY"
     assert factory.execution.work_until_done is False
     assert all(
         value > 0
@@ -81,6 +83,13 @@ def test_checked_in_v3_configuration_is_finite_and_fail_closed() -> None:
     assert milestones.source_migration_machine_policy_receipt_required is True
     assert scheduler.active_milestone == milestones.active_milestone
     assert executors.allow_paid_usage is False
+
+
+def test_v3_factory_payload_is_not_silently_accepted_as_v31(tmp_path: Path) -> None:
+    legacy = tmp_path / "factory.yaml"
+    legacy.write_text("version: 3\nallowPaidUsage: false\n", encoding="utf-8")
+    with pytest.raises(ValueError, match="migration input only"):
+        load_factory_config(legacy)
 
 
 def test_legacy_loader_projects_v3_configuration_safely(
@@ -118,7 +127,9 @@ def test_authoritative_roadmap_generation_is_exact_and_typed() -> None:
     generated = build_collection()
     assert collection == generated
     assert len(collection.work_items) == 109
-    assert collection.active_milestone == "M1_NATIVE_PREFLIGHT"
+    assert collection.active_milestone == "M0_FACTORY_MIGRATED"
+    assert collection.item("V3-MIG-016").status is WorkStatus.BLOCKED_POLICY
+    assert collection.item("V3-MIG-019").status is WorkStatus.PROPOSED
     assert all(item.source_dependency_expression is not None for item in collection.work_items)
     assert sum(item.status is WorkStatus.WAITING_EXTERNAL for item in collection.work_items) == 12
     for identifier in ("V3-MKT-005", "V3-MKT-006", "V3-MKT-007"):
@@ -129,17 +140,30 @@ def test_authoritative_roadmap_generation_is_exact_and_typed() -> None:
         assert item.automatable is False
     assert "WAITING_HUMAN" not in WorkStatus.__members__
     assert "WAITING_HUMAN" not in MilestoneStatus.__members__
-    assert sum(item.kind is WorkKind.MACHINE_POLICY_REVIEW for item in collection.work_items) == 12
+    assert sum(item.kind is WorkKind.MACHINE_POLICY_REVIEW for item in collection.work_items) == 11
+    for item in collection.work_items:
+        if item.kind is WorkKind.MACHINE_POLICY_REVIEW:
+            assert item.owner_type.value == "MACHINE_POLICY_AUTHORITY"
+            assert item.automatable is False
+            assert item.machine_policy_receipt_required is True
+            assert item.retry_policy.max_plan_attempts == 0
+            assert item.retry_policy.max_candidate_repair_cycles == 0
+    decision = collection.item("V3-DEC-001")
+    assert decision.owner_type.value == "MACHINE_POLICY_AUTHORITY"
+    assert decision.automatable is False
+    assert collection.item("V3-DEC-005").depends_on == [
+        "V3-REPEAT-004",
+        "V3-REPEAT-005",
+        "V3-REPEAT-006",
+    ]
     assert "human" not in collection.model_dump_json(by_alias=True).lower()
 
 
 def test_m0_through_m6_are_bounded_and_external_milestones_remain_waiting() -> None:
-    roadmap = MilestoneRoadmap.model_validate(
-        load_yaml(ROOT / "factory/roadmap/milestones.yaml")
-    )
+    roadmap = MilestoneRoadmap.model_validate(load_yaml(ROOT / "factory/roadmap/milestones.yaml"))
     assert len(roadmap.milestones) == 7
-    assert roadmap.milestones[0].status is MilestoneStatus.COMPLETED
-    assert roadmap.milestones[1].status is MilestoneStatus.ACTIVE
+    assert roadmap.milestones[0].status is MilestoneStatus.ACTIVE
+    assert roadmap.milestones[1].status is MilestoneStatus.PROPOSED
     external = roadmap.milestones[3:]
     assert all(item.status is MilestoneStatus.WAITING_EXTERNAL for item in external)
     assert all(item.required_evidence for item in roadmap.milestones)
@@ -148,7 +172,7 @@ def test_m0_through_m6_are_bounded_and_external_milestones_remain_waiting() -> N
 
 
 def test_every_generated_schema_rejects_unknown_top_level_fields() -> None:
-    assert len(SCHEMAS) == 45
+    assert len(SCHEMAS) == len(set(SCHEMAS)) == 63
     assert {
         "private-gate-receipt.schema.json",
         "milestone-runtime-state.schema.json",
@@ -172,7 +196,7 @@ def test_v3_scheduler_cli_is_dry_run_only_and_does_not_mutate_roadmap() -> None:
         ["v3-schedule", "--repo", str(ROOT), "--dry-run", "--explain"],
     )
     assert result.exit_code == 0, result.output
-    assert '"activeMilestone": "M1_NATIVE_PREFLIGHT"' in result.output
+    assert '"activeMilestone": "M0_FACTORY_MIGRATED"' in result.output
     assert '"selectedWorkItemIds"' in result.output
     assert path.read_bytes() == before
 
@@ -189,4 +213,5 @@ def test_v3_repository_refuses_legacy_mutating_cli_surfaces() -> None:
     for command in commands:
         result = runner.invoke(app, [*command, "--repo", str(ROOT)])
         assert result.exit_code != 0
-        assert "disabled V2 compatibility surface" in result.output
+        observed = result.output or str(result.exception)
+        assert "disabled" in observed.lower()

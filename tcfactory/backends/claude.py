@@ -2,7 +2,8 @@
 
 from __future__ import annotations
 
-from datetime import UTC, datetime
+import asyncio
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
@@ -13,11 +14,14 @@ from tcfactory.backends.base import (
     AgentSession,
     AgentTaskRequest,
     BackendRouteState,
+    BackendTerminalDisposition,
+    ExecutionEvidenceMode,
     Handoff,
     SessionState,
     TranscriptRetention,
     UsageState,
 )
+from tcfactory.claude_runner import expire_redacted_event_summaries
 from tcfactory.config import load_factory_config, load_roles
 from tcfactory.models import (
     FactoryConfig,
@@ -27,7 +31,9 @@ from tcfactory.models import (
     Stage,
     TaskPacket,
 )
+from tcfactory.quota import AuthenticationPause, QuotaLimitPause
 from tcfactory.util import redact_sensitive, sha256_file, write_json
+from tcfactory.v3.base import V3Model
 from tcfactory.v3.planning import V3TaskPacket
 
 
@@ -52,6 +58,42 @@ class ClaudeCredentialProvider:
         return sanitized_agent_environment(extra)
 
 
+class BackendTerminalRecord(V3Model):
+    request_id: str
+    session_ref: str
+    state: SessionState
+    disposition: BackendTerminalDisposition
+    evidence_mode: ExecutionEvidenceMode
+    redacted_summary: str
+    retry_at: datetime | None = None
+    completed_at: datetime
+
+
+def load_backend_terminal_record(
+    path: Path,
+    *,
+    expected_digest: str,
+    expected_request_id: str | None = None,
+    expected_session_ref: str | None = None,
+) -> BackendTerminalRecord:
+    """Load a terminal record only when its bytes and identity remain bound."""
+
+    if path.is_symlink() or not path.is_file():
+        raise RuntimeError("backend terminal record is missing or untrusted")
+    actual_digest = f"sha256:{sha256_file(path)}"
+    if actual_digest != expected_digest:
+        raise RuntimeError("backend terminal record digest mismatch")
+    try:
+        record = BackendTerminalRecord.model_validate_json(path.read_text(encoding="utf-8"))
+    except (OSError, ValueError) as exc:
+        raise RuntimeError("backend terminal record is invalid") from exc
+    if expected_request_id is not None and record.request_id != expected_request_id:
+        raise RuntimeError("backend terminal record request mismatch")
+    if expected_session_ref is not None and record.session_ref != expected_session_ref:
+        raise RuntimeError("backend terminal record session mismatch")
+    return record
+
+
 class ClaudeBackend:
     def __init__(self, credentials: ClaudeCredentialProvider | None = None) -> None:
         self.credentials = credentials or ClaudeCredentialProvider()
@@ -63,20 +105,24 @@ class ClaudeBackend:
         return AgentCapabilityReport(
             backend="claude",
             structured_output=True,
-            resume=True,
-            cancellation=True,
+            resume=False,
+            cancellation=False,
             sandbox=True,
             network_denial=True,
             transcript_retention=TranscriptRetention.REDACTED_SUMMARY,
-            allowed_tools=["Read", "Glob", "Grep", "Bash"],
+            allowed_tools=["Read", "Glob", "Grep", "Write", "Edit", "Bash"],
+            overall_wall_clock_timeout=True,
+            bash_argument_allowlist=True,
+            durable_terminal_records=True,
         )
 
     def start(self, request: AgentTaskRequest) -> AgentSession:
         if request.network_policy != "DENY" or request.network_allowed:
             raise ValueError("Claude V3 execution requires an explicit DENY network policy")
-        state = self.credentials.state()
-        if state is not BackendRouteState.AUTHENTICATED:
-            raise RuntimeError(state.value)
+        unsupported_tools = set(request.allowed_tools) - set(self.capabilities().allowed_tools)
+        if unsupported_tools:
+            names = ", ".join(sorted(unsupported_tools))
+            raise ValueError(f"Claude V3 execution rejects unsupported tools: {names}")
         self._counter += 1
         session = AgentSession(
             session_ref=f"ASESS-CLAUDE-{self._counter:04d}",
@@ -101,6 +147,8 @@ class ClaudeBackend:
             artifact_digests=handoff.artifact_digests,
             usage=self.usage_state(),
             redacted_summary="Claude execution requires the async run_stage adapter.",
+            evidence_mode=ExecutionEvidenceMode.LIVE_VALIDATION,
+            terminal_disposition=BackendTerminalDisposition.ROUTE_REFUSED,
             error_state=BackendRouteState.ROUTE_REFUSED,
         )
 
@@ -137,11 +185,17 @@ class ClaudeBackend:
 
     def usage_state(self) -> UsageState:
         route = self.credentials.state()
+        retry_at = (
+            (datetime.now(UTC) + timedelta(minutes=5)).isoformat()
+            if route is not BackendRouteState.AUTHENTICATED
+            else None
+        )
         return UsageState(
             route_state=route,
             subscription_capacity=(
                 "available" if route is BackendRouteState.AUTHENTICATED else "unavailable"
             ),
+            retry_at=retry_at,
             estimated_api_equivalent_usd=0.0,
             actual_charge_usd=0.0,
         )
@@ -153,6 +207,7 @@ class ClaudeBackend:
         repo_root = Path(request.controller_repo_root).resolve()
         worktree = Path(request.candidate_worktree).resolve()
         artifact_root = Path(request.artifact_root).resolve()
+        expire_redacted_event_summaries(repo_root / "factory/artifacts/v3")
         packet = V3TaskPacket.model_validate(request.task_packet)
         role = RoleName(request.role)
         stage = Stage(
@@ -210,37 +265,99 @@ class ClaudeBackend:
         roles = load_roles(repo_root / factory.roles_path)
         result_artifact = artifact_root / role.value
         result_artifact.mkdir(parents=True, exist_ok=True)
-        try:
-            result = await self.run_stage(
-                repo_root=repo_root,
-                worktree=worktree,
-                config=factory,
-                task=compatibility_packet,
-                stage=stage,
-                role_config=roles[role],
-                global_prompt_path=factory.global_prompt,
-                run_id=request.request_id.lower(),
-                attempt=1,
-                artifact_dir=result_artifact,
-                base_sha=packet.base_sha,
-                system_prompt_override=request.system_prompt,
-                task_prompt_override=request.prompt,
+        terminal_path = result_artifact / "backend-terminal.json"
+
+        def terminal_result(
+            *,
+            state: SessionState,
+            disposition: BackendTerminalDisposition,
+            summary: str,
+            verdict: str = "blocked",
+            structured_output: dict[str, object] | None = None,
+            artifact_digests: dict[str, str] | None = None,
+            usage: UsageState | None = None,
+            error_state: BackendRouteState | None = None,
+            retry_at: datetime | None = None,
+        ) -> AgentRunResult:
+            safe_summary = redact_sensitive(summary)
+            terminal = BackendTerminalRecord(
+                request_id=request.request_id,
+                session_ref=session.session_ref,
+                state=state,
+                disposition=disposition,
+                evidence_mode=ExecutionEvidenceMode.LIVE_VALIDATION,
+                redacted_summary=safe_summary,
+                retry_at=retry_at,
+                completed_at=datetime.now(UTC),
             )
+            write_json(terminal_path, terminal.model_dump(mode="json", by_alias=True))
+            completed_session = session.model_copy(update={"state": state})
+            self._sessions[session.session_ref] = completed_session
+            digest = f"sha256:{sha256_file(terminal_path)}"
+            return AgentRunResult(
+                session=completed_session,
+                state=state,
+                verdict=verdict,
+                structured_output=structured_output,
+                artifact_digests={
+                    **(artifact_digests or {}),
+                    f"{role.value}/backend-terminal.json": digest,
+                },
+                usage=usage or self.usage_state(),
+                redacted_summary=safe_summary,
+                evidence_mode=ExecutionEvidenceMode.LIVE_VALIDATION,
+                terminal_disposition=disposition,
+                terminal_record_digest=digest,
+                error_state=error_state,
+            )
+        route = self.credentials.state()
+        if route is not BackendRouteState.AUTHENTICATED:
+            retry_at = datetime.now(UTC) + timedelta(minutes=5)
+            return terminal_result(
+                state=SessionState.FAILED,
+                disposition=BackendTerminalDisposition.AUTH_EXPIRED,
+                summary="backend authentication route is unavailable",
+                error_state=BackendRouteState.AUTH_EXPIRED,
+                retry_at=retry_at,
+                usage=UsageState(
+                    route_state=BackendRouteState.AUTH_EXPIRED,
+                    subscription_capacity="unavailable",
+                    retry_at=retry_at.isoformat(),
+                ),
+            )
+        try:
+            async with asyncio.timeout(request.max_wall_time_seconds):
+                result = await self.run_stage(
+                    repo_root=repo_root,
+                    worktree=worktree,
+                    config=factory,
+                    task=compatibility_packet,
+                    stage=stage,
+                    role_config=roles[role],
+                    global_prompt_path=factory.global_prompt,
+                    run_id=request.request_id.lower(),
+                    attempt=1,
+                    artifact_dir=result_artifact,
+                    base_sha=packet.base_sha,
+                    system_prompt_override=request.system_prompt,
+                    task_prompt_override=request.prompt,
+                    bash_allowlist=request.bash_allowlist,
+                    strict_tool_allowlist=True,
+                )
             result_path = result_artifact / "backend-result.json"
             write_json(result_path, result.model_dump(mode="json"))
-            completed = session.model_copy(
-                update={
-                    "state": (
-                        SessionState.COMPLETED
-                        if result.verdict.value == "pass"
-                        else SessionState.FAILED
-                    )
-                }
+            completed_state = (
+                SessionState.COMPLETED
+                if result.verdict.value == "pass"
+                else SessionState.FAILED
             )
-            self._sessions[session.session_ref] = completed
-            return AgentRunResult(
-                session=completed,
-                state=completed.state,
+            return terminal_result(
+                state=completed_state,
+                disposition=(
+                    BackendTerminalDisposition.COMPLETED
+                    if completed_state is SessionState.COMPLETED
+                    else BackendTerminalDisposition.FAILED
+                ),
                 verdict=result.verdict.value,
                 structured_output=result.model_dump(mode="json"),
                 artifact_digests={
@@ -252,22 +369,63 @@ class ClaudeBackend:
                     estimated_api_equivalent_usd=result.total_cost_usd,
                     actual_charge_usd=0.0,
                 ),
-                redacted_summary=redact_sensitive(
-                    result.error or result.terminal_reason or result.verdict.value
+                summary=result.error or result.terminal_reason or result.verdict.value,
+            )
+        except QuotaLimitPause as exc:
+            retry_at = exc.record.resume_at
+            return terminal_result(
+                state=SessionState.FAILED,
+                disposition=BackendTerminalDisposition.QUOTA_WAIT,
+                summary="subscription capacity is temporarily unavailable",
+                error_state=BackendRouteState.QUOTA_WAIT,
+                retry_at=retry_at,
+                usage=UsageState(
+                    route_state=BackendRouteState.QUOTA_WAIT,
+                    subscription_capacity="unavailable",
+                    retry_at=retry_at.isoformat(),
+                ),
+            )
+        except AuthenticationPause:
+            retry_at = datetime.now(UTC) + timedelta(minutes=5)
+            return terminal_result(
+                state=SessionState.FAILED,
+                disposition=BackendTerminalDisposition.AUTH_EXPIRED,
+                summary="backend authentication expired during execution",
+                error_state=BackendRouteState.AUTH_EXPIRED,
+                retry_at=retry_at,
+                usage=UsageState(
+                    route_state=BackendRouteState.AUTH_EXPIRED,
+                    subscription_capacity="unavailable",
+                    retry_at=retry_at.isoformat(),
+                ),
+            )
+        except TimeoutError:
+            retry_at = datetime.now(UTC) + timedelta(minutes=2)
+            return terminal_result(
+                state=SessionState.FAILED,
+                disposition=BackendTerminalDisposition.TIMEOUT,
+                summary="backend overall wall-clock deadline exceeded",
+                error_state=BackendRouteState.TIMEOUT,
+                retry_at=retry_at,
+                usage=UsageState(
+                    route_state=BackendRouteState.TIMEOUT,
+                    subscription_capacity="unknown",
+                    retry_at=retry_at.isoformat(),
                 ),
             )
         except Exception:
-            failed = session.model_copy(update={"state": SessionState.FAILED})
-            self._sessions[session.session_ref] = failed
-            return AgentRunResult(
-                session=failed,
+            retry_at = datetime.now(UTC) + timedelta(minutes=2)
+            return terminal_result(
                 state=SessionState.FAILED,
-                verdict="blocked",
-                structured_output=None,
-                artifact_digests={},
-                usage=self.usage_state(),
-                redacted_summary="backend execution failed safely",
-                error_state=BackendRouteState.ROUTE_REFUSED,
+                disposition=BackendTerminalDisposition.INFRASTRUCTURE,
+                summary="backend execution failed safely",
+                error_state=BackendRouteState.INFRASTRUCTURE,
+                retry_at=retry_at,
+                usage=UsageState(
+                    route_state=BackendRouteState.INFRASTRUCTURE,
+                    subscription_capacity="unknown",
+                    retry_at=retry_at.isoformat(),
+                ),
             )
 
     @staticmethod

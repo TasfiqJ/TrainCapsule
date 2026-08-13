@@ -1,8 +1,8 @@
-# TrainCapsule V3 global execution contract
+# TrainCapsule V3.1-ZH global execution contract
 
 ## Mission and authority
 
-Deliver exactly one bounded, trustworthy work item on the shortest evidence-backed path to a repeatable incident-to-change qualification decision. Read only the digest-bound work-item packet and its context manifest. V3 authority outranks historical material. Acquisition, career, and advisory context must not influence routine product or factory work.
+Deliver exactly one bounded, trustworthy work item on the shortest evidence-backed path to a repeatable incident-to-change qualification decision. Read only the digest-bound work-item packet and its context manifest. The canonical V3.1-ZH active generation outranks historical material. Reject mixed generations, missing sources, or manifest mismatch before work. Acquisition, career, and advisory context must not influence routine product or factory work.
 
 Do not expand the packet, create speculative scaffolding, or mutate the roadmap. A planning gap may be returned as an advisory proposal for the authorized scheduler; it is never an automatic roadmap change.
 
@@ -24,7 +24,7 @@ Before adding proprietary behavior, identify what the complete approved native, 
 
 Keep technical result, epistemic claim, operational decision, and commercial maturity separate. Use these technical states exactly where applicable: PASS, FAIL, UNKNOWN, INVALID_EVIDENCE, INVALID_ORACLE, INFRASTRUCTURE_ERROR, POLICY_BLOCKED, and EXPIRED. UNKNOWN is valid and must never be hidden or upgraded.
 
-Do not fabricate or infer customer demand, payment, adoption, external integration, machine authority, hardware fault, root cause, or universal safety. Synthetic records must be labeled SYNTHETIC_TEST_ONLY. If external evidence is required, stop with WAITING_EXTERNAL. If deterministic machine policy is missing or denies an action, bind the attempted decision to the exact candidate SHA and artifact digests and stop with BLOCKED_POLICY. Never create an external receipt yourself.
+Do not fabricate or infer customer demand, payment, adoption, external integration, machine authority, hardware fault, root cause, or universal safety. Synthetic records must be labeled SYNTHETIC_TEST_ONLY. If external evidence is required, stop only the dependent scope with WAITING_EXTERNAL and allow unrelated lanes to continue. If deterministic off-repository machine policy is missing, stale, revoked, or denies an action, bind the attempted decision to the exact candidate SHA and artifact digests and stop with BLOCKED_POLICY. Never create an external, release, merge, or activation receipt yourself.
 
 ## Findings
 
@@ -56,6 +56,6 @@ Where relevant, test positive, negative, boundary, malformed-input, tamper, UNKN
 
 ## Release and handoff
 
-Do not force-push, rewrite unrelated history, or publish any Git ref from an agent session. Preserve the exact base and candidate SHAs. Only the controller may promote an exact gate-bound candidate to `main`, monitor hosted checks, and perform a normal revert/quarantine on failure.
+Do not force-push, rewrite unrelated history, or publish any Git ref from an agent session. Preserve the exact base and candidate SHAs. Only the controller may publish the candidate branch, open or update its automated pull request, verify exact-head-SHA server checks and an independent signed machine-policy receipt, and authorize auto-merge into protected `main`. Direct-main publication is forbidden. Post-merge invariant failure must open an automated revert pull request; it is never repaired by force or silent history rewrite.
 
 Return the packet's structured handoff with work item, status, SHAs, outcome, changed files, acceptance and oracle evidence, gate results, native comparison, truth states, limitations, bounded findings, external evidence required, machine-policy state, rollback, and one next recommended action already within the authorized roadmap.

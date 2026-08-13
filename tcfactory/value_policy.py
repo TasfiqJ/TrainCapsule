@@ -90,9 +90,7 @@ def contract_for_task(policy: ValuePolicy, task_id: str) -> ValueContract:
         merged["evidence_path"] = f"docs/evidence/{task_id}/capability-value.json"
     if entry.mode == ValueGateMode.MEASURED:
         if merged.get("primary_metric") == "all_predeclared_task_conditions_pass":
-            raise ValuePolicyError(
-                f"Measured task {task_id} uses a tautological completion metric"
-            )
+            raise ValuePolicyError(f"Measured task {task_id} uses a tautological completion metric")
         required_conditions = [
             str(value) for value in cast(list[object], merged.get("required_conditions", []))
         ]

@@ -37,10 +37,23 @@
       "title": "Evidencedigests",
       "type": "object"
     },
-    "ownerDirectivesDigest": {
+    "sourceAuthorityDigest": {
       "pattern": "^sha256:[0-9a-f]{64}$",
-      "title": "Ownerdirectivesdigest",
+      "title": "Sourceauthoritydigest",
       "type": "string"
+    },
+    "commercialAuthorizationDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Commercialauthorizationdigest"
     },
     "proposals": {
       "items": {
@@ -63,7 +76,7 @@
     "milestoneId",
     "nextMilestoneId",
     "evidenceDigests",
-    "ownerDirectivesDigest",
+    "sourceAuthorityDigest",
     "decision",
     "decidedAt"
   ],

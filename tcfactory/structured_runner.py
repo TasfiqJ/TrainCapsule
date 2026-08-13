@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import asyncio
 import json
+import shlex
 from pathlib import Path
 from typing import Any, TypeVar, cast
 
@@ -12,6 +13,7 @@ from .auth import sanitized_agent_environment
 from .backends.base import (
     AgentTaskRequest,
     BackendRouteState,
+    BashCommandRule,
     EngineeringAgentBackend,
     Handoff,
     SessionState,
@@ -51,8 +53,16 @@ def validate_bash_command(command: str, allowlist: list[str]) -> None:
     normalized = " ".join(command.split())
     if any(marker in normalized for marker in (";", "&&", "||", "`", "$(")):
         raise ValueError("compound or substituting Bash commands are forbidden")
-    if not any(normalized == item or normalized.startswith(item + " ") for item in allowlist):
+    rules = [_bash_rule(item) for item in allowlist]
+    if not any(rule.permits(normalized) for rule in rules):
         raise ValueError(f"Bash command is outside the explicit allowlist: {normalized}")
+
+
+def _bash_rule(command: str) -> BashCommandRule:
+    arguments = shlex.split(command, posix=True)
+    if not arguments:
+        raise ValueError("Bash allowlist command cannot be empty")
+    return BashCommandRule(executable=arguments[0], argumentPrefix=arguments[1:])
 
 
 async def run_structured_read_only_review[T: BaseModel](
@@ -117,8 +127,13 @@ async def run_structured_read_only_review[T: BaseModel](
             max_tokens=max(1000, max_turns * 1500),
             max_cost_usd_equivalent=max_budget_usd,
             max_wall_time_seconds=max_wall_time_seconds,
-            tools=["Read", "Grep", "Glob", "Bash"],
-            bash_allowlist=allowed_bash,
+            tools=[
+                "Read",
+                "Grep",
+                "Glob",
+                *(["Bash"] if allowed_bash else []),
+            ],
+            bash_allowlist=[_bash_rule(command) for command in allowed_bash],
             network_allowed=False,
         )
         session = backend.start(request)
@@ -200,8 +215,8 @@ async def run_structured_read_only_review[T: BaseModel](
             "exclude_dynamic_sections": True,
         },
         setting_sources=["project"],
-        tools=["Read", "Grep", "Glob", *( ["Bash"] if allowed_bash else [])],
-        allowed_tools=["Read", "Grep", "Glob", *( ["Bash"] if allowed_bash else [])],
+        tools=["Read", "Grep", "Glob", *(["Bash"] if allowed_bash else [])],
+        allowed_tools=["Read", "Grep", "Glob", *(["Bash"] if allowed_bash else [])],
         disallowed_tools=["Write", "Edit", "WebFetch", "WebSearch", "Agent"],
         permission_mode="dontAsk",
         model=model,
@@ -301,9 +316,10 @@ async def run_structured_read_only_review[T: BaseModel](
 
     result = result_type.model_validate(result_message.structured_output)
     write_json(artifact_dir / "structured-result.json", result.model_dump(mode="json"))
-    backend_session_ref = "ASESS-CLAUDE-" + sha256_digest(
-        str(result_message.session_id).encode()
-    ).split(":", 1)[1][:16].upper()
+    backend_session_ref = (
+        "ASESS-CLAUDE-"
+        + sha256_digest(str(result_message.session_id).encode()).split(":", 1)[1][:16].upper()
+    )
     usage_payload = {
         "backend_session_ref": backend_session_ref,
         "estimated_api_equivalent_usd": float(result_message.total_cost_usd or 0.0),

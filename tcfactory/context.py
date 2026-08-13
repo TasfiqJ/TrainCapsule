@@ -10,12 +10,22 @@ from pydantic import Field
 from .models import FactoryConfig, Stage, TaskPacket
 from .util import read_json, run_command, sha256_file
 from .v3.base import DIGEST_PATTERN, V3Model, sha256_digest
+from .v3.source_authority import (
+    emit_stale_source_proposal,
+    validate_active_source_generation,
+)
 from .v3.work_items import WorkItem
 from .yamlutil import load_yaml
 
 
 class ContextPolicyError(RuntimeError):
     pass
+
+
+class StaleCurrentFactError(ContextPolicyError):
+    def __init__(self, message: str, *, proposal_path: Path | None = None) -> None:
+        super().__init__(message)
+        self.proposal_path = proposal_path
 
 
 class V3ContextEntry(V3Model):
@@ -40,29 +50,22 @@ class V3ContextManifest(V3Model):
     max_context_chars: int = Field(ge=1)
 
 
-def _owner_authority_entries(repo_root: Path) -> list[V3ContextEntry]:
-    """Bind the owner override and precedence rules into every runtime context."""
+def _active_authority_entries(repo_root: Path) -> list[V3ContextEntry]:
+    """Bind the canonical generation pointer and manifest into every context."""
 
+    active_source = validate_active_source_generation(repo_root)
     specifications = (
         (
-            "config/owner_directives.yaml",
-            "owner_directive",
-            [
-                "directives.unattendedOperation",
-                "directives.humanIntervention",
-                "directives.publicationBranch",
-                "directives.nonMainPushes",
-                "directives.pullRequestDependency",
-                "deviationsFromBundle",
-            ],
-            "Highest authority: unattended machine-policy operation and exact-SHA "
-            "main-only publication.",
+            active_source.config_path,
+            "active_generation_pointer",
+            ["§generationId", "§manifestPath", "§mixedNormativeGenerationPolicy"],
+            "Canonical pointer selecting the only active normative generation.",
         ),
         (
-            "SOURCE_PRECEDENCE.md",
-            "authority_precedence",
-            ["§Normative authority", "§Conflict handling", "§Product and commercial truth"],
-            "Authority ordering and the narrow scope of owner-directed overrides.",
+            active_source.manifest_path,
+            "active_generation_manifest",
+            ["§documents", "§supersession", "§integrity"],
+            "Digest-bound inventory of the active normative generation.",
         ),
     )
     entries: list[V3ContextEntry] = []
@@ -70,12 +73,13 @@ def _owner_authority_entries(repo_root: Path) -> list[V3ContextEntry]:
         path = repo_root / relative
         if not path.is_file():
             raise ContextPolicyError(f"required owner authority is missing: {relative}")
-        source_text = path.read_text(encoding="utf-8")
         entries.append(
             V3ContextEntry(
                 path=relative,
                 bytes=path.stat().st_size,
-                characters=len(source_text),
+                # Control-plane authority is digest-bound and sent as entry metadata;
+                # its full body is not duplicated into every role's content budget.
+                characters=0,
                 sha256=sha256_file(path),
                 authority_class=authority_class,
                 authority_sections=sections,
@@ -320,15 +324,17 @@ def build_v3_context_manifest(
     freshness_receipts: dict[str, datetime] | None = None,
     current_fact_max_age_days: int = 30,
     now: datetime | None = None,
+    stale_proposal_root: Path | None = None,
 ) -> V3ContextManifest:
     """Build a scoped V3 manifest with authority, relevance, digest, and freshness."""
 
+    active_source = validate_active_source_generation(repo_root)
     if max_context_chars <= 0:
         raise ContextPolicyError("context-size budget must be positive")
     index_path = repo_root / "docs/CONTEXT_INDEX.yaml"
     index = _load_yaml(index_path)
-    if index.get("version") != 3 or not isinstance(index.get("groups"), dict):
-        raise ContextPolicyError("V3 context index is missing or mixed with legacy authority")
+    if index.get("version") != 4 or not isinstance(index.get("groups"), dict):
+        raise ContextPolicyError("V3.1-ZH context index is missing or mixed with legacy authority")
     groups = cast(dict[str, Any], index["groups"])
     forbidden = {"advisory_career", "advisory_acquisition"}
     if forbidden & set(requested_groups):
@@ -339,7 +345,7 @@ def build_v3_context_manifest(
 
     observed = (now or datetime.now(UTC)).astimezone(UTC)
     freshness = freshness_receipts or {}
-    entries = _owner_authority_entries(repo_root)
+    entries = _active_authority_entries(repo_root)
     excluded: list[str] = sorted(forbidden)
     for group_name in requested_groups:
         group = cast(dict[str, Any], groups[group_name])
@@ -419,9 +425,19 @@ def build_v3_context_manifest(
                 else:
                     status = "CURRENT"
                 if status != "CURRENT":
-                    raise ContextPolicyError(
+                    proposal_path: Path | None = None
+                    if stale_proposal_root is not None:
+                        _, proposal_path = emit_stale_source_proposal(
+                            proposal_root=stale_proposal_root,
+                            work_item_id=work_item.work_item_id,
+                            group=group_name,
+                            freshness_status=status,
+                            now=observed,
+                        )
+                    raise StaleCurrentFactError(
                         f"work item {work_item.work_item_id} is blocked by {status.lower()} "
-                        f"current fact group {group_name}"
+                        f"current fact group {group_name}",
+                        proposal_path=proposal_path,
                     )
             entries.append(
                 V3ContextEntry(
@@ -442,8 +458,10 @@ def build_v3_context_manifest(
             )
 
     ordered_entries = sorted(entries, key=lambda entry: entry.path)
-    payload = b"".join(
-        f"{entry.path}\0{entry.sha256}\n".encode() for entry in ordered_entries
+    payload = (
+        active_source.source_digest.encode()
+        + b"\n"
+        + b"".join(f"{entry.path}\0{entry.sha256}\n".encode() for entry in ordered_entries)
     )
     manifest = V3ContextManifest(
         work_item_id=work_item.work_item_id,

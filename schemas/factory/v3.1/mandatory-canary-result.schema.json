@@ -1,0 +1,126 @@
+{
+  "$defs": {
+    "CanaryStatus": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "BLOCKED_PREREQUISITE"
+      ],
+      "title": "CanaryStatus",
+      "type": "string"
+    },
+    "MandatoryCanaryId": {
+      "enum": [
+        "real_claude_mechanical_task",
+        "process_kill_and_resume",
+        "quota_pause_and_resume",
+        "authentication_expiry_and_recovery",
+        "repeated_finding_finite_stop",
+        "external_wait_lane_isolation",
+        "bad_candidate_rejected_before_main",
+        "release_transaction_crash_idempotency",
+        "automatic_milestone_advancement",
+        "machine_receipt_missing_invalid_expired_revoked",
+        "duplicate_controller_rejection",
+        "lease_renewal_failure",
+        "stale_current_facts",
+        "missing_source_authority",
+        "malformed_report",
+        "private_gate_missing_for_trust_risk",
+        "machine_verifier_unavailable",
+        "activation_receipt_wrong_sha",
+        "runtime_root_outside_repo",
+        "post_merge_invariant_failure_and_automated_revert_pr"
+      ],
+      "title": "MandatoryCanaryId",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/mandatory-canary-result.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "canaryId": {
+      "$ref": "#/$defs/MandatoryCanaryId"
+    },
+    "completedAt": {
+      "format": "date-time",
+      "title": "Completedat",
+      "type": "string"
+    },
+    "evidenceArtifacts": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "maxProperties": 128,
+      "title": "Evidenceartifacts",
+      "type": "object"
+    },
+    "exactMainSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Exactmainsha",
+      "type": "string"
+    },
+    "exactTreeSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Exacttreesha",
+      "type": "string"
+    },
+    "failureReason": {
+      "anyOf": [
+        {
+          "maxLength": 2000,
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Failurereason"
+    },
+    "runId": {
+      "pattern": "^CANARY-[A-Z0-9_-]{8,160}$",
+      "title": "Runid",
+      "type": "string"
+    },
+    "runnerDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Runnerdigest"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "startedAt": {
+      "format": "date-time",
+      "title": "Startedat",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/CanaryStatus"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "runId",
+    "canaryId",
+    "exactMainSha",
+    "exactTreeSha",
+    "status",
+    "startedAt",
+    "completedAt"
+  ],
+  "title": "MandatoryCanaryResult",
+  "type": "object"
+}

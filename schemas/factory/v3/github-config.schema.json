@@ -4,6 +4,7 @@
       "additionalProperties": false,
       "properties": {
         "enabled": {
+          "const": true,
           "default": true,
           "title": "Enabled",
           "type": "boolean"
@@ -14,6 +15,29 @@
           },
           "minItems": 1,
           "title": "Requiredworkflows",
+          "type": "array"
+        },
+        "trustedCheckAppIds": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "minProperties": 1,
+          "title": "Trustedcheckappids",
+          "type": "object"
+        },
+        "postMergeRequiredWorkflows": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Postmergerequiredworkflows",
           "type": "array"
         },
         "requiredRiskTiers": {
@@ -44,6 +68,10 @@
           "type": "boolean"
         }
       },
+      "required": [
+        "trustedCheckAppIds",
+        "postMergeRequiredWorkflows"
+      ],
       "title": "RemoteCIConfig",
       "type": "object"
     },
@@ -60,11 +88,11 @@
   },
   "additionalProperties": false,
   "properties": {
-    "version": {
-      "const": 3,
-      "default": 3,
-      "title": "Version",
-      "type": "integer"
+    "schemaVersion": {
+      "const": "3.1",
+      "default": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
     },
     "enabled": {
       "default": false,
@@ -83,78 +111,98 @@
       "title": "Basebranch",
       "type": "string"
     },
-    "branch": {
-      "const": "main",
-      "default": "main",
-      "title": "Branch",
-      "type": "string"
-    },
     "visibility": {
-      "const": "private",
-      "default": "private",
+      "const": "public",
+      "default": "public",
       "title": "Visibility",
       "type": "string"
     },
     "repository": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Repository"
+      "minLength": 3,
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+      "title": "Repository",
+      "type": "string"
     },
     "releaseMode": {
-      "const": "owner_directed_main_only",
-      "default": "owner_directed_main_only",
+      "const": "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE",
+      "default": "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE",
       "title": "Releasemode",
       "type": "string"
     },
     "directMainPush": {
-      "const": true,
-      "default": true,
+      "const": false,
+      "default": false,
       "title": "Directmainpush",
       "type": "boolean"
     },
-    "releaseMetadataPath": {
-      "const": "factory/state/latest-release.json",
-      "default": "factory/state/latest-release.json",
-      "title": "Releasemetadatapath",
+    "candidateBranchPrefix": {
+      "const": "factory/",
+      "default": "factory/",
+      "title": "Candidatebranchprefix",
       "type": "string"
     },
-    "pushAfterVerifiedTasks": {
-      "default": 3,
-      "maximum": 50,
-      "minimum": 1,
-      "title": "Pushafterverifiedtasks",
-      "type": "integer"
+    "pullRequestMetadataPath": {
+      "const": "factory/state/latest-pull-request.json",
+      "default": "factory/state/latest-pull-request.json",
+      "title": "Pullrequestmetadatapath",
+      "type": "string"
     },
-    "pushIntervalSeconds": {
-      "default": 3600,
-      "maximum": 86400,
-      "minimum": 60,
-      "title": "Pushintervalseconds",
-      "type": "integer"
+    "transactionPath": {
+      "const": "publication-transactions",
+      "default": "publication-transactions",
+      "title": "Transactionpath",
+      "type": "string"
     },
-    "pushBeforeQuotaPause": {
+    "quarantinePath": {
+      "const": "publication-quarantine",
+      "default": "publication-quarantine",
+      "title": "Quarantinepath",
+      "type": "string"
+    },
+    "independentReceiptRoot": {
+      "minLength": 1,
+      "title": "Independentreceiptroot",
+      "type": "string"
+    },
+    "receiptVerifierExecutable": {
+      "minLength": 1,
+      "title": "Receiptverifierexecutable",
+      "type": "string"
+    },
+    "activationReceiptPath": {
+      "minLength": 1,
+      "title": "Activationreceiptpath",
+      "type": "string"
+    },
+    "exactHeadShaChecksRequired": {
+      "const": true,
       "default": true,
-      "title": "Pushbeforequotapause",
+      "title": "Exactheadshachecksrequired",
       "type": "boolean"
     },
-    "pushAtCompletion": {
+    "independentMachinePolicyReceiptRequired": {
+      "const": true,
       "default": true,
-      "title": "Pushatcompletion",
+      "title": "Independentmachinepolicyreceiptrequired",
       "type": "boolean"
     },
-    "immediateRiskTiers": {
-      "items": {
-        "$ref": "#/$defs/RiskTier"
-      },
-      "title": "Immediaterisktiers",
-      "type": "array"
+    "mergeQueueOrAutoMergeRequired": {
+      "const": true,
+      "default": true,
+      "title": "Mergequeueorautomergerequired",
+      "type": "boolean"
+    },
+    "exactMergedMainVerificationRequired": {
+      "const": true,
+      "default": true,
+      "title": "Exactmergedmainverificationrequired",
+      "type": "boolean"
+    },
+    "publisherCapability": {
+      "const": "AUTOMATED_PR_V31_READY",
+      "default": "AUTOMATED_PR_V31_READY",
+      "title": "Publishercapability",
+      "type": "string"
     },
     "retryAttempts": {
       "default": 5,
@@ -187,6 +235,13 @@
       "$ref": "#/$defs/RemoteCIConfig"
     }
   },
+  "required": [
+    "repository",
+    "independentReceiptRoot",
+    "receiptVerifierExecutable",
+    "activationReceiptPath",
+    "remoteCi"
+  ],
   "title": "GitHubConfig",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",

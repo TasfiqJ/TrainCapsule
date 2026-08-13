@@ -24,8 +24,12 @@ for executable in ruff pyright python; do
 done
 
 "$SHARED_VENV/bin/python" scripts/gates/active_policy_integrity.py
+"$SHARED_VENV/bin/python" scripts/gates/validate_source_manifest.py
 "$SHARED_VENV/bin/python" scripts/gates/v3_bundle_integrity.py --check-report
+"$SHARED_VENV/bin/python" scripts/gates/v3_1_zh_package_integrity.py
+"$SHARED_VENV/bin/python" scripts/generate_v3_1_zh_source.py --check
 "$SHARED_VENV/bin/python" scripts/gates/source_of_truth_integrity.py
+"$SHARED_VENV/bin/python" scripts/gates/output_and_integration_gate.py --repository-v31
 if [[ $EVIDENCE_MODE == "validate" ]]; then
   "$SHARED_VENV/bin/python" scripts/gates/v3_migration_evidence.py
 fi
@@ -45,14 +49,19 @@ export UV_OFFLINE=1
 "$UV_BIN" run --active --no-sync pyright
 "$UV_BIN" run --active --no-sync python -m pytest -q
 "$UV_BIN" run --active --no-sync python scripts/generate_v3_schemas.py --check
+"$UV_BIN" run --active --no-sync python scripts/generate_v31_contract_schemas.py --check
+PYTHONPATH="$ROOT/verifier/src${PYTHONPATH:+:$PYTHONPATH}" \
+  "$UV_BIN" run --active --no-sync python verifier/scripts/generate_schemas.py --check
 "$UV_BIN" run --active --no-sync python scripts/generate_v3_roadmap.py --check
 "$UV_BIN" run --active --no-sync python scripts/generate_v3_legacy_migration.py --check
 "$UV_BIN" run --active --no-sync python scripts/generate_product_schemas.py --check
 "$UV_BIN" run --active --no-sync python scripts/update_v3_migration_inventory.py --check
+"$UV_BIN" run --active --no-sync python scripts/update_v31_findings_candidate.py --check
 "$UV_BIN" run --active --no-sync python scripts/gates/no_paid_usage.py
 "$UV_BIN" run --active --no-sync tcfactory config validate
 "$UV_BIN" run --active --no-sync tcfactory migrate-roadmap --from-v2 --dry-run
 "$UV_BIN" build --offline --wheel
+"$UV_BIN" build --offline --wheel --project verifier --out-dir dist/verifier
 
 root_script_present() {
   "$SHARED_VENV/bin/python" - "$1" <<'PY'

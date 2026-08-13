@@ -43,8 +43,7 @@ class V3Model(BaseModel):
 
         payload = self.model_dump(mode="json", by_alias=True, exclude_none=False)
         return (
-            json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True)
-            + "\n"
+            json.dumps(payload, ensure_ascii=False, separators=(",", ":"), sort_keys=True) + "\n"
         ).encode("utf-8")
 
     def canonical_digest(self) -> str:

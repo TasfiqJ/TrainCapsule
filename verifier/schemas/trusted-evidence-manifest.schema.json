@@ -1,0 +1,313 @@
+{
+  "$defs": {
+    "CommercialCeiling": {
+      "enum": [
+        "NOT_EVALUATED",
+        "NATIVE_ADVANTAGE_UNPROVEN",
+        "PILOT_ELIGIBLE",
+        "COMMERCIALLY_SUPPORTED",
+        "WITHDRAWN"
+      ],
+      "title": "CommercialCeiling",
+      "type": "string"
+    },
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "EngineeringCeiling": {
+      "enum": [
+        "NOT_EVALUATED",
+        "FAILED",
+        "PASSED"
+      ],
+      "title": "EngineeringCeiling",
+      "type": "string"
+    },
+    "EvidenceMode": {
+      "enum": [
+        "SIMULATED",
+        "CONTROLLED_VALIDATED",
+        "LIVE_VALIDATED"
+      ],
+      "title": "EvidenceMode",
+      "type": "string"
+    },
+    "GateObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "candidateSha": {
+          "$ref": "#/$defs/GitSha"
+        },
+        "evidenceDigest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "result": {
+          "$ref": "#/$defs/GateResult"
+        }
+      },
+      "required": [
+        "candidateSha",
+        "result",
+        "evidenceDigest"
+      ],
+      "title": "GateObservation",
+      "type": "object"
+    },
+    "GateResult": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "UNKNOWN"
+      ],
+      "title": "GateResult",
+      "type": "string"
+    },
+    "GitSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    },
+    "NativeDisposition": {
+      "enum": [
+        "NATIVE_SUFFICIENT",
+        "INCREMENTAL_VALUE",
+        "NOT_COMPARABLE",
+        "UNKNOWN"
+      ],
+      "title": "NativeDisposition",
+      "type": "string"
+    },
+    "OracleObservation": {
+      "additionalProperties": false,
+      "properties": {
+        "candidateSha": {
+          "$ref": "#/$defs/GitSha"
+        },
+        "candidateTreeSha": {
+          "$ref": "#/$defs/GitSha"
+        },
+        "commercialCeiling": {
+          "$ref": "#/$defs/CommercialCeiling"
+        },
+        "engineeringCeiling": {
+          "$ref": "#/$defs/EngineeringCeiling"
+        },
+        "nativeDisposition": {
+          "$ref": "#/$defs/NativeDisposition"
+        },
+        "oracleId": {
+          "$ref": "#/$defs/Identifier"
+        },
+        "oracleRunnerDigest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "outcome": {
+          "$ref": "#/$defs/OracleOutcome"
+        },
+        "rawEvidenceArtifactHashes": {
+          "items": {
+            "$ref": "#/$defs/Digest"
+          },
+          "maxItems": 128,
+          "minItems": 1,
+          "title": "Rawevidenceartifacthashes",
+          "type": "array"
+        },
+        "valueDisposition": {
+          "$ref": "#/$defs/ValueDisposition"
+        }
+      },
+      "required": [
+        "oracleId",
+        "oracleRunnerDigest",
+        "candidateSha",
+        "candidateTreeSha",
+        "outcome",
+        "rawEvidenceArtifactHashes",
+        "nativeDisposition",
+        "valueDisposition",
+        "engineeringCeiling",
+        "commercialCeiling"
+      ],
+      "title": "OracleObservation",
+      "type": "object"
+    },
+    "OracleOutcome": {
+      "enum": [
+        "PASS",
+        "FAIL",
+        "UNKNOWN"
+      ],
+      "title": "OracleOutcome",
+      "type": "string"
+    },
+    "RawArtifactBinding": {
+      "additionalProperties": false,
+      "properties": {
+        "digest": {
+          "$ref": "#/$defs/Digest"
+        },
+        "path": {
+          "$ref": "#/$defs/RelativePath"
+        }
+      },
+      "required": [
+        "path",
+        "digest"
+      ],
+      "title": "RawArtifactBinding",
+      "type": "object"
+    },
+    "RelativePath": {
+      "maxLength": 512,
+      "minLength": 1,
+      "pattern": "^[^/].*$",
+      "type": "string"
+    },
+    "SourceGenerationId": {
+      "maxLength": 128,
+      "minLength": 3,
+      "type": "string"
+    },
+    "ValueDisposition": {
+      "enum": [
+        "NATIVE_WORKFLOW_SUFFICIENT",
+        "NO_INCREMENTAL_DECISION_VALUE",
+        "TECHNICALLY_VALID_BUT_NOT_ECONOMIC",
+        "INCREMENTAL_DECISION_VALUE_DEMONSTRATED",
+        "EXTERNAL_EVIDENCE_REQUIRED",
+        "UNKNOWN"
+      ],
+      "title": "ValueDisposition",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/verifier/v3.1/trusted-evidence-manifest.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "baseSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "candidateManifestDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "candidateSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "candidateTreeSha": {
+      "$ref": "#/$defs/GitSha"
+    },
+    "checkpointDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "contextManifestDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "evidenceMode": {
+      "$ref": "#/$defs/EvidenceMode"
+    },
+    "gates": {
+      "additionalProperties": {
+        "$ref": "#/$defs/GateObservation"
+      },
+      "maxProperties": 128,
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "title": "Gates",
+      "type": "object"
+    },
+    "lane": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "milestoneId": {
+      "pattern": "^M[0-9]+_[A-Z0-9_]+$",
+      "title": "Milestoneid",
+      "type": "string"
+    },
+    "observedAt": {
+      "format": "date-time",
+      "title": "Observedat",
+      "type": "string"
+    },
+    "oracles": {
+      "additionalProperties": {
+        "$ref": "#/$defs/OracleObservation"
+      },
+      "maxProperties": 32,
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "title": "Oracles",
+      "type": "object"
+    },
+    "privateGateRunnerDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "privateGateSuiteId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "rawArtifacts": {
+      "additionalProperties": {
+        "$ref": "#/$defs/RawArtifactBinding"
+      },
+      "maxProperties": 128,
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/Identifier"
+      },
+      "title": "Rawartifacts",
+      "type": "object"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "sourceGenerationDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "sourceGenerationId": {
+      "$ref": "#/$defs/SourceGenerationId"
+    },
+    "taskPacketDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "evidenceMode",
+    "workItemId",
+    "milestoneId",
+    "lane",
+    "candidateSha",
+    "candidateTreeSha",
+    "baseSha",
+    "sourceGenerationId",
+    "sourceGenerationDigest",
+    "contextManifestDigest",
+    "taskPacketDigest",
+    "candidateManifestDigest",
+    "checkpointDigest",
+    "gates",
+    "privateGateSuiteId",
+    "privateGateRunnerDigest",
+    "oracles",
+    "rawArtifacts",
+    "observedAt"
+  ],
+  "title": "TrustedEvidenceManifest",
+  "type": "object"
+}

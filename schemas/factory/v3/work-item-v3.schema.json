@@ -68,7 +68,7 @@
     "OwnerType": {
       "enum": [
         "AI",
-        "FOUNDER",
+        "MACHINE_POLICY_AUTHORITY",
         "CUSTOMER",
         "EXTERNAL_PARTY"
       ],
@@ -146,6 +146,7 @@
         "QUEUED",
         "RUNNING",
         "PAUSED_QUOTA",
+        "PAUSED_BACKEND",
         "WAITING_EXTERNAL",
         "BLOCKED_TECHNICAL",
         "BLOCKED_POLICY",
@@ -276,6 +277,11 @@
     },
     "externalReceiptRequired": {
       "title": "Externalreceiptrequired",
+      "type": "boolean"
+    },
+    "machinePolicyReceiptRequired": {
+      "default": false,
+      "title": "Machinepolicyreceiptrequired",
       "type": "boolean"
     },
     "retryPolicy": {

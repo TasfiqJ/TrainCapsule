@@ -80,13 +80,9 @@ def apply_controller_owned_catalog_minimums(
                 "source_of_truth": list(
                     dict.fromkeys([*packet.source_of_truth, *catalog_seed.source_of_truth])
                 ),
-                "non_goals": list(
-                    dict.fromkeys([*packet.non_goals, *catalog_seed.non_goals])
-                ),
+                "non_goals": list(dict.fromkeys([*packet.non_goals, *catalog_seed.non_goals])),
                 "acceptance_criteria": list(
-                    dict.fromkeys(
-                        [*packet.acceptance_criteria, *catalog_seed.acceptance_criteria]
-                    )
+                    dict.fromkeys([*packet.acceptance_criteria, *catalog_seed.acceptance_criteria])
                 ),
                 "outputs": list(dict.fromkeys([*packet.outputs, *catalog_seed.outputs])),
                 "stop_conditions": list(
@@ -103,9 +99,7 @@ def apply_controller_owned_catalog_minimums(
     seed_gates = {gate.name: gate for gate in catalog_seed.gates}
     gates = [seed_gates.get(gate.name, gate) for gate in packet.gates]
     present_gate_names = {gate.name for gate in gates}
-    gates.extend(
-        gate for name, gate in seed_gates.items() if name not in present_gate_names
-    )
+    gates.extend(gate for name, gate in seed_gates.items() if name not in present_gate_names)
     gate_names = [gate.name for gate in gates]
 
     proposed_research = next(
@@ -118,14 +112,10 @@ def apply_controller_owned_catalog_minimums(
                 dict.fromkeys([*proposed_research.allowed_paths, *seed_research.allowed_paths])
             ),
             "forbidden_paths": list(
-                dict.fromkeys(
-                    [*proposed_research.forbidden_paths, *seed_research.forbidden_paths]
-                )
+                dict.fromkeys([*proposed_research.forbidden_paths, *seed_research.forbidden_paths])
             ),
             "allowed_domains": list(
-                dict.fromkeys(
-                    [*proposed_research.allowed_domains, *seed_research.allowed_domains]
-                )
+                dict.fromkeys([*proposed_research.allowed_domains, *seed_research.allowed_domains])
             ),
             "acceptance_criteria": list(
                 dict.fromkeys(
@@ -163,9 +153,7 @@ def apply_controller_owned_catalog_minimums(
             ),
             "non_goals": list(dict.fromkeys([*packet.non_goals, *catalog_seed.non_goals])),
             "acceptance_criteria": list(
-                dict.fromkeys(
-                    [*packet.acceptance_criteria, *catalog_seed.acceptance_criteria]
-                )
+                dict.fromkeys([*packet.acceptance_criteria, *catalog_seed.acceptance_criteria])
             ),
             "outputs": list(dict.fromkeys([*packet.outputs, *catalog_seed.outputs])),
             "stop_conditions": list(
@@ -175,9 +163,7 @@ def apply_controller_owned_catalog_minimums(
             "gates": gates,
             "pipeline": pipeline,
             "value_contract": catalog_seed.value_contract,
-            "context_keys": list(
-                dict.fromkeys([*packet.context_keys, *catalog_seed.context_keys])
-            ),
+            "context_keys": list(dict.fromkeys([*packet.context_keys, *catalog_seed.context_keys])),
         }
     )
 
@@ -380,8 +366,7 @@ def validate_product_task_packet(
     ]
     if unwritable_outputs:
         errors.append(
-            "outputs are not writable by the owner stage: "
-            + ", ".join(sorted(unwritable_outputs))
+            "outputs are not writable by the owner stage: " + ", ".join(sorted(unwritable_outputs))
         )
     scope_paths = [*packet.outputs, *writable_patterns]
     has_product = any(
@@ -411,11 +396,7 @@ def validate_product_task_packet(
         )
     seed_research = (
         next(
-            (
-                stage
-                for stage in catalog_seed.pipeline
-                if stage.role == RoleName.RESEARCH
-            ),
+            (stage for stage in catalog_seed.pipeline if stage.role == RoleName.RESEARCH),
             None,
         )
         if catalog_seed is not None
@@ -429,8 +410,7 @@ def validate_product_task_packet(
         missing_gates = sorted(required_gate_names - {gate.name for gate in packet.gates})
         if missing_gates:
             errors.append(
-                "catalog research task omitted controller-owned gates: "
-                + ", ".join(missing_gates)
+                "catalog research task omitted controller-owned gates: " + ", ".join(missing_gates)
             )
         missing_outputs = sorted(set(catalog_seed.outputs) - set(packet.outputs))
         if missing_outputs:
@@ -458,9 +438,7 @@ def validate_product_task_packet(
         if stage.permission_mode == "bypassPermissions":
             errors.append(f"stage {stage.role.value} may not use bypassPermissions")
         if stage.read_only is not True:
-            missing_forbidden = sorted(
-                PRODUCT_PROTECTED_PATHS - set(stage.forbidden_paths)
-            )
+            missing_forbidden = sorted(PRODUCT_PROTECTED_PATHS - set(stage.forbidden_paths))
             if missing_forbidden:
                 errors.append(
                     f"writable stage {stage.role.value} does not forbid protected paths: "

@@ -1,0 +1,71 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "RelativePath": {
+      "maxLength": 512,
+      "minLength": 1,
+      "pattern": "^[^/].*$",
+      "type": "string"
+    },
+    "SourceGenerationId": {
+      "maxLength": 128,
+      "minLength": 3,
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/source-generation.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "activeNormative": {
+      "const": true,
+      "title": "Activenormative",
+      "type": "boolean"
+    },
+    "createdAt": {
+      "format": "date-time",
+      "title": "Createdat",
+      "type": "string"
+    },
+    "generationId": {
+      "$ref": "#/$defs/SourceGenerationId"
+    },
+    "manifestDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "sourceDigests": {
+      "additionalProperties": {
+        "$ref": "#/$defs/Digest"
+      },
+      "maxProperties": 256,
+      "minProperties": 1,
+      "propertyNames": {
+        "$ref": "#/$defs/RelativePath"
+      },
+      "title": "Sourcedigests",
+      "type": "object"
+    },
+    "supersedesGenerationId": {
+      "$ref": "#/$defs/SourceGenerationId"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "generationId",
+    "manifestDigest",
+    "sourceDigests",
+    "activeNormative",
+    "supersedesGenerationId",
+    "createdAt"
+  ],
+  "title": "SourceGenerationV31",
+  "type": "object"
+}

@@ -317,14 +317,31 @@ def _prepare_isolated_canary_repo(
     ).stdout.strip()
     if not origin:
         raise RuntimeError("mandatory live canaries require an explicit publication remote")
+    bundle_path = run_root / "isolated-repository.bundle"
+    bundled = run_command(
+        ["git", "bundle", "create", str(bundle_path), "HEAD"],
+        cwd=repo_root,
+        check=False,
+        timeout=300,
+    )
+    if bundled.returncode != 0:
+        raise RuntimeError("disposable canary repository bundle failed")
     cloned = run_command(
-        ["git", "clone", "--no-hardlinks", "--no-checkout", str(repo_root), str(isolated_repo)],
+        [
+            "git",
+            "clone",
+            "--no-hardlinks",
+            "--no-checkout",
+            str(bundle_path),
+            str(isolated_repo),
+        ],
         cwd=run_root,
         check=False,
         timeout=300,
     )
     if cloned.returncode != 0:
         raise RuntimeError("disposable canary repository clone failed")
+    bundle_path.unlink()
     run_command(["git", "checkout", "--detach", exact_main_sha], cwd=isolated_repo)
     run_command(["git", "remote", "set-url", "origin", origin], cwd=isolated_repo)
     if (

@@ -151,6 +151,11 @@ def test_authoritative_roadmap_generation_is_exact_and_typed() -> None:
     decision = collection.item("V3-DEC-001")
     assert decision.owner_type.value == "MACHINE_POLICY_AUTHORITY"
     assert decision.automatable is False
+    assert collection.item("V3-DEC-005").depends_on == [
+        "V3-REPEAT-004",
+        "V3-REPEAT-005",
+        "V3-REPEAT-006",
+    ]
     assert "human" not in collection.model_dump_json(by_alias=True).lower()
 
 

@@ -653,6 +653,87 @@ def _validate_deployment_refresh(sources: Mapping[str, Path]) -> None:
         raise BundleAssemblyError("deployment refresh policy is not exact or runtime-bound")
 
 
+def _validate_machine_policy_profile(sources: Mapping[str, Path]) -> None:
+    profile = _canonical_mapping(
+        sources["machine-policy-review-profile"].read_bytes(),
+        label="machine-policy review profile",
+    )
+    policy = _canonical_mapping(
+        sources["policy"].read_bytes(), label="independent verifier policy"
+    )
+    expected_profile_keys = {
+        "schemaVersion",
+        "riskTier",
+        "requestedClaims",
+        "publicationScope",
+        "nativeDisposition",
+        "valueDisposition",
+        "engineeringCeiling",
+        "commercialCeiling",
+        "privateGateSuiteId",
+        "privateGateRunnerDigest",
+        "oracles",
+    }
+    risk_policies_raw = policy.get("riskPolicies")
+    if not isinstance(risk_policies_raw, dict):
+        raise BundleAssemblyError("independent verifier risk policy is unavailable")
+    risk_policies = cast(dict[str, object], risk_policies_raw)
+    risk_tier = profile.get("riskTier")
+    if not isinstance(risk_tier, str):
+        raise BundleAssemblyError("machine-policy review risk tier is invalid")
+    risk_raw = risk_policies.get(risk_tier)
+    if not isinstance(risk_raw, dict):
+        raise BundleAssemblyError("machine-policy review risk tier is not installed")
+    risk = cast(dict[str, object], risk_raw)
+    oracles_raw = profile.get("oracles")
+    runner_digests_raw = risk.get("oracleRunnerDigests")
+    required_oracles_raw = risk.get("requiredOracleIds")
+    if (
+        set(profile) != expected_profile_keys
+        or profile["schemaVersion"] != "3.1"
+        or profile["riskTier"] != "TRUST_CORE"
+        or profile["privateGateSuiteId"] != policy.get("privateGateSuiteId")
+        or profile["privateGateRunnerDigest"] != policy.get("privateGateRunnerDigest")
+        or profile["nativeDisposition"] != "UNKNOWN"
+        or profile["valueDisposition"] != "EXTERNAL_EVIDENCE_REQUIRED"
+        or profile["engineeringCeiling"] != "PASSED"
+        or profile["commercialCeiling"] != "NATIVE_ADVANTAGE_UNPROVEN"
+        or profile["requestedClaims"] != ["CLAIM:ENGINEERING-PASS"]
+        or profile["publicationScope"] != ["factory/roadmap/work_items.yaml"]
+        or risk.get("requiredGates") != ["CANDIDATE-MANIFEST"]
+        or risk.get("acceptedEvidenceModes") != ["CONTROLLED_VALIDATED"]
+        or not isinstance(oracles_raw, dict)
+        or not isinstance(runner_digests_raw, dict)
+        or not isinstance(required_oracles_raw, list)
+    ):
+        raise BundleAssemblyError("machine-policy review profile is unsafe")
+    oracles = cast(dict[str, object], oracles_raw)
+    runner_digests = cast(dict[str, object], runner_digests_raw)
+    required_oracles = cast(list[object], required_oracles_raw)
+    if set(oracles) != set(required_oracles) or set(runner_digests) != set(required_oracles):
+        raise BundleAssemblyError("machine-policy review oracle roster is inconsistent")
+    for identifier, binding_raw in oracles.items():
+        if not isinstance(binding_raw, dict):
+            raise BundleAssemblyError("machine-policy review oracle binding is invalid")
+        binding = cast(dict[str, object], binding_raw)
+        if (
+            set(binding)
+            != {
+                "runnerDigest",
+                "nativeDisposition",
+                "valueDisposition",
+                "engineeringCeiling",
+                "commercialCeiling",
+            }
+            or binding["runnerDigest"] != runner_digests[identifier]
+            or binding["nativeDisposition"] != profile["nativeDisposition"]
+            or binding["valueDisposition"] != profile["valueDisposition"]
+            or binding["engineeringCeiling"] != profile["engineeringCeiling"]
+            or binding["commercialCeiling"] != profile["commercialCeiling"]
+        ):
+            raise BundleAssemblyError("machine-policy review oracle binding is unsafe")
+
+
 def _validate_github_token_refresher(sources: Mapping[str, Path]) -> None:
     policy = _canonical_mapping(
         sources["github-token-refresher-policy"].read_bytes(),
@@ -1018,6 +1099,7 @@ def assemble_bundle(
     _validate_controller_runtime(sources)
     _validate_github_token_refresher(sources)
     _validate_deployment_refresh(sources)
+    _validate_machine_policy_profile(sources)
     _validate_anchor_producer(sources)
     _validate_controller_oauth(sources["controller-oauth-token"])
     if _digest(sources["canary-claude-token"]) != _digest(sources["controller-oauth-token"]):

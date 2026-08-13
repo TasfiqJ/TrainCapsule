@@ -166,6 +166,7 @@ def _directory_rows() -> list[dict[str, str]]:
     return [
         row("/var/lib/traincapsule-verifier", "root", "0755"),
         row("/etc/traincapsule-verifier", "root", "0755"),
+        row("/etc/traincapsule-verifier/request-profiles", "root", "0755"),
         row("/etc/traincapsule-canary-runner", "root", "0755"),
         row("/etc/traincapsule-runtime", "root", "0755"),
         row("/etc/traincapsule-controller", "root", "0755"),
@@ -587,6 +588,48 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
             producer_policy["installationId"] = 456
             producer_policy["requiredCheckAppIds"]["TrainCapsule / Machine policy"] = 789
             data = canonical_json_bytes(producer_policy)
+        elif role == "policy":
+            data = canonical_json_bytes(
+                {
+                    "schemaVersion": "3.1",
+                    "privateGateSuiteId": "FULL-RELEASE-V31",
+                    "privateGateRunnerDigest": "sha256:" + "d" * 64,
+                    "riskPolicies": {
+                        "TRUST_CORE": {
+                            "requiredGates": ["CANDIDATE-MANIFEST"],
+                            "requiredOracleIds": ["ORACLE:CONFORMANCE:001"],
+                            "oracleRunnerDigests": {
+                                "ORACLE:CONFORMANCE:001": "sha256:" + "e" * 64
+                            },
+                            "acceptedEvidenceModes": ["CONTROLLED_VALIDATED"],
+                        }
+                    },
+                }
+            )
+        elif role == "machine-policy-review-profile":
+            data = canonical_json_bytes(
+                {
+                    "schemaVersion": "3.1",
+                    "riskTier": "TRUST_CORE",
+                    "requestedClaims": ["CLAIM:ENGINEERING-PASS"],
+                    "publicationScope": ["factory/roadmap/work_items.yaml"],
+                    "nativeDisposition": "UNKNOWN",
+                    "valueDisposition": "EXTERNAL_EVIDENCE_REQUIRED",
+                    "engineeringCeiling": "PASSED",
+                    "commercialCeiling": "NATIVE_ADVANTAGE_UNPROVEN",
+                    "privateGateSuiteId": "FULL-RELEASE-V31",
+                    "privateGateRunnerDigest": "sha256:" + "d" * 64,
+                    "oracles": {
+                        "ORACLE:CONFORMANCE:001": {
+                            "runnerDigest": "sha256:" + "e" * 64,
+                            "nativeDisposition": "UNKNOWN",
+                            "valueDisposition": "EXTERNAL_EVIDENCE_REQUIRED",
+                            "engineeringCeiling": "PASSED",
+                            "commercialCeiling": "NATIVE_ADVANTAGE_UNPROVEN",
+                        }
+                    },
+                }
+            )
         elif role == "git-anchor-github-private-key":
             data = anchor_github_key.private_bytes(
                 serialization.Encoding.PEM,

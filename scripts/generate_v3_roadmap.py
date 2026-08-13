@@ -163,6 +163,7 @@ def _range_dependencies(
         item.work_item_id
         for item in milestone_rows
         if item.work_item_id.startswith(prefix + "-")
+        and item.work_item_id != row.work_item_id
         and start <= int(item.work_item_id.rsplit("-", 1)[1]) <= end
     ]
     if same_prefix:

@@ -1742,8 +1742,6 @@ class V3Controller:
                 )
             evidence_paths[dependency] = path.resolve()
             evidence_digests[dependency] = _digest_file(path)
-        if not evidence_paths:
-            raise MachinePolicyRuntimeError("machine-policy review has no dependency evidence")
         root = self.artifact_root / item.work_item_id / f"machine-policy-review-{main_sha}"
         root.mkdir(parents=True, exist_ok=True)
         checkpoint_path = root / "checkpoint-generation-0001.json"
@@ -1805,6 +1803,16 @@ class V3Controller:
         manifest_path = root / "candidate-manifest.json"
         write_json(manifest_path, manifest.model_dump(mode="json", by_alias=True))
         manifest_digest = _digest_file(manifest_path)
+        verification_gate_evidence = {
+            "CANDIDATE-MANIFEST": manifest_path,
+            **evidence_paths,
+        }
+        verification_gate_results = {
+            name: GateResult.PASS for name in sorted(verification_gate_evidence)
+        }
+        verification_evidence_digests = [
+            _digest_file(path) for path in verification_gate_evidence.values()
+        ]
         github = load_github_config(self.repo_root / "config/github.yaml")
         receipt_path = (
             Path(github.independent_receipt_root)
@@ -1832,7 +1840,7 @@ class V3Controller:
                     task_packet_digest=context_digest,
                     candidate_manifest_digest=manifest_digest,
                     checkpoint_digest=context_digest,
-                    gate_evidence=evidence_paths,
+                    gate_evidence=verification_gate_evidence,
                     evidence_root=root / "verifier-request-evidence",
                     now=now,
                 )
@@ -1853,10 +1861,8 @@ class V3Controller:
             base_sha=main_sha,
             candidate_manifest_digest=manifest_digest,
             review_context_digest=context_digest,
-            dependency_evidence_digests=list(evidence_digests.values()),
-            required_gate_results={
-                dependency: GateResult.PASS for dependency in sorted(evidence_paths)
-            },
+            dependency_evidence_digests=verification_evidence_digests,
+            required_gate_results=verification_gate_results,
             expected_main_sha=main_sha,
             source_generation_id=active.generation_id,
             source_generation_digest=f"sha256:{active.manifest_digest}",

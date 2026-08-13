@@ -291,6 +291,9 @@ ROLE_TARGETS: dict[str, str] = {
     "ruleset-credential": "/etc/traincapsule-verifier/ruleset-observer-credential.env",
     "public-key": "/etc/traincapsule-verifier/public-key.pem",
     "policy": "/etc/traincapsule-verifier/policy.json",
+    "machine-policy-review-profile": (
+        "/etc/traincapsule-verifier/request-profiles/machine_policy_review.json"
+    ),
     "check-publisher-policy": "/etc/traincapsule-verifier/check-publisher.json",
     "activation-selector-policy": "/etc/traincapsule-verifier/activation-selector.json",
     "ruleset-observer-policy": "/etc/traincapsule-verifier/ruleset-observer.json",
@@ -992,6 +995,7 @@ def production_directory_pins(
     rows = [
         ("/var/lib/traincapsule-verifier", "root", "root", "0755"),
         ("/etc/traincapsule-verifier", "root", "root", "0755"),
+        ("/etc/traincapsule-verifier/request-profiles", "root", "root", "0755"),
         ("/etc/traincapsule-canary-runner", "root", "root", "0755"),
         ("/etc/traincapsule-runtime", "root", "root", "0755"),
         ("/etc/traincapsule-controller", "root", "root", "0755"),

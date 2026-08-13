@@ -141,7 +141,6 @@ def load_authorized_machine_policy_review(
         "context_manifest_digest": review_context_digest,
         "task_packet_digest": review_context_digest,
         "checkpoint_digest": review_context_digest,
-        "request_digest": review_context_digest,
     }
     for field, value in expected.items():
         if getattr(receipt, field) != value:

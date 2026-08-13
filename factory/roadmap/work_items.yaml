@@ -3615,7 +3615,10 @@ workItems:
   milestone: M5_PAID_REPEAT
   decisionContribution: Repeat/productization disposition
   customerOutcome: Repeat/productization disposition
-  dependsOn: []
+  dependsOn:
+  - V3-REPEAT-004
+  - V3-REPEAT-005
+  - V3-REPEAT-006
   softDependsOn: []
   sourceDependencyExpression: 004–006
   blocksCommercialRelease: true

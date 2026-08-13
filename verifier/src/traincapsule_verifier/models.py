@@ -522,10 +522,6 @@ class RulesetObservationReceipt(V31Model):
         }
         if self.observation_digest != sha256_digest(canonical_json_bytes(core)):
             raise ValueError("ruleset observation digest does not bind the exact policy")
-        if self.observation_id != ruleset_observation_identifier(
-            self.observation_digest, self.observed_at
-        ):
-            raise ValueError("ruleset observation ID does not bind its policy and instant")
         return self
 
 

@@ -236,3 +236,36 @@ def test_ruleset_broker_skips_exact_expired_history_but_rejects_conflicts(
             promote_ruleset_outbox_item(
                 name, raw + b"\n", target=target, public_key=key.public_key()
             )
+
+
+def test_ruleset_broker_verifies_then_skips_unpromoted_older_history(
+    tmp_path: Path,
+) -> None:
+    target_path = tmp_path / "ruleset"
+    target_path.mkdir(mode=0o700)
+    key = Ed25519PrivateKey.generate()
+    current = _ruleset_receipt(key, datetime.now(UTC) - timedelta(minutes=1))
+    older = _ruleset_receipt(key, datetime.now(UTC) - timedelta(hours=1))
+    older_raw = canonical_json_bytes(older)
+    older_name = f"{older.observation_id}.json"
+
+    with open_trusted_root(target_path, expected_uid=os.getuid()) as target:
+        promote_ruleset_observation(
+            canonical_json_bytes(current), target=target, public_key=key.public_key()
+        )
+        promote_ruleset_outbox_item(
+            older_name, older_raw, target=target, public_key=key.public_key()
+        )
+        forged = older.model_copy(update={"signature": "B" * 88})
+        with pytest.raises(ValueError, match="signature"):
+            promote_ruleset_outbox_item(
+                f"{older.observation_id}.forged.json",
+                canonical_json_bytes(forged),
+                target=target,
+                public_key=key.public_key(),
+            )
+
+    assert not (target_path / older_name).exists()
+    assert RulesetObservationReceipt.model_validate_json(
+        (target_path / "current.json").read_bytes(), strict=True
+    ).observation_id == current.observation_id

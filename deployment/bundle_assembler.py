@@ -804,7 +804,7 @@ def _validate_anchor_producer(sources: Mapping[str, Path]) -> None:
         raise BundleAssemblyError("Git anchor observer key pair does not match")
 
 
-def _validate_repository_git_graph(
+def validate_repository_git_graph(
     archive_path: Path, manifest_path: Path
 ) -> None:
     manifest = load_repository_snapshot_manifest(manifest_path)
@@ -817,6 +817,7 @@ def _validate_repository_git_graph(
                     target.mkdir(mode=0o700, parents=False)
                 else:
                     target.write_bytes(archive.read(entry.path))
+                    target.chmod(int(entry.mode, 8))
         commands = (
             (("fsck", "--strict", "--no-dangling"), None),
             (("remote",), ""),
@@ -1000,7 +1001,7 @@ def assemble_bundle(
         sources["repository-snapshot-manifest"]
     )
     validate_repository_snapshot_archive(sources["repository-snapshot"], snapshot_manifest)
-    _validate_repository_git_graph(
+    validate_repository_git_graph(
         sources["repository-snapshot"], sources["repository-snapshot-manifest"]
     )
     if (

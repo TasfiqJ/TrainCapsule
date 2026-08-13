@@ -40,8 +40,15 @@ def _fixture(tmp_path: Path) -> tuple[RefreshPolicy, DeploymentUpdateHandoff, Pa
     _git(source, "config", "user.email", "refresh@example.invalid")
     generation_id = "test-final-generation"
     source_raw = canonical_json_bytes({"generationId": generation_id})
+    source_manifest_path = "docs/source-of-truth/test/FINAL_MANIFEST.json"
     files = {
-        "config/source-generation.json": source_raw,
+        "config/active_generation.yaml": (
+            b"schemaVersion: '3.1'\n"
+            b"generationId: test-final-generation\n"
+            b"sourceRoot: docs/source-of-truth/test\n"
+            b"manifestPath: docs/source-of-truth/test/FINAL_MANIFEST.json\n"
+        ),
+        source_manifest_path: source_raw,
         "config/factory.yaml": b"schemaVersion: '3.1'\n",
         "tcfactory/__init__.py": b"VALUE = 1\n",
         "deployment/__init__.py": b"VALUE = 2\n",

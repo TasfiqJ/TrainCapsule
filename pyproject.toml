@@ -29,6 +29,7 @@ traincapsule-assemble-production-bundle = "deployment.bundle_assembler:main"
 traincapsule-privileged-install = "deployment.privileged_installer:main"
 traincapsule-github-token-refresher = "deployment.github_token_refresher:main"
 traincapsule-deployment-refresh = "deployment.runtime_refresh:main"
+traincapsule-build-repository-snapshot = "deployment.repository_snapshot:main"
 
 [build-system]
 requires = ["hatchling"]

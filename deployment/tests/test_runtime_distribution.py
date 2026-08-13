@@ -54,6 +54,26 @@ def _build(tmp_path: Path) -> tuple[Path, RuntimeDistributionManifest, Path]:
     return archive, manifest, sentinel
 
 
+def test_mutable_interpreter_bytecode_cache_is_excluded(tmp_path: Path) -> None:
+    python_root, dependencies, _ = _inputs(tmp_path)
+    cache = python_root / "lib/python3.12/__pycache__"
+    cache.mkdir()
+    (cache / "netrc.cpython-312.pyc").write_bytes(b"mutable-cache")
+    archive, manifest_path = build_runtime_distribution(
+        tmp_path / "runtime.zip",
+        python_root=python_root,
+        dependency_root=dependencies,
+        python_version="3.12.13",
+        required_imports=("pydantic",),
+    )
+    manifest = RuntimeDistributionManifest.model_validate_json(
+        manifest_path.read_bytes(), strict=True
+    )
+    assert all("__pycache__" not in entry.path for entry in manifest.entries)
+    with zipfile.ZipFile(archive) as observed:
+        assert all("__pycache__" not in name for name in observed.namelist())
+
+
 def test_exact_distribution_extracts_without_running_build_hooks(tmp_path: Path) -> None:
     archive, manifest, sentinel = _build(tmp_path)
     validate_runtime_distribution(archive, manifest)

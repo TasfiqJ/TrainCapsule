@@ -365,7 +365,10 @@ def build_runtime_distribution(
     identities.add(executable_identity)
     for root, prefix in roots:
         for source in sorted(path for path in root.rglob("*") if path.is_file()):
-            if root == stdlib and source.relative_to(root).parts[0] == "site-packages":
+            relative_source = source.relative_to(root)
+            if root == stdlib and relative_source.parts[0] == "site-packages":
+                continue
+            if source.suffix == ".pyc" or "__pycache__" in relative_source.parts:
                 continue
             if source.is_symlink():
                 raise RuntimeDistributionError("runtime input contains a symlink")
@@ -373,7 +376,7 @@ def build_runtime_distribution(
             if identity in identities or source.stat().st_nlink != 1:
                 raise RuntimeDistributionError("runtime input contains a hard link")
             identities.add(identity)
-            relative = prefix / source.relative_to(root).as_posix()
+            relative = prefix / relative_source.as_posix()
             mode = 0o555 if source.stat().st_mode & 0o111 else 0o444
             files.append((relative.as_posix(), source, mode))
     if not files:

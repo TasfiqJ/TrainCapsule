@@ -15,6 +15,7 @@ import sys
 import tempfile
 from pathlib import Path
 
+from deployment.repository_snapshot import materialize_exact_repository_tree
 from deployment.runtime_distribution import (
     COMPLETE_RUNTIME_IMPORTS,
     PRODUCTION_RUNTIME_IMPORTS,
@@ -61,6 +62,8 @@ def build_production_runtime(
         raise RuntimeError("runtime build inputs are incomplete")
     with tempfile.TemporaryDirectory(prefix="traincapsule-runtime-build-") as temporary:
         stage = Path(temporary)
+        exact_repo = stage / "repository"
+        materialize_exact_repository_tree(repo, "HEAD", exact_repo)
         requirements = stage / "requirements.txt"
         dependencies = stage / "site-packages"
         dependencies.mkdir()
@@ -79,7 +82,7 @@ def build_production_runtime(
                 "--output-file",
                 str(requirements),
             ],
-            cwd=repo,
+            cwd=exact_repo,
         )
         _run(
             [
@@ -98,14 +101,14 @@ def build_production_runtime(
                 "--requirements",
                 str(requirements),
             ],
-            cwd=repo,
+            cwd=exact_repo,
         )
         for cache in dependencies.rglob("__pycache__"):
             shutil.rmtree(cache)
         for compiled in dependencies.rglob("*.pyc"):
             compiled.unlink()
         for source_prefix, target_prefix in PROJECT_SOURCE_MAPPINGS:
-            source_root = repo / source_prefix.rstrip("/")
+            source_root = exact_repo / source_prefix.rstrip("/")
             if source_root.is_symlink() or not source_root.is_dir():
                 raise RuntimeError("project runtime source root is unavailable")
             for source in sorted(source_root.rglob("*.py")):
@@ -131,13 +134,13 @@ def build_production_runtime(
         )
         extract_runtime_distribution(archive, parsed_manifest, installed)
         project_paths = (
-            repo,
-            repo / "packages/traincapsule-core/src",
-            repo / "packages/traincapsule-ingest-pytorch/src",
-            repo / "packages/traincapsule-qualify/src",
-            repo / "packages/traincapsule-cli/src",
-            repo / "verifier/src",
-            repo / "canary_runner/src",
+            exact_repo,
+            exact_repo / "packages/traincapsule-core/src",
+            exact_repo / "packages/traincapsule-ingest-pytorch/src",
+            exact_repo / "packages/traincapsule-qualify/src",
+            exact_repo / "packages/traincapsule-cli/src",
+            exact_repo / "verifier/src",
+            exact_repo / "canary_runner/src",
         )
         smoke = (
             "import importlib,sys;"
@@ -161,7 +164,7 @@ def build_production_runtime(
                 *PRODUCTION_RUNTIME_IMPORTS,
                 *PROJECT_RUNTIME_IMPORTS,
                 ],
-                cwd=repo,
+                cwd=exact_repo,
             )
             service_smoke = (
                 "import importlib;"
@@ -177,7 +180,7 @@ def build_production_runtime(
             )
             if not claude.is_file() or not claude.stat().st_mode & 0o111:
                 raise RuntimeError("Claude SDK bundled executable is absent or non-executable")
-            _run([str(claude), "--version"], cwd=repo)
+            _run([str(claude), "--version"], cwd=exact_repo)
         finally:
             for directory in [
                 installed,

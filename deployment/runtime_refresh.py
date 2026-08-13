@@ -24,6 +24,7 @@ from datetime import UTC, datetime
 from pathlib import Path, PurePosixPath
 from typing import ClassVar, Literal, cast
 
+import yaml
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 from traincapsule_verifier.canonical import (
     canonical_json_bytes,
@@ -567,11 +568,31 @@ def _build_generation(
     manifest = manifest.model_copy(update={"manifest_digest": manifest.computed_digest()})
     manifest_raw = canonical_json_bytes(manifest)
     _write_exact(generation / "GENERATION_MANIFEST.json", manifest_raw, 0o444)
-    source_manifest_path = repository / "config/source-generation.json"
+    active_generation_path = repository / "config/active_generation.yaml"
+    try:
+        active_value: object = yaml.safe_load(active_generation_path.read_bytes())
+    except (OSError, UnicodeDecodeError, yaml.YAMLError) as exc:
+        raise RefreshFailure("required main source pointer is invalid") from exc
+    if not isinstance(active_value, dict):
+        raise RefreshFailure("required main source pointer identity changed")
+    active_generation = cast(dict[str, object], active_value)
+    source_path_value = active_generation.get("manifestPath")
     if (
-        not source_manifest_path.is_file()
-        or _digest(source_manifest_path) != handoff.source_generation_digest
+        active_generation.get("generationId") != handoff.source_generation_id
+        or not isinstance(source_path_value, str)
     ):
+        raise RefreshFailure("required main source pointer identity changed")
+    source_pure = PurePosixPath(source_path_value)
+    if (
+        source_pure.is_absolute()
+        or ".." in source_pure.parts
+        or str(source_pure) != source_path_value
+    ):
+        raise RefreshFailure("required main source path is unsafe")
+    source_manifest_path = repository.joinpath(*source_pure.parts)
+    if not source_manifest_path.is_file() or _digest(
+        source_manifest_path
+    ) != handoff.source_generation_digest:
         raise RefreshFailure("required main source generation is not authoritative")
     try:
         source_value: object = json.loads(source_manifest_path.read_bytes())
@@ -580,10 +601,7 @@ def _build_generation(
     if not isinstance(source_value, dict):
         raise RefreshFailure("required main source authority identity changed")
     source_authority = cast(dict[str, object], source_value)
-    if (
-        canonical_json_bytes(source_authority) != source_manifest_path.read_bytes()
-        or source_authority.get("generationId") != handoff.source_generation_id
-    ):
+    if source_authority.get("generationId") != handoff.source_generation_id:
         raise RefreshFailure("required main source authority identity changed")
     effective_config = repository / "config/factory.yaml"
     if not effective_config.is_file():
@@ -629,7 +647,7 @@ def _build_generation(
         "manifestDigest": "sha256:" + "0" * 64,
         "mainSha": handoff.required_main_sha,
         "treeSha": handoff.required_main_tree_sha,
-        "sourceManifestPath": "config/source-generation.json",
+        "sourceManifestPath": source_path_value,
         "sourceGenerationDigest": handoff.source_generation_digest,
         "effectiveConfigDigest": _digest(effective_config),
         "pythonRuntimeManifestDigest": policy.dependency_manifest_digest,

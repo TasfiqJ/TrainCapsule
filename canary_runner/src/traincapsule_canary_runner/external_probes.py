@@ -248,6 +248,7 @@ def _github_revert(args: argparse.Namespace) -> dict[str, object]:
         raise ValueError("isolated revert canary workflow dispatch was rejected")
     verified_stdout = ""
     verified_returncode = 1
+    proven = False
     for attempt in range(30):
         verified = subprocess.run(
             [
@@ -259,7 +260,7 @@ def _github_revert(args: argparse.Namespace) -> dict[str, object]:
                 "--head",
                 revert_branch,
                 "--state",
-                "open",
+                "all",
                 "--json",
                 "number,headRefName,baseRefName,body,statusCheckRollup",
             ],
@@ -273,35 +274,66 @@ def _github_revert(args: argparse.Namespace) -> dict[str, object]:
         verified_stdout = verified.stdout
         if verified_returncode == 0:
             observed_rows: object = json.loads(verified_stdout)
-            if isinstance(observed_rows, list) and observed_rows:
+            rows = cast(list[object], observed_rows) if isinstance(observed_rows, list) else []
+            row = (
+                cast(dict[str, object], rows[0])
+                if len(rows) == 1 and isinstance(rows[0], dict)
+                else {}
+            )
+            checks_raw = row.get("statusCheckRollup")
+            checks = cast(list[object], checks_raw) if isinstance(checks_raw, list) else []
+            check_rows = [
+                cast(dict[str, object], item) for item in checks if isinstance(item, dict)
+            ]
+            conclusions = {item.get("conclusion") for item in check_rows}
+            check_names = {item.get("name") for item in check_rows}
+            body = row.get("body")
+            required_body = (
+                isinstance(body, str)
+                and "TrainCapsule-Automated-Revert: true" in body
+                and f"Exact-Main-SHA: {args.main_sha}" in body
+                and f"Exact-Tree-SHA: {args.tree_sha}" in body
+            )
+            base_sha = ""
+            if isinstance(body, str):
+                base_lines = [
+                    line.removeprefix("Canary-Base-SHA: ")
+                    for line in body.splitlines()
+                    if line.startswith("Canary-Base-SHA: ")
+                ]
+                if len(base_lines) == 1:
+                    base_sha = base_lines[0]
+            restored = subprocess.run(
+                [
+                    str(gh),
+                    "api",
+                    f"repos/{repository}/git/ref/heads/main",
+                    "--method",
+                    "GET",
+                    "--jq",
+                    ".object.sha",
+                ],
+                env=env,
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=60,
+            )
+            proven = (
+                row.get("headRefName") == revert_branch
+                and row.get("baseRefName") == "main"
+                and required_body
+                and len(base_sha) == 40
+                and bool(checks)
+                and conclusions == {"SUCCESS"}
+                and "TrainCapsule revert PR validation" in check_names
+                and restored.returncode == 0
+                and restored.stdout.strip() == base_sha
+            )
+            if proven:
                 break
         if attempt < 29:
             time.sleep(10)
-    raw_rows: object = json.loads(verified_stdout) if verified_returncode == 0 else []
-    rows = cast(list[object], raw_rows) if isinstance(raw_rows, list) else []
-    row = cast(dict[str, object], rows[0]) if len(rows) == 1 and isinstance(rows[0], dict) else {}
-    checks_raw = row.get("statusCheckRollup")
-    checks = cast(list[object], checks_raw) if isinstance(checks_raw, list) else []
-    conclusions = {
-        cast(dict[str, object], item).get("conclusion")
-        for item in checks
-        if isinstance(item, dict)
-    }
-    body = row.get("body")
-    required_body = (
-        isinstance(body, str)
-        and "TrainCapsule-Automated-Revert: true" in body
-        and f"Exact-Main-SHA: {args.main_sha}" in body
-        and f"Exact-Tree-SHA: {args.tree_sha}" in body
-    )
-    proven = (
-        len(rows) == 1
-        and row.get("headRefName") == revert_branch
-        and row.get("baseRefName") == "main"
-        and required_body
-        and bool(checks)
-        and conclusions == {"SUCCESS"}
-    )
     return {
         "proven": proven,
         "repository": repository,

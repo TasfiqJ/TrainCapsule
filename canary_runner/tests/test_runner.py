@@ -347,6 +347,85 @@ def test_github_live_probe_forces_read_only_method_before_dispatch(
     ]
 
 
+def test_github_live_probe_requires_exact_check_and_restored_baseline(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    executable = tmp_path / "gh"
+    executable.write_bytes(b"gh")
+    token = tmp_path / "token"
+    token.write_text("test-token", encoding="utf-8")
+    token.chmod(0o600)
+    base_sha = "c" * 40
+    commands: list[list[str]] = []
+
+    def policy() -> Any:
+        return SimpleNamespace(
+            github=SimpleNamespace(
+                executable=str(executable),
+                executable_digest=sha256_digest(executable.read_bytes()),
+                repository="TasfiqJ/TrainCapsule-Canary",
+                token_file=str(token),
+                workflow="traincapsule-post-merge-revert-canary.yml",
+            )
+        )
+
+    def trust(_path: Path, _expected_digest: str) -> None:
+        return None
+
+    def run(
+        command: list[str], **_kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        commands.append(command)
+        if command[1:3] == ["pr", "list"]:
+            body = "\n".join(
+                (
+                    "TrainCapsule-Automated-Revert: true",
+                    f"Exact-Main-SHA: {SHA}",
+                    f"Exact-Tree-SHA: {TREE}",
+                    f"Canary-Base-SHA: {base_sha}",
+                )
+            )
+            payload = [
+                {
+                    "number": 1,
+                    "headRefName": f"canary/revert-{RUN.lower()}",
+                    "baseRefName": "main",
+                    "body": body,
+                    "statusCheckRollup": [
+                        {
+                            "name": "TrainCapsule revert PR validation",
+                            "conclusion": "SUCCESS",
+                        }
+                    ],
+                }
+            ]
+            return subprocess.CompletedProcess(command, 0, json.dumps(payload), "")
+        if "git/ref/heads/main" in " ".join(command):
+            return subprocess.CompletedProcess(command, 0, base_sha + "\n", "")
+        return subprocess.CompletedProcess(command, 0, "{}", "")
+
+    monkeypatch.setattr(external_probes, "_load_policy", policy)
+    monkeypatch.setattr(external_probes, "_trusted_executable", trust)
+    monkeypatch.setattr(subprocess, "run", run)
+    args = argparse.Namespace(
+        repo=tmp_path,
+        runtime_root=tmp_path,
+        artifact_root=tmp_path,
+        run_id=RUN,
+        main_sha=SHA,
+        tree_sha=TREE,
+    )
+    outcome = external_probes._github_revert(args)  # pyright: ignore[reportPrivateUsage]
+    assert outcome["proven"] is True
+    assert "all" in commands[2]
+    assert commands[3][1:5] == [
+        "api",
+        "repos/TasfiqJ/TrainCapsule-Canary/git/ref/heads/main",
+        "--method",
+        "GET",
+    ]
+
+
 def test_claude_live_probe_uses_and_cleans_disposable_workspace_output(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

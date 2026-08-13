@@ -123,7 +123,7 @@ No future SHA, run ID, receipt, or PASS is invented here. Retain `factory/state/
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **636 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **638 paths**.
 
 This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing
 report must bind acceptance to an immutable candidate SHA and independent test/receipt
@@ -758,6 +758,7 @@ artifacts.
 | `A` | `verifier/src/traincapsule_verifier/request_broker_cli.py` |
 | `A` | `verifier/src/traincapsule_verifier/ruleset_broker.py` |
 | `A` | `verifier/src/traincapsule_verifier/ruleset_observer.py` |
+| `A` | `verifier/src/traincapsule_verifier/ruleset_policy.py` |
 | `A` | `verifier/tests/canonical-vector.json` |
 | `A` | `verifier/tests/test_canary_receipt_probe.py` |
 | `A` | `verifier/tests/test_controller_start_broker.py` |
@@ -765,6 +766,7 @@ artifacts.
 | `A` | `verifier/tests/test_git_anchor_updater.py` |
 | `A` | `verifier/tests/test_post_activation_observer.py` |
 | `A` | `verifier/tests/test_public_boundary.py` |
+| `A` | `verifier/tests/test_ruleset_policy.py` |
 | `A` | `verifier/tests/test_selector_and_ruleset.py` |
 | `A` | `verifier/tests/test_service_bootstrap.py` |
 <!-- END GENERATED FILE INVENTORY -->

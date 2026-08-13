@@ -112,7 +112,11 @@ def _metadata(role: str) -> tuple[str, str, str]:
         return "root", ANCHOR_FETCHER_USER, "0750"
     if role in {"git-anchor-github-private-key", "git-anchor-observer-private-key"}:
         return ANCHOR_FETCHER_USER, ANCHOR_FETCHER_USER, "0600"
-    if role in {"git-anchor-producer-policy", "git-anchor-observer-public-key"}:
+    if role in {
+        "git-anchor-producer-policy",
+        "git-anchor-observer-public-key",
+        "selector-public-key",
+    }:
         return "root", "root", "0444"
     if role in {"private-key", "github-app-private-key"}:
         return SERVICE_USER, SERVICE_USER, "0600"
@@ -888,6 +892,9 @@ def _validate_read_only_observer_policies(sources: Mapping[str, Path]) -> None:
         selector_key = serialization.load_pem_private_key(
             sources["selector-private-key"].read_bytes(), password=None
         )
+        selector_public = serialization.load_pem_public_key(
+            sources["selector-public-key"].read_bytes()
+        )
         ruleset_key = serialization.load_pem_private_key(
             sources["ruleset-private-key"].read_bytes(), password=None
         )
@@ -896,7 +903,16 @@ def _validate_read_only_observer_policies(sources: Mapping[str, Path]) -> None:
         )
     except ValueError as exc:
         raise BundleAssemblyError("observer signing key material is invalid") from exc
-    if not isinstance(selector_key, Ed25519PrivateKey) or (
+    if (
+        not isinstance(selector_key, Ed25519PrivateKey)
+        or not isinstance(selector_public, Ed25519PublicKey)
+        or selector_key.public_key().public_bytes(
+            serialization.Encoding.Raw, serialization.PublicFormat.Raw
+        )
+        != selector_public.public_bytes(
+            serialization.Encoding.Raw, serialization.PublicFormat.Raw
+        )
+    ) or (
         not isinstance(ruleset_key, Ed25519PrivateKey)
         or not isinstance(ruleset_public, Ed25519PublicKey)
         or ruleset_key.public_key().public_bytes(

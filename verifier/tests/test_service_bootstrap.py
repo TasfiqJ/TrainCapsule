@@ -203,6 +203,24 @@ def test_receipt_broker_success_payload_is_canonical_json() -> None:
     )
 
 
+def test_activation_request_broker_isolates_rejected_requests() -> None:
+    import traincapsule_verifier.activation_request_broker as request_broker
+
+    seen: list[str] = []
+
+    def process(name: str) -> None:
+        seen.append(name)
+        if name == "stale.activation-request.json":
+            raise ValueError("stale request")
+
+    accepted, rejected = request_broker._process_requests(  # pyright: ignore[reportPrivateUsage]
+        ("stale.activation-request.json", "valid.activation-request.json"),
+        process,
+    )
+    assert (accepted, rejected) == (1, 1)
+    assert seen == ["stale.activation-request.json", "valid.activation-request.json"]
+
+
 def test_issuer_isolates_rejected_requests_without_authorizing_them(
     monkeypatch: pytest.MonkeyPatch,
     capfd: pytest.CaptureFixture[str],

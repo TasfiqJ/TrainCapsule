@@ -495,12 +495,12 @@ def _activate_v31_locked(
         suite_path, repo_root=repo_root, require_pass=True
     )
     receipt_path, receipt_before, receipt = _load_live_receipt(repo_root)
-    runtime_value, _, _ = installed_runtime_loader(
+    runtime_value, runtime_raw, _ = installed_runtime_loader(
         installed_runtime_manifest_path
     )
     installed_runtime = runtime_value
     if (
-        receipt.controller_binary_digest != installed_runtime.manifest_digest
+        receipt.controller_binary_digest != sha256_digest(runtime_raw)
         or receipt.controller_config_digest
         != installed_runtime.effective_config.digest
     ):

@@ -763,6 +763,9 @@ def publish_activation_completions(
     target_root = _at(
         root, "/var/lib/traincapsule-verifier/activation-refresh-inbox"
     )
+    retired_root = _at(
+        root, "/var/lib/traincapsule-verifier/activation-refresh-retirement"
+    ) / "retired"
     published: list[Path] = []
     for source in sorted(source_root.glob("*.json")):
         raw = _trusted(source, uid=authority_uid, mode=0o400, maximum=2_000_000)
@@ -775,6 +778,16 @@ def publish_activation_completions(
         expected = f"{completion.required_main_sha}-{completion.transaction_id}.json"
         if source.name != expected:
             raise RefreshFailure("refresh completion path is not canonical")
+        retired = retired_root / source.name
+        if retired.is_file():
+            if _trusted(
+                retired,
+                uid=authority_uid,
+                mode=0o440,
+                maximum=2_000_000,
+            ) != raw:
+                raise RefreshFailure("retired activation completion identity conflicts")
+            continue
         target = target_root / source.name
         if target.is_file():
             if _trusted(

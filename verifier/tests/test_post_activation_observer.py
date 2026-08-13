@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from types import SimpleNamespace
@@ -15,6 +16,18 @@ from traincapsule_verifier.canonical import sha256_digest
 DIGEST = "sha256:" + "a" * 64
 
 
+def _sandbox_writable(unit: str, target: str) -> bool:
+    target_path = Path(target)
+    return any(
+        target_path == Path(root) or target_path.is_relative_to(Path(root))
+        for root in (
+            line.split("=", 1)[1]
+            for line in unit.splitlines()
+            if line.startswith("ReadWritePaths=")
+        )
+    )
+
+
 def _policy(tmp_path: Path) -> observer._Policy:  # pyright: ignore[reportPrivateUsage]
     return observer._Policy.model_construct(  # pyright: ignore[reportPrivateUsage]
         schema_version="3.1",
@@ -23,6 +36,9 @@ def _policy(tmp_path: Path) -> observer._Policy:  # pyright: ignore[reportPrivat
         runtime_root=str(tmp_path / "runtime"),
         start_journal_root=str(tmp_path / "start"),
         observation_root=str(tmp_path / "observations"),
+        refresh_completion_root=str(tmp_path / "refresh-inbox"),
+        refresh_retirement_root=str(tmp_path / "retirement"),
+        runtime_manifest_path=str(tmp_path / "runtime-manifest.json"),
         maximum_observation_seconds=3600,
     )
 
@@ -74,9 +90,10 @@ def test_seven_events_require_exact_receipt_tree_monotonicity_and_artifact_diges
     policy = _policy(tmp_path)
     runtime = tmp_path / "runtime"
     runtime.mkdir()
+    issued_at = datetime.now(UTC) - timedelta(minutes=1)
     receipt = SimpleNamespace(
         receipt_id="ACT-TEST",
-        issued_at=datetime.now(UTC) - timedelta(minutes=1),
+        issued_at=issued_at,
     )
     receipt_digest = DIGEST
     def digest_receipt(_receipt: object) -> str:
@@ -95,7 +112,7 @@ def test_seven_events_require_exact_receipt_tree_monotonicity_and_artifact_diges
             exact_main_sha="a" * 40,
             exact_tree_sha="b" * 40,
             sequence=sequence,
-            occurred_at="2026-08-12T18:00:00Z",
+            occurred_at=issued_at + timedelta(seconds=sequence),
             artifact_path=str(artifact),
             artifact_digest=sha256_digest(artifact.read_bytes()),
         )
@@ -116,8 +133,53 @@ def test_seven_events_require_exact_receipt_tree_monotonicity_and_artifact_diges
     )
     assert set(artifacts) == set(observer.ObservationId)
     assert set(digests) == set(observer.ObservationId)
+    complete_lines = list(lines)
     lines.pop()
     with pytest.raises(ValueError, match="omits mandatory"):
+        observer._event_evidence(  # pyright: ignore[reportPrivateUsage]
+            policy,
+            cast(observer.ActivationReceipt, receipt),
+            main_sha="a" * 40,
+            tree_sha="b" * 40,
+        )
+
+    lines[:] = complete_lines
+    for index, sequence in ((0, 2), (1, 1)):
+        outer = cast(dict[str, str], json.loads(lines[index]))
+        event = cast(
+            dict[str, object],
+            json.loads(outer["MESSAGE"].removeprefix("TCF_V31_EVENT ")),
+        )
+        event["sequence"] = sequence
+        lines[index] = json.dumps(
+            {"MESSAGE": "TCF_V31_EVENT " + json.dumps(event, separators=(",", ":"))}
+        )
+    with pytest.raises(ValueError, match="sequence is not exact"):
+        observer._event_evidence(  # pyright: ignore[reportPrivateUsage]
+            policy,
+            cast(observer.ActivationReceipt, receipt),
+            main_sha="a" * 40,
+            tree_sha="b" * 40,
+        )
+    lines[:] = complete_lines + [complete_lines[0]]
+    with pytest.raises(ValueError, match="duplicate events"):
+        observer._event_evidence(  # pyright: ignore[reportPrivateUsage]
+            policy,
+            cast(observer.ActivationReceipt, receipt),
+            main_sha="a" * 40,
+            tree_sha="b" * 40,
+        )
+    lines[:] = complete_lines
+    outer = cast(dict[str, str], json.loads(lines[-1]))
+    stale = cast(
+        dict[str, object],
+        json.loads(outer["MESSAGE"].removeprefix("TCF_V31_EVENT ")),
+    )
+    stale["occurredAt"] = (issued_at - timedelta(seconds=1)).isoformat()
+    lines[-1] = json.dumps(
+        {"MESSAGE": "TCF_V31_EVENT " + json.dumps(stale, separators=(",", ":"))}
+    )
+    with pytest.raises(ValueError, match="timestamps are not monotonic"):
         observer._event_evidence(  # pyright: ignore[reportPrivateUsage]
             policy,
             cast(observer.ActivationReceipt, receipt),
@@ -133,3 +195,97 @@ def test_post_activation_unit_is_root_owned_automatic_and_cannot_start_controlle
     assert "traincapsule-verifier-post-activation observe" in service
     assert "systemctl start" not in service
     assert "Persistent=true" in timer
+    assert "ReadWritePaths=/var/lib/traincapsule-verifier/activation-refresh-inbox" in service
+    assert (
+        "ReadWritePaths=/var/lib/traincapsule-verifier/activation-refresh-retirement"
+        in service
+    )
+    activation = systemd_unit_content(unit="activation-supervisor").decode()
+    required = (
+        "ReadWritePaths=/var/lib/traincapsule-verifier/controller-start-outbox"
+    )
+    target = "/var/lib/traincapsule-verifier/controller-start-outbox/start.json"
+    assert _sandbox_writable(activation, target)
+    assert not _sandbox_writable(activation.replace(required + "\n", ""), target)
+
+
+def test_refresh_completion_retires_only_after_observation_and_replays_crash(
+    tmp_path: Path,
+) -> None:
+    policy = _policy(tmp_path)
+    completion_root = Path(policy.refresh_completion_root)
+    completion_root.mkdir()
+    Path(policy.runtime_manifest_path).write_bytes(b"runtime-manifest\n")
+    runtime_digest = sha256_digest(Path(policy.runtime_manifest_path).read_bytes())
+    completion = observer._RefreshCompletion(  # pyright: ignore[reportPrivateUsage]
+        transaction_id="a" * 40 + "-" + "1" * 16,
+        handoff_digest=DIGEST,
+        previous_main_sha="c" * 40,
+        required_main_sha="a" * 40,
+        required_main_tree_sha="b" * 40,
+        source_generation_id="traincapsule-v3.1-zh-2026-08-12",
+        source_generation_digest=DIGEST,
+        generation_manifest_digest=DIGEST,
+        runtime_manifest_digest=runtime_digest,
+        environment_digest=DIGEST,
+        effective_config_digest=DIGEST,
+        snapshot_manifest_digest=DIGEST,
+        committed_at=datetime.now(UTC),
+    )
+    claim = completion_root / f"{'a' * 40}-{completion.transaction_id}.json"
+    claim.write_bytes(observer.canonical_json_bytes(completion))
+    claim.chmod(0o440)
+    receipt = cast(
+        observer.ActivationReceipt,
+        SimpleNamespace(
+            receipt_id="ACT-TEST",
+            source_generation_id=completion.source_generation_id,
+            source_generation_digest=completion.source_generation_digest,
+            controller_config_digest=completion.effective_config_digest,
+        ),
+    )
+    roster = {event_id: f"evidence/{event_id.value}.json" for event_id in observer.ObservationId}
+    digests = {event_id: DIGEST for event_id in observer.ObservationId}
+    observation = observer._Observation(  # pyright: ignore[reportPrivateUsage]
+        observation_id="OBS-ACT-TEST",
+        activation_receipt_id="ACT-TEST",
+        activation_receipt_digest=DIGEST,
+        exact_main_sha=completion.required_main_sha,
+        exact_tree_sha=completion.required_main_tree_sha,
+        evidence_artifacts=roster,
+        evidence_digests=digests,
+        started_at=datetime.now(UTC).isoformat(),
+        completed_at=datetime.now(UTC).isoformat(),
+    )
+
+    def crash_after_copy(phase: str) -> None:
+        if phase == "COPIED":
+            raise RuntimeError("simulated crash")
+
+    with pytest.raises(RuntimeError, match="simulated crash"):
+        observer._retire_refresh_completion(  # pyright: ignore[reportPrivateUsage]
+            policy,
+            receipt,
+            observation,
+            fail_hook=crash_after_copy,
+            authority_uid=os.geteuid(),
+        )
+    assert claim.exists()
+    retired = observer._retire_refresh_completion(  # pyright: ignore[reportPrivateUsage]
+        policy,
+        receipt,
+        observation,
+        authority_uid=os.geteuid(),
+    )
+    assert retired is not None and retired.read_bytes() == observer.canonical_json_bytes(
+        completion
+    )
+    assert not claim.exists()
+    journal = json.loads(
+        (
+            Path(policy.refresh_retirement_root)
+            / "journals"
+            / f"{completion.transaction_id}.json"
+        ).read_bytes()
+    )
+    assert journal["phase"] == "RETIRED"

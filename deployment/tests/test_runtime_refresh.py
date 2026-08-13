@@ -336,3 +336,22 @@ def test_completion_broker_keeps_activation_claim_root_owned(tmp_path: Path) -> 
     assert len(published) == 1
     assert published[0].stat().st_uid == os.getuid()
     assert published[0].stat().st_mode & 0o777 == 0o440
+    retirement = (
+        root
+        / "var/lib/traincapsule-verifier/activation-refresh-retirement/retired"
+    )
+    retirement.mkdir(parents=True)
+    retired = retirement / source.name
+    retired.write_bytes(source.read_bytes())
+    retired.chmod(0o440)
+    published[0].unlink()
+    assert (
+        publish_activation_completions(
+            policy,
+            root=root,
+            authority_uid=os.getuid(),
+            controller_uid=os.getuid(),
+        )
+        == []
+    )
+    assert not published[0].exists()

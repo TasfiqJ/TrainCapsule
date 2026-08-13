@@ -227,6 +227,11 @@ def _directory_rows() -> list[dict[str, str]]:
             "mode": "0750",
         },
         row(
+            "/var/lib/traincapsule-verifier/activation-refresh-retirement",
+            "root",
+            "0700",
+        ),
+        row(
             "/var/lib/traincapsule-controller",
             "traincapsule-controller",
             "0700",

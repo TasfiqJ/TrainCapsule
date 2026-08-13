@@ -31,6 +31,15 @@ from tcfactory.yamlutil import load_yaml
 ROOT = Path(__file__).resolve().parents[1]
 
 
+def _ignore_untracked_runtime_evidence(
+    directory: str, names: list[str]
+) -> set[str]:
+    ignored = {".git", ".venv", "worktrees"}.intersection(names)
+    if Path(directory).as_posix().endswith("/factory/artifacts"):
+        ignored.update({"T001", "T002"}.intersection(names))
+    return ignored
+
+
 def test_all_124_legacy_entries_and_statuses_are_preserved_exactly() -> None:
     source_path = ROOT / "factory/feature_ledger.yaml"
     archive_path = ROOT / "factory/roadmap/legacy_feature_ledger.yaml"
@@ -102,6 +111,40 @@ def test_preserved_evidence_inventory_detects_byte_tamper(tmp_path: Path) -> Non
     target.write_bytes(target.read_bytes() + b"\ntampered\n")
     with pytest.raises(ValueError, match="stopped-runtime snapshot|stale"):
         verify_installed(copied)
+
+
+def test_ignored_runtime_evidence_is_reproducible_in_clean_checkout(
+    tmp_path: Path,
+) -> None:
+    copied = tmp_path / "repo"
+    shutil.copytree(
+        ROOT,
+        copied,
+        ignore=_ignore_untracked_runtime_evidence,
+    )
+    assert not (copied / "factory/artifacts/T001").exists()
+    assert not (copied / "factory/artifacts/T002").exists()
+    assert build_mapping(copied) == build_mapping(ROOT)
+    verify_installed(copied)
+
+
+def test_ignored_runtime_evidence_manifest_rejects_digest_tamper(
+    tmp_path: Path,
+) -> None:
+    copied = tmp_path / "repo"
+    shutil.copytree(
+        ROOT,
+        copied,
+        ignore=_ignore_untracked_runtime_evidence,
+    )
+    manifest = (
+        copied
+        / "factory/roadmap/migrations/v2_runtime_evidence_manifest.json"
+    )
+    payload = manifest.read_text(encoding="utf-8")
+    manifest.write_text(payload.replace("b8426b38", "08426b38", 1), encoding="utf-8")
+    with pytest.raises(ValueError, match="manifest digest mismatch"):
+        build_mapping(copied)
 
 
 def test_mapping_targets_only_existing_v3_work_and_legacy_ids_never_enter_graph() -> None:

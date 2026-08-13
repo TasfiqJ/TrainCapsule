@@ -4,14 +4,16 @@ from __future__ import annotations
 
 import json
 import os
+import stat
 import subprocess
 import sys
+from collections.abc import Callable
 from datetime import UTC, datetime
 from enum import StrEnum
 from pathlib import Path
 from typing import ClassVar, Literal, cast
 
-from pydantic import BaseModel, ConfigDict, Field, model_validator
+from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, model_validator
 
 from .canonical import canonical_json_bytes, model_digest, sha256_digest
 from .controller_start_broker import (
@@ -59,6 +61,15 @@ class _Policy(_Strict):
     observation_root: Literal[
         "/var/lib/traincapsule-verifier/post-activation-observations"
     ]
+    refresh_completion_root: Literal[
+        "/var/lib/traincapsule-verifier/activation-refresh-inbox"
+    ]
+    refresh_retirement_root: Literal[
+        "/var/lib/traincapsule-verifier/activation-refresh-retirement"
+    ]
+    runtime_manifest_path: Literal[
+        "/etc/traincapsule-controller/runtime-manifest.json"
+    ]
     maximum_observation_seconds: int = Field(ge=60, le=86400)
 
 
@@ -70,7 +81,7 @@ class _RuntimeEvent(_Strict):
     exact_main_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
     exact_tree_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
     sequence: int = Field(ge=1)
-    occurred_at: str
+    occurred_at: AwareDatetime
     artifact_path: str
     artifact_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
 
@@ -104,6 +115,34 @@ class _FailureJournal(_Strict):
     recorded_at: str
 
 
+class _RefreshCompletion(_Strict):
+    schema_version: Literal["3.1"] = "3.1"
+    transaction_id: str = Field(pattern=r"^[0-9a-f]{40}-[0-9a-f]{16}$")
+    handoff_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    previous_main_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    required_main_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    required_main_tree_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    source_generation_id: str = Field(pattern=r"^[a-z0-9][a-z0-9._-]{2,127}$")
+    source_generation_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    generation_manifest_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    runtime_manifest_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    environment_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    effective_config_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    snapshot_manifest_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    committed_at: AwareDatetime
+
+
+class _RetirementJournal(_Strict):
+    schema_version: Literal["3.1"] = "3.1"
+    transaction_id: str
+    phase: Literal["PREPARED", "RETIRED"]
+    completion_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    observation_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
+    activation_receipt_id: str
+    required_main_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    recorded_at: AwareDatetime
+
+
 def _atomic(path: Path, raw: bytes) -> None:
     path.parent.mkdir(parents=True, exist_ok=True)
     temporary = path.with_name(f".{path.name}.{os.getpid()}.pending")
@@ -118,6 +157,147 @@ def _atomic(path: Path, raw: bytes) -> None:
     finally:
         os.close(descriptor)
     os.replace(temporary, path)
+
+
+def _completion_at(
+    path: Path, *, authority_uid: int = 0
+) -> tuple[_RefreshCompletion, bytes]:
+    metadata = path.stat(follow_symlinks=False)
+    if (
+        path.is_symlink()
+        or not stat.S_ISREG(metadata.st_mode)
+        or metadata.st_uid != authority_uid
+        or stat.S_IMODE(metadata.st_mode) != 0o440
+    ):
+        raise ValueError("refresh completion claim boundary is invalid")
+    raw = path.read_bytes()
+    completion = _RefreshCompletion.model_validate_json(raw, strict=True)
+    if raw != canonical_json_bytes(completion):
+        raise ValueError("refresh completion claim is not canonical")
+    if path.name != f"{completion.required_main_sha}-{completion.transaction_id}.json":
+        raise ValueError("refresh completion claim filename is not exact")
+    return completion, raw
+
+
+def _matching_refresh_completion(
+    policy: _Policy,
+    receipt: ActivationReceipt,
+    *,
+    main_sha: str,
+    tree_sha: str,
+    authority_uid: int = 0,
+) -> tuple[Path, _RefreshCompletion, bytes] | None:
+    root = Path(policy.refresh_completion_root)
+    matches: list[tuple[Path, _RefreshCompletion, bytes]] = []
+    for path in sorted(root.glob("*.json")):
+        completion, raw = _completion_at(path, authority_uid=authority_uid)
+        if (
+            completion.required_main_sha == main_sha
+            and completion.required_main_tree_sha == tree_sha
+            and completion.source_generation_id == receipt.source_generation_id
+            and completion.source_generation_digest == receipt.source_generation_digest
+            and completion.effective_config_digest == receipt.controller_config_digest
+        ):
+            matches.append((path, completion, raw))
+    if len(matches) > 1:
+        raise ValueError("multiple refresh completions match post-activation identity")
+    return matches[0] if matches else None
+
+
+def _retire_refresh_completion(
+    policy: _Policy,
+    receipt: ActivationReceipt,
+    observation: _Observation,
+    *,
+    fail_hook: Callable[[str], None] | None = None,
+    authority_uid: int = 0,
+) -> Path | None:
+    matched = _matching_refresh_completion(
+        policy,
+        receipt,
+        main_sha=observation.exact_main_sha,
+        tree_sha=observation.exact_tree_sha,
+        authority_uid=authority_uid,
+    )
+    retirement_root = Path(policy.refresh_retirement_root)
+    retired_root = retirement_root / "retired"
+    journal_root = retirement_root / "journals"
+    if matched is None:
+        retired_candidates: list[tuple[Path, _RefreshCompletion, bytes]] = []
+        for path in sorted(retired_root.glob("*.json")):
+            completion, raw = _completion_at(path, authority_uid=authority_uid)
+            if (
+                completion.required_main_sha == observation.exact_main_sha
+                and completion.required_main_tree_sha == observation.exact_tree_sha
+                and completion.source_generation_id == receipt.source_generation_id
+                and completion.source_generation_digest == receipt.source_generation_digest
+                and completion.effective_config_digest == receipt.controller_config_digest
+            ):
+                retired_candidates.append((path, completion, raw))
+        if not retired_candidates:
+            return None
+        if len(retired_candidates) != 1:
+            raise ValueError("multiple retired refresh completions match activation")
+        retired_path, completion, raw = retired_candidates[0]
+        claim_path: Path | None = None
+    else:
+        claim_path, completion, raw = matched
+        retired_path = retired_root / claim_path.name
+    runtime_raw = Path(policy.runtime_manifest_path).read_bytes()
+    if sha256_digest(runtime_raw) != completion.runtime_manifest_digest:
+        raise ValueError("refresh completion runtime changed before retirement")
+    completion_digest = sha256_digest(raw)
+    observation_digest = model_digest(observation)
+    journal_path = journal_root / f"{completion.transaction_id}.json"
+    prepared = _RetirementJournal(
+        transaction_id=completion.transaction_id,
+        phase="PREPARED",
+        completion_digest=completion_digest,
+        observation_digest=observation_digest,
+        activation_receipt_id=receipt.receipt_id,
+        required_main_sha=completion.required_main_sha,
+        recorded_at=datetime.now(UTC),
+    )
+    if journal_path.is_file():
+        existing = _RetirementJournal.model_validate_json(
+            journal_path.read_bytes(), strict=True
+        )
+        if existing.model_copy(
+            update={"phase": prepared.phase, "recorded_at": prepared.recorded_at}
+        ) != prepared:
+            raise ValueError("refresh completion retirement identity conflicts")
+        if existing.phase == "RETIRED":
+            if not retired_path.is_file() or retired_path.read_bytes() != raw:
+                raise ValueError("retired refresh completion bytes changed")
+            if claim_path is not None:
+                if claim_path.read_bytes() != raw:
+                    raise ValueError("refresh completion claim changed during retirement")
+                claim_path.unlink()
+            return retired_path
+    else:
+        _atomic(journal_path, canonical_json_bytes(prepared))
+    if fail_hook is not None:
+        fail_hook("PREPARED")
+    retired_path.parent.mkdir(parents=True, exist_ok=True)
+    if retired_path.exists():
+        if retired_path.read_bytes() != raw:
+            raise ValueError("retired refresh completion identity conflicts")
+    else:
+        _atomic(retired_path, raw)
+        retired_path.chmod(0o440)
+    if fail_hook is not None:
+        fail_hook("COPIED")
+    retired = prepared.model_copy(
+        update={"phase": "RETIRED", "recorded_at": datetime.now(UTC)}
+    )
+    _atomic(journal_path, canonical_json_bytes(retired))
+    if fail_hook is not None:
+        fail_hook("RETIRED")
+    if claim_path is not None:
+        if claim_path.read_bytes() != raw:
+            raise ValueError("refresh completion claim changed during retirement")
+        claim_path.unlink()
+    return retired_path
 
 
 def _git(repo: Path, *arguments: str) -> str:
@@ -192,11 +372,26 @@ def _event_evidence(
             and event.exact_tree_sha == tree_sha
         ):
             prior = events.get(event.event_id)
-            if prior is not None and event.sequence <= prior.sequence:
-                raise ValueError("post-activation event sequence is not monotonic")
+            if prior is not None:
+                raise ValueError("post-activation journal contains duplicate events")
             events[event.event_id] = event
     if set(events) != set(ObservationId):
         raise ValueError("post-activation journal omits mandatory observed events")
+    ordered = list(ObservationId)
+    observed_now = datetime.now(UTC)
+    prior_time = receipt.issued_at
+    for expected_sequence, event_id in enumerate(ordered, start=1):
+        event = events[event_id]
+        occurred_at = event.occurred_at.astimezone(UTC)
+        if event.sequence != expected_sequence:
+            raise ValueError("post-activation event sequence is not exact")
+        if occurred_at < prior_time or occurred_at > observed_now:
+            raise ValueError("post-activation event timestamps are not monotonic")
+        prior_time = occurred_at
+    if (
+        prior_time - receipt.issued_at.astimezone(UTC)
+    ).total_seconds() > policy.maximum_observation_seconds:
+        raise ValueError("post-activation event timeline exceeded bounded window")
     evidence_root = Path(policy.observation_root) / receipt.receipt_id / "evidence"
     artifacts: dict[ObservationId, str] = {}
     digests: dict[ObservationId, str] = {}
@@ -212,6 +407,41 @@ def _event_evidence(
         artifacts[event_id] = str(target.relative_to(evidence_root.parent))
         digests[event_id] = sha256_digest(raw)
     return artifacts, digests
+
+
+def _verified_existing_observation(
+    policy: _Policy,
+    receipt: ActivationReceipt,
+    *,
+    main_sha: str,
+    tree_sha: str,
+) -> tuple[Path, _Observation] | None:
+    target = Path(policy.observation_root) / receipt.receipt_id / "observation.json"
+    if not target.exists():
+        return None
+    if target.is_symlink() or not target.is_file():
+        raise ValueError("post-activation observation path is indirect")
+    raw = target.read_bytes()
+    observation = _Observation.model_validate_json(raw, strict=True)
+    if raw != canonical_json_bytes(observation):
+        raise ValueError("post-activation observation is not canonical")
+    if (
+        observation.activation_receipt_id != receipt.receipt_id
+        or observation.activation_receipt_digest != model_digest(receipt)
+        or observation.exact_main_sha != main_sha
+        or observation.exact_tree_sha != tree_sha
+    ):
+        raise ValueError("post-activation observation identity changed")
+    evidence_root = target.parent
+    for event_id in ObservationId:
+        artifact = (evidence_root / observation.evidence_artifacts[event_id]).resolve(
+            strict=True
+        )
+        if not artifact.is_relative_to(evidence_root) or artifact.is_symlink():
+            raise ValueError("post-activation observation evidence escapes its root")
+        if sha256_digest(artifact.read_bytes()) != observation.evidence_digests[event_id]:
+            raise ValueError("post-activation observation evidence changed")
+    return target, observation
 
 
 def observe() -> Path:
@@ -242,6 +472,18 @@ def observe() -> Path:
                 controller_binary_digest=receipt.controller_binary_digest,
                 controller_config_digest=receipt.controller_config_digest,
             )
+        repo = Path(policy.repository_root)
+        main_sha = _git(repo, "rev-parse", "HEAD")
+        tree_sha = _git(repo, "rev-parse", "HEAD^{tree}")
+        if main_sha != receipt.verified_main_sha:
+            raise ValueError("post-activation exact main changed")
+        existing = _verified_existing_observation(
+            policy, receipt, main_sha=main_sha, tree_sha=tree_sha
+        )
+        if existing is not None:
+            target, observation = existing
+            _retire_refresh_completion(policy, receipt, observation)
+            return target
         if controller_active_pid(policy.service_name) is None:
             raise ValueError("controller service is not active")
         start_journal = (
@@ -253,11 +495,6 @@ def observe() -> Path:
             dict[str, object], start_payload
         ).get("phase") != "STARTED":
             raise ValueError("root start broker has no terminal STARTED journal")
-        repo = Path(policy.repository_root)
-        main_sha = _git(repo, "rev-parse", "HEAD")
-        tree_sha = _git(repo, "rev-parse", "HEAD^{tree}")
-        if main_sha != receipt.verified_main_sha:
-            raise ValueError("post-activation exact main changed")
         artifacts, digests = _event_evidence(
             policy, receipt, main_sha=main_sha, tree_sha=tree_sha
         )
@@ -277,6 +514,7 @@ def observe() -> Path:
         )
         target = Path(policy.observation_root) / receipt.receipt_id / "observation.json"
         _atomic(target, canonical_json_bytes(observation))
+        _retire_refresh_completion(policy, receipt, observation)
         return target
     except (OSError, ValueError, subprocess.TimeoutExpired) as error:
         _fail_closed(policy, receipt, str(error))

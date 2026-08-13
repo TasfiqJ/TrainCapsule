@@ -1021,6 +1021,12 @@ def production_directory_pins(
             "0750",
         ),
         (
+            "/var/lib/traincapsule-verifier/activation-refresh-retirement",
+            "root",
+            "root",
+            "0700",
+        ),
+        (
             "/var/lib/traincapsule-verifier/deployment-refresh-journal",
             "root",
             "root",

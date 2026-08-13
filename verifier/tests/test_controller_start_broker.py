@@ -16,6 +16,19 @@ from traincapsule_verifier.canonical import canonical_json_bytes, sha256_digest
 DIGEST = "sha256:" + "a" * 64
 
 
+def _sandbox_writable(unit: str, target: str) -> bool:
+    writable = [
+        line.split("=", 1)[1]
+        for line in unit.splitlines()
+        if line.startswith("ReadWritePaths=")
+    ]
+    target_path = Path(target)
+    return any(
+        target_path == Path(root) or target_path.is_relative_to(Path(root))
+        for root in writable
+    )
+
+
 def _transaction() -> dict[str, object]:
     return {
         "schemaVersion": "3.1",
@@ -77,6 +90,15 @@ def test_systemd_path_has_one_root_broker_and_no_direct_controller_start() -> No
     assert "systemctl start" not in service
     assert "PathChanged=/var/lib/traincapsule-verifier/controller-start-outbox" in trigger
     assert "traincapsule-controller.service" not in trigger
+    assert _sandbox_writable(
+        service, "/var/lib/traincapsule-verifier/controller-start-journal/tx.json"
+    )
+    weakened = service.replace(
+        "ReadWritePaths=/var/lib/traincapsule-verifier/controller-start-journal\n", ""
+    )
+    assert not _sandbox_writable(
+        weakened, "/var/lib/traincapsule-verifier/controller-start-journal/tx.json"
+    )
 
 
 def test_install_manifest_binds_exact_start_and_observation_policies() -> None:
@@ -92,3 +114,11 @@ def test_install_manifest_binds_exact_start_and_observation_policies() -> None:
     assert '"runtimeManifestPath":"/etc/traincapsule-controller/runtime-manifest.json"' in start
     assert '"journalRoot":"/var/lib/traincapsule-verifier/controller-start-journal"' in start
     assert '"maximumObservationSeconds":3600' in observation
+    assert (
+        '"refreshCompletionRoot":"/var/lib/traincapsule-verifier/'
+        'activation-refresh-inbox"' in observation
+    )
+    assert (
+        '"refreshRetirementRoot":"/var/lib/traincapsule-verifier/'
+        'activation-refresh-retirement"' in observation
+    )

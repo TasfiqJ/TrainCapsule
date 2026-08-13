@@ -33,8 +33,15 @@ from tcfactory.yamlutil import load_yaml
 LEGACY_SOURCE: Final = ROOT / "factory/feature_ledger.yaml"
 LEGACY_ARCHIVE: Final = ROOT / "factory/roadmap/legacy_feature_ledger.yaml"
 MAPPING_OUTPUT: Final = ROOT / "factory/roadmap/migrations/v2_to_v3.yaml"
+OPTIONAL_EVIDENCE_MANIFEST: Final = (
+    ROOT / "factory/roadmap/migrations/v2_runtime_evidence_manifest.json"
+)
 ROADMAP_SOURCE: Final = ROOT / "factory/roadmap/work_items.yaml"
 SNAPSHOT_SOURCE: Final = ROOT / "docs/migrations/V3_RUNTIME_SNAPSHOT_METADATA.json"
+OPTIONAL_RUNTIME_EVIDENCE_ROOTS: Final = (
+    "factory/artifacts/T001",
+    "factory/artifacts/T002",
+)
 
 # Only explicit V3 equivalents are mapped. Broad or merely similar V2 designs stay
 # deferred, which prevents semantic title matching from silently expanding V3.
@@ -163,6 +170,63 @@ def _snapshot_ledger_digest(snapshot: dict[str, object]) -> str:
     raise ValueError("runtime snapshot does not bind the V2 feature ledger")
 
 
+def _inventory_digest(inventory: list[LegacyEvidenceFile]) -> str:
+    payload = b"".join(
+        f"{item.mode}\0{item.path}\0{item.sha256}\n".encode() for item in inventory
+    )
+    return sha256_digest(payload)
+
+
+def _load_optional_evidence_manifest(root: Path) -> list[LegacyEvidenceFile]:
+    manifest_path = root / "factory/roadmap/migrations/v2_runtime_evidence_manifest.json"
+    raw: object = json.loads(manifest_path.read_text(encoding="utf-8"))
+    if not isinstance(raw, dict):
+        raise ValueError("legacy runtime evidence manifest must be an object")
+    payload = cast(dict[str, object], raw)
+    if set(payload) != {
+        "schemaVersion",
+        "sourceMigrationBaseSha",
+        "inventory",
+        "inventoryDigest",
+    }:
+        raise ValueError("legacy runtime evidence manifest fields are not exact")
+    if payload["schemaVersion"] != "1":
+        raise ValueError("legacy runtime evidence manifest version is unsupported")
+    snapshot = _snapshot(root / "docs/migrations/V3_RUNTIME_SNAPSHOT_METADATA.json")
+    if payload["sourceMigrationBaseSha"] != snapshot.get("head"):
+        raise ValueError("legacy runtime evidence manifest base SHA mismatch")
+    raw_inventory = payload["inventory"]
+    if not isinstance(raw_inventory, list):
+        raise ValueError("legacy runtime evidence inventory must be a list")
+    inventory = [
+        LegacyEvidenceFile.model_validate(item)
+        for item in cast(list[object], raw_inventory)
+    ]
+    paths = [item.path for item in inventory]
+    if paths != sorted(set(paths)):
+        raise ValueError("legacy runtime evidence paths must be unique and sorted")
+    if not inventory or any(
+        not any(
+            item.path == evidence_root
+            or item.path.startswith(f"{evidence_root}/")
+            for evidence_root in OPTIONAL_RUNTIME_EVIDENCE_ROOTS
+        )
+        for item in inventory
+    ):
+        raise ValueError("legacy runtime evidence escaped its exact optional roots")
+    if payload["inventoryDigest"] != _inventory_digest(inventory):
+        raise ValueError("legacy runtime evidence manifest digest mismatch")
+    return inventory
+
+
+def _evidence_file(root: Path, path: Path) -> LegacyEvidenceFile:
+    return LegacyEvidenceFile(
+        path=path.relative_to(root).as_posix(),
+        mode=format(path.stat().st_mode & 0o7777, "04o"),
+        sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
+    )
+
+
 def _preserved_evidence(item: FeatureItem, root: Path) -> list[str]:
     references = {"factory/feature_ledger.yaml"}
     if item.packet_path:
@@ -196,6 +260,16 @@ def _preserved_evidence(item: FeatureItem, root: Path) -> list[str]:
 def _evidence_inventory(
     root: Path, records: list[LegacyMapRecord]
 ) -> tuple[list[LegacyEvidenceFile], str]:
+    optional_inventory = _load_optional_evidence_manifest(root)
+    optional_by_path = {item.path: item for item in optional_inventory}
+    optional_roots = {
+        evidence_root: {
+            path: item
+            for path, item in optional_by_path.items()
+            if path == evidence_root or path.startswith(f"{evidence_root}/")
+        }
+        for evidence_root in OPTIONAL_RUNTIME_EVIDENCE_ROOTS
+    }
     files: set[Path] = set()
     for record in records:
         for relative in record.evidence_preserved:
@@ -206,20 +280,38 @@ def _evidence_inventory(
                 files.update(path for path in candidate.rglob("*") if path.is_file())
             elif candidate.is_file():
                 files.add(candidate)
+            elif any(
+                relative == evidence_root
+                or relative.startswith(f"{evidence_root}/")
+                for evidence_root in OPTIONAL_RUNTIME_EVIDENCE_ROOTS
+            ):
+                # T001/T002 execution artifacts are deliberately ignored runtime bytes.
+                # Their complete immutable per-file roster is checked in separately so a
+                # clean checkout can reproduce the migration map without pretending the
+                # runtime trees are repository source.
+                continue
             else:
                 raise ValueError(f"legacy evidence is missing: {relative}")
-    inventory = [
-        LegacyEvidenceFile(
-            path=path.relative_to(root).as_posix(),
-            mode=format(path.stat().st_mode & 0o7777, "04o"),
-            sha256=hashlib.sha256(path.read_bytes()).hexdigest(),
-        )
-        for path in sorted(files)
-    ]
-    payload = b"".join(
-        f"{item.mode}\0{item.path}\0{item.sha256}\n".encode() for item in inventory
-    )
-    return inventory, sha256_digest(payload)
+    observed_items = [_evidence_file(root, path) for path in sorted(files)]
+    observed = {item.path: item for item in observed_items}
+    for evidence_root, expected in optional_roots.items():
+        candidate_root = root / evidence_root
+        if candidate_root.exists():
+            actual = {
+                item.path: item
+                for item in (
+                    _evidence_file(root, path)
+                    for path in sorted(candidate_root.rglob("*"))
+                    if path.is_file()
+                )
+            }
+            if actual != expected:
+                raise ValueError(
+                    f"legacy runtime evidence differs from its immutable manifest: {evidence_root}"
+                )
+        observed.update(expected)
+    inventory = [observed[path] for path in sorted(observed)]
+    return inventory, _inventory_digest(inventory)
 
 
 def build_mapping(root: Path = ROOT) -> LegacyMigrationMap:

@@ -148,6 +148,7 @@ ProtectHome=read-only
 ReadOnlyPaths=/var/lib/traincapsule-verifier/receipts
 ReadWritePaths=/var/lib/traincapsule-runtime
 ReadWritePaths=/var/lib/traincapsule-verifier/activation-controller-outbox
+ReadWritePaths=/var/lib/traincapsule-verifier/controller-start-outbox
 InaccessiblePaths=/var/lib/traincapsule-verifier/private /var/lib/traincapsule-verifier/oracle
 """
     elif unit == "controller-start-broker":
@@ -168,6 +169,7 @@ ReadOnlyPaths=/var/lib/traincapsule-verifier/controller-start-outbox
 ReadOnlyPaths=/var/lib/traincapsule-verifier/activation
 ReadOnlyPaths=/var/lib/traincapsule-verifier/receipts
 ReadWritePaths=/var/lib/traincapsule-runtime
+ReadWritePaths=/var/lib/traincapsule-verifier/controller-start-journal
 InaccessiblePaths=/var/lib/traincapsule-verifier/private
 InaccessiblePaths=/var/lib/traincapsule-verifier/oracle
 """
@@ -183,7 +185,6 @@ WantedBy=multi-user.target
         value = """[Unit]
 Description=TrainCapsule independent post-activation observer
 After=traincapsule-controller.service traincapsule-verifier-controller-start.service
-ConditionPathExists=!/var/lib/traincapsule-runtime/STOP
 
 [Service]
 Type=oneshot
@@ -198,6 +199,8 @@ ReadOnlyPaths=/var/lib/traincapsule-verifier/activation
 ReadOnlyPaths=/var/lib/traincapsule-verifier/controller-start-journal
 ReadOnlyPaths=/var/lib/traincapsule-runtime
 ReadWritePaths=/var/lib/traincapsule-verifier/post-activation-observations
+ReadWritePaths=/var/lib/traincapsule-verifier/activation-refresh-inbox
+ReadWritePaths=/var/lib/traincapsule-verifier/activation-refresh-retirement
 ReadWritePaths=/var/lib/traincapsule-runtime/STOP
 InaccessiblePaths=/var/lib/traincapsule-verifier/private /var/lib/traincapsule-verifier/oracle
 """
@@ -637,6 +640,15 @@ def post_activation_policy_content() -> bytes:
             "observationRoot": (
                 "/var/lib/traincapsule-verifier/post-activation-observations"
             ),
+            "refreshCompletionRoot": (
+                "/var/lib/traincapsule-verifier/activation-refresh-inbox"
+            ),
+            "refreshRetirementRoot": (
+                "/var/lib/traincapsule-verifier/activation-refresh-retirement"
+            ),
+            "runtimeManifestPath": (
+                "/etc/traincapsule-controller/runtime-manifest.json"
+            ),
             "maximumObservationSeconds": 3600,
         }
     )
@@ -757,6 +769,13 @@ def production_install_manifest() -> InstallManifest:
             group="root",
             mode="0700",
             purpose="independent post-activation observations and stop journals",
+        ),
+        InstallDirectory(
+            path="/var/lib/traincapsule-verifier/activation-refresh-retirement",
+            owner="root",
+            group="root",
+            mode="0700",
+            purpose="root refresh completion retirement journal and archive",
         ),
         InstallDirectory(
             path="/var/lib/traincapsule-verifier/activation-controller-outbox",

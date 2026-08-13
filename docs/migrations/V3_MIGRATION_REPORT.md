@@ -123,7 +123,7 @@ No future SHA, run ID, receipt, or PASS is invented here. Retain `factory/state/
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **638 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **640 paths**.
 
 This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing
 report must bind acceptance to an immutable candidate SHA and independent test/receipt
@@ -745,6 +745,7 @@ artifacts.
 | `A` | `verifier/src/traincapsule_verifier/git_anchor_producer.py` |
 | `A` | `verifier/src/traincapsule_verifier/git_anchor_updater.py` |
 | `A` | `verifier/src/traincapsule_verifier/github_app_backend.py` |
+| `A` | `verifier/src/traincapsule_verifier/github_app_readonly.py` |
 | `A` | `verifier/src/traincapsule_verifier/install_cli.py` |
 | `A` | `verifier/src/traincapsule_verifier/issuer_service.py` |
 | `A` | `verifier/src/traincapsule_verifier/models.py` |
@@ -764,6 +765,7 @@ artifacts.
 | `A` | `verifier/tests/test_controller_start_broker.py` |
 | `A` | `verifier/tests/test_git_anchor_producer.py` |
 | `A` | `verifier/tests/test_git_anchor_updater.py` |
+| `A` | `verifier/tests/test_github_app_readonly.py` |
 | `A` | `verifier/tests/test_post_activation_observer.py` |
 | `A` | `verifier/tests/test_public_boundary.py` |
 | `A` | `verifier/tests/test_ruleset_policy.py` |

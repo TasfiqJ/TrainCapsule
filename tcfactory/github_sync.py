@@ -194,6 +194,24 @@ class RemoteCIFailure(GitHubSyncError):
 GithubSyncError = GitHubSyncError
 
 
+def validate_release_rule_types(rule_types: set[str]) -> None:
+    required = {
+        "required_status_checks",
+        "pull_request",
+        "non_fast_forward",
+        "deletion",
+    }
+    missing = required - rule_types
+    if missing:
+        raise GitHubSyncError(
+            f"main rules are missing required release controls: {sorted(missing)}"
+        )
+    if "update" in rule_types:
+        raise GitHubSyncError(
+            "GitHub restrict-updates would block bypass-free automated PR merges"
+        )
+
+
 def load_github_config(path: Path) -> GitHubConfig:
     if not path.is_file():
         raise GitHubSyncError("V3.1 GitHub configuration is missing")
@@ -365,17 +383,7 @@ def validate_repository_release_controls(
             typed_rule = cast(dict[str, object], raw_rule)
             if isinstance(typed_rule.get("type"), str):
                 rule_map[cast(str, typed_rule["type"])] = typed_rule
-    required = {
-        "required_status_checks",
-        "pull_request",
-        "non_fast_forward",
-        "deletion",
-        "update",
-    }
-    if not required.issubset(rule_map):
-        raise GitHubSyncError(
-            "main rules do not enforce checks/PR-only/update or prevent force/deletion"
-        )
+    validate_release_rule_types(set(rule_map))
     status_parameters = rule_map["required_status_checks"].get("parameters")
     if not isinstance(status_parameters, dict):
         raise GitHubSyncError("required status-check parameters are unavailable")
@@ -420,7 +428,7 @@ def validate_repository_release_controls(
         "deletionForbidden": True,
         "forcePushForbidden": True,
         "pullRequestRequired": True,
-        "branchUpdateRestricted": True,
+        "directBranchUpdatesForbidden": True,
         "autoMergeEnabled": True,
     }
     digest = sha256_digest(

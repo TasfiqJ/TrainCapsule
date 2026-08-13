@@ -23,11 +23,6 @@
       "title": "Basebranch",
       "type": "string"
     },
-    "branchUpdateRestricted": {
-      "const": true,
-      "title": "Branchupdaterestricted",
-      "type": "boolean"
-    },
     "bypassActorCount": {
       "const": 0,
       "title": "Bypassactorcount",
@@ -36,6 +31,11 @@
     "deletionForbidden": {
       "const": true,
       "title": "Deletionforbidden",
+      "type": "boolean"
+    },
+    "directBranchUpdatesForbidden": {
+      "const": true,
+      "title": "Directbranchupdatesforbidden",
       "type": "boolean"
     },
     "enforcement": {
@@ -124,7 +124,7 @@
     "deletionForbidden",
     "forcePushForbidden",
     "pullRequestRequired",
-    "branchUpdateRestricted",
+    "directBranchUpdatesForbidden",
     "autoMergeEnabled",
     "observedAt",
     "expiresAt",

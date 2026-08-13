@@ -141,7 +141,7 @@ def test_read_only_producer_promoter_and_updater_material_are_exact(
         "deletionForbidden": True,
         "forcePushForbidden": True,
         "pullRequestRequired": True,
-        "branchUpdateRestricted": True,
+        "directBranchUpdatesForbidden": True,
         "autoMergeEnabled": True,
     }
     ruleset_provisional = RulesetObservationReceipt(
@@ -157,7 +157,7 @@ def test_read_only_producer_promoter_and_updater_material_are_exact(
         deletion_forbidden=True,
         force_push_forbidden=True,
         pull_request_required=True,
-        branch_update_restricted=True,
+        direct_branch_updates_forbidden=True,
         auto_merge_enabled=True,
         observed_at=NOW,
         expires_at=NOW + timedelta(minutes=15),

@@ -16,6 +16,7 @@ from .canonical import canonical_json_bytes, sha256_digest
 from .crypto import load_private_key, sign_model
 from .filesystem import atomic_write_new, open_trusted_root, read_bounded_file
 from .models import RulesetObservationReceipt
+from .ruleset_policy import validate_release_rule_types
 
 USER = "traincapsule-ruleset-observer"
 ROOT = Path("/var/lib/traincapsule-verifier")
@@ -101,15 +102,7 @@ def _observe(uid: int) -> None:
         for raw in cast(list[object], rules)
         if isinstance(raw, dict) and isinstance(cast(dict[str, object], raw).get("type"), str)
     }
-    required_types = {
-        "required_status_checks",
-        "pull_request",
-        "non_fast_forward",
-        "deletion",
-        "update",
-    }
-    if not required_types <= set(rule_map):
-        raise ValueError("ruleset does not provide the exact release controls")
+    validate_release_rule_types(set(rule_map))
     parameters = rule_map["required_status_checks"].get("parameters")
     if not isinstance(parameters, dict):
         raise ValueError("ruleset status-check parameters are unavailable")
@@ -142,7 +135,7 @@ def _observe(uid: int) -> None:
         "deletionForbidden": True,
         "forcePushForbidden": True,
         "pullRequestRequired": True,
-        "branchUpdateRestricted": True,
+        "directBranchUpdatesForbidden": True,
         "autoMergeEnabled": True,
     }
     observation_digest = sha256_digest(canonical_json_bytes(core))
@@ -159,7 +152,7 @@ def _observe(uid: int) -> None:
         deletion_forbidden=True,
         force_push_forbidden=True,
         pull_request_required=True,
-        branch_update_restricted=True,
+        direct_branch_updates_forbidden=True,
         auto_merge_enabled=True,
         observed_at=now,
         expires_at=now + timedelta(minutes=15),

@@ -28,7 +28,7 @@ def _ruleset_receipt(
         "deletionForbidden": True,
         "forcePushForbidden": True,
         "pullRequestRequired": True,
-        "branchUpdateRestricted": True,
+        "directBranchUpdatesForbidden": True,
         "autoMergeEnabled": True,
     }
     digest = sha256_digest(canonical_json_bytes(core))
@@ -45,7 +45,7 @@ def _ruleset_receipt(
         deletion_forbidden=True,
         force_push_forbidden=True,
         pull_request_required=True,
-        branch_update_restricted=True,
+        direct_branch_updates_forbidden=True,
         auto_merge_enabled=True,
         observed_at=observed_at,
         expires_at=observed_at + timedelta(minutes=15),

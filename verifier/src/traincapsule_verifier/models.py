@@ -474,7 +474,7 @@ class RulesetObservationReceipt(V31Model):
     deletion_forbidden: Literal[True]
     force_push_forbidden: Literal[True]
     pull_request_required: Literal[True]
-    branch_update_restricted: Literal[True]
+    direct_branch_updates_forbidden: Literal[True]
     auto_merge_enabled: Literal[True]
     observed_at: AwareDatetime
     expires_at: AwareDatetime
@@ -502,7 +502,7 @@ class RulesetObservationReceipt(V31Model):
             "deletionForbidden": self.deletion_forbidden,
             "forcePushForbidden": self.force_push_forbidden,
             "pullRequestRequired": self.pull_request_required,
-            "branchUpdateRestricted": self.branch_update_restricted,
+            "directBranchUpdatesForbidden": self.direct_branch_updates_forbidden,
             "autoMergeEnabled": self.auto_merge_enabled,
         }
         if self.observation_digest != sha256_digest(canonical_json_bytes(core)):

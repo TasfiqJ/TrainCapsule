@@ -89,6 +89,15 @@ def test_required_check_roster_cannot_omit_independent_policy() -> None:
         GitHubConfig.model_validate(payload)
 
 
+def test_release_rules_require_pr_controls_without_merge_deadlocking_update() -> None:
+    valid = {"required_status_checks", "pull_request", "non_fast_forward", "deletion"}
+    github_sync.validate_release_rule_types(valid)
+    with pytest.raises(github_sync.GitHubSyncError, match="would block.*PR merges"):
+        github_sync.validate_release_rule_types(valid | {"update"})
+    with pytest.raises(github_sync.GitHubSyncError, match="missing required release controls"):
+        github_sync.validate_release_rule_types({"non_fast_forward", "deletion"})
+
+
 def test_pull_request_observation_cannot_launder_a_non_main_base() -> None:
     raw: dict[str, object] = {
         "number": 1,

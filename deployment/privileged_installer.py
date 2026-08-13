@@ -1292,6 +1292,7 @@ class AuthorityBackend(Protocol):
 class SystemBackend(Protocol):
     simulated: bool
 
+    def system_ready(self) -> bool: ...
     def unit_enabled(self, unit: str) -> bool: ...
     def unit_active(self, unit: str) -> bool: ...
     def unit_main_pid(self, unit: str) -> int: ...
@@ -1364,6 +1365,19 @@ class LinuxAuthority:
 
 class LinuxSystemd:
     simulated = False
+
+    def system_ready(self) -> bool:
+        if not Path("/run/systemd/system").is_dir():
+            return False
+        return (
+            subprocess.run(
+                ["systemctl", "show", "--property=Version", "--value"],
+                check=False,
+                capture_output=True,
+                text=True,
+            ).returncode
+            == 0
+        )
 
     @staticmethod
     def _show(unit: str, prop: str) -> str:
@@ -1481,6 +1495,10 @@ class PrivilegedInstaller:
         simulated = self.authority.simulated and self.system.simulated
         if not simulated and (self.root != Path("/") or os.geteuid() != 0):
             raise InstallFailure("production apply requires uid 0 and the real filesystem root")
+        if not simulated and not self.system.system_ready():
+            raise InstallFailure(
+                "production apply requires a booted and reachable systemd manager"
+            )
         self._preflight_sources(require_privileged_bundle=not simulated)
         self._require_stopped_controller()
         self._open_transaction()

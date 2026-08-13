@@ -104,14 +104,19 @@ class FakeSystem:
         *,
         enabled: set[str] | None = None,
         active: set[str] | None = None,
+        ready: bool = True,
     ) -> None:
         self.controller = controller
         self.enabled = set(enabled or ())
         self.active = set(active or ())
+        self.ready = ready
         self.reloads = 0
         self.calls: list[tuple[str, str]] = []
         self.pids = {"traincapsule-controller.service": 101}
         self.fail_start_unit: str | None = None
+
+    def system_ready(self) -> bool:
+        return self.ready
 
     def unit_enabled(self, unit: str) -> bool:
         return unit in self.enabled
@@ -1155,6 +1160,33 @@ def test_default_is_read_only_and_apply_attests_exact_tree(tmp_path: Path) -> No
     )
     assert system.reloads == 1
     assert installer.apply(APPLY_CONFIRMATION) == result
+
+
+def test_production_apply_rejects_missing_systemd_before_mutation(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    _, bundle, spec, authority, _ = _fixture(tmp_path)
+    authority.simulated = False
+    system = FakeSystem(ready=False)
+    system.simulated = False
+    monkeypatch.setattr(os, "geteuid", lambda: 0)
+    installer = PrivilegedInstaller(
+        bundle,
+        spec,
+        root=Path("/"),
+        authority=authority,
+        system=system,
+    )
+
+    with pytest.raises(
+        InstallFailure,
+        match="production apply requires a booted and reachable systemd manager",
+    ):
+        installer.apply(APPLY_CONFIRMATION)
+
+    assert not authority.accounts
+    assert not system.calls
+    assert not installer.txn.exists()
 
 
 def test_partial_crash_replays_from_durable_journal(tmp_path: Path) -> None:

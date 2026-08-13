@@ -144,7 +144,8 @@ def test_context_manifest_never_falls_back_to_live_repo_source(tmp_path: Path) -
 def test_repository_role_default_contexts_resolve_to_existing_sources() -> None:
     context_config = load_yaml(ROOT / "config/context.yaml")
     context_index = load_yaml(ROOT / "docs/CONTEXT_INDEX.yaml")
-    assert context_config["version"] == context_index["version"] == 3
+    assert context_config["version"] == 3
+    assert context_index["version"] == 4
     groups = context_index["groups"]
     for role, names in context_config["roleDefaultGroups"].items():
         for name in names:

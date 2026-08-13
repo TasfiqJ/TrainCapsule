@@ -1,0 +1,127 @@
+{
+  "distributionDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "mechanisms": {
+    "activation_receipt_wrong_sha": {
+      "executable": "/usr/libexec/traincapsule-canary-activation_receipt_wrong_sha",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "authentication_expiry_and_recovery": {
+      "executable": "/usr/libexec/traincapsule-canary-authentication_expiry_and_recovery",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "automatic_milestone_advancement": {
+      "executable": "/usr/libexec/traincapsule-canary-automatic_milestone_advancement",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "bad_candidate_rejected_before_main": {
+      "executable": "/usr/libexec/traincapsule-canary-bad_candidate_rejected_before_main",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "duplicate_controller_rejection": {
+      "executable": "/usr/libexec/traincapsule-canary-duplicate_controller_rejection",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "external_wait_lane_isolation": {
+      "executable": "/usr/libexec/traincapsule-canary-external_wait_lane_isolation",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "lease_renewal_failure": {
+      "executable": "/usr/libexec/traincapsule-canary-lease_renewal_failure",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "machine_receipt_missing_invalid_expired_revoked": {
+      "executable": "/usr/libexec/traincapsule-canary-machine_receipt_missing_invalid_expired_revoked",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "machine_verifier_unavailable": {
+      "executable": "/usr/libexec/traincapsule-canary-machine_verifier_unavailable",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "malformed_report": {
+      "executable": "/usr/libexec/traincapsule-canary-malformed_report",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "missing_source_authority": {
+      "executable": "/usr/libexec/traincapsule-canary-missing_source_authority",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "post_merge_invariant_failure_and_automated_revert_pr": {
+      "executable": "/usr/libexec/traincapsule-canary-post_merge_invariant_failure_and_automated_revert_pr",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": true,
+      "timeoutSeconds": 3600
+    },
+    "private_gate_missing_for_trust_risk": {
+      "executable": "/usr/libexec/traincapsule-canary-private_gate_missing_for_trust_risk",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "process_kill_and_resume": {
+      "executable": "/usr/libexec/traincapsule-canary-process_kill_and_resume",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "quota_pause_and_resume": {
+      "executable": "/usr/libexec/traincapsule-canary-quota_pause_and_resume",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "real_claude_mechanical_task": {
+      "executable": "/usr/libexec/traincapsule-canary-real_claude_mechanical_task",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": true,
+      "timeoutSeconds": 3600
+    },
+    "release_transaction_crash_idempotency": {
+      "executable": "/usr/libexec/traincapsule-canary-release_transaction_crash_idempotency",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "repeated_finding_finite_stop": {
+      "executable": "/usr/libexec/traincapsule-canary-repeated_finding_finite_stop",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "runtime_root_outside_repo": {
+      "executable": "/usr/libexec/traincapsule-canary-runtime_root_outside_repo",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    },
+    "stale_current_facts": {
+      "executable": "/usr/libexec/traincapsule-canary-stale_current_facts",
+      "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+      "networkAllowed": false,
+      "timeoutSeconds": 300
+    }
+  },
+  "runnerExecutableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+  "schemaVersion": "3.1"
+}

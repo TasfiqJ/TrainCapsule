@@ -131,10 +131,16 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
             return BackendRouteState.AUTHENTICATED
 
     monkeypatch.setattr("tcfactory.supervisor.ClaudeCredentialProvider", AuthenticatedProvider)
-
-    with pytest.raises(RuntimeError, match="publisher/verifier capability is pending"):
-        run_startup_preflight(repo_root)
-    return
+    monkeypatch.setattr("tcfactory.supervisor.validate_publication_installation", lambda *_: None)
+    monkeypatch.setattr(
+        "tcfactory.supervisor.validate_controller_activation",
+        lambda **_: "sha256:" + "b" * 64,
+    )
+    monkeypatch.setattr(
+        "tcfactory.supervisor.validate_repository_release_controls",
+        lambda **_: {"status": "PASS", "rulesDigest": "sha256:" + "c" * 64},
+    )
+    monkeypatch.setattr("tcfactory.supervisor.reconcile_publications", lambda **_: [])
 
     def reject_private_gate(*_args: object, **_kwargs: object) -> tuple[Path, Path]:
         raise PrivateGateVerificationError("mandatory gate missing")
@@ -152,6 +158,20 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
     paths.stop.write_text("stop\n", encoding="utf-8")
     with pytest.raises(RuntimeError, match="durable STOP"):
         run_startup_preflight(repo_root)
+    paths.stop.unlink()
+
+    result = run_startup_preflight(repo_root)
+    assert result["ready"] is True
+    assert result["publicationRecovery"] == {
+        "status": "RECONCILED",
+        "transactions": 0,
+        "phases": [],
+        "repositoryControls": {
+            "status": "PASS",
+            "rulesDigest": "sha256:" + "c" * 64,
+        },
+        "activationReceiptDigest": "sha256:" + "b" * 64,
+    }
 
 
 def test_startup_reconciles_publication_before_exact_sha_marker(
@@ -159,8 +179,33 @@ def test_startup_reconciles_publication_before_exact_sha_marker(
 ) -> None:
     repo_root = Path(__file__).resolve().parents[1]
     _patch_policy(monkeypatch, repo_root, tmp_path)
-    with pytest.raises(RuntimeError, match="publisher/verifier capability is pending"):
+    calls: list[str] = []
+    monkeypatch.setattr("tcfactory.supervisor._verify_source_integrity", lambda _: None)
+    monkeypatch.setattr(
+        "tcfactory.supervisor.verify_legacy_queue_archive_receipt", lambda *_, **__: {}
+    )
+    monkeypatch.setattr("tcfactory.supervisor.validate_publication_installation", lambda *_: None)
+    monkeypatch.setattr(
+        "tcfactory.supervisor.validate_controller_activation",
+        lambda **_: "sha256:" + "b" * 64,
+    )
+    monkeypatch.setattr(
+        "tcfactory.supervisor.validate_repository_release_controls",
+        lambda **_: {"status": "PASS"},
+    )
+    monkeypatch.setattr(
+        "tcfactory.supervisor.reconcile_publications",
+        lambda **_: calls.append("reconcile") or [],
+    )
+
+    def reject_marker(*_: object) -> None:
+        calls.append("marker")
+        raise RuntimeError("exact-SHA marker intentionally unavailable")
+
+    monkeypatch.setattr("tcfactory.supervisor._verify_migration_marker", reject_marker)
+    with pytest.raises(RuntimeError, match="exact-SHA marker intentionally unavailable"):
         run_startup_preflight(repo_root)
+    assert calls == ["reconcile", "marker"]
 
 
 def test_v3_status_exposes_required_operator_fields() -> None:

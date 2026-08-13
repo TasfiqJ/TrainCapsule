@@ -458,8 +458,10 @@ def build_v3_context_manifest(
             )
 
     ordered_entries = sorted(entries, key=lambda entry: entry.path)
-    payload = active_source.source_digest.encode() + b"\n" + b"".join(
-        f"{entry.path}\0{entry.sha256}\n".encode() for entry in ordered_entries
+    payload = (
+        active_source.source_digest.encode()
+        + b"\n"
+        + b"".join(f"{entry.path}\0{entry.sha256}\n".encode() for entry in ordered_entries)
     )
     manifest = V3ContextManifest(
         work_item_id=work_item.work_item_id,

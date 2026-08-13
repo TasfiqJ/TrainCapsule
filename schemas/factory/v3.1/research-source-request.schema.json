@@ -1,0 +1,70 @@
+{
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/research-source-request.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "controlQuery": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Controlquery",
+      "type": "string"
+    },
+    "freshnessPolicy": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Freshnesspolicy",
+      "type": "string"
+    },
+    "freshnessSeconds": {
+      "maximum": 7776000,
+      "minimum": 60,
+      "title": "Freshnessseconds",
+      "type": "integer"
+    },
+    "method": {
+      "const": "GET",
+      "default": "GET",
+      "title": "Method",
+      "type": "string"
+    },
+    "parserId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Parserid",
+      "type": "string"
+    },
+    "parserVersion": {
+      "maxLength": 64,
+      "minLength": 1,
+      "title": "Parserversion",
+      "type": "string"
+    },
+    "query": {
+      "maxLength": 2000,
+      "minLength": 1,
+      "title": "Query",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "url": {
+      "maxLength": 2048,
+      "minLength": 1,
+      "title": "Url",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "url",
+    "query",
+    "controlQuery",
+    "parserId",
+    "parserVersion",
+    "freshnessPolicy",
+    "freshnessSeconds"
+  ],
+  "title": "ResearchSourceRequest",
+  "type": "object"
+}

@@ -203,6 +203,11 @@
       "title": "Candidatesha",
       "type": "string"
     },
+    "candidateTreeSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatetreesha",
+      "type": "string"
+    },
     "workItemId": {
       "pattern": "^V3-[A-Z]+-[0-9]{3}$",
       "title": "Workitemid",
@@ -266,6 +271,7 @@
   "required": [
     "baseSha",
     "candidateSha",
+    "candidateTreeSha",
     "workItemId",
     "packetDigest",
     "contextDigest",

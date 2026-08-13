@@ -107,7 +107,7 @@ def _policy(key: Ed25519PrivateKey) -> VerifierPolicy:
         issuer_key_id="KEY:ED25519:001",
         public_key_fingerprint=public_key_fingerprint(key.public_key()),
         minimum_revocation_epoch=1,
-        active_source_generation_id="V3.1-ZH-2026-08-12",
+        active_source_generation_id="traincapsule-v3.1-zh-2026-08-12",
         active_source_generation_digest=DIGEST_A,
         private_gate_suite_id="FULL-RELEASE-V31",
         private_gate_runner_digest=DIGEST_B,
@@ -181,7 +181,7 @@ def _request(**updates: Any) -> VerificationRequest:
         "candidateSha": SHA_A,
         "candidateTreeSha": SHA_B,
         "baseSha": SHA_C,
-        "sourceGenerationId": "V3.1-ZH-2026-08-12",
+        "sourceGenerationId": "traincapsule-v3.1-zh-2026-08-12",
         "sourceGenerationDigest": DIGEST_A,
         "contextManifestDigest": DIGEST_A,
         "taskPacketDigest": DIGEST_A,
@@ -211,7 +211,7 @@ def _evidence(raw_digest: str, **updates: Any) -> TrustedEvidenceManifest:
         "candidateSha": SHA_A,
         "candidateTreeSha": SHA_B,
         "baseSha": SHA_C,
-        "sourceGenerationId": "V3.1-ZH-2026-08-12",
+        "sourceGenerationId": "traincapsule-v3.1-zh-2026-08-12",
         "sourceGenerationDigest": DIGEST_A,
         "contextManifestDigest": DIGEST_A,
         "taskPacketDigest": DIGEST_A,
@@ -342,7 +342,7 @@ def _activation_request(fixture: Fixture, policy_receipt: Any, **updates: Any) -
         "machineEnvironmentDigest": sha256_digest(
             (fixture.activation / "machine-environment.json").read_bytes()
         ),
-        "sourceGenerationId": "V3.1-ZH-2026-08-12",
+        "sourceGenerationId": "traincapsule-v3.1-zh-2026-08-12",
         "sourceGenerationDigest": DIGEST_A,
         "controllerBinaryDigest": sha256_digest(
             (fixture.activation / "controller.py").read_bytes()
@@ -743,7 +743,7 @@ def test_check_requires_matching_local_receipt_and_activation_binds_exact_machin
         machine_environment_digest=sha256_digest(
             (fixture.activation / "machine-environment.json").read_bytes()
         ),
-        source_generation_id="V3.1-ZH-2026-08-12",
+        source_generation_id="traincapsule-v3.1-zh-2026-08-12",
         source_generation_digest=DIGEST_A,
         controller_binary_digest=sha256_digest((fixture.activation / "controller.py").read_bytes()),
         controller_config_digest=sha256_digest(

@@ -12,13 +12,38 @@ exactHeadShaChecksRequired: true
 independentMachinePolicyReceiptRequired: true
 mergeQueueOrAutoMergeRequired: true
 exactMergedMainVerificationRequired: true
-publisherCapability: PENDING_PHASE_4
+publisherCapability: AUTOMATED_PR_V31_READY
+transactionPath: publication-transactions
+quarantinePath: publication-quarantine
+independentReceiptRoot: /var/lib/traincapsule-verifier/receipts
+receiptVerifierExecutable: /usr/local/bin/traincapsule-verifier-verify-receipt
+activationReceiptPath: /var/lib/traincapsule-verifier/activation/current.json
 retry_attempts: 5
 retry_backoff_seconds: 30
 verify_remote_sha: true
 remote_ci:
   enabled: true
   requiredWorkflows:
+  - TrainCapsule / Factory quality
+  - TrainCapsule / Product unit
+  - TrainCapsule / Product contract
+  - TrainCapsule / Security
+  - TrainCapsule / Source-of-truth integrity
+  - TrainCapsule / Packaging install
+  - TrainCapsule / Docs and schemas
+  - TrainCapsule / Source freshness
+  - TrainCapsule / Machine policy
+  trustedCheckAppIds:
+    TrainCapsule / Factory quality: 15368
+    TrainCapsule / Product unit: 15368
+    TrainCapsule / Product contract: 15368
+    TrainCapsule / Security: 15368
+    TrainCapsule / Source-of-truth integrity: 15368
+    TrainCapsule / Packaging install: 15368
+    TrainCapsule / Docs and schemas: 15368
+    TrainCapsule / Source freshness: 15368
+    TrainCapsule / Machine policy: null
+  postMergeRequiredWorkflows:
   - TrainCapsule / Factory quality
   - TrainCapsule / Product unit
   - TrainCapsule / Product contract

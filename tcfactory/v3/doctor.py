@@ -64,9 +64,7 @@ def package_contracts(repo_root: Path) -> str:
 def _product_import_probe(repo_root: Path) -> str:
     source_roots = [str(path) for path in sorted((repo_root / "packages").glob("*/src"))]
     environment = os.environ.copy()
-    environment["PYTHONPATH"] = os.pathsep.join(
-        [*source_roots, environment.get("PYTHONPATH", "")]
-    )
+    environment["PYTHONPATH"] = os.pathsep.join([*source_roots, environment.get("PYTHONPATH", "")])
     code = (
         "import traincapsule_core, traincapsule_ingest_pytorch, traincapsule_qualify; "
         "from traincapsule_cli.cli import main; "
@@ -123,10 +121,8 @@ def _source_integrity(repo_root: Path) -> str:
 def _configuration(repo_root: Path) -> str:
     loaded = validate_v3_configuration(repo_root)
     github = load_github_config(repo_root / "config/github.yaml")
-    if github.direct_main_push or github.publisher_capability == "PENDING_PHASE_4":
-        raise RuntimeError(
-            "V3.1 automated PR publisher/verifier is not installed; factory is fail-closed"
-        )
+    if github.direct_main_push or github.publisher_capability != "AUTOMATED_PR_V31_READY":
+        raise RuntimeError("V3.1 automated PR publisher is not the active release mode")
     return f"validated {len(loaded)} V3.1 configurations and PR-only publication policy"
 
 

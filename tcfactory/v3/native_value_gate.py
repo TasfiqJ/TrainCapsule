@@ -53,6 +53,7 @@ class MachineReceiptVerifier(Protocol):
 
 class NativeValueGatePolicyV31(V31Model):
     policy_id: str = Field(pattern=r"^[A-Z0-9][A-Z0-9._:-]{2,127}$")
+    policy_version: str = Field(pattern=r"^[0-9]+\.[0-9]+\.[0-9]+$")
     approved_native_substitute: list[NativeToolConfigurationV31] = Field(
         min_length=1, max_length=32
     )
@@ -203,8 +204,8 @@ def authorize_value_transition(
     expected_value = value_result.disposition
     if receipt.decision is not PolicyDecision.PASS:
         raise NativeValueGateError("machine policy did not authorize this candidate")
-    if receipt.policy_id != policy.policy_id:
-        raise NativeValueGateError("machine receipt policy mismatch")
+    if receipt.policy_id != policy.policy_id or receipt.policy_version != policy.policy_version:
+        raise NativeValueGateError("machine receipt policy identity/version mismatch")
     if (
         receipt.work_item_id != benchmark.work_item_id
         or receipt.candidate_sha != benchmark.candidate_sha
@@ -228,6 +229,13 @@ def authorize_value_transition(
         raise NativeValueGateError("controlled evidence cannot authorize commercial support")
 
     status = _work_status(expected_value)
+    if status is WorkStatus.PASSED_ENGINEERING and (
+        receipt.engineering_maturity_ceiling is not TechnicalState.PASSED
+        or receipt.commercial_maturity_ceiling is CommercialState.NOT_EVALUATED
+    ):
+        raise NativeValueGateError(
+            "machine receipt maturity ceilings cannot authorize PASSED_ENGINEERING"
+        )
     return AuthorizedValueTransitionV31(
         schema_version="3.1",
         work_item_id=benchmark.work_item_id,

@@ -5,11 +5,13 @@ description = "Claude subscription-only, value-gated, risk-tiered, quota-resumab
 requires-python = ">=3.12,<3.13"
 dependencies = [
   "claude-agent-sdk==0.2.134",
+  "cryptography>=46",
   "pydantic>=2.8",
   "PyYAML>=6.0",
   "typer>=0.12",
   "rich>=13.7",
   "python-dateutil>=2.9",
+  "traincapsule-independent-verifier==3.1.0",
 ]
 
 [project.optional-dependencies]
@@ -22,20 +24,29 @@ dev = [
 
 [project.scripts]
 tcfactory = "tcfactory.cli:app"
+tcfactory-external-evidence-broker = "tcfactory.v3.external_evidence_broker_cli:main"
+traincapsule-assemble-production-bundle = "deployment.bundle_assembler:main"
+traincapsule-privileged-install = "deployment.privileged_installer:main"
+traincapsule-github-token-refresher = "deployment.github_token_refresher:main"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
+exclude = [
+  "deployment/tests",
+]
 packages = [
   "tcfactory",
+  "deployment",
 ]
 
 [tool.uv.workspace]
 members = ["packages/traincapsule-*"]
 
 [tool.uv.sources]
+traincapsule-independent-verifier = { path = "verifier" }
 traincapsule-core = { workspace = true }
 traincapsule-ingest-pytorch = { workspace = true }
 traincapsule-qualify = { workspace = true }
@@ -61,10 +72,11 @@ extraPaths = [
   "packages/traincapsule-qualify/src",
   "packages/traincapsule-cli/src",
   "verifier/src",
+  "canary_runner/src",
 ]
 
 [tool.pytest.ini_options]
-testpaths = ["tests"]
+testpaths = ["tests", "verifier/tests", "canary_runner/tests"]
 addopts = "-q"
 pythonpath = [
   "packages/traincapsule-core/src",
@@ -72,4 +84,5 @@ pythonpath = [
   "packages/traincapsule-qualify/src",
   "packages/traincapsule-cli/src",
   "verifier/src",
+  "canary_runner/src",
 ]

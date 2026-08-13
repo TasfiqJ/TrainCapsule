@@ -27,6 +27,7 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
         {
             WorkStatus.READY,
             WorkStatus.WAITING_EXTERNAL,
+            WorkStatus.PASSED_ENGINEERING,
             WorkStatus.BLOCKED_POLICY,
             WorkStatus.REJECTED_VALUE,
             WorkStatus.NATIVE_SUFFICIENT,
@@ -49,6 +50,7 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
         {
             WorkStatus.RUNNING,
             WorkStatus.PAUSED_QUOTA,
+            WorkStatus.PAUSED_BACKEND,
             WorkStatus.BLOCKED_TECHNICAL,
             WorkStatus.CANCELLED,
         }
@@ -56,10 +58,12 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
     WorkStatus.RUNNING: frozenset(
         {
             WorkStatus.PAUSED_QUOTA,
+            WorkStatus.PAUSED_BACKEND,
             WorkStatus.WAITING_EXTERNAL,
             WorkStatus.BLOCKED_TECHNICAL,
             WorkStatus.BLOCKED_POLICY,
             WorkStatus.PASSED_ENGINEERING,
+            WorkStatus.READY,
             WorkStatus.REJECTED_VALUE,
             WorkStatus.NATIVE_SUFFICIENT,
             WorkStatus.DEFERRED,
@@ -67,6 +71,9 @@ ALLOWED_TRANSITIONS: dict[WorkStatus, frozenset[WorkStatus]] = {
         }
     ),
     WorkStatus.PAUSED_QUOTA: frozenset({WorkStatus.QUEUED, WorkStatus.CANCELLED}),
+    WorkStatus.PAUSED_BACKEND: frozenset(
+        {WorkStatus.READY, WorkStatus.BLOCKED_TECHNICAL, WorkStatus.CANCELLED}
+    ),
     WorkStatus.WAITING_EXTERNAL: frozenset(
         {
             WorkStatus.READY,
@@ -221,8 +228,7 @@ class WorkItemCollection(V3Model):
             missing = ({*item.depends_on, *item.soft_depends_on}) - known
             if missing:
                 raise ValueError(
-                    f"work item {item.work_item_id} has missing dependencies: "
-                    f"{sorted(missing)}"
+                    f"work item {item.work_item_id} has missing dependencies: {sorted(missing)}"
                 )
         self._require_acyclic()
         return self

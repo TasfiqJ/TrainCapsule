@@ -24,9 +24,7 @@ class ActiveGenerationConfig(V3Model):
     schema_id: Literal["traincapsule.active-generation/v3.1-zh"]
     generation_id: Literal["traincapsule-v3.1-zh-2026-08-12"]
     source_root: Literal["docs/source-of-truth/v3.1-zh-2026-08-12"]
-    manifest_path: Literal[
-        "docs/source-of-truth/v3.1-zh-2026-08-12/FINAL_MANIFEST_V3_1_ZH.json"
-    ]
+    manifest_path: Literal["docs/source-of-truth/v3.1-zh-2026-08-12/FINAL_MANIFEST_V3_1_ZH.json"]
     manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     generator_path: Literal["scripts/generate_v3_1_zh_source.py"]
     generator_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
@@ -333,9 +331,7 @@ def validate_active_source_generation(repo_root: Path) -> ActiveSourceGeneration
         if actual != document.sha256:
             raise SourceAuthorityError(f"source document digest mismatch: {document.path}")
         document_paths.append(document.path)
-        document_headings[document.path] = {
-            heading for heading, _line in _headings(path)
-        }
+        document_headings[document.path] = {heading for heading, _line in _headings(path)}
         digest_payload.append(f"{document.path}\0{actual}\n".encode())
 
     declared = set(document_paths)
@@ -348,9 +344,7 @@ def validate_active_source_generation(repo_root: Path) -> ActiveSourceGeneration
     coverage_path = resolve_within(root, coverage.path, require_exists=True)
     if not coverage_path.is_file() or sha256_file(coverage_path) != coverage.sha256:
         raise SourceAuthorityError("source coverage evidence digest mismatch")
-    observed_source, observed_mapped = _validate_coverage(
-        root, coverage_path, config.generation_id
-    )
+    observed_source, observed_mapped = _validate_coverage(root, coverage_path, config.generation_id)
     if (observed_source, observed_mapped) != (
         coverage.source_heading_count,
         coverage.mapped_heading_count,
@@ -359,10 +353,7 @@ def validate_active_source_generation(repo_root: Path) -> ActiveSourceGeneration
     digest_payload.append(f"{coverage.path}\0{coverage.sha256}\n".encode())
     source_root_relative = Path(config.source_root)
     expected_members = {
-        *(
-            Path(relative).relative_to(source_root_relative).as_posix()
-            for relative in declared
-        ),
+        *(Path(relative).relative_to(source_root_relative).as_posix() for relative in declared),
         Path(config.manifest_path).relative_to(source_root_relative).as_posix(),
         Path(coverage.path).relative_to(source_root_relative).as_posix(),
     }

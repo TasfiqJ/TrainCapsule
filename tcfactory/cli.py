@@ -8,9 +8,10 @@ import os
 import shutil
 import subprocess
 import sys
+import time
 from datetime import UTC, datetime
 from pathlib import Path
-from typing import Annotated, cast
+from typing import Annotated, Any, cast
 
 import typer
 import yaml
@@ -28,9 +29,11 @@ from .completion import audit_and_expand_or_complete
 from .config import load_autonomy_config, load_factory_config, load_roles, load_task
 from .feature_ledger import load_feature_ledger
 from .github_sync import (
+    build_automated_pr_publisher,
     load_github_config,
     load_github_state,
     sync_github,
+    validate_controller_activation,
 )
 from .gitops import current_sha
 from .ledger import Ledger
@@ -47,6 +50,7 @@ from .peer_messaging import peer_status as read_peer_status
 from .pipeline import run_pipeline
 from .queue import enqueue_task, promote_due_paused, reconcile_running, worker_loop
 from .runtime_status import build_runtime_status
+from .supervisor import run_startup_preflight
 from .usage import usage_health
 from .util import atomic_write_text, read_json, write_json
 from .v3.configuration import (
@@ -97,12 +101,44 @@ def _v3_milestones(repo_root: Path) -> MilestoneRoadmap:
     return MilestoneRoadmap.model_validate(load_yaml(repo_root / "factory/roadmap/milestones.yaml"))
 
 
+def _is_v3_factory_payload(raw: object) -> bool:
+    if not isinstance(raw, dict):
+        return False
+    payload = cast(dict[str, object], raw)
+    return payload.get("schemaVersion") == "3.1" or payload.get("version") == 3
+
+
+def _canonical_v31_repository(repo_root: Path) -> bool:
+    """Identify active V3.1 from canonical authority, never a caller-selected config."""
+
+    factory_path = repo_root / "config/factory.yaml"
+    if not factory_path.is_file():
+        return False
+    factory_raw = load_yaml(factory_path)
+    if not _is_v3_factory_payload(factory_raw):
+        return False
+    active_path = repo_root / "config/active_generation.yaml"
+    if not active_path.is_file():
+        raise typer.BadParameter("canonical V3.1 active-generation pointer is missing")
+    active_raw = load_yaml(active_path)
+    if not isinstance(factory_raw, dict) or not isinstance(active_raw, dict):
+        raise typer.BadParameter("canonical V3.1 authority configuration is malformed")
+    factory_generation = cast(dict[str, object], factory_raw).get("generationId")
+    active_generation = cast(dict[str, object], active_raw).get("generationId")
+    if (
+        cast(dict[str, object], active_raw).get("schemaVersion") != "3.1"
+        or not isinstance(factory_generation, str)
+        or factory_generation != active_generation
+    ):
+        raise typer.BadParameter("canonical V3.1 generation authority is inconsistent")
+    return True
+
+
 def _reject_legacy_v2_surface(repo_root: Path, config_path: Path, command: str) -> None:
     """Prevent callable V2 queue/ledger commands from mutating a V3 repository."""
 
     raw = load_yaml(repo_root / config_path)
-    active_factory = cast(dict[str, object], raw) if isinstance(raw, dict) else {}
-    if active_factory.get("version") == 3 or active_factory.get("schemaVersion") == "3.1":
+    if _canonical_v31_repository(repo_root) or _is_v3_factory_payload(raw):
         raise typer.BadParameter(
             f"{command} is a disabled V2 compatibility surface; use V3.1 typed "
             "roadmap/status commands while controller startup is fail-closed"
@@ -237,15 +273,16 @@ def config_migrate(
 
 @app.command("lanes")
 def lanes(repo: Annotated[Path, typer.Option("--repo")] = Path(".")) -> None:
-    roadmap = _v3_roadmap(_resolve_repo(repo))
-    payload: dict[str, dict[str, int]] = {}
-    for lane in Lane:
-        items = [item for item in roadmap.work_items if item.lane is lane]
-        counts: dict[str, int] = {}
-        for item in items:
-            counts[item.status.value] = counts.get(item.status.value, 0) + 1
-        payload[lane.value] = counts
-    console.print_json(data={"activeMilestone": roadmap.active_milestone, "lanes": payload})
+    status = build_runtime_status(_resolve_repo(repo))
+    console.print_json(
+        data={
+            "activeMilestone": status["activeMilestone"],
+            "queueRoot": status["queueRoot"],
+            "lanes": status["laneCounts"],
+            "scopedBlockers": status["scopedBlockers"],
+            "mutation": False,
+        }
+    )
 
 
 @app.command("milestones")
@@ -656,16 +693,26 @@ def queue_status(
 ) -> None:
     repo_root = _resolve_repo(repo)
     raw = load_yaml(repo_root / config_path)
-    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+    if _is_v3_factory_payload(raw):
         from .v3.queue import V3Queue
 
         paths = resolve_v3_runtime_paths(repo_root)
         queue = V3Queue(paths.queue)
+        authoritative = {item.work_item_id: item for item in _v3_roadmap(repo_root).work_items}
+        items, compatibility = queue.compatible_items(authoritative)
         counts: dict[str, int] = {}
-        for item in queue.items():
+        for item in items:
             counts[item.status.value] = counts.get(item.status.value, 0) + 1
         console.print_json(
-            data={"version": 3, "queueRoot": str(paths.queue), "queue": counts, "mutation": False}
+            data={
+                "version": "3.1",
+                "queueRoot": str(paths.queue),
+                "queue": counts,
+                "policyCompatibility": [
+                    item.model_dump(mode="json", by_alias=True) for item in compatibility
+                ],
+                "mutation": False,
+            }
         )
         return
     config = load_factory_config(repo_root / config_path)
@@ -866,18 +913,47 @@ def v3_controller(
     repo: Annotated[Path, typer.Option("--repo")] = Path("."),
     once: Annotated[bool, typer.Option("--once")] = False,
 ) -> None:
-    """Fail closed until the V3.1 automated PR publisher is installed."""
+    """Run the V3.1 controller with the automated exact-SHA PR publisher."""
 
     root = _resolve_repo(repo)
-    validate_v3_configuration(root)
+    # Every public spelling of the controller funnels through this function.
+    # Keep the complete supervisor preflight here as well as in the scheduled
+    # launcher so direct CLI invocation cannot bypass migration, private-gate,
+    # publication-recovery, ruleset, checkpoint, or credential checks.
+    run_startup_preflight(root)
+    paths = resolve_v3_runtime_paths(root)
+    if paths.stop.exists() or paths.hard_stuck.exists():
+        raise typer.BadParameter("durable STOP or HARD_STUCK prevents controller startup")
     github = load_github_config(root / "config/github.yaml")
-    del once
-    if github.publisher_capability == "PENDING_PHASE_4":
-        raise typer.BadParameter(
-            "V3.1 automated PR publisher/verifier capability is pending; "
-            "controller startup is fail-closed"
+    try:
+        validate_controller_activation(repo_root=root, config=github)
+        publisher = build_automated_pr_publisher(
+            repo_root=root, state_root=paths.state_root, config=github
         )
-    raise typer.BadParameter("no validated V3.1 publisher capability is installed")
+    except (OSError, ValueError, RuntimeError) as exc:
+        raise typer.BadParameter(f"V3.1 publication preflight failed closed: {exc}") from exc
+    controller = _construct_live_v3_controller(root=root, publisher=publisher)
+    while True:
+        result = asyncio.run(controller.run_cycle())
+        console.print_json(data=result)
+        if once:
+            return
+        time.sleep(5)
+
+
+def _construct_live_v3_controller(*, root: Path, publisher: object) -> Any:
+    """One production construction seam, kept testable without starting the loop."""
+
+    from .backends.claude import ClaudeBackend, ClaudeCredentialProvider
+    from .v3.controller import V3Controller
+    from .v3.phase6_installation import build_phase6_runtime
+
+    return V3Controller(
+        repo_root=root,
+        backend=ClaudeBackend(ClaudeCredentialProvider(require_long_lived_token=True)),
+        publisher=publisher,  # pyright: ignore[reportArgumentType]
+        phase6_runtime=build_phase6_runtime(repo_root=root),
+    )
 
 
 @app.command("autonomy-enable")
@@ -1171,7 +1247,7 @@ def autonomy_pause(
 ) -> None:
     repo_root = _resolve_repo(repo)
     raw = load_yaml(repo_root / config_path)
-    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+    if _canonical_v31_repository(repo_root) or _is_v3_factory_payload(raw):
         path = resolve_v3_runtime_paths(repo_root).pause
     else:
         factory = load_factory_config(repo_root / config_path)
@@ -1188,7 +1264,7 @@ def autonomy_resume(
 ) -> None:
     repo_root = _resolve_repo(repo)
     raw = load_yaml(repo_root / config_path)
-    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+    if _canonical_v31_repository(repo_root) or _is_v3_factory_payload(raw):
         paths = resolve_v3_runtime_paths(repo_root)
         if paths.stop.exists() or paths.hard_stuck.exists():
             console.print("[red]Refused.[/red] Generic resume cannot clear STOP/HARD_STUCK.")
@@ -1239,7 +1315,7 @@ def autonomy_stop(
 ) -> None:
     repo_root = _resolve_repo(repo)
     raw = load_yaml(repo_root / config_path)
-    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+    if _canonical_v31_repository(repo_root) or _is_v3_factory_payload(raw):
         path = resolve_v3_runtime_paths(repo_root).stop
     else:
         factory = load_factory_config(repo_root / config_path)
@@ -1315,7 +1391,7 @@ def start(
     """Run only the V3 controller in the foreground without clearing controls."""
     repo_root = _resolve_repo(repo)
     raw = load_yaml(repo_root / config_path)
-    if not isinstance(raw, dict) or cast(dict[str, object], raw).get("version") != 3:
+    if not _is_v3_factory_payload(raw):
         console.print(
             "[red]Refused.[/red] tcfactory start is V3-only; legacy V2 dispatch is disabled."
         )
@@ -1332,11 +1408,100 @@ def start(
     ]
     if controls:
         console.print(
-            "[red]Refused.[/red] V3 start cannot clear durable controls: "
-            + ", ".join(controls)
+            "[red]Refused.[/red] V3 start cannot clear durable controls: " + ", ".join(controls)
         )
         raise typer.Exit(2)
     v3_controller(repo=repo, once=once)
+
+
+@app.command("canaries")
+def mandatory_canaries(
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+    result_root: Annotated[
+        Path | None,
+        typer.Option("--result-root", help="Override the configured canary result root"),
+    ] = None,
+    runner: Annotated[
+        Path,
+        typer.Option("--runner", help="Root-owned external mandatory-canary runner"),
+    ] = Path("/usr/local/bin/traincapsule-v31-run-canary"),
+) -> None:
+    """Run the exact ten-canary roster or emit a typed blocked suite."""
+
+    from .v3.canaries import CanaryStatus, MandatoryCanarySuite, run_mandatory_canaries
+
+    repo_root = _resolve_repo(repo)
+    paths = resolve_v3_runtime_paths(repo_root)
+    suite_path = run_mandatory_canaries(
+        repo_root=repo_root,
+        result_root=result_root or paths.canary_results,
+        runner_executable=runner,
+    )
+    suite = MandatoryCanarySuite.model_validate_json(suite_path.read_bytes(), strict=True)
+    console.print_json(
+        data={
+            "suite": suite.model_dump(mode="json", by_alias=True),
+            "suitePath": str(suite_path),
+            "suiteDigest": suite.canonical_digest(),
+        }
+    )
+    if suite.status is not CanaryStatus.PASS:
+        raise typer.Exit(2)
+
+
+@app.command("activate")
+def activate(
+    canary_suite: Annotated[
+        Path, typer.Option("--canary-suite", help="Exact mandatory-canary suite artifact")
+    ],
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+) -> None:
+    """Verify LIVE authority and atomically archive STOP; never clear HARD_STUCK."""
+
+    from .v3.activation import activate_v31
+
+    transaction = activate_v31(
+        repo_root=_resolve_repo(repo),
+        canary_suite_path=canary_suite,
+    )
+    console.print_json(data=transaction.model_dump(mode="json", by_alias=True))
+
+
+@app.command("request-activation")
+def request_activation(
+    canary_suite: Annotated[
+        Path, typer.Option("--canary-suite", help="Exact passing 20-canary suite")
+    ],
+    machine_policy_receipt: Annotated[
+        Path, typer.Option("--machine-policy-receipt", help="Independent activation policy receipt")
+    ],
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+) -> None:
+    """Stage an unsigned exact-evidence request for independent activation selection."""
+
+    from .v3.activation import stage_activation_request
+
+    request_path = stage_activation_request(
+        repo_root=_resolve_repo(repo),
+        canary_suite_path=canary_suite,
+        machine_policy_receipt_path=machine_policy_receipt,
+    )
+    console.print_json(data={"state": "SUBMITTED", "requestPath": str(request_path)})
+
+
+@app.command("coordinate-activation")
+def coordinate_activation(
+    repo: Annotated[Path, typer.Option("--repo")] = Path("."),
+) -> None:
+    """Zero-human stopped-state coordinator for exact activation requests."""
+
+    from .v3.activation import coordinate_activation_request
+
+    request = coordinate_activation_request(repo_root=_resolve_repo(repo))
+    if request is None:
+        console.print_json(data={"state": "STOPPED_PREREQUISITE"})
+        raise typer.Exit(2)
+    console.print_json(data={"state": "SUBMITTED", "requestPath": str(request)})
 
 
 @app.command("pause")
@@ -1374,12 +1539,10 @@ def verify_factory(
     """Show one machine-readable health snapshot without changing factory state."""
     repo_root = _resolve_repo(repo)
     raw = load_yaml(repo_root / config_path)
-    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+    if _is_v3_factory_payload(raw):
         payload = build_runtime_status(repo_root)
         payload["version"] = 3
-        payload["healthy"] = not (
-            resolve_v3_runtime_paths(repo_root).hard_stuck.exists()
-        )
+        payload["healthy"] = not (resolve_v3_runtime_paths(repo_root).hard_stuck.exists())
         console.print_json(data=payload)
         if not payload["healthy"]:
             raise typer.Exit(1)
@@ -1466,7 +1629,7 @@ def roadmap(
     """Show roadmap counts and the next dependency-ready task."""
     repo_root = _resolve_repo(repo)
     raw = load_yaml(repo_root / config_path)
-    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+    if _is_v3_factory_payload(raw):
         collection = _v3_roadmap(repo_root)
         counts: dict[str, int] = {}
         for item in collection.work_items:
@@ -1577,7 +1740,7 @@ def explain_blocker(
     """Explain the latest durable blocker using controller state and artifacts only."""
     repo_root = _resolve_repo(repo)
     raw = load_yaml(repo_root / config_path)
-    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+    if _is_v3_factory_payload(raw):
         console.print_json(data=build_runtime_status(repo_root))
         return
     factory = load_factory_config(repo_root / config_path)
@@ -1603,7 +1766,7 @@ def recover(
     """Reconcile interrupted queue state and promote quota pauses whose reset has passed."""
     repo_root = _resolve_repo(repo)
     raw = load_yaml(repo_root / config_path)
-    if isinstance(raw, dict) and cast(dict[str, object], raw).get("version") == 3:
+    if _is_v3_factory_payload(raw):
         paths = resolve_v3_runtime_paths(repo_root)
         queue = V3Queue(paths.queue)
         transactions = queue.reconcile_transactions()

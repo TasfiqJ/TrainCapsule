@@ -36,7 +36,8 @@ def test_global_prompt_holds_normative_v3_execution_contract() -> None:
         "Do not expand the packet",
         "must not influence routine product or factory work",
         "Do not renew the session",
-        "controller may promote an exact gate-bound candidate to `main`",
+        "Only the controller may publish the candidate branch",
+        "Direct-main publication is forbidden",
     }
     assert all(item in prompt for item in required)
     assert "work until done" not in prompt.lower()
@@ -103,12 +104,12 @@ def test_specialist_prompts_preserve_external_truth_and_machine_authority() -> N
     assert "BLOCKED_POLICY" in receipt
 
 
-def test_release_reviewer_obeys_owner_main_only_policy_without_publishing() -> None:
+def test_release_reviewer_obeys_v31_pr_policy_without_publishing() -> None:
     release = _text("release.md")
-    assert "only the controller may promote" in release
-    assert "directly to `main`" in release
-    assert "non-main pushes and pull requests are forbidden" in release
-    assert "draft-pull-request only" not in release
+    assert "The controller must use a candidate branch and automated pull request" in release
+    assert "use merge queue or auto-merge" in release
+    assert "without publishing or merging anything yourself" in release
+    assert "directly to `main`" not in release
     assert "Do not force-push" in release
 
 

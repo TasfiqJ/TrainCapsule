@@ -12,6 +12,7 @@ from typing import Annotated, ClassVar, Literal
 
 from pydantic import (
     AwareDatetime,
+    BeforeValidator,
     ConfigDict,
     Field,
     StringConstraints,
@@ -32,6 +33,19 @@ from tcfactory.v3.work_items import WorkItem
 type Digest = Annotated[str, StringConstraints(pattern=DIGEST_PATTERN.pattern)]
 type GitSha = Annotated[str, StringConstraints(pattern=SHA_PATTERN.pattern)]
 type Identifier = Annotated[str, StringConstraints(pattern=r"^[A-Z0-9][A-Z0-9._:-]{2,127}$")]
+
+
+def _reject_source_generation_whitespace(value: object) -> object:
+    if isinstance(value, str) and value != value.strip():
+        raise ValueError("source generation ID whitespace is forbidden")
+    return value
+
+
+type SourceGenerationId = Annotated[
+    str,
+    BeforeValidator(_reject_source_generation_whitespace),
+    StringConstraints(min_length=3, max_length=128, pattern=r"^[a-z0-9][a-z0-9._:-]{2,127}$"),
+]
 type RelativePath = Annotated[
     str, StringConstraints(min_length=1, max_length=512, pattern=r"^[^/].*$")
 ]
@@ -166,13 +180,24 @@ class ActivationMode(StrEnum):
 
 class PRPublicationPhase(StrEnum):
     PREPARED = "PREPARED"
+    BRANCH_PUSHED = "BRANCH_PUSHED"
     PR_OPEN = "PR_OPEN"
     CHECKS_PENDING = "CHECKS_PENDING"
     POLICY_PENDING = "POLICY_PENDING"
     READY_TO_MERGE = "READY_TO_MERGE"
+    AUTO_MERGE_REQUESTED = "AUTO_MERGE_REQUESTED"
     MERGED = "MERGED"
+    MAIN_VERIFIED = "MAIN_VERIFIED"
+    INVARIANTS_VERIFIED = "INVARIANTS_VERIFIED"
+    REVERT_REQUIRED = "REVERT_REQUIRED"
+    REVERT_BRANCH_PUSHED = "REVERT_BRANCH_PUSHED"
+    REVERT_PR_OPEN = "REVERT_PR_OPEN"
+    REVERT_CHECKS_PENDING = "REVERT_CHECKS_PENDING"
+    REVERT_POLICY_PENDING = "REVERT_POLICY_PENDING"
+    REVERT_MERGE_REQUESTED = "REVERT_MERGE_REQUESTED"
     FAILED = "FAILED"
     REVERTED = "REVERTED"
+    HARD_STUCK = "HARD_STUCK"
 
 
 class RuntimeMode(StrEnum):
@@ -214,11 +239,11 @@ def _require_relative_path(value: str) -> None:
 
 
 class SourceGenerationV31(V31Model):
-    generation_id: Identifier
+    generation_id: SourceGenerationId
     manifest_digest: Digest
     source_digests: dict[RelativePath, Digest] = Field(min_length=1, max_length=256)
     active_normative: Literal[True]
-    supersedes_generation_id: Identifier
+    supersedes_generation_id: SourceGenerationId
     created_at: AwareDatetime
 
     @field_validator("source_digests")
@@ -231,7 +256,7 @@ class SourceGenerationV31(V31Model):
 
 class SourceFreshnessReceiptV31(V31Model):
     receipt_id: Identifier
-    generation_id: Identifier
+    generation_id: SourceGenerationId
     generation_digest: Digest
     source_id: Identifier
     source_digest: Digest
@@ -559,7 +584,7 @@ class MachinePolicyReceiptV31(V31Model):
     candidate_sha: GitSha
     candidate_tree_sha: GitSha
     base_sha: GitSha
-    source_generation_id: Identifier
+    source_generation_id: SourceGenerationId
     source_generation_digest: Digest
     context_manifest_digest: Digest
     task_packet_digest: Digest
@@ -638,14 +663,33 @@ class MachinePolicyRevocationListV31(V31Model):
         return self
 
 
+class ActivationRequestV31(V31Model):
+    request_id: Identifier
+    nonce: str = Field(min_length=16, max_length=256)
+    verified_main_sha: GitSha
+    machine_environment_digest: Digest
+    source_generation_id: SourceGenerationId
+    source_generation_digest: Digest
+    controller_binary_digest: Digest
+    controller_config_digest: Digest
+    machine_environment_path: RelativePath
+    controller_binary_path: RelativePath
+    controller_config_path: RelativePath
+    machine_policy_receipt: MachinePolicyReceiptV31
+    mode: ActivationMode
+
+
 class ActivationReceiptV31(V31Model):
     receipt_id: Identifier
     verified_main_sha: GitSha
     machine_environment_digest: Digest
-    source_generation_id: Identifier
+    source_generation_id: SourceGenerationId
     source_generation_digest: Digest
     controller_binary_digest: Digest
     controller_config_digest: Digest
+    machine_environment_path: RelativePath
+    controller_binary_path: RelativePath
+    controller_config_path: RelativePath
     machine_policy_receipt_id: Identifier
     machine_policy_receipt_digest: Digest
     mode: ActivationMode
@@ -656,11 +700,11 @@ class ActivationReceiptV31(V31Model):
     issuer_id: Identifier
     issuer_key_id: Identifier
     signature_algorithm: Literal["ed25519"]
-    signature: str = Field(min_length=32, max_length=1024)
+    signature: str = Field(min_length=80, max_length=128)
 
     @model_validator(mode="after")
     def validate_activation(self) -> ActivationReceiptV31:
-        _require_forward_time(self.issued_at, self.expires_at, maximum=timedelta(hours=24))
+        _require_forward_time(self.issued_at, self.expires_at, maximum=timedelta(hours=1))
         return self
 
 
@@ -672,12 +716,28 @@ class PRPublicationTransactionV31(V31Model):
     base_sha: GitSha
     candidate_sha: GitSha
     candidate_tree_sha: GitSha
+    candidate_manifest_digest: Digest | None = None
     pull_request_number: int | None = Field(default=None, ge=1)
     pull_request_url: str | None = Field(
         default=None, pattern=r"^https://github\.com/.+/pull/[1-9][0-9]*$"
     )
-    machine_policy_receipt_id: Identifier
-    machine_policy_receipt_digest: Digest
+    machine_policy_receipt_id: Identifier | None = None
+    machine_policy_receipt_digest: Digest | None = None
+    required_check_digests: dict[Identifier, Digest] = Field(default_factory=dict, max_length=64)
+    merge_queue_entry_id: Identifier | None = None
+    merged_main_sha: GitSha | None = None
+    merged_main_tree_sha: GitSha | None = None
+    revert_sha: GitSha | None = None
+    revert_branch: str | None = Field(default=None, max_length=128)
+    revert_pull_request_number: int | None = Field(default=None, ge=1)
+    revert_pull_request_url: str | None = Field(
+        default=None, pattern=r"^https://github\.com/.+/pull/[1-9][0-9]*$"
+    )
+    revert_machine_policy_receipt_id: Identifier | None = None
+    revert_machine_policy_receipt_digest: Digest | None = None
+    reverted_main_sha: GitSha | None = None
+    idempotency_receipts: dict[Identifier, Digest] = Field(default_factory=dict, max_length=32)
+    failure_reason: str | None = Field(default=None, max_length=2000)
     phase: PRPublicationPhase
     attempt: int = Field(ge=1, le=20)
     maximum_attempts: int = Field(ge=1, le=20)
@@ -690,9 +750,58 @@ class PRPublicationTransactionV31(V31Model):
     def validate_publication(self) -> PRPublicationTransactionV31:
         if self.updated_at < self.created_at or self.attempt > self.maximum_attempts:
             raise ValueError("publication timestamps or retry budget are inconsistent")
-        opened = self.phase not in {PRPublicationPhase.PREPARED, PRPublicationPhase.FAILED}
-        if opened != (self.pull_request_number is not None and self.pull_request_url is not None):
+        has_pr = self.pull_request_number is not None and self.pull_request_url is not None
+        if (self.pull_request_number is None) != (self.pull_request_url is None):
+            raise ValueError("pull-request number and URL must be recorded together")
+        if (
+            self.phase
+            not in {
+                PRPublicationPhase.PREPARED,
+                PRPublicationPhase.BRANCH_PUSHED,
+                PRPublicationPhase.FAILED,
+                PRPublicationPhase.HARD_STUCK,
+            }
+            and not has_pr
+        ):
             raise ValueError("open/terminal PR phases require number and URL")
+        if (self.machine_policy_receipt_id is None) != (self.machine_policy_receipt_digest is None):
+            raise ValueError("machine-policy receipt identity and digest must be paired")
+        if (
+            self.phase
+            in {
+                PRPublicationPhase.READY_TO_MERGE,
+                PRPublicationPhase.AUTO_MERGE_REQUESTED,
+                PRPublicationPhase.MERGED,
+                PRPublicationPhase.MAIN_VERIFIED,
+                PRPublicationPhase.INVARIANTS_VERIFIED,
+                PRPublicationPhase.REVERT_REQUIRED,
+                PRPublicationPhase.REVERT_BRANCH_PUSHED,
+                PRPublicationPhase.REVERT_PR_OPEN,
+                PRPublicationPhase.REVERT_CHECKS_PENDING,
+                PRPublicationPhase.REVERT_POLICY_PENDING,
+                PRPublicationPhase.REVERT_MERGE_REQUESTED,
+                PRPublicationPhase.REVERTED,
+            }
+            and self.machine_policy_receipt_id is None
+        ):
+            raise ValueError("merge and post-merge phases require a machine-policy receipt")
+        if (
+            self.phase
+            in {
+                PRPublicationPhase.MERGED,
+                PRPublicationPhase.MAIN_VERIFIED,
+                PRPublicationPhase.INVARIANTS_VERIFIED,
+                PRPublicationPhase.REVERT_REQUIRED,
+                PRPublicationPhase.REVERT_BRANCH_PUSHED,
+                PRPublicationPhase.REVERT_PR_OPEN,
+                PRPublicationPhase.REVERT_CHECKS_PENDING,
+                PRPublicationPhase.REVERT_POLICY_PENDING,
+                PRPublicationPhase.REVERT_MERGE_REQUESTED,
+                PRPublicationPhase.REVERTED,
+            }
+            and self.merged_main_sha is None
+        ):
+            raise ValueError("post-merge phases require the exact merged-main SHA")
         return self
 
 
@@ -740,7 +849,7 @@ class RuntimeStatusV31(V31Model):
     autonomy_enabled: bool
     activation_receipt_id: Identifier | None = None
     activation_receipt_digest: Digest | None = None
-    source_generation_id: Identifier
+    source_generation_id: SourceGenerationId
     source_generation_digest: Digest
     controller_binary_digest: Digest
     controller_config_digest: Digest
@@ -878,6 +987,7 @@ V31_NATIVE_CONTRACTS: dict[str, type[V31Model]] = {
     "decision-value": DecisionValueResultV31,
     "machine-policy-receipt": MachinePolicyReceiptV31,
     "machine-policy-revocation-list": MachinePolicyRevocationListV31,
+    "activation-request": ActivationRequestV31,
     "activation-receipt": ActivationReceiptV31,
     "pr-publication-transaction": PRPublicationTransactionV31,
     "milestone-completion-proposal": MilestoneCompletionProposalV31,

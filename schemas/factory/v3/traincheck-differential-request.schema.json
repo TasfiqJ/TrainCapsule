@@ -1,0 +1,47 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "traincheckToolDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Trainchecktooldigest",
+      "type": "string"
+    },
+    "incidentContractDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Incidentcontractdigest",
+      "type": "string"
+    },
+    "baselineObservationDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Baselineobservationdigest",
+      "type": "string"
+    },
+    "candidateObservationDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Candidateobservationdigest",
+      "type": "string"
+    },
+    "independentOracleId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Independentoracleid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "workItemId",
+    "traincheckToolDigest",
+    "incidentContractDigest",
+    "baselineObservationDigest",
+    "candidateObservationDigest",
+    "independentOracleId"
+  ],
+  "title": "TrainCheckDifferentialRequest",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/traincheck-differential-request.schema.json"
+}

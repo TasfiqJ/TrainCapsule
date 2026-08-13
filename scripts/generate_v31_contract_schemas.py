@@ -15,22 +15,30 @@ ROOT: Final = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
+from tcfactory.v3.activation import ACTIVATION_CONTRACTS  # noqa: E402
 from tcfactory.v3.base import json_schema_for  # noqa: E402
+from tcfactory.v3.canaries import CANARY_CONTRACTS  # noqa: E402
 from tcfactory.v3.contracts_v31 import (  # noqa: E402
     REUSABLE_V3_MIGRATIONS,
     V31_NATIVE_CONTRACTS,
 )
+from tcfactory.v3.external_actions import EXTERNAL_ACTION_CONTRACTS  # noqa: E402
 from tcfactory.v3.market_artifacts import MARKET_ARTIFACT_CONTRACTS  # noqa: E402
 from tcfactory.v3.native_value_gate import NATIVE_VALUE_CONTRACTS  # noqa: E402
 from tcfactory.v3.source_acquisition import SOURCE_ACQUISITION_CONTRACTS  # noqa: E402
+from tcfactory.v3.task_compiler_v31 import TASK_COMPILER_CONTRACTS  # noqa: E402
 
 SCHEMA_ROOT: Final = ROOT / "schemas/factory/v3.1"
 SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     **{f"{name}.schema.json": model for name, model in V31_NATIVE_CONTRACTS.items()},
     **{f"migrated-{name}.schema.json": model for name, model in REUSABLE_V3_MIGRATIONS.items()},
     **{f"{name}.schema.json": model for name, model in SOURCE_ACQUISITION_CONTRACTS.items()},
+    **{f"{name}.schema.json": model for name, model in EXTERNAL_ACTION_CONTRACTS.items()},
     **{f"{name}.schema.json": model for name, model in NATIVE_VALUE_CONTRACTS.items()},
     **{f"{name}.schema.json": model for name, model in MARKET_ARTIFACT_CONTRACTS.items()},
+    **{f"{name}.schema.json": model for name, model in TASK_COMPILER_CONTRACTS.items()},
+    **{f"{name}.schema.json": model for name, model in CANARY_CONTRACTS.items()},
+    **{f"{name}.schema.json": model for name, model in ACTIVATION_CONTRACTS.items()},
 }
 
 

@@ -1,0 +1,49 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "GitSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/verifier/v3.1/activation-authorization.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "activationReceiptDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "activationReceiptId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "verified": {
+      "const": true,
+      "title": "Verified",
+      "type": "boolean"
+    },
+    "verifiedMainSha": {
+      "$ref": "#/$defs/GitSha"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "verified",
+    "verifiedMainSha",
+    "activationReceiptId",
+    "activationReceiptDigest"
+  ],
+  "title": "ActivationAuthorization",
+  "type": "object"
+}

@@ -207,9 +207,7 @@ def normalize_claude_led_nodes(packet: TaskPacket) -> TaskPacket:
     repair = packet.repair.model_copy(
         update={
             "mutating_role": owner.role,
-            "restart_review_from": (
-                RoleName.ADVERSARY if len(stages) > 1 else owner.role
-            ),
+            "restart_review_from": (RoleName.ADVERSARY if len(stages) > 1 else owner.role),
         }
     )
     return packet.model_copy(update={"pipeline": stages, "gates": gates, "repair": repair})

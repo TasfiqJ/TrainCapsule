@@ -30,9 +30,7 @@ class Ledger:
         with single_writer_lock(self.path.with_suffix(self.path.suffix + ".lock")):
             data = self._load()
             record = result.model_dump(mode="json")
-            record["estimated_api_equivalent_usd"] = float(
-                record.get("total_cost_usd", 0.0) or 0.0
-            )
+            record["estimated_api_equivalent_usd"] = float(record.get("total_cost_usd", 0.0) or 0.0)
             record["actual_subscription_charge_usd"] = 0.0
             record["capacity_source"] = "subscription"
             data["version"] = 2

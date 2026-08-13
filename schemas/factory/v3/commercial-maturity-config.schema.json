@@ -22,7 +22,16 @@
         "SECOND_PAID_ACTION",
         "INDEPENDENT_OPERATOR",
         "UPSTREAM_ACCEPTANCE",
-        "PROVIDER_ACCEPTANCE"
+        "PROVIDER_ACCEPTANCE",
+        "INCIDENT_TIMELINE",
+        "UPCOMING_CHANGE",
+        "PILOT_CANDIDATE",
+        "CUSTOMER_AUTHORIZATION",
+        "SECOND_ACTION_COMMITMENT",
+        "GPU_EXECUTION",
+        "SAME_FAMILY_CASE",
+        "SUPPORT_ACCEPTANCE",
+        "DELIVERY_ECONOMICS"
       ],
       "title": "EvidenceType",
       "type": "string"

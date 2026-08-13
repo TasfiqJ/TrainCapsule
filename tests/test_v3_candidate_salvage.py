@@ -27,8 +27,19 @@ class _DisabledPublisher:
 
 def _repo(tmp_path: Path) -> tuple[Path, str]:
     repo = tmp_path / "repo"
-    (repo / "config").mkdir(parents=True)
-    shutil.copy2(ROOT / "config/factory.yaml", repo / "config/factory.yaml")
+    shutil.copytree(ROOT / "config", repo / "config")
+    shutil.copytree(ROOT / "docs/source-of-truth", repo / "docs/source-of-truth")
+    shutil.copy2(ROOT / "docs/CONTEXT_INDEX.yaml", repo / "docs/CONTEXT_INDEX.yaml")
+    shutil.copy2(ROOT / "SOURCE_PRECEDENCE.md", repo / "SOURCE_PRECEDENCE.md")
+    (repo / "scripts").mkdir()
+    shutil.copy2(
+        ROOT / "scripts/generate_v3_1_zh_source.py",
+        repo / "scripts/generate_v3_1_zh_source.py",
+    )
+    shutil.copytree(
+        ROOT / "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11",
+        repo / "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11",
+    )
     subprocess.run(["git", "init", "-b", "main"], cwd=repo, check=True, capture_output=True)
     subprocess.run(["git", "config", "user.name", "Test"], cwd=repo, check=True)
     subprocess.run(["git", "config", "user.email", "test@example.invalid"], cwd=repo, check=True)

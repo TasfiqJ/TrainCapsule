@@ -44,6 +44,25 @@ def _claim_and_wait(root: str, ready: object, release: object) -> None:
     release.wait()  # type: ignore[attr-defined]
 
 
+def _transition_process(
+    root: str,
+    target: str,
+    start: object,
+    results: object,
+) -> None:
+    start.wait()  # type: ignore[attr-defined]
+    try:
+        path = V3Queue(Path(root)).transition(
+            "V3-PROD-001",
+            WorkStatus(target),
+            updated_at=NOW,
+        )
+    except Exception as exc:  # noqa: BLE001 - child reports exact losing disposition
+        results.put(("error", type(exc).__name__, str(exc)))  # type: ignore[attr-defined]
+    else:
+        results.put(("transitioned", path.parent.name))  # type: ignore[attr-defined]
+
+
 def _hold_controller_lock(path: str, ready: object, release: object) -> None:
     with controller_process_lock(Path(path)):
         ready.set()  # type: ignore[attr-defined]
@@ -167,6 +186,38 @@ def test_cross_process_claim_has_exactly_one_owner(tmp_path: Path) -> None:
     lease = json.loads((root / ".leases/V3-PROD-001.json").read_text(encoding="utf-8"))
     assert lease["ownerId"] in {"owner-a", "owner-b"}
     assert queue.load("V3-PROD-001").status is WorkStatus.RUNNING
+
+
+def test_cross_process_transition_is_compare_and_swap_not_last_writer_wins(
+    tmp_path: Path,
+) -> None:
+    root = tmp_path / "v3-queue"
+    queue = V3Queue(root)
+    queue.put(_item())
+    context = multiprocessing.get_context("fork")
+    start = context.Event()
+    results = context.Queue()
+    processes = [
+        context.Process(
+            target=_transition_process,
+            args=(str(root), target, start, results),
+        )
+        for target in (WorkStatus.QUEUED.value, WorkStatus.DEFERRED.value)
+    ]
+    for process in processes:
+        process.start()
+    start.set()
+    for process in processes:
+        process.join(timeout=5)
+        assert process.exitcode == 0
+    observed = [results.get(timeout=2), results.get(timeout=2)]
+    assert sum(row[0] == "transitioned" for row in observed) == 1
+    physical_entries = list(root.glob("*/V3-PROD-001.yaml"))
+    assert len(physical_entries) == 1
+    assert queue.load("V3-PROD-001").status in {
+        WorkStatus.QUEUED,
+        WorkStatus.DEFERRED,
+    }
 
 
 def test_claim_lock_is_released_on_process_crash_and_lease_recovers(tmp_path: Path) -> None:

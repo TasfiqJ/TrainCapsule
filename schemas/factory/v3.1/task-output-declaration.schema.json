@@ -1,0 +1,93 @@
+{
+  "$defs": {
+    "EvidenceClass": {
+      "enum": [
+        "ENGINEERING",
+        "RESEARCH",
+        "TRUST",
+        "FACTORY"
+      ],
+      "title": "EvidenceClass",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/task-output-declaration.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "contentDigestRequired": {
+      "title": "Contentdigestrequired",
+      "type": "boolean"
+    },
+    "evidenceClass": {
+      "$ref": "#/$defs/EvidenceClass"
+    },
+    "externalAuthorityRequired": {
+      "title": "Externalauthorityrequired",
+      "type": "boolean"
+    },
+    "maximumBytes": {
+      "maximum": 100000000,
+      "minimum": 1,
+      "title": "Maximumbytes",
+      "type": "integer"
+    },
+    "mutatingOwner": {
+      "enum": [
+        "CANDIDATE_AGENT",
+        "CONTROLLER"
+      ],
+      "title": "Mutatingowner",
+      "type": "string"
+    },
+    "outputId": {
+      "pattern": "^OUT:V3:[A-Z]+:[0-9]{3}:[A-Z_]+$",
+      "title": "Outputid",
+      "type": "string"
+    },
+    "path": {
+      "maxLength": 512,
+      "minLength": 1,
+      "title": "Path",
+      "type": "string"
+    },
+    "readers": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 16,
+      "minItems": 1,
+      "title": "Readers",
+      "type": "array"
+    },
+    "required": {
+      "title": "Required",
+      "type": "boolean"
+    },
+    "schemaId": {
+      "pattern": "^traincapsule\\.v3\\.1\\.[a-z0-9.-]+$",
+      "title": "Schemaid",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "outputId",
+    "path",
+    "schemaId",
+    "required",
+    "evidenceClass",
+    "mutatingOwner",
+    "readers",
+    "contentDigestRequired",
+    "externalAuthorityRequired",
+    "maximumBytes"
+  ],
+  "title": "OutputDeclarationV31",
+  "type": "object"
+}

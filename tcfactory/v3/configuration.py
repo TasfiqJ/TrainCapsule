@@ -21,9 +21,7 @@ from tcfactory.yamlutil import load_yaml
 
 class RepositoryPolicy(V3Model):
     base_branch: Literal["main"]
-    release_mode: Literal[
-        "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
-    ]
+    release_mode: Literal["AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"]
     direct_main_push: Literal[False]
     candidate_branch_prefix: Literal["factory/"]
     require_clean_base: bool
@@ -75,7 +73,7 @@ class ReleasePolicy(V3Model):
     independent_machine_policy_receipt_required: Literal[True]
     merge_queue_or_auto_merge_required: Literal[True]
     exact_merged_main_verification_required: Literal[True]
-    publisher_capability: Literal["PENDING_PHASE_4"]
+    publisher_capability: Literal["AUTOMATED_PR_V31_READY"]
 
 
 class OperatorPolicy(V3Model):
@@ -319,8 +317,10 @@ def validate_v3_configuration(repo_root: Path) -> dict[str, V3Model]:
             group = cast(dict[str, object], raw_group)
             include = group.get("includeRoles")
             exclude = group.get("excludeRoles")
-            if not isinstance(include, list) or role not in include or (
-                isinstance(exclude, list) and role in exclude
+            if (
+                not isinstance(include, list)
+                or role not in include
+                or (isinstance(exclude, list) and role in exclude)
             ):
                 raise ValueError(f"context group {group_name} is not authorized for role {role}")
     factory = load_factory_v3(repo_root / "config/factory.yaml")
@@ -371,13 +371,9 @@ def validate_v3_configuration(repo_root: Path) -> dict[str, V3Model]:
     }
     if set(factory.compatibility.allowed_inputs) != set(compatibility_inputs.values()):
         raise ValueError("V3 compatibility inputs differ from the explicit lossless adapter set")
-    legacy_versions = {
-        name: cast(Any, loaded[name]).version for name in compatibility_inputs
-    }
+    legacy_versions = {name: cast(Any, loaded[name]).version for name in compatibility_inputs}
     if set(legacy_versions.values()) != {factory.compatibility.input_version}:
-        raise ValueError(
-            f"legacy compatibility input version mismatch: {legacy_versions}"
-        )
+        raise ValueError(f"legacy compatibility input version mismatch: {legacy_versions}")
     return loaded
 
 

@@ -57,6 +57,11 @@
       "pattern": "^[^/].*$",
       "type": "string"
     },
+    "SourceGenerationId": {
+      "maxLength": 128,
+      "minLength": 3,
+      "type": "string"
+    },
     "ValueDisposition": {
       "enum": [
         "NATIVE_WORKFLOW_SUFFICIENT",
@@ -242,7 +247,7 @@
       "$ref": "#/$defs/Digest"
     },
     "sourceGenerationId": {
-      "$ref": "#/$defs/Identifier"
+      "$ref": "#/$defs/SourceGenerationId"
     },
     "taskPacketDigest": {
       "$ref": "#/$defs/Digest"

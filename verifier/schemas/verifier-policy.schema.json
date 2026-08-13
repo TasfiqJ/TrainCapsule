@@ -115,6 +115,11 @@
       ],
       "title": "RiskPolicy",
       "type": "object"
+    },
+    "SourceGenerationId": {
+      "maxLength": 128,
+      "minLength": 3,
+      "type": "string"
     }
   },
   "$id": "https://traincapsule.local/schemas/verifier/v3.1/verifier-policy.schema.json",
@@ -125,7 +130,7 @@
       "$ref": "#/$defs/Digest"
     },
     "activeSourceGenerationId": {
-      "$ref": "#/$defs/Identifier"
+      "$ref": "#/$defs/SourceGenerationId"
     },
     "allowedClaims": {
       "items": {

@@ -1,4 +1,30 @@
 {
+  "$defs": {
+    "BashCommandRule": {
+      "additionalProperties": false,
+      "properties": {
+        "executable": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$",
+          "title": "Executable",
+          "type": "string"
+        },
+        "argumentPrefix": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Argumentprefix",
+          "type": "array"
+        }
+      },
+      "required": [
+        "executable",
+        "argumentPrefix"
+      ],
+      "title": "BashCommandRule",
+      "type": "object"
+    }
+  },
   "additionalProperties": false,
   "properties": {
     "requestId": {
@@ -121,8 +147,9 @@
     },
     "bashAllowlist": {
       "items": {
-        "type": "string"
+        "$ref": "#/$defs/BashCommandRule"
       },
+      "maxItems": 16,
       "title": "Bashallowlist",
       "type": "array"
     },

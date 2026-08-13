@@ -14,12 +14,27 @@
           "title": "Backend",
           "type": "string"
         },
+        "bashArgumentAllowlist": {
+          "default": false,
+          "title": "Bashargumentallowlist",
+          "type": "boolean"
+        },
         "cancellation": {
           "title": "Cancellation",
           "type": "boolean"
         },
+        "durableTerminalRecords": {
+          "default": false,
+          "title": "Durableterminalrecords",
+          "type": "boolean"
+        },
         "networkDenial": {
           "title": "Networkdenial",
+          "type": "boolean"
+        },
+        "overallWallClockTimeout": {
+          "default": false,
+          "title": "Overallwallclocktimeout",
           "type": "boolean"
         },
         "resume": {

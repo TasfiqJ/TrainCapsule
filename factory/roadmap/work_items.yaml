@@ -1651,7 +1651,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -1686,7 +1686,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -1722,7 +1722,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -1757,7 +1757,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -1792,7 +1792,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -1827,7 +1827,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -1864,7 +1864,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -1900,7 +1900,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -1936,7 +1936,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -1971,7 +1971,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2006,7 +2006,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2041,7 +2041,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2076,7 +2076,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2114,7 +2114,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2149,7 +2149,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2184,7 +2184,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2223,7 +2223,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2259,7 +2259,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2294,7 +2294,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2330,7 +2330,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2366,7 +2366,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2437,7 +2437,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2472,7 +2472,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2530,7 +2530,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: MACHINE_POLICY_AUTHORITY
@@ -2566,7 +2566,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: NATIVE_ADVANTAGE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: MACHINE_POLICY_AUTHORITY
@@ -2600,7 +2600,7 @@ workItems:
   riskTier: EXTERNAL
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: WAITING_EXTERNAL
   ownerType: EXTERNAL_PARTY
@@ -2634,7 +2634,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2668,7 +2668,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2702,7 +2702,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2736,7 +2736,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2771,7 +2771,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2806,7 +2806,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: INTEGRATE_EXISTING_BACKEND
   status: PROPOSED
   ownerType: AI
@@ -2845,7 +2845,7 @@ workItems:
   riskTier: EXTERNAL
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: WAITING_EXTERNAL
   ownerType: EXTERNAL_PARTY
@@ -2883,7 +2883,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: MACHINE_POLICY_AUTHORITY
@@ -2917,7 +2917,7 @@ workItems:
   riskTier: EXTERNAL
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: WAITING_EXTERNAL
   ownerType: EXTERNAL_PARTY
@@ -2952,7 +2952,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -2987,7 +2987,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: INTEGRATE_EXISTING_BACKEND
   status: PROPOSED
   ownerType: AI
@@ -3023,7 +3023,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3060,7 +3060,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: MACHINE_POLICY_AUTHORITY
@@ -3095,7 +3095,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3130,7 +3130,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3165,7 +3165,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3201,7 +3201,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3236,7 +3236,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: MACHINE_POLICY_AUTHORITY
@@ -3307,7 +3307,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3343,7 +3343,7 @@ workItems:
   riskTier: EXTERNAL
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: WAITING_EXTERNAL
   ownerType: EXTERNAL_PARTY
@@ -3380,7 +3380,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: MACHINE_POLICY_AUTHORITY
@@ -3414,7 +3414,7 @@ workItems:
   riskTier: EXTERNAL
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: WAITING_EXTERNAL
   ownerType: EXTERNAL_PARTY
@@ -3449,7 +3449,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3484,7 +3484,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3519,7 +3519,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3589,7 +3589,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3623,7 +3623,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: EXTERNAL_VALUE_DEMONSTRATED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: MACHINE_POLICY_AUTHORITY
@@ -3657,7 +3657,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: COMMERCIALLY_SUPPORTED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3692,7 +3692,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: COMMERCIALLY_SUPPORTED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3727,7 +3727,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: COMMERCIALLY_SUPPORTED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: INTEGRATE_EXISTING_BACKEND
   status: PROPOSED
   ownerType: AI
@@ -3764,7 +3764,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: COMMERCIALLY_SUPPORTED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3799,7 +3799,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: COMMERCIALLY_SUPPORTED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3834,7 +3834,7 @@ workItems:
   riskTier: INTEGRATION
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: COMMERCIALLY_SUPPORTED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: AI
@@ -3868,7 +3868,7 @@ workItems:
   riskTier: EXTERNAL
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: COMMERCIALLY_SUPPORTED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: WAITING_EXTERNAL
   ownerType: EXTERNAL_PARTY
@@ -3909,7 +3909,7 @@ workItems:
   riskTier: TRUST_CORE
   maturityTarget:
     engineering: EXTERNAL_VALIDATED
-    commercial: COMMERCIALLY_SUPPORTED
+    commercial: NATIVE_ADVANTAGE_UNPROVEN
   disposition: KEEP
   status: PROPOSED
   ownerType: MACHINE_POLICY_AUTHORITY

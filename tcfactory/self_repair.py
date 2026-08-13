@@ -159,8 +159,15 @@ def build_self_repair_task(*, reason: str, attempt: int, task_id: str) -> TaskPa
                 max_turns=200,
                 task_budget_tokens=None,
                 tools=[
-                    "Read", "Grep", "Glob", "Write", "Edit", "Bash",
-                    "WebFetch", "WebSearch", "Agent",
+                    "Read",
+                    "Grep",
+                    "Glob",
+                    "Write",
+                    "Edit",
+                    "Bash",
+                    "WebFetch",
+                    "WebSearch",
+                    "Agent",
                 ],
                 disallowed_tools=[],
                 permission_mode="acceptEdits",
@@ -218,9 +225,7 @@ async def attempt_factory_self_repair(
         return SelfRepairOutcome(False, "disabled", "", "automatic factory repair is disabled")
     if factory.allow_paid_usage or autonomy.allow_paid_usage:
         return SelfRepairOutcome(False, "refused", "", "paid usage invariant is not false")
-    assert_max_oauth_only(
-        require_long_lived_token=factory.require_long_lived_oauth_for_autopilot
-    )
+    assert_max_oauth_only(require_long_lived_token=factory.require_long_lived_oauth_for_autopilot)
     stamp = datetime.now(UTC).strftime("%Y%m%dT%H%M%SZ")
     task_id = f"FACTORY_REPAIR_{stamp}_{attempt}"
     packet = build_self_repair_task(reason=reason, attempt=attempt, task_id=task_id)

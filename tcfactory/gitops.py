@@ -300,21 +300,6 @@ def cleanup_task_branches(repo_root: Path, *, task_id: str, run_id: str) -> None
     run_command(["git", "worktree", "prune"], cwd=repo_root, check=False)
 
 
-def fast_forward_main(
-    repo_root: Path, base_branch: str, expected_base_sha: str, final_sha: str
-) -> None:
-    actual = current_sha(repo_root, base_branch)
-    if actual != expected_base_sha:
-        raise GitError(
-            f"{base_branch} moved during the run: expected {expected_base_sha}, found {actual}. "
-            "Refusing automatic integration."
-        )
-    branch = current_branch(repo_root)
-    if branch != base_branch:
-        run_command(["git", "checkout", base_branch], cwd=repo_root)
-    run_command(["git", "merge", "--ff-only", final_sha], cwd=repo_root)
-
-
 def remote_exists(repo_root: Path, name: str = "origin") -> bool:
     result = run_command(["git", "remote", "get-url", name], cwd=repo_root, check=False)
     return result.returncode == 0 and bool(result.stdout.strip())

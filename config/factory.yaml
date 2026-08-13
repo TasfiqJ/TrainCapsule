@@ -45,7 +45,7 @@ release:
   independentMachinePolicyReceiptRequired: true
   mergeQueueOrAutoMergeRequired: true
   exactMergedMainVerificationRequired: true
-  publisherCapability: PENDING_PHASE_4
+  publisherCapability: AUTOMATED_PR_V31_READY
 operatorPolicy:
   zeroHumanOperation: true
   policyGateMode: deterministic_machine_policy

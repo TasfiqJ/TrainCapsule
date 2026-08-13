@@ -26,6 +26,11 @@
       "minLength": 1,
       "pattern": "^[^/].*$",
       "type": "string"
+    },
+    "SourceGenerationId": {
+      "maxLength": 128,
+      "minLength": 3,
+      "type": "string"
     }
   },
   "$id": "https://traincapsule.local/schemas/verifier/v3.1/activation-receipt.schema.json",
@@ -109,7 +114,7 @@
       "$ref": "#/$defs/Digest"
     },
     "sourceGenerationId": {
-      "$ref": "#/$defs/Identifier"
+      "$ref": "#/$defs/SourceGenerationId"
     },
     "verifiedMainSha": {
       "$ref": "#/$defs/GitSha"

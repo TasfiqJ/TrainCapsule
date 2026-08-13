@@ -65,11 +65,11 @@ SIGNATURE = "A" * 64
 def _source_generation() -> SourceGenerationV31:
     return SourceGenerationV31(
         schema_version="3.1",
-        generation_id="V3.1-ZH-2026-08-12",
+        generation_id="traincapsule-v3.1-zh-2026-08-12",
         manifest_digest=DIGEST,
         source_digests={"docs/spec.md": DIGEST},
         active_normative=True,
-        supersedes_generation_id="V3-2026-08-11",
+        supersedes_generation_id="traincapsule-v3-2026-08-11",
         created_at=NOW,
     )
 
@@ -124,7 +124,7 @@ def _policy_receipt(**updates: Any) -> MachinePolicyReceiptV31:
         "candidate_sha": SHA,
         "candidate_tree_sha": SHA_B,
         "base_sha": "c" * 40,
-        "source_generation_id": "V3.1-ZH-2026-08-12",
+        "source_generation_id": "traincapsule-v3.1-zh-2026-08-12",
         "source_generation_digest": DIGEST,
         "context_manifest_digest": DIGEST,
         "task_packet_digest": DIGEST,
@@ -290,6 +290,9 @@ def test_all_native_v31_contracts_accept_coherent_records() -> None:
         source_generation_digest=source.manifest_digest,
         controller_binary_digest=DIGEST,
         controller_config_digest=DIGEST_B,
+        machine_environment_path="runtime/canary-suite.json",
+        controller_binary_path="tcfactory/v3/controller.py",
+        controller_config_path="config/factory.yaml",
         machine_policy_receipt_id=policy.receipt_id,
         machine_policy_receipt_digest=policy.canonical_digest(),
         mode=ActivationMode.CANARY,
@@ -300,7 +303,7 @@ def test_all_native_v31_contracts_accept_coherent_records() -> None:
         issuer_id=policy.issuer_id,
         issuer_key_id=policy.issuer_key_id,
         signature_algorithm="ed25519",
-        signature=SIGNATURE,
+        signature="A" * 80,
     )
     publication = PRPublicationTransactionV31(
         schema_version="3.1",
@@ -507,7 +510,7 @@ def test_stale_freshness_cannot_omit_conflict_or_wedge_evidence() -> None:
     payload: dict[str, Any] = {
         "schemaVersion": "3.1",
         "receiptId": "RECEIPT:FRESHNESS:002",
-        "generationId": "V3.1-ZH-2026-08-12",
+        "generationId": "traincapsule-v3.1-zh-2026-08-12",
         "generationDigest": DIGEST,
         "sourceId": "SOURCE:PYTORCH:001",
         "sourceDigest": DIGEST,
@@ -635,10 +638,13 @@ def test_revocation_activation_publication_and_maturity_boundaries_fail_closed()
         "receiptId": "RECEIPT:ACTIVATION:002",
         "verifiedMainSha": SHA,
         "machineEnvironmentDigest": DIGEST,
-        "sourceGenerationId": "V3.1-ZH-2026-08-12",
+        "sourceGenerationId": "traincapsule-v3.1-zh-2026-08-12",
         "sourceGenerationDigest": DIGEST,
         "controllerBinaryDigest": DIGEST,
         "controllerConfigDigest": DIGEST,
+        "machineEnvironmentPath": "runtime/canary-suite.json",
+        "controllerBinaryPath": "tcfactory/v3/controller.py",
+        "controllerConfigPath": "config/factory.yaml",
         "machinePolicyReceiptId": "RECEIPT:POLICY:001",
         "machinePolicyReceiptDigest": DIGEST,
         "mode": ActivationMode.LIVE,
@@ -649,7 +655,7 @@ def test_revocation_activation_publication_and_maturity_boundaries_fail_closed()
         "issuerId": "VERIFIER:LOCAL:001",
         "issuerKeyId": "KEY:ED25519:001",
         "signatureAlgorithm": "ed25519",
-        "signature": SIGNATURE,
+        "signature": "A" * 80,
     }
     with pytest.raises(ValidationError, match="expiry"):
         ActivationReceiptV31.model_validate(activation, strict=True)
@@ -686,7 +692,7 @@ def test_runtime_live_mode_requires_activation_and_autonomy() -> None:
         "observedAt": NOW,
         "mode": RuntimeMode.LIVE,
         "autonomyEnabled": False,
-        "sourceGenerationId": "V3.1-ZH-2026-08-12",
+        "sourceGenerationId": "traincapsule-v3.1-zh-2026-08-12",
         "sourceGenerationDigest": DIGEST,
         "controllerBinaryDigest": DIGEST,
         "controllerConfigDigest": DIGEST,

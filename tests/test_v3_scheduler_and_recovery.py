@@ -161,15 +161,73 @@ def test_waiting_external_lane_does_not_block_product_or_competitor() -> None:
         cycle_id="cycle-1",
         decided_at=NOW,
     )
-    assert set(artifact.selected_work_item_ids) == {
-        "V3-PROD-001",
-        "V3-COMP-001",
-    }
+    # The active factory policy permits one mutating session globally.  A scoped
+    # WAITING_EXTERNAL item therefore must not make the other lanes ineligible,
+    # while fair rotation selects them across bounded cycles rather than claiming
+    # impossible same-cycle concurrency.
+    assert artifact.selected_work_item_ids == ["V3-PROD-001"]
+    competitor_evaluation = next(
+        item for item in artifact.evaluations if item.work_item_id == "V3-COMP-001"
+    )
+    assert competitor_evaluation.eligible is True
+    competitor_cycle = schedule_cycle(
+        _collection(market, product, competitor),
+        _config(),
+        cycle_id="cycle-2",
+        decided_at=NOW,
+        lane_cursor=Lane.COMPETITOR,
+    )
+    assert competitor_cycle.selected_work_item_ids == ["V3-COMP-001"]
     market_evaluation = next(
         item for item in artifact.evaluations if item.work_item_id == "V3-MKT-001"
     )
     assert market_evaluation.eligible is False
     assert "WAITING_EXTERNAL" in market_evaluation.reasons[0]
+
+
+@pytest.mark.parametrize(
+    ("cursor", "expected"),
+    [
+        (Lane.PRODUCT, "V3-PROD-001"),
+        (Lane.MARKET, "V3-MKT-001"),
+        (Lane.COMPETITOR, "V3-COMP-001"),
+        (Lane.TRUST, "V3-TRUST-001"),
+    ],
+)
+def test_four_lane_cursor_prevents_score_starvation(
+    cursor: Lane,
+    expected: str,
+) -> None:
+    items = (
+        _item("V3-PROD-001", kind="RESEARCH"),
+        _item("V3-MKT-001", lane="MARKET", kind="RESEARCH"),
+        _item("V3-COMP-001", lane="COMPETITOR", kind="RESEARCH"),
+        _item("V3-TRUST-001", lane="TRUST", kind="RESEARCH"),
+        _item("V3-MIG-001", lane="FACTORY", kind="RESEARCH"),
+    )
+    artifact = schedule_cycle(
+        _collection(*items),
+        _config(),
+        cycle_id=f"fair-{cursor.value.lower()}",
+        decided_at=NOW,
+        lane_cursor=cursor,
+        max_concurrent_read_only_sessions=1,
+    )
+    assert artifact.selected_work_item_ids == [expected]
+
+
+def test_factory_observation_lane_cannot_starve_the_four_product_lanes() -> None:
+    factory = _item("V3-MIG-001", lane="FACTORY", kind="RESEARCH")
+    product = _item("V3-PROD-001", kind="RESEARCH")
+    artifact = schedule_cycle(
+        _collection(factory, product),
+        _config(),
+        cycle_id="factory-last",
+        decided_at=NOW,
+        lane_cursor=Lane.PRODUCT,
+        max_concurrent_read_only_sessions=1,
+    )
+    assert artifact.selected_work_item_ids == [product.work_item_id]
 
 
 def test_scheduler_order_is_deterministic_and_not_input_order() -> None:
@@ -212,6 +270,58 @@ def test_scheduler_rejects_ready_work_outside_active_milestone() -> None:
     )
     assert future_evaluation.eligible is False
     assert "is not active" in future_evaluation.reasons[0]
+
+
+def test_scheduler_allows_only_explicit_future_lane_during_external_wait() -> None:
+    product = _item("V3-PROD-002", milestone="M2_CONTROLLED_QUALIFICATION")
+    commercial = _item(
+        "V3-PILOT-001",
+        lane="MARKET",
+        milestone="M2_CONTROLLED_QUALIFICATION",
+    )
+    artifact = schedule_cycle(
+        _collection(product, commercial),
+        _config(),
+        cycle_id="decoupled-product-lane",
+        decided_at=NOW,
+        eligible_future_milestones={
+            Lane.PRODUCT: frozenset({"M2_CONTROLLED_QUALIFICATION"})
+        },
+    )
+    assert artifact.selected_work_item_ids == [product.work_item_id]
+    commercial_evaluation = next(
+        value for value in artifact.evaluations if value.work_item_id == commercial.work_item_id
+    )
+    assert any("is not active" in reason for reason in commercial_evaluation.reasons)
+
+
+def test_future_lane_never_skips_required_external_dependency() -> None:
+    waiting = _item(
+        "V3-MKT-003",
+        lane="MARKET",
+        kind="EXTERNAL_EVIDENCE",
+        status="WAITING_EXTERNAL",
+        external_evidence_refs=[],
+    )
+    product = _item(
+        "V3-PROD-002",
+        milestone="M2_CONTROLLED_QUALIFICATION",
+        depends_on=[waiting.work_item_id],
+    )
+    artifact = schedule_cycle(
+        _collection(waiting, product),
+        _config(),
+        cycle_id="future-dependency-remains-blocked",
+        decided_at=NOW,
+        eligible_future_milestones={
+            Lane.PRODUCT: frozenset({"M2_CONTROLLED_QUALIFICATION"})
+        },
+    )
+    assert artifact.selected_work_item_ids == []
+    product_evaluation = next(
+        value for value in artifact.evaluations if value.work_item_id == product.work_item_id
+    )
+    assert any("unsatisfied hard dependencies" in reason for reason in product_evaluation.reasons)
 
 
 def test_scheduler_never_executes_outside_fact_even_with_a_receipt_reference() -> None:

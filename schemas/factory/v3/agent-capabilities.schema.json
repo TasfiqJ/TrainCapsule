@@ -44,6 +44,21 @@
       },
       "title": "Allowedtools",
       "type": "array"
+    },
+    "overallWallClockTimeout": {
+      "default": false,
+      "title": "Overallwallclocktimeout",
+      "type": "boolean"
+    },
+    "bashArgumentAllowlist": {
+      "default": false,
+      "title": "Bashargumentallowlist",
+      "type": "boolean"
+    },
+    "durableTerminalRecords": {
+      "default": false,
+      "title": "Durableterminalrecords",
+      "type": "boolean"
     }
   },
   "required": [

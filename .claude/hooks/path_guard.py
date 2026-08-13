@@ -5,6 +5,7 @@ import fnmatch
 import json
 import os
 import re
+import shlex
 import sys
 from pathlib import Path
 from typing import NoReturn, cast
@@ -40,6 +41,28 @@ def string_list_env(name: str) -> list[str]:
     if not all(isinstance(item, str) for item in items):
         deny(f"{name} must contain a JSON string array")
     return cast(list[str], items)
+
+
+def bash_rules_env() -> list[tuple[str, list[str]]]:
+    value: object = json.loads(os.environ.get("TCF_BASH_RULES_JSON", "[]"))
+    if not isinstance(value, list):
+        deny("TCF_BASH_RULES_JSON must contain a JSON array")
+    rules: list[tuple[str, list[str]]] = []
+    for raw_rule in cast(list[object], value):
+        rule = object_dict(raw_rule, "Bash rule")
+        executable = rule.get("executable")
+        prefix = rule.get("argumentPrefix")
+        if not isinstance(executable, str) or not re.fullmatch(
+            r"[A-Za-z0-9][A-Za-z0-9._+-]{0,63}", executable
+        ):
+            deny("Bash rule executable is invalid")
+        if not isinstance(prefix, list):
+            deny("Bash rule argumentPrefix must be a string array")
+        prefix_objects = cast(list[object], prefix)
+        if not all(isinstance(argument, str) for argument in prefix_objects):
+            deny("Bash rule argumentPrefix must be a string array")
+        rules.append((executable, cast(list[str], prefix_objects)))
+    return rules
 
 
 def matches(path: str, patterns: list[str]) -> bool:
@@ -128,6 +151,19 @@ def main() -> None:
 
     if tool == "Bash":
         command = str(tool_input.get("command", ""))
+        if re.search(r"(?:&&|\|\||[;|<>`\n]|\$\(|\$\{)", command):
+            deny("Bash command contains shell composition or expansion")
+        try:
+            arguments = shlex.split(command, posix=True)
+        except ValueError:
+            deny("Bash command is not valid shell token syntax")
+        rules = bash_rules_env()
+        if not arguments or not any(
+            arguments[0] == executable
+            and arguments[1 : 1 + len(prefix)] == prefix
+            for executable, prefix in rules
+        ):
+            deny("Bash executable or argument prefix is outside the task allowlist")
         blocked = [
             r"(^|[;&|]\s*)sudo\b",
             r"\bgit\s+(push|reset\s+--hard|clean|checkout|switch|rebase|worktree|commit|add|merge|cherry-pick|tag)\b",

@@ -3,7 +3,7 @@ from __future__ import annotations
 import re
 from pathlib import Path
 
-from tcfactory.github_sync import load_github_config
+from tcfactory.github_sync import MACHINE_POLICY_CHECK, load_github_config
 
 EXPECTED_FILES = {
     "factory-quality.yml": "TrainCapsule / Factory quality",
@@ -25,9 +25,14 @@ def test_required_workflow_files_and_config_names_match() -> None:
     observed_files = {path.name for path in workflow_root.glob("*.yml")}
 
     assert observed_files == set(EXPECTED_FILES) | set(OPTIONAL_MANUAL_FILES)
-    assert config.remote_ci.required_workflows == list(EXPECTED_FILES.values())
-    assert config.release_mode == "owner_directed_main_only"
-    assert config.direct_main_push is True
+    assert config.remote_ci.required_workflows == [
+        *EXPECTED_FILES.values(),
+        MACHINE_POLICY_CHECK,
+    ]
+    assert config.release_mode == "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
+    assert config.direct_main_push is False
+    assert config.publisher_capability == "AUTOMATED_PR_V31_READY"
+    assert config.remote_ci.trusted_check_app_ids[MACHINE_POLICY_CHECK] is None
 
 
 def test_required_workflows_are_bounded_portable_and_secret_free() -> None:
@@ -47,17 +52,15 @@ def test_required_workflows_are_bounded_portable_and_secret_free() -> None:
             assert "retention-days:" in text
             assert "include-hidden-files: true" in text
         assert "push:\n    branches: [main]" in text
-        assert "pull_request:" not in text
+        assert "pull_request:\n    branches: [main]" in text
+        assert "merge_group:" in text
         assert "${{ secrets" not in text
         uses = [line for line in text.splitlines() if "uses:" in line]
         assert uses
         assert all(action.search(line) for line in uses)
         assert "astral-sh/setup-uv@d0d8abe699bfb85fec6de9f7adb5ae17292296ff" not in text
         if "astral-sh/setup-uv@" in text:
-            assert (
-                "astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e"
-                in text
-            )
+            assert "astral-sh/setup-uv@d0cc045d04ccac9d8b7881df0226f9e82c39688e" in text
 
     gpu = (workflow_root / "gpu-validation.yml").read_text(encoding="utf-8")
     assert "workflow_dispatch:" in gpu
@@ -68,13 +71,11 @@ def test_required_workflows_are_bounded_portable_and_secret_free() -> None:
 def test_workflow_test_scopes_are_explicit() -> None:
     root = Path(__file__).resolve().parents[1]
     workflow_root = root / ".github" / "workflows"
-    assert "tests --ignore=tests/product" in (
-        workflow_root / "factory-quality.yml"
-    ).read_text(encoding="utf-8")
-    product_unit = (workflow_root / "product-unit.yml").read_text(encoding="utf-8")
-    product_contract = (workflow_root / "product-contract.yml").read_text(
+    assert "tests --ignore=tests/product" in (workflow_root / "factory-quality.yml").read_text(
         encoding="utf-8"
     )
+    product_unit = (workflow_root / "product-unit.yml").read_text(encoding="utf-8")
+    product_contract = (workflow_root / "product-contract.yml").read_text(encoding="utf-8")
     assert "generate_product_schemas.py --check" in product_unit
     assert "Install product workspace packages" in product_unit
     assert "-e packages/traincapsule-core" in product_unit

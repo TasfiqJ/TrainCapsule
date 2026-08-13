@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [ValidateSet(
-        "Status", "Overview", "Start", "Pause", "Resume", "Recover", "Stop",
+        "Status", "Overview", "Start", "Canaries", "Activate", "Pause", "Resume", "Recover", "Stop",
         "ScheduleDryRun", "MilestoneStatus", "Verify", "Logs", "Queue", "GitHub",
         "Lanes", "Milestones", "Commercial", "Competitors", "Pilot", "Approvals",
         "KillGates", "Doctor", "Migration", "CandidateSalvage"
@@ -9,7 +9,8 @@ param(
     [string]$Action = "Status",
     [string]$RepoPath = $env:TCF_REPO_PATH,
     [string]$WslDistribution = $env:TCF_WSL_DISTRIBUTION,
-    [string]$FactoryRuntimePath = "scripts/factory_control.sh"
+    [string]$FactoryRuntimePath = "scripts/factory_control.sh",
+    [string]$CanarySuitePath
 )
 
 $ErrorActionPreference = "Stop"
@@ -63,6 +64,8 @@ $ControlAction = switch ($Action) {
     "Status" { "status" }
     "Overview" { "status" }
     "Start" { "start" }
+    "Canaries" { "canaries" }
+    "Activate" { "activate" }
     "Pause" { "pause" }
     "Resume" { "resume" }
     "Recover" { "recover" }
@@ -87,4 +90,14 @@ $ControlAction = switch ($Action) {
 
 # The runtime script owns environment loading and redaction. OAuth values are never requested,
 # interpolated, printed, or passed as command-line arguments by this Windows control surface.
-Invoke-TrainCapsuleWsl -LinuxArguments @("bash", $Runtime, $ControlAction)
+$ControlArguments = @("bash", $Runtime, $ControlAction)
+if ($Action -eq "Activate") {
+    if ([string]::IsNullOrWhiteSpace($CanarySuitePath) -or -not $CanarySuitePath.StartsWith("/")) {
+        throw "Activate requires -CanarySuitePath with an absolute WSL path."
+    }
+    if ($CanarySuitePath -match "[`r`n`0]") {
+        throw "CanarySuitePath may not contain control characters."
+    }
+    $ControlArguments += $CanarySuitePath
+}
+Invoke-TrainCapsuleWsl -LinuxArguments $ControlArguments

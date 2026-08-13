@@ -43,9 +43,7 @@ def test_checked_in_v3_configuration_is_finite_and_fail_closed() -> None:
     commercial = CommercialMaturityConfig.model_validate(
         load_yaml(ROOT / "config/commercial_maturity.yaml")
     )
-    milestones = MilestonePolicyConfig.model_validate(
-        load_yaml(ROOT / "config/milestones.yaml")
-    )
+    milestones = MilestonePolicyConfig.model_validate(load_yaml(ROOT / "config/milestones.yaml"))
 
     assert isinstance(factory, FactoryV3Config)
     assert isinstance(autonomy, AutonomyV3Config)
@@ -54,10 +52,9 @@ def test_checked_in_v3_configuration_is_finite_and_fail_closed() -> None:
     assert factory.schema_version == "3.1"
     assert factory.repository.direct_main_push is False
     assert (
-        factory.repository.release_mode
-        == "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
+        factory.repository.release_mode == "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
     )
-    assert factory.release.publisher_capability == "PENDING_PHASE_4"
+    assert factory.release.publisher_capability == "AUTOMATED_PR_V31_READY"
     assert factory.execution.work_until_done is False
     assert all(
         value > 0
@@ -158,9 +155,7 @@ def test_authoritative_roadmap_generation_is_exact_and_typed() -> None:
 
 
 def test_m0_through_m6_are_bounded_and_external_milestones_remain_waiting() -> None:
-    roadmap = MilestoneRoadmap.model_validate(
-        load_yaml(ROOT / "factory/roadmap/milestones.yaml")
-    )
+    roadmap = MilestoneRoadmap.model_validate(load_yaml(ROOT / "factory/roadmap/milestones.yaml"))
     assert len(roadmap.milestones) == 7
     assert roadmap.milestones[0].status is MilestoneStatus.ACTIVE
     assert roadmap.milestones[1].status is MilestoneStatus.PROPOSED
@@ -172,7 +167,7 @@ def test_m0_through_m6_are_bounded_and_external_milestones_remain_waiting() -> N
 
 
 def test_every_generated_schema_rejects_unknown_top_level_fields() -> None:
-    assert len(SCHEMAS) == 43
+    assert len(SCHEMAS) == 60
     assert {
         "private-gate-receipt.schema.json",
         "milestone-runtime-state.schema.json",

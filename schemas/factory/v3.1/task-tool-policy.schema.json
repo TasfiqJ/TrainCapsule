@@ -1,0 +1,77 @@
+{
+  "$defs": {
+    "BashCommandRuleV31": {
+      "additionalProperties": false,
+      "properties": {
+        "argumentPrefix": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 8,
+          "minItems": 1,
+          "title": "Argumentprefix",
+          "type": "array"
+        },
+        "executable": {
+          "enum": [
+            "git",
+            "uv"
+          ],
+          "title": "Executable",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "executable",
+        "argumentPrefix"
+      ],
+      "title": "BashCommandRuleV31",
+      "type": "object"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/task-tool-policy.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "allowedTools": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 8,
+      "minItems": 1,
+      "title": "Allowedtools",
+      "type": "array"
+    },
+    "bashRules": {
+      "items": {
+        "$ref": "#/$defs/BashCommandRuleV31"
+      },
+      "maxItems": 16,
+      "title": "Bashrules",
+      "type": "array"
+    },
+    "mutatingOwner": {
+      "title": "Mutatingowner",
+      "type": "boolean"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "mutatingOwner",
+    "allowedTools",
+    "bashRules"
+  ],
+  "title": "ToolPolicyV31",
+  "type": "object"
+}

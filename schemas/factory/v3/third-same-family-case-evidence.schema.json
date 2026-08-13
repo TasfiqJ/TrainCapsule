@@ -1,0 +1,79 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "schemaVersion": {
+      "const": "3.1",
+      "default": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "workItemId": {
+      "const": "V3-PACK-002",
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "evidenceBasisSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Evidencebasissha",
+      "type": "string"
+    },
+    "sourceAuthorityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourceauthoritydigest",
+      "type": "string"
+    },
+    "familyIdentityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Familyidentitydigest",
+      "type": "string"
+    },
+    "caseIdentityDigests": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "title": "Caseidentitydigests",
+      "type": "array"
+    },
+    "caseEvidenceArtifactDigests": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "title": "Caseevidenceartifactdigests",
+      "type": "array"
+    },
+    "trustCoreBeforeDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Trustcorebeforedigest",
+      "type": "string"
+    },
+    "trustCoreAfterDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Trustcoreafterdigest",
+      "type": "string"
+    },
+    "reusablePackDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Reusablepackdigest",
+      "type": "string"
+    }
+  },
+  "required": [
+    "workItemId",
+    "evidenceBasisSha",
+    "sourceAuthorityDigest",
+    "familyIdentityDigest",
+    "caseIdentityDigests",
+    "caseEvidenceArtifactDigests",
+    "trustCoreBeforeDigest",
+    "trustCoreAfterDigest",
+    "reusablePackDigest"
+  ],
+  "title": "ThirdSameFamilyCaseEvidence",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/third-same-family-case-evidence.schema.json"
+}

@@ -1,0 +1,15 @@
+[Unit]
+Description=TrainCapsule external-evidence monotonic authority broker
+After=local-fs.target
+
+[Service]
+Type=oneshot
+User=root
+Group=root
+ExecStart=/usr/local/bin/tcfactory-external-evidence-broker --staged-root /var/lib/traincapsule-external-evidence/staged-authority --public-key /etc/traincapsule-factory/external-evidence/authority.pub --ledger /var/lib/traincapsule-external-evidence-authority/authority-ledger.json
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadOnlyPaths=/etc/traincapsule-factory/external-evidence /var/lib/traincapsule-external-evidence/staged-authority
+ReadWritePaths=/var/lib/traincapsule-external-evidence-authority

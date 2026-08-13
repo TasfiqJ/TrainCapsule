@@ -14,6 +14,7 @@ from pydantic import (
     AfterValidator,
     AwareDatetime,
     BaseModel,
+    BeforeValidator,
     ConfigDict,
     Field,
     StringConstraints,
@@ -35,6 +36,19 @@ def _normalized_relative_path(value: str) -> str:
 type Digest = Annotated[str, StringConstraints(pattern=r"^sha256:[0-9a-f]{64}$")]
 type GitSha = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{40}$")]
 type Identifier = Annotated[str, StringConstraints(pattern=r"^[A-Z0-9][A-Z0-9._:-]{2,127}$")]
+
+
+def _reject_source_generation_whitespace(value: object) -> object:
+    if isinstance(value, str) and value != value.strip():
+        raise ValueError("source generation ID whitespace is forbidden")
+    return value
+
+
+type SourceGenerationId = Annotated[
+    str,
+    BeforeValidator(_reject_source_generation_whitespace),
+    StringConstraints(min_length=3, max_length=128, pattern=r"^[a-z0-9][a-z0-9._:-]{2,127}$"),
+]
 type RelativePath = Annotated[
     str,
     StringConstraints(min_length=1, max_length=512, pattern=r"^[^/].*$"),
@@ -168,7 +182,7 @@ class TrustedEvidenceManifest(V31Model):
     candidate_sha: GitSha
     candidate_tree_sha: GitSha
     base_sha: GitSha
-    source_generation_id: Identifier
+    source_generation_id: SourceGenerationId
     source_generation_digest: Digest
     context_manifest_digest: Digest
     task_packet_digest: Digest
@@ -208,7 +222,7 @@ class VerificationRequest(V31Model):
     candidate_sha: GitSha
     candidate_tree_sha: GitSha
     base_sha: GitSha
-    source_generation_id: Identifier
+    source_generation_id: SourceGenerationId
     source_generation_digest: Digest
     context_manifest_digest: Digest
     task_packet_digest: Digest
@@ -260,7 +274,7 @@ class VerifierPolicy(V31Model):
     issuer_key_id: Identifier
     public_key_fingerprint: Digest
     minimum_revocation_epoch: int = Field(ge=1)
-    active_source_generation_id: Identifier
+    active_source_generation_id: SourceGenerationId
     active_source_generation_digest: Digest
     private_gate_suite_id: Identifier
     private_gate_runner_digest: Digest
@@ -303,7 +317,7 @@ class MachinePolicyReceipt(V31Model):
     candidate_sha: GitSha
     candidate_tree_sha: GitSha
     base_sha: GitSha
-    source_generation_id: Identifier
+    source_generation_id: SourceGenerationId
     source_generation_digest: Digest
     context_manifest_digest: Digest
     task_packet_digest: Digest
@@ -412,7 +426,7 @@ class ActivationRequest(V31Model):
     nonce: str = Field(min_length=16, max_length=256)
     verified_main_sha: GitSha
     machine_environment_digest: Digest
-    source_generation_id: Identifier
+    source_generation_id: SourceGenerationId
     source_generation_digest: Digest
     controller_binary_digest: Digest
     controller_config_digest: Digest
@@ -423,11 +437,89 @@ class ActivationRequest(V31Model):
     mode: ActivationMode
 
 
+class ObservedMainReceipt(V31Model):
+    observation_id: Identifier
+    repository: str = Field(pattern=r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+    verified_main_sha: GitSha
+    verified_main_tree_sha: GitSha
+    source_generation_id: SourceGenerationId
+    source_generation_digest: Digest
+    ruleset_observation_digest: Digest
+    required_check_digests: dict[Identifier, Digest] = Field(min_length=1, max_length=64)
+    github_app_id: int = Field(gt=0)
+    observed_at: AwareDatetime
+    expires_at: AwareDatetime
+    issuer_id: Identifier
+    issuer_key_id: Identifier
+    signature_algorithm: Literal["ed25519"]
+    signature: str = Field(min_length=80, max_length=128)
+
+    @model_validator(mode="after")
+    def validate_observation_lifetime(self) -> ObservedMainReceipt:
+        lifetime = self.expires_at.astimezone(UTC) - self.observed_at.astimezone(UTC)
+        if lifetime <= timedelta(0) or lifetime > timedelta(minutes=30):
+            raise ValueError("observed-main lifetime must be positive and at most thirty minutes")
+        return self
+
+
+class RulesetObservationReceipt(V31Model):
+    observation_id: Identifier
+    observation_digest: Digest
+    repository: str = Field(pattern=r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+    base_branch: Literal["main"]
+    ruleset_id: int = Field(gt=0)
+    enforcement: Literal["active"]
+    required_check_app_ids: dict[str, int] = Field(min_length=1, max_length=64)
+    bypass_actor_count: Literal[0]
+    deletion_forbidden: Literal[True]
+    force_push_forbidden: Literal[True]
+    pull_request_required: Literal[True]
+    branch_update_restricted: Literal[True]
+    auto_merge_enabled: Literal[True]
+    observed_at: AwareDatetime
+    expires_at: AwareDatetime
+    issuer_id: Identifier
+    issuer_key_id: Identifier
+    signature_algorithm: Literal["ed25519"]
+    signature: str = Field(min_length=80, max_length=128)
+
+    @model_validator(mode="after")
+    def validate_ruleset_lifetime(self) -> RulesetObservationReceipt:
+        from .canonical import canonical_json_bytes, sha256_digest
+
+        lifetime = self.expires_at.astimezone(UTC) - self.observed_at.astimezone(UTC)
+        if lifetime <= timedelta(0) or lifetime > timedelta(minutes=30):
+            raise ValueError(
+                "ruleset observation lifetime must be positive and at most thirty minutes"
+            )
+        core = {
+            "repository": self.repository,
+            "baseBranch": self.base_branch,
+            "rulesetId": self.ruleset_id,
+            "enforcement": self.enforcement,
+            "requiredCheckAppIds": self.required_check_app_ids,
+            "bypassActorCount": self.bypass_actor_count,
+            "deletionForbidden": self.deletion_forbidden,
+            "forcePushForbidden": self.force_push_forbidden,
+            "pullRequestRequired": self.pull_request_required,
+            "branchUpdateRestricted": self.branch_update_restricted,
+            "autoMergeEnabled": self.auto_merge_enabled,
+        }
+        if self.observation_digest != sha256_digest(canonical_json_bytes(core)):
+            raise ValueError("ruleset observation digest does not bind the exact policy")
+        return self
+
+
+class ActivationSelectionEnvelope(V31Model):
+    activation_request: ActivationRequest
+    observed_main: ObservedMainReceipt
+
+
 class ActivationReceipt(V31Model):
     receipt_id: Identifier
     verified_main_sha: GitSha
     machine_environment_digest: Digest
-    source_generation_id: Identifier
+    source_generation_id: SourceGenerationId
     source_generation_digest: Digest
     controller_binary_digest: Digest
     controller_config_digest: Digest
@@ -460,6 +552,13 @@ class CheckAuthorization(V31Model):
     conclusion: Literal["success"]
     receipt_id: Identifier
     receipt_digest: Digest
+
+
+class ActivationAuthorization(V31Model):
+    verified: Literal[True]
+    verified_main_sha: GitSha
+    activation_receipt_id: Identifier
+    activation_receipt_digest: Digest
 
 
 class InstallationState(StrEnum):

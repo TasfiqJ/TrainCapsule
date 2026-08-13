@@ -139,18 +139,14 @@ class EvidenceBinding(V3Model):
     """Bind evidence without recursively hashing the evidence files themselves."""
 
     subject_sha: str | None = Field(default=None, pattern=SHA_PATTERN.pattern)
-    implementation_tree_sha256: str | None = Field(
-        default=None, pattern=DIGEST_HEX_PATTERN
-    )
+    implementation_tree_sha256: str | None = Field(default=None, pattern=DIGEST_HEX_PATTERN)
     implementation_tree_file_count: int | None = Field(default=None, ge=1)
     algorithm: Literal["git-commit-sha1", "sha256-mode-path-blob-manifest"]
 
     @model_validator(mode="after")
     def require_exactly_one_nonrecursive_binding(self) -> EvidenceBinding:
         if (self.subject_sha is None) == (self.implementation_tree_sha256 is None):
-            raise ValueError(
-                "evidence requires exactly one subjectSha or implementationTreeSha256"
-            )
+            raise ValueError("evidence requires exactly one subjectSha or implementationTreeSha256")
         if self.subject_sha is not None:
             if (
                 self.algorithm != "git-commit-sha1"
@@ -185,9 +181,7 @@ class EvidenceExecution(V3Model):
     result: Literal["PASS", "FAIL"]
     passed_count: int = Field(ge=0)
     failed_count: int = Field(ge=0)
-    failure_attribution: Literal[
-        "NONE", "PRE_EXISTING", "INTRODUCED", "INFRASTRUCTURE", "UNKNOWN"
-    ]
+    failure_attribution: Literal["NONE", "PRE_EXISTING", "INTRODUCED", "INFRASTRUCTURE", "UNKNOWN"]
     transcript_path: str = Field(min_length=1)
     transcript_sha256: str = Field(pattern=DIGEST_HEX_PATTERN)
 
@@ -261,9 +255,7 @@ class PullRequestAcceptanceReceipt(IndependentReceiptAuthority):
 
     @model_validator(mode="after")
     def validate_exact_sha_and_checks(self) -> PullRequestAcceptanceReceipt:
-        if not (
-            self.pull_request_head_sha == self.candidate_sha == self.merged_main_sha
-        ):
+        if not (self.pull_request_head_sha == self.candidate_sha == self.merged_main_sha):
             raise ValueError("PR receipt must bind one exact candidate/head/merged-main SHA")
         names = [check.name for check in self.required_checks]
         if len(names) != len(set(names)):
@@ -307,8 +299,7 @@ class FinalMigrationEvidence(V3Model):
         if self.work_item_id in self.evidence_inputs:
             raise ValueError("migration evidence cannot cite itself")
         if any(
-            not re.fullmatch(DIGEST_HEX_PATTERN, value)
-            for value in self.evidence_inputs.values()
+            not re.fullmatch(DIGEST_HEX_PATTERN, value) for value in self.evidence_inputs.values()
         ):
             raise ValueError("evidenceInputs require raw SHA-256 hex digests")
         if self.result == "PASS" and any(item.result != "PASS" for item in self.executions):
@@ -317,9 +308,7 @@ class FinalMigrationEvidence(V3Model):
             raise ValueError("a FAIL evidence record requires at least one failed execution")
         expected_type = EXPECTED_EVIDENCE_TYPES[self.work_item_id]
         if self.evidence_type != expected_type:
-            raise ValueError(
-                f"{self.work_item_id} evidenceType must be exactly {expected_type}"
-            )
+            raise ValueError(f"{self.work_item_id} evidenceType must be exactly {expected_type}")
         observed_executions = tuple(
             (execution.command_id, tuple(execution.command)) for execution in self.executions
         )
@@ -399,11 +388,7 @@ def _git_paths(repo_root: Path, *arguments: str) -> set[str]:
         check=True,
         capture_output=True,
     )
-    return {
-        value.decode("utf-8")
-        for value in completed.stdout.split(b"\0")
-        if value
-    }
+    return {value.decode("utf-8") for value in completed.stdout.split(b"\0") if value}
 
 
 def _is_implementation_path(relative: str) -> bool:

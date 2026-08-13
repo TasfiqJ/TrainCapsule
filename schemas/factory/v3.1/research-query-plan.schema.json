@@ -11,6 +11,49 @@
       "title": "Lane",
       "type": "string"
     },
+    "ParserLimits": {
+      "additionalProperties": false,
+      "properties": {
+        "maximumClaimResults": {
+          "default": 128,
+          "maximum": 512,
+          "minimum": 1,
+          "title": "Maximumclaimresults",
+          "type": "integer"
+        },
+        "maximumDepth": {
+          "default": 24,
+          "maximum": 64,
+          "minimum": 1,
+          "title": "Maximumdepth",
+          "type": "integer"
+        },
+        "maximumNodes": {
+          "default": 10000,
+          "maximum": 100000,
+          "minimum": 1,
+          "title": "Maximumnodes",
+          "type": "integer"
+        },
+        "maximumStringBytes": {
+          "default": 1048576,
+          "maximum": 4194304,
+          "minimum": 1,
+          "title": "Maximumstringbytes",
+          "type": "integer"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion"
+      ],
+      "title": "ParserLimits",
+      "type": "object"
+    },
     "ResearchClaim": {
       "additionalProperties": false,
       "properties": {
@@ -51,6 +94,46 @@
           "title": "Claimids",
           "type": "array"
         },
+        "controlQuery": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Controlquery",
+          "type": "string"
+        },
+        "freshnessPolicy": {
+          "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+          "title": "Freshnesspolicy",
+          "type": "string"
+        },
+        "freshnessSeconds": {
+          "maximum": 7776000,
+          "minimum": 60,
+          "title": "Freshnessseconds",
+          "type": "integer"
+        },
+        "method": {
+          "const": "GET",
+          "default": "GET",
+          "title": "Method",
+          "type": "string"
+        },
+        "parserId": {
+          "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+          "title": "Parserid",
+          "type": "string"
+        },
+        "parserVersion": {
+          "maxLength": 64,
+          "minLength": 1,
+          "title": "Parserversion",
+          "type": "string"
+        },
+        "query": {
+          "maxLength": 2000,
+          "minLength": 1,
+          "title": "Query",
+          "type": "string"
+        },
         "schemaVersion": {
           "const": "3.1",
           "title": "Schemaversion",
@@ -73,8 +156,14 @@
       },
       "required": [
         "schemaVersion",
-        "sourceId",
         "url",
+        "query",
+        "controlQuery",
+        "parserId",
+        "parserVersion",
+        "freshnessPolicy",
+        "freshnessSeconds",
+        "sourceId",
         "sourceClass",
         "claimIds"
       ],
@@ -113,6 +202,9 @@
     },
     "lane": {
       "$ref": "#/$defs/Lane"
+    },
+    "parserLimits": {
+      "$ref": "#/$defs/ParserLimits"
     },
     "planId": {
       "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",

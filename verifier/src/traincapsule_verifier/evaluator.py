@@ -153,6 +153,7 @@ class IndependentVerifier:
         receipt_root: Path,
         anchor_root: Path,
         oracle_root: Path,
+        authority_state_root: Path | None = None,
         config_owner_uid: int = 0,
         verifier_owner_uid: int = 0,
     ) -> IndependentVerifier:
@@ -180,12 +181,23 @@ class IndependentVerifier:
                 anchor_root, expected_uid=config_owner_uid, repository_root=repository_root
             )
             opened.append(anchors)
+            authority_state = (
+                state
+                if authority_state_root is None
+                else assert_trusted_root(
+                    authority_state_root,
+                    expected_uid=config_owner_uid,
+                    repository_root=repository_root,
+                )
+            )
+            if authority_state is not state:
+                opened.append(authority_state)
             oracles = assert_trusted_root(
                 oracle_root, expected_uid=config_owner_uid, repository_root=repository_root
             )
             opened.append(oracles)
             policy = _load_model(config, "policy.json", VerifierPolicy)
-            revocations = _load_model(state, "revocations.json", RevocationList)
+            revocations = _load_model(authority_state, "revocations.json", RevocationList)
             anchor = _load_model(anchors, "authority-anchor.json", AuthorityAnchor)
             public_key = load_public_key(
                 read_bounded_file(config, "public-key.pem", maximum_bytes=8192)

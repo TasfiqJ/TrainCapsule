@@ -19,14 +19,14 @@ if str(ROOT) not in sys.path:
 
 from tcfactory.feature_ledger import FeatureItem, load_feature_ledger
 from tcfactory.util import atomic_write_text
+from tcfactory.v3.base import sha256_digest
 from tcfactory.v3.migrations import (
-    LegacyEvidenceFile,
     LegacyDisposition,
+    LegacyEvidenceFile,
     LegacyMapRecord,
     LegacyMigrationMap,
     LegacyStatus,
 )
-from tcfactory.v3.base import sha256_digest
 from tcfactory.v3.work_items import WorkItemCollection
 from tcfactory.yamlutil import load_yaml
 

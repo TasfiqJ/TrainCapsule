@@ -31,6 +31,19 @@ from tcfactory.handoffs import V3Handoff
 from tcfactory.supervisor import MigrationCompleteMarker, SupervisorState
 from tcfactory.v3.base import json_schema_for
 from tcfactory.v3.candidate_manifest import CandidateManifest
+from tcfactory.v3.completion_artifacts import (
+    DeliveryEconomicsEvidence,
+    FrozenReleaseEvidenceAuthorization,
+    ReductionBoundaryEvidence,
+    SupportPolicyEvidence,
+    ThirdSameFamilyCaseEvidence,
+)
+from tcfactory.v3.completion_policy import (
+    CompletionEvidenceObservation,
+    CompletionEvidencePolicy,
+    MilestoneEvidenceContract,
+    WorkItemEvidenceContract,
+)
 from tcfactory.v3.configuration import (
     AutonomyV3Config,
     CommercialMaturityConfig,
@@ -41,7 +54,15 @@ from tcfactory.v3.configuration import (
     MilestonePolicyConfig,
 )
 from tcfactory.v3.dispositions import DispositionLedger
-from tcfactory.v3.external_evidence import ExternalEvidenceReceipt
+from tcfactory.v3.external_evidence import (
+    ExternalEvidenceAuthorityAnchor,
+    ExternalEvidenceReceipt,
+    ExternalEvidenceRevocationList,
+)
+from tcfactory.v3.external_evidence_authority import (
+    ExternalEvidenceAuthorityLedger,
+    ExternalEvidenceAuthorityState,
+)
 from tcfactory.v3.migration_evidence import MigrationEvidenceDocument
 from tcfactory.v3.migrations import LegacyMigrationMap
 from tcfactory.v3.milestone_runtime import (
@@ -63,6 +84,12 @@ from tcfactory.v3.source_authority import (
     SourceGenerationManifest,
     StaleSourceProposal,
 )
+from tcfactory.v3.traincheck_differential import (
+    IncidentContract,
+    IncidentInvariantObservation,
+    TrainCheckDifferentialRequest,
+    TrainCheckDifferentialResult,
+)
 from tcfactory.v3.work_items import WorkItem, WorkItemCollection
 from tcfactory.value import DecisionValueResult
 
@@ -77,11 +104,21 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "candidate-manifest.schema.json": CandidateManifest,
     "checkpoint.schema.json": V3Checkpoint,
     "commercial-maturity-config.schema.json": CommercialMaturityConfig,
+    "completion-evidence-observation.schema.json": CompletionEvidenceObservation,
+    "completion-evidence-policy.schema.json": CompletionEvidencePolicy,
+    "delivery-economics-evidence.schema.json": DeliveryEconomicsEvidence,
+    "frozen-release-evidence-authorization.schema.json": (
+        FrozenReleaseEvidenceAuthorization
+    ),
     "context-policy-config.schema.json": ContextRoutingConfig,
     "dispositions.schema.json": DispositionLedger,
     "executors-config.schema.json": ExecutorConfig,
     "external-evidence-config.schema.json": ExternalEvidenceConfig,
+    "external-evidence-authority-anchor.schema.json": ExternalEvidenceAuthorityAnchor,
+    "external-evidence-authority-ledger.schema.json": ExternalEvidenceAuthorityLedger,
+    "external-evidence-authority-state.schema.json": ExternalEvidenceAuthorityState,
     "external-evidence-receipt.schema.json": ExternalEvidenceReceipt,
+    "external-evidence-revocation-list.schema.json": ExternalEvidenceRevocationList,
     "factory-config.schema.json": FactoryV3Config,
     "finding.schema.json": V3Finding,
     "finding-counter.schema.json": FindingCounter,
@@ -93,16 +130,20 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "migration-complete-marker.schema.json": MigrationCompleteMarker,
     "migration-evidence.schema.json": MigrationEvidenceDocument,
     "milestone-completion.schema.json": MilestoneCompletionDecision,
+    "milestone-evidence-contract.schema.json": MilestoneEvidenceContract,
     "milestone-completion-receipt.schema.json": MilestoneCompletionReceipt,
     "milestone-runtime-state.schema.json": MilestoneRuntimeState,
     "milestone-advance-transaction.schema.json": MilestoneAdvanceTransaction,
     "work-item-completion-evidence.schema.json": WorkItemCompletionEvidence,
+    "work-item-evidence-contract.schema.json": WorkItemEvidenceContract,
     "milestone-policy-config.schema.json": MilestonePolicyConfig,
     "retry-policy.schema.json": RetryPolicy,
     "private-gate-receipt.schema.json": PrivateGateReceipt,
+    "reduction-boundary-evidence.schema.json": ReductionBoundaryEvidence,
     "release-candidate.schema.json": ReleaseCandidate,
     "scheduler.schema.json": SchedulerConfig,
     "supervisor-state.schema.json": SupervisorState,
+    "support-policy-evidence.schema.json": SupportPolicyEvidence,
     "source-generation-manifest.schema.json": SourceGenerationManifest,
     "source-wedge-proposal.schema.json": StaleSourceProposal,
     "work-item-v3.schema.json": WorkItem,
@@ -111,6 +152,11 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "usage-state.schema.json": UsageState,
     "context-manifest.schema.json": V3ContextManifest,
     "decision-value.schema.json": DecisionValueResult,
+    "incident-contract.schema.json": IncidentContract,
+    "incident-invariant-observation.schema.json": IncidentInvariantObservation,
+    "traincheck-differential-request.schema.json": TrainCheckDifferentialRequest,
+    "traincheck-differential-result.schema.json": TrainCheckDifferentialResult,
+    "third-same-family-case-evidence.schema.json": ThirdSameFamilyCaseEvidence,
 }
 
 

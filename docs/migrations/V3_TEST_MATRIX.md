@@ -2,8 +2,10 @@
 
 > **HISTORICAL V3 TEST RECORD — NOT CURRENT V3.1-ZH ACCEPTANCE.** The tables and results below
 > describe the frozen V3 baseline under its superseded release policy. Current V3.1-ZH status is
-> `STOPPED / NOT AUTHORIZED`, M0 is active/pending, and publication capability is
-> `PENDING_PHASE_4`; see `docs/migrations/V3_1_ZH_CODEX_EXECUTION_STATE.md`.
+> `STOPPED / NOT AUTHORIZED` and M0 is active/pending. The repository's Phase 4 PR-only
+> publisher is implemented, but external repository rules, trusted check identity, verifier
+> installation, and signed activation evidence remain unprovisioned; see
+> `docs/migrations/V3_1_ZH_CODEX_EXECUTION_STATE.md`.
 
 > Historical acceptance at `f1fd8077fee001fa6751aa86b26f341f04d0d150` superseded the
 > phase-by-phase counts below at that SHA only. Its 554-test local result and eight remote workflow

@@ -1,0 +1,6 @@
+[Path]
+PathChanged=/var/lib/traincapsule-github-token/outbox/token-metadata.json
+Unit=traincapsule-github-token-promoter.service
+
+[Install]
+WantedBy=multi-user.target

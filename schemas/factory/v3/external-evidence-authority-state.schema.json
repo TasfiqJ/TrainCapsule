@@ -1,0 +1,67 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "stateVersion": {
+      "default": 1,
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Stateversion",
+      "type": "integer"
+    },
+    "authorityId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Authorityid",
+      "type": "string"
+    },
+    "epoch": {
+      "minimum": 1,
+      "title": "Epoch",
+      "type": "integer"
+    },
+    "anchorDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Anchordigest",
+      "type": "string"
+    },
+    "revocationListDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Revocationlistdigest",
+      "type": "string"
+    },
+    "keyFingerprint": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Keyfingerprint",
+      "type": "string"
+    },
+    "previousStateDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Previousstatedigest"
+    },
+    "advancedAt": {
+      "format": "date-time",
+      "title": "Advancedat",
+      "type": "string"
+    }
+  },
+  "required": [
+    "authorityId",
+    "epoch",
+    "anchorDigest",
+    "revocationListDigest",
+    "keyFingerprint",
+    "previousStateDigest",
+    "advancedAt"
+  ],
+  "title": "ExternalEvidenceAuthorityState",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/external-evidence-authority-state.schema.json"
+}

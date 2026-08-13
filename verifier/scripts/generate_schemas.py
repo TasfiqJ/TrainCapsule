@@ -9,15 +9,25 @@ from pathlib import Path
 from typing import Final
 
 from pydantic import BaseModel
+from traincapsule_verifier.check_publisher import (
+    CheckDeliveryReceipt,
+    CheckEvent,
+    CheckProcessResult,
+    CheckPublisherPolicy,
+    CheckPublishRequest,
+)
 from traincapsule_verifier.models import (
+    ActivationAuthorization,
     ActivationReceipt,
     ActivationRequest,
     AuthorityAnchor,
     CheckAuthorization,
     InstallationAttestation,
     MachinePolicyReceipt,
+    ObservedMainReceipt,
     OracleExecutionResult,
     RevocationList,
+    RulesetObservationReceipt,
     TrustedEvidenceManifest,
     VerificationRequest,
     VerifierPolicy,
@@ -26,14 +36,22 @@ from traincapsule_verifier.models import (
 ROOT: Final = Path(__file__).resolve().parents[1]
 SCHEMA_ROOT: Final = ROOT / "schemas"
 SCHEMAS: Final[dict[str, type[BaseModel]]] = {
+    "activation-authorization.schema.json": ActivationAuthorization,
     "activation-receipt.schema.json": ActivationReceipt,
     "activation-request.schema.json": ActivationRequest,
     "authority-anchor.schema.json": AuthorityAnchor,
     "check-authorization.schema.json": CheckAuthorization,
+    "check-delivery-receipt.schema.json": CheckDeliveryReceipt,
+    "check-event.schema.json": CheckEvent,
+    "check-process-result.schema.json": CheckProcessResult,
+    "check-publish-request.schema.json": CheckPublishRequest,
+    "check-publisher-policy.schema.json": CheckPublisherPolicy,
     "installation-attestation.schema.json": InstallationAttestation,
     "machine-policy-receipt.schema.json": MachinePolicyReceipt,
     "oracle-execution-result.schema.json": OracleExecutionResult,
+    "observed-main-receipt.schema.json": ObservedMainReceipt,
     "revocation-list.schema.json": RevocationList,
+    "ruleset-observation-receipt.schema.json": RulesetObservationReceipt,
     "trusted-evidence-manifest.schema.json": TrustedEvidenceManifest,
     "verification-request.schema.json": VerificationRequest,
     "verifier-policy.schema.json": VerifierPolicy,

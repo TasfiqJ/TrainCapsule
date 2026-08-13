@@ -21,6 +21,23 @@
       "title": "Allowedhostnames",
       "type": "array"
     },
+    "allowedMethods": {
+      "items": {
+        "const": "GET",
+        "type": "string"
+      },
+      "maxItems": 1,
+      "minItems": 1,
+      "title": "Allowedmethods",
+      "type": "array"
+    },
+    "maxRedirects": {
+      "default": 3,
+      "maximum": 5,
+      "minimum": 0,
+      "title": "Maxredirects",
+      "type": "integer"
+    },
     "maxResponseBytes": {
       "maximum": 16777216,
       "minimum": 1,
@@ -31,6 +48,13 @@
       "maximum": 64,
       "minimum": 1,
       "title": "Maxsourcesperplan",
+      "type": "integer"
+    },
+    "maximumFreshnessSeconds": {
+      "default": 86400,
+      "maximum": 7776000,
+      "minimum": 60,
+      "title": "Maximumfreshnessseconds",
       "type": "integer"
     },
     "policyId": {

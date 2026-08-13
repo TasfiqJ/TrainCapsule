@@ -18,8 +18,9 @@
         },
         "bashAllowlist": {
           "items": {
-            "type": "string"
+            "$ref": "#/$defs/BashCommandRule"
           },
+          "maxItems": 16,
           "title": "Bashallowlist",
           "type": "array"
         },
@@ -159,6 +160,30 @@
         "bashAllowlist"
       ],
       "title": "AgentTaskRequest",
+      "type": "object"
+    },
+    "BashCommandRule": {
+      "additionalProperties": false,
+      "properties": {
+        "argumentPrefix": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 16,
+          "title": "Argumentprefix",
+          "type": "array"
+        },
+        "executable": {
+          "pattern": "^[A-Za-z0-9][A-Za-z0-9._+-]{0,63}$",
+          "title": "Executable",
+          "type": "string"
+        }
+      },
+      "required": [
+        "executable",
+        "argumentPrefix"
+      ],
+      "title": "BashCommandRule",
       "type": "object"
     }
   },

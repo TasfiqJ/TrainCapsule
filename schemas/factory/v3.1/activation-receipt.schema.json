@@ -20,6 +20,17 @@
     "Identifier": {
       "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
       "type": "string"
+    },
+    "RelativePath": {
+      "maxLength": 512,
+      "minLength": 1,
+      "pattern": "^[^/].*$",
+      "type": "string"
+    },
+    "SourceGenerationId": {
+      "maxLength": 128,
+      "minLength": 3,
+      "type": "string"
     }
   },
   "$id": "https://traincapsule.local/schemas/factory/v3.1/activation-receipt.schema.json",
@@ -29,8 +40,14 @@
     "controllerBinaryDigest": {
       "$ref": "#/$defs/Digest"
     },
+    "controllerBinaryPath": {
+      "$ref": "#/$defs/RelativePath"
+    },
     "controllerConfigDigest": {
       "$ref": "#/$defs/Digest"
+    },
+    "controllerConfigPath": {
+      "$ref": "#/$defs/RelativePath"
     },
     "expiresAt": {
       "format": "date-time",
@@ -50,6 +67,9 @@
     },
     "machineEnvironmentDigest": {
       "$ref": "#/$defs/Digest"
+    },
+    "machineEnvironmentPath": {
+      "$ref": "#/$defs/RelativePath"
     },
     "machinePolicyReceiptDigest": {
       "$ref": "#/$defs/Digest"
@@ -80,8 +100,8 @@
       "type": "string"
     },
     "signature": {
-      "maxLength": 1024,
-      "minLength": 32,
+      "maxLength": 128,
+      "minLength": 80,
       "title": "Signature",
       "type": "string"
     },
@@ -94,7 +114,7 @@
       "$ref": "#/$defs/Digest"
     },
     "sourceGenerationId": {
-      "$ref": "#/$defs/Identifier"
+      "$ref": "#/$defs/SourceGenerationId"
     },
     "verifiedMainSha": {
       "$ref": "#/$defs/GitSha"
@@ -109,6 +129,9 @@
     "sourceGenerationDigest",
     "controllerBinaryDigest",
     "controllerConfigDigest",
+    "machineEnvironmentPath",
+    "controllerBinaryPath",
+    "controllerConfigPath",
     "machinePolicyReceiptId",
     "machinePolicyReceiptDigest",
     "mode",

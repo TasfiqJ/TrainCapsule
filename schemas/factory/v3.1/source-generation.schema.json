@@ -4,14 +4,15 @@
       "pattern": "^sha256:[0-9a-f]{64}$",
       "type": "string"
     },
-    "Identifier": {
-      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
-      "type": "string"
-    },
     "RelativePath": {
       "maxLength": 512,
       "minLength": 1,
       "pattern": "^[^/].*$",
+      "type": "string"
+    },
+    "SourceGenerationId": {
+      "maxLength": 128,
+      "minLength": 3,
       "type": "string"
     }
   },
@@ -30,7 +31,7 @@
       "type": "string"
     },
     "generationId": {
-      "$ref": "#/$defs/Identifier"
+      "$ref": "#/$defs/SourceGenerationId"
     },
     "manifestDigest": {
       "$ref": "#/$defs/Digest"
@@ -53,7 +54,7 @@
       "type": "object"
     },
     "supersedesGenerationId": {
-      "$ref": "#/$defs/Identifier"
+      "$ref": "#/$defs/SourceGenerationId"
     }
   },
   "required": [

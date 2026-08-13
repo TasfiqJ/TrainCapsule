@@ -635,10 +635,12 @@ version = "1.0.0"
 source = { editable = "." }
 dependencies = [
     { name = "claude-agent-sdk" },
+    { name = "cryptography" },
     { name = "pydantic" },
     { name = "python-dateutil" },
     { name = "pyyaml" },
     { name = "rich" },
+    { name = "traincapsule-independent-verifier" },
     { name = "typer" },
 ]
 
@@ -653,6 +655,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "claude-agent-sdk", specifier = "==0.2.134" },
+    { name = "cryptography", specifier = ">=46" },
     { name = "pydantic", specifier = ">=2.8" },
     { name = "pyright", marker = "extra == 'dev'", specifier = ">=1.1.390" },
     { name = "pytest", marker = "extra == 'dev'", specifier = ">=8.3" },
@@ -660,6 +663,7 @@ requires-dist = [
     { name = "pyyaml", specifier = ">=6.0" },
     { name = "rich", specifier = ">=13.7" },
     { name = "ruff", marker = "extra == 'dev'", specifier = ">=0.9" },
+    { name = "traincapsule-independent-verifier", directory = "verifier" },
     { name = "typer", specifier = ">=0.12" },
     { name = "types-pyyaml", marker = "extra == 'dev'", specifier = ">=6.0" },
 ]
@@ -696,6 +700,21 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [{ name = "pydantic", specifier = ">=2.8" }]
+
+[[package]]
+name = "traincapsule-independent-verifier"
+version = "3.1.0"
+source = { directory = "verifier" }
+dependencies = [
+    { name = "cryptography" },
+    { name = "pydantic" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "cryptography", specifier = ">=46" },
+    { name = "pydantic", specifier = ">=2.8" },
+]
 
 [[package]]
 name = "traincapsule-ingest-pytorch"

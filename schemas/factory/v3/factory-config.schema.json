@@ -156,7 +156,7 @@
           "type": "boolean"
         },
         "publisherCapability": {
-          "const": "PENDING_PHASE_4",
+          "const": "AUTOMATED_PR_V31_READY",
           "title": "Publishercapability",
           "type": "string"
         }

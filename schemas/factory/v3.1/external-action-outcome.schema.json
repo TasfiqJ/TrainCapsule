@@ -1,0 +1,246 @@
+{
+  "$defs": {
+    "ExternalActionChannel": {
+      "enum": [
+        "EMAIL",
+        "CRM",
+        "CALENDAR"
+      ],
+      "title": "ExternalActionChannel",
+      "type": "string"
+    },
+    "ExternalActionReason": {
+      "enum": [
+        "DELIVERED",
+        "ADAPTER_NOT_INSTALLED",
+        "VERIFIER_NOT_INSTALLED",
+        "BACKEND_NOT_INSTALLED",
+        "POLICY_VERIFIER_NOT_INSTALLED",
+        "JOURNAL_NOT_INSTALLED",
+        "MACHINE_POLICY_UNVERIFIED",
+        "MACHINE_POLICY_EXPIRED",
+        "POLICY_ARTIFACT_UNVERIFIED",
+        "IDEMPOTENCY_PENDING",
+        "CHANNEL_UNAVAILABLE"
+      ],
+      "title": "ExternalActionReason",
+      "type": "string"
+    },
+    "ExternalActionRequest": {
+      "additionalProperties": false,
+      "properties": {
+        "actionId": {
+          "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+          "title": "Actionid",
+          "type": "string"
+        },
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "channel": {
+          "$ref": "#/$defs/ExternalActionChannel"
+        },
+        "machinePolicyReceiptDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Machinepolicyreceiptdigest",
+          "type": "string"
+        },
+        "machinePolicyReceiptId": {
+          "maxLength": 128,
+          "minLength": 1,
+          "title": "Machinepolicyreceiptid",
+          "type": "string"
+        },
+        "recipient": {
+          "maxLength": 320,
+          "minLength": 1,
+          "title": "Recipient",
+          "type": "string"
+        },
+        "requestedAt": {
+          "format": "date-time",
+          "title": "Requestedat",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "templateId": {
+          "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+          "title": "Templateid",
+          "type": "string"
+        },
+        "variables": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "maxProperties": 64,
+          "title": "Variables",
+          "type": "object"
+        },
+        "workItemId": {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "title": "Workitemid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "actionId",
+        "workItemId",
+        "candidateSha",
+        "channel",
+        "recipient",
+        "templateId",
+        "variables",
+        "machinePolicyReceiptId",
+        "machinePolicyReceiptDigest",
+        "requestedAt"
+      ],
+      "title": "ExternalActionRequest",
+      "type": "object"
+    },
+    "ExternalActionStatus": {
+      "enum": [
+        "SENT",
+        "WAITING_EXTERNAL_CHANNEL"
+      ],
+      "title": "ExternalActionStatus",
+      "type": "string"
+    },
+    "ExternalDeliveryReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "actionDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Actiondigest",
+          "type": "string"
+        },
+        "backendDeliveryId": {
+          "maxLength": 256,
+          "minLength": 1,
+          "title": "Backenddeliveryid",
+          "type": "string"
+        },
+        "backendId": {
+          "title": "Backendid",
+          "type": "string"
+        },
+        "deliveredAt": {
+          "format": "date-time",
+          "title": "Deliveredat",
+          "type": "string"
+        },
+        "deliveryDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Deliverydigest",
+          "type": "string"
+        },
+        "deliveryGenerationId": {
+          "pattern": "^[0-9a-f]{32}$",
+          "title": "Deliverygenerationid",
+          "type": "string"
+        },
+        "idempotencyKey": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Idempotencykey",
+          "type": "string"
+        },
+        "payloadDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Payloaddigest",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "backendId",
+        "backendDeliveryId",
+        "actionDigest",
+        "payloadDigest",
+        "idempotencyKey",
+        "deliveryGenerationId",
+        "deliveredAt",
+        "deliveryDigest"
+      ],
+      "title": "ExternalDeliveryReceipt",
+      "type": "object"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/external-action-outcome.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "actionId": {
+      "title": "Actionid",
+      "type": "string"
+    },
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "deliveryReceipt": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/ExternalDeliveryReceipt"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "reason": {
+      "$ref": "#/$defs/ExternalActionReason"
+    },
+    "request": {
+      "$ref": "#/$defs/ExternalActionRequest"
+    },
+    "requestDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Requestdigest",
+      "type": "string"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "status": {
+      "$ref": "#/$defs/ExternalActionStatus"
+    },
+    "unrelatedLanesMayContinue": {
+      "const": true,
+      "default": true,
+      "title": "Unrelatedlanesmaycontinue",
+      "type": "boolean"
+    },
+    "workItemId": {
+      "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+      "title": "Workitemid",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "actionId",
+    "workItemId",
+    "candidateSha",
+    "request",
+    "requestDigest",
+    "status",
+    "reason"
+  ],
+  "title": "ExternalActionOutcome",
+  "type": "object"
+}

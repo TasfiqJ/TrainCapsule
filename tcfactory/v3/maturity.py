@@ -37,11 +37,9 @@ def commercial_maturity_supported(
         return True
     if maturity is CommercialMaturity.NATIVE_ADVANTAGE_DEMONSTRATED:
         return bool(evidence)
-    value_types = {
-        EvidenceType.PAID_PREFLIGHT,
-        EvidenceType.PAID_PILOT,
-        EvidenceType.DECISION_CHANGED,
-    }
+    # Payment, authorization, scheduling, and engagement are attributable facts,
+    # but none proves that the product changed or strengthened a decision.
+    value_types = {EvidenceType.DECISION_CHANGED}
     if maturity is CommercialMaturity.EXTERNAL_VALUE_DEMONSTRATED:
         return bool(evidence & value_types)
     if maturity is CommercialMaturity.COMMERCIALLY_SUPPORTED:

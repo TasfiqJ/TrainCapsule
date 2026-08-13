@@ -131,11 +131,7 @@ class V3Queue:
 
     def _paths(self, work_item_id: str) -> list[Path]:
         name = f"{work_item_id}.yaml"
-        return [
-            path
-            for state in WorkStatus
-            if (path := self._state_dir(state) / name).is_file()
-        ]
+        return [path for state in WorkStatus if (path := self._state_dir(state) / name).is_file()]
 
     def locate(self, work_item_id: str) -> Path:
         paths = self._paths(work_item_id)
@@ -157,11 +153,12 @@ class V3Queue:
         os.replace(temporary, path)
 
     def put(self, item: WorkItem) -> Path:
-        if self._paths(item.work_item_id):
-            raise ValueError(f"duplicate queue work item: {item.work_item_id}")
-        target = self._state_dir(item.status) / f"{item.work_item_id}.yaml"
-        self._atomic_write(target, item)
-        return target
+        with self._claim_lock(item.work_item_id):
+            if self._paths(item.work_item_id):
+                raise ValueError(f"duplicate queue work item: {item.work_item_id}")
+            target = self._state_dir(item.status) / f"{item.work_item_id}.yaml"
+            self._atomic_write(target, item)
+            return target
 
     def bind_external_evidence(
         self,
@@ -172,24 +169,27 @@ class V3Queue:
     ) -> Path:
         """Bind a controller-verified receipt before an outside-fact transition."""
 
-        source = self.locate(work_item_id)
-        item = WorkItem.model_validate(load_yaml(source))
-        if not item.external_receipt_required:
-            raise ValueError("work item does not require external evidence")
-        references = list(dict.fromkeys([*item.external_evidence_refs, receipt_id]))
-        payload = item.model_dump(mode="python", by_alias=False)
-        payload.update({"external_evidence_refs": references, "updated_at": updated_at})
-        updated = WorkItem.model_validate(payload)
-        self._atomic_write(source, updated)
-        return source
+        with self._claim_lock(work_item_id):
+            source = self.locate(work_item_id)
+            item = WorkItem.model_validate(load_yaml(source))
+            if not item.external_receipt_required:
+                raise ValueError("work item does not require external evidence")
+            references = list(dict.fromkeys([*item.external_evidence_refs, receipt_id]))
+            payload = item.model_dump(mode="python", by_alias=False)
+            payload.update({"external_evidence_refs": references, "updated_at": updated_at})
+            updated = WorkItem.model_validate(payload)
+            self._atomic_write(source, updated)
+            return source
 
-    def transition(
+    def _transition_owned(
         self,
         work_item_id: str,
         target: WorkStatus,
         *,
         updated_at: datetime,
     ) -> Path:
+        """Transition while the caller holds the work-item OS lock."""
+
         source = self.locate(work_item_id)
         item = WorkItem.model_validate(load_yaml(source))
         assert_status_transition(item.status, target)
@@ -217,6 +217,22 @@ class V3Queue:
             self._lease_path(work_item_id).unlink(missing_ok=True)
         return destination
 
+    def transition(
+        self,
+        work_item_id: str,
+        target: WorkStatus,
+        *,
+        updated_at: datetime,
+    ) -> Path:
+        """Cross-process atomic state transition with a durable write-ahead intent."""
+
+        with self._claim_lock(work_item_id):
+            return self._transition_owned(
+                work_item_id,
+                target,
+                updated_at=updated_at,
+            )
+
     def reconcile_transactions(self) -> list[str]:
         """Complete interrupted transitions without guessing or discarding evidence."""
 
@@ -239,9 +255,7 @@ class V3Queue:
                 self._ensure_directory(destination.parent)
                 os.replace(source, destination)
             else:
-                raise ValueError(
-                    f"ambiguous interrupted transition for {intent.work_item_id}"
-                )
+                raise ValueError(f"ambiguous interrupted transition for {intent.work_item_id}")
             journal.unlink()
             repaired.append(intent.work_item_id)
         return repaired
@@ -313,9 +327,7 @@ class V3Queue:
                         compatible_digest=(
                             "sha256:" + hashlib.sha256(compatible_bytes).hexdigest()
                         ),
-                        status_preserved=(
-                            compatible.status.value == typed_raw.get("status")
-                        ),
+                        status_preserved=(compatible.status.value == typed_raw.get("status")),
                     )
                 )
         identifiers = [item.work_item_id for item in result]
@@ -355,7 +367,7 @@ class V3Queue:
             )
             write_json(lease_path, lease.model_dump(mode="json", by_alias=True))
             try:
-                self.transition(work_item_id, WorkStatus.RUNNING, updated_at=now)
+                self._transition_owned(work_item_id, WorkStatus.RUNNING, updated_at=now)
                 # transition deliberately clears non-RUNNING leases only.
             except Exception:
                 observed = read_json(lease_path, {})
@@ -373,6 +385,8 @@ class V3Queue:
         lease_seconds: int = 900,
     ) -> QueueLease:
         with self._claim_lock(work_item_id):
+            if self.load(work_item_id).status is not WorkStatus.RUNNING:
+                raise ValueError("only RUNNING work leases may be renewed")
             lease_path = self._lease_path(work_item_id)
             lease = QueueLease.model_validate(read_json(lease_path, {}))
             if lease.lease_id != lease_id or lease.expires_at <= now:
@@ -403,7 +417,7 @@ class V3Queue:
                     owner_alive = self._lease_owner_is_alive(lease)
                     abandoned = lease.expires_at <= now or owner_alive is False
                 if abandoned:
-                    self.transition(
+                    self._transition_owned(
                         item.work_item_id,
                         WorkStatus.BLOCKED_TECHNICAL,
                         updated_at=now,

@@ -18,13 +18,23 @@ def test_v31_legacy_mutation_commands_reject_before_mutation() -> None:
         ["enqueue", "tasks/T002.yaml", "--repo", str(ROOT)],
         ["worker", "--repo", str(ROOT)],
         ["queue-reconcile", "--repo", str(ROOT)],
-        ["recover", "--repo", str(ROOT)],
     )
     for command in commands:
         result = runner.invoke(app, command)
         assert result.exit_code != 0
         observed = result.output or str(result.exception)
         assert "disabled V2 compatibility surface" in observed
+    assert (ROOT / "factory/feature_ledger.yaml").read_bytes() == before
+
+
+def test_v31_recover_routes_to_the_v31_runtime_without_legacy_mutation() -> None:
+    runner = CliRunner()
+    before = (ROOT / "factory/feature_ledger.yaml").read_bytes()
+    result = runner.invoke(app, ["recover", "--repo", str(ROOT)])
+    assert result.exit_code == 0
+    assert '"version": 3' in result.output
+    assert '"queueRoot"' in result.output
+    assert "v3-queue" in result.output
     assert (ROOT / "factory/feature_ledger.yaml").read_bytes() == before
 
 

@@ -1,6 +1,9 @@
 name: TrainCapsule / Source freshness
 
 on:
+  pull_request:
+    branches: [main]
+  merge_group:
   push:
     branches: [main]
   schedule:
@@ -16,6 +19,7 @@ concurrency:
 
 jobs:
   source-freshness:
+    name: TrainCapsule / Source freshness
     runs-on: ${{ fromJSON(vars.TRAINCAPSULE_CI_RUNNER || '["ubuntu-latest"]') }}
     timeout-minutes: 15
     steps:

@@ -1,0 +1,138 @@
+{
+  "$defs": {
+    "Digest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "type": "string"
+    },
+    "Identifier": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/verifier/v3.1/ruleset-observation-receipt.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "autoMergeEnabled": {
+      "const": true,
+      "title": "Automergeenabled",
+      "type": "boolean"
+    },
+    "baseBranch": {
+      "const": "main",
+      "title": "Basebranch",
+      "type": "string"
+    },
+    "branchUpdateRestricted": {
+      "const": true,
+      "title": "Branchupdaterestricted",
+      "type": "boolean"
+    },
+    "bypassActorCount": {
+      "const": 0,
+      "title": "Bypassactorcount",
+      "type": "integer"
+    },
+    "deletionForbidden": {
+      "const": true,
+      "title": "Deletionforbidden",
+      "type": "boolean"
+    },
+    "enforcement": {
+      "const": "active",
+      "title": "Enforcement",
+      "type": "string"
+    },
+    "expiresAt": {
+      "format": "date-time",
+      "title": "Expiresat",
+      "type": "string"
+    },
+    "forcePushForbidden": {
+      "const": true,
+      "title": "Forcepushforbidden",
+      "type": "boolean"
+    },
+    "issuerId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "issuerKeyId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "observationDigest": {
+      "$ref": "#/$defs/Digest"
+    },
+    "observationId": {
+      "$ref": "#/$defs/Identifier"
+    },
+    "observedAt": {
+      "format": "date-time",
+      "title": "Observedat",
+      "type": "string"
+    },
+    "pullRequestRequired": {
+      "const": true,
+      "title": "Pullrequestrequired",
+      "type": "boolean"
+    },
+    "repository": {
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+      "title": "Repository",
+      "type": "string"
+    },
+    "requiredCheckAppIds": {
+      "additionalProperties": {
+        "type": "integer"
+      },
+      "maxProperties": 64,
+      "minProperties": 1,
+      "title": "Requiredcheckappids",
+      "type": "object"
+    },
+    "rulesetId": {
+      "exclusiveMinimum": 0,
+      "title": "Rulesetid",
+      "type": "integer"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "signature": {
+      "maxLength": 128,
+      "minLength": 80,
+      "title": "Signature",
+      "type": "string"
+    },
+    "signatureAlgorithm": {
+      "const": "ed25519",
+      "title": "Signaturealgorithm",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "observationId",
+    "observationDigest",
+    "repository",
+    "baseBranch",
+    "rulesetId",
+    "enforcement",
+    "requiredCheckAppIds",
+    "bypassActorCount",
+    "deletionForbidden",
+    "forcePushForbidden",
+    "pullRequestRequired",
+    "branchUpdateRestricted",
+    "autoMergeEnabled",
+    "observedAt",
+    "expiresAt",
+    "issuerId",
+    "issuerKeyId",
+    "signatureAlgorithm",
+    "signature"
+  ],
+  "title": "RulesetObservationReceipt",
+  "type": "object"
+}

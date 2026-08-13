@@ -135,6 +135,23 @@ class ReachableAccountMap(MarketModel):
             raise ValueError("account-map claim IDs must be unique")
         if len(set(self.raw_source_artifact_digests)) != len(self.raw_source_artifact_digests):
             raise ValueError("account-map source artifacts must be unique")
+        raw_roster = set(self.raw_source_artifact_digests)
+        for account in self.accounts:
+            for field in (
+                account.organization,
+                account.segment,
+                account.relationship_path,
+                account.relevant_workload,
+                account.known_incident,
+                account.planned_change,
+                account.decision_owner,
+                account.technical_champion,
+                account.budget_owner,
+                account.native_stack,
+                account.privacy_constraint,
+            ):
+                if not set(field.source_artifact_digests).issubset(raw_roster):
+                    raise ValueError("account field cites evidence outside the map roster")
         if self.external_outcomes_demonstrated:
             raise ValueError("a research account map cannot claim external outcomes")
         return self

@@ -18,6 +18,7 @@ from tcfactory.feature_ledger import load_feature_ledger
 from tcfactory.util import sha256_file
 from tcfactory.v3.enums import WorkStatus
 from tcfactory.v3.migrations import (
+    LEGACY_ARCHIVE_V3_STATE_DIRECTORIES,
     LegacyDisposition,
     LegacyMigrationMap,
     load_installed_legacy_migration,
@@ -157,10 +158,8 @@ def test_non_resuming_queue_archive_receipt_is_fully_verifiable() -> None:
     state_directories = receipt["v3StateDirectories"]
     assert isinstance(files, list) and len(cast(list[object], files)) == 3
     assert isinstance(state_directories, list)
-    assert set(cast(list[str], state_directories)) == {
-        *(status.value.lower() for status in WorkStatus),
-        "waiting_human",  # historical V2 archive namespace; never a V3 runtime state
-    }
+    assert cast(list[str], state_directories) == list(LEGACY_ARCHIVE_V3_STATE_DIRECTORIES)
+    assert WorkStatus.PAUSED_BACKEND.value.lower() not in cast(list[str], state_directories)
 
 
 def test_tracked_queue_receipts_verify_in_a_clean_checkout(tmp_path: Path) -> None:

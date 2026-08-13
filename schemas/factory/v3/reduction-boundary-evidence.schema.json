@@ -1,0 +1,82 @@
+{
+  "additionalProperties": false,
+  "description": "Independent-oracle evidence for one legal and one illegal reduction.",
+  "properties": {
+    "schemaVersion": {
+      "const": "3.1",
+      "default": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "workItemId": {
+      "const": "V3-TRUST-005",
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "evidenceBasisSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Evidencebasissha",
+      "type": "string"
+    },
+    "sourceAuthorityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourceauthoritydigest",
+      "type": "string"
+    },
+    "oracleExecutableDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Oracleexecutabledigest",
+      "type": "string"
+    },
+    "oracleResultDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Oracleresultdigest",
+      "type": "string"
+    },
+    "rawArtifactDigests": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "minItems": 3,
+      "title": "Rawartifactdigests",
+      "type": "array"
+    },
+    "legalReductionArtifactDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Legalreductionartifactdigest",
+      "type": "string"
+    },
+    "legalReductionVerdict": {
+      "const": "VERIFIED",
+      "title": "Legalreductionverdict",
+      "type": "string"
+    },
+    "illegalReductionArtifactDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Illegalreductionartifactdigest",
+      "type": "string"
+    },
+    "illegalReductionVerdict": {
+      "const": "REJECTED",
+      "title": "Illegalreductionverdict",
+      "type": "string"
+    }
+  },
+  "required": [
+    "workItemId",
+    "evidenceBasisSha",
+    "sourceAuthorityDigest",
+    "oracleExecutableDigest",
+    "oracleResultDigest",
+    "rawArtifactDigests",
+    "legalReductionArtifactDigest",
+    "legalReductionVerdict",
+    "illegalReductionArtifactDigest",
+    "illegalReductionVerdict"
+  ],
+  "title": "ReductionBoundaryEvidence",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/reduction-boundary-evidence.schema.json"
+}

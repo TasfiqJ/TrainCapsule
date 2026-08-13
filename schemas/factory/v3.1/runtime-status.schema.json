@@ -50,6 +50,11 @@
       "title": "RuntimeMode",
       "type": "string"
     },
+    "SourceGenerationId": {
+      "maxLength": 128,
+      "minLength": 3,
+      "type": "string"
+    },
     "TechnicalState": {
       "enum": [
         "NOT_EVALUATED",
@@ -160,7 +165,7 @@
       "$ref": "#/$defs/Digest"
     },
     "sourceGenerationId": {
-      "$ref": "#/$defs/Identifier"
+      "$ref": "#/$defs/SourceGenerationId"
     },
     "technicalState": {
       "$ref": "#/$defs/TechnicalState"

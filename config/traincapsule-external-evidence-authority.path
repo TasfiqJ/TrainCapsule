@@ -1,0 +1,16 @@
+[Unit]
+Description=Watch staged TrainCapsule external-evidence authority snapshots
+After=local-fs.target
+
+[Path]
+# A freshly staged epoch-1 snapshot must trigger genesis when this path unit is
+# first enabled; subsequent exact-byte changes trigger monotonic rotations.
+PathExists=/var/lib/traincapsule-external-evidence/staged-authority/authority-anchor.json
+PathChanged=/var/lib/traincapsule-external-evidence/staged-authority/revocation-list.json
+PathChanged=/var/lib/traincapsule-external-evidence/staged-authority/revocation-list.json.sig
+PathChanged=/var/lib/traincapsule-external-evidence/staged-authority/authority-anchor.json
+PathChanged=/var/lib/traincapsule-external-evidence/staged-authority/authority-anchor.json.sig
+Unit=traincapsule-external-evidence-authority.service
+
+[Install]
+WantedBy=multi-user.target

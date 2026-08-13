@@ -1,0 +1,61 @@
+{
+  "$defs": {
+    "ExternalActionChannel": {
+      "enum": [
+        "EMAIL",
+        "CRM",
+        "CALENDAR"
+      ],
+      "title": "ExternalActionChannel",
+      "type": "string"
+    }
+  },
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/external-action-template.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "bodyTemplate": {
+      "maxLength": 16000,
+      "minLength": 1,
+      "title": "Bodytemplate",
+      "type": "string"
+    },
+    "channel": {
+      "$ref": "#/$defs/ExternalActionChannel"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    },
+    "subjectTemplate": {
+      "maxLength": 500,
+      "minLength": 1,
+      "title": "Subjecttemplate",
+      "type": "string"
+    },
+    "templateId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Templateid",
+      "type": "string"
+    },
+    "variableNames": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 64,
+      "title": "Variablenames",
+      "type": "array"
+    }
+  },
+  "required": [
+    "schemaVersion",
+    "templateId",
+    "channel",
+    "subjectTemplate",
+    "bodyTemplate",
+    "variableNames"
+  ],
+  "title": "ExternalActionTemplate",
+  "type": "object"
+}

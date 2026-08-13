@@ -115,7 +115,7 @@ These facts prove only the completed V3 baseline. They do not prove V3.1-ZH acce
 All package findings are presumed unresolved until the cross-reference records exact current-SHA proof. At minimum:
 
 1. GitHub ruleset and `main` protection are absent.
-2. V3.1 automated PR publication is configured as the required target, but `publisherCapability=PENDING_PHASE_4`; controller startup fails closed and no PR/merge/revert capability is claimed.
+2. The repository Phase 4 implementation is complete: the controller can publish only an exact-SHA candidate branch and automated draft PR, accepts only exact-head trusted-app checks plus a separately verified machine-policy receipt, uses repository-authorized auto-merge, verifies merged `main`, monitors post-merge invariants, and routes any repair through a second verified revert PR. Runtime activation still fails closed because the independent policy-check App ID, protected-branch/ruleset controls, signed activation receipt, verifier-owned receipt root, and installed public verifier client are not yet provisioned and verified.
 3. The separately owned and independently operated V3.1 verifier service is absent.
 4. Exact-SHA machine receipts for PR merge and activation are absent.
 5. Mandatory negative controls and live canaries have not been executed against a V3.1 candidate.

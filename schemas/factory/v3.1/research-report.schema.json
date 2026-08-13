@@ -13,6 +13,7 @@
       "additionalProperties": false,
       "properties": {
         "artifactDigest": {
+          "default": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
           "pattern": "^sha256:[0-9a-f]{64}$",
           "title": "Artifactdigest",
           "type": "string"
@@ -26,6 +27,24 @@
         "observedVerdict": {
           "$ref": "#/$defs/ResearchVerdict"
         },
+        "oracleExecutableDigest": {
+          "default": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Oracleexecutabledigest",
+          "type": "string"
+        },
+        "oracleResultDigest": {
+          "default": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Oracleresultdigest",
+          "type": "string"
+        },
+        "rawArtifactRosterDigest": {
+          "default": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Rawartifactrosterdigest",
+          "type": "string"
+        },
         "schemaVersion": {
           "const": "3.1",
           "title": "Schemaversion",
@@ -35,7 +54,6 @@
       "required": [
         "schemaVersion",
         "kind",
-        "artifactDigest",
         "expectedVerdict",
         "observedVerdict"
       ],
@@ -139,6 +157,9 @@
           "title": "Requestedurl",
           "type": "string"
         },
+        "retrievalReceipt": {
+          "$ref": "#/$defs/SourceRetrievalReceipt"
+        },
         "schemaVersion": {
           "const": "3.1",
           "title": "Schemaversion",
@@ -171,7 +192,8 @@
         "contentDigest",
         "headersDigest",
         "artifactPath",
-        "claimIds"
+        "claimIds",
+        "retrievalReceipt"
       ],
       "title": "SourceArtifact",
       "type": "object"
@@ -186,6 +208,258 @@
       ],
       "title": "SourceClass",
       "type": "string"
+    },
+    "SourceHopReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "peerAddress": {
+          "title": "Peeraddress",
+          "type": "string"
+        },
+        "resolvedPublicAddresses": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 32,
+          "minItems": 1,
+          "title": "Resolvedpublicaddresses",
+          "type": "array"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "url": {
+          "title": "Url",
+          "type": "string"
+        },
+        "urlDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Urldigest",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "url",
+        "urlDigest",
+        "resolvedPublicAddresses",
+        "peerAddress"
+      ],
+      "title": "SourceHopReceipt",
+      "type": "object"
+    },
+    "SourceRetrievalReceipt": {
+      "additionalProperties": false,
+      "description": "Controller attestation binding one bounded retrieval to its raw CAS bytes.",
+      "properties": {
+        "authorityEffect": {
+          "const": "ADVISORY_ONLY_NEVER_NORMATIVE",
+          "default": "ADVISORY_ONLY_NEVER_NORMATIVE",
+          "title": "Authorityeffect",
+          "type": "string"
+        },
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "contentDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Contentdigest",
+          "type": "string"
+        },
+        "contentLength": {
+          "maximum": 16777216,
+          "minimum": 0,
+          "title": "Contentlength",
+          "type": "integer"
+        },
+        "contentType": {
+          "title": "Contenttype",
+          "type": "string"
+        },
+        "controlQuery": {
+          "title": "Controlquery",
+          "type": "string"
+        },
+        "finalUrl": {
+          "title": "Finalurl",
+          "type": "string"
+        },
+        "finalUrlDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Finalurldigest",
+          "type": "string"
+        },
+        "freshUntil": {
+          "format": "date-time",
+          "title": "Freshuntil",
+          "type": "string"
+        },
+        "freshnessPolicy": {
+          "title": "Freshnesspolicy",
+          "type": "string"
+        },
+        "hopReceipts": {
+          "items": {
+            "$ref": "#/$defs/SourceHopReceipt"
+          },
+          "maxItems": 6,
+          "minItems": 1,
+          "title": "Hopreceipts",
+          "type": "array"
+        },
+        "issuerId": {
+          "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+          "title": "Issuerid",
+          "type": "string"
+        },
+        "issuerKeyId": {
+          "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+          "title": "Issuerkeyid",
+          "type": "string"
+        },
+        "method": {
+          "const": "GET",
+          "title": "Method",
+          "type": "string"
+        },
+        "parserId": {
+          "title": "Parserid",
+          "type": "string"
+        },
+        "parserVersion": {
+          "title": "Parserversion",
+          "type": "string"
+        },
+        "planDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Plandigest",
+          "type": "string"
+        },
+        "policyId": {
+          "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+          "title": "Policyid",
+          "type": "string"
+        },
+        "query": {
+          "title": "Query",
+          "type": "string"
+        },
+        "receiptId": {
+          "pattern": "^SRCREC-[A-F0-9]{24}$",
+          "title": "Receiptid",
+          "type": "string"
+        },
+        "redirectChain": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5,
+          "title": "Redirectchain",
+          "type": "array"
+        },
+        "redirectChainDigests": {
+          "items": {
+            "type": "string"
+          },
+          "maxItems": 5,
+          "title": "Redirectchaindigests",
+          "type": "array"
+        },
+        "requestedUrl": {
+          "title": "Requestedurl",
+          "type": "string"
+        },
+        "requestedUrlDigest": {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "title": "Requestedurldigest",
+          "type": "string"
+        },
+        "responseHeaders": {
+          "additionalProperties": {
+            "type": "string"
+          },
+          "maxProperties": 16,
+          "title": "Responseheaders",
+          "type": "object"
+        },
+        "retrievedAt": {
+          "format": "date-time",
+          "title": "Retrievedat",
+          "type": "string"
+        },
+        "schemaVersion": {
+          "const": "3.1",
+          "title": "Schemaversion",
+          "type": "string"
+        },
+        "signature": {
+          "maxLength": 2048,
+          "minLength": 32,
+          "title": "Signature",
+          "type": "string"
+        },
+        "signatureAlgorithm": {
+          "pattern": "^[a-z0-9][a-z0-9._-]{2,63}$",
+          "title": "Signaturealgorithm",
+          "type": "string"
+        },
+        "sourceClass": {
+          "$ref": "#/$defs/SourceClass"
+        },
+        "sourceId": {
+          "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+          "title": "Sourceid",
+          "type": "string"
+        },
+        "statusCode": {
+          "const": 200,
+          "title": "Statuscode",
+          "type": "integer"
+        },
+        "workItemId": {
+          "pattern": "^V3-[A-Z]+-[0-9]{3}$",
+          "title": "Workitemid",
+          "type": "string"
+        }
+      },
+      "required": [
+        "schemaVersion",
+        "receiptId",
+        "sourceId",
+        "workItemId",
+        "candidateSha",
+        "policyId",
+        "planDigest",
+        "method",
+        "requestedUrl",
+        "requestedUrlDigest",
+        "finalUrl",
+        "finalUrlDigest",
+        "hopReceipts",
+        "retrievedAt",
+        "statusCode",
+        "responseHeaders",
+        "contentType",
+        "contentLength",
+        "sourceClass",
+        "query",
+        "controlQuery",
+        "contentDigest",
+        "parserId",
+        "parserVersion",
+        "freshnessPolicy",
+        "freshUntil",
+        "issuerId",
+        "issuerKeyId",
+        "signatureAlgorithm",
+        "signature"
+      ],
+      "title": "SourceRetrievalReceipt",
+      "type": "object"
     }
   },
   "$id": "https://traincapsule.local/schemas/factory/v3.1/research-report.schema.json",

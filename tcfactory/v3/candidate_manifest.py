@@ -54,6 +54,7 @@ class CandidateManifest(V3Model):
     manifest_version: int = Field(default=3, ge=3, le=3)
     base_sha: GitSha
     candidate_sha: GitSha
+    candidate_tree_sha: GitSha
     work_item_id: str = Field(pattern=r"^V3-[A-Z]+-[0-9]{3}$")
     packet_digest: Digest
     context_digest: Digest
@@ -88,23 +89,14 @@ class CandidateManifest(V3Model):
             "checkpoint": self.checkpoint_digest,
         }
         bindings.update(
-            {
-                f"stage:{item.stage}:{item.name}": item.digest
-                for item in self.stage_outputs
-            }
+            {f"stage:{item.stage}:{item.name}": item.digest for item in self.stage_outputs}
         )
         bindings.update({f"gate:{item.name}": item.evidence_digest for item in self.gates})
         bindings.update(
-            {
-                f"finding:{item.fingerprint}": item.artifact_digest
-                for item in self.findings
-            }
+            {f"finding:{item.fingerprint}": item.artifact_digest for item in self.findings}
         )
         bindings.update(
-            {
-                f"external:{item.receipt_id}": item.record_digest
-                for item in self.external_evidence
-            }
+            {f"external:{item.receipt_id}": item.record_digest for item in self.external_evidence}
         )
         return bindings
 

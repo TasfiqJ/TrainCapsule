@@ -1,0 +1,45 @@
+{
+  "$id": "https://traincapsule.local/schemas/factory/v3.1/source-parser-limits.schema.json",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "maximumClaimResults": {
+      "default": 128,
+      "maximum": 512,
+      "minimum": 1,
+      "title": "Maximumclaimresults",
+      "type": "integer"
+    },
+    "maximumDepth": {
+      "default": 24,
+      "maximum": 64,
+      "minimum": 1,
+      "title": "Maximumdepth",
+      "type": "integer"
+    },
+    "maximumNodes": {
+      "default": 10000,
+      "maximum": 100000,
+      "minimum": 1,
+      "title": "Maximumnodes",
+      "type": "integer"
+    },
+    "maximumStringBytes": {
+      "default": 1048576,
+      "maximum": 4194304,
+      "minimum": 1,
+      "title": "Maximumstringbytes",
+      "type": "integer"
+    },
+    "schemaVersion": {
+      "const": "3.1",
+      "title": "Schemaversion",
+      "type": "string"
+    }
+  },
+  "required": [
+    "schemaVersion"
+  ],
+  "title": "ParserLimits",
+  "type": "object"
+}

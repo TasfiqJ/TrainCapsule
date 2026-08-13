@@ -10,9 +10,14 @@ from typing import Literal
 
 from pydantic import Field
 
-from .backends.base import BackendRouteState
 from .backends.claude import ClaudeCredentialProvider
-from .github_sync import load_github_config
+from .github_sync import (
+    load_github_config,
+    reconcile_publications,
+    validate_controller_activation,
+    validate_publication_installation,
+    validate_repository_release_controls,
+)
 from .gitops import current_sha
 from .util import read_json, resolve_within, sha256_file, write_json
 from .v3.base import SHA_PATTERN, V3Model, sha256_digest
@@ -167,7 +172,9 @@ def _verify_migration_marker(
     return marker
 
 
-def run_startup_preflight(repo_root: Path) -> dict[str, object]:
+def run_startup_preflight(
+    repo_root: Path, *, allow_stop_for_activation: bool = False
+) -> dict[str, object]:
     """Fail closed before a controller process can start."""
 
     repo_root = repo_root.resolve()
@@ -177,19 +184,32 @@ def run_startup_preflight(repo_root: Path) -> dict[str, object]:
     _verify_source_integrity(repo_root)
     legacy_migration = load_installed_legacy_migration(repo_root)
     verify_legacy_queue_archive_receipt(repo_root, require_live=True)
-    if paths.stop.exists():
+    if paths.stop.exists() and not allow_stop_for_activation:
         raise RuntimeError("durable STOP is present")
     if paths.hard_stuck.exists():
         raise RuntimeError("HARD_STUCK is present")
     validate_private_gate_installation(repo_root)
     private_gate_health = validate_private_gate_runtime_health(repo_root, paths.state_root)
     github = load_github_config(repo_root / "config/github.yaml")
-    if github.publisher_capability == "PENDING_PHASE_4":
-        raise RuntimeError(
-            "V3.1 automated PR publisher/verifier capability is pending; "
-            "startup is fail-closed"
+    validate_publication_installation(github)
+    activation_digest = validate_controller_activation(repo_root=repo_root, config=github)
+    if not allow_stop_for_activation:
+        from .v3.activation import validate_activation_control_state
+
+        validate_activation_control_state(
+            paths=resolve_v3_runtime_paths(repo_root, config),
+            exact_main_sha=current_sha(repo_root),
+            activation_receipt_digest=activation_digest,
         )
-    publication_recovery: dict[str, object] = {"status": "GITHUB_DISABLED"}
+    release_controls = validate_repository_release_controls(repo_root=repo_root, config=github)
+    recovered = reconcile_publications(repo_root=repo_root, state_root=paths.state_root)
+    publication_recovery: dict[str, object] = {
+        "status": "RECONCILED",
+        "transactions": len(recovered),
+        "phases": [item.phase.value for item in recovered],
+        "repositoryControls": release_controls,
+        "activationReceiptDigest": activation_digest,
+    }
     marker = _verify_migration_marker(repo_root, config, paths.migration_marker)
     queue = V3Queue(paths.queue)
     queue.initialize()
@@ -198,8 +218,6 @@ def run_startup_preflight(repo_root: Path) -> dict[str, object]:
     if corrupt:
         raise RuntimeError("corrupt checkpoints require explicit recovery before startup")
     route = ClaudeCredentialProvider(require_long_lived_token=True).state()
-    if route is not BackendRouteState.AUTHENTICATED:
-        raise RuntimeError(f"credential preflight failed: {route.value}")
     return {
         "ready": True,
         "configVersion": 3,
@@ -207,6 +225,7 @@ def run_startup_preflight(repo_root: Path) -> dict[str, object]:
         "sourceIntegrity": "PASS",
         "legacyMigrationRecords": len(legacy_migration.records),
         "migrationCompletedSha": marker.completed_sha,
+        "credentialRoute": route.value,
         "credentials": route.value,
         "runtimeState": "RECOVERY_PENDING" if pending_claim_recovery else "CLEAN",
         "pendingClaimRecovery": pending_claim_recovery,

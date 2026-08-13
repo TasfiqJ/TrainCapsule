@@ -287,16 +287,24 @@ def _maturity(row: SourceRow) -> MaturityTarget:
     if row.milestone_number == 2:
         return MaturityTarget(
             engineering=EngineeringMaturity.EXTERNAL_VALIDATED,
-            commercial=CommercialMaturity.NATIVE_ADVANTAGE_DEMONSTRATED,
+            commercial=(
+                CommercialMaturity.NATIVE_ADVANTAGE_DEMONSTRATED
+                if row.work_item_id == "V3-COMP-005"
+                else CommercialMaturity.NATIVE_ADVANTAGE_UNPROVEN
+            ),
         )
     if row.milestone_number in {3, 4, 5}:
         return MaturityTarget(
             engineering=EngineeringMaturity.EXTERNAL_VALIDATED,
-            commercial=CommercialMaturity.EXTERNAL_VALUE_DEMONSTRATED,
+            commercial=(
+                CommercialMaturity.EXTERNAL_VALUE_DEMONSTRATED
+                if row.work_item_id in {"V3-PILOT-011", "V3-REPEAT-005"}
+                else CommercialMaturity.NATIVE_ADVANTAGE_UNPROVEN
+            ),
         )
     return MaturityTarget(
         engineering=EngineeringMaturity.EXTERNAL_VALIDATED,
-        commercial=CommercialMaturity.COMMERCIALLY_SUPPORTED,
+        commercial=CommercialMaturity.NATIVE_ADVANTAGE_UNPROVEN,
     )
 
 

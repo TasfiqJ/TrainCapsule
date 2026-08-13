@@ -1,0 +1,94 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "workItemId": {
+      "title": "Workitemid",
+      "type": "string"
+    },
+    "candidateSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatesha",
+      "type": "string"
+    },
+    "candidateTreeSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatetreesha",
+      "type": "string"
+    },
+    "requestDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Requestdigest",
+      "type": "string"
+    },
+    "traincheckToolDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Trainchecktooldigest",
+      "type": "string"
+    },
+    "contractDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Contractdigest",
+      "type": "string"
+    },
+    "baselineDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Baselinedigest",
+      "type": "string"
+    },
+    "candidateDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Candidatedigest",
+      "type": "string"
+    },
+    "oracleId": {
+      "title": "Oracleid",
+      "type": "string"
+    },
+    "oracleResultDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Oracleresultdigest",
+      "type": "string"
+    },
+    "changedOperationalDecision": {
+      "title": "Changedoperationaldecision",
+      "type": "boolean"
+    },
+    "baselineDecision": {
+      "title": "Baselinedecision",
+      "type": "string"
+    },
+    "candidateDecision": {
+      "title": "Candidatedecision",
+      "type": "string"
+    },
+    "limitations": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 32,
+      "minItems": 1,
+      "title": "Limitations",
+      "type": "array"
+    }
+  },
+  "required": [
+    "workItemId",
+    "candidateSha",
+    "candidateTreeSha",
+    "requestDigest",
+    "traincheckToolDigest",
+    "contractDigest",
+    "baselineDigest",
+    "candidateDigest",
+    "oracleId",
+    "oracleResultDigest",
+    "changedOperationalDecision",
+    "baselineDecision",
+    "candidateDecision",
+    "limitations"
+  ],
+  "title": "TrainCheckDifferentialResult",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/traincheck-differential-result.schema.json"
+}

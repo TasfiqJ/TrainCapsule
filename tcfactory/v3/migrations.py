@@ -19,12 +19,33 @@ from tcfactory.v3.base import (
     V3Model,
     sha256_digest,
 )
-from tcfactory.v3.enums import WorkStatus
 from tcfactory.v3.queue import V3Queue
 from tcfactory.v3.work_items import WorkItemCollection
 from tcfactory.yamlutil import load_yaml
 
 V3WorkItemId = Annotated[str, Field(pattern=r"^V3-[A-Z]+-[0-9]{3}$")]
+
+# Historical evidence records the state-directory roster that existed when the
+# immutable V2 queue archive was captured. Later runtime statuses must not
+# rewrite that receipt retroactively.
+LEGACY_ARCHIVE_V3_STATE_DIRECTORIES = (
+    "blocked_policy",
+    "blocked_technical",
+    "cancelled",
+    "completed",
+    "deferred",
+    "native_sufficient",
+    "passed_engineering",
+    "paused_quota",
+    "proposed",
+    "queued",
+    "ready",
+    "rejected_value",
+    "running",
+    "superseded",
+    "waiting_external",
+    "waiting_human",
+)
 
 
 class LegacyStatus(StrEnum):
@@ -69,10 +90,7 @@ class LegacyMapRecord(V3Model):
             raise ValueError("preserved evidence references must be unique")
         if self.evidence_preserved != sorted(self.evidence_preserved):
             raise ValueError("preserved evidence references must be sorted")
-        if (
-            self.v3_disposition is LegacyDisposition.MAPPED_TO_V3
-            and not self.mapped_work_items
-        ):
+        if self.v3_disposition is LegacyDisposition.MAPPED_TO_V3 and not self.mapped_work_items:
             raise ValueError("MAPPED_TO_V3 requires at least one V3 work item")
         if (
             self.v3_disposition
@@ -123,9 +141,7 @@ class LegacyMigrationMap(V3Model):
 
     def validate_v3_targets(self, known_work_items: set[str]) -> None:
         mapped = {
-            work_item_id
-            for record in self.records
-            for work_item_id in record.mapped_work_items
+            work_item_id for record in self.records for work_item_id in record.mapped_work_items
         }
         missing = mapped - known_work_items
         if missing:
@@ -163,9 +179,7 @@ def verify_stopped_legacy_queue(
         path = raw.get("path")
         size = raw.get("bytes")
         digest = raw.get("sha256")
-        if not isinstance(path, str) or not isinstance(size, int) or not isinstance(
-            digest, str
-        ):
+        if not isinstance(path, str) or not isinstance(size, int) or not isinstance(digest, str):
             raise ValueError("runtime snapshot queue file fields are invalid")
         expected[path] = (size, digest)
 
@@ -240,15 +254,13 @@ def archive_stopped_legacy_queue(repo_root: Path) -> Path:
         "files": manifest.get("files"),
         "originalQueueRetained": True,
         "autoResume": False,
-        "v3StateDirectories": sorted(state.value.lower() for state in WorkStatus),
+        "v3StateDirectories": list(LEGACY_ARCHIVE_V3_STATE_DIRECTORIES),
         "stopControlPresent": (repo_root / "factory/state/STOP").is_file(),
         "pauseControlPresent": (repo_root / "factory/state/PAUSE").is_file(),
     }
     receipt_path = repo_root / "docs/migrations/V3_LEGACY_QUEUE_ARCHIVE_METADATA.json"
     rendered_receipt = json.dumps(receipt, indent=2, sort_keys=True) + "\n"
-    if not receipt_path.is_file() or (
-        receipt_path.read_text(encoding="utf-8") != rendered_receipt
-    ):
+    if not receipt_path.is_file() or (receipt_path.read_text(encoding="utf-8") != rendered_receipt):
         atomic_write_text(receipt_path, rendered_receipt, keep_previous=True)
     return target
 
@@ -271,6 +283,8 @@ def verify_legacy_queue_archive_receipt(
         or receipt.get("pauseControlPresent") is not True
     ):
         raise ValueError("legacy queue archive receipt violates stopped-state policy")
+    if receipt.get("v3StateDirectories") != list(LEGACY_ARCHIVE_V3_STATE_DIRECTORIES):
+        raise ValueError("legacy queue archive historical state roster mismatch")
     archive_raw = receipt.get("archivePath")
     if not isinstance(archive_raw, str):
         raise ValueError("legacy queue archive receipt lacks archivePath")
@@ -300,9 +314,7 @@ def verify_legacy_queue_archive_receipt(
         normalized_files.append({"path": relative, "sha256": digest, "bytes": size})
         source = (source_root / relative).resolve()
         copied = (archive / relative).resolve()
-        if not source.is_relative_to(source_root.resolve()) or not copied.is_relative_to(
-            archive
-        ):
+        if not source.is_relative_to(source_root.resolve()) or not copied.is_relative_to(archive):
             raise ValueError("legacy queue archive receipt file path escapes")
         if require_live or (source.is_file() and copied.is_file()):
             for path in (source, copied):

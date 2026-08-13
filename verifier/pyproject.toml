@@ -15,6 +15,24 @@ dependencies = [
 
 [project.scripts]
 traincapsule-verifier = "traincapsule_verifier.cli:main"
+traincapsule-verifier-verify-receipt = "traincapsule_verifier.public_cli:main"
+traincapsule-verifier-plan-install = "traincapsule_verifier.install_cli:main"
+traincapsule-verifier-broker = "traincapsule_verifier.broker_cli:main"
+traincapsule-verifier-request-broker = "traincapsule_verifier.request_broker_cli:main"
+traincapsule-verifier-issuer = "traincapsule_verifier.issuer_service:main"
+traincapsule-verifier-activation-issuer = "traincapsule_verifier.activation_issuer_service:main"
+traincapsule-verifier-check-worker = "traincapsule_verifier.check_worker_cli:main"
+traincapsule-verifier-observed-main-selector = "traincapsule_verifier.observed_main_selector:main"
+traincapsule-verifier-activation-selector-broker = "traincapsule_verifier.activation_selector_broker:main"
+traincapsule-verifier-ruleset-observer = "traincapsule_verifier.ruleset_observer:main"
+traincapsule-verifier-ruleset-broker = "traincapsule_verifier.ruleset_broker:main"
+traincapsule-verifier-canary-receipt-probe = "traincapsule_verifier.canary_receipt_probe:main"
+traincapsule-verifier-controller-start = "traincapsule_verifier.controller_start_broker:main"
+traincapsule-verifier-post-activation = "traincapsule_verifier.post_activation_observer:main"
+traincapsule-verifier-activation-request-broker = "traincapsule_verifier.activation_request_broker:main"
+traincapsule-verifier-git-anchor-producer = "traincapsule_verifier.git_anchor_producer:main"
+traincapsule-verifier-git-anchor-updater = "traincapsule_verifier.git_anchor_updater:main"
+traincapsule-anchor-askpass = "traincapsule_verifier.git_anchor_producer:askpass"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/traincapsule_verifier"]

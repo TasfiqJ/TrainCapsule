@@ -1,0 +1,87 @@
+{
+  "additionalProperties": false,
+  "properties": {
+    "revocationVersion": {
+      "default": 1,
+      "maximum": 1,
+      "minimum": 1,
+      "title": "Revocationversion",
+      "type": "integer"
+    },
+    "authorityId": {
+      "pattern": "^[A-Z0-9][A-Z0-9._:-]{2,127}$",
+      "title": "Authorityid",
+      "type": "string"
+    },
+    "issuerId": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Issuerid",
+      "type": "string"
+    },
+    "keyId": {
+      "maxLength": 256,
+      "minLength": 1,
+      "title": "Keyid",
+      "type": "string"
+    },
+    "epoch": {
+      "minimum": 1,
+      "title": "Epoch",
+      "type": "integer"
+    },
+    "previousListDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "title": "Previouslistdigest"
+    },
+    "issuedAt": {
+      "format": "date-time",
+      "title": "Issuedat",
+      "type": "string"
+    },
+    "expiresAt": {
+      "format": "date-time",
+      "title": "Expiresat",
+      "type": "string"
+    },
+    "revokedReceiptIds": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 100000,
+      "title": "Revokedreceiptids",
+      "type": "array"
+    },
+    "revokedNonces": {
+      "items": {
+        "type": "string"
+      },
+      "maxItems": 100000,
+      "title": "Revokednonces",
+      "type": "array"
+    }
+  },
+  "required": [
+    "authorityId",
+    "issuerId",
+    "keyId",
+    "epoch",
+    "previousListDigest",
+    "issuedAt",
+    "expiresAt",
+    "revokedReceiptIds",
+    "revokedNonces"
+  ],
+  "title": "ExternalEvidenceRevocationList",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/external-evidence-revocation-list.schema.json"
+}

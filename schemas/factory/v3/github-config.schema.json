@@ -4,6 +4,7 @@
       "additionalProperties": false,
       "properties": {
         "enabled": {
+          "const": true,
           "default": true,
           "title": "Enabled",
           "type": "boolean"
@@ -14,6 +15,29 @@
           },
           "minItems": 1,
           "title": "Requiredworkflows",
+          "type": "array"
+        },
+        "trustedCheckAppIds": {
+          "additionalProperties": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "minProperties": 1,
+          "title": "Trustedcheckappids",
+          "type": "object"
+        },
+        "postMergeRequiredWorkflows": {
+          "items": {
+            "type": "string"
+          },
+          "minItems": 1,
+          "title": "Postmergerequiredworkflows",
           "type": "array"
         },
         "requiredRiskTiers": {
@@ -44,6 +68,10 @@
           "type": "boolean"
         }
       },
+      "required": [
+        "trustedCheckAppIds",
+        "postMergeRequiredWorkflows"
+      ],
       "title": "RemoteCIConfig",
       "type": "object"
     },
@@ -90,16 +118,10 @@
       "type": "string"
     },
     "repository": {
-      "anyOf": [
-        {
-          "type": "string"
-        },
-        {
-          "type": "null"
-        }
-      ],
-      "default": null,
-      "title": "Repository"
+      "minLength": 3,
+      "pattern": "^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$",
+      "title": "Repository",
+      "type": "string"
     },
     "releaseMode": {
       "const": "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE",
@@ -123,6 +145,33 @@
       "const": "factory/state/latest-pull-request.json",
       "default": "factory/state/latest-pull-request.json",
       "title": "Pullrequestmetadatapath",
+      "type": "string"
+    },
+    "transactionPath": {
+      "const": "publication-transactions",
+      "default": "publication-transactions",
+      "title": "Transactionpath",
+      "type": "string"
+    },
+    "quarantinePath": {
+      "const": "publication-quarantine",
+      "default": "publication-quarantine",
+      "title": "Quarantinepath",
+      "type": "string"
+    },
+    "independentReceiptRoot": {
+      "minLength": 1,
+      "title": "Independentreceiptroot",
+      "type": "string"
+    },
+    "receiptVerifierExecutable": {
+      "minLength": 1,
+      "title": "Receiptverifierexecutable",
+      "type": "string"
+    },
+    "activationReceiptPath": {
+      "minLength": 1,
+      "title": "Activationreceiptpath",
       "type": "string"
     },
     "exactHeadShaChecksRequired": {
@@ -150,8 +199,8 @@
       "type": "boolean"
     },
     "publisherCapability": {
-      "const": "PENDING_PHASE_4",
-      "default": "PENDING_PHASE_4",
+      "const": "AUTOMATED_PR_V31_READY",
+      "default": "AUTOMATED_PR_V31_READY",
       "title": "Publishercapability",
       "type": "string"
     },
@@ -186,6 +235,13 @@
       "$ref": "#/$defs/RemoteCIConfig"
     }
   },
+  "required": [
+    "repository",
+    "independentReceiptRoot",
+    "receiptVerifierExecutable",
+    "activationReceiptPath",
+    "remoteCi"
+  ],
   "title": "GitHubConfig",
   "type": "object",
   "$schema": "https://json-schema.org/draft/2020-12/schema",

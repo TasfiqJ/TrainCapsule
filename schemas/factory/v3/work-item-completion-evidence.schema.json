@@ -1,4 +1,37 @@
 {
+  "$defs": {
+    "ExecutionEvidenceMode": {
+      "enum": [
+        "SIMULATION",
+        "CONTROLLED_VALIDATION",
+        "LIVE_VALIDATION",
+        "EXTERNAL_VALIDATION"
+      ],
+      "title": "ExecutionEvidenceMode",
+      "type": "string"
+    },
+    "SemanticEvidence": {
+      "enum": [
+        "DETERMINISTIC_ARTIFACT",
+        "CANDIDATE_MANIFEST",
+        "INDEPENDENT_REVIEW",
+        "MACHINE_POLICY_DECISION",
+        "NATIVE_VALUE_AUTHORIZATION",
+        "REACHABLE_ACCOUNT",
+        "ATTRIBUTABLE_SOURCE",
+        "TRAINCHECK_INCIDENT_DIFFERENTIAL",
+        "SUPPORT_POLICY",
+        "DELIVERY_ECONOMICS",
+        "THIRD_SAME_FAMILY_CASE",
+        "LEGAL_REDUCTION_VERIFIED",
+        "ILLEGAL_REDUCTION_REJECTED",
+        "CUSTOMER_DECISION_CHANGED",
+        "CUSTOMER_VALUE_EXCEEDS_PRICE_RETAINED_EFFORT"
+      ],
+      "title": "SemanticEvidence",
+      "type": "string"
+    }
+  },
   "additionalProperties": false,
   "properties": {
     "workItemId": {
@@ -14,10 +47,41 @@
       "title": "Candidatesha",
       "type": "string"
     },
+    "baseSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Basesha",
+      "type": "string"
+    },
+    "candidateTreeSha": {
+      "pattern": "^[0-9a-f]{40}$",
+      "title": "Candidatetreesha",
+      "type": "string"
+    },
+    "sourceAuthorityDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Sourceauthoritydigest",
+      "type": "string"
+    },
+    "evidenceMode": {
+      "$ref": "#/$defs/ExecutionEvidenceMode"
+    },
     "checkpointDigest": {
       "pattern": "^sha256:[0-9a-f]{64}$",
       "title": "Checkpointdigest",
       "type": "string"
+    },
+    "checkpointPath": {
+      "anyOf": [
+        {
+          "format": "path",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Checkpointpath"
     },
     "candidateManifestDigest": {
       "anyOf": [
@@ -32,9 +96,25 @@
       "default": null,
       "title": "Candidatemanifestdigest"
     },
-    "independentReviewed": {
-      "title": "Independentreviewed",
-      "type": "boolean"
+    "candidateManifestPath": {
+      "anyOf": [
+        {
+          "format": "path",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Candidatemanifestpath"
+    },
+    "independentReviewArtifacts": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Independentreviewartifacts",
+      "type": "object"
     },
     "machinePolicyReceiptDigest": {
       "anyOf": [
@@ -49,12 +129,71 @@
       "default": null,
       "title": "Machinepolicyreceiptdigest"
     },
+    "machinePolicyReceiptPath": {
+      "anyOf": [
+        {
+          "format": "path",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Machinepolicyreceiptpath"
+    },
+    "releaseAuthorizationEnvelopeDigest": {
+      "anyOf": [
+        {
+          "pattern": "^sha256:[0-9a-f]{64}$",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Releaseauthorizationenvelopedigest"
+    },
+    "releaseAuthorizationEnvelopePath": {
+      "anyOf": [
+        {
+          "format": "path",
+          "type": "string"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null,
+      "title": "Releaseauthorizationenvelopepath"
+    },
     "externalReceiptRefs": {
       "items": {
         "type": "string"
       },
       "title": "Externalreceiptrefs",
       "type": "array"
+    },
+    "semanticEvidenceRefs": {
+      "additionalProperties": {
+        "items": {
+          "type": "string"
+        },
+        "type": "array"
+      },
+      "propertyNames": {
+        "$ref": "#/$defs/SemanticEvidence"
+      },
+      "title": "Semanticevidencerefs",
+      "type": "object"
+    },
+    "semanticArtifactBindings": {
+      "additionalProperties": {
+        "type": "string"
+      },
+      "title": "Semanticartifactbindings",
+      "type": "object"
     },
     "createdAt": {
       "format": "date-time",
@@ -66,8 +205,11 @@
     "workItemId",
     "milestoneId",
     "candidateSha",
+    "baseSha",
+    "candidateTreeSha",
+    "sourceAuthorityDigest",
+    "evidenceMode",
     "checkpointDigest",
-    "independentReviewed",
     "externalReceiptRefs",
     "createdAt"
   ],

@@ -1,10 +1,17 @@
 from __future__ import annotations
 
-from datetime import UTC, datetime
+import hashlib
+from datetime import UTC, datetime, timedelta
+from pathlib import Path
+from types import SimpleNamespace
+from typing import Any, cast
 
 import pytest
 from pydantic import ValidationError
 
+from tcfactory.checkpoints import V3Checkpoint
+from tcfactory.v3.completion_policy import SemanticEvidence
+from tcfactory.v3.controller import V3Controller
 from tcfactory.v3.market_artifacts import (
     AccountEvidenceField,
     AccountQualificationScore,
@@ -24,14 +31,115 @@ from tcfactory.v3.source_acquisition import (
     ResearchVerdict,
     SourceArtifact,
     SourceClass,
+    SourceHopReceipt,
+    SourceRetrievalReceipt,
+    research_artifact_roster_digest,
+    research_control_result_digest,
 )
+from tcfactory.v3.work_items import WorkItemCollection
+from tcfactory.yamlutil import load_yaml
 
 DIGEST = "sha256:" + "a" * 64
 OTHER = "sha256:" + "b" * 64
 SHA = "c" * 40
+ROOT = Path(__file__).resolve().parents[1]
+
+
+def source_receipt() -> SourceRetrievalReceipt:
+    observed = datetime(2026, 8, 12, tzinfo=UTC)
+    draft = SourceRetrievalReceipt.model_construct(
+        schema_version="3.1",
+        receipt_id="SRCREC-" + "A" * 24,
+        source_id="SOURCE-001",
+        work_item_id="V3-MKT-001",
+        candidate_sha=SHA,
+        policy_id="RESEARCH-POLICY-001",
+        plan_digest=OTHER,
+        method="GET",
+        requested_url="https://company.example.test/about",
+        requested_url_digest=f"sha256:{hashlib.sha256(b'https://company.example.test/about').hexdigest()}",
+        final_url="https://company.example.test/about",
+        final_url_digest=f"sha256:{hashlib.sha256(b'https://company.example.test/about').hexdigest()}",
+        redirect_chain=[],
+        redirect_chain_digests=[],
+        hop_receipts=[
+            SourceHopReceipt(
+                schema_version="3.1",
+                url="https://company.example.test/about",
+                url_digest=(
+                    f"sha256:{hashlib.sha256(b'https://company.example.test/about').hexdigest()}"
+                ),
+                resolved_public_addresses=["93.184.216.34"],
+                peer_address="93.184.216.34",
+            )
+        ],
+        retrieved_at=observed,
+        status_code=200,
+        response_headers={"content-type": "application/json"},
+        content_type="application/json",
+        content_length=10,
+        source_class=SourceClass.COMPANY_PRIMARY,
+        query="bounded public organization fact",
+        control_query="known-negative public organization fact",
+        content_digest=DIGEST,
+        parser_id="JSON.COMPANY",
+        parser_version="1.0.0",
+        freshness_policy="DAILY",
+        fresh_until=observed + timedelta(days=1),
+        authority_effect="ADVISORY_ONLY_NEVER_NORMATIVE",
+        issuer_id="CONTROLLER:TEST:001",
+        issuer_key_id="KEY:TEST:001",
+        signature_algorithm="hmac-sha256",
+        signature="f" * 64,
+    )
+    return SourceRetrievalReceipt.model_validate(
+        draft.model_dump(by_alias=True),
+        strict=True,
+    )
 
 
 def report(*, verdict: ResearchVerdict = ResearchVerdict.CLEAR) -> ResearchReport:
+    artifacts = [
+        SourceArtifact(
+            schema_version="3.1",
+            source_id="SOURCE-001",
+            source_class=SourceClass.COMPANY_PRIMARY,
+            requested_url="https://company.example.test/about",
+            final_url="https://company.example.test/about",
+            observed_at=datetime(2026, 8, 12, tzinfo=UTC),
+            status_code=200,
+            content_type="application/json",
+            content_length=10,
+            content_digest=DIGEST,
+            headers_digest=OTHER,
+            artifact_path="a" * 64 + ".raw",
+            claim_ids=["CLAIM-ACCOUNT-001"],
+            retrieval_receipt=source_receipt(),
+        )
+    ]
+    roster_digest = research_artifact_roster_digest(artifacts)
+    control_draft = [
+        ResearchControl(
+            schema_version="3.1",
+            kind=kind,
+            artifact_digest=roster_digest,
+            raw_artifact_roster_digest=roster_digest,
+            oracle_executable_digest=OTHER,
+            oracle_result_digest="sha256:" + "0" * 64,
+            expected_verdict=outcome,
+            observed_verdict=outcome,
+        )
+        for kind, outcome in (
+            (ControlKind.POSITIVE, ResearchVerdict.CLEAR),
+            (ControlKind.NEGATIVE, ResearchVerdict.CONFLICT),
+            (ControlKind.ERROR, ResearchVerdict.UNKNOWN),
+        )
+    ]
+    control_result_digest = research_control_result_digest(control_draft)
+    control_evidence = [
+        control.model_copy(update={"oracle_result_digest": control_result_digest})
+        for control in control_draft
+    ]
     return ResearchReport(
         schema_version="3.1",
         report_id="RESEARCH-REPORT-001",
@@ -39,37 +147,8 @@ def report(*, verdict: ResearchVerdict = ResearchVerdict.CLEAR) -> ResearchRepor
         work_item_id="V3-MKT-001",
         candidate_sha=SHA,
         overall_verdict=verdict,
-        artifacts=[
-            SourceArtifact(
-                schema_version="3.1",
-                source_id="SOURCE-001",
-                source_class=SourceClass.COMPANY_PRIMARY,
-                requested_url="https://company.example.test/about",
-                final_url="https://company.example.test/about",
-                observed_at=datetime(2026, 8, 12, tzinfo=UTC),
-                status_code=200,
-                content_type="application/json",
-                content_length=10,
-                content_digest=DIGEST,
-                headers_digest=OTHER,
-                artifact_path="a" * 64 + ".raw",
-                claim_ids=["CLAIM-ACCOUNT-001"],
-            )
-        ],
-        controls=[
-            ResearchControl(
-                schema_version="3.1",
-                kind=kind,
-                artifact_digest=OTHER,
-                expected_verdict=outcome,
-                observed_verdict=outcome,
-            )
-            for kind, outcome in (
-                (ControlKind.POSITIVE, ResearchVerdict.CLEAR),
-                (ControlKind.NEGATIVE, ResearchVerdict.CONFLICT),
-                (ControlKind.ERROR, ResearchVerdict.UNKNOWN),
-            )
-        ],
+        artifacts=artifacts,
+        controls=control_evidence,
         findings=[
             ResearchFinding(
                 schema_version="3.1",
@@ -150,6 +229,86 @@ def test_30_account_map_is_attributable_but_never_external_proof() -> None:
         item.state is AccountResearchState.EXTERNAL_EVIDENCE_REQUIRED
         for item in account_map.accounts
     )
+
+
+def test_controller_counts_only_named_attributable_reachable_accounts(
+    tmp_path: Path,
+) -> None:
+    current = report()
+    unknown_accounts: list[ReachableAccount] = []
+    for index in range(1, 31):
+        empty = unknown_field()
+        unknown_accounts.append(
+            account(index).model_copy(
+                update={
+                    name: empty
+                    for name in (
+                        "organization",
+                        "segment",
+                        "relationship_path",
+                        "relevant_workload",
+                        "known_incident",
+                        "planned_change",
+                        "decision_owner",
+                        "technical_champion",
+                        "budget_owner",
+                        "native_stack",
+                        "privacy_constraint",
+                    )
+                }
+            )
+        )
+    unknown_map = bind_reachable_account_map(
+        map_id="ACCOUNT-MAP-UNKNOWN",
+        report=current,
+        accounts=unknown_accounts,
+    )
+    path = tmp_path / "reachable-account-map.json"
+    path.write_bytes(unknown_map.canonical_json_bytes())
+    digest = "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+    key = "controller:research-typed-reachable-account-map"
+    checkpoint = cast(
+        V3Checkpoint,
+        SimpleNamespace(
+            stage_artifact_paths={key: str(path)},
+            stage_artifact_digests={key: digest},
+        ),
+    )
+    controller = cast(Any, object.__new__(V3Controller))
+    controller.artifact_root = tmp_path
+    item = next(
+        item
+        for item in WorkItemCollection.model_validate(
+            load_yaml(ROOT / "factory/roadmap/work_items.yaml")
+        ).work_items
+        if item.work_item_id == "V3-MKT-001"
+    )
+    semantics, _ = controller._controller_semantic_evidence(
+        item=item,
+        checkpoint=checkpoint,
+        base_sha=SHA,
+        candidate_sha="d" * 40,
+    )
+    assert semantics[SemanticEvidence.REACHABLE_ACCOUNT] == []
+    assert semantics[SemanticEvidence.ATTRIBUTABLE_SOURCE] == []
+
+    named_map = bind_reachable_account_map(
+        map_id="ACCOUNT-MAP-NAMED",
+        report=current,
+        accounts=[account(index) for index in range(1, 31)],
+    )
+    path.write_bytes(named_map.canonical_json_bytes())
+    checkpoint.stage_artifact_digests[key] = (
+        "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+    )
+    semantics, _ = controller._controller_semantic_evidence(
+        item=item,
+        checkpoint=checkpoint,
+        base_sha=SHA,
+        candidate_sha="d" * 40,
+    )
+    assert len(semantics[SemanticEvidence.REACHABLE_ACCOUNT]) == 30
+    assert semantics[SemanticEvidence.ATTRIBUTABLE_SOURCE] == [DIGEST]
 
 
 def test_map_rejects_missing_count_duplicate_ids_and_out_of_report_evidence() -> None:

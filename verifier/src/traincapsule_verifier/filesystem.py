@@ -104,6 +104,8 @@ def open_trusted_root(path: Path, *, expected_uid: int) -> TrustedRoot:
 
 
 def assert_trusted_root(path: Path, *, expected_uid: int, repository_root: Path) -> TrustedRoot:
+    if path.is_symlink():
+        raise TrustedPathError("trusted root cannot be a symbolic link")
     resolved = assert_outside_repository(path, repository_root)
     return _open_directory_identity(resolved, expected_uid)
 
@@ -146,6 +148,7 @@ def open_trusted_file(
     maximum_bytes: int = 10_000_000,
     require_executable: bool = False,
     required_mode: int | None = None,
+    expected_file_uid: int | None = None,
 ) -> int:
     """Open a regular file relative to an already-anchored trusted root."""
 
@@ -171,7 +174,9 @@ def open_trusted_file(
         try:
             metadata = _validate_opened(
                 descriptor,
-                expected_uid=root.expected_uid,
+                expected_uid=(
+                    root.expected_uid if expected_file_uid is None else expected_file_uid
+                ),
                 require_directory=False,
                 maximum_bytes=maximum_bytes,
             )
@@ -210,12 +215,14 @@ def read_bounded_file(
     *,
     maximum_bytes: int = 10_000_000,
     required_mode: int | None = None,
+    expected_file_uid: int | None = None,
 ) -> bytes:
     descriptor = open_trusted_file(
         root,
         relative,
         maximum_bytes=maximum_bytes,
         required_mode=required_mode,
+        expected_file_uid=expected_file_uid,
     )
     try:
         return _read_descriptor(descriptor, maximum_bytes)
@@ -312,17 +319,55 @@ class NonceStore:
             os.close(root_descriptor)
 
 
-def atomic_write_new(root: TrustedRoot, relative: str, data: bytes, *, mode: int = 0o600) -> Path:
-    _validate_relative(relative, single_component=True)
+def atomic_write_new(
+    root: TrustedRoot,
+    relative: str,
+    data: bytes,
+    *,
+    mode: int = 0o600,
+    owner_uid: int | None = None,
+    owner_gid: int | None = None,
+) -> Path:
+    parts = _validate_relative(relative)
     root_descriptor = root.duplicate_descriptor()
-    temporary = f".{relative}.{os.getpid()}.tmp"
+    parent_descriptor = root_descriptor
+    opened_directories: list[int] = []
+    temporary = f".{parts[-1]}.{os.getpid()}.tmp"
     descriptor: int | None = None
     try:
+        if (owner_uid is None) != (owner_gid is None):
+            raise TrustedPathError("output owner UID/GID must be supplied together")
+        expected_uid = owner_uid if owner_uid is not None else root.expected_uid
+        for component in parts[:-1]:
+            try:
+                child = os.open(
+                    component,
+                    os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0),
+                    dir_fd=parent_descriptor,
+                )
+            except FileNotFoundError:
+                os.mkdir(component, mode=0o700, dir_fd=parent_descriptor)
+                if owner_uid is not None and owner_gid is not None:
+                    os.chown(
+                        component,
+                        owner_uid,
+                        owner_gid,
+                        dir_fd=parent_descriptor,
+                        follow_symlinks=False,
+                    )
+                child = os.open(
+                    component,
+                    os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0),
+                    dir_fd=parent_descriptor,
+                )
+            _validate_opened(child, expected_uid=expected_uid, require_directory=True)
+            opened_directories.append(child)
+            parent_descriptor = child
         descriptor = os.open(
             temporary,
             os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0),
             mode,
-            dir_fd=root_descriptor,
+            dir_fd=parent_descriptor,
         )
         view = memoryview(data)
         while view:
@@ -330,18 +375,20 @@ def atomic_write_new(root: TrustedRoot, relative: str, data: bytes, *, mode: int
             if written <= 0:
                 raise TrustedPathError("verifier output write did not progress")
             view = view[written:]
+        if owner_uid is not None and owner_gid is not None:
+            os.fchown(descriptor, owner_uid, owner_gid)
         os.fsync(descriptor)
         os.close(descriptor)
         descriptor = None
         os.link(
             temporary,
-            relative,
-            src_dir_fd=root_descriptor,
-            dst_dir_fd=root_descriptor,
+            parts[-1],
+            src_dir_fd=parent_descriptor,
+            dst_dir_fd=parent_descriptor,
             follow_symlinks=False,
         )
-        os.unlink(temporary, dir_fd=root_descriptor)
-        os.fsync(root_descriptor)
+        os.unlink(temporary, dir_fd=parent_descriptor)
+        os.fsync(parent_descriptor)
         return root.path / relative
     except FileExistsError as exc:
         raise TrustedPathError("refusing to overwrite existing verifier output") from exc
@@ -349,5 +396,7 @@ def atomic_write_new(root: TrustedRoot, relative: str, data: bytes, *, mode: int
         if descriptor is not None:
             os.close(descriptor)
         with contextlib.suppress(FileNotFoundError):
-            os.unlink(temporary, dir_fd=root_descriptor)
+            os.unlink(temporary, dir_fd=parent_descriptor)
+        for opened in reversed(opened_directories):
+            os.close(opened)
         os.close(root_descriptor)

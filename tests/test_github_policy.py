@@ -1,80 +1,119 @@
-# pyright: reportUnknownLambdaType=false, reportUnknownArgumentType=false
-
 from __future__ import annotations
 
 import subprocess
 from pathlib import Path
 
 import pytest
+from pydantic import ValidationError
 
 import tcfactory.github_sync as github_sync
-from tcfactory.github_sync import (
-    GitHubConfig,
-    GitHubSyncError,
-    MainOnlyPublisher,
-    push_main_with_retry,
+import tcfactory.v3.publication as publication
+from tcfactory.github_sync import GitHubConfig, load_github_config
+from tcfactory.v3.publication import (
+    ExternalReceiptAuthorizer,
+    GhPublicationClient,
+    PublicationError,
+    trusted_external_path,
 )
 
-BASE = "a" * 40
 CANDIDATE = "b" * 40
 
 
-def test_non_main_push_and_pr_surfaces_do_not_exist() -> None:
-    assert not hasattr(github_sync, "push_release_branch_with_retry")
-    assert not hasattr(github_sync, "prepare_release_pull_request")
-    assert not hasattr(github_sync, "run_remote_ci")
+def test_direct_main_publication_surfaces_do_not_exist() -> None:
+    assert not hasattr(github_sync, "push_main_with_retry")
+    assert not hasattr(github_sync, "MainOnlyPublisher")
+    assert not hasattr(github_sync, "MainPublicationTransaction")
+    source = Path(github_sync.__file__).read_text(encoding="utf-8")
+    assert "fast_forward_main" not in source
+    assert ":refs/heads/main" not in source
 
 
-def test_private_gate_uses_fixed_controller_owned_path(
-    monkeypatch: pytest.MonkeyPatch,
+def test_candidate_push_rejects_main_force_tags_and_symbolic_sources(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
-    monkeypatch.setenv("TCF_PRIVATE_GATE_RUNNER", "/attacker/controlled")
-    assert Path("/var/lib/traincapsule-factory/private-gates/run_private_gate.sh") == (
-        github_sync.CONTROLLER_PRIVATE_GATE
-    )
-    assert "TCF_PRIVATE_GATE_RUNNER" not in github_sync.CONTROLLER_PRIVATE_GATE.as_posix()
-
-
-def test_push_helper_accepts_only_exact_sha_to_main(monkeypatch: pytest.MonkeyPatch) -> None:
-    config = GitHubConfig(enabled=True, retry_attempts=1, retry_backoff_seconds=1)
-    for refspec in ("candidate:refs/heads/main", f"{CANDIDATE}:refs/heads/dev"):
-        with pytest.raises(GitHubSyncError, match="exact-SHA main"):
-            push_main_with_retry(Path("."), config, refspec)
     observed: list[list[str]] = []
 
     def fake_run(args: list[str], **_: object) -> subprocess.CompletedProcess[str]:
         observed.append(args)
         return subprocess.CompletedProcess(args, 0, "ok", "")
 
-    monkeypatch.setattr(github_sync, "run_command", fake_run)
-    push_main_with_retry(Path("."), config, f"{CANDIDATE}:refs/heads/main")
+    monkeypatch.setattr(publication, "run_command", fake_run)
+    client = GhPublicationClient(
+        tmp_path,
+        remote="origin",
+        repository="TasfiqJ/TrainCapsule",
+        branch_prefix="factory/",
+    )
+    for branch in ("main", "refs/tags/release", "factory/../main", "other/candidate"):
+        with pytest.raises(PublicationError):
+            client.push_candidate_branch(sha=CANDIDATE, branch=branch)
+    with pytest.raises(PublicationError, match="exact commit SHA"):
+        client.push_candidate_branch(sha="HEAD", branch="factory/v3-rel-001/candidate")
+    client.push_candidate_branch(sha=CANDIDATE, branch="factory/v3-rel-001/candidate")
     assert observed == [
-        ["git", "push", "--porcelain", "origin", f"{CANDIDATE}:refs/heads/main"]
+        [
+            "git",
+            "push",
+            "--porcelain",
+            "origin",
+            f"{CANDIDATE}:refs/heads/factory/v3-rel-001/candidate",
+        ]
     ]
 
 
-def test_historical_v3_publisher_is_unreachable_under_v31(tmp_path: Path) -> None:
-    repo = tmp_path / "repo"
-    repo.mkdir()
-    with pytest.raises(RuntimeError, match="disabled.*pending Phase 4"):
-        MainOnlyPublisher(
-            repo_root=repo,
-            config=GitHubConfig(enabled=True),
-            receipt_root=tmp_path / "receipts",
-            quarantine_root=tmp_path / "quarantine",
-            local_gate_command=("true",),
-        )
+@pytest.mark.parametrize(
+    ("field", "value"),
+    [
+        ("directMainPush", True),
+        ("releaseMode", "owner_directed_main_only"),
+        ("publisherCapability", "PENDING_PHASE_4"),
+        ("candidateBranchPrefix", "main"),
+    ],
+)
+def test_v31_config_rejects_legacy_or_unproven_release_modes(field: str, value: object) -> None:
+    root = Path(__file__).resolve().parents[1]
+    payload = load_github_config(root / "config/github.yaml").model_dump(mode="json", by_alias=True)
+    payload[field] = value
+    with pytest.raises(ValidationError):
+        GitHubConfig.model_validate(payload)
 
 
-def test_disabled_historical_publisher_creates_no_receipt_or_ref(tmp_path: Path) -> None:
-    repo = tmp_path / "repo"
-    repo.mkdir()
+def test_required_check_roster_cannot_omit_independent_policy() -> None:
+    root = Path(__file__).resolve().parents[1]
+    payload = load_github_config(root / "config/github.yaml").model_dump(mode="json", by_alias=True)
+    remote = payload["remoteCi"]
+    assert isinstance(remote, dict)
+    remote["requiredWorkflows"] = ["TrainCapsule / Factory quality"]
+    remote["trustedCheckAppIds"] = {"TrainCapsule / Factory quality": 15368}
+    with pytest.raises(ValidationError, match="machine-policy"):
+        GitHubConfig.model_validate(payload)
+
+
+def test_pull_request_observation_cannot_launder_a_non_main_base() -> None:
+    raw: dict[str, object] = {
+        "number": 1,
+        "url": "https://github.com/TasfiqJ/TrainCapsule/pull/1",
+        "state": "OPEN",
+        "isDraft": True,
+        "headRefName": "factory/v3-rel-001/candidate",
+        "headRefOid": CANDIDATE,
+        "baseRefName": "attacker-controlled-base",
+        "baseRefOid": "a" * 40,
+        "mergedAt": None,
+        "mergeCommit": None,
+        "autoMergeRequest": None,
+    }
+    with pytest.raises(PublicationError, match="invalid types"):
+        GhPublicationClient._pr(raw)  # pyright: ignore[reportPrivateUsage]
+
+
+def test_external_verifier_paths_reject_symlink_substitution(tmp_path: Path) -> None:
+    executable_link = tmp_path / "verifier"
+    executable_link.symlink_to("/usr/bin/true")
+    with pytest.raises(PublicationError, match="symlink"):
+        ExternalReceiptAuthorizer(executable_link)
+
     receipt_root = tmp_path / "receipts"
-    with pytest.raises(RuntimeError):
-        MainOnlyPublisher(
-            repo_root=repo,
-            config=GitHubConfig(enabled=True),
-            receipt_root=receipt_root,
-            quarantine_root=tmp_path / "quarantine",
-        )
-    assert not receipt_root.exists()
+    receipt_root.symlink_to(tmp_path, target_is_directory=True)
+    with pytest.raises(PublicationError, match="symlink"):
+        trusted_external_path(receipt_root, directory=True, label="receipt root")

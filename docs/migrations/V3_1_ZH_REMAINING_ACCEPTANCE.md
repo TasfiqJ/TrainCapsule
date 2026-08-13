@@ -1,8 +1,8 @@
 # TrainCapsule V3.1-ZH remaining acceptance
 
 This is the durable no-forgetting checklist for the active V3.1-ZH remediation. It is
-bound to implementation candidate `9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad` and tree
-`cc498044793cc865b06e1375a5442f75ef6fada5`. It is a progress record, not an
+bound to implementation candidate `0fa90da735ac3958d00c7549412b38bb6e09d0ce` and tree
+`f68c2f2ca193584995b4c07b6957499ba00a05e4`. It is a progress record, not an
 activation receipt.
 
 ## Safety state

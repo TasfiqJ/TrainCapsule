@@ -40,9 +40,9 @@ as current acceptance. Candidate reclassification is stored separately in
 
 ## Current implementation candidate
 
-- Candidate commit: `9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad`.
-- Candidate tree: `cc498044793cc865b06e1375a5442f75ef6fada5`.
-- Commit subject: `Refresh migration inventory for ruleset fix`.
+- Candidate commit: `0fa90da735ac3958d00c7549412b38bb6e09d0ce`.
+- Candidate tree: `f68c2f2ca193584995b4c07b6957499ba00a05e4`.
+- Commit subject: `Fail-closed-without-systemd`.
 - Branch push: complete.
 - PR state: draft; merge is not authorized.
 
@@ -66,6 +66,9 @@ Relevant branch history:
 - `4ff3b22` — exact-candidate acceptance evidence checkpoint.
 - `7c77f0a` — bypass-free PR ruleset semantics.
 - `9b95cfb` — migration inventory synchronized with the ruleset correction.
+- `8d8d3d6` — 158-row ledger rebound to the exact implementation candidate.
+- `3b0e1b1` — live bootstrap and WSL service-manager state recorded.
+- `0fa90da` — privileged installer refuses before mutation when systemd is unavailable.
 
 ## Candidate evidence completed so far
 
@@ -132,6 +135,12 @@ byte-for-byte:
 
 These `/tmp` build outputs are not root-owned installed-state, independent receipt, canary,
 or activation evidence.
+
+At exact code candidate `0fa90da`, the complete repository pytest suite passed, repository
+Ruff passed, strict Pyright reported zero errors/warnings, and the deployment suite passed
+37/37 including the hostile no-systemd-before-mutation control. Five of eight hosted Actions
+checks plus GitGuardian had passed when this record was updated; Factory quality was running
+and two Actions checks remained queued.
 
 ## Current runtime and external state
 

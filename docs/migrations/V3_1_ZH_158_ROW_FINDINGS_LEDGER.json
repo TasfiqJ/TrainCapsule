@@ -167,7 +167,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -178,7 +178,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -207,7 +207,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -218,7 +218,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -247,7 +247,7 @@
       "remediationPhase": 1,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -258,7 +258,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -287,7 +287,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -298,7 +298,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -327,7 +327,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -338,7 +338,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -367,7 +367,7 @@
       "remediationPhase": 1,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -378,7 +378,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "INDEPENDENT_PROVISIONING_PENDING",
       "candidateEvidenceState": "ROOT-OWNED INSTALLATION, TRUSTED GITHUB IDENTITY, OR SERVER POLICY IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -407,7 +407,7 @@
       "remediationPhase": 1,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -418,7 +418,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "OPEN_CONFLICT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -447,7 +447,7 @@
       "remediationPhase": 1,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -458,7 +458,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -487,7 +487,7 @@
       "remediationPhase": 1,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -498,7 +498,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -527,7 +527,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -538,7 +538,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -567,7 +567,7 @@
       "remediationPhase": 1,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -578,7 +578,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -607,7 +607,7 @@
       "remediationPhase": 1,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -618,7 +618,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -647,7 +647,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -658,7 +658,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -687,7 +687,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -698,7 +698,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -727,7 +727,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -738,7 +738,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -767,7 +767,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -778,7 +778,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -807,7 +807,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -818,7 +818,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -847,7 +847,7 @@
       "remediationPhase": 1,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -858,7 +858,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -887,7 +887,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -898,7 +898,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -927,7 +927,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -938,7 +938,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -967,7 +967,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -978,7 +978,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1007,7 +1007,7 @@
       "remediationPhase": 1,
       "positiveControl": "Validate a genuine attributable signed external receipt without blocking unrelated lanes.",
       "hostileControl": "Reject agent-authored, stale, unsigned, mismatched, and replayed external evidence.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1018,7 +1018,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "EXTERNAL_WAIT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1047,7 +1047,7 @@
       "remediationPhase": 1,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1058,7 +1058,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "OPEN_CONFLICT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1087,7 +1087,7 @@
       "remediationPhase": 3,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1098,7 +1098,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "INDEPENDENT_PROVISIONING_PENDING",
       "candidateEvidenceState": "ROOT-OWNED INSTALLATION, TRUSTED GITHUB IDENTITY, OR SERVER POLICY IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1127,7 +1127,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1138,7 +1138,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1167,7 +1167,7 @@
       "remediationPhase": 11,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1178,7 +1178,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1207,7 +1207,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1218,7 +1218,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1247,7 +1247,7 @@
       "remediationPhase": 11,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1258,7 +1258,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1287,7 +1287,7 @@
       "remediationPhase": 1,
       "positiveControl": "Validate a genuine attributable signed external receipt without blocking unrelated lanes.",
       "hostileControl": "Reject agent-authored, stale, unsigned, mismatched, and replayed external evidence.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1298,7 +1298,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "EXTERNAL_WAIT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1327,7 +1327,7 @@
       "remediationPhase": 1,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1338,7 +1338,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1367,7 +1367,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1378,7 +1378,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1407,7 +1407,7 @@
       "remediationPhase": 14,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1418,7 +1418,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1447,7 +1447,7 @@
       "remediationPhase": 14,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1458,7 +1458,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1487,7 +1487,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1498,7 +1498,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1527,7 +1527,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1538,7 +1538,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1567,7 +1567,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1578,7 +1578,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1607,7 +1607,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1618,7 +1618,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1647,7 +1647,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1658,7 +1658,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1687,7 +1687,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1698,7 +1698,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1727,7 +1727,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1738,7 +1738,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1767,7 +1767,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1778,7 +1778,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1807,7 +1807,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1818,7 +1818,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1847,7 +1847,7 @@
       "remediationPhase": 11,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1858,7 +1858,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1887,7 +1887,7 @@
       "remediationPhase": 14,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1898,7 +1898,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1927,7 +1927,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1938,7 +1938,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -1968,7 +1968,7 @@
       "remediationPhase": 2,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -1979,7 +1979,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2009,7 +2009,7 @@
       "remediationPhase": 2,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2020,7 +2020,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2050,7 +2050,7 @@
       "remediationPhase": 2,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2061,7 +2061,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2091,7 +2091,7 @@
       "remediationPhase": 2,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2102,7 +2102,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2132,7 +2132,7 @@
       "remediationPhase": 1,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2143,7 +2143,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "M0_EXTERNAL_EVIDENCE_PENDING",
       "candidateEvidenceState": "INDEPENDENT SOURCE AUTHORIZATION AND REAL PR/CI/MERGED-MAIN RECEIPTS ARE ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2173,7 +2173,7 @@
       "remediationPhase": 2,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2184,7 +2184,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2214,7 +2214,7 @@
       "remediationPhase": 12,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2225,7 +2225,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2255,7 +2255,7 @@
       "remediationPhase": 12,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2266,7 +2266,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2296,7 +2296,7 @@
       "remediationPhase": 12,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2307,7 +2307,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "M0_EXTERNAL_EVIDENCE_PENDING",
       "candidateEvidenceState": "INDEPENDENT SOURCE AUTHORIZATION AND REAL PR/CI/MERGED-MAIN RECEIPTS ARE ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2337,7 +2337,7 @@
       "remediationPhase": 12,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2348,7 +2348,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2378,7 +2378,7 @@
       "remediationPhase": 12,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2389,7 +2389,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2419,7 +2419,7 @@
       "remediationPhase": 12,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2430,7 +2430,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2460,7 +2460,7 @@
       "remediationPhase": 12,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2471,7 +2471,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2501,7 +2501,7 @@
       "remediationPhase": 12,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2512,7 +2512,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2542,7 +2542,7 @@
       "remediationPhase": 8,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2553,7 +2553,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2583,7 +2583,7 @@
       "remediationPhase": 8,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2594,7 +2594,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2624,7 +2624,7 @@
       "remediationPhase": 8,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2635,7 +2635,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2665,7 +2665,7 @@
       "remediationPhase": 8,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2676,7 +2676,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2706,7 +2706,7 @@
       "remediationPhase": 8,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2717,7 +2717,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2747,7 +2747,7 @@
       "remediationPhase": 8,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2758,7 +2758,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2788,7 +2788,7 @@
       "remediationPhase": 9,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2799,7 +2799,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2829,7 +2829,7 @@
       "remediationPhase": 9,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2840,7 +2840,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2870,7 +2870,7 @@
       "remediationPhase": 9,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2881,7 +2881,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2911,7 +2911,7 @@
       "remediationPhase": 9,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2922,7 +2922,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2952,7 +2952,7 @@
       "remediationPhase": 9,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -2963,7 +2963,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -2993,7 +2993,7 @@
       "remediationPhase": 9,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3004,7 +3004,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3034,7 +3034,7 @@
       "remediationPhase": 8,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3045,7 +3045,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3075,7 +3075,7 @@
       "remediationPhase": 8,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3086,7 +3086,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3116,7 +3116,7 @@
       "remediationPhase": 8,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3127,7 +3127,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3157,7 +3157,7 @@
       "remediationPhase": 8,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3168,7 +3168,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3198,7 +3198,7 @@
       "remediationPhase": 8,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3209,7 +3209,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3239,7 +3239,7 @@
       "remediationPhase": 8,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3250,7 +3250,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3280,7 +3280,7 @@
       "remediationPhase": 5,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3291,7 +3291,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3321,7 +3321,7 @@
       "remediationPhase": 5,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3332,7 +3332,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3362,7 +3362,7 @@
       "remediationPhase": 7,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3373,7 +3373,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3403,7 +3403,7 @@
       "remediationPhase": 7,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3414,7 +3414,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3444,7 +3444,7 @@
       "remediationPhase": 5,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3455,7 +3455,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3485,7 +3485,7 @@
       "remediationPhase": 6,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3496,7 +3496,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3526,7 +3526,7 @@
       "remediationPhase": 7,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3537,7 +3537,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3567,7 +3567,7 @@
       "remediationPhase": 7,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3578,7 +3578,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3608,7 +3608,7 @@
       "remediationPhase": 5,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3619,7 +3619,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3649,7 +3649,7 @@
       "remediationPhase": 5,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3660,7 +3660,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3690,7 +3690,7 @@
       "remediationPhase": 5,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3701,7 +3701,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3731,7 +3731,7 @@
       "remediationPhase": 10,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3742,7 +3742,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3772,7 +3772,7 @@
       "remediationPhase": 10,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3783,7 +3783,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3813,7 +3813,7 @@
       "remediationPhase": 5,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3824,7 +3824,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3854,7 +3854,7 @@
       "remediationPhase": 6,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3865,7 +3865,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3895,7 +3895,7 @@
       "remediationPhase": 6,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3906,7 +3906,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3936,7 +3936,7 @@
       "remediationPhase": 13,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3947,7 +3947,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -3977,7 +3977,7 @@
       "remediationPhase": 6,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -3988,7 +3988,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4018,7 +4018,7 @@
       "remediationPhase": 6,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4029,7 +4029,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4059,7 +4059,7 @@
       "remediationPhase": 5,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4070,7 +4070,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4100,7 +4100,7 @@
       "remediationPhase": 10,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4111,7 +4111,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4141,7 +4141,7 @@
       "remediationPhase": 10,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4152,7 +4152,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4182,7 +4182,7 @@
       "remediationPhase": 10,
       "positiveControl": "Prove the scope boundary and absence of false completion claims.",
       "hostileControl": "Fail if deferred evidence is used as a completion proxy.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4193,7 +4193,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFERRED",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "INDEPENDENT_PROVISIONING_PENDING",
       "candidateEvidenceState": "ROOT-OWNED INSTALLATION, TRUSTED GITHUB IDENTITY, OR SERVER POLICY IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4223,7 +4223,7 @@
       "remediationPhase": 10,
       "positiveControl": "Prove the scope boundary and absence of false completion claims.",
       "hostileControl": "Fail if deferred evidence is used as a completion proxy.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4234,7 +4234,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFERRED",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "INDEPENDENT_PROVISIONING_PENDING",
       "candidateEvidenceState": "ROOT-OWNED INSTALLATION, TRUSTED GITHUB IDENTITY, OR SERVER POLICY IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4264,7 +4264,7 @@
       "remediationPhase": 3,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4275,7 +4275,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "INDEPENDENT_PROVISIONING_PENDING",
       "candidateEvidenceState": "ROOT-OWNED INSTALLATION, TRUSTED GITHUB IDENTITY, OR SERVER POLICY IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4305,7 +4305,7 @@
       "remediationPhase": 3,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4316,7 +4316,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "INDEPENDENT_PROVISIONING_PENDING",
       "candidateEvidenceState": "ROOT-OWNED INSTALLATION, TRUSTED GITHUB IDENTITY, OR SERVER POLICY IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4346,7 +4346,7 @@
       "remediationPhase": 3,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4357,7 +4357,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "INDEPENDENT_PROVISIONING_PENDING",
       "candidateEvidenceState": "ROOT-OWNED INSTALLATION, TRUSTED GITHUB IDENTITY, OR SERVER POLICY IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4387,7 +4387,7 @@
       "remediationPhase": 10,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4398,7 +4398,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4428,7 +4428,7 @@
       "remediationPhase": 11,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4439,7 +4439,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4469,7 +4469,7 @@
       "remediationPhase": 11,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4480,7 +4480,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4510,7 +4510,7 @@
       "remediationPhase": 10,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4521,7 +4521,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4551,7 +4551,7 @@
       "remediationPhase": 4,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4562,7 +4562,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "OPEN_CONFLICT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "INDEPENDENT_PROVISIONING_PENDING",
       "candidateEvidenceState": "ROOT-OWNED INSTALLATION, TRUSTED GITHUB IDENTITY, OR SERVER POLICY IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4592,7 +4592,7 @@
       "remediationPhase": 4,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4603,7 +4603,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "INDEPENDENT_PROVISIONING_PENDING",
       "candidateEvidenceState": "ROOT-OWNED INSTALLATION, TRUSTED GITHUB IDENTITY, OR SERVER POLICY IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4633,7 +4633,7 @@
       "remediationPhase": 4,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4644,7 +4644,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "INDEPENDENT_PROVISIONING_PENDING",
       "candidateEvidenceState": "ROOT-OWNED INSTALLATION, TRUSTED GITHUB IDENTITY, OR SERVER POLICY IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4674,7 +4674,7 @@
       "remediationPhase": 10,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4685,7 +4685,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4715,7 +4715,7 @@
       "remediationPhase": 10,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4726,7 +4726,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4756,7 +4756,7 @@
       "remediationPhase": 10,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4767,7 +4767,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4797,7 +4797,7 @@
       "remediationPhase": 4,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4808,7 +4808,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4838,7 +4838,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4849,7 +4849,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4879,7 +4879,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4890,7 +4890,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4920,7 +4920,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4931,7 +4931,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -4961,7 +4961,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -4972,7 +4972,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5002,7 +5002,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5013,7 +5013,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5043,7 +5043,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5054,7 +5054,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5084,7 +5084,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5095,7 +5095,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5125,7 +5125,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5136,7 +5136,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5166,7 +5166,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5177,7 +5177,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5207,7 +5207,7 @@
       "remediationPhase": 16,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5218,7 +5218,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5248,7 +5248,7 @@
       "remediationPhase": 16,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5259,7 +5259,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5289,7 +5289,7 @@
       "remediationPhase": 16,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5300,7 +5300,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5330,7 +5330,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5341,7 +5341,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5371,7 +5371,7 @@
       "remediationPhase": 16,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5382,7 +5382,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5412,7 +5412,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5423,7 +5423,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5453,7 +5453,7 @@
       "remediationPhase": 16,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5464,7 +5464,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LIVE_CANARY_PENDING",
       "candidateEvidenceState": "EXACT-INSTALLED-CANDIDATE 20-CANARY OR SEVEN-EVENT OBSERVER PROOF IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5495,7 +5495,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5506,7 +5506,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5537,7 +5537,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5548,7 +5548,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5579,7 +5579,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5590,7 +5590,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5621,7 +5621,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5632,7 +5632,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5663,7 +5663,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5674,7 +5674,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5705,7 +5705,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5716,7 +5716,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5747,7 +5747,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5758,7 +5758,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5789,7 +5789,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5800,7 +5800,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5831,7 +5831,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5842,7 +5842,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5873,7 +5873,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5884,7 +5884,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5915,7 +5915,7 @@
       "remediationPhase": 14,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5926,7 +5926,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5957,7 +5957,7 @@
       "remediationPhase": 14,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -5968,7 +5968,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -5999,7 +5999,7 @@
       "remediationPhase": 14,
       "positiveControl": "Validate a genuine attributable signed external receipt without blocking unrelated lanes.",
       "hostileControl": "Reject agent-authored, stale, unsigned, mismatched, and replayed external evidence.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6010,7 +6010,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "EXTERNAL_WAIT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6041,7 +6041,7 @@
       "remediationPhase": 14,
       "positiveControl": "Validate a genuine attributable signed external receipt without blocking unrelated lanes.",
       "hostileControl": "Reject agent-authored, stale, unsigned, mismatched, and replayed external evidence.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6052,7 +6052,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "EXTERNAL_WAIT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6083,7 +6083,7 @@
       "remediationPhase": 14,
       "positiveControl": "Validate a genuine attributable signed external receipt without blocking unrelated lanes.",
       "hostileControl": "Reject agent-authored, stale, unsigned, mismatched, and replayed external evidence.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6094,7 +6094,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "EXTERNAL_WAIT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6123,7 +6123,7 @@
       "remediationPhase": 6,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6134,7 +6134,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6163,7 +6163,7 @@
       "remediationPhase": 6,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6174,7 +6174,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6203,7 +6203,7 @@
       "remediationPhase": 13,
       "positiveControl": "Validate a genuine attributable signed external receipt without blocking unrelated lanes.",
       "hostileControl": "Reject agent-authored, stale, unsigned, mismatched, and replayed external evidence.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6214,7 +6214,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "EXTERNAL_WAIT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6243,7 +6243,7 @@
       "remediationPhase": 13,
       "positiveControl": "Validate a genuine attributable signed external receipt without blocking unrelated lanes.",
       "hostileControl": "Reject agent-authored, stale, unsigned, mismatched, and replayed external evidence.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6254,7 +6254,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "EXTERNAL_WAIT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6283,7 +6283,7 @@
       "remediationPhase": 13,
       "positiveControl": "Validate a genuine attributable signed external receipt without blocking unrelated lanes.",
       "hostileControl": "Reject agent-authored, stale, unsigned, mismatched, and replayed external evidence.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6294,7 +6294,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "EXTERNAL_WAIT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6323,7 +6323,7 @@
       "remediationPhase": 13,
       "positiveControl": "Validate a genuine attributable signed external receipt without blocking unrelated lanes.",
       "hostileControl": "Reject agent-authored, stale, unsigned, mismatched, and replayed external evidence.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6334,7 +6334,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "EXTERNAL_WAIT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6363,7 +6363,7 @@
       "remediationPhase": 13,
       "positiveControl": "Validate a genuine attributable signed external receipt without blocking unrelated lanes.",
       "hostileControl": "Reject agent-authored, stale, unsigned, mismatched, and replayed external evidence.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6374,7 +6374,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "EXTERNAL_WAIT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6403,7 +6403,7 @@
       "remediationPhase": 6,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6414,7 +6414,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6443,7 +6443,7 @@
       "remediationPhase": 6,
       "positiveControl": "Re-run the cited baseline control at the exact V3.1 candidate SHA.",
       "hostileControl": "Repeat the relevant adversarial test under immutable V3.1 authority and the independent verifier.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6454,7 +6454,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PROVEN_BASELINE",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "EXTERNAL_FACT_PENDING",
       "candidateEvidenceState": "TRUSTED ATTRIBUTABLE EXTERNAL FACT IS ABSENT",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6483,7 +6483,7 @@
       "remediationPhase": 13,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6494,7 +6494,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6523,7 +6523,7 @@
       "remediationPhase": 6,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6534,7 +6534,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "PARTIAL",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6563,7 +6563,7 @@
       "remediationPhase": 6,
       "positiveControl": "Implement the package remediation and run an exact-candidate positive acceptance control.",
       "hostileControl": "Reproduce the Phase-0 defect and prove the repaired path fails closed.",
-      "candidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
+      "candidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
       "artifactDigests": {
         "phase0BaselineReportSha256": "db2eac2b8c92475dba7c8c0b803308fac80df2c2d1a5d696945135c9b84e71cf",
         "activeV3ManifestSha256": "1c0a9edd65ca8464d8a6195c9bf08c339f5d26e49b79bac577b6c9649100401c"
@@ -6574,7 +6574,7 @@
       "closureProof": "PENDING_EXACT_CANDIDATE_ACCEPTANCE_ARTIFACTS",
       "phase0Sha": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
       "phase0Classification": "DEFECT",
-      "candidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
+      "candidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
       "candidateClassification": "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE",
       "candidateEvidenceState": "TARGETED_LOCAL_CONTROLS_EXIST; FULL_LOCAL, HOSTED, INSTALLATION, AND APPLICABLE LIVE PROOF REMAIN PENDING",
       "candidateAcceptance": "PENDING_NOT_ACTIVATION_AUTHORITY"
@@ -6595,9 +6595,9 @@
     "immutableHistoricalFact": true
   },
   "candidateEvaluation": {
-    "implementationCandidateSha": "9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad",
-    "implementationCandidateTree": "cc498044793cc865b06e1375a5442f75ef6fada5",
-    "implementationCandidateCommittedAt": "2026-08-13T02:37:25-04:00",
+    "implementationCandidateSha": "0fa90da735ac3958d00c7549412b38bb6e09d0ce",
+    "implementationCandidateTree": "f68c2f2ca193584995b4c07b6957499ba00a05e4",
+    "implementationCandidateCommittedAt": "2026-08-13T03:12:13-04:00",
     "status": "IN_PROGRESS_NOT_ACCEPTED_NOT_ACTIVATED",
     "classificationCounts": {
       "LOCAL_IMPLEMENTATION_PENDING_INTEGRATED_ACCEPTANCE": 100,

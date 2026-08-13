@@ -40,9 +40,9 @@ as current acceptance. Candidate reclassification is stored separately in
 
 ## Current implementation candidate
 
-- Candidate commit: `81e46ce5ad95c588c8fae3bd64f5704e40ac984b`.
-- Candidate tree: `b01b982b5a32926e00656c9ea8b1980c0d91e405`.
-- Commit subject: `fix: bind commercial authority and portable migration evidence`.
+- Candidate commit: `550bee834bd63cae0c30f7f96b4732d049124fd1`.
+- Candidate tree: `55d08d4296fb781edaa142820d16511fc38da9f4`.
+- Commit subject: `Build` (exact deterministic repository snapshot implementation).
 - Branch push: complete.
 - PR state: draft; merge is not authorized.
 
@@ -60,11 +60,14 @@ Relevant branch history:
 - `3907d65` — automatic refresh and evidence hardening.
 - `16e65dc` — activation replay and clean evidence.
 - `81e46ce` — commercial/reduction authority, portable legacy evidence, and hosted-runtime fixes.
+- `4ca86ff` — exact-head local/hosted acceptance and truthful evidence checkpoint.
+- `b53b68d` — complete deterministic Python runtime distribution and deployment hardening.
+- `550bee8` — exact Git-object repository snapshot and dirty-workspace-proof runtime builds.
 
 ## Candidate evidence completed so far
 
-The following results are scoped implementation evidence. They are not final activation
-authority and do not replace the pending complete local/hosted/live runs.
+The following results are candidate-bound local implementation evidence. They are not final
+activation authority and do not replace pending hosted, installed, or live acceptance.
 
 - Exact 109-row completion-evidence policy passed.
 - Exact 63 V3 schema generation passed.
@@ -83,13 +86,33 @@ authority and do not replace the pending complete local/hosted/live runs.
   public machine-policy/LIVE activation receipts; launcher environment cannot select the oracle/key.
 - Cross-identity, stale, revoked, rollback, missing-install, and substituted-install hostile
   controls fail closed.
+- Complete local repository suite passed 959/959 and the deployment suite passed 36/36.
+- The complete Python 3.12 runtime archive was built twice with identical archive and manifest
+  digests, then relocated and exercised without repository-local Python or user site packages.
+- The relocated runtime imported the full locked third-party dependency closure, all eight
+  TrainCapsule packages, and launched the bundled Claude SDK helper.
+- Runtime archive/extraction traversal, link, hardlink, tamper, inventory, ownership, bounded
+  streaming, crash-replay, and rollback negative controls passed.
+- Two exact-commit runtime rebuilds from an intentionally dirty workspace matched byte-for-byte:
+  archive `4c3858eef668568a2c97dd95b41fcbc7aa1a9263f282fd9017f9f63d1c022393`
+  and manifest `950435333f74d2e27d80ecef66c5dc386861f53fa2e96903343dd37bd82a6b52`.
+- Two exact `550bee8` repository-snapshot dry runs matched byte-for-byte and passed complete
+  inventory, loose-object identity, strict Git fsck, exact HEAD/tree, remote-free, hook-free,
+  alternate-free, and clean-tree validation. The archive digest was
+  `4b4f839205fd94f32ba4ef930e1cdcb6fc8298d5551176b3d426c5a880fcae2b` and the
+  self-digested manifest file digest was
+  `9887bc006a2a5bc55b27e99f7dabc1775a0386fa4048d0d2fcd90f62fc494ef7`.
+- Source authority, exact 109-row roadmap/completion policy, exact 124-row legacy mapping,
+  tracked inventory, 63 V3 schemas, 63 V3.1 schemas, 19 verifier schemas, Ruff, and strict
+  Pyright all passed at the candidate.
 
-Still required for this exact candidate: canonical full pre-evidence quality, all packaging
-and clean-install checks, the complete local suite, and every exact-head hosted PR check.
+All eight hosted PR workflows passed at the previous implementation checkpoint `b53b68d`.
+The eight exact-head `550bee8` workflows were queued or running when this state was recorded;
+their completion plus the independent installed/live acceptance below remain required.
 
 ## Current runtime and external state
 
-Observed after `81e46ce` was pushed:
+Observed after `b53b68d` was pushed:
 
 - Authoritative stop marker: `factory/state/STOP` is present.
 - `factory/state/PAUSE` and `factory/state/HARD_STUCK` are absent.
@@ -127,7 +150,7 @@ The human no-forgetting sequence is in `V3_1_ZH_REMAINING_ACCEPTANCE.md`.
 
 ## Blockers that prohibit activation
 
-1. Complete candidate-bound local and hosted acceptance has not finished.
+1. Exact-head local acceptance is green; the `550bee8` hosted workflows are still in progress.
 2. The independent root-owned verifier/runtime deployment does not exist on this host.
 3. The trusted GitHub App identity, exact ruleset, and signed live ruleset observation are absent.
 4. V3.1 MIG-016 through MIG-020 independent receipts remain pending.
@@ -139,14 +162,14 @@ The human no-forgetting sequence is in `V3_1_ZH_REMAINING_ACCEPTANCE.md`.
 
 ## Next exact action
 
-1. Commit the candidate-bound inventory, ledger, and truthful durable documentation.
-2. Run the canonical complete local/pre-evidence acceptance against that exact head.
-3. Push the evidence checkpoint and repair all hosted PR checks until exact-head green.
-4. Stage, dry-run, install, and independently attest the verifier/runtime/service bundle.
-5. Provision the GitHub App and exact main ruleset; capture a signed live observation.
-6. Run all 20 live canaries; missing live mechanisms remain blocked rather than simulated.
-7. Obtain the exact signed activation receipt and ordered seven-event observation.
-8. Merge only the exact verified SHA through the automated PR-only path.
+1. Monitor and repair all eight exact-head `550bee8` hosted workflows until green.
+2. Assemble the exact production bundle from the proven deterministic runtime/snapshot plus externally
+   provisioned authority inputs; stage and dry-run it before any privileged apply.
+3. Install and independently attest the verifier/runtime/service bundle while retaining STOP.
+4. Provision the GitHub App and exact main ruleset; capture a signed live observation.
+5. Run all 20 live canaries; missing live mechanisms remain blocked rather than simulated.
+6. Obtain the exact signed activation receipt and ordered seven-event observation.
+7. Merge only the exact verified SHA through the automated PR-only path.
 
 ## Activation state
 

@@ -123,7 +123,7 @@ No future SHA, run ID, receipt, or PASS is invented here. Retain `factory/state/
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **634 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **636 paths**.
 
 This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing
 report must bind acceptance to an immutable candidate SHA and independent test/receipt
@@ -239,10 +239,12 @@ artifacts.
 | `A` | `deployment/bundle_assembler.py` |
 | `A` | `deployment/github_token_refresher.py` |
 | `A` | `deployment/privileged_installer.py` |
+| `A` | `deployment/repository_snapshot.py` |
 | `A` | `deployment/runtime_distribution.py` |
 | `A` | `deployment/runtime_refresh.py` |
 | `A` | `deployment/tests/test_github_token_refresher.py` |
 | `A` | `deployment/tests/test_privileged_installer.py` |
+| `A` | `deployment/tests/test_repository_snapshot.py` |
 | `A` | `deployment/tests/test_runtime_distribution.py` |
 | `A` | `deployment/tests/test_runtime_refresh.py` |
 | `M` | `docs/CONTEXT_INDEX.yaml` |

@@ -1460,6 +1460,7 @@ def test_rollback_restores_preexisting_bytes_and_is_idempotent(tmp_path: Path) -
     installer.rollback()
     assert public.read_bytes() == b"previous-version\n"
     assert public.stat().st_mode & 0o777 == 0o700
+    assert not (root / "opt/traincapsule-runtime/python").exists()
     assert not system.enabled
     assert authority.accounts == {
         "traincapsule-verifier",

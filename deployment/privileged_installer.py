@@ -1682,6 +1682,15 @@ class PrivilegedInstaller:
                 while parent != runtime_root and parent.is_dir() and not any(parent.iterdir()):
                     parent.rmdir()
                     parent = parent.parent
+            for directory in sorted(
+                (path for path in runtime_root.rglob("*") if path.is_dir()),
+                key=lambda path: (len(path.parts), str(path)),
+                reverse=True,
+            ):
+                if directory.is_symlink():
+                    raise InstallFailure("rollback runtime directory changed type")
+                if not any(directory.iterdir()):
+                    directory.rmdir()
             if not any(runtime_root.iterdir()):
                 runtime_root.rmdir()
             self._record("RUNTIME_DISTRIBUTION_ROLLED_BACK", {})

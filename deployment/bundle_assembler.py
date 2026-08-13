@@ -502,6 +502,13 @@ def _validate_controller_runtime(sources: Mapping[str, Path]) -> None:
         environment.count(b"TCF_RUNTIME_ROOT=/var/lib/traincapsule-runtime\n") != 1
         or environment.count(b"PYTHONSAFEPATH=1\n") != 1
         or environment.count(b"PYTHONNOUSERSITE=1\n") != 1
+        or environment.count(b"GIT_CONFIG_COUNT=1\n") != 1
+        or environment.count(b"GIT_CONFIG_KEY_0=safe.directory\n") != 1
+        or environment.count(
+            b"GIT_CONFIG_VALUE_0=/var/lib/traincapsule-verifier/"
+            b"repository-boundary\n"
+        )
+        != 1
         or environment.count(
             f"PYTHONPATH={INITIAL_CONTROLLER_PYTHONPATH}\n".encode()
         )
@@ -1232,6 +1239,9 @@ def assemble_bundle(
     _validate_external_authority(sources)
     repository_pins = {
         "activation-supervisor-launcher": repo_root / "scripts/windows_activation_entrypoint.sh",
+        "controller-runtime-environment": (
+            repo_root / "config/traincapsule-controller-runtime.env"
+        ),
         "external-evidence-service": (
             repo_root / "config/traincapsule-external-evidence-authority.service"
         ),

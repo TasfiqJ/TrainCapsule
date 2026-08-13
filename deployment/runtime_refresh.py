@@ -1391,6 +1391,9 @@ def refresh(
             "TCF_RUNTIME_ROOT=/var/lib/traincapsule-runtime\n"
             "PYTHONSAFEPATH=1\n"
             "PYTHONNOUSERSITE=1\n"
+            "GIT_CONFIG_COUNT=1\n"
+            "GIT_CONFIG_KEY_0=safe.directory\n"
+            "GIT_CONFIG_VALUE_0=/var/lib/traincapsule-verifier/repository-boundary\n"
             f"PYTHONPATH={logical_generation}/site-packages\n"
         ).encode()
         runtime_manifest = _runtime_manifest(

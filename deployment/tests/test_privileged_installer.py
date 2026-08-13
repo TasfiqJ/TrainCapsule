@@ -840,6 +840,10 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                 b"TCF_RUNTIME_ROOT=/var/lib/traincapsule-runtime\n"
                 b"PYTHONSAFEPATH=1\n"
                 b"PYTHONNOUSERSITE=1\n"
+                b"GIT_CONFIG_COUNT=1\n"
+                b"GIT_CONFIG_KEY_0=safe.directory\n"
+                b"GIT_CONFIG_VALUE_0=/var/lib/traincapsule-verifier/"
+                b"repository-boundary\n"
                 + f"PYTHONPATH={INITIAL_CONTROLLER_PYTHONPATH}\n".encode()
             )
         elif role == "controller-effective-config":
@@ -1534,6 +1538,7 @@ def _assembler_repo(tmp_path: Path, artifacts: dict[str, Path]) -> Path:
     config = repo / "config"
     config.mkdir()
     for name in (
+        "traincapsule-controller-runtime.env",
         "traincapsule-external-evidence-authority.service",
         "traincapsule-external-evidence-authority.path",
         "traincapsule-github-token-refresher.service",

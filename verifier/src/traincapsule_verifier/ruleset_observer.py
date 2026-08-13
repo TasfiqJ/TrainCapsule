@@ -41,6 +41,61 @@ def _api(path: str, token: str) -> object:
         raise ValueError("ruleset observer GitHub API is unavailable") from exc
 
 
+def _graphql(query: str, variables: dict[str, str], token: str) -> object:
+    request = urllib.request.Request(
+        "https://api.github.com/graphql",
+        data=json.dumps(
+            {"query": query, "variables": variables},
+            separators=(",", ":"),
+            sort_keys=True,
+        ).encode(),
+        method="POST",
+        headers={
+            "Accept": "application/vnd.github+json",
+            "Authorization": f"Bearer {token}",
+            "Content-Type": "application/json",
+            "User-Agent": "TrainCapsule-Ruleset-Observer/3.1",
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
+    )
+    try:
+        with urllib.request.urlopen(request, timeout=30) as response:
+            return json.loads(response.read(1_000_000))
+    except (OSError, ValueError, urllib.error.URLError) as exc:
+        raise ValueError("ruleset observer GitHub GraphQL API is unavailable") from exc
+
+
+def _repository_auto_merge_enabled(repository: str, token: str) -> bool:
+    owner, name = repository.split("/", 1)
+    marker = "$"
+    query = (
+        f"query({marker}owner:String!,{marker}name:String!)"
+        f"{{repository(owner:{marker}owner,name:{marker}name){{autoMergeAllowed}}}}"
+    )
+    result = _graphql(query, {"owner": owner, "name": name}, token)
+    if not isinstance(result, dict):
+        return False
+    typed_result = cast(dict[str, object], result)
+    if typed_result.get("errors"):
+        return False
+    data = typed_result.get("data")
+    typed_data = cast(dict[str, object], data) if isinstance(data, dict) else {}
+    repository_payload = typed_data.get("repository")
+    typed_repository = (
+        cast(dict[str, object], repository_payload)
+        if isinstance(repository_payload, dict)
+        else {}
+    )
+    return (
+        bool(typed_repository)
+        and typed_repository.get("autoMergeAllowed") is True
+    )
+
+
+def _has_no_bypass_actors(value: object) -> bool:
+    return value is None or value == []
+
+
 def _observe(uid: int) -> None:
     with open_trusted_root(CONFIG, expected_uid=0) as config_root:
         policy = json.loads(read_bounded_file(config_root, "ruleset-observer.json"))
@@ -102,9 +157,7 @@ def _observe(uid: int) -> None:
         if candidate.get("enforcement") == "active" and exact_main:
             selected = candidate
             break
-    if selected is None or not isinstance(selected.get("bypass_actors"), list) or selected[
-        "bypass_actors"
-    ]:
+    if selected is None or not _has_no_bypass_actors(selected.get("bypass_actors")):
         raise ValueError("no bypass-free active ruleset is available")
     rules = selected.get("rules")
     if not isinstance(rules, list):
@@ -131,10 +184,7 @@ def _observe(uid: int) -> None:
                 observed[cast(str, check["context"])] = cast(int, check["integration_id"])
     if observed != expected:
         raise ValueError("ruleset exact check/App mapping differs from policy")
-    repository_state = _api(f"/repos/{repository}", token)
-    if not isinstance(repository_state, dict) or cast(dict[str, object], repository_state).get(
-        "allow_auto_merge"
-    ) is not True:
+    if not _repository_auto_merge_enabled(repository, token):
         raise ValueError("repository auto-merge is disabled")
     now = datetime.now(UTC)
     core = {

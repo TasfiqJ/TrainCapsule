@@ -7,12 +7,36 @@ from pathlib import Path
 
 import pytest
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PrivateKey
+from traincapsule_verifier import ruleset_observer
 from traincapsule_verifier.canonical import canonical_json_bytes, sha256_digest
 from traincapsule_verifier.crypto import sign_model
 from traincapsule_verifier.filesystem import open_trusted_root
 from traincapsule_verifier.models import RulesetObservationReceipt
 from traincapsule_verifier.observed_main_selector import verified_check_digests
 from traincapsule_verifier.ruleset_broker import promote_ruleset_observation
+
+
+def test_ruleset_observer_accepts_github_null_as_no_bypass_and_uses_graphql_auto_merge(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    assert ruleset_observer._has_no_bypass_actors(None)
+    assert ruleset_observer._has_no_bypass_actors([])
+    assert not ruleset_observer._has_no_bypass_actors([{"actor_id": 1}])
+    monkeypatch.setattr(
+        ruleset_observer,
+        "_graphql",
+        lambda _query, variables, _token: {
+            "data": {
+                "repository": {
+                    "autoMergeAllowed": variables
+                    == {"owner": "TasfiqJ", "name": "TrainCapsule"}
+                }
+            }
+        },
+    )
+    assert ruleset_observer._repository_auto_merge_enabled(
+        "TasfiqJ/TrainCapsule", "installation-token"
+    )
 
 
 def _ruleset_receipt(

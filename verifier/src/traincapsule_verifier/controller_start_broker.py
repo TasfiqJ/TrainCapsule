@@ -315,21 +315,28 @@ def process() -> int:
             receipt_root=RECEIPTS,
             expected_owner_uid=0,
         ) as verifier:
-            for name in sorted(os.listdir(outbox.descriptor)):
-                if not name.endswith(".controller-start.json"):
-                    continue
+            names = tuple(
+                sorted(
+                    name
+                    for name in os.listdir(outbox.descriptor)
+                    if name.endswith(".controller-start.json")
+                )
+            )
+            processed = False
+            for name in names:
                 raw = read_bounded_file(outbox, name, maximum_bytes=5_000_000)
                 request = _StartRequest.model_validate_json(raw, strict=True)
                 if raw != canonical_json_bytes(request):
                     raise ValueError("controller start request is not canonical")
+                if name != f"{request.transaction_id}.controller-start.json":
+                    raise ValueError("controller start request filename/identity mismatch")
                 if (
-                    name != f"{request.transaction_id}.controller-start.json"
-                    or request.activation_receipt_id != receipt.receipt_id
+                    request.activation_receipt_id != receipt.receipt_id
                     or request.activation_receipt_digest != model_digest(receipt)
                     or receipt.controller_binary_digest != manifest.manifest_digest
                     or receipt.controller_config_digest != manifest.effective_config.digest
                 ):
-                    raise ValueError("controller start request receipt/runtime identity mismatch")
+                    continue
                 verifier.authorize_activation(
                     receipt,
                     main_sha=request.exact_main_sha,
@@ -391,6 +398,9 @@ def process() -> int:
                     recorded_at=datetime.now(UTC).isoformat(),
                 )
                 _atomic_write(journal_path, canonical_json_bytes(terminal))
+                processed = True
+            if names and not processed:
+                raise ValueError("no controller start request matches current activation")
     return 0
 
 

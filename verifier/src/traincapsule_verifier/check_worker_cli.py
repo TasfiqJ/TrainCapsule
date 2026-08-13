@@ -12,13 +12,47 @@ from .check_publisher import CheckEvent, CheckPublisherPolicy, CheckPublisherWor
 from .filesystem import open_trusted_root
 from .github_app_backend import GitHubAppHTTPBackend
 from .models import MachinePolicyReceipt
-from .public_verifier import PublicVerifier
+from .public_verifier import PublicVerificationError, PublicVerifier
 
 ROOT = Path("/var/lib/traincapsule-verifier")
 CONFIG = Path("/etc/traincapsule-verifier")
 POLICY_PATH = CONFIG / "check-publisher.json"
 PRIVATE_KEY = ROOT / "github-app/private-key.pem"
 SERVICE_USER = "traincapsule-verifier"
+
+
+def eligible_events(
+    *,
+    policy: CheckPublisherPolicy,
+    verifier: PublicVerifier,
+    receipt_root: Path,
+) -> list[CheckEvent]:
+    """Return only currently authorized receipts; stale history cannot starve fresh work."""
+
+    events: list[CheckEvent] = []
+    for path in sorted(receipt_root.glob("MPOL:*.json")):
+        receipt = MachinePolicyReceipt.model_validate_json(path.read_bytes(), strict=True)
+        try:
+            verifier.verify_machine_receipt(receipt)
+        except PublicVerificationError:
+            continue
+        events.append(
+            CheckEvent(
+                schema_version="3.1",
+                event_id=f"CHECK:{receipt.receipt_id}",
+                repository=policy.repository,
+                github_app_id=policy.github_app_id,
+                installation_id=policy.installation_id,
+                candidate_sha=receipt.candidate_sha,
+                candidate_tree_sha=receipt.candidate_tree_sha,
+                base_sha=receipt.base_sha,
+                work_item_id=receipt.work_item_id,
+                candidate_manifest_digest=receipt.candidate_manifest_digest,
+                receipt_id=receipt.receipt_id,
+                receipt_digest=model_digest(receipt),
+            )
+        )
+    return events
 
 
 def main() -> int:
@@ -30,26 +64,6 @@ def main() -> int:
         if os.geteuid() != service_uid:
             raise ValueError("check worker requires verifier service identity")
         policy = CheckPublisherPolicy.model_validate_json(POLICY_PATH.read_bytes(), strict=True)
-        events: list[CheckEvent] = []
-        for path in sorted((ROOT / "receipts").glob("MPOL:*.json")):
-            receipt = MachinePolicyReceipt.model_validate_json(path.read_bytes(), strict=True)
-            events.append(
-                CheckEvent(
-                    schema_version="3.1",
-                    event_id=f"CHECK:{receipt.receipt_id}",
-                    repository=policy.repository,
-                    github_app_id=policy.github_app_id,
-                    installation_id=policy.installation_id,
-                    candidate_sha=receipt.candidate_sha,
-                    candidate_tree_sha=receipt.candidate_tree_sha,
-                    base_sha=receipt.base_sha,
-                    work_item_id=receipt.work_item_id,
-                    candidate_manifest_digest=receipt.candidate_manifest_digest,
-                    receipt_id=receipt.receipt_id,
-                    receipt_digest=model_digest(receipt),
-                )
-            )
-        backend = GitHubAppHTTPBackend(policy=policy, private_key_path=PRIVATE_KEY, events=events)
         with (
             PublicVerifier.from_public_roots(
                 repository_root=ROOT / "repository-boundary",
@@ -60,6 +74,16 @@ def main() -> int:
             ) as verifier,
             open_trusted_root(ROOT / "check-journal", expected_uid=service_uid) as journal,
         ):
+            events = eligible_events(
+                policy=policy,
+                verifier=verifier,
+                receipt_root=ROOT / "receipts",
+            )
+            backend = GitHubAppHTTPBackend(
+                policy=policy,
+                private_key_path=PRIVATE_KEY,
+                events=events,
+            )
             results = CheckPublisherWorker(
                 verifier=verifier, policy=policy, journal_root=journal, backend=backend
             ).run_once(limit=100)

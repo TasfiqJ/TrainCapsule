@@ -6,7 +6,7 @@ import sys
 from dataclasses import dataclass
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from cryptography.hazmat.primitives import serialization
@@ -21,6 +21,7 @@ from traincapsule_verifier.check_publisher import (
     CheckPublisherWorker,
     CheckPublishRequest,
 )
+from traincapsule_verifier.check_worker_cli import eligible_events
 from traincapsule_verifier.crypto import public_key_fingerprint, sign_model
 from traincapsule_verifier.filesystem import open_trusted_root
 from traincapsule_verifier.models import (
@@ -630,6 +631,41 @@ def _event(fixture: PublicFixture) -> CheckEvent:
         receipt_id=fixture.machine.receipt_id,
         receipt_digest=model_digest(fixture.machine),
     )
+
+
+def test_check_worker_skips_stale_history_and_keeps_fresh_receipts(
+    public_fixture: PublicFixture, tmp_path: Path
+) -> None:
+    receipt_root = tmp_path / "receipts"
+    receipt_root.mkdir()
+    raw = canonical_json_bytes(public_fixture.machine)
+    (receipt_root / "MPOL:OLD.json").write_bytes(raw)
+    (receipt_root / "MPOL:CURRENT.json").write_bytes(raw)
+
+    class RejectFirstVerifier:
+        calls = 0
+
+        def verify_machine_receipt(self, receipt: MachinePolicyReceipt) -> None:
+            self.calls += 1
+            if self.calls == 1:
+                raise PublicVerificationError("machine-policy receipt is expired")
+
+    policy = CheckPublisherPolicy(
+        schema_version="3.1",
+        repository="owner/repository",
+        github_app_id=456,
+        installation_id=123,
+        backend_id="GITHUB:APP",
+        credential_reference="CREDENTIAL:GITHUB-APP",
+        check_name="TrainCapsule / Machine policy",
+    )
+    events = eligible_events(
+        policy=policy,
+        verifier=cast(PublicVerifier, RejectFirstVerifier()),
+        receipt_root=receipt_root,
+    )
+    assert len(events) == 1
+    assert events[0].candidate_sha == public_fixture.machine.candidate_sha
 
 
 def test_check_worker_reconciles_ambiguous_replay_without_second_send(

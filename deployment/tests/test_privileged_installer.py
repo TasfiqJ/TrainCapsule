@@ -1456,6 +1456,10 @@ def test_rollback_restores_preexisting_bytes_and_is_idempotent(tmp_path: Path) -
     installer = _installer(root, bundle, spec, authority, system)
     installer.apply(APPLY_CONFIRMATION)
     assert public.read_bytes() != b"previous-version\n"
+    cache = root / "opt/traincapsule-runtime/python/lib/python3.12/__pycache__"
+    cache.parent.chmod(0o755)
+    cache.mkdir(parents=True, exist_ok=True)
+    (cache / "runtime.cpython-312.pyc").write_bytes(b"runtime cache")
     installer.rollback()
     installer.rollback()
     assert public.read_bytes() == b"previous-version\n"

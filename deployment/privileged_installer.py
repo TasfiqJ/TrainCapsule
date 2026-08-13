@@ -1682,6 +1682,10 @@ class PrivilegedInstaller:
                 while parent != runtime_root and parent.is_dir() and not any(parent.iterdir()):
                     parent.rmdir()
                     parent = parent.parent
+            for cached in sorted(runtime_root.rglob("*.pyc"), reverse=True):
+                if cached.is_symlink() or cached.parent.name != "__pycache__":
+                    raise InstallFailure("rollback runtime contains an unexpected file")
+                cached.unlink()
             for directory in sorted(
                 (path for path in runtime_root.rglob("*") if path.is_dir()),
                 key=lambda path: (len(path.parts), str(path)),

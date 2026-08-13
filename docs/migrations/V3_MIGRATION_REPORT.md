@@ -123,7 +123,7 @@ No future SHA, run ID, receipt, or PASS is invented here. Retain `factory/state/
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **640 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **641 paths**.
 
 This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing
 report must bind acceptance to an immutable candidate SHA and independent test/receipt
@@ -223,6 +223,7 @@ artifacts.
 | `M` | `config/risk_profiles.yaml` |
 | `M` | `config/roles.yaml` |
 | `A` | `config/scheduler.yaml` |
+| `A` | `config/traincapsule-controller-runtime.env` |
 | `A` | `config/traincapsule-deployment-refresh-claim.path` |
 | `A` | `config/traincapsule-deployment-refresh-claim.service` |
 | `A` | `config/traincapsule-deployment-refresh-completion.path` |

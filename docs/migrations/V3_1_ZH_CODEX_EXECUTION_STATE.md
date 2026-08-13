@@ -151,7 +151,11 @@ Observed on 2026-08-13 after exact candidate `9b95cfb` was pushed:
 - `/opt/traincapsule-runtime`: absent.
 - Machine-policy GitHub App ID: unprovisioned.
 - Repository rulesets: none (`GET /repos/TasfiqJ/TrainCapsule/rulesets` returned `[]`).
-- Repository auto-merge setting: disabled.
+- Repository auto-merge setting: enabled on 2026-08-13 through the owner-authenticated
+  GitHub repository API; this is necessary but not sufficient without the exact ruleset.
+- WSL systemd state: disabled (`PID 1` is `init`, `/run/systemd/system` is absent). The
+  staged production units cannot be applied or observed until systemd is enabled and WSL
+  is restarted after the exact bundle is ready.
 - Signed live ruleset observation: absent.
 - Signed LIVE activation receipt: absent.
 - Exact installed 20-canary result: absent.
@@ -176,24 +180,27 @@ The human no-forgetting sequence is in `V3_1_ZH_REMAINING_ACCEPTANCE.md`.
 ## Blockers that prohibit activation
 
 1. The independent root-owned verifier/runtime deployment does not exist on this host.
-2. The trusted Machine-policy GitHub App identity, exact ruleset, repository auto-merge,
-   and signed live ruleset observation are absent.
-3. V3.1 MIG-016 through MIG-020 independent receipts remain pending.
-4. The exact installed candidate has not passed all 20 mandatory canaries.
-5. No signed LIVE activation transaction exists for this candidate.
-6. No ordered seven-event post-activation observer receipt exists.
-7. Customer, market, GPU, paid-use, and other outside facts remain UNKNOWN or `WAITING_EXTERNAL`
+2. The trusted Machine-policy GitHub App identity, exact ruleset, and signed live ruleset
+   observation are absent. Repository auto-merge is enabled but has no release authority by
+   itself.
+3. WSL systemd is disabled, so the independently attested service graph cannot run yet.
+4. V3.1 MIG-016 through MIG-020 independent receipts remain pending.
+5. The exact installed candidate has not passed all 20 mandatory canaries.
+6. No signed LIVE activation transaction exists for this candidate.
+7. No ordered seven-event post-activation observer receipt exists.
+8. Customer, market, GPU, paid-use, and other outside facts remain UNKNOWN or `WAITING_EXTERNAL`
    where the contract requires them.
 
 ## Next exact action
 
 1. Provision the dedicated Machine-policy GitHub App with Checks write, Contents read,
    Pull requests read, Metadata read, no webhook, and installation limited to this repository.
-2. Configure repository auto-merge and the exact no-bypass PR-only `main` ruleset with all
-   nine required contexts/App IDs; do not enable GitHub's Restrict updates rule.
+2. Configure the exact no-bypass PR-only `main` ruleset with all nine required contexts/App
+   IDs; do not enable GitHub's Restrict updates rule.
 3. Assemble the exact production bundle from the proven deterministic runtime/snapshot plus externally
    provisioned authority inputs; stage and dry-run it before any privileged apply.
-4. Install and independently attest the verifier/runtime/service bundle while retaining STOP.
+4. Enable WSL systemd through the reviewed one-time host bootstrap, restart WSL, then install
+   and independently attest the verifier/runtime/service bundle while retaining STOP.
 5. Capture the signed live ruleset observation and run all 20 live canaries; missing live
    mechanisms remain blocked rather than simulated.
 6. Obtain the exact signed activation receipt and ordered seven-event observation.

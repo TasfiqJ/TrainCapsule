@@ -14,7 +14,10 @@ activation receipt.
 - The independent verifier, installed runtime, GitHub App authority, live receipts, and
   post-activation observer are not installed or accepted.
 - All eight exact-candidate hosted workflows and GitGuardian pass, but the GitHub ruleset
-  API returns no rulesets and repository auto-merge is disabled.
+  API returns no rulesets. Repository auto-merge is enabled but is not release authority
+  without the exact required ruleset and Machine-policy App.
+- WSL systemd is disabled; no verifier/runtime unit can be installed and observed until the
+  reviewed host bootstrap enables it and restarts WSL.
 - Activation remains `STOPPED / NOT AUTHORIZED`.
 
 ## Candidate classification

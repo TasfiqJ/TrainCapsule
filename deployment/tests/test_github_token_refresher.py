@@ -48,6 +48,7 @@ def _policy(tmp_path: Path) -> RefreshPolicy:
         audience="https://api.github.com",
         permissions={
             "actions": "write",
+            "checks": "read",
             "contents": "read",
             "pull_requests": "read",
         },
@@ -80,6 +81,7 @@ def test_policy_loader_accepts_the_repository_canonical_json_line(tmp_path: Path
         audience="https://api.github.com",
         permissions={
             "actions": "write",
+            "checks": "read",
             "contents": "read",
             "pull_requests": "read",
         },
@@ -140,6 +142,7 @@ def test_scoped_refresh_rotation_and_promotion_never_log_token(
     assert request_payload == {
         "permissions": {
             "actions": "write",
+            "checks": "read",
             "contents": "read",
             "pull_requests": "read",
         },

@@ -735,6 +735,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                     "audience": "https://api.github.com",
                     "permissions": {
                         "actions": "write",
+                        "checks": "read",
                         "contents": "read",
                         "pull_requests": "read",
                     },

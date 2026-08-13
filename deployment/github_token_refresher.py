@@ -72,6 +72,7 @@ class RefreshPolicy(_Strict):
     def exact_scope(self) -> RefreshPolicy:
         if self.permissions != {
             "actions": "write",
+            "checks": "read",
             "contents": "read",
             "pull_requests": "read",
         }:

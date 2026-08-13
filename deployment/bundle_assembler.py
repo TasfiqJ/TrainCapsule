@@ -898,6 +898,7 @@ def _validate_github_token_refresher(sources: Mapping[str, Path]) -> None:
         or policy["permissions"]
         != {
             "actions": "write",
+            "checks": "read",
             "contents": "read",
             "pull_requests": "read",
         }

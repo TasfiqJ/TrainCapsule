@@ -16,6 +16,7 @@ EXPECTED_FILES = {
     "source-freshness.yml": "TrainCapsule / Source freshness",
 }
 OPTIONAL_MANUAL_FILES = {"gpu-validation.yml": "TrainCapsule / GPU validation"}
+MACHINE_POLICY_APP_ID = 4580794
 
 
 def test_required_workflow_files_and_config_names_match() -> None:
@@ -32,7 +33,10 @@ def test_required_workflow_files_and_config_names_match() -> None:
     assert config.release_mode == "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
     assert config.direct_main_push is False
     assert config.publisher_capability == "AUTOMATED_PR_V31_READY"
-    assert config.remote_ci.trusted_check_app_ids[MACHINE_POLICY_CHECK] is None
+    assert (
+        config.remote_ci.trusted_check_app_ids[MACHINE_POLICY_CHECK]
+        == MACHINE_POLICY_APP_ID
+    )
 
 
 def test_required_workflows_are_bounded_portable_and_secret_free() -> None:

@@ -341,7 +341,11 @@ def _validate_python_runtime(
         distribution_prefix = "lib/python3.12/site-packages/" + target_prefix
         application_roots.append(distribution_prefix)
         for source_path, digest in snapshot_files.items():
-            if source_path.startswith(source_prefix) and source_path.endswith(".py"):
+            if (
+                source_path.startswith(source_prefix)
+                and source_path.endswith(".py")
+                and not source_path.startswith(source_prefix + "tests/")
+            ):
                 target = distribution_prefix + source_path.removeprefix(source_prefix)
                 expected_application_files[target] = digest
     observed_application_files = {
@@ -1162,7 +1166,11 @@ def assemble_bundle(
             secret=role in SECRET_ROLES,
             executable=bool(int(mode, 8) & 0o111),
             repo_root=repo_root,
-            maximum_size=1_000_000_000 if role == "python-runtime-archive" else 128_000_000,
+            maximum_size=(
+                1_000_000_000
+                if role in {"python-runtime-archive", "canary-claude-executable"}
+                else 128_000_000
+            ),
         )
         identity = (source.stat().st_dev, source.stat().st_ino)
         prior_role = identities.get(identity)

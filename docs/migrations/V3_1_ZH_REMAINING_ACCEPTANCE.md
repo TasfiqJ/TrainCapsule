@@ -1,8 +1,8 @@
 # TrainCapsule V3.1-ZH remaining acceptance
 
 This is the durable no-forgetting checklist for the active V3.1-ZH remediation. It is
-bound to implementation candidate `81e46ce5ad95c588c8fae3bd64f5704e40ac984b` and tree
-`b01b982b5a32926e00656c9ea8b1980c0d91e405`. It is a progress record, not an
+bound to implementation candidate `9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad` and tree
+`cc498044793cc865b06e1375a5442f75ef6fada5`. It is a progress record, not an
 activation receipt.
 
 ## Safety state
@@ -13,6 +13,8 @@ activation receipt.
 - The GitHub runner listener is the only active TrainCapsule task process.
 - The independent verifier, installed runtime, GitHub App authority, live receipts, and
   post-activation observer are not installed or accepted.
+- All eight exact-candidate hosted workflows and GitGuardian pass, but the GitHub ruleset
+  API returns no rulesets and repository auto-merge is disabled.
 - Activation remains `STOPPED / NOT AUTHORIZED`.
 
 ## Candidate classification
@@ -39,7 +41,8 @@ The exact row membership is machine-bound in
 3. Run every source, package, roadmap, policy, schema, static, unit, hostile, packaging,
    clean-checkout, and pre-evidence quality gate against the exact candidate.
 4. Push the evidence-document commit and require every hosted PR check at that exact head.
-5. Repair all hosted failures without weakening policy or tests; repeat until exact-head green.
+5. Keep every hosted check green without weakening policy or tests; repeat after each
+   evidence-only or configuration-binding commit.
 6. Build and dry-run the privileged deployment bundle; verify every file, owner, mode,
    executable, runtime, wheel, import origin, service, rollback journal, and access boundary.
 7. Provision the independent verifier authority, revocation state, oracle, GitHub App,

@@ -40,9 +40,9 @@ as current acceptance. Candidate reclassification is stored separately in
 
 ## Current implementation candidate
 
-- Candidate commit: `550bee834bd63cae0c30f7f96b4732d049124fd1`.
-- Candidate tree: `55d08d4296fb781edaa142820d16511fc38da9f4`.
-- Commit subject: `Build` (exact deterministic repository snapshot implementation).
+- Candidate commit: `9b95cfb766ad6c3eb3cfb6f262d5a6625d6482ad`.
+- Candidate tree: `cc498044793cc865b06e1375a5442f75ef6fada5`.
+- Commit subject: `Refresh migration inventory for ruleset fix`.
 - Branch push: complete.
 - PR state: draft; merge is not authorized.
 
@@ -63,6 +63,9 @@ Relevant branch history:
 - `4ca86ff` — exact-head local/hosted acceptance and truthful evidence checkpoint.
 - `b53b68d` — complete deterministic Python runtime distribution and deployment hardening.
 - `550bee8` — exact Git-object repository snapshot and dirty-workspace-proof runtime builds.
+- `4ff3b22` — exact-candidate acceptance evidence checkpoint.
+- `7c77f0a` — bypass-free PR ruleset semantics.
+- `9b95cfb` — migration inventory synchronized with the ruleset correction.
 
 ## Candidate evidence completed so far
 
@@ -106,13 +109,33 @@ activation authority and do not replace pending hosted, installed, or live accep
   tracked inventory, 63 V3 schemas, 63 V3.1 schemas, 19 verifier schemas, Ruff, and strict
   Pyright all passed at the candidate.
 
-All eight hosted PR workflows passed at the previous implementation checkpoint `b53b68d`.
-The eight exact-head `550bee8` workflows were queued or running when this state was recorded;
-their completion plus the independent installed/live acceptance below remain required.
+At exact candidate `9b95cfb`, all eight hosted PR workflows passed under GitHub Actions App
+ID `15368`: Factory quality, Product unit, Product contract, Security,
+Source-of-truth integrity, Packaging install, Docs and schemas, and Source freshness.
+GitGuardian also passed under App ID `46505`. The repository ruleset API still returns an
+empty list, so these green checks are implementation evidence rather than server-side release
+enforcement.
+
+Exact-candidate reproducible inert build outputs were each built twice and matched
+byte-for-byte:
+
+- production runtime archive SHA-256:
+  `a10fb3d83bb215164c4fc1be1a937dc6c2a0e83a7592879eac44be67ac9da4d3`;
+- production runtime manifest SHA-256:
+  `fe676b41c82b321ab367040da6307e7759ac2fab9d59be8fd3761c191649300c`;
+- repository snapshot SHA-256:
+  `7da60b49fd281ed9acad9079c946eb4f3b4349c5a19d7b6a501947cd86ec267b`;
+- repository snapshot manifest SHA-256:
+  `3f2a83d31e52967015407cdfb26a0059b56d0e57935a14f8403a8dc8790f2fda`;
+- controller wheel SHA-256:
+  `961d7ac5ed923be0e61eaab68fe105b4ae45ad81c0da55dae788ea692476de6d`.
+
+These `/tmp` build outputs are not root-owned installed-state, independent receipt, canary,
+or activation evidence.
 
 ## Current runtime and external state
 
-Observed after `b53b68d` was pushed:
+Observed on 2026-08-13 after exact candidate `9b95cfb` was pushed:
 
 - Authoritative stop marker: `factory/state/STOP` is present.
 - `factory/state/PAUSE` and `factory/state/HARD_STUCK` are absent.
@@ -127,6 +150,8 @@ Observed after `b53b68d` was pushed:
 - `/etc/traincapsule-controller`: absent.
 - `/opt/traincapsule-runtime`: absent.
 - Machine-policy GitHub App ID: unprovisioned.
+- Repository rulesets: none (`GET /repos/TasfiqJ/TrainCapsule/rulesets` returned `[]`).
+- Repository auto-merge setting: disabled.
 - Signed live ruleset observation: absent.
 - Signed LIVE activation receipt: absent.
 - Exact installed 20-canary result: absent.
@@ -150,26 +175,30 @@ The human no-forgetting sequence is in `V3_1_ZH_REMAINING_ACCEPTANCE.md`.
 
 ## Blockers that prohibit activation
 
-1. Exact-head local acceptance is green; the `550bee8` hosted workflows are still in progress.
-2. The independent root-owned verifier/runtime deployment does not exist on this host.
-3. The trusted GitHub App identity, exact ruleset, and signed live ruleset observation are absent.
-4. V3.1 MIG-016 through MIG-020 independent receipts remain pending.
-5. The exact installed candidate has not passed all 20 mandatory canaries.
-6. No signed LIVE activation transaction exists for this candidate.
-7. No ordered seven-event post-activation observer receipt exists.
-8. Customer, market, GPU, paid-use, and other outside facts remain UNKNOWN or `WAITING_EXTERNAL`
+1. The independent root-owned verifier/runtime deployment does not exist on this host.
+2. The trusted Machine-policy GitHub App identity, exact ruleset, repository auto-merge,
+   and signed live ruleset observation are absent.
+3. V3.1 MIG-016 through MIG-020 independent receipts remain pending.
+4. The exact installed candidate has not passed all 20 mandatory canaries.
+5. No signed LIVE activation transaction exists for this candidate.
+6. No ordered seven-event post-activation observer receipt exists.
+7. Customer, market, GPU, paid-use, and other outside facts remain UNKNOWN or `WAITING_EXTERNAL`
    where the contract requires them.
 
 ## Next exact action
 
-1. Monitor and repair all eight exact-head `550bee8` hosted workflows until green.
-2. Assemble the exact production bundle from the proven deterministic runtime/snapshot plus externally
+1. Provision the dedicated Machine-policy GitHub App with Checks write, Contents read,
+   Pull requests read, Metadata read, no webhook, and installation limited to this repository.
+2. Configure repository auto-merge and the exact no-bypass PR-only `main` ruleset with all
+   nine required contexts/App IDs; do not enable GitHub's Restrict updates rule.
+3. Assemble the exact production bundle from the proven deterministic runtime/snapshot plus externally
    provisioned authority inputs; stage and dry-run it before any privileged apply.
-3. Install and independently attest the verifier/runtime/service bundle while retaining STOP.
-4. Provision the GitHub App and exact main ruleset; capture a signed live observation.
-5. Run all 20 live canaries; missing live mechanisms remain blocked rather than simulated.
+4. Install and independently attest the verifier/runtime/service bundle while retaining STOP.
+5. Capture the signed live ruleset observation and run all 20 live canaries; missing live
+   mechanisms remain blocked rather than simulated.
 6. Obtain the exact signed activation receipt and ordered seven-event observation.
-7. Merge only the exact verified SHA through the automated PR-only path.
+7. Finalize MIG-016 through MIG-020 only from real independent and GitHub evidence.
+8. Merge only the exact verified SHA through the automated PR-only path.
 
 ## Activation state
 

@@ -53,9 +53,9 @@ def _issue_one(name: str, service_uid: int) -> None:
         state_root=SERVICE_STATE_ROOT,
         private_root=PRIVATE_ROOT,
         receipt_root=OUTBOX_ROOT,
-        anchor_root=PUBLIC_STATE_ROOT,
+        anchor_root=CONFIG_ROOT,
         oracle_root=ORACLE_ROOT,
-        authority_state_root=PUBLIC_STATE_ROOT,
+        authority_state_root=CONFIG_ROOT,
         config_owner_uid=0,
         verifier_owner_uid=service_uid,
     ) as verifier:

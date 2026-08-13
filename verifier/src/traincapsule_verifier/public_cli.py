@@ -114,7 +114,7 @@ def main() -> int:
             with PublicVerifier.from_public_roots(
                 repository_root=Path.cwd(),
                 config_root=CONFIG_ROOT,
-                state_root=STATE_ROOT,
+                state_root=CONFIG_ROOT,
                 receipt_root=RECEIPT_ROOT,
                 expected_owner_uid=EXPECTED_OWNER_UID,
             ) as verifier:

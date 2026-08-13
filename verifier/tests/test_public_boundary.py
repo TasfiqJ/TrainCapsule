@@ -519,6 +519,10 @@ def test_public_cli_exact_arguments_output_and_service_unavailability(
     executable = bin_root / "traincapsule-verifier-verify-receipt"
     executable.write_text("#!/bin/sh\nexit 1\n")
     executable.chmod(0o500)
+    for name in ("revocations.json", "authority-anchor.json"):
+        (public_fixture.config / name).write_bytes(
+            (public_fixture.state / name).read_bytes()
+        )
     monkeypatch.setattr(public_cli, "CONFIG_ROOT", public_fixture.config)
     monkeypatch.setattr(public_cli, "STATE_ROOT", public_fixture.state)
     monkeypatch.setattr(public_cli, "RECEIPT_ROOT", public_fixture.receipts)

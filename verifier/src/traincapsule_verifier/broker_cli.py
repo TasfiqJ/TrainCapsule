@@ -36,7 +36,7 @@ def main() -> int:
             PublicVerifier.from_public_roots(
                 repository_root=REPOSITORY_BOUNDARY_ROOT,
                 config_root=CONFIG_ROOT,
-                state_root=STATE_ROOT,
+                state_root=CONFIG_ROOT,
                 receipt_root=PUBLIC_ROOT,
                 expected_owner_uid=0,
             ) as verifier,

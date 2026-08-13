@@ -460,7 +460,7 @@ def observe() -> Path:
         with PublicVerifier.from_public_roots(
             repository_root=Path(policy.repository_root),
             config_root=CONFIG,
-            state_root=ROOT,
+            state_root=CONFIG,
             receipt_root=ROOT / "receipts",
             expected_owner_uid=0,
         ) as verifier:

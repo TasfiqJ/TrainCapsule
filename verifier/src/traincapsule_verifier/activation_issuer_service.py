@@ -57,9 +57,9 @@ def _process(name: str, service_uid: int) -> None:
         state_root=STATE_ROOT / "state",
         private_root=STATE_ROOT / "private",
         receipt_root=ACTIVATION_OUTBOX,
-        anchor_root=STATE_ROOT,
+        anchor_root=CONFIG_ROOT,
         oracle_root=STATE_ROOT / "oracle",
-        authority_state_root=STATE_ROOT,
+        authority_state_root=CONFIG_ROOT,
         config_owner_uid=0,
         verifier_owner_uid=service_uid,
     ) as verifier:

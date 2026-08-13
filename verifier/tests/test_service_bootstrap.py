@@ -87,6 +87,27 @@ def test_install_manifest_denies_controller_and_service_cross_authority() -> Non
     assert not manifest.system_mutated
 
 
+def test_runtime_consumers_use_the_installed_root_owned_authority_layout() -> None:
+    import traincapsule_verifier.activation_issuer_service as activation_issuer
+    import traincapsule_verifier.broker_cli as broker_cli
+    import traincapsule_verifier.check_worker_cli as check_worker
+    import traincapsule_verifier.controller_start_broker as controller_start
+    import traincapsule_verifier.issuer_service as issuer_service
+    import traincapsule_verifier.post_activation_observer as post_activation
+    import traincapsule_verifier.public_cli as public_cli
+
+    authority_root = Path("/etc/traincapsule-verifier")
+    assert {
+        activation_issuer.CONFIG_ROOT,
+        broker_cli.CONFIG_ROOT,
+        check_worker.CONFIG,
+        controller_start.CONFIG,
+        issuer_service.CONFIG_ROOT,
+        post_activation.CONFIG,
+        public_cli.CONFIG_ROOT,
+    } == {authority_root}
+
+
 def test_public_process_cold_imports_no_issuer_or_private_crypto() -> None:
     import subprocess
     import sys

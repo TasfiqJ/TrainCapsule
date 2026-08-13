@@ -34,6 +34,26 @@ from .installed_runtime import (
     load_installed_controller_runtime,
 )
 from .runtime_paths import V3RuntimePaths, resolve_v3_runtime_paths
+from .verifier_submission import create_and_submit_verification_request
+
+ACTIVATION_POLICY_WORK_ITEM = "V3-MIG-019"
+ACTIVATION_POLICY_PROFILE = Path(
+    "/etc/traincapsule-verifier/request-profiles/activation_policy.json"
+)
+ACTIVATION_POLICY_RECEIPT_ROOT = Path(
+    "/var/lib/traincapsule-verifier/receipts/machine-policy/V3-MIG-019"
+)
+
+
+def resolve_activation_policy_receipt_path(
+    repo_root: Path, configured_path: Path | None = None
+) -> Path:
+    """Resolve the immutable public receipt selector for the exact current SHA."""
+
+    selected = configured_path or ACTIVATION_POLICY_RECEIPT_ROOT
+    if selected == ACTIVATION_POLICY_RECEIPT_ROOT or selected.is_dir():
+        return selected / f"{current_sha(repo_root.resolve(strict=True))}.json"
+    return selected
 
 
 class ActivationPhase(StrEnum):
@@ -229,9 +249,7 @@ def stage_activation_request(
 def coordinate_activation_request(
     *,
     repo_root: Path,
-    machine_policy_receipt_path: Path = Path(
-        "/var/lib/traincapsule-verifier/receipts/activation-policy/current.json"
-    ),
+    machine_policy_receipt_path: Path | None = None,
 ) -> Path | None:
     """Automatically stage the newest exact passing suite, or remain safely stopped."""
 
@@ -239,6 +257,9 @@ def coordinate_activation_request(
     paths = resolve_v3_runtime_paths(repo_root)
     if not paths.stop.is_file() or paths.pause.exists() or paths.hard_stuck.exists():
         return None
+    machine_policy_receipt_path = resolve_activation_policy_receipt_path(
+        repo_root, machine_policy_receipt_path
+    )
     if not machine_policy_receipt_path.is_file() or machine_policy_receipt_path.is_symlink():
         return None
     suites = sorted(
@@ -256,6 +277,88 @@ def coordinate_activation_request(
         except (OSError, RuntimeError, ValueError):
             continue
     return None
+
+
+def coordinate_activation_policy_request(
+    *,
+    repo_root: Path,
+    canary_suite_path: Path,
+    profile_path: Path = ACTIVATION_POLICY_PROFILE,
+    machine_policy_receipt_path: Path | None = None,
+    installed_runtime_manifest_path: Path = Path(
+        "/etc/traincapsule-controller/runtime-manifest.json"
+    ),
+    installed_runtime_loader: InstalledRuntimeLoader = _activation_runtime_bundle,
+    controller_outbox: Path = Path(
+        "/var/lib/traincapsule-verifier/controller-outbox"
+    ),
+) -> Path | None:
+    """Submit exact stopped-state evidence for independent activation policy review."""
+
+    repo_root = repo_root.resolve(strict=True)
+    paths = resolve_v3_runtime_paths(repo_root)
+    if (
+        not paths.stop.is_file()
+        or paths.stop.is_symlink()
+        or paths.pause.exists()
+        or paths.hard_stuck.exists()
+    ):
+        return None
+    suite_path = canary_suite_path.resolve(strict=True)
+    suite_raw = suite_path.read_bytes()
+    suite = verify_mandatory_canary_suite(
+        suite_path, repo_root=repo_root, require_pass=True
+    )
+    main_sha = current_sha(repo_root)
+    tree_sha = _exact_tree(repo_root, main_sha)
+    if suite.exact_main_sha != main_sha or suite.exact_tree_sha != tree_sha:
+        return None
+    receipt_path = resolve_activation_policy_receipt_path(
+        repo_root, machine_policy_receipt_path
+    )
+    if receipt_path.is_file() and not receipt_path.is_symlink():
+        return None
+    installed_runtime, runtime_raw, config_raw = installed_runtime_loader(
+        installed_runtime_manifest_path
+    )
+    suite_digest = sha256_digest(suite_raw)
+    runtime_digest = sha256_digest(runtime_raw)
+    config_digest = sha256_digest(config_raw)
+    evidence_identity = sha256_digest(
+        b"\0".join(
+            (
+                main_sha.encode(),
+                tree_sha.encode(),
+                suite_digest.encode(),
+                installed_runtime.manifest_digest.encode(),
+                config_digest.encode(),
+            )
+        )
+    )
+    evidence_root = (
+        paths.state_root
+        / "activation-policy-evidence"
+        / evidence_identity.removeprefix("sha256:")
+    )
+    return create_and_submit_verification_request(
+        profile_path=profile_path,
+        work_item_id=ACTIVATION_POLICY_WORK_ITEM,
+        milestone_id="M0_SOURCE_INSTALLATION",
+        lane="FACTORY",
+        candidate_sha=main_sha,
+        candidate_tree_sha=tree_sha,
+        base_sha=main_sha,
+        source_generation_id=suite.source_generation_id,
+        source_generation_digest=suite.source_generation_digest,
+        context_manifest_digest=suite_digest,
+        task_packet_digest=suite.controller_digest,
+        candidate_manifest_digest=suite.factory_config_digest,
+        checkpoint_digest=runtime_digest,
+        gate_evidence={"CANDIDATE-MANIFEST": suite_path},
+        evidence_root=evidence_root,
+        controller_outbox=controller_outbox,
+        now=suite.completed_at,
+    )
 
 
 def _transaction_path(paths: V3RuntimePaths, transaction_id: str) -> Path:

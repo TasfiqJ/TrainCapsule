@@ -18,10 +18,13 @@ from pydantic import AwareDatetime, Field, model_validator
 
 from ..util import atomic_write_bytes, sha256_file
 from .activation import (
+    ACTIVATION_POLICY_RECEIPT_ROOT,
     ActivationTransaction,
     InstalledRuntimeLoader,
     activate_v31,
+    coordinate_activation_policy_request,
     coordinate_activation_request,
+    resolve_activation_policy_receipt_path,
     stage_activation_request,
 )
 from .base import DIGEST_PATTERN, V3Model
@@ -43,9 +46,7 @@ CONTROLLER_START_OUTBOX = Path(
 REFRESH_COMPLETION_INBOX = Path(
     "/var/lib/traincapsule-verifier/activation-refresh-inbox"
 )
-ACTIVATION_POLICY_RECEIPT = Path(
-    "/var/lib/traincapsule-verifier/receipts/activation-policy/current.json"
-)
+ACTIVATION_POLICY_RECEIPT = ACTIVATION_POLICY_RECEIPT_ROOT
 
 
 def _refresh_runtime_bundle(
@@ -647,6 +648,9 @@ def _run_activation_supervisor_locked(
 ) -> str:
     if paths.pause.exists() or paths.hard_stuck.exists():
         return "STOPPED_CONTROL"
+    selected_policy_receipt = resolve_activation_policy_receipt_path(
+        repo_root, activation_policy_receipt_path
+    )
     refreshed = _process_refresh_activation(
         repo_root=repo_root,
         paths=paths,
@@ -655,7 +659,7 @@ def _run_activation_supervisor_locked(
         completion_loader=refresh_completion_loader,
         installed_runtime_manifest_path=installed_runtime_manifest_path,
         installed_runtime_loader=installed_runtime_loader,
-        activation_policy_receipt_path=activation_policy_receipt_path,
+        activation_policy_receipt_path=selected_policy_receipt,
     )
     if refreshed is not None:
         return refreshed
@@ -690,6 +694,24 @@ def _run_activation_supervisor_locked(
             return f"ACTIVATED_START_REQUESTED:{transaction.transaction_id}"
         except (OSError, RuntimeError, ValueError):
             continue
+    if suites:
+        request = coordinate_activation_request(
+            repo_root=repo_root,
+            machine_policy_receipt_path=selected_policy_receipt,
+        )
+        if request is not None:
+            return "ACTIVATION_REQUEST_SUBMITTED"
+        for existing_suite in suites:
+            try:
+                policy_request = coordinate_activation_policy_request(
+                    repo_root=repo_root,
+                    canary_suite_path=existing_suite,
+                    machine_policy_receipt_path=activation_policy_receipt_path,
+                )
+                if policy_request is not None:
+                    return "ACTIVATION_POLICY_REQUEST_SUBMITTED"
+            except (OSError, RuntimeError, ValueError):
+                continue
     suite_path = run_mandatory_canaries(
         repo_root=repo_root,
         result_root=paths.canary_results,
@@ -699,8 +721,22 @@ def _run_activation_supervisor_locked(
     suite = MandatoryCanarySuite.model_validate_json(suite_path.read_bytes(), strict=True)
     if suite.status is not CanaryStatus.PASS:
         return "STOPPED_CANARY_PREREQUISITE"
-    request = coordinate_activation_request(repo_root=repo_root)
-    return "ACTIVATION_REQUEST_SUBMITTED" if request is not None else "STOPPED_POLICY_PREREQUISITE"
+    request = coordinate_activation_request(
+        repo_root=repo_root,
+        machine_policy_receipt_path=selected_policy_receipt,
+    )
+    if request is not None:
+        return "ACTIVATION_REQUEST_SUBMITTED"
+    policy_request = coordinate_activation_policy_request(
+        repo_root=repo_root,
+        canary_suite_path=suite_path,
+        machine_policy_receipt_path=activation_policy_receipt_path,
+    )
+    return (
+        "ACTIVATION_POLICY_REQUEST_SUBMITTED"
+        if policy_request is not None
+        else "STOPPED_POLICY_PREREQUISITE"
+    )
 
 
 def main() -> int:
@@ -713,7 +749,12 @@ def main() -> int:
     print(state)
     return (
         0
-        if state in {"INACTIVE_NOT_STOPPED", "ACTIVATION_REQUEST_SUBMITTED"}
+        if state
+        in {
+            "INACTIVE_NOT_STOPPED",
+            "ACTIVATION_REQUEST_SUBMITTED",
+            "ACTIVATION_POLICY_REQUEST_SUBMITTED",
+        }
         or state.startswith("ACTIVATED_START_REQUESTED:")
         else 2
     )

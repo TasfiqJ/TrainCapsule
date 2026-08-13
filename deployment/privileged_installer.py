@@ -298,6 +298,9 @@ ROLE_TARGETS: dict[str, str] = {
     "machine-policy-review-profile": (
         "/etc/traincapsule-verifier/request-profiles/machine_policy_review.json"
     ),
+    "activation-policy-profile": (
+        "/etc/traincapsule-verifier/request-profiles/activation_policy.json"
+    ),
     "check-publisher-policy": "/etc/traincapsule-verifier/check-publisher.json",
     "activation-selector-policy": "/etc/traincapsule-verifier/activation-selector.json",
     "ruleset-observer-policy": "/etc/traincapsule-verifier/ruleset-observer.json",
@@ -894,6 +897,8 @@ def _validate_role_metadata(spec: PrivilegedInstallSpec) -> None:
     for role in (
         "public-key",
         "policy",
+        "machine-policy-review-profile",
+        "activation-policy-profile",
         "check-publisher-policy",
         "activation-selector-policy",
         "ruleset-observer-policy",

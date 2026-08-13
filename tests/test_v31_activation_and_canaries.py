@@ -398,6 +398,91 @@ def test_activation_request_is_exact_idempotent_and_stopped(
         )
 
 
+def test_activation_policy_request_uses_independent_verifier_bridge(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _repo(tmp_path)
+    suite = _suite(repo, tmp_path, monkeypatch)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    (runtime / "STOP").write_text("stopped\n", encoding="utf-8")
+    outbox = tmp_path / "controller-outbox"
+    outbox.mkdir(mode=0o700)
+    profile = tmp_path / "activation-policy.json"
+    profile.write_bytes(
+        json.dumps(
+            {
+                "schemaVersion": "3.1",
+                "riskTier": "TRUST_CORE",
+                "requestedClaims": ["ACTIVATION"],
+                "publicationScope": ["factory/state"],
+                "nativeDisposition": "UNKNOWN",
+                "valueDisposition": "EXTERNAL_EVIDENCE_REQUIRED",
+                "engineeringCeiling": "PASSED",
+                "commercialCeiling": "NATIVE_ADVANTAGE_UNPROVEN",
+                "privateGateSuiteId": "GATES:PRIVATE",
+                "privateGateRunnerDigest": DIGEST,
+                "oracles": {
+                    "ORACLE:ACTIVATION": {
+                        "runnerDigest": DIGEST,
+                        "nativeDisposition": "UNKNOWN",
+                        "valueDisposition": "EXTERNAL_EVIDENCE_REQUIRED",
+                        "engineeringCeiling": "PASSED",
+                        "commercialCeiling": "NATIVE_ADVANTAGE_UNPROVEN",
+                    }
+                },
+            },
+            sort_keys=True,
+            separators=(",", ":"),
+        ).encode()
+        + b"\n"
+    )
+
+    def resolve_paths(_root: Path) -> V3RuntimePaths:
+        return _runtime_paths(runtime)
+
+    monkeypatch.setattr(activation, "resolve_v3_runtime_paths", resolve_paths)
+    _, runtime_loader = _runtime_loader()
+    receipt = tmp_path / "missing-policy-receipt.json"
+    first = activation.coordinate_activation_policy_request(
+        repo_root=repo,
+        canary_suite_path=suite,
+        profile_path=profile,
+        machine_policy_receipt_path=receipt,
+        installed_runtime_loader=runtime_loader,
+        controller_outbox=outbox,
+    )
+    assert first is not None
+    request = json.loads(first.read_bytes())
+    assert request["workItemId"] == "V3-MIG-019"
+    assert request["requestedClaims"] == ["ACTIVATION"]
+    assert request["publicationScope"] == ["factory/state"]
+    assert (outbox / f"{request['requestId']}.evidence/evidence.json").is_file()
+    assert (
+        activation.coordinate_activation_policy_request(
+            repo_root=repo,
+            canary_suite_path=suite,
+            profile_path=profile,
+            machine_policy_receipt_path=receipt,
+            installed_runtime_loader=runtime_loader,
+            controller_outbox=outbox,
+        )
+        == first
+    )
+    receipt.write_bytes(b"promoted independently\n")
+    assert (
+        activation.coordinate_activation_policy_request(
+            repo_root=repo,
+            canary_suite_path=suite,
+            profile_path=profile,
+            machine_policy_receipt_path=receipt,
+            installed_runtime_loader=runtime_loader,
+            controller_outbox=outbox,
+        )
+        is None
+    )
+
+
 def test_stopped_activation_supervisor_runs_canaries_then_coordinates_without_controller(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -425,7 +510,7 @@ def test_stopped_activation_supervisor_runs_canaries_then_coordinates_without_co
         assert strict
         return SimpleNamespace(status=CanaryStatus.PASS)
 
-    def coordinate(*, repo_root: Path) -> Path:
+    def coordinate(*, repo_root: Path, **_: object) -> Path:
         assert repo_root == repo.resolve()
         calls.append("coordinate")
         return tmp_path / "request.json"

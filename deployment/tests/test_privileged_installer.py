@@ -602,6 +602,11 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
             data = canonical_json_bytes(
                 {
                     "schemaVersion": "3.1",
+                    "allowedClaims": ["ACTIVATION", "CLAIM:ENGINEERING-PASS"],
+                    "allowedPublicationScopes": [
+                        "factory/roadmap/work_items.yaml",
+                        "factory/state",
+                    ],
                     "privateGateSuiteId": "FULL-RELEASE-V31",
                     "privateGateRunnerDigest": "sha256:" + "d" * 64,
                     "riskPolicies": {
@@ -623,6 +628,30 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                     "riskTier": "TRUST_CORE",
                     "requestedClaims": ["CLAIM:ENGINEERING-PASS"],
                     "publicationScope": ["factory/roadmap/work_items.yaml"],
+                    "nativeDisposition": "UNKNOWN",
+                    "valueDisposition": "EXTERNAL_EVIDENCE_REQUIRED",
+                    "engineeringCeiling": "PASSED",
+                    "commercialCeiling": "NATIVE_ADVANTAGE_UNPROVEN",
+                    "privateGateSuiteId": "FULL-RELEASE-V31",
+                    "privateGateRunnerDigest": "sha256:" + "d" * 64,
+                    "oracles": {
+                        "ORACLE:CONFORMANCE:001": {
+                            "runnerDigest": "sha256:" + "e" * 64,
+                            "nativeDisposition": "UNKNOWN",
+                            "valueDisposition": "EXTERNAL_EVIDENCE_REQUIRED",
+                            "engineeringCeiling": "PASSED",
+                            "commercialCeiling": "NATIVE_ADVANTAGE_UNPROVEN",
+                        }
+                    },
+                }
+            )
+        elif role == "activation-policy-profile":
+            data = canonical_json_bytes(
+                {
+                    "schemaVersion": "3.1",
+                    "riskTier": "TRUST_CORE",
+                    "requestedClaims": ["ACTIVATION"],
+                    "publicationScope": ["factory/state"],
                     "nativeDisposition": "UNKNOWN",
                     "valueDisposition": "EXTERNAL_EVIDENCE_REQUIRED",
                     "engineeringCeiling": "PASSED",

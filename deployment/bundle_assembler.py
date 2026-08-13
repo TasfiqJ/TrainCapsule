@@ -708,6 +708,10 @@ def _validate_machine_policy_profile(sources: Mapping[str, Path]) -> None:
     policy = _canonical_mapping(
         sources["policy"].read_bytes(), label="independent verifier policy"
     )
+    activation_profile = _canonical_mapping(
+        sources["activation-policy-profile"].read_bytes(),
+        label="activation policy profile",
+    )
     expected_profile_keys = {
         "schemaVersion",
         "riskTier",
@@ -747,6 +751,10 @@ def _validate_machine_policy_profile(sources: Mapping[str, Path]) -> None:
         or profile["commercialCeiling"] != "NATIVE_ADVANTAGE_UNPROVEN"
         or profile["requestedClaims"] != ["CLAIM:ENGINEERING-PASS"]
         or profile["publicationScope"] != ["factory/roadmap/work_items.yaml"]
+        or policy.get("allowedClaims")
+        != ["ACTIVATION", "CLAIM:ENGINEERING-PASS"]
+        or policy.get("allowedPublicationScopes")
+        != ["factory/roadmap/work_items.yaml", "factory/state"]
         or risk.get("requiredGates") != ["CANDIDATE-MANIFEST"]
         or risk.get("acceptedEvidenceModes") != ["CONTROLLED_VALIDATED"]
         or not isinstance(oracles_raw, dict)
@@ -779,6 +787,25 @@ def _validate_machine_policy_profile(sources: Mapping[str, Path]) -> None:
             or binding["commercialCeiling"] != profile["commercialCeiling"]
         ):
             raise BundleAssemblyError("machine-policy review oracle binding is unsafe")
+
+    if (
+        set(activation_profile) != expected_profile_keys
+        or activation_profile["schemaVersion"] != "3.1"
+        or activation_profile["riskTier"] != "TRUST_CORE"
+        or activation_profile["privateGateSuiteId"]
+        != policy.get("privateGateSuiteId")
+        or activation_profile["privateGateRunnerDigest"]
+        != policy.get("privateGateRunnerDigest")
+        or activation_profile["nativeDisposition"] != "UNKNOWN"
+        or activation_profile["valueDisposition"] != "EXTERNAL_EVIDENCE_REQUIRED"
+        or activation_profile["engineeringCeiling"] != "PASSED"
+        or activation_profile["commercialCeiling"]
+        != "NATIVE_ADVANTAGE_UNPROVEN"
+        or activation_profile["requestedClaims"] != ["ACTIVATION"]
+        or activation_profile["publicationScope"] != ["factory/state"]
+        or activation_profile["oracles"] != profile["oracles"]
+    ):
+        raise BundleAssemblyError("activation policy profile is unsafe")
 
 
 def _validate_read_only_observer_policies(sources: Mapping[str, Path]) -> None:

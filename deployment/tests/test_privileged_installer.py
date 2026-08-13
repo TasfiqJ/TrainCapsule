@@ -718,6 +718,11 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                 serialization.PrivateFormat.PKCS8,
                 serialization.NoEncryption(),
             )
+        elif role == "selector-public-key":
+            data = selector_signing_key.public_key().public_bytes(
+                serialization.Encoding.PEM,
+                serialization.PublicFormat.SubjectPublicKeyInfo,
+            )
         elif role == "ruleset-private-key":
             data = ruleset_signing_key.private_bytes(
                 serialization.Encoding.PEM,

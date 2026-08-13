@@ -183,6 +183,26 @@ def test_issuer_and_broker_entrypoints_fail_closed_for_wrong_identity(
         assert output.err == expected
 
 
+def test_receipt_broker_success_payload_is_canonical_json() -> None:
+    import traincapsule_verifier.broker_cli as broker_cli
+    from traincapsule_verifier.receipt_broker import ReceiptPromotionResult
+
+    result = ReceiptPromotionResult(
+        state="PROMOTED",
+        receipt_type="machine-policy",
+        receipt_id="MPOL:PAYLOAD-TEST",
+        receipt_digest="sha256:" + "1" * 64,
+        public_relative_path="machine-policy/V3-MIG-019/candidate.json",
+    )
+    single = broker_cli.promotion_payload([result], single=True)
+    batch = broker_cli.promotion_payload([result], single=False)
+
+    assert canonical_json_bytes(single) == canonical_json_bytes(result)
+    assert canonical_json_bytes(batch) == canonical_json_bytes(
+        {"promotions": [result.model_dump(mode="json", by_alias=True)]}
+    )
+
+
 def test_issuer_isolates_rejected_requests_without_authorizing_them(
     monkeypatch: pytest.MonkeyPatch,
     capfd: pytest.CaptureFixture[str],

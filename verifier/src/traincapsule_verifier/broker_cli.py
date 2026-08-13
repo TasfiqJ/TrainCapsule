@@ -6,11 +6,16 @@ import os
 import pwd
 import sys
 from pathlib import Path
+from typing import Any
 
 from .canonical import canonical_json_bytes
 from .filesystem import open_trusted_root
 from .public_verifier import PublicVerifier
-from .receipt_broker import ReceiptPromotionError, RootReceiptBroker
+from .receipt_broker import (
+    ReceiptPromotionError,
+    ReceiptPromotionResult,
+    RootReceiptBroker,
+)
 
 CONFIG_ROOT = Path("/etc/traincapsule-verifier")
 STATE_ROOT = Path("/var/lib/traincapsule-verifier")
@@ -18,6 +23,13 @@ OUTBOX_ROOT = STATE_ROOT / "outbox"
 PUBLIC_ROOT = STATE_ROOT / "receipts"
 REPOSITORY_BOUNDARY_ROOT = STATE_ROOT / "repository-boundary"
 SERVICE_USER = "traincapsule-verifier"
+
+
+def promotion_payload(
+    results: list[ReceiptPromotionResult], *, single: bool
+) -> dict[str, Any]:
+    serialized = [result.model_dump(mode="json", by_alias=True) for result in results]
+    return serialized[0] if single else {"promotions": serialized}
 
 
 def main() -> int:
@@ -58,7 +70,7 @@ def main() -> int:
                 )
             )
             results = [broker.promote(name) for name in names]
-        payload: object = results[0] if sys.argv[1] == "promote" else {"promotions": results}
+        payload = promotion_payload(results, single=sys.argv[1] == "promote")
         sys.stdout.buffer.write(canonical_json_bytes(payload))
         return 0
     except (KeyError, OSError, ValueError, ReceiptPromotionError):

@@ -15,6 +15,7 @@ from typing import cast
 from .canonical import canonical_json_bytes, sha256_digest
 from .crypto import load_private_key, sign_model
 from .filesystem import atomic_write_new, open_trusted_root, read_bounded_file
+from .github_app_readonly import mint_read_only_installation_token
 from .models import RulesetObservationReceipt
 from .ruleset_policy import validate_release_rule_types
 
@@ -48,17 +49,28 @@ def _observe(uid: int) -> None:
     typed = cast(dict[str, object], policy)
     repository = typed.get("repository")
     required = typed.get("requiredCheckAppIds")
-    credential_env = typed.get("readOnlyCredentialEnvironment")
-    if not isinstance(repository, str) or not isinstance(required, dict) or not isinstance(
-        credential_env, str
+    app_id = typed.get("githubAppId")
+    installation_id = typed.get("installationId")
+    credential_env = typed.get("privateKeyEnvironment")
+    if (
+        not isinstance(repository, str)
+        or not isinstance(required, dict)
+        or not isinstance(app_id, int)
+        or not isinstance(installation_id, int)
+        or not isinstance(credential_env, str)
     ):
         raise ValueError("ruleset observer policy is incomplete")
     expected = cast(dict[str, object], required)
     if any(not isinstance(app, int) for app in expected.values()):
         raise ValueError("ruleset observer check/App mapping is invalid")
-    token = os.environ.get(credential_env)
-    if not token:
-        raise ValueError("ruleset observer read-only credential is unavailable")
+    private_key = os.environ.get(credential_env)
+    if not private_key:
+        raise ValueError("ruleset observer GitHub App credential is unavailable")
+    token = mint_read_only_installation_token(
+        app_id=app_id,
+        installation_id=installation_id,
+        private_key_base64=private_key,
+    )
     raw_rulesets = _api(f"/repos/{repository}/rulesets", token)
     if not isinstance(raw_rulesets, list):
         raise ValueError("ruleset observer response is invalid")

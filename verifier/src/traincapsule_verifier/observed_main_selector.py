@@ -15,6 +15,7 @@ from typing import cast
 from .canonical import canonical_json_bytes, model_digest, sha256_digest
 from .crypto import load_private_key, sign_model
 from .filesystem import atomic_write_new, open_trusted_root, read_bounded_file
+from .github_app_readonly import mint_read_only_installation_token
 from .models import (
     ActivationRequest,
     ActivationSelectionEnvelope,
@@ -84,16 +85,25 @@ def _select(request_raw: bytes, *, selector_uid: int) -> None:
     typed_policy = cast(dict[str, object], policy)
     repository = typed_policy.get("repository")
     required_check_app_ids = typed_policy.get("requiredCheckAppIds")
-    credential_env = typed_policy.get("readOnlyCredentialEnvironment")
+    app_id = typed_policy.get("githubAppId")
+    installation_id = typed_policy.get("installationId")
+    credential_env = typed_policy.get("privateKeyEnvironment")
     if (
         not isinstance(repository, str)
         or not isinstance(required_check_app_ids, dict)
+        or not isinstance(app_id, int)
+        or not isinstance(installation_id, int)
         or not isinstance(credential_env, str)
     ):
         raise ValueError("activation selector policy is incomplete")
-    token = os.environ.get(credential_env)
-    if not token:
-        raise ValueError("activation selector read-only credential is unavailable")
+    private_key = os.environ.get(credential_env)
+    if not private_key:
+        raise ValueError("activation selector GitHub App credential is unavailable")
+    token = mint_read_only_installation_token(
+        app_id=app_id,
+        installation_id=installation_id,
+        private_key_base64=private_key,
+    )
     required_checks_raw = cast(dict[str, object], required_check_app_ids)
     if not required_checks_raw or any(
         not isinstance(app_id, int) for app_id in required_checks_raw.values()

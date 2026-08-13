@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import base64
 import hashlib
 import json
 import os
@@ -567,6 +568,9 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
     files: list[dict[str, str]] = []
     anchor_observer_key = Ed25519PrivateKey.generate()
     anchor_github_key = generate_private_key(public_exponent=65537, key_size=2048)
+    publisher_github_key = generate_private_key(public_exponent=65537, key_size=2048)
+    selector_signing_key = Ed25519PrivateKey.generate()
+    ruleset_signing_key = Ed25519PrivateKey.generate()
     for role, target in ROLE_TARGETS.items():
         if role in unit_names and unit_names[role] in rendered_by_name:
             data = rendered_by_name[unit_names[role]]
@@ -629,6 +633,61 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                         }
                     },
                 }
+            )
+        elif role in {"activation-selector-policy", "ruleset-observer-policy"}:
+            data = canonical_json_bytes(
+                {
+                    "schemaVersion": "3.1",
+                    "repository": "TasfiqJ/TrainCapsule",
+                    "requiredCheckAppIds": {
+                        "TrainCapsule / Docs and schemas": 15368,
+                        "TrainCapsule / Factory quality": 15368,
+                        "TrainCapsule / Machine policy": 789,
+                        "TrainCapsule / Packaging install": 15368,
+                        "TrainCapsule / Product contract": 15368,
+                        "TrainCapsule / Product unit": 15368,
+                        "TrainCapsule / Security": 15368,
+                        "TrainCapsule / Source freshness": 15368,
+                        "TrainCapsule / Source-of-truth integrity": 15368,
+                    },
+                    "githubAppId": 123,
+                    "installationId": 456,
+                    "privateKeyEnvironment": (
+                        "TRAINCAPSULE_GITHUB_APP_PRIVATE_KEY_BASE64"
+                    ),
+                }
+            )
+        elif role == "github-app-private-key":
+            data = publisher_github_key.private_bytes(
+                serialization.Encoding.PEM,
+                serialization.PrivateFormat.PKCS8,
+                serialization.NoEncryption(),
+            )
+        elif role in {"selector-credential", "ruleset-credential"}:
+            encoded = base64.b64encode(
+                publisher_github_key.private_bytes(
+                    serialization.Encoding.PEM,
+                    serialization.PrivateFormat.PKCS8,
+                    serialization.NoEncryption(),
+                )
+            )
+            data = b"TRAINCAPSULE_GITHUB_APP_PRIVATE_KEY_BASE64=" + encoded + b"\n"
+        elif role == "selector-private-key":
+            data = selector_signing_key.private_bytes(
+                serialization.Encoding.PEM,
+                serialization.PrivateFormat.PKCS8,
+                serialization.NoEncryption(),
+            )
+        elif role == "ruleset-private-key":
+            data = ruleset_signing_key.private_bytes(
+                serialization.Encoding.PEM,
+                serialization.PrivateFormat.PKCS8,
+                serialization.NoEncryption(),
+            )
+        elif role == "ruleset-public-key":
+            data = ruleset_signing_key.public_key().public_bytes(
+                serialization.Encoding.PEM,
+                serialization.PublicFormat.SubjectPublicKeyInfo,
             )
         elif role == "git-anchor-github-private-key":
             data = anchor_github_key.private_bytes(

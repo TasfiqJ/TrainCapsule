@@ -371,6 +371,7 @@ class IndependentVerifier:
         observed_oracles, oracle_output_hashes = self._execute_oracles(
             request=request,
             evidence=evidence,
+            evidence_root=evidence_root,
             artifact_hashes=sorted(computed_hashes),
         )
         if observed_oracles != evidence.oracles:
@@ -394,6 +395,7 @@ class IndependentVerifier:
         *,
         request: VerificationRequest,
         evidence: TrustedEvidenceManifest,
+        evidence_root: TrustedRoot,
         artifact_hashes: list[str],
     ) -> tuple[dict[str, OracleObservation], list[str]]:
         if self.oracle_root is None:
@@ -434,6 +436,15 @@ class IndependentVerifier:
                         "milestoneId": request.milestone_id,
                         "lane": request.lane,
                         "evidenceMode": evidence.evidence_mode,
+                        "evidenceRootFd": evidence_root.descriptor,
+                        "rawEvidenceArtifacts": [
+                            {
+                                "artifactId": artifact_id,
+                                "path": binding.path,
+                                "digest": binding.digest,
+                            }
+                            for artifact_id, binding in sorted(evidence.raw_artifacts.items())
+                        ],
                         "rawEvidenceArtifactHashes": artifact_hashes,
                     }
                 )
@@ -445,7 +456,7 @@ class IndependentVerifier:
                     check=False,
                     timeout=30,
                     env={"LANG": "C", "LC_ALL": "C"},
-                    pass_fds=(descriptor,),
+                    pass_fds=(descriptor, evidence_root.descriptor),
                 )
             except (OSError, subprocess.SubprocessError) as exc:
                 raise VerificationError("independent oracle execution failed") from exc

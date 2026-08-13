@@ -7,6 +7,7 @@ credentials, receipts, PASS decisions, oracle outcomes, or network traffic.
 from __future__ import annotations
 
 import argparse
+import base64
 import hashlib
 import json
 import os
@@ -734,6 +735,91 @@ def _validate_machine_policy_profile(sources: Mapping[str, Path]) -> None:
             raise BundleAssemblyError("machine-policy review oracle binding is unsafe")
 
 
+def _validate_read_only_observer_policies(sources: Mapping[str, Path]) -> None:
+    anchor_policy = _canonical_mapping(
+        sources["git-anchor-producer-policy"].read_bytes(),
+        label="Git anchor producer policy",
+    )
+    required_checks = anchor_policy.get("requiredCheckAppIds")
+    app_id = anchor_policy.get("githubAppId")
+    installation_id = anchor_policy.get("installationId")
+    if (
+        not isinstance(required_checks, dict)
+        or not isinstance(app_id, int)
+        or not isinstance(installation_id, int)
+    ):
+        raise BundleAssemblyError("read-only observer GitHub App binding is unavailable")
+    environment_name = "TRAINCAPSULE_GITHUB_APP_PRIVATE_KEY_BASE64"
+    expected: dict[str, object] = {
+        "schemaVersion": "3.1",
+        "repository": "TasfiqJ/TrainCapsule",
+        "requiredCheckAppIds": cast(dict[str, object], required_checks),
+        "githubAppId": app_id,
+        "installationId": installation_id,
+        "privateKeyEnvironment": environment_name,
+    }
+    for role in ("activation-selector-policy", "ruleset-observer-policy"):
+        if _canonical_mapping(sources[role].read_bytes(), label=role) != expected:
+            raise BundleAssemblyError(f"{role} is not exact or GitHub-App-bound")
+    try:
+        publisher_key = serialization.load_pem_private_key(
+            sources["github-app-private-key"].read_bytes(), password=None
+        )
+    except ValueError as exc:
+        raise BundleAssemblyError("Machine-policy GitHub App key is invalid") from exc
+    if not isinstance(publisher_key, RSAPrivateKey):
+        raise BundleAssemblyError("Machine-policy GitHub App key must be RSA")
+    publisher_public = publisher_key.public_key().public_bytes(
+        serialization.Encoding.DER,
+        serialization.PublicFormat.SubjectPublicKeyInfo,
+    )
+    for role in ("selector-credential", "ruleset-credential"):
+        try:
+            lines = sources[role].read_text(encoding="ascii").splitlines()
+        except (OSError, UnicodeDecodeError) as exc:
+            raise BundleAssemblyError("observer credential environment is invalid") from exc
+        prefix = environment_name + "="
+        if len(lines) != 1 or not lines[0].startswith(prefix):
+            raise BundleAssemblyError("observer credential environment is not exact")
+        try:
+            raw = base64.b64decode(lines[0].removeprefix(prefix), validate=True)
+            key = serialization.load_pem_private_key(raw, password=None)
+        except (ValueError, TypeError) as exc:
+            raise BundleAssemblyError("observer GitHub App key is invalid") from exc
+        if (
+            not isinstance(key, RSAPrivateKey)
+            or key.public_key().public_bytes(
+                serialization.Encoding.DER,
+                serialization.PublicFormat.SubjectPublicKeyInfo,
+            )
+            != publisher_public
+        ):
+            raise BundleAssemblyError("observer credential is not the pinned GitHub App")
+    try:
+        selector_key = serialization.load_pem_private_key(
+            sources["selector-private-key"].read_bytes(), password=None
+        )
+        ruleset_key = serialization.load_pem_private_key(
+            sources["ruleset-private-key"].read_bytes(), password=None
+        )
+        ruleset_public = serialization.load_pem_public_key(
+            sources["ruleset-public-key"].read_bytes()
+        )
+    except ValueError as exc:
+        raise BundleAssemblyError("observer signing key material is invalid") from exc
+    if not isinstance(selector_key, Ed25519PrivateKey) or (
+        not isinstance(ruleset_key, Ed25519PrivateKey)
+        or not isinstance(ruleset_public, Ed25519PublicKey)
+        or ruleset_key.public_key().public_bytes(
+            serialization.Encoding.Raw, serialization.PublicFormat.Raw
+        )
+        != ruleset_public.public_bytes(
+            serialization.Encoding.Raw, serialization.PublicFormat.Raw
+        )
+    ):
+        raise BundleAssemblyError("observer signing key material is inconsistent")
+
+
 def _validate_github_token_refresher(sources: Mapping[str, Path]) -> None:
     policy = _canonical_mapping(
         sources["github-token-refresher-policy"].read_bytes(),
@@ -1101,6 +1187,7 @@ def assemble_bundle(
     _validate_deployment_refresh(sources)
     _validate_machine_policy_profile(sources)
     _validate_anchor_producer(sources)
+    _validate_read_only_observer_policies(sources)
     _validate_controller_oauth(sources["controller-oauth-token"])
     if _digest(sources["canary-claude-token"]) != _digest(sources["controller-oauth-token"]):
         raise BundleAssemblyError("live Claude probe must use the provisioned Max OAuth token")

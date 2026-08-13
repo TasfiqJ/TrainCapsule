@@ -66,9 +66,30 @@ SHA_A = "a" * 40
 SHA_B = "b" * 40
 SHA_C = "c" * 40
 ORACLE_RUNNER = b"""#!/usr/bin/python3
+import hashlib
 import json
+import os
 import sys
 request = json.load(sys.stdin)
+observed = []
+for artifact in request["rawEvidenceArtifacts"]:
+    descriptor = os.open(
+        artifact["path"],
+        os.O_RDONLY | os.O_NOFOLLOW,
+        dir_fd=request["evidenceRootFd"],
+    )
+    try:
+        payload = b""
+        while chunk := os.read(descriptor, 1048576):
+            payload += chunk
+    finally:
+        os.close(descriptor)
+    digest = "sha256:" + hashlib.sha256(payload).hexdigest()
+    if digest != artifact["digest"]:
+        raise SystemExit(41)
+    observed.append(digest)
+if sorted(observed) != sorted(request["rawEvidenceArtifactHashes"]):
+    raise SystemExit(42)
 result = {
     "commercialCeiling": "PILOT_ELIGIBLE",
     "engineeringCeiling": "PASSED",

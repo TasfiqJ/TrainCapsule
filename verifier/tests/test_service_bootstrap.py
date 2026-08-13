@@ -262,6 +262,31 @@ def test_activation_request_broker_isolates_rejected_requests() -> None:
     assert seen == ["stale.activation-request.json", "valid.activation-request.json"]
 
 
+def test_activation_selection_and_issuance_isolate_stale_history() -> None:
+    from traincapsule_verifier.activation_issuer_service import (
+        _process_inbox,  # pyright: ignore[reportPrivateUsage]
+    )
+    from traincapsule_verifier.activation_selector_broker import (
+        _process_selections,  # pyright: ignore[reportPrivateUsage]
+    )
+
+    seen: list[str] = []
+
+    def process(name: str) -> None:
+        seen.append(name)
+        if name == "stale.activation-request.json":
+            raise ValueError("stale main")
+
+    names = ("stale.activation-request.json", "current.activation-request.json")
+    assert _process_selections(names, process) == (1, 1)
+    assert seen == list(names)
+    seen.clear()
+    assert _process_inbox(names, process) == (1, 1)
+    assert seen == list(names)
+    assert _process_selections((names[0],), process) == (0, 1)
+    assert _process_inbox((names[0],), process) == (0, 1)
+
+
 def test_issuer_isolates_rejected_requests_without_authorizing_them(
     monkeypatch: pytest.MonkeyPatch,
     capfd: pytest.CaptureFixture[str],

@@ -6,6 +6,7 @@ import os
 import pwd
 import re
 import sys
+from collections.abc import Callable
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -25,6 +26,28 @@ ACTIVATION_OUTBOX = STATE_ROOT / "outbox"
 REPOSITORY_BOUNDARY_ROOT = STATE_ROOT / "repository-boundary"
 SELECTOR_PUBLIC_KEY = CONFIG_ROOT / "selector-public-key.pem"
 _NAME = re.compile(r"^[A-Z0-9][A-Z0-9._:-]{2,127}\.activation-request\.json$")
+
+
+def _process_inbox(
+    names: tuple[str, ...], process: Callable[[str], None]
+) -> tuple[int, int]:
+    accepted = 0
+    rejected = 0
+    for name in names:
+        try:
+            process(name)
+        except (
+            OSError,
+            SignatureError,
+            TrustedPathError,
+            ValidationError,
+            ValueError,
+            VerificationError,
+        ):
+            rejected += 1
+            continue
+        accepted += 1
+    return accepted, rejected
 
 
 def _process(name: str, service_uid: int) -> None:
@@ -82,10 +105,18 @@ def main() -> int:
         if os.geteuid() != service_uid:
             raise VerificationError("activation issuer requires the verifier service identity")
         with open_trusted_root(ACTIVATION_INBOX, expected_uid=service_uid) as inbox:
-            names = sorted(name for name in os.listdir(inbox.descriptor) if _NAME.fullmatch(name))
-        for name in names:
-            _process(name, service_uid)
-        return 0
+            names = tuple(
+                sorted(name for name in os.listdir(inbox.descriptor) if _NAME.fullmatch(name))
+            )
+        accepted, rejected = _process_inbox(
+            names, lambda name: _process(name, service_uid)
+        )
+        if rejected:
+            print(
+                f"independent activation issuer rejected {rejected} stale or invalid request(s)",
+                file=sys.stderr,
+            )
+        return 0 if accepted or not names else 1
     except (
         KeyError,
         OSError,

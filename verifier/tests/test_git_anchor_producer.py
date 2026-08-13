@@ -16,7 +16,10 @@ from traincapsule_verifier.canonical import canonical_json_bytes, sha256_digest
 from traincapsule_verifier.crypto import sign_model
 from traincapsule_verifier.git_anchor_producer import AnchorProducerPolicy
 from traincapsule_verifier.git_anchor_updater import AnchorUpdatePolicy, advance_anchor
-from traincapsule_verifier.models import RulesetObservationReceipt
+from traincapsule_verifier.models import (
+    RulesetObservationReceipt,
+    ruleset_observation_identifier,
+)
 
 NOW = datetime(2026, 8, 12, 22, 0, tzinfo=UTC)
 
@@ -144,10 +147,11 @@ def test_read_only_producer_promoter_and_updater_material_are_exact(
         "directBranchUpdatesForbidden": True,
         "autoMergeEnabled": True,
     }
+    ruleset_digest = sha256_digest(canonical_json_bytes(ruleset_core))
     ruleset_provisional = RulesetObservationReceipt(
         schema_version="3.1",
-        observation_id="RULESET:ANCHOR_PRODUCER_0001",
-        observation_digest=sha256_digest(canonical_json_bytes(ruleset_core)),
+        observation_id=ruleset_observation_identifier(ruleset_digest, NOW),
+        observation_digest=ruleset_digest,
         repository=policy.repository,
         base_branch="main",
         ruleset_id=1,

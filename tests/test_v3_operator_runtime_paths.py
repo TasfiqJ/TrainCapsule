@@ -8,6 +8,7 @@ import pytest
 import typer
 
 import tcfactory.cli as cli
+import tcfactory.v3.runtime_paths as runtime_paths
 from tcfactory.runtime_status import build_runtime_status
 from tcfactory.v3.configuration import FactoryV3Config
 from tcfactory.v3.queue import V3Queue
@@ -16,6 +17,29 @@ from tcfactory.v3.work_items import WorkItem, WorkItemCollection
 from tcfactory.yamlutil import load_yaml
 
 ROOT = Path(__file__).resolve().parents[1]
+
+
+def test_runtime_git_commands_pin_the_exact_trusted_repository(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    captured: list[str] = []
+
+    def run(command: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        captured.extend(command)
+        return subprocess.CompletedProcess(command, 0, "result\n", "")
+
+    monkeypatch.setattr(runtime_paths.subprocess, "run", run)
+    repo = tmp_path / "root-owned-repository"
+
+    assert runtime_paths._git(repo, "rev-parse", "HEAD") == "result"  # pyright: ignore[reportPrivateUsage]
+    assert captured[:6] == [
+        "/usr/bin/git",
+        "-c",
+        f"safe.directory={repo}",
+        "-C",
+        str(repo),
+        "rev-parse",
+    ]
 
 
 def _item() -> WorkItem:

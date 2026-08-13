@@ -6,7 +6,7 @@ candidate repository's policy implementation.
 
 from __future__ import annotations
 
-from datetime import UTC, timedelta
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from typing import Annotated, ClassVar, Literal
 
@@ -36,6 +36,21 @@ def _normalized_relative_path(value: str) -> str:
 type Digest = Annotated[str, StringConstraints(pattern=r"^sha256:[0-9a-f]{64}$")]
 type GitSha = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{40}$")]
 type Identifier = Annotated[str, StringConstraints(pattern=r"^[A-Z0-9][A-Z0-9._:-]{2,127}$")]
+
+
+def ruleset_observation_identifier(
+    observation_digest: str, observed_at: datetime
+) -> str:
+    """Derive a unique append-only identity for one policy observation instant."""
+    from .canonical import canonical_json_bytes, sha256_digest
+
+    instant = observed_at.astimezone(UTC).isoformat().replace("+00:00", "Z")
+    identity_digest = sha256_digest(
+        canonical_json_bytes(
+            {"observationDigest": observation_digest, "observedAt": instant}
+        )
+    )
+    return f"RULESET:{identity_digest[7:39].upper()}"
 
 
 def _reject_source_generation_whitespace(value: object) -> object:
@@ -507,6 +522,10 @@ class RulesetObservationReceipt(V31Model):
         }
         if self.observation_digest != sha256_digest(canonical_json_bytes(core)):
             raise ValueError("ruleset observation digest does not bind the exact policy")
+        if self.observation_id != ruleset_observation_identifier(
+            self.observation_digest, self.observed_at
+        ):
+            raise ValueError("ruleset observation ID does not bind its policy and instant")
         return self
 
 

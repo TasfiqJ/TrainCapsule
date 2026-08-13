@@ -16,7 +16,7 @@ from .canonical import canonical_json_bytes, sha256_digest
 from .crypto import load_private_key, sign_model
 from .filesystem import atomic_write_new, open_trusted_root, read_bounded_file
 from .github_app_readonly import mint_read_only_installation_token
-from .models import RulesetObservationReceipt
+from .models import RulesetObservationReceipt, ruleset_observation_identifier
 from .ruleset_policy import validate_release_rule_types
 
 USER = "traincapsule-ruleset-observer"
@@ -203,7 +203,7 @@ def _observe(uid: int) -> None:
     observation_digest = sha256_digest(canonical_json_bytes(core))
     provisional = RulesetObservationReceipt(
         schema_version="3.1",
-        observation_id=f"RULESET:{observation_digest[7:39].upper()}",
+        observation_id=ruleset_observation_identifier(observation_digest, now),
         observation_digest=observation_digest,
         repository=repository,
         base_branch="main",

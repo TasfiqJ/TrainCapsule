@@ -173,7 +173,14 @@ def _load_refresh_completion(path: Path) -> tuple[RefreshCompletionV31, bytes]:
 def _git_identity(repo_root: Path) -> tuple[str, str]:
     def run(*arguments: str) -> str:
         completed = subprocess.run(
-            ["git", "-C", str(repo_root), *arguments],
+            [
+                "git",
+                "-c",
+                f"safe.directory={repo_root}",
+                "-C",
+                str(repo_root),
+                *arguments,
+            ],
             check=True,
             capture_output=True,
             text=True,

@@ -14,6 +14,7 @@ from pydantic import ValidationError
 
 import tcfactory.cli as cli
 import tcfactory.v3.activation as activation
+import tcfactory.v3.activation_supervisor as activation_supervisor
 import tcfactory.v3.canaries as canaries
 from tcfactory.v3.activation import (
     ActivationPhase,
@@ -61,6 +62,30 @@ DIGEST = "sha256:" + "a" * 64
 RuntimeLoader = Callable[
     [Path], tuple[InstalledControllerRuntimeManifest, bytes, bytes]
 ]
+
+
+def test_activation_git_identity_pins_the_exact_trusted_repository(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    calls: list[list[str]] = []
+
+    def run(command: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        calls.append(command)
+        value = "a" * 40 if command[-1] == "HEAD" else "b" * 40
+        return subprocess.CompletedProcess(command, 0, f"{value}\n", "")
+
+    monkeypatch.setattr(activation_supervisor.subprocess, "run", run)
+    repo = tmp_path / "root-owned-repository"
+
+    assert activation_supervisor._git_identity(repo) == (  # pyright: ignore[reportPrivateUsage]
+        "a" * 40,
+        "b" * 40,
+    )
+    assert all(
+        command[:5]
+        == ["git", "-c", f"safe.directory={repo}", "-C", str(repo)]
+        for command in calls
+    )
 
 
 def _runtime_loader() -> tuple[InstalledControllerRuntimeManifest, RuntimeLoader]:

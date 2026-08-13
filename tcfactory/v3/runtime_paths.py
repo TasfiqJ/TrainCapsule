@@ -121,7 +121,14 @@ def _anchor_lock(state_root: Path) -> Generator[None, None, None]:
 
 def _git(path: Path, *arguments: str) -> str:
     result = subprocess.run(
-        ["/usr/bin/git", "-C", str(path), *arguments],
+        [
+            "/usr/bin/git",
+            "-c",
+            f"safe.directory={path}",
+            "-C",
+            str(path),
+            *arguments,
+        ],
         check=False,
         capture_output=True,
         text=True,
@@ -176,6 +183,8 @@ def ensure_v3_mutable_runtime(
                 clone = subprocess.run(
                     [
                         "/usr/bin/git",
+                        "-c",
+                        f"safe.directory={immutable}",
                         "clone",
                         "--bare",
                         "--no-hardlinks",

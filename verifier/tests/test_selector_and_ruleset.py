@@ -11,7 +11,10 @@ from traincapsule_verifier import ruleset_observer
 from traincapsule_verifier.canonical import canonical_json_bytes, sha256_digest
 from traincapsule_verifier.crypto import sign_model
 from traincapsule_verifier.filesystem import open_trusted_root
-from traincapsule_verifier.models import RulesetObservationReceipt
+from traincapsule_verifier.models import (
+    RulesetObservationReceipt,
+    ruleset_observation_identifier,
+)
 from traincapsule_verifier.observed_main_selector import verified_check_digests
 from traincapsule_verifier.ruleset_broker import promote_ruleset_observation
 
@@ -51,7 +54,7 @@ def _ruleset_receipt(
     core = {
         "repository": "TasfiqJ/TrainCapsule",
         "baseBranch": "main",
-        "rulesetId": int(observed_at.timestamp()),
+        "rulesetId": 20_794_549,
         "enforcement": "active",
         "requiredCheckAppIds": {"Factory quality": 15368},
         "bypassActorCount": 0,
@@ -64,11 +67,11 @@ def _ruleset_receipt(
     digest = sha256_digest(canonical_json_bytes(core))
     provisional = RulesetObservationReceipt(
         schema_version="3.1",
-        observation_id=f"RULESET:{digest[7:39].upper()}",
+        observation_id=ruleset_observation_identifier(digest, observed_at),
         observation_digest=digest,
         repository="TasfiqJ/TrainCapsule",
         base_branch="main",
-        ruleset_id=int(observed_at.timestamp()),
+        ruleset_id=20_794_549,
         enforcement="active",
         required_check_app_ids={"Factory quality": 15368},
         bypass_actor_count=0,

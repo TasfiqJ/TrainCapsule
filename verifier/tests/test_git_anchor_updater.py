@@ -15,7 +15,11 @@ from traincapsule_verifier.git_anchor_updater import (
     AnchorUpdateRequest,
     advance_anchor,
 )
-from traincapsule_verifier.models import ObservedMainReceipt, RulesetObservationReceipt
+from traincapsule_verifier.models import (
+    ObservedMainReceipt,
+    RulesetObservationReceipt,
+    ruleset_observation_identifier,
+)
 
 NOW = datetime(2026, 8, 12, 20, 0, tzinfo=UTC)
 
@@ -67,10 +71,11 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
         "directBranchUpdatesForbidden": True,
         "autoMergeEnabled": True,
     }
+    ruleset_digest = sha256_digest(canonical_json_bytes(core))
     ruleset_provisional = RulesetObservationReceipt(
         schema_version="3.1",
-        observation_id="RULESET:ANCHOR_TEST_0001",
-        observation_digest=sha256_digest(canonical_json_bytes(core)),
+        observation_id=ruleset_observation_identifier(ruleset_digest, NOW),
+        observation_digest=ruleset_digest,
         repository="TasfiqJ/TrainCapsule",
         base_branch="main",
         ruleset_id=1,

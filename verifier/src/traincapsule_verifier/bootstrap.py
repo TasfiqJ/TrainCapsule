@@ -144,6 +144,7 @@ EnvironmentFile=/etc/traincapsule-controller/controller-runtime.env
 ExecStart=/usr/libexec/traincapsule-activation-supervisor
 WorkingDirectory=/var/lib/traincapsule-verifier/repository-boundary
 NoNewPrivileges=yes
+PrivateTmp=yes
 ProtectSystem=strict
 ProtectHome=read-only
 ReadOnlyPaths=/var/lib/traincapsule-verifier/receipts

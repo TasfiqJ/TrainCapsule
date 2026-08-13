@@ -121,12 +121,31 @@ def test_alternate_v2_config_cannot_bypass_any_disabled_v2_mutator(tmp_path: Pat
 def test_mutable_git_anchor_accepts_only_exact_private_empty_installer_leaf(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
+    immutable = tmp_path / "immutable-snapshot"
+    subprocess.run(
+        ["git", "clone", "--no-local", "--no-hardlinks", str(ROOT), str(immutable)],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
+    immutable_head = subprocess.run(
+        ["git", "-C", str(immutable), "rev-parse", "HEAD"],
+        check=True,
+        capture_output=True,
+        text=True,
+    ).stdout.strip()
+    subprocess.run(
+        ["git", "-C", str(immutable), "update-ref", "refs/heads/main", immutable_head],
+        check=True,
+        capture_output=True,
+        text=True,
+    )
     runtime_root = tmp_path / "runtime"
     monkeypatch.setenv("TCF_RUNTIME_ROOT", str(runtime_root))
     paths = resolve_v3_runtime_paths(ROOT)
     paths.state_root.mkdir(mode=0o700)
     paths.git_root.mkdir(parents=True, mode=0o700)
-    ensure_v3_mutable_runtime(ROOT, paths)
+    ensure_v3_mutable_runtime(immutable, paths)
     assert (paths.git_root / "HEAD").is_file()
     assert subprocess.run(
         ["git", "-C", str(paths.git_root), "config", "user.name"],
@@ -142,7 +161,7 @@ def test_mutable_git_anchor_accepts_only_exact_private_empty_installer_leaf(
     substituted_paths.git_root.mkdir(parents=True, mode=0o700)
     (substituted_paths.git_root / "attacker").write_text("not Git\n", encoding="utf-8")
     with pytest.raises(RuntimeError, match="mutable Git anchor validation failed"):
-        ensure_v3_mutable_runtime(ROOT, substituted_paths)
+        ensure_v3_mutable_runtime(immutable, substituted_paths)
 
     weak = tmp_path / "weak"
     monkeypatch.setenv("TCF_RUNTIME_ROOT", str(weak))
@@ -150,7 +169,7 @@ def test_mutable_git_anchor_accepts_only_exact_private_empty_installer_leaf(
     weak_paths.state_root.mkdir(mode=0o700)
     weak_paths.git_root.mkdir(parents=True, mode=0o755)
     with pytest.raises(RuntimeError, match="empty mutable Git anchor is not private"):
-        ensure_v3_mutable_runtime(ROOT, weak_paths)
+        ensure_v3_mutable_runtime(immutable, weak_paths)
 
 
 def test_controller_paths_honor_alternate_configured_runtime_environment_variable(

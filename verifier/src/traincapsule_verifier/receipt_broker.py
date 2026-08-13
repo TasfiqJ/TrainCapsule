@@ -41,6 +41,7 @@ class RootReceiptBroker:
         verifier: PublicVerifier,
         outbox_root: TrustedRoot,
         public_root: TrustedRoot,
+        activation_root: TrustedRoot | None = None,
     ) -> None:
         if outbox_root.expected_uid == public_root.expected_uid:
             raise ReceiptPromotionError("service outbox and public root must have different owners")
@@ -51,9 +52,74 @@ class RootReceiptBroker:
             public_root.inode,
         ):
             raise ReceiptPromotionError("broker and public verifier receipt roots differ")
+        if activation_root is not None:
+            if activation_root.expected_uid != public_root.expected_uid:
+                raise ReceiptPromotionError(
+                    "activation selector and public receipt roots must share root ownership"
+                )
+            if (activation_root.device, activation_root.inode) in {
+                (outbox_root.device, outbox_root.inode),
+                (public_root.device, public_root.inode),
+            }:
+                raise ReceiptPromotionError(
+                    "activation selector root must be distinct from broker roots"
+                )
         self.verifier = verifier
         self.outbox_root = outbox_root
         self.public_root = public_root
+        self.activation_root = activation_root
+
+    def _select_current_activation(
+        self, activation: ActivationReceipt, canonical: bytes
+    ) -> None:
+        if self.activation_root is None:
+            return
+        try:
+            current_raw = read_bounded_file(
+                self.activation_root,
+                "current.json",
+                maximum_bytes=MAX_RECEIPT_BYTES,
+                expected_file_uid=self.activation_root.expected_uid,
+            )
+        except FileNotFoundError:
+            current_raw = None
+        if current_raw is not None:
+            current = ActivationReceipt.model_validate_json(current_raw, strict=True)
+            if canonical_json_bytes(current) != current_raw:
+                raise ReceiptPromotionError(
+                    "current activation selector bytes are not canonical"
+                )
+            if current.issued_at > activation.issued_at:
+                return
+            if current.issued_at == activation.issued_at:
+                if current_raw != canonical:
+                    raise ReceiptPromotionError(
+                        "activation selector timestamp conflicts with different bytes"
+                    )
+                return
+        pending = f".{activation.receipt_id}.current.pending"
+        try:
+            atomic_write_new(self.activation_root, pending, canonical, mode=0o644)
+        except TrustedPathError:
+            if (
+                read_bounded_file(
+                    self.activation_root,
+                    pending,
+                    maximum_bytes=MAX_RECEIPT_BYTES,
+                    expected_file_uid=self.activation_root.expected_uid,
+                )
+                != canonical
+            ):
+                raise ReceiptPromotionError(
+                    "activation selector recovery bytes conflict"
+                ) from None
+        os.rename(
+            pending,
+            "current.json",
+            src_dir_fd=self.activation_root.descriptor,
+            dst_dir_fd=self.activation_root.descriptor,
+        )
+        os.fsync(self.activation_root.descriptor)
 
     def promote(self, outbox_name: str) -> ReceiptPromotionResult:
         if not outbox_name.endswith(".json"):
@@ -124,6 +190,8 @@ class RootReceiptBroker:
                 make_publicly_readable(self.public_root, expected_name)
                 if machine is not None:
                     make_publicly_readable(self.public_root, public_relative_path)
+                elif activation is not None:
+                    self._select_current_activation(activation, canonical)
                 return ReceiptPromotionResult(
                     state="ALREADY_PROMOTED",
                     receipt_type=receipt_type,
@@ -166,6 +234,8 @@ class RootReceiptBroker:
                             "machine-policy selector conflicts for exact work item/SHA"
                         ) from None
                 make_publicly_readable(self.public_root, public_relative_path)
+            elif activation is not None:
+                self._select_current_activation(activation, canonical)
             return ReceiptPromotionResult(
                 state=state,
                 receipt_type=receipt_type,

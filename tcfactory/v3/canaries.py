@@ -9,7 +9,6 @@ explicit BLOCKED_PREREQUISITE suite, never a synthetic PASS.
 
 from __future__ import annotations
 
-import json
 from collections.abc import Callable
 from datetime import UTC, datetime
 from enum import StrEnum
@@ -258,9 +257,10 @@ class ExternalCanaryRunner:
         if len(result.stdout.encode("utf-8")) > 65_536:
             raise RuntimeError("external canary runner output exceeded its bound")
         try:
-            parsed: object = json.loads(result.stdout)
-            observed_result = MandatoryCanaryResult.model_validate(parsed, strict=True)
-        except (json.JSONDecodeError, ValueError) as exc:
+            observed_result = MandatoryCanaryResult.model_validate_json(
+                result.stdout, strict=True
+            )
+        except ValueError as exc:
             raise RuntimeError("external canary runner returned an invalid result") from exc
         if observed_result.runner_digest != self.runner_digest:
             raise RuntimeError("external canary result runner digest mismatch")

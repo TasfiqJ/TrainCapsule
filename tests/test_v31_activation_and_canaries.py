@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import json
+import os
 import subprocess
 import sys
 from collections.abc import Callable
@@ -770,6 +771,50 @@ def test_missing_live_runner_emits_only_typed_blocked_results(
     assert len(MandatoryCanaryId) == 20
     with pytest.raises(RuntimeError, match="have not passed"):
         verify_mandatory_canary_suite(suite_path, repo_root=repo, require_pass=True)
+
+
+def test_external_canary_runner_validates_strict_json_at_the_process_boundary(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    executable = tmp_path / "runner"
+    executable.write_bytes(b"runner")
+    observed = executable.lstat()
+    runner_digest = f"sha256:{canaries.sha256_file(executable)}"
+    payload: dict[str, object] = {
+        "schemaVersion": "3.1",
+        "runId": "CANARY-STRICT-JSON-001",
+        "canaryId": MandatoryCanaryId.PROCESS_KILL_AND_RESUME.value,
+        "exactMainSha": "a" * 40,
+        "exactTreeSha": "b" * 40,
+        "runnerDigest": runner_digest,
+        "status": CanaryStatus.BLOCKED_PREREQUISITE.value,
+        "evidenceArtifacts": {},
+        "startedAt": NOW.isoformat(),
+        "completedAt": NOW.isoformat(),
+        "failureReason": "blocked test result",
+    }
+
+    def trust(path: Path, **_kwargs: object) -> tuple[Path, os.stat_result]:
+        return path, observed
+
+    def command(
+        *_args: object, **_kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess([], 0, json.dumps(payload), "")
+
+    monkeypatch.setattr(canaries, "trusted_external_path", trust)
+    monkeypatch.setattr(canaries, "run_command", command)
+    runner = canaries.ExternalCanaryRunner(executable)
+    result = runner.run(
+        canary_id=MandatoryCanaryId.PROCESS_KILL_AND_RESUME,
+        run_id="CANARY-STRICT-JSON-001",
+        repo_root=tmp_path,
+        runtime_root=tmp_path,
+        artifact_root=tmp_path,
+        exact_main_sha="a" * 40,
+        exact_tree_sha="b" * 40,
+    )
+    assert result.status is CanaryStatus.BLOCKED_PREREQUISITE
 
 
 def test_canary_publication_remote_is_explicit_and_exact(

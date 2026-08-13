@@ -395,6 +395,50 @@ def _external_verifier(fixture: Fixture) -> IndependentVerifier:
     )
 
 
+def test_external_verifier_opens_private_oracle_as_service_owner(
+    fixture: Fixture,
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    import traincapsule_verifier.evaluator as evaluator_module
+
+    actual_uid = os.getuid()
+    config_owner_uid = actual_uid + 10_000
+    verifier_owner_uid = actual_uid + 20_000
+    observed: dict[Path, int] = {}
+    real_assert_trusted_root = evaluator_module.assert_trusted_root
+
+    def record_owner(
+        path: Path,
+        *,
+        expected_uid: int,
+        repository_root: Path,
+    ) -> Any:
+        observed[Path(path)] = expected_uid
+        return real_assert_trusted_root(
+            path,
+            expected_uid=actual_uid,
+            repository_root=repository_root,
+        )
+
+    monkeypatch.setattr(evaluator_module, "assert_trusted_root", record_owner)
+    with IndependentVerifier.from_external_roots(
+        repository_root=fixture.repo,
+        config_root=fixture.config,
+        state_root=fixture.state,
+        private_root=fixture.private,
+        receipt_root=fixture.receipts,
+        anchor_root=fixture.anchor_root,
+        oracle_root=fixture.oracle,
+        config_owner_uid=config_owner_uid,
+        verifier_owner_uid=verifier_owner_uid,
+    ):
+        pass
+
+    assert observed[fixture.config] == config_owner_uid
+    assert observed[fixture.anchor_root] == config_owner_uid
+    assert observed[fixture.oracle] == verifier_owner_uid
+
+
 def _descriptor_count() -> int:
     descriptor_root = Path("/proc/self/fd")
     if not descriptor_root.is_dir():

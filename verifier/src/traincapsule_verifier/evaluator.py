@@ -193,7 +193,9 @@ class IndependentVerifier:
             if authority_state is not state:
                 opened.append(authority_state)
             oracles = assert_trusted_root(
-                oracle_root, expected_uid=config_owner_uid, repository_root=repository_root
+                oracle_root,
+                expected_uid=verifier_owner_uid,
+                repository_root=repository_root,
             )
             opened.append(oracles)
             policy = _load_model(config, "policy.json", VerifierPolicy)

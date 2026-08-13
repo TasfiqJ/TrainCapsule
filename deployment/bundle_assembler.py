@@ -738,6 +738,7 @@ def _validate_machine_policy_profile(sources: Mapping[str, Path]) -> None:
     risk = cast(dict[str, object], risk_raw)
     oracles_raw = profile.get("oracles")
     runner_digests_raw = risk.get("oracleRunnerDigests")
+    runner_paths_raw = risk.get("oracleRunnerPaths")
     required_oracles_raw = risk.get("requiredOracleIds")
     if (
         set(profile) != expected_profile_keys
@@ -759,18 +760,33 @@ def _validate_machine_policy_profile(sources: Mapping[str, Path]) -> None:
         or risk.get("acceptedEvidenceModes") != ["CONTROLLED_VALIDATED"]
         or not isinstance(oracles_raw, dict)
         or not isinstance(runner_digests_raw, dict)
+        or not isinstance(runner_paths_raw, dict)
         or not isinstance(required_oracles_raw, list)
     ):
         raise BundleAssemblyError("machine-policy review profile is unsafe")
     oracles = cast(dict[str, object], oracles_raw)
     runner_digests = cast(dict[str, object], runner_digests_raw)
+    runner_paths = cast(dict[str, object], runner_paths_raw)
     required_oracles = cast(list[object], required_oracles_raw)
-    if set(oracles) != set(required_oracles) or set(runner_digests) != set(required_oracles):
+    if (
+        set(oracles) != set(required_oracles)
+        or set(runner_digests) != set(required_oracles)
+        or set(runner_paths) != set(required_oracles)
+    ):
         raise BundleAssemblyError("machine-policy review oracle roster is inconsistent")
     for identifier, binding_raw in oracles.items():
         if not isinstance(binding_raw, dict):
             raise BundleAssemblyError("machine-policy review oracle binding is invalid")
         binding = cast(dict[str, object], binding_raw)
+        runner_path = runner_paths[identifier]
+        if (
+            not isinstance(runner_path, str)
+            or f"oracle:{runner_path}" not in sources
+            or runner_digests[identifier] != _digest(sources[f"oracle:{runner_path}"])
+        ):
+            raise BundleAssemblyError(
+                "machine-policy review oracle path or digest is not installed"
+            )
         if (
             set(binding)
             != {

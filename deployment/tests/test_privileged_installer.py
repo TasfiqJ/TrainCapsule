@@ -614,7 +614,12 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                             "requiredGates": ["CANDIDATE-MANIFEST"],
                             "requiredOracleIds": ["ORACLE:CONFORMANCE:001"],
                             "oracleRunnerDigests": {
-                                "ORACLE:CONFORMANCE:001": "sha256:" + "e" * 64
+                                "ORACLE:CONFORMANCE:001": sha256_digest(
+                                    b"#!/bin/sh\nexit 1\n"
+                                )
+                            },
+                            "oracleRunnerPaths": {
+                                "ORACLE:CONFORMANCE:001": "test-runner"
                             },
                             "acceptedEvidenceModes": ["CONTROLLED_VALIDATED"],
                         }
@@ -636,7 +641,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                     "privateGateRunnerDigest": "sha256:" + "d" * 64,
                     "oracles": {
                         "ORACLE:CONFORMANCE:001": {
-                            "runnerDigest": "sha256:" + "e" * 64,
+                            "runnerDigest": sha256_digest(b"#!/bin/sh\nexit 1\n"),
                             "nativeDisposition": "UNKNOWN",
                             "valueDisposition": "EXTERNAL_EVIDENCE_REQUIRED",
                             "engineeringCeiling": "PASSED",
@@ -660,7 +665,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                     "privateGateRunnerDigest": "sha256:" + "d" * 64,
                     "oracles": {
                         "ORACLE:CONFORMANCE:001": {
-                            "runnerDigest": "sha256:" + "e" * 64,
+                            "runnerDigest": sha256_digest(b"#!/bin/sh\nexit 1\n"),
                             "nativeDisposition": "UNKNOWN",
                             "valueDisposition": "EXTERNAL_EVIDENCE_REQUIRED",
                             "engineeringCeiling": "PASSED",
@@ -1657,6 +1662,25 @@ def test_bundle_assembly_rejects_tamper_duplicate_and_repo_secret(tmp_path: Path
             repo_root=repo_root,
         )
     assert not (tmp_path / "tampered").exists()
+
+    _, bundle, _, _, _ = _fixture(tmp_path / "oracle-path")
+    artifacts, oracles = _assembly_inputs(bundle)
+    policy_path = artifacts["policy"]
+    policy = json.loads(policy_path.read_bytes())
+    policy["riskPolicies"]["TRUST_CORE"]["oracleRunnerPaths"][
+        "ORACLE:CONFORMANCE:001"
+    ] = "not-installed"
+    policy_path.chmod(0o600)
+    policy_path.write_bytes(canonical_json_bytes(policy))
+    policy_path.chmod(0o444)
+    with pytest.raises(BundleAssemblyError, match="oracle path or digest is not installed"):
+        assemble_bundle(
+            tmp_path / "oracle-path-mismatch",
+            artifacts=artifacts,
+            oracles=oracles,
+            repo_root=_assembler_repo(tmp_path / "oracle-path", artifacts),
+        )
+    assert not (tmp_path / "oracle-path-mismatch").exists()
 
     _, bundle, _, _, _ = _fixture(tmp_path / "duplicate")
     artifacts, oracles = _assembly_inputs(bundle)

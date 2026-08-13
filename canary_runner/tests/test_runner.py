@@ -5,7 +5,7 @@ import json
 import subprocess
 import zipfile
 from pathlib import Path
-from typing import Any
+from typing import Any, cast
 
 import pytest
 from traincapsule_canary_runner import mechanisms
@@ -157,7 +157,7 @@ def test_fake_pass_without_evidence_and_wrong_status_exit_are_blocked(
                 "executable": "/usr/libexec/traincapsule-canary-driver",
                 "executableDigest": sha256_digest(driver.read_bytes()),
                 "timeoutSeconds": 30,
-                "networkAllowed": True,
+                "networkAllowed": False,
             }
             for item in MandatoryCanaryId
         },
@@ -192,8 +192,13 @@ def test_fake_pass_without_evidence_and_wrong_status_exit_are_blocked(
         "observedAt": "2026-08-12T18:00:00Z",
     }
     completed = subprocess.CompletedProcess([], 0, json.dumps(outcome).encode(), b"")
+    commands: list[list[str]] = []
+
     def completed_run(*args: Any, **kwargs: Any) -> subprocess.CompletedProcess[bytes]:
-        del args, kwargs
+        command = args[0]
+        assert isinstance(command, list)
+        commands.append(cast(list[str], command))
+        del kwargs
         return completed
 
     monkeypatch.setattr(subprocess, "run", completed_run)
@@ -210,6 +215,13 @@ def test_fake_pass_without_evidence_and_wrong_status_exit_are_blocked(
     )
     assert result.status.value == "BLOCKED_PREREQUISITE"
     assert result.failure_reason and "without evidence" in result.failure_reason
+    assert commands[0][:5] == [
+        "/usr/bin/unshare",
+        "--user",
+        "--map-root-user",
+        "--net",
+        "--",
+    ]
 
 
 def test_wheel_has_only_runner_code_and_no_signing_authority() -> None:

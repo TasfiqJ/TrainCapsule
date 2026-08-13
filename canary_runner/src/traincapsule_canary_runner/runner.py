@@ -193,7 +193,14 @@ def execute(
         if not mechanism.network_allowed:
             unshare = Path("/usr/bin/unshare")
             _regular(unshare, executable=True)
-            command = [str(unshare), "--net", "--", *command]
+            command = [
+                str(unshare),
+                "--user",
+                "--map-root-user",
+                "--net",
+                "--",
+                *command,
+            ]
         result = subprocess.run(
             command,
             cwd=artifacts,

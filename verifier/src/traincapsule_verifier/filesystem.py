@@ -400,3 +400,54 @@ def atomic_write_new(
         for opened in reversed(opened_directories):
             os.close(opened)
         os.close(root_descriptor)
+
+
+def make_publicly_readable(
+    root: TrustedRoot,
+    relative: str,
+    *,
+    file_mode: int = 0o644,
+    directory_mode: int = 0o755,
+) -> None:
+    """Expose already-verified public evidence without making it writable."""
+    if file_mode & 0o022 or directory_mode & 0o022:
+        raise TrustedPathError("public evidence modes cannot grant group/world write access")
+    parts = _validate_relative(relative)
+    root_descriptor = root.duplicate_descriptor()
+    parent_descriptor = root_descriptor
+    opened_directories: list[int] = []
+    descriptor: int | None = None
+    try:
+        for component in parts[:-1]:
+            child = os.open(
+                component,
+                os.O_RDONLY | os.O_DIRECTORY | getattr(os, "O_NOFOLLOW", 0),
+                dir_fd=parent_descriptor,
+            )
+            _validate_opened(
+                child,
+                expected_uid=root.expected_uid,
+                require_directory=True,
+            )
+            os.fchmod(child, directory_mode)
+            opened_directories.append(child)
+            parent_descriptor = child
+        descriptor = os.open(
+            parts[-1],
+            os.O_RDONLY | getattr(os, "O_NOFOLLOW", 0),
+            dir_fd=parent_descriptor,
+        )
+        _validate_opened(
+            descriptor,
+            expected_uid=root.expected_uid,
+            require_directory=False,
+        )
+        os.fchmod(descriptor, file_mode)
+        os.fsync(descriptor)
+        os.fsync(parent_descriptor)
+    finally:
+        if descriptor is not None:
+            os.close(descriptor)
+        for opened in reversed(opened_directories):
+            os.close(opened)
+        os.close(root_descriptor)

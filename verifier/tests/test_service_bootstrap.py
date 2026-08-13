@@ -382,9 +382,28 @@ def test_broker_promotion_replay_crash_and_partial_state(
         first = broker.promote(f"{public_fixture.machine.receipt_id}.json")
         assert first.state == "PROMOTED"
         assert first.receipt_digest == sha256_digest(canonical_json_bytes(public_fixture.machine))
+        promoted = public / f"{public_fixture.machine.receipt_id}.json"
+        selector = (
+            public
+            / "machine-policy"
+            / public_fixture.machine.work_item_id
+            / f"{public_fixture.machine.candidate_sha}.json"
+        )
+        assert promoted.stat().st_mode & 0o777 == 0o644
+        assert selector.stat().st_mode & 0o777 == 0o644
+        assert selector.parent.stat().st_mode & 0o777 == 0o755
+        assert selector.parent.parent.stat().st_mode & 0o777 == 0o755
+        promoted.chmod(0o600)
+        selector.chmod(0o600)
+        selector.parent.chmod(0o700)
+        selector.parent.parent.chmod(0o700)
         assert (
             broker.promote(f"{public_fixture.machine.receipt_id}.json").state == "ALREADY_PROMOTED"
         )
+        assert promoted.stat().st_mode & 0o777 == 0o644
+        assert selector.stat().st_mode & 0o777 == 0o644
+        assert selector.parent.stat().st_mode & 0o777 == 0o755
+        assert selector.parent.parent.stat().st_mode & 0o777 == 0o755
     finally:
         _close_broker(broker)
 

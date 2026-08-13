@@ -12,6 +12,7 @@ from .filesystem import (
     TrustedPathError,
     TrustedRoot,
     atomic_write_new,
+    make_publicly_readable,
     read_bounded_file,
     strict_json_loads,
 )
@@ -103,6 +104,7 @@ class RootReceiptBroker:
                         "public receipt identity already exists with different bytes"
                     ) from None
                 state = "ALREADY_PROMOTED"
+            make_publicly_readable(self.public_root, expected_name)
             public_relative_path = expected_name
             if machine is not None:
                 public_relative_path = (
@@ -121,6 +123,7 @@ class RootReceiptBroker:
                         raise ReceiptPromotionError(
                             "machine-policy selector conflicts for exact work item/SHA"
                         ) from None
+                make_publicly_readable(self.public_root, public_relative_path)
             return ReceiptPromotionResult(
                 state=state,
                 receipt_type=receipt_type,

@@ -104,7 +104,7 @@ def _runtime_loader() -> tuple[InstalledControllerRuntimeManifest, RuntimeLoader
         artifact_root="/var/lib/traincapsule-runtime/artifacts/v3",
         entry_arguments=(
             "-m",
-            "tcfactory",
+            "tcfactory.cli",
             "v3-controller",
             "--repo",
             "/var/lib/traincapsule-verifier/repository-boundary",

@@ -13,6 +13,7 @@ from traincapsule_verifier.bootstrap import (
     production_install_manifest,
     render_systemd_units,
     staged_tree_digest,
+    systemd_unit_content,
 )
 from traincapsule_verifier.canonical import canonical_json_bytes, sha256_digest
 from traincapsule_verifier.filesystem import open_trusted_root
@@ -176,6 +177,15 @@ def test_staged_installer_is_inert_exact_and_idempotently_rejected(tmp_path: Pat
     with pytest.raises(ValueError, match="absent or empty"):
         render_systemd_units(destination)
     assert staged_tree_digest(paths) == digest
+
+
+def test_activation_units_use_installed_environment_and_create_stop_fail_closed() -> None:
+    supervisor = systemd_unit_content(unit="activation-supervisor").decode()
+    observer = systemd_unit_content(unit="post-activation-observer").decode()
+    assert "EnvironmentFile=/etc/traincapsule-controller/controller-runtime.env" in supervisor
+    assert "EnvironmentFile=/etc/traincapsule-verifier/controller-runtime.env" not in supervisor
+    assert "ReadWritePaths=/var/lib/traincapsule-runtime\n" in observer
+    assert "ReadWritePaths=/var/lib/traincapsule-runtime/STOP" not in observer
 
 
 def test_unit_separation_and_rollback_are_explicit(tmp_path: Path) -> None:

@@ -829,7 +829,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                 b"[Service]\n"
                 b"User=traincapsule-controller\n"
                 b"Group=traincapsule-controller\n"
-                b"ExecStart=/opt/traincapsule-runtime/python/bin/python3.12 -m tcfactory "
+                b"ExecStart=/opt/traincapsule-runtime/python/bin/python3.12 -m tcfactory.cli "
                 b"v3-controller --repo /var/lib/traincapsule-verifier/repository-boundary\n"
                 b"EnvironmentFile=/etc/traincapsule-controller/controller-runtime.env\n"
                 b"WorkingDirectory=/var/lib/traincapsule-verifier/repository-boundary\n"
@@ -1079,7 +1079,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
         "artifactRoot": "/var/lib/traincapsule-runtime/artifacts/v3",
         "entryArguments": [
             "-m",
-            "tcfactory",
+            "tcfactory.cli",
             "v3-controller",
             "--repo",
             "/var/lib/traincapsule-verifier/repository-boundary",
@@ -1298,6 +1298,11 @@ def test_default_is_read_only_and_apply_attests_exact_tree(tmp_path: Path) -> No
     assert installer.apply(APPLY_CONFIRMATION) == result
     snapshot_index = root / "var/lib/traincapsule-verifier/repository-boundary/.git/index"
     assert stat.S_IMODE(snapshot_index.stat().st_mode) == 0o444
+    stop = root / "var/lib/traincapsule-runtime/STOP"
+    assert stop.read_bytes() == b"stopped pending independent activation\n"
+    assert stat.S_IMODE(stop.stat().st_mode) == 0o600
+    controller_uid = authority.uid("traincapsule-controller")
+    assert authority.owner(stop) == (controller_uid, controller_uid)
 
 
 def test_production_apply_rejects_missing_systemd_before_mutation(
@@ -1656,7 +1661,7 @@ def test_bundle_rejects_controller_runtime_manifest_divergence(tmp_path: Path) -
     repo_root = _assembler_repo(tmp_path, artifacts)
     manifest_path = artifacts["installed-controller-runtime-manifest"]
     manifest = cast(dict[str, object], json.loads(manifest_path.read_bytes()))
-    manifest["entryArguments"] = ["-m", "tcfactory", "v3-controller"]
+    manifest["entryArguments"] = ["-m", "tcfactory.cli", "v3-controller"]
     manifest["manifestDigest"] = "sha256:" + "0" * 64
     manifest["manifestDigest"] = sha256_digest(canonical_json_bytes(manifest))
     manifest_path.chmod(0o600)

@@ -15,6 +15,7 @@ from cryptography.hazmat.primitives.asymmetric import rsa
 from deployment.github_token_refresher import (
     RefreshFailure,
     RefreshPolicy,
+    load_policy,
     promote,
     refresh,
 )
@@ -65,6 +66,41 @@ def _identity(monkeypatch: pytest.MonkeyPatch) -> None:
         "deployment.github_token_refresher.pwd.getpwnam",
         lookup,
     )
+
+
+def test_policy_loader_accepts_the_repository_canonical_json_line(tmp_path: Path) -> None:
+    policy = RefreshPolicy(
+        github_app_id=123,
+        installation_id=456,
+        repository="test-owner/isolated-canary",
+        audience="https://api.github.com",
+        permissions={"actions": "write", "contents": "read"},
+        private_key_path="/var/lib/traincapsule-github-token/github-app-private-key.pem",
+        outbox_token_path="/var/lib/traincapsule-github-token/outbox/token",
+        outbox_metadata_path=(
+            "/var/lib/traincapsule-github-token/outbox/token-metadata.json"
+        ),
+        target_token_path=(
+            "/var/lib/traincapsule-canary-secrets/github-app-installation-token"
+        ),
+        target_metadata_path=(
+            "/var/lib/traincapsule-canary-secrets/github-app-installation-token.json"
+        ),
+        refresh_before_seconds=600,
+    )
+    path = tmp_path / "policy.json"
+    path.write_bytes(
+        (
+            json.dumps(
+                policy.model_dump(mode="json", by_alias=True),
+                sort_keys=True,
+                separators=(",", ":"),
+            )
+            + "\n"
+        ).encode()
+    )
+    path.chmod(0o444)
+    assert load_policy(path, expected_owner_uid=os.getuid()) == policy
 
 
 def test_scoped_refresh_rotation_and_promotion_never_log_token(

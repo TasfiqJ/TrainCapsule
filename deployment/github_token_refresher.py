@@ -108,14 +108,16 @@ def _trusted_file(path: Path, *, owner_uid: int, mode: int, maximum: int) -> byt
     return path.read_bytes()
 
 
-def load_policy(path: Path = POLICY_PATH) -> RefreshPolicy:
-    raw = _trusted_file(path, owner_uid=0, mode=0o444, maximum=64_000)
+def load_policy(path: Path = POLICY_PATH, *, expected_owner_uid: int = 0) -> RefreshPolicy:
+    raw = _trusted_file(path, owner_uid=expected_owner_uid, mode=0o444, maximum=64_000)
     try:
         policy = RefreshPolicy.model_validate_json(raw, strict=True)
     except ValueError as exc:
         raise RefreshFailure("GitHub token refresher policy is invalid") from exc
     parsed = json.loads(raw)
-    expected = json.dumps(parsed, sort_keys=True, separators=(",", ":")).encode()
+    expected = (
+        json.dumps(parsed, sort_keys=True, separators=(",", ":")) + "\n"
+    ).encode()
     if raw != expected:
         raise RefreshFailure("GitHub token refresher policy is not exact")
     return policy

@@ -400,7 +400,7 @@ def _validate_controller_runtime(sources: Mapping[str, Path]) -> None:
         or manifest["entryArguments"]
         != [
             "-m",
-            "tcfactory",
+            "tcfactory.cli",
             "v3-controller",
             "--repo",
             "/var/lib/traincapsule-verifier/repository-boundary",
@@ -464,7 +464,7 @@ def _validate_controller_runtime(sources: Mapping[str, Path]) -> None:
 
     unit_lines = sources["controller-service"].read_text(encoding="utf-8").splitlines()
     arguments = (
-        "-m tcfactory v3-controller --repo "
+        "-m tcfactory.cli v3-controller --repo "
         "/var/lib/traincapsule-verifier/repository-boundary"
     )
     required = {

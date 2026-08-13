@@ -69,7 +69,7 @@ class InstalledControllerRuntimeManifest(V3Model):
     artifact_root: Literal["/var/lib/traincapsule-runtime/artifacts/v3"]
     entry_arguments: tuple[
         Literal["-m"],
-        Literal["tcfactory"],
+        Literal["tcfactory.cli"],
         Literal["v3-controller"],
         Literal["--repo"],
         Literal["/var/lib/traincapsule-verifier/repository-boundary"],

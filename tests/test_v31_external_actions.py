@@ -1228,6 +1228,12 @@ def test_signed_snapshot_broker_derives_state_and_rejects_alternate_genesis(
         "sha256:" + hashlib.sha256(revocations.canonical_json_bytes()).hexdigest()
     )
     assert promoted.key_fingerprint == key_fingerprint(public_key.read_bytes())
+    replayed = broker.promote_signed_snapshot(
+        staged_root=staged,
+        public_key=public_key,
+        now=NOW + timedelta(minutes=5),
+    )
+    assert replayed.model_copy(update={"advanced_at": promoted.advanced_at}) == promoted
 
     publish(
         revocations.model_copy(

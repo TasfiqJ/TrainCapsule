@@ -146,7 +146,10 @@ class ExternalEvidenceAuthorityBroker:
             existing = load_external_evidence_authority_state(
                 self.ledger_path, expected_owner_uid=self.expected_owner_uid
             )
-            if existing != ledger:
+            existing_identity = existing.current.model_copy(
+                update={"advanced_at": state.advanced_at}
+            )
+            if len(existing.entries) != 1 or existing_identity != state:
                 raise ExternalEvidenceAuthorityStateError(
                     "genesis authority state conflicts with existing ledger"
                 ) from None

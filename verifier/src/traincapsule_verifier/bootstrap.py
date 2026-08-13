@@ -139,7 +139,7 @@ Wants=network-online.target
 Type=oneshot
 User={controller_user}
 Group={controller_user}
-EnvironmentFile=/etc/traincapsule-verifier/controller-runtime.env
+EnvironmentFile=/etc/traincapsule-controller/controller-runtime.env
 ExecStart=/usr/libexec/traincapsule-activation-supervisor
 WorkingDirectory=/var/lib/traincapsule-verifier/repository-boundary
 NoNewPrivileges=yes
@@ -201,7 +201,7 @@ ReadOnlyPaths=/var/lib/traincapsule-runtime
 ReadWritePaths=/var/lib/traincapsule-verifier/post-activation-observations
 ReadWritePaths=/var/lib/traincapsule-verifier/activation-refresh-inbox
 ReadWritePaths=/var/lib/traincapsule-verifier/activation-refresh-retirement
-ReadWritePaths=/var/lib/traincapsule-runtime/STOP
+ReadWritePaths=/var/lib/traincapsule-runtime
 InaccessiblePaths=/var/lib/traincapsule-verifier/private /var/lib/traincapsule-verifier/oracle
 """
     elif unit == "post-activation-observer-timer":

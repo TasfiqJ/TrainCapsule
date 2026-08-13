@@ -1531,6 +1531,7 @@ class PrivilegedInstaller:
         try:
             self._ensure_accounts()
             self._ensure_directories()
+            self._ensure_stop_marker()
             self._stage_sources()
             self._install_runtime_distribution()
             self._install_files()
@@ -1631,6 +1632,7 @@ class PrivilegedInstaller:
                 target.rmdir()
             self._record("SNAPSHOT_ENTRY_ROLLED_BACK", {"path": relative})
         files = {item.target for item in self.spec.files}
+        files.add("/var/lib/traincapsule-runtime/STOP")
         for target_text in reversed([item.target for item in self.spec.files]):
             saved = resources.get(target_text)
             if saved is None:
@@ -1904,6 +1906,29 @@ class PrivilegedInstaller:
             self._record("DIRECTORY_INSTALLED", {"target": item.target})
             self._fail("directory:" + item.target)
 
+    def _ensure_stop_marker(self) -> None:
+        target_text = "/var/lib/traincapsule-runtime/STOP"
+        target = self._target(target_text)
+        saved = self._prepare_resource(target_text, target, directory=False)
+        if not bool(saved["existed"]):
+            _atomic_replace(target, b"stopped pending independent activation\n", 0o600)
+            self.authority.chown(
+                target,
+                self.spec.controller_account.name,
+                self.spec.controller_account.name,
+            )
+        self._attest_metadata(
+            target,
+            self.spec.controller_account.name,
+            self.spec.controller_account.name,
+            "0600",
+            directory=False,
+        )
+        saved["complete"] = True
+        self._save_state()
+        self._record("STOP_CONTROL_ATTESTED", {"target": target_text})
+        self._fail("control:STOP")
+
     def _stage_sources(self) -> None:
         stage = self.txn / "stage"
         for item in self.spec.files:
@@ -2162,7 +2187,7 @@ class PrivilegedInstaller:
         unit = unit_path.read_text(encoding="utf-8")
         principal = self.spec.controller_account.name
         arguments = (
-            "-m tcfactory v3-controller --repo "
+            "-m tcfactory.cli v3-controller --repo "
             "/var/lib/traincapsule-verifier/repository-boundary"
         )
         required = (
@@ -2230,7 +2255,7 @@ class PrivilegedInstaller:
             or manifest["entryArguments"]
             != [
                 "-m",
-                "tcfactory",
+                "tcfactory.cli",
                 "v3-controller",
                 "--repo",
                 "/var/lib/traincapsule-verifier/repository-boundary",

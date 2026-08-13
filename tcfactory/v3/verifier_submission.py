@@ -263,7 +263,7 @@ def create_and_submit_verification_request(
             "candidateSha": candidate_sha,
             "candidateTreeSha": candidate_tree_sha,
             "outcome": "PASS",
-            "rawEvidenceArtifactHashes": raw_hashes,
+            "rawEvidenceArtifactHashes": sorted(raw_hashes),
             "nativeDisposition": binding["nativeDisposition"],
             "valueDisposition": binding["valueDisposition"],
             "engineeringCeiling": binding["engineeringCeiling"],

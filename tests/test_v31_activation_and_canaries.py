@@ -279,7 +279,9 @@ def _receipt(
         machine_environment_digest=sha256_digest(suite.read_bytes()),
         source_generation_id="traincapsule-v3.1-zh",
         source_generation_digest="sha256:" + "b" * 64,
-        controller_binary_digest=(runtime.manifest_digest if runtime else DIGEST),
+        controller_binary_digest=(
+            sha256_digest(runtime.canonical_json_bytes()) if runtime else DIGEST
+        ),
         controller_config_digest=(runtime.effective_config.digest if runtime else DIGEST),
         machine_environment_path="canary-suite.json",
         controller_binary_path="controller.py",

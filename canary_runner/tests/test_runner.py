@@ -5,10 +5,11 @@ import json
 import subprocess
 import zipfile
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, cast
 
 import pytest
-from traincapsule_canary_runner import mechanisms
+from traincapsule_canary_runner import external_probes, mechanisms
 from traincapsule_canary_runner.external_probes import run_probe
 from traincapsule_canary_runner.mechanisms import EXTERNAL, LOCAL
 from traincapsule_canary_runner.models import MandatoryCanaryId, RunnerPolicy
@@ -288,3 +289,59 @@ def test_live_probes_cannot_pass_without_root_policy(
             MandatoryCanaryId.POST_MERGE_INVARIANT_FAILURE_AND_AUTOMATED_REVERT_PR.value,
             args,
         )
+
+
+def test_github_live_probe_forces_read_only_method_before_dispatch(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    executable = tmp_path / "gh"
+    executable.write_bytes(b"gh")
+    token = tmp_path / "token"
+    token.write_text("test-token", encoding="utf-8")
+    token.chmod(0o600)
+    commands: list[list[str]] = []
+
+    def policy() -> Any:
+        return SimpleNamespace(
+            github=SimpleNamespace(
+                executable=str(executable),
+                executable_digest=sha256_digest(executable.read_bytes()),
+                repository="TasfiqJ/TrainCapsule-Canary",
+                token_file=str(token),
+                workflow="traincapsule-post-merge-revert-canary.yml",
+            )
+        )
+
+    def trust(_path: Path, _expected_digest: str) -> None:
+        return None
+
+    def run(
+        command: list[str], **_kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        commands.append(command)
+        return subprocess.CompletedProcess(
+            command,
+            1 if "workflow" in command else 0,
+            "{}",
+            "",
+        )
+
+    monkeypatch.setattr(external_probes, "_load_policy", policy)
+    monkeypatch.setattr(external_probes, "_trusted_executable", trust)
+    monkeypatch.setattr(subprocess, "run", run)
+    args = argparse.Namespace(
+        repo=tmp_path,
+        runtime_root=tmp_path,
+        artifact_root=tmp_path,
+        run_id=RUN,
+        main_sha=SHA,
+        tree_sha=TREE,
+    )
+    with pytest.raises(ValueError, match="dispatch was rejected"):
+        external_probes._github_revert(args)  # pyright: ignore[reportPrivateUsage]
+    assert commands[0][1:5] == [
+        "api",
+        "repos/TasfiqJ/TrainCapsule-Canary/actions/runs",
+        "--method",
+        "GET",
+    ]

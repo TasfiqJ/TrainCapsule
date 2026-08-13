@@ -193,6 +193,8 @@ def _github_revert(args: argparse.Namespace) -> dict[str, object]:
             str(gh),
             "api",
             f"repos/{repository}/actions/runs",
+            "--method",
+            "GET",
             "-f",
             f"head_sha={args.main_sha}",
         ],

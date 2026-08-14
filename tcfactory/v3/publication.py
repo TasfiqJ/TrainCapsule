@@ -336,10 +336,11 @@ class ExternalReceiptAuthorizer:
         )
         receipt_bytes = receipt_path.read_bytes()
         try:
-            receipt_raw: object = json.loads(receipt_bytes)
-        except json.JSONDecodeError as exc:
+            receipt = MachinePolicyReceiptV31.model_validate_json(
+                receipt_bytes, strict=True
+            )
+        except ValueError as exc:
             raise PublicationError("machine-policy receipt is not valid JSON") from exc
-        receipt = MachinePolicyReceiptV31.model_validate(receipt_raw, strict=True)
         expected = {
             "candidate_sha": candidate_sha,
             "candidate_tree_sha": candidate_tree_sha,
@@ -383,9 +384,10 @@ class ExternalReceiptAuthorizer:
         if len(result.stdout.encode()) > 65_536:
             raise PublicationError("independent receipt verifier output exceeded its bound")
         try:
-            raw: object = json.loads(result.stdout)
-            authorization = PublicCheckAuthorization.model_validate(raw, strict=True)
-        except (json.JSONDecodeError, ValueError) as exc:
+            authorization = PublicCheckAuthorization.model_validate_json(
+                result.stdout, strict=True
+            )
+        except ValueError as exc:
             raise PublicationError(
                 "independent verifier returned an invalid public authorization"
             ) from exc
@@ -416,9 +418,8 @@ class ExternalReceiptAuthorizer:
         )
         raw_bytes = activation_path.read_bytes()
         try:
-            raw: object = json.loads(raw_bytes)
-            receipt = ActivationReceiptV31.model_validate(raw, strict=True)
-        except (json.JSONDecodeError, ValueError) as exc:
+            receipt = ActivationReceiptV31.model_validate_json(raw_bytes, strict=True)
+        except ValueError as exc:
             raise PublicationError("activation receipt contract is invalid") from exc
         expected = {
             "verified_main_sha": expected_main_sha,

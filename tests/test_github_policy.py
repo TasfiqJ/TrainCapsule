@@ -1,6 +1,8 @@
 from __future__ import annotations
 
+import os
 import subprocess
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 import pytest
@@ -9,6 +11,7 @@ from pydantic import ValidationError
 import tcfactory.github_sync as github_sync
 import tcfactory.v3.publication as publication
 from tcfactory.github_sync import GitHubConfig, load_github_config
+from tcfactory.v3.contracts_v31 import ActivationMode, ActivationReceiptV31
 from tcfactory.v3.publication import (
     ExternalReceiptAuthorizer,
     GhPublicationClient,
@@ -126,3 +129,73 @@ def test_external_verifier_paths_reject_symlink_substitution(tmp_path: Path) -> 
     receipt_root.symlink_to(tmp_path, target_is_directory=True)
     with pytest.raises(PublicationError, match="symlink"):
         trusted_external_path(receipt_root, directory=True, label="receipt root")
+
+
+def test_external_activation_authorizer_accepts_strict_canonical_json(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    executable = tmp_path / "verifier"
+    executable.write_text("#!/bin/sh\n", encoding="utf-8")
+    executable.chmod(0o555)
+    receipt_path = tmp_path / "activation.json"
+    now = datetime(2026, 8, 13, 20, 0, tzinfo=UTC)
+    receipt = ActivationReceiptV31(
+        schema_version="3.1",
+        receipt_id="ACT:STRICT-JSON-001",
+        verified_main_sha="a" * 40,
+        machine_environment_digest="sha256:" + "b" * 64,
+        source_generation_id="traincapsule-v3.1-zh-2026-08-12",
+        source_generation_digest="sha256:" + "c" * 64,
+        controller_binary_digest="sha256:" + "d" * 64,
+        controller_config_digest="sha256:" + "e" * 64,
+        machine_environment_path="canary-suite.json",
+        controller_binary_path="installed-controller-runtime.json",
+        controller_config_path="effective-config.yaml",
+        machine_policy_receipt_id="MPOL:STRICT-JSON-001",
+        machine_policy_receipt_digest="sha256:" + "f" * 64,
+        mode=ActivationMode.LIVE,
+        issued_at=now,
+        expires_at=now + timedelta(minutes=30),
+        revocation_epoch=1,
+        nonce="strict-json-nonce-0001",
+        issuer_id="VERIFIER:INDEPENDENT",
+        issuer_key_id="KEY:ED25519:001",
+        signature_algorithm="ed25519",
+        signature="A" * 80,
+    )
+    receipt_path.write_bytes(receipt.canonical_json_bytes())
+
+    def trust(
+        path: Path, *, directory: bool, label: str
+    ) -> tuple[Path, os.stat_result]:
+        del directory, label
+        return path.resolve(strict=True), path.lstat()
+
+    authorization = publication.PublicActivationAuthorization(
+        verified=True,
+        verified_main_sha=receipt.verified_main_sha,
+        activation_receipt_id=receipt.receipt_id,
+        activation_receipt_digest=receipt.canonical_digest(),
+    )
+
+    def run(
+        args: list[str], **_kwargs: object
+    ) -> subprocess.CompletedProcess[str]:
+        return subprocess.CompletedProcess(
+            args,
+            0,
+            authorization.model_dump_json(by_alias=True),
+            "",
+        )
+
+    monkeypatch.setattr(publication, "trusted_external_path", trust)
+    monkeypatch.setattr(publication, "run_command", run)
+    observed = ExternalReceiptAuthorizer(executable).verify_activation(
+        receipt_path,
+        expected_main_sha=receipt.verified_main_sha,
+        source_generation_id=receipt.source_generation_id,
+        source_generation_digest=receipt.source_generation_digest,
+        controller_binary_digest=receipt.controller_binary_digest,
+        controller_config_digest=receipt.controller_config_digest,
+    )
+    assert observed.activation_receipt_digest == receipt.canonical_digest()

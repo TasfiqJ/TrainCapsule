@@ -640,6 +640,18 @@ uv run pyright verifier/src/traincapsule_verifier/post_activation_observer.py ve
 0 errors, 0 warnings, 0 informations
 ```
 
+Repository-wide revalidation after the safety-window change also passed the complete pytest suite,
+full Ruff, strict Pyright, V3.1 source generation (11 documents and 504 mapped headings), V3.1
+package integrity, source-authority integrity, active-policy integrity (282 files), roadmap and V3/V3.1
+schema generation (63 V3.1 schemas), legacy migration generation (124 entries), and the regenerated
+644-path migration inventory. The migration-evidence gate remained truthfully red with:
+
+```text
+FAIL: V3-MIG-016 is pending; run .venv/bin/python scripts/finalize_v3_1_zh_m0_evidence.py
+```
+
+The finalizer was not used to invent or self-author the missing independent authority.
+
 Remaining immediate blocker and next action: the installed runtime still contains the old observer
 bytes, and normal authority renewal does not yet exist. Implement and hostile-test pre-expiry
 machine-policy/activation renewal with a stop-before-expiry deadline, then publish only through the

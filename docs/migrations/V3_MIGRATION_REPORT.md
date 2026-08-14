@@ -123,7 +123,7 @@ No future SHA, run ID, receipt, or PASS is invented here. Retain `factory/state/
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **643 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **644 paths**.
 
 This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing
 report must bind acceptance to an immutable candidate SHA and independent test/receipt
@@ -255,6 +255,7 @@ artifacts.
 | `A` | `docs/migrations/V3_1_ZH_PACKAGE_INTEGRITY.json` |
 | `A` | `docs/migrations/V3_1_ZH_PHASE_0_BASELINE.json` |
 | `A` | `docs/migrations/V3_1_ZH_REMAINING_ACCEPTANCE.md` |
+| `A` | `docs/migrations/V3_1_ZH_ZERO_HUMAN_COMPLETION_PLAN.md` |
 | `A` | `docs/migrations/V3_BASELINE_REPORT.md` |
 | `A` | `docs/migrations/V3_BUNDLE_INTEGRITY_REPORT.json` |
 | `A` | `docs/migrations/V3_CODEX_EXECUTION_STATE.md` |

@@ -116,6 +116,7 @@ def _metadata(role: str) -> tuple[str, str, str]:
         "git-anchor-producer-policy",
         "git-anchor-observer-public-key",
         "selector-public-key",
+        "ruleset-public-key",
     }:
         return "root", "root", "0444"
     if role in {"private-key", "github-app-private-key"}:

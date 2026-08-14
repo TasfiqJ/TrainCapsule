@@ -14,6 +14,7 @@ from traincapsule_verifier.git_anchor_updater import (
     AnchorUpdatePolicy,
     AnchorUpdateRequest,
     advance_anchor,
+    valid_main_parent_binding,
 )
 from traincapsule_verifier.models import (
     ObservedMainReceipt,
@@ -22,6 +23,24 @@ from traincapsule_verifier.models import (
 )
 
 NOW = datetime(2026, 8, 12, 20, 0, tzinfo=UTC)
+
+
+def test_parent_binding_accepts_only_exact_protected_merge_shapes() -> None:
+    base = "a" * 40
+    candidate = "b" * 40
+    assert valid_main_parent_binding([base], base_sha=base, candidate_sha=candidate)
+    assert valid_main_parent_binding(
+        [base, candidate], base_sha=base, candidate_sha=candidate
+    )
+    assert not valid_main_parent_binding(
+        [candidate, base], base_sha=base, candidate_sha=candidate
+    )
+    assert not valid_main_parent_binding(
+        [base, "c" * 40], base_sha=base, candidate_sha=candidate
+    )
+    assert not valid_main_parent_binding(
+        [base, candidate, "c" * 40], base_sha=base, candidate_sha=candidate
+    )
 
 
 def _git(path: Path, *args: str) -> str:
@@ -119,7 +138,12 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
         update={"signature": sign_model(observed_provisional, selector)}
     )
     publication_raw = canonical_json_bytes(
-        {"phase": "MERGED", "baseSha": base, "mergedMainSha": merged}
+        {
+            "phase": "MERGED",
+            "baseSha": base,
+            "candidateSha": merged,
+            "mergedMainSha": merged,
+        }
     )
     request = AnchorUpdateRequest(
         request_id="ANCHOR:TEST_0001",

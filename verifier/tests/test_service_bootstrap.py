@@ -483,6 +483,14 @@ def test_activation_units_use_installed_environment_and_create_stop_fail_closed(
     )
 
 
+def test_ruleset_consumers_do_not_receive_dac_override_capabilities() -> None:
+    for unit in ("selector", "git-anchor-producer"):
+        service = systemd_unit_content(unit=unit).decode()
+        assert "NoNewPrivileges=yes" in service
+        assert "CAP_DAC" not in service
+        assert "AmbientCapabilities=" not in service
+
+
 def test_unit_separation_and_rollback_are_explicit(tmp_path: Path) -> None:
     paths = render_systemd_units(tmp_path / "stage")
     issuer = next(path for path in paths if path.name.endswith("issuer.service")).read_text()

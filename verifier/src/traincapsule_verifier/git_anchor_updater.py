@@ -77,6 +77,14 @@ class AnchorUpdateJournal(V31Model):
     updated_at: datetime
 
 
+def valid_main_parent_binding(
+    parents: list[str], *, base_sha: str, candidate_sha: str
+) -> bool:
+    """Accept protected squash/rebase ancestry or GitHub's exact PR merge shape."""
+
+    return parents == [base_sha] or parents == [base_sha, candidate_sha]
+
+
 def _run_git(path: Path, *arguments: str) -> str:
     result = subprocess.run(
         ["/usr/bin/git", "-C", str(path), *arguments],
@@ -123,7 +131,9 @@ def _canonical_mapping(raw: bytes, label: str) -> dict[str, object]:
     return cast(dict[str, object], value)
 
 
-def _validate_staging(stage: Path, request: AnchorUpdateRequest) -> None:
+def _validate_staging(
+    stage: Path, request: AnchorUpdateRequest, transaction: dict[str, object]
+) -> None:
     if (stage / "hooks").exists() or (stage / "objects/info/alternates").exists():
         raise ValueError("anchor bundle contains external Git behavior")
     if _run_git(stage, "remote"):
@@ -150,10 +160,15 @@ def _validate_staging(stage: Path, request: AnchorUpdateRequest) -> None:
     main = _run_git(stage, "rev-parse", "refs/heads/main")
     tree = _run_git(stage, "rev-parse", f"{main}^{{tree}}")
     parents = _run_git(stage, "show", "-s", "--format=%P", main).split()
+    candidate = transaction.get("candidateSha")
+    if not isinstance(candidate, str):
+        raise ValueError("anchor publication transaction lacks its candidate")
     if (
         main != request.merged_main_sha
         or tree != request.merged_main_tree_sha
-        or parents != [request.base_sha]
+        or not valid_main_parent_binding(
+            parents, base_sha=request.base_sha, candidate_sha=candidate
+        )
     ):
         raise ValueError("anchor bundle main/tree/parent binding is invalid")
 
@@ -333,7 +348,7 @@ def advance_anchor(
                     raise ValueError("anchor bundle cannot be materialized")
                 _run_git(stage, "remote", "remove", "origin")
                 shutil.rmtree(stage / "hooks")
-                _validate_staging(stage, request)
+                _validate_staging(stage, request, transaction)
                 _run_git(anchor, "fetch", "--no-tags", str(stage), "refs/heads/main")
                 imported = prepared.model_copy(update={"phase": "OBJECTS_IMPORTED"})
                 _write_journal(journal_path, imported)

@@ -266,7 +266,7 @@ def test_ruleset_broker_rotates_replays_and_recovers_after_preselector_crash(
     ).observation_id == second.observation_id
     assert (target_path / f"{first.observation_id}.json").exists()
     assert (target_path / f"{second.observation_id}.json").exists()
-    assert (target_path / "current.json").stat().st_mode & 0o777 == 0o644
+    assert (target_path / "current.json").stat().st_mode & 0o777 == 0o444
     assert (target_path / f"{first.observation_id}.json").stat().st_mode & 0o777 == 0o644
     assert (target_path / f"{second.observation_id}.json").stat().st_mode & 0o777 == 0o644
 

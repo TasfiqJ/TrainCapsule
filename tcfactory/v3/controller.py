@@ -1648,6 +1648,10 @@ class V3Controller:
             proposals=[],
             now=datetime.now(UTC),
         )
+        if collection.active_milestone == "M0_FACTORY_MIGRATED":
+            from ..supervisor import create_migration_complete_marker
+
+            create_migration_complete_marker(self.repo_root)
         return state.active_milestone
 
     def initialize(self) -> None:

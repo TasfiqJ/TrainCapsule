@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-# pyright: reportUnknownLambdaType=false, reportUnknownArgumentType=false
+# pyright: reportUnknownLambdaType=false, reportUnknownArgumentType=false, reportPrivateUsage=false
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -12,13 +12,25 @@ from tcfactory.supervisor import (
     MigrationCompleteMarker,
     RuntimePaths,
     SupervisorState,
+    _verify_m0_observation_state,
+    _verify_migration_marker,
+    create_migration_complete_marker,
     record_controller_exit,
     run_startup_preflight,
     save_supervisor_state,
 )
-from tcfactory.util import sha256_file, write_json
+from tcfactory.util import read_json, sha256_file, write_json
 from tcfactory.v3.configuration import load_autonomy_v3, load_factory_v3
+from tcfactory.v3.enums import MilestoneStatus
+from tcfactory.v3.milestone_runtime import (
+    MilestoneRuntimeState,
+    advance_milestone_state,
+)
+from tcfactory.v3.milestones import MilestoneRoadmap
 from tcfactory.v3.private_gate import PrivateGateHealthCheck, PrivateGateVerificationError
+from tcfactory.v3.runtime_paths import resolve_v3_runtime_paths
+from tcfactory.v3.source_authority import validate_active_source_generation
+from tcfactory.yamlutil import load_yaml
 
 
 def _runtime_paths(root: Path) -> RuntimePaths:
@@ -114,6 +126,7 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
         acceptance_evidence_digests={
             f"V3-MIG-{number:03d}": "sha256:" + "a" * 64 for number in range(16, 21)
         },
+        milestone_receipt_digest="sha256:" + "d" * 64,
         completed_at=datetime(2026, 8, 11, 21, 0, tzinfo=UTC),
     )
     write_json(paths.migration_marker, marker.model_dump(mode="json", by_alias=True))
@@ -184,6 +197,96 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
     }
 
 
+def test_m0_observation_is_the_only_markerless_migration_state(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    config = load_factory_v3(repo_root / "config" / "factory.yaml")
+    monkeypatch.setenv(config.runtime.local_state_root_environment_variable, str(tmp_path))
+    paths = resolve_v3_runtime_paths(repo_root, config)
+
+    _verify_m0_observation_state(repo_root, config, paths)
+
+    completed = MilestoneRuntimeState(
+        active_milestone="M1_NATIVE_PREFLIGHT",
+        statuses={
+            "M0_FACTORY_MIGRATED": MilestoneStatus.COMPLETED,
+            "M1_NATIVE_PREFLIGHT": MilestoneStatus.ACTIVE,
+        },
+        last_completion_digest="sha256:" + "a" * 64,
+        updated_at=datetime(2026, 8, 14, 2, 0, tzinfo=UTC),
+    )
+    write_json(
+        paths.milestone_state,
+        {
+            "record": completed.model_dump(mode="json", by_alias=True),
+            "contentDigest": completed.canonical_digest(),
+        },
+    )
+    with pytest.raises(RuntimeError, match="mandatory after M0 observation"):
+        _verify_m0_observation_state(repo_root, config, paths)
+
+
+def test_migration_marker_is_derived_from_immutable_m0_runtime_receipt(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo_root = Path(__file__).resolve().parents[1]
+    config = load_factory_v3(repo_root / "config" / "factory.yaml")
+    monkeypatch.setenv(config.runtime.local_state_root_environment_variable, str(tmp_path))
+    monkeypatch.setattr("tcfactory.supervisor._verify_source_integrity", lambda _: None)
+    paths = resolve_v3_runtime_paths(repo_root, config)
+    active_source = validate_active_source_generation(repo_root)
+    required = {f"V3-MIG-{number:03d}" for number in range(16, 21)}
+    evidence = {
+        identifier: "sha256:" + str(index) * 64
+        for index, identifier in enumerate(sorted(required), 1)
+    }
+    roadmap = MilestoneRoadmap.model_validate(
+        load_yaml(repo_root / config.roadmap.milestones)
+    )
+    receipt_path = paths.milestone_decisions / "M0_FACTORY_MIGRATED.json"
+    advance_milestone_state(
+        roadmap=roadmap,
+        state_path=paths.milestone_state,
+        receipt_path=receipt_path,
+        evidence_digests=evidence,
+        expected_evidence_ids=required,
+        source_authority_digest=active_source.canonical_digest(),
+        now=datetime(2026, 8, 14, 2, 15, tzinfo=UTC),
+    )
+
+    marker = create_migration_complete_marker(repo_root)
+    assert marker.acceptance_evidence_digests == evidence
+    assert marker.milestone_receipt_digest == read_json(receipt_path, {})["contentDigest"]
+    assert _verify_migration_marker(repo_root, config, paths.migration_marker) == marker
+
+    from tcfactory.gitops import current_sha
+
+    previous = marker.model_copy(update={"completed_sha": current_sha(repo_root, "HEAD^")})
+    write_json(
+        paths.migration_marker, previous.model_dump(mode="json", by_alias=True)
+    )
+    with pytest.raises(RuntimeError, match="exact current checkout SHA"):
+        _verify_migration_marker(repo_root, config, paths.migration_marker)
+    assert (
+        _verify_migration_marker(
+            repo_root,
+            config,
+            paths.migration_marker,
+            allow_ancestor_completion=True,
+        )
+        == previous
+    )
+    marker = create_migration_complete_marker(repo_root)
+    assert marker.completed_sha == current_sha(repo_root)
+
+    raw = read_json(receipt_path, {})
+    raw["contentDigest"] = "sha256:" + "f" * 64
+    write_json(receipt_path, raw)
+    with pytest.raises(RuntimeError, match="receipt digest mismatch"):
+        _verify_migration_marker(repo_root, config, paths.migration_marker)
+
+
 def test_startup_reconciles_publication_before_exact_sha_marker(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -216,6 +319,7 @@ def test_startup_reconciles_publication_before_exact_sha_marker(
         raise RuntimeError("exact-SHA marker intentionally unavailable")
 
     monkeypatch.setattr("tcfactory.supervisor._verify_migration_marker", reject_marker)
+    write_json(tmp_path / "MIGRATION_COMPLETE_V3.json", {})
     with pytest.raises(RuntimeError, match="exact-SHA marker intentionally unavailable"):
         run_startup_preflight(repo_root)
     assert calls == ["reconcile", "marker"]

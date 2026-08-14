@@ -662,6 +662,22 @@ asserting the disposable clone is present. The activation/canary module, Ruff, a
 pass. A fresh installed-runner 20-canary result is still required before this blocker can be marked
 closed.
 
+A subsequent real invocation of the installed root-owned runner on exact commit
+`0d4a20c34923d790a6dca95f517eaae877e9fda3` and tree
+`1887d6de6f2785b535b0ecf4c646ee0fe60112ca` produced suite
+`CANARY-20260814T162117Z-0D4A20C34923` at
+`/tmp/traincapsule-current-canaries-0d4a20c/CANARY-20260814T162117Z-0D4A20C34923/suite.json`,
+digest `sha256:4414e84c4ecb6bb5799c0c84aed64917b697990064c23f55c113d13f7eea1411`.
+Eighteen mechanisms passed. Two remained truthfully `BLOCKED_PREREQUISITE`:
+
+- `post_merge_invariant_failure_and_automated_revert_pr`: the external probe lacked a proven
+  isolated GitHub repository, App credential, ruleset, and revert-PR permission;
+- `real_claude_mechanical_task`: the external probe lacked a proven real Claude executable,
+  credential, and paid canary budget.
+
+This is local installed-runner proof bound to the branch commit, not exact installed-main proof and
+not a 20/20 PASS claim.
+
 Remaining immediate blocker and next action: the installed runtime still contains the old observer
 bytes, and normal authority renewal does not yet exist. Implement and hostile-test pre-expiry
 machine-policy/activation renewal with a stop-before-expiry deadline, then publish only through the

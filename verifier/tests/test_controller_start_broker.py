@@ -82,6 +82,15 @@ def test_start_failure_stop_restore_is_atomic_and_idempotent(tmp_path: Path) -> 
     assert len(list(tmp_path.iterdir())) == 1
 
 
+def test_activation_binds_runtime_manifest_file_not_inner_self_digest() -> None:
+    raw = b'{"manifestDigest":"sha256:' + b"a" * 64 + b'"}\n'
+    authority_digest = broker._runtime_manifest_authority_digest(  # pyright: ignore[reportPrivateUsage]
+        raw
+    )
+    assert authority_digest == sha256_digest(raw)
+    assert authority_digest != "sha256:" + "a" * 64
+
+
 def test_systemd_path_has_one_root_broker_and_no_direct_controller_start() -> None:
     service = systemd_unit_content(unit="controller-start-broker").decode()
     trigger = systemd_unit_content(unit="controller-start-path").decode()

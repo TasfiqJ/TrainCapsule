@@ -121,7 +121,10 @@ def test_seven_events_require_exact_receipt_tree_monotonicity_and_artifact_diges
                 {"MESSAGE": "TCF_V31_EVENT " + event.model_dump_json(by_alias=True)}
             )
         )
-    def run_journal(*_args: object, **_kwargs: object) -> SimpleNamespace:
+    journal_commands: list[list[str]] = []
+
+    def run_journal(*args: object, **_kwargs: object) -> SimpleNamespace:
+        journal_commands.append(cast(list[str], args[0]))
         return SimpleNamespace(returncode=0, stdout="\n".join(lines))
 
     monkeypatch.setattr(observer.subprocess, "run", run_journal)
@@ -133,6 +136,9 @@ def test_seven_events_require_exact_receipt_tree_monotonicity_and_artifact_diges
     )
     assert set(artifacts) == set(observer.ObservationId)
     assert set(digests) == set(observer.ObservationId)
+    assert journal_commands[0][-1] == (
+        f"--since={issued_at.strftime('%Y-%m-%d %H:%M:%S UTC')}"
+    )
     complete_lines = list(lines)
     lines.pop()
     with pytest.raises(ValueError, match="omits mandatory"):

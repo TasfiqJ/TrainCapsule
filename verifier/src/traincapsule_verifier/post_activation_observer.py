@@ -341,13 +341,16 @@ def _event_evidence(
     main_sha: str,
     tree_sha: str,
 ) -> tuple[dict[ObservationId, str], dict[ObservationId, str]]:
+    journal_since = receipt.issued_at.astimezone(UTC).strftime(
+        "%Y-%m-%d %H:%M:%S UTC"
+    )
     command = [
         "/usr/bin/journalctl",
         "--unit",
         policy.service_name,
         "--output=json",
         "--no-pager",
-        f"--since={receipt.issued_at.isoformat()}",
+        f"--since={journal_since}",
     ]
     result = subprocess.run(
         command, check=False, capture_output=True, text=True, timeout=60

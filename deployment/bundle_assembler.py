@@ -478,7 +478,9 @@ def _validate_controller_runtime(sources: Mapping[str, Path]) -> None:
         f"ExecStart={ROLE_TARGETS['python-runtime']} {arguments}",
         f"EnvironmentFile={ROLE_TARGETS['controller-runtime-environment']}",
         "WorkingDirectory=/var/lib/traincapsule-verifier/repository-boundary",
-        "NoNewPrivileges=yes",
+        # The controller must be able to invoke the single root-owned helper
+        # allowed by the private-gate sudoers policy.
+        "NoNewPrivileges=no",
     }
     if (
         not required <= set(unit_lines)

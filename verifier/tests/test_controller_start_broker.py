@@ -78,6 +78,8 @@ def test_start_request_requires_exact_terminal_transaction_digest() -> None:
 def test_start_failure_stop_restore_is_atomic_and_idempotent(tmp_path: Path) -> None:
     broker.restore_runtime_stop(tmp_path)
     assert (tmp_path / "STOP").read_bytes() == b"controller start broker rollback\n"
+    assert (tmp_path / "STOP").stat().st_uid == tmp_path.stat().st_uid
+    assert (tmp_path / "STOP").stat().st_gid == tmp_path.stat().st_gid
     broker.restore_runtime_stop(tmp_path)
     assert len(list(tmp_path.iterdir())) == 1
 

@@ -204,6 +204,9 @@ def _atomic_write(path: Path, raw: bytes) -> None:
 
 def restore_runtime_stop(runtime_root: Path) -> None:
     runtime_root.mkdir(parents=True, exist_ok=True)
+    runtime_stat = runtime_root.lstat()
+    if runtime_root.is_symlink() or not stat.S_ISDIR(runtime_stat.st_mode):
+        raise ValueError("runtime root is not a direct directory")
     stop = runtime_root / "STOP"
     if stop.exists():
         return
@@ -211,6 +214,7 @@ def restore_runtime_stop(runtime_root: Path) -> None:
         stop, os.O_WRONLY | os.O_CREAT | os.O_EXCL | getattr(os, "O_NOFOLLOW", 0), 0o600
     )
     try:
+        os.fchown(descriptor, runtime_stat.st_uid, runtime_stat.st_gid)
         os.write(descriptor, b"controller start broker rollback\n")
         os.fsync(descriptor)
     finally:

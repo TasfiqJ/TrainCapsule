@@ -328,9 +328,9 @@ def _activation_policy_receipt(repo: Path, suite_path: Path, path: Path) -> Path
         base_sha=sha,
         source_generation_id=suite.source_generation_id,
         source_generation_digest=suite.source_generation_digest,
-        context_manifest_digest=DIGEST,
-        task_packet_digest=DIGEST,
-        candidate_manifest_digest=DIGEST,
+        context_manifest_digest=sha256_digest(suite_path.read_bytes()),
+        task_packet_digest=suite.controller_digest,
+        candidate_manifest_digest=suite.factory_config_digest,
         checkpoint_digest=DIGEST,
         required_gate_results={"GATE:ACTIVATION": GateResult.PASS},
         private_gate_suite_id="GATES:PRIVATE",
@@ -395,6 +395,23 @@ def test_activation_request_is_exact_idempotent_and_stopped(
     ).read_bytes()
     assert request.controller_binary_digest == sha256_digest(controller_raw)
     assert request.controller_config_digest == sha256_digest(config_raw)
+    receipt_value = MachinePolicyReceiptV31.model_validate_json(
+        receipt.read_bytes(), strict=True
+    )
+    mismatched_receipt = tmp_path / "mismatched-policy.json"
+    mismatched_receipt.write_bytes(
+        receipt_value.model_copy(
+            update={"context_manifest_digest": DIGEST}
+        ).canonical_json_bytes()
+    )
+    with pytest.raises(RuntimeError, match="does not authorize the exact activation evidence"):
+        stage_activation_request(
+            repo_root=repo,
+            canary_suite_path=suite,
+            machine_policy_receipt_path=mismatched_receipt,
+            _outbox_root=outbox,
+            installed_runtime_loader=runtime_loader,
+        )
     manifest, _ = _runtime_loader()
 
     def tampered_loader(

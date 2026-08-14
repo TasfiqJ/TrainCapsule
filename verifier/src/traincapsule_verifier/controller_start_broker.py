@@ -41,6 +41,33 @@ class _Artifact(_Strict):
     executable: bool = False
 
 
+class _ReductionOracle(_Strict):
+    oracle_id: Literal["TRAINCAPSULE_REDUCTION_ORACLE_V1"]
+    executable: _Artifact
+    public_key: _Artifact
+    receipt_verifier: _Artifact
+    public_receipt_root: Literal["/var/lib/traincapsule-verifier/receipts"]
+    activation_receipt_path: Literal[
+        "/var/lib/traincapsule-verifier/activation/current.json"
+    ]
+
+    @model_validator(mode="after")
+    def exact_installation(self) -> _ReductionOracle:
+        if (
+            self.executable.path
+            != "/usr/local/libexec/traincapsule-reduction-oracle"
+            or not self.executable.executable
+            or self.public_key.path
+            != "/etc/traincapsule-verifier/keys/reduction-oracle.pub"
+            or self.public_key.executable
+            or self.receipt_verifier.path
+            != "/usr/local/bin/traincapsule-verifier-verify-receipt"
+            or not self.receipt_verifier.executable
+        ):
+            raise ValueError("reduction oracle installation contract mismatch")
+        return self
+
+
 class _RuntimeManifest(_Strict):
     schema_version: Literal["3.1"]
     manifest_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
@@ -56,9 +83,12 @@ class _RuntimeManifest(_Strict):
     environment_file: _Artifact
     effective_config: _Artifact
     repository_snapshot_manifest: _Artifact
+    reduction_oracle: _ReductionOracle | None = None
     repository_main_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
     repository_tree_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
+    mutable_git_root: Literal["/var/lib/traincapsule-runtime/git"]
     mutable_worktree_root: Literal["/var/lib/traincapsule-runtime/worktrees"]
+    artifact_root: Literal["/var/lib/traincapsule-runtime/artifacts/v3"]
     entry_arguments: tuple[str, ...]
 
     @model_validator(mode="after")

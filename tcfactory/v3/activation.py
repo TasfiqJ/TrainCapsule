@@ -131,12 +131,16 @@ def stage_activation_request(
         raise RuntimeError("activation canary suite does not bind the exact current main/tree")
     receipt_raw = machine_policy_receipt_path.resolve(strict=True).read_bytes()
     receipt = MachinePolicyReceiptV31.model_validate_json(receipt_raw, strict=True)
+    suite_digest = sha256_digest(suite_raw)
     if (
         receipt.decision is not PolicyDecision.PASS
         or receipt.candidate_sha != main_sha
         or receipt.candidate_tree_sha != tree_sha
         or receipt.source_generation_id != suite.source_generation_id
         or receipt.source_generation_digest != suite.source_generation_digest
+        or receipt.context_manifest_digest != suite_digest
+        or receipt.task_packet_digest != suite.controller_digest
+        or receipt.candidate_manifest_digest != suite.factory_config_digest
         or "ACTIVATION" not in receipt.allowed_claims
     ):
         raise RuntimeError(
@@ -145,7 +149,6 @@ def stage_activation_request(
     installed_runtime, controller_raw, config_raw = installed_runtime_loader(
         installed_runtime_manifest_path
     )
-    suite_digest = sha256_digest(suite_raw)
     controller_digest = sha256_digest(controller_raw)
     config_digest = sha256_digest(config_raw)
     if controller_raw != installed_runtime.canonical_json_bytes():

@@ -367,7 +367,11 @@ def _metadata(role: str) -> tuple[str, str, str]:
         return "root", "traincapsule-anchor-fetcher", "0750"
     if role in {"git-anchor-github-private-key", "git-anchor-observer-private-key"}:
         return "traincapsule-anchor-fetcher", "traincapsule-anchor-fetcher", "0600"
-    if role in {"git-anchor-producer-policy", "git-anchor-observer-public-key"}:
+    if role in {
+        "git-anchor-producer-policy",
+        "git-anchor-observer-public-key",
+        "ruleset-public-key",
+    }:
         return "root", "root", "0444"
     if role in {
         "canary-policy",

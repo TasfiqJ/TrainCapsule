@@ -26,7 +26,7 @@ from pydantic import Field, model_validator
 from .canonical import canonical_json_bytes, model_digest, sha256_digest
 from .crypto import load_private_key, sign_model
 from .filesystem import open_trusted_root, read_bounded_file
-from .git_anchor_updater import AnchorUpdateRequest
+from .git_anchor_updater import AnchorUpdateRequest, valid_main_parent_binding
 from .models import ObservedMainReceipt, RulesetObservationReceipt, SourceGenerationId, V31Model
 from .public_crypto import load_public_key, verify_model_signature
 
@@ -364,7 +364,7 @@ def produce(
         Path(policy.observer_key_path), uid=fetcher.pw_uid, mode=0o600, maximum=64_000
     )
     ruleset_raw = _trusted_raw(
-        Path(policy.ruleset_receipt_path), uid=0, mode=0o400, maximum=1_000_000
+        Path(policy.ruleset_receipt_path), uid=0, mode=0o444, maximum=1_000_000
     )
     ruleset_key_raw = _trusted_raw(
         Path(policy.ruleset_public_key_path), uid=0, mode=0o444, maximum=16_000
@@ -478,7 +478,9 @@ def produce(
                 ["-C", str(stage), "show", "-s", "--format=%P", main],
                 cwd=Path(raw),
             ).split()
-            if main != job.merged_main_sha or parents != [job.base_sha]:
+            if main != job.merged_main_sha or not valid_main_parent_binding(
+                parents, base_sha=job.base_sha, candidate_sha=candidate_sha
+            ):
                 raise ValueError("anchor fetcher main/tree/parent binding is invalid")
             bundle = Path(raw) / "main.bundle"
             _run_git(

@@ -904,7 +904,6 @@ def _validate_role_metadata(spec: PrivilegedInstallSpec) -> None:
         "check-publisher-policy",
         "activation-selector-policy",
         "ruleset-observer-policy",
-        "ruleset-public-key",
         "controller-principal-policy",
         "controller-start-policy",
         "post-activation-policy",
@@ -915,6 +914,13 @@ def _validate_role_metadata(spec: PrivilegedInstallSpec) -> None:
         item = by_role[role]
         if (item.owner, item.group, item.mode) != ("root", "root", "0644"):
             raise ValueError("public authority files must be root-owned read-only")
+    ruleset_public_key = by_role["ruleset-public-key"]
+    if (ruleset_public_key.owner, ruleset_public_key.group, ruleset_public_key.mode) != (
+        "root",
+        "root",
+        "0444",
+    ):
+        raise ValueError("ruleset public key must be globally readable and immutable")
     for role in (
         "issuer-service",
         "issuer-path",

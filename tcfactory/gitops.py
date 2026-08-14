@@ -26,6 +26,20 @@ class GitError(RuntimeError):
     pass
 
 
+def trusted_repository_git_command(repo_root: Path, *args: str) -> list[str]:
+    """Build a Git command pinned to one exact trusted repository boundary."""
+
+    trusted_root = repo_root.resolve(strict=True)
+    return [
+        "git",
+        "-c",
+        f"safe.directory={trusted_root}",
+        "-c",
+        f"safe.directory={trusted_root / '.git'}",
+        *args,
+    ]
+
+
 _CLAUDE_SANDBOX_SENTINELS = frozenset(
     {
         ".gitmodules",
@@ -49,7 +63,9 @@ def ensure_git_repo(repo_root: Path) -> None:
 
 
 def current_sha(repo_root: Path, ref: str = "HEAD") -> str:
-    return run_command(["git", "rev-parse", ref], cwd=repo_root).stdout.strip()
+    return run_command(
+        trusted_repository_git_command(repo_root, "rev-parse", ref), cwd=repo_root
+    ).stdout.strip()
 
 
 def current_branch(repo_root: Path) -> str:

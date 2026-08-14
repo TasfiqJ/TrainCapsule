@@ -10,6 +10,7 @@ from typing import Literal
 
 from pydantic import Field, model_validator
 
+from ..gitops import trusted_repository_git_command
 from ..util import sha256_file
 from .base import DIGEST_PATTERN, V3Model, sha256_digest
 
@@ -166,21 +167,24 @@ def load_installed_controller_runtime(
         if forbidden.exists():
             raise RuntimeError("installed repository snapshot has mutable external Git behavior")
     remote = subprocess.run(
-        ["/usr/bin/git", "-C", str(snapshot_root), "remote"],
+        trusted_repository_git_command(snapshot_root, "remote"),
+        cwd=snapshot_root,
         check=False,
         capture_output=True,
         text=True,
         timeout=30,
     )
     sha = subprocess.run(
-        ["/usr/bin/git", "-C", str(snapshot_root), "rev-parse", "HEAD"],
+        trusted_repository_git_command(snapshot_root, "rev-parse", "HEAD"),
+        cwd=snapshot_root,
         check=False,
         capture_output=True,
         text=True,
         timeout=30,
     )
     tree = subprocess.run(
-        ["/usr/bin/git", "-C", str(snapshot_root), "rev-parse", "HEAD^{tree}"],
+        trusted_repository_git_command(snapshot_root, "rev-parse", "HEAD^{tree}"),
+        cwd=snapshot_root,
         check=False,
         capture_output=True,
         text=True,

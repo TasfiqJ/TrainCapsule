@@ -2,7 +2,9 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime
+from enum import StrEnum
 from typing import Literal
 
 from pydantic import Field, model_validator
@@ -186,3 +188,92 @@ class PreflightInputs(ProductModel):
         ):
             raise ValueError("native binding artifacts are not all verified")
         return self
+
+
+class QualificationResult(StrEnum):
+    PASS = "PASS"
+    FAIL = "FAIL"
+    UNKNOWN = "UNKNOWN"
+    INAPPLICABLE = "INAPPLICABLE"
+    EXPIRED = "EXPIRED"
+
+
+class CommandExpectation(ProductModel):
+    expected_exit_codes: list[int] = Field(min_length=1, max_length=16)
+    required_stdout_tokens: list[str] = Field(default_factory=list, max_length=32)
+    forbidden_output_tokens: list[str] = Field(default_factory=list, max_length=32)
+
+    @model_validator(mode="after")
+    def bounded_tokens(self) -> CommandExpectation:
+        tokens = self.required_stdout_tokens + self.forbidden_output_tokens
+        if any(not token or len(token.encode("utf-8")) > 1024 for token in tokens):
+            raise ValueError("oracle tokens must contain 1 to 1024 UTF-8 bytes")
+        return self
+
+
+class ExperimentSpecification(ProductModel):
+    schema_version: int = Field(default=1, ge=1, le=1)
+    case_id: Identifier
+    workload_id: Digest
+    baseline_environment_id: Digest
+    candidate_environment_id: Digest
+    hypothesis: str = Field(min_length=1, max_length=4096)
+    observed_boundary: str = Field(min_length=1, max_length=4096)
+    manipulated_variables: dict[str, str] = Field(min_length=1, max_length=64)
+    controlled_variables: dict[str, str] = Field(min_length=1, max_length=64)
+    expected_observations: list[str] = Field(min_length=1, max_length=64)
+    legal_transformations: list[str] = Field(min_length=1, max_length=64)
+    forbidden_transformations: list[str] = Field(min_length=1, max_length=64)
+    baseline_command: list[str] = Field(min_length=1, max_length=256)
+    candidate_command: list[str] = Field(min_length=1, max_length=256)
+    working_directory: str = Field(min_length=1, max_length=4096)
+    environment: dict[str, str] = Field(default_factory=dict, max_length=128)
+    timeout_seconds: int = Field(ge=1, le=3600)
+    max_output_bytes: int = Field(default=1024 * 1024, ge=1024, le=4 * 1024 * 1024)
+    stop_conditions: list[str] = Field(min_length=1, max_length=64)
+    baseline_expectation: CommandExpectation
+    candidate_expectation: CommandExpectation
+    result_semantics: str = Field(min_length=1, max_length=4096)
+
+    @model_validator(mode="after")
+    def commands_and_environment_are_explicit(self) -> ExperimentSpecification:
+        for command in (self.baseline_command, self.candidate_command):
+            if any(not value or "\x00" in value or len(value) > 16_384 for value in command):
+                raise ValueError("command arguments must be non-empty, bounded strings")
+            if not command[0].startswith("/"):
+                raise ValueError("experiment executables must use absolute paths")
+        if any(
+            re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", key) is None
+            or "\x00" in value
+            or len(value) > 16_384
+            for key, value in self.environment.items()
+        ):
+            raise ValueError("experiment environment contains an invalid key or value")
+        return self
+
+
+class ExperimentRun(ProductModel):
+    phase: Literal["baseline", "candidate"]
+    command_digest: Digest
+    stdout_artifact: EvidenceArtifact
+    stderr_artifact: EvidenceArtifact
+    exit_code: int | None
+    timed_out: bool
+    output_limit_exceeded: bool
+    expectation_met: bool
+    started_at: datetime
+    finished_at: datetime
+    elapsed_milliseconds: int = Field(ge=0)
+
+
+class QualificationDecision(ProductModel):
+    schema_version: int = Field(default=1, ge=1, le=1)
+    case_id: Identifier
+    experiment_specification_digest: Digest
+    eligibility_decision_digest: Digest
+    result: QualificationResult
+    baseline_run: ExperimentRun | None = None
+    candidate_run: ExperimentRun | None = None
+    evidence_refs: list[Digest] = Field(min_length=1)
+    reasons: list[str] = Field(min_length=1)
+    generated_at: datetime

@@ -29,8 +29,10 @@ from traincapsule_ingest_pytorch import (
     PyTorchFlightRecorderImporter,
 )
 from traincapsule_qualify import (
+    ExperimentSpecification,
     PreflightInputs,
     evaluate_preflight,
+    execute_qualification,
     generate_native_baseline,
     render_native_baseline_human,
 )
@@ -454,6 +456,36 @@ def preflight(
             ),
         }
         raise typer.Exit(codes[decision.outcome.value])
+    except (OSError, ValueError, ValidationError, json.JSONDecodeError) as error:
+        _fail(str(error), code=ExitCode.INVALID_INPUT, machine=machine)
+
+
+@app.command("qualify")
+def qualify(
+    preflight_input: Annotated[Path, typer.Argument(help="Preflight inputs JSON.")],
+    experiment: Annotated[Path, typer.Argument(help="Experiment specification JSON.")],
+    store_root: Annotated[Path, typer.Option("--store")],
+    output: Annotated[Path | None, typer.Option("--output")] = None,
+    machine: Annotated[bool, typer.Option("--json")] = False,
+) -> None:
+    """Run a bounded local baseline/candidate experiment and qualify the change."""
+    try:
+        inputs = PreflightInputs.model_validate(_read_object(preflight_input))
+        specification = ExperimentSpecification.model_validate(_read_object(experiment))
+        decision = execute_qualification(
+            inputs,
+            specification,
+            store=LocalEvidenceStore(store_root),
+        )
+        _write_result(decision, output=output, machine=machine)
+        codes = {
+            "PASS": ExitCode.QUALIFICATION_PASS,
+            "FAIL": ExitCode.QUALIFICATION_FAIL,
+            "UNKNOWN": ExitCode.QUALIFICATION_UNKNOWN,
+            "INAPPLICABLE": ExitCode.POLICY_BLOCKED,
+            "EXPIRED": ExitCode.EXPIRED,
+        }
+        raise typer.Exit(codes[decision.result.value])
     except (OSError, ValueError, ValidationError, json.JSONDecodeError) as error:
         _fail(str(error), code=ExitCode.INVALID_INPUT, machine=machine)
 

@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import fcntl
 import os
+import shlex
 import shutil
 import stat
 import subprocess
@@ -180,15 +181,27 @@ def ensure_v3_mutable_runtime(
                 prefix="git-anchor-stage-", dir=paths.state_root
             ) as raw_stage:
                 stage = Path(raw_stage) / "anchor.git"
+                upload_pack = shlex.join(
+                    [
+                        "/usr/bin/git",
+                        "-c",
+                        f"safe.directory={immutable / '.git'}",
+                        "upload-pack",
+                    ]
+                )
                 clone = subprocess.run(
                     [
                         "/usr/bin/git",
                         "-c",
                         f"safe.directory={immutable}",
+                        "-c",
+                        f"safe.directory={immutable / '.git'}",
                         "clone",
                         "--bare",
                         "--no-hardlinks",
                         "--no-local",
+                        "--upload-pack",
+                        upload_pack,
                         str(immutable),
                         str(stage),
                     ],

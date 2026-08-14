@@ -3,6 +3,7 @@ from __future__ import annotations
 import subprocess
 from pathlib import Path
 from typing import cast
+from unittest.mock import patch
 
 import pytest
 import typer
@@ -169,7 +170,21 @@ def test_mutable_git_anchor_accepts_only_exact_private_empty_installer_leaf(
     paths = resolve_v3_runtime_paths(ROOT)
     paths.state_root.mkdir(mode=0o700)
     paths.git_root.mkdir(parents=True, mode=0o700)
-    ensure_v3_mutable_runtime(immutable, paths)
+    with patch.object(runtime_paths.subprocess, "run", wraps=subprocess.run) as run:
+        ensure_v3_mutable_runtime(immutable, paths)
+    clone_args = next(
+        call.args[0]
+        for call in run.call_args_list
+        if "clone" in call.args[0]
+    )
+    assert f"safe.directory={immutable}" in clone_args
+    assert f"safe.directory={immutable / '.git'}" in clone_args
+    upload_pack_index = clone_args.index("--upload-pack")
+    assert clone_args[upload_pack_index + 1] == (
+        "/usr/bin/git -c "
+        f"safe.directory={immutable / '.git'} upload-pack"
+    )
+    assert "safe.directory=*" not in clone_args
     assert (paths.git_root / "HEAD").is_file()
     assert subprocess.run(
         ["git", "-C", str(paths.git_root), "config", "user.name"],

@@ -18,6 +18,22 @@ from deployment.runtime_distribution import (
     validate_extracted_runtime_distribution,
     validate_runtime_distribution,
 )
+from scripts.build_production_runtime import project_runtime_source_files
+
+
+def test_production_runtime_excludes_package_local_tests(tmp_path: Path) -> None:
+    source = tmp_path / "application"
+    (source / "tests").mkdir(parents=True)
+    (source / "runtime.py").write_text("VALUE = 1\n", encoding="utf-8")
+    (source / "tests/test_runtime.py").write_text(
+        "raise AssertionError\n", encoding="utf-8"
+    )
+
+    selected = project_runtime_source_files(source)
+
+    assert [(path.name, relative.as_posix()) for path, relative in selected] == [
+        ("runtime.py", "runtime.py")
+    ]
 
 
 def _inputs(tmp_path: Path) -> tuple[Path, Path, Path]:

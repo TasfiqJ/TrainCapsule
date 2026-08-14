@@ -48,6 +48,20 @@ def _run(arguments: list[str], *, cwd: Path) -> None:
         raise RuntimeError(f"runtime dependency build failed: {detail}")
 
 
+def project_runtime_source_files(source_root: Path) -> list[tuple[Path, Path]]:
+    """Return production sources while excluding package-local test trees."""
+
+    selected: list[tuple[Path, Path]] = []
+    for source in sorted(source_root.rglob("*.py")):
+        if source.is_symlink() or not source.is_file():
+            raise RuntimeError("project runtime source contains a link")
+        relative = source.relative_to(source_root)
+        if relative.parts and relative.parts[0] == "tests":
+            continue
+        selected.append((source, relative))
+    return selected
+
+
 def build_production_runtime(
     *,
     repo_root: Path,
@@ -111,10 +125,7 @@ def build_production_runtime(
             source_root = exact_repo / source_prefix.rstrip("/")
             if source_root.is_symlink() or not source_root.is_dir():
                 raise RuntimeError("project runtime source root is unavailable")
-            for source in sorted(source_root.rglob("*.py")):
-                if source.is_symlink() or not source.is_file():
-                    raise RuntimeError("project runtime source contains a link")
-                relative = source.relative_to(source_root)
+            for source, relative in project_runtime_source_files(source_root):
                 target = dependencies / target_prefix / relative
                 if target.exists() or target.is_symlink():
                     raise RuntimeError("project runtime source collides with a dependency")

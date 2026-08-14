@@ -121,6 +121,63 @@ class RootReceiptBroker:
         )
         os.fsync(self.activation_root.descriptor)
 
+    def _select_current_machine(
+        self, machine: MachinePolicyReceipt, canonical: bytes
+    ) -> str:
+        selector = f"machine-policy/{machine.work_item_id}/{machine.candidate_sha}.json"
+        try:
+            current_raw = read_bounded_file(
+                self.public_root,
+                selector,
+                maximum_bytes=MAX_RECEIPT_BYTES,
+                expected_file_uid=self.public_root.expected_uid,
+            )
+        except FileNotFoundError:
+            current_raw = None
+        if current_raw is not None:
+            current = MachinePolicyReceipt.model_validate_json(current_raw, strict=True)
+            if canonical_json_bytes(current) != current_raw:
+                raise ReceiptPromotionError(
+                    "current machine-policy selector bytes are not canonical"
+                )
+            if current.issued_at > machine.issued_at:
+                return selector
+            if current.issued_at == machine.issued_at:
+                if current_raw != canonical:
+                    raise ReceiptPromotionError(
+                        "machine-policy selector timestamp conflicts with different bytes"
+                    )
+                return selector
+        # Historical immutable bytes remain replayable, but selector advancement
+        # must still be currently authorized so an expired or newly revoked
+        # receipt cannot displace a usable selection during crash recovery.
+        self.verifier.verify_machine_receipt_authority(machine)
+        parent, name = selector.rsplit("/", 1)
+        pending = f"{parent}/.{machine.receipt_id}.{name}.pending"
+        try:
+            atomic_write_new(self.public_root, pending, canonical, mode=0o644)
+        except TrustedPathError:
+            if (
+                read_bounded_file(
+                    self.public_root,
+                    pending,
+                    maximum_bytes=MAX_RECEIPT_BYTES,
+                    expected_file_uid=self.public_root.expected_uid,
+                )
+                != canonical
+            ):
+                raise ReceiptPromotionError(
+                    "machine-policy selector recovery bytes conflict"
+                ) from None
+        os.rename(
+            pending,
+            selector,
+            src_dir_fd=self.public_root.descriptor,
+            dst_dir_fd=self.public_root.descriptor,
+        )
+        os.fsync(self.public_root.descriptor)
+        return selector
+
     def promote(self, outbox_name: str) -> ReceiptPromotionResult:
         if not outbox_name.endswith(".json"):
             raise ReceiptPromotionError("outbox receipt name must end in .json")
@@ -173,22 +230,10 @@ class RootReceiptBroker:
                 public_relative_path = (
                     f"machine-policy/{machine.work_item_id}/{machine.candidate_sha}.json"
                 )
-                try:
-                    selected = read_bounded_file(
-                        self.public_root,
-                        public_relative_path,
-                        maximum_bytes=MAX_RECEIPT_BYTES,
-                        expected_file_uid=os.fstat(self.public_root.descriptor).st_uid,
-                    )
-                    if selected != canonical:
-                        raise ReceiptPromotionError(
-                            "machine-policy selector conflicts for exact work item/SHA"
-                        )
-                except FileNotFoundError:
-                    already_promoted = False
             if already_promoted:
                 make_publicly_readable(self.public_root, expected_name)
                 if machine is not None:
+                    self._select_current_machine(machine, canonical)
                     make_publicly_readable(self.public_root, public_relative_path)
                 elif activation is not None:
                     self._select_current_activation(activation, canonical)
@@ -220,19 +265,7 @@ class RootReceiptBroker:
                 state = "ALREADY_PROMOTED"
             make_publicly_readable(self.public_root, expected_name)
             if machine is not None:
-                try:
-                    atomic_write_new(self.public_root, public_relative_path, canonical)
-                except TrustedPathError:
-                    selected = read_bounded_file(
-                        self.public_root,
-                        public_relative_path,
-                        maximum_bytes=MAX_RECEIPT_BYTES,
-                        expected_file_uid=os.fstat(self.public_root.descriptor).st_uid,
-                    )
-                    if selected != canonical:
-                        raise ReceiptPromotionError(
-                            "machine-policy selector conflicts for exact work item/SHA"
-                        ) from None
+                self._select_current_machine(machine, canonical)
                 make_publicly_readable(self.public_root, public_relative_path)
             elif activation is not None:
                 self._select_current_activation(activation, canonical)

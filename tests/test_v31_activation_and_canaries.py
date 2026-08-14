@@ -294,7 +294,14 @@ def _receipt(
     return receipt
 
 
-def _activation_policy_receipt(repo: Path, suite_path: Path, path: Path) -> Path:
+def _activation_policy_receipt(
+    repo: Path,
+    suite_path: Path,
+    path: Path,
+    *,
+    issued_at: datetime = NOW,
+    expires_at: datetime = NOW + timedelta(minutes=30),
+) -> Path:
     suite = verify_mandatory_canary_suite(suite_path, repo_root=repo)
     sha = _git(repo, "rev-parse", "HEAD")
     tree = _git(repo, "rev-parse", "HEAD^{tree}")
@@ -305,8 +312,8 @@ def _activation_policy_receipt(repo: Path, suite_path: Path, path: Path) -> Path
         policy_version="3.1",
         issuer_id="ISSUER:INDEPENDENT",
         issuer_key_id="KEY:INDEPENDENT",
-        issued_at=NOW,
-        expires_at=NOW + timedelta(minutes=30),
+        issued_at=issued_at,
+        expires_at=expires_at,
         revocation_epoch=1,
         nonce="activation-policy-nonce-0001",
         request_digest=DIGEST,
@@ -494,7 +501,42 @@ def test_activation_policy_request_uses_independent_verifier_bridge(
         )
         == first
     )
-    receipt.write_bytes(b"promoted independently\n")
+    observed_now = datetime.now(UTC)
+    _activation_policy_receipt(
+        repo,
+        suite,
+        receipt,
+        issued_at=observed_now - timedelta(hours=2),
+        expires_at=observed_now - timedelta(hours=1),
+    )
+    renewal = activation.coordinate_activation_policy_request(
+        repo_root=repo,
+        canary_suite_path=suite,
+        profile_path=profile,
+        machine_policy_receipt_path=receipt,
+        installed_runtime_loader=runtime_loader,
+        controller_outbox=outbox,
+    )
+    assert renewal is not None
+    assert renewal != first
+    assert (
+        activation.coordinate_activation_policy_request(
+            repo_root=repo,
+            canary_suite_path=suite,
+            profile_path=profile,
+            machine_policy_receipt_path=receipt,
+            installed_runtime_loader=runtime_loader,
+            controller_outbox=outbox,
+        )
+        == renewal
+    )
+    _activation_policy_receipt(
+        repo,
+        suite,
+        receipt,
+        issued_at=observed_now,
+        expires_at=observed_now + timedelta(minutes=30),
+    )
     assert (
         activation.coordinate_activation_policy_request(
             repo_root=repo,

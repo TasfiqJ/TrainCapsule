@@ -8,7 +8,7 @@ import shutil
 import stat
 import tempfile
 from collections.abc import Callable
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from enum import StrEnum
 from pathlib import Path
 from typing import Literal
@@ -43,6 +43,8 @@ ACTIVATION_POLICY_PROFILE = Path(
 ACTIVATION_POLICY_RECEIPT_ROOT = Path(
     "/var/lib/traincapsule-verifier/receipts/machine-policy/V3-MIG-019"
 )
+ACTIVATION_POLICY_RENEWAL_MARGIN = timedelta(minutes=15)
+ACTIVATION_POLICY_MAX_RENEWAL_EVIDENCE_AGE = timedelta(minutes=15)
 
 
 def resolve_activation_policy_receipt_path(
@@ -324,8 +326,33 @@ def coordinate_activation_policy_request(
     receipt_path = resolve_activation_policy_receipt_path(
         repo_root, machine_policy_receipt_path
     )
+    renewal_parent_digest: str | None = None
     if receipt_path.is_file() and not receipt_path.is_symlink():
-        return None
+        receipt_raw = receipt_path.read_bytes()
+        renewal_parent_digest = sha256_digest(receipt_raw)
+        try:
+            receipt = MachinePolicyReceiptV31.model_validate_json(
+                receipt_raw, strict=True
+            )
+            now = datetime.now(UTC)
+            if (
+                receipt.canonical_json_bytes() == receipt_raw
+                and receipt.work_item_id == ACTIVATION_POLICY_WORK_ITEM
+                and receipt.candidate_sha == main_sha
+                and receipt.candidate_tree_sha == tree_sha
+                and receipt.decision is PolicyDecision.PASS
+                and receipt.issued_at <= now
+                and receipt.expires_at > now + ACTIVATION_POLICY_RENEWAL_MARGIN
+            ):
+                return None
+        except ValueError:
+            pass
+        # Never submit old evidence as a renewal and then wait forever on an
+        # independently rejected request. Let the supervisor run fresh canaries.
+        if datetime.now(UTC) - suite.completed_at.astimezone(UTC) > (
+            ACTIVATION_POLICY_MAX_RENEWAL_EVIDENCE_AGE
+        ):
+            return None
     installed_runtime, runtime_raw, config_raw = installed_runtime_loader(
         installed_runtime_manifest_path
     )
@@ -374,6 +401,7 @@ def coordinate_activation_policy_request(
         evidence_root=evidence_root,
         controller_outbox=controller_outbox,
         now=suite.completed_at,
+        renewal_parent_digest=renewal_parent_digest,
     )
 
 

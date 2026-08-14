@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import os
 import pwd
-from datetime import timedelta
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import cast
 
@@ -21,6 +21,7 @@ from traincapsule_verifier.broker_cli import (
     _promote_names,  # pyright: ignore[reportPrivateUsage]
 )
 from traincapsule_verifier.canonical import canonical_json_bytes, sha256_digest
+from traincapsule_verifier.crypto import sign_model
 from traincapsule_verifier.filesystem import open_trusted_root
 from traincapsule_verifier.public_verifier import PublicVerifier
 from traincapsule_verifier.receipt_broker import (
@@ -605,8 +606,50 @@ def test_broker_promotion_replay_crash_and_partial_state(
     broker = _broker_with_distinct_owner_simulation(public_fixture, outbox, public)
     try:
         assert (
-            broker.promote(f"{public_fixture.machine.receipt_id}.json").state == "ALREADY_PROMOTED"
+            broker.promote(f"{public_fixture.machine.receipt_id}.json").state
+            == "ALREADY_PROMOTED"
         )
+    finally:
+        _close_broker(broker)
+
+
+def test_machine_policy_selector_advances_for_same_sha_without_rollback(
+    public_fixture: PublicFixture, tmp_path: Path
+) -> None:
+    outbox, public = _prepare_broker(public_fixture, tmp_path)
+    broker = _broker_with_distinct_owner_simulation(public_fixture, outbox, public)
+    selector = (
+        public
+        / "machine-policy"
+        / public_fixture.machine.work_item_id
+        / f"{public_fixture.machine.candidate_sha}.json"
+    )
+    try:
+        broker.promote(f"{public_fixture.machine.receipt_id}.json")
+        issued_at = datetime.now(UTC)
+        provisional = public_fixture.machine.model_copy(
+            update={
+                "receipt_id": "MPOL:PUBLIC-BOUNDARY-RENEWED",
+                "issued_at": issued_at,
+                "expires_at": issued_at + timedelta(hours=1),
+                "nonce": "machine-renewal-nonce-0002",
+                "signature": "A" * 88,
+            }
+        )
+        renewed = provisional.model_copy(
+            update={"signature": sign_model(provisional, public_fixture.key)}
+        )
+        renewed_raw = canonical_json_bytes(renewed)
+        renewed_name = f"{renewed.receipt_id}.json"
+        (outbox / renewed_name).write_bytes(renewed_raw)
+
+        assert broker.promote(renewed_name).state == "PROMOTED"
+        assert selector.read_bytes() == renewed_raw
+        assert (
+            broker.promote(f"{public_fixture.machine.receipt_id}.json").state
+            == "ALREADY_PROMOTED"
+        )
+        assert selector.read_bytes() == renewed_raw
     finally:
         _close_broker(broker)
 

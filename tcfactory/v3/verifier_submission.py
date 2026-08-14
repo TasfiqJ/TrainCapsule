@@ -16,6 +16,7 @@ from typing import cast
 from tcfactory.util import atomic_write_bytes
 
 _IDENTIFIER = re.compile(r"^[A-Z0-9][A-Z0-9._:-]{2,127}$")
+_DIGEST = re.compile(r"^sha256:[0-9a-f]{64}$")
 MAX_EVIDENCE_FILES = 129
 MAX_EVIDENCE_BYTES = 100_000_000
 
@@ -168,6 +169,7 @@ def create_and_submit_verification_request(
     evidence_root: Path,
     controller_outbox: Path = Path("/var/lib/traincapsule-verifier/controller-outbox"),
     now: datetime | None = None,
+    renewal_parent_digest: str | None = None,
 ) -> Path:
     """Create a policy-profiled request; the independent verifier still decides it."""
 
@@ -194,15 +196,21 @@ def create_and_submit_verification_request(
     oracles = profile.get("oracles")
     if not isinstance(oracles, dict) or not oracles or not gate_evidence:
         raise VerifierSubmissionError("verification profile/gate evidence is incomplete")
-    request_identity = _canonical_json(
-        {
-            "workItemId": work_item_id,
-            "candidateSha": candidate_sha,
-            "candidateTreeSha": candidate_tree_sha,
-            "candidateManifestDigest": candidate_manifest_digest,
-            "checkpointDigest": checkpoint_digest,
-        }
-    )
+    identity: dict[str, object] = {
+        "workItemId": work_item_id,
+        "candidateSha": candidate_sha,
+        "candidateTreeSha": candidate_tree_sha,
+        "candidateManifestDigest": candidate_manifest_digest,
+        "checkpointDigest": checkpoint_digest,
+    }
+    if renewal_parent_digest is not None:
+        if _DIGEST.fullmatch(renewal_parent_digest) is None:
+            raise VerifierSubmissionError("renewal parent digest is invalid")
+        # A renewal is a new authority decision even when the candidate bytes are
+        # unchanged. Binding its identity to the exact prior receipt gives the
+        # issuer a fresh nonce without allowing timer ticks to create request spam.
+        identity["renewalParentDigest"] = renewal_parent_digest
+    request_identity = _canonical_json(identity)
     identity_hash = hashlib.sha256(request_identity).hexdigest()
     request_id = f"REQUEST:{work_item_id}:{identity_hash[:24].upper()}"
     nonce = identity_hash

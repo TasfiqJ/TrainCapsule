@@ -318,6 +318,10 @@ def run_startup_preflight(
     route = ClaudeCredentialProvider(require_long_lived_token=True).state()
     return {
         "ready": True,
+        # Activation consumes the same independently verified receipt binding
+        # directly from the startup-preflight contract.  Keep the nested copy
+        # in publicationRecovery for recovery/status compatibility.
+        "activationReceiptDigest": activation_digest,
         "configVersion": 3,
         "validatedConfigs": sorted(loaded),
         "sourceIntegrity": "PASS",

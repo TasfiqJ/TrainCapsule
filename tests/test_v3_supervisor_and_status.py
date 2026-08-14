@@ -185,6 +185,7 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
 
     result = run_startup_preflight(repo_root)
     assert result["ready"] is True
+    assert result["activationReceiptDigest"] == "sha256:" + "b" * 64
     assert result["publicationRecovery"] == {
         "status": "RECONCILED",
         "transactions": 0,

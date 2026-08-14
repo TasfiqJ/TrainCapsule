@@ -18,8 +18,9 @@ from pydantic import ConfigDict, Field, field_validator, model_validator
 
 from .gitops import current_sha
 from .models import RiskTier, TaskPacket
-from .util import read_json, run_command, sha256_file, write_json
+from .util import read_json, run_command, write_json
 from .v3.base import SHA_PATTERN, V3Model, sha256_digest
+from .v3.installed_runtime import load_installed_controller_runtime
 from .v3.publication import (
     MACHINE_POLICY_CHECK,
     AutomatedPRPublisher,
@@ -293,8 +294,7 @@ def validate_controller_activation(*, repo_root: Path, config: GitHubConfig) -> 
             "controller/publication code or active release configuration differs from exact HEAD"
         )
     active = validate_active_source_generation(repo_root)
-    controller = repo_root / "tcfactory/v3/controller.py"
-    config_path = repo_root / "config/factory.yaml"
+    controller_digest, config_digest = installed_activation_digests()
     authorization = ExternalReceiptAuthorizer(
         Path(config.receipt_verifier_executable)
     ).verify_activation(
@@ -302,10 +302,20 @@ def validate_controller_activation(*, repo_root: Path, config: GitHubConfig) -> 
         expected_main_sha=current_sha(repo_root, "main"),
         source_generation_id=active.generation_id,
         source_generation_digest=f"sha256:{active.manifest_digest}",
-        controller_binary_digest=f"sha256:{sha256_file(controller)}",
-        controller_config_digest=f"sha256:{sha256_file(config_path)}",
+        controller_binary_digest=controller_digest,
+        controller_config_digest=config_digest,
     )
     return authorization.activation_receipt_digest
+
+
+def installed_activation_digests() -> tuple[str, str]:
+    """Attest the exact installed runtime/config bytes signed for activation."""
+    installed_runtime, runtime_manifest_raw = load_installed_controller_runtime()
+    effective_config_raw = Path(installed_runtime.effective_config.path).read_bytes()
+    config_digest = sha256_digest(effective_config_raw)
+    if config_digest != installed_runtime.effective_config.digest:
+        raise GitHubSyncError("installed controller effective config digest mismatch")
+    return sha256_digest(runtime_manifest_raw), config_digest
 
 
 def validate_repository_release_controls(

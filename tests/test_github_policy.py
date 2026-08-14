@@ -4,6 +4,8 @@ import os
 import subprocess
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from types import SimpleNamespace
+from typing import Any
 
 import pytest
 from pydantic import ValidationError
@@ -11,6 +13,7 @@ from pydantic import ValidationError
 import tcfactory.github_sync as github_sync
 import tcfactory.v3.publication as publication
 from tcfactory.github_sync import GitHubConfig, load_github_config
+from tcfactory.v3.base import sha256_digest
 from tcfactory.v3.contracts_v31 import ActivationMode, ActivationReceiptV31
 from tcfactory.v3.publication import (
     ExternalReceiptAuthorizer,
@@ -20,6 +23,48 @@ from tcfactory.v3.publication import (
 )
 
 CANDIDATE = "b" * 40
+
+
+def test_installed_activation_digests_bind_exact_runtime_bytes(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    runtime_raw = b'{"installed":"runtime"}\n'
+    config_raw = b"runtime: installed\n"
+    config_path = tmp_path / "effective-config.yaml"
+    config_path.write_bytes(config_raw)
+    installed = SimpleNamespace(
+        effective_config=SimpleNamespace(
+            path=str(config_path), digest=sha256_digest(config_raw)
+        )
+    )
+    def load() -> tuple[Any, bytes]:
+        return installed, runtime_raw
+
+    monkeypatch.setattr(github_sync, "load_installed_controller_runtime", load)
+
+    assert github_sync.installed_activation_digests() == (
+        sha256_digest(runtime_raw),
+        sha256_digest(config_raw),
+    )
+
+
+def test_controller_activation_rejects_substituted_effective_config(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    config_path = tmp_path / "effective-config.yaml"
+    config_path.write_bytes(b"substituted: true\n")
+    installed = SimpleNamespace(
+        effective_config=SimpleNamespace(
+            path=str(config_path), digest=sha256_digest(b"expected: true\n")
+        )
+    )
+    def load() -> tuple[Any, bytes]:
+        return installed, b"{}\n"
+
+    monkeypatch.setattr(github_sync, "load_installed_controller_runtime", load)
+
+    with pytest.raises(github_sync.GitHubSyncError, match="effective config digest"):
+        github_sync.installed_activation_digests()
 
 
 def test_direct_main_publication_surfaces_do_not_exist() -> None:

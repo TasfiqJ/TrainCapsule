@@ -1,11 +1,14 @@
 from __future__ import annotations
 
+import sys
 from datetime import UTC, datetime
+from pathlib import Path
 from typing import cast
 
 import pytest
 from pydantic import ValidationError
 from traincapsule_core import (
+    LocalEvidenceStore,
     build_environment_identity,
     build_workload_identity,
     digest_json,
@@ -29,10 +32,14 @@ from traincapsule_core.models import (
 )
 from traincapsule_ingest_pytorch import reimport_from_raw_artifacts
 from traincapsule_qualify import (
+    CommandExpectation,
+    ExperimentSpecification,
     NativeBaseline,
     PreflightInputs,
+    QualificationResult,
     assess_completeness,
     evaluate_preflight,
+    execute_qualification,
     generate_native_baseline,
     render_native_baseline_human,
 )
@@ -689,3 +696,148 @@ def test_human_native_report_neutralizes_markdown_control_injection() -> None:
     assert report.count("\n## Decision reached") == 1
     assert "\nAPPROVE_WITHIN_ENVELOPE" not in report
     assert "question  ## Decision reached  APPROVE_WITHIN_ENVELOPE" in report
+
+
+def qualification_store(tmp_path: Path, inputs: PreflightInputs) -> LocalEvidenceStore:
+    store = LocalEvidenceStore(tmp_path / "store")
+    for artifact_record in inputs.verified_artifacts:
+        stored = store.put_bytes(
+            case_id=artifact_record.case_id,
+            payload=PAYLOADS[artifact_record.content_digest],
+            kind=artifact_record.kind,
+            source_adapter=artifact_record.source_adapter,
+            source_version=artifact_record.source_version,
+            captured_at=artifact_record.captured_at,
+            privacy_class=artifact_record.privacy_class,
+            provenance=artifact_record.provenance,
+            workload_id=artifact_record.workload_id,
+            baseline_environment_id=artifact_record.baseline_environment_id,
+            candidate_environment_id=artifact_record.candidate_environment_id,
+        )
+        assert stored == artifact_record
+    return store
+
+
+def qualification_specification(
+    tmp_path: Path, inputs: PreflightInputs, *, candidate_text: str = "fixed"
+) -> ExperimentSpecification:
+    executable = str(Path(sys.executable).resolve())
+    return ExperimentSpecification(
+        case_id=inputs.incident_case.case_id,
+        workload_id=inputs.workload_identity.workload_id,
+        baseline_environment_id=inputs.baseline_environment.environment_id,
+        candidate_environment_id=inputs.candidate_environment.environment_id,
+        hypothesis="The candidate removes the observed collective lifecycle failure.",
+        observed_boundary="Process exit and customer-local stdout.",
+        manipulated_variables={"environment": "candidate identity"},
+        controlled_variables={"workload": "fully verified workload identity"},
+        expected_observations=["baseline reproduces", "candidate reports fixed"],
+        legal_transformations=["candidate environment substitution"],
+        forbidden_transformations=["workload or oracle substitution"],
+        baseline_command=[executable, "-c", "print('incident')"],
+        candidate_command=[executable, "-c", f"print('{candidate_text}')"],
+        working_directory=str(tmp_path.resolve()),
+        timeout_seconds=5,
+        max_output_bytes=4096,
+        stop_conditions=["timeout", "combined output limit"],
+        baseline_expectation=CommandExpectation(
+            expected_exit_codes=[0], required_stdout_tokens=["incident"]
+        ),
+        candidate_expectation=CommandExpectation(
+            expected_exit_codes=[0], required_stdout_tokens=["fixed"]
+        ),
+        result_semantics="PASS requires baseline reproduction and candidate oracle success.",
+    )
+
+
+def test_customer_local_runner_qualifies_a_bound_candidate(tmp_path: Path) -> None:
+    inputs = make_inputs()
+    decision = execute_qualification(
+        inputs,
+        qualification_specification(tmp_path, inputs),
+        store=qualification_store(tmp_path, inputs),
+        now=lambda: EVALUATED_AT,
+    )
+
+    assert decision.result is QualificationResult.PASS
+    assert decision.baseline_run is not None and decision.baseline_run.expectation_met
+    assert decision.candidate_run is not None and decision.candidate_run.expectation_met
+    assert len(decision.evidence_refs) >= len(inputs.verified_artifacts) + 4
+
+
+def test_candidate_oracle_failure_is_a_qualification_fail(tmp_path: Path) -> None:
+    inputs = make_inputs()
+    decision = execute_qualification(
+        inputs,
+        qualification_specification(tmp_path, inputs, candidate_text="still broken"),
+        store=qualification_store(tmp_path, inputs),
+        now=lambda: EVALUATED_AT,
+    )
+
+    assert decision.result is QualificationResult.FAIL
+    assert decision.baseline_run is not None and decision.baseline_run.expectation_met
+    assert decision.candidate_run is not None and not decision.candidate_run.expectation_met
+
+
+def test_preflight_blocks_local_command_execution(tmp_path: Path) -> None:
+    inputs = make_inputs()
+    inputs = inputs.model_copy(
+        update={
+            "incident_case": inputs.incident_case.model_copy(
+                update={"privacy_policy": "EXPORT_ALLOWED"}
+            )
+        }
+    )
+    marker = tmp_path / "must-not-exist"
+    specification = qualification_specification(tmp_path, inputs)
+    specification = specification.model_copy(
+        update={
+            "baseline_command": [
+                str(Path(sys.executable).resolve()),
+                "-c",
+                f"from pathlib import Path; Path({str(marker)!r}).touch()",
+            ]
+        }
+    )
+    decision = execute_qualification(
+        inputs,
+        specification,
+        store=qualification_store(tmp_path, inputs),
+        now=lambda: EVALUATED_AT,
+    )
+
+    assert decision.result is QualificationResult.INAPPLICABLE
+    assert decision.baseline_run is None
+    assert not marker.exists()
+
+
+def test_output_budget_stops_before_candidate_execution(tmp_path: Path) -> None:
+    inputs = make_inputs()
+    marker = tmp_path / "candidate-must-not-run"
+    specification = qualification_specification(tmp_path, inputs).model_copy(
+        update={
+            "baseline_command": [
+                str(Path(sys.executable).resolve()),
+                "-c",
+                "print('x' * 5000)",
+            ],
+            "candidate_command": [
+                str(Path(sys.executable).resolve()),
+                "-c",
+                f"from pathlib import Path; Path({str(marker)!r}).touch()",
+            ],
+            "max_output_bytes": 1024,
+        }
+    )
+    decision = execute_qualification(
+        inputs,
+        specification,
+        store=qualification_store(tmp_path, inputs),
+        now=lambda: EVALUATED_AT,
+    )
+
+    assert decision.result is QualificationResult.UNKNOWN
+    assert decision.baseline_run is not None
+    assert decision.baseline_run.output_limit_exceeded
+    assert decision.candidate_run is None
+    assert not marker.exists()

@@ -12,6 +12,7 @@ from pydantic import ValidationError
 from traincapsule_verifier import post_activation_observer as observer
 from traincapsule_verifier.bootstrap import systemd_unit_content
 from traincapsule_verifier.canonical import sha256_digest
+from traincapsule_verifier.public_verifier import PublicVerificationError
 
 DIGEST = "sha256:" + "a" * 64
 
@@ -40,6 +41,7 @@ def _policy(tmp_path: Path) -> observer._Policy:  # pyright: ignore[reportPrivat
         refresh_retirement_root=str(tmp_path / "retirement"),
         runtime_manifest_path=str(tmp_path / "runtime-manifest.json"),
         maximum_observation_seconds=3600,
+        renewal_safety_window_seconds=900,
     )
 
 
@@ -82,6 +84,44 @@ def test_failure_is_journaled_then_stops_and_restores_stop(
         (tmp_path / "observations/failure-journal/ACT-TEST.json").read_bytes()
     )
     assert journal["phase"] == "STOPPED"
+
+
+def test_public_verification_error_is_reported_as_fail_closed(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def reject_authority() -> Path:
+        raise PublicVerificationError("activation receipt is expired")
+
+    monkeypatch.setattr(observer, "observe", reject_authority)
+    monkeypatch.setattr(observer.sys, "argv", ["observer", "observe"])
+
+    assert observer.main() == 1
+
+
+def test_authority_renewal_margin_uses_earliest_expiry(tmp_path: Path) -> None:
+    policy = _policy(tmp_path)
+    now = datetime.now(UTC)
+    receipt = cast(
+        observer.ActivationReceipt,
+        SimpleNamespace(expires_at=now + timedelta(hours=1)),
+    )
+
+    with pytest.raises(PublicVerificationError, match="renewal safety window"):
+        observer._require_authority_renewal_margin(  # pyright: ignore[reportPrivateUsage]
+            policy,
+            receipt,
+            machine_policy_expires_at=now + timedelta(minutes=10),
+            revocations_expire_at=now + timedelta(hours=2),
+            now=now,
+        )
+
+    observer._require_authority_renewal_margin(  # pyright: ignore[reportPrivateUsage]
+        policy,
+        receipt,
+        machine_policy_expires_at=now + timedelta(minutes=16),
+        revocations_expire_at=now + timedelta(hours=2),
+        now=now,
+    )
 
 
 def test_seven_events_require_exact_receipt_tree_monotonicity_and_artifact_digest(

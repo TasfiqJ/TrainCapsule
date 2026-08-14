@@ -461,6 +461,7 @@ def run_mandatory_canaries(
     """Run the exact mandatory roster or emit a typed blocked suite."""
 
     repo_root = repo_root.resolve()
+    result_root = result_root.resolve()
     observed_now = (now or datetime.now(UTC)).astimezone(UTC)
     main_sha = current_sha(repo_root)
     tree_sha = _git_tree(repo_root, main_sha)

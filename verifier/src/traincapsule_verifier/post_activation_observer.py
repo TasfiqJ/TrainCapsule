@@ -23,7 +23,7 @@ from .controller_start_broker import (
 )
 from .filesystem import open_trusted_root, read_bounded_file
 from .models import ActivationReceipt
-from .public_verifier import PublicVerifier
+from .public_verifier import PublicVerificationError, PublicVerifier
 
 ROOT = Path("/var/lib/traincapsule-verifier")
 CONFIG = Path("/etc/traincapsule-verifier")
@@ -71,6 +71,7 @@ class _Policy(_Strict):
         "/etc/traincapsule-controller/runtime-manifest.json"
     ]
     maximum_observation_seconds: int = Field(ge=60, le=86400)
+    renewal_safety_window_seconds: int = Field(ge=60, le=3600)
 
 
 class _RuntimeEvent(_Strict):
@@ -141,6 +142,26 @@ class _RetirementJournal(_Strict):
     activation_receipt_id: str
     required_main_sha: str = Field(pattern=r"^[0-9a-f]{40}$")
     recorded_at: AwareDatetime
+
+
+def _require_authority_renewal_margin(
+    policy: _Policy,
+    receipt: ActivationReceipt,
+    *,
+    machine_policy_expires_at: AwareDatetime,
+    revocations_expire_at: AwareDatetime,
+    now: datetime,
+) -> None:
+    deadline = min(
+        receipt.expires_at.astimezone(UTC),
+        machine_policy_expires_at.astimezone(UTC),
+        revocations_expire_at.astimezone(UTC),
+    )
+    remaining = (deadline - now.astimezone(UTC)).total_seconds()
+    if remaining <= policy.renewal_safety_window_seconds:
+        raise PublicVerificationError(
+            "active authority entered the mandatory pre-expiry renewal safety window"
+        )
 
 
 def _atomic(path: Path, raw: bytes) -> None:
@@ -467,6 +488,16 @@ def observe() -> Path:
             receipt_root=ROOT / "receipts",
             expected_owner_uid=0,
         ) as verifier:
+            machine_receipt = verifier.load_machine_receipt(
+                receipt.machine_policy_receipt_id
+            )
+            _require_authority_renewal_margin(
+                policy,
+                receipt,
+                machine_policy_expires_at=machine_receipt.expires_at,
+                revocations_expire_at=verifier.revocations.expires_at,
+                now=started,
+            )
             verifier.authorize_activation(
                 receipt,
                 main_sha=receipt.verified_main_sha,
@@ -519,7 +550,12 @@ def observe() -> Path:
         _atomic(target, canonical_json_bytes(observation))
         _retire_refresh_completion(policy, receipt, observation)
         return target
-    except (OSError, ValueError, subprocess.TimeoutExpired) as error:
+    except (
+        OSError,
+        ValueError,
+        subprocess.TimeoutExpired,
+        PublicVerificationError,
+    ) as error:
         _fail_closed(policy, receipt, str(error))
         raise
 
@@ -531,7 +567,7 @@ def main() -> int:
     try:
         observe()
         return 0
-    except (OSError, ValueError, subprocess.TimeoutExpired):
+    except (OSError, ValueError, subprocess.TimeoutExpired, PublicVerificationError):
         print("post-activation observation failed closed", file=sys.stderr)
         return 1
 

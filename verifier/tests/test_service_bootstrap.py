@@ -160,9 +160,7 @@ def test_request_broker_rejection_does_not_block_later_valid_request() -> None:
     assert rejected == 1
     assert [item.request_id for item in results] == ["REQUEST:GOOD"]
     with pytest.raises(RequestSubmissionError):
-        _process_names(
-            Broker(), ["BAD.request.json"], tolerate_rejections=False
-        )
+        _process_names(Broker(), ["BAD.request.json"], tolerate_rejections=False)
 
 
 def test_install_manifest_denies_controller_and_service_cross_authority() -> None:
@@ -359,9 +357,7 @@ def test_issuer_isolates_rejected_requests_without_authorizing_them(
 
     def service_identity(name: str) -> pwd.struct_passwd:
         assert name == "traincapsule-verifier"
-        return pwd.struct_passwd(
-            (name, "x", 7, 7, "", "/nonexistent", "/usr/sbin/nologin")
-        )
+        return pwd.struct_passwd((name, "x", 7, 7, "", "/nonexistent", "/usr/sbin/nologin"))
 
     seen: list[tuple[str, int]] = []
 
@@ -437,11 +433,11 @@ def test_staged_installer_is_inert_exact_and_idempotently_rejected(tmp_path: Pat
         Path("stage/traincapsule-verifier-activation-request-broker.service"),
         Path("stage/traincapsule-verifier-activation-request-broker.path"),
         Path("stage/traincapsule-activation-supervisor.service"),
-            Path("stage/traincapsule-activation-supervisor.timer"),
-            Path("stage/traincapsule-verifier-controller-start.service"),
-            Path("stage/traincapsule-verifier-controller-start.path"),
-            Path("stage/traincapsule-verifier-post-activation-observer.service"),
-            Path("stage/traincapsule-verifier-post-activation-observer.timer"),
+        Path("stage/traincapsule-activation-supervisor.timer"),
+        Path("stage/traincapsule-verifier-controller-start.service"),
+        Path("stage/traincapsule-verifier-controller-start.path"),
+        Path("stage/traincapsule-verifier-post-activation-observer.service"),
+        Path("stage/traincapsule-verifier-post-activation-observer.timer"),
         Path("stage/traincapsule-verifier-ruleset-observer.service"),
         Path("stage/traincapsule-verifier-ruleset-observer.timer"),
         Path("stage/traincapsule-verifier-ruleset-broker.service"),
@@ -471,21 +467,19 @@ def test_activation_units_use_installed_environment_and_create_stop_fail_closed(
     assert "TimeoutStartSec=4h" in supervisor
     assert "PrivateTmp=yes" in supervisor
     assert "NoNewPrivileges=no" in supervisor
-    assert (
-        "ReadWritePaths=/var/lib/traincapsule-verifier/controller-outbox" in supervisor
-    )
+    assert "ReadWritePaths=/var/lib/traincapsule-verifier/controller-outbox" in supervisor
     assert "ReadWritePaths=/var/lib/traincapsule-runtime\n" in observer
+    assert "ReadOnlyPaths=/var/lib/traincapsule-runtime\n" not in observer
     assert "ReadWritePaths=/var/lib/traincapsule-runtime/STOP" not in observer
+    assert "ConditionPathExists=/var/lib/traincapsule-verifier/activation/current.json" in observer
     assert (
-        "ConditionPathExists=/var/lib/traincapsule-verifier/activation/current.json"
-        in observer
+        "OnCalendar=*-*-* *:00/5:00"
+        in systemd_unit_content(unit="activation-supervisor-timer").decode()
     )
-    assert "OnCalendar=*-*-* *:00/5:00" in systemd_unit_content(
-        unit="activation-supervisor-timer"
-    ).decode()
-    assert "OnCalendar=*-*-* *:00/2:00" in systemd_unit_content(
-        unit="post-activation-observer-timer"
-    ).decode()
+    assert (
+        "OnCalendar=*-*-* *:00/2:00"
+        in systemd_unit_content(unit="post-activation-observer-timer").decode()
+    )
 
 
 def test_unit_separation_and_rollback_are_explicit(tmp_path: Path) -> None:
@@ -533,9 +527,7 @@ def _broker_with_distinct_owner_simulation(
     outbox_root = open_trusted_root(outbox, expected_uid=os.getuid())
     public_root = open_trusted_root(public, expected_uid=os.getuid())
     public_root.expected_uid = os.getuid() + 1
-    broker = RootReceiptBroker(
-        verifier=verifier, outbox_root=outbox_root, public_root=public_root
-    )
+    broker = RootReceiptBroker(verifier=verifier, outbox_root=outbox_root, public_root=public_root)
     # Constructor observes distinct production principals; local tests run under one UID.
     public_root.expected_uid = os.getuid()
     return broker

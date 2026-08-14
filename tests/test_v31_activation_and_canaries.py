@@ -61,9 +61,7 @@ from tcfactory.v3.runtime_paths import V3RuntimePaths
 
 NOW = datetime(2026, 8, 12, 18, 0, tzinfo=UTC)
 DIGEST = "sha256:" + "a" * 64
-RuntimeLoader = Callable[
-    [Path], tuple[InstalledControllerRuntimeManifest, bytes, bytes]
-]
+RuntimeLoader = Callable[[Path], tuple[InstalledControllerRuntimeManifest, bytes, bytes]]
 
 
 def test_activation_git_identity_pins_the_exact_trusted_repository(
@@ -84,9 +82,7 @@ def test_activation_git_identity_pins_the_exact_trusted_repository(
         "b" * 40,
     )
     assert all(
-        command[:5]
-        == ["git", "-c", f"safe.directory={repo}", "-C", str(repo)]
-        for command in calls
+        command[:5] == ["git", "-c", f"safe.directory={repo}", "-C", str(repo)] for command in calls
     )
 
 
@@ -120,10 +116,7 @@ def _runtime_loader() -> tuple[InstalledControllerRuntimeManifest, RuntimeLoader
             digest=sha256_digest(config_raw),
         ),
         repository_snapshot_manifest=InstalledArtifact(
-            path=(
-                "/var/lib/traincapsule-verifier/repository-boundary/"
-                "SNAPSHOT_MANIFEST.json"
-            ),
+            path=("/var/lib/traincapsule-verifier/repository-boundary/SNAPSHOT_MANIFEST.json"),
             digest=DIGEST,
         ),
         repository_main_sha="a" * 40,
@@ -151,9 +144,7 @@ def _runtime_loader() -> tuple[InstalledControllerRuntimeManifest, RuntimeLoader
 
 
 def _git(repo: Path, *args: str) -> str:
-    result = subprocess.run(
-        ["git", *args], cwd=repo, check=True, capture_output=True, text=True
-    )
+    result = subprocess.run(["git", *args], cwd=repo, check=True, capture_output=True, text=True)
     return result.stdout.strip()
 
 
@@ -364,6 +355,7 @@ def test_activation_request_is_exact_idempotent_and_stopped(
     outbox = tmp_path / "activation-outbox"
     outbox.mkdir(mode=0o700)
     receipt = _activation_policy_receipt(repo, suite, tmp_path / "policy.json")
+
     def resolve_paths(_root: Path) -> V3RuntimePaths:
         return _runtime_paths(runtime)
 
@@ -395,14 +387,10 @@ def test_activation_request_is_exact_idempotent_and_stopped(
     ).read_bytes()
     assert request.controller_binary_digest == sha256_digest(controller_raw)
     assert request.controller_config_digest == sha256_digest(config_raw)
-    receipt_value = MachinePolicyReceiptV31.model_validate_json(
-        receipt.read_bytes(), strict=True
-    )
+    receipt_value = MachinePolicyReceiptV31.model_validate_json(receipt.read_bytes(), strict=True)
     mismatched_receipt = tmp_path / "mismatched-policy.json"
     mismatched_receipt.write_bytes(
-        receipt_value.model_copy(
-            update={"context_manifest_digest": DIGEST}
-        ).canonical_json_bytes()
+        receipt_value.model_copy(update={"context_manifest_digest": DIGEST}).canonical_json_bytes()
     )
     with pytest.raises(RuntimeError, match="does not authorize the exact activation evidence"):
         stage_activation_request(
@@ -493,9 +481,7 @@ def test_activation_policy_request_uses_independent_verifier_bridge(
     evidence = json.loads(evidence_path.read_bytes())
     assert len(evidence["rawArtifacts"]) == 21
     assert len({item["digest"] for item in evidence["rawArtifacts"].values()}) == 21
-    oracle_hashes = evidence["oracles"]["ORACLE:ACTIVATION"][
-        "rawEvidenceArtifactHashes"
-    ]
+    oracle_hashes = evidence["oracles"]["ORACLE:ACTIVATION"]["rawEvidenceArtifactHashes"]
     assert oracle_hashes == sorted(oracle_hashes)
     assert (
         activation.coordinate_activation_policy_request(
@@ -531,9 +517,7 @@ def test_stopped_activation_supervisor_runs_canaries_then_coordinates_without_co
     (runtime / "STOP").write_text("stopped\n", encoding="utf-8")
     paths = _runtime_paths(runtime)
     calls: list[str] = []
-    monkeypatch.setenv(
-        "TCF_CANARY_PUBLICATION_REMOTE", canaries.CANARY_PUBLICATION_REMOTE
-    )
+    monkeypatch.setenv("TCF_CANARY_PUBLICATION_REMOTE", canaries.CANARY_PUBLICATION_REMOTE)
 
     def resolve_paths(_root: Path) -> V3RuntimePaths:
         return paths
@@ -605,9 +589,7 @@ def test_activation_supervisor_consumes_delayed_live_receipt_and_stages_start(
     def resolved_paths(_repo: Path) -> V3RuntimePaths:
         return paths
 
-    def verify_suite(
-        _path: Path, *, repo_root: Path, require_pass: bool
-    ) -> None:
+    def verify_suite(_path: Path, *, repo_root: Path, require_pass: bool) -> None:
         assert repo_root == repo.resolve()
         assert require_pass
         calls.append("verify")
@@ -625,9 +607,7 @@ def test_activation_supervisor_consumes_delayed_live_receipt_and_stages_start(
         (runtime / "STOP").unlink(missing_ok=True)
         return transaction
 
-    def stage(
-        observed: ActivationTransaction, *, transaction_path: Path
-    ) -> Path:
+    def stage(observed: ActivationTransaction, *, transaction_path: Path) -> Path:
         assert observed == transaction
         assert transaction_path == paths.activation_transactions / "ACTIVATE-ACT-TEST.json"
         calls.append("start")
@@ -644,6 +624,52 @@ def test_activation_supervisor_consumes_delayed_live_receipt_and_stages_start(
         "ACTIVATED_START_REQUESTED:ACTIVATE-ACT-TEST"
     )
     assert calls[-2:] == ["activate", "start"]
+
+
+def test_activation_supervisor_requests_fresh_policy_before_reusing_consumed_request(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    (runtime / "STOP").write_text("stopped\n", encoding="utf-8")
+    paths = _runtime_paths(runtime)
+    suite = paths.canary_results / "RUN" / "suite.json"
+    suite.parent.mkdir(parents=True)
+    suite.write_bytes(b"{}")
+    calls: list[str] = []
+
+    import tcfactory.v3.activation_supervisor as supervisor
+
+    def resolved_paths(_repo: Path) -> V3RuntimePaths:
+        return paths
+
+    def accept_suite(
+        _suite: Path, *, repo_root: Path, require_pass: bool
+    ) -> None:
+        assert repo_root == repo.resolve()
+        assert require_pass
+
+    monkeypatch.setattr(supervisor, "resolve_v3_runtime_paths", resolved_paths)
+    monkeypatch.setattr(supervisor, "verify_mandatory_canary_suite", accept_suite)
+
+    def no_unused_live_receipt(**_kwargs: object) -> Never:
+        raise RuntimeError("the previous activation receipt was consumed")
+
+    monkeypatch.setattr(supervisor, "activate_v31", no_unused_live_receipt)
+
+    def request_policy(**_kwargs: object) -> Path:
+        calls.append("policy")
+        return tmp_path / "policy-request.json"
+
+    def stale_activation_request(**_kwargs: object) -> Path:
+        calls.append("stale-activation")
+        return tmp_path / "old-request.json"
+
+    monkeypatch.setattr(supervisor, "coordinate_activation_policy_request", request_policy)
+    monkeypatch.setattr(supervisor, "coordinate_activation_request", stale_activation_request)
+    assert run_activation_supervisor(repo_root=repo) == ("ACTIVATION_POLICY_REQUEST_SUBMITTED")
+    assert calls == ["policy"]
 
 
 def test_refresh_completion_forces_fresh_exact_canaries_and_never_reuses_history(
@@ -715,6 +741,7 @@ def test_refresh_completion_forces_fresh_exact_canaries_and_never_reuses_history
         source_generation_digest=completion.source_generation_digest,
     )
     monkeypatch.setattr(supervisor, "run_mandatory_canaries", run_canaries)
+
     def parse_fresh(_raw: bytes, *, strict: bool) -> SimpleNamespace:
         assert strict
         return fresh
@@ -730,6 +757,7 @@ def test_refresh_completion_forces_fresh_exact_canaries_and_never_reuses_history
         return request
 
     monkeypatch.setattr(supervisor, "stage_activation_request", stage)
+
     def receipt_pending(**_kwargs: object) -> Never:
         raise RuntimeError("receipt pending")
 
@@ -887,9 +915,7 @@ def test_missing_live_runner_emits_only_typed_blocked_results(
         runner_factory=unavailable,
         now=NOW,
     )
-    suite = verify_mandatory_canary_suite(
-        suite_path, repo_root=repo, require_pass=False
-    )
+    suite = verify_mandatory_canary_suite(suite_path, repo_root=repo, require_pass=False)
     assert suite.status is CanaryStatus.BLOCKED_PREREQUISITE
     assert set(suite.result_artifacts) == set(MandatoryCanaryId)
     assert len(MandatoryCanaryId) == 20
@@ -921,9 +947,7 @@ def test_external_canary_runner_validates_strict_json_at_the_process_boundary(
     def trust(path: Path, **_kwargs: object) -> tuple[Path, os.stat_result]:
         return path, observed
 
-    def command(
-        *_args: object, **_kwargs: object
-    ) -> subprocess.CompletedProcess[str]:
+    def command(*_args: object, **_kwargs: object) -> subprocess.CompletedProcess[str]:
         return subprocess.CompletedProcess([], 0, json.dumps(payload), "")
 
     monkeypatch.setattr(canaries, "trusted_external_path", trust)
@@ -973,8 +997,7 @@ def test_canary_suite_reopens_every_exact_result_and_evidence_byte(
     suite = verify_mandatory_canary_suite(suite_path, repo_root=repo)
     assert suite.status is CanaryStatus.PASS
     result = (
-        suite_path.parent
-        / suite.result_artifacts[MandatoryCanaryId.REAL_CLAUDE_MECHANICAL_TASK]
+        suite_path.parent / suite.result_artifacts[MandatoryCanaryId.REAL_CLAUDE_MECHANICAL_TASK]
     )
     result.write_bytes(result.read_bytes() + b" ")
     with pytest.raises(RuntimeError, match="substitution"):
@@ -1063,6 +1086,7 @@ def _activation_fixture(
     receipt_path = tmp_path / "external/activation.json"
     runtime_manifest, runtime_loader = _runtime_loader()
     receipt = _receipt(repo, suite, receipt_path, runtime_manifest)
+
     def runtime_paths(_: Path) -> V3RuntimePaths:
         return paths
 
@@ -1125,13 +1149,16 @@ def test_activation_is_atomic_auditable_idempotent_and_crash_recoverable(
         installed_runtime_loader=runtime_loader,
     )
     assert completed.phase is ActivationPhase.ACTIVATED
-    assert activate_v31(
-        repo_root=repo,
-        canary_suite_path=suite,
-        preflight=preflight,
-        now=NOW,
-        installed_runtime_loader=runtime_loader,
-    ) == completed
+    assert (
+        activate_v31(
+            repo_root=repo,
+            canary_suite_path=suite,
+            preflight=preflight,
+            now=NOW,
+            installed_runtime_loader=runtime_loader,
+        )
+        == completed
+    )
     assert (
         validate_activation_control_state(
             paths=paths,
@@ -1203,9 +1230,7 @@ def test_activation_rejects_a_stale_or_substituted_live_receipt_before_preflight
     receipt_path.write_bytes(substituted.canonical_json_bytes())
     called = False
 
-    def preflight_must_not_run(
-        _: Path, *, allow_stop_for_activation: bool
-    ) -> dict[str, object]:
+    def preflight_must_not_run(_: Path, *, allow_stop_for_activation: bool) -> dict[str, object]:
         nonlocal called
         del allow_stop_for_activation
         called = True
@@ -1234,6 +1259,7 @@ def test_direct_controller_entry_runs_full_supervisor_preflight_first(
         raise RuntimeError("full preflight sentinel")
 
     monkeypatch.setattr(cli, "run_startup_preflight", reject)
+
     def publisher_must_not_run(**_: object) -> Never:
         pytest.fail("publisher constructed before full preflight")
 

@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+import json
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
@@ -35,6 +36,28 @@ from tcfactory.quota import AuthenticationPause, QuotaLimitPause
 from tcfactory.util import redact_sensitive, sha256_file, write_json
 from tcfactory.v3.base import V3Model
 from tcfactory.v3.planning import V3TaskPacket
+
+
+def validate_planning_packet(request: AgentTaskRequest) -> V3TaskPacket:
+    from tcfactory.v3.task_compiler_v31 import CompiledTaskContractV31
+
+    payload = dict(request.task_packet)
+    contract_payload = payload.pop("taskContract", None)
+    packet = V3TaskPacket.model_validate(payload)
+    if contract_payload is None:
+        return packet
+    contract = CompiledTaskContractV31.model_validate_json(
+        json.dumps(contract_payload, sort_keys=True, separators=(",", ":"))
+    )
+    if (
+        contract.work_item_id != request.work_item_id
+        or contract.work_item_id != packet.work_item_id
+        or contract.task_packet_digest != packet.canonical_digest()
+        or contract.source_digest != request.source_digest
+        or contract.context_digest != request.context_digest
+    ):
+        raise ValueError("compiled task contract does not bind the backend request")
+    return packet
 
 
 class ClaudeCredentialProvider:
@@ -208,7 +231,7 @@ class ClaudeBackend:
         worktree = Path(request.candidate_worktree).resolve()
         artifact_root = Path(request.artifact_root).resolve()
         expire_redacted_event_summaries(repo_root / "factory/artifacts/v3")
-        packet = V3TaskPacket.model_validate(request.task_packet)
+        packet = validate_planning_packet(request)
         role = RoleName(request.role)
         stage = Stage(
             role=role,

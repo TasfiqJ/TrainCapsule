@@ -20,6 +20,7 @@ from tcfactory.backends.claude import (
     ClaudeBackend,
     ClaudeCredentialProvider,
     load_backend_terminal_record,
+    validate_planning_packet,
 )
 from tcfactory.backends.fake import FakeBackend
 from tcfactory.claude_runner import (
@@ -31,6 +32,9 @@ from tcfactory.models import PauseKind, QuotaPauseRecord
 from tcfactory.quota import QuotaLimitPause
 from tcfactory.v3.enums import Lane, RiskTier, WorkKind
 from tcfactory.v3.planning import V3TaskPacket
+from tcfactory.v3.task_compiler_v31 import compile_task_contract_v31
+from tcfactory.v3.work_items import WorkItemCollection
+from tcfactory.yamlutil import load_yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 DIGEST = "sha256:" + "0" * 64
@@ -94,6 +98,47 @@ def _request(tmp_path: Path, **updates: object) -> AgentTaskRequest:
     }
     payload.update(updates)
     return AgentTaskRequest.model_validate(payload)
+
+
+def test_claude_accepts_exact_compiled_task_contract_envelope(tmp_path: Path) -> None:
+    packet = _packet()
+    collection = WorkItemCollection.model_validate(
+        load_yaml(ROOT / "factory/roadmap/work_items.yaml")
+    )
+    contract = compile_task_contract_v31(
+        collection.item("V3-MIG-001"),
+        task_packet_digest=packet.canonical_digest(),
+        source_generation_id="traincapsule-v3.1-zh-2026-08-12",
+        source_digest=packet.source_digest,
+        context_digest=packet.context_digest,
+    )
+    task_packet = packet.model_dump(mode="json", by_alias=True)
+    task_packet["taskContract"] = contract.model_dump(mode="json", by_alias=True)
+    request = _request(tmp_path, taskPacket=task_packet)
+
+    assert validate_planning_packet(request) == packet
+
+
+def test_claude_rejects_mismatched_compiled_task_contract_envelope(
+    tmp_path: Path,
+) -> None:
+    packet = _packet()
+    collection = WorkItemCollection.model_validate(
+        load_yaml(ROOT / "factory/roadmap/work_items.yaml")
+    )
+    contract = compile_task_contract_v31(
+        collection.item("V3-MIG-001"),
+        task_packet_digest=packet.canonical_digest(),
+        source_generation_id="traincapsule-v3.1-zh-2026-08-12",
+        source_digest=packet.source_digest,
+        context_digest=packet.context_digest,
+    )
+    task_packet = packet.model_dump(mode="json", by_alias=True)
+    task_packet["taskContract"] = contract.model_dump(mode="json", by_alias=True)
+    request = _request(tmp_path, taskPacket=task_packet, contextDigest="sha256:" + "1" * 64)
+
+    with pytest.raises(ValueError, match="does not bind"):
+        validate_planning_packet(request)
 
 
 def _authenticated_backend(monkeypatch: pytest.MonkeyPatch) -> ClaudeBackend:

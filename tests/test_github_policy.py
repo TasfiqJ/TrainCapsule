@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 import os
 import subprocess
 from datetime import UTC, datetime, timedelta
@@ -65,6 +66,53 @@ def test_controller_activation_rejects_substituted_effective_config(
 
     with pytest.raises(github_sync.GitHubSyncError, match="effective config digest"):
         github_sync.installed_activation_digests()
+
+
+def test_release_controls_use_verified_root_observation_without_gh_credentials(
+    monkeypatch: pytest.MonkeyPatch, tmp_path: Path
+) -> None:
+    config = load_github_config(Path("config/github.yaml"))
+    expected = config.remote_ci.trusted_check_app_ids
+    core = {
+        "repository": config.repository,
+        "baseBranch": "main",
+        "rulesetId": 20794549,
+        "enforcement": "active",
+        "requiredCheckAppIds": expected,
+        "bypassActorCount": 0,
+        "deletionForbidden": True,
+        "forcePushForbidden": True,
+        "pullRequestRequired": True,
+        "directBranchUpdatesForbidden": True,
+        "autoMergeEnabled": True,
+    }
+    digest = sha256_digest(
+        (json.dumps(core, separators=(",", ":"), sort_keys=True) + "\n").encode()
+    )
+    receipt = tmp_path / "ruleset.json"
+    receipt.write_text(json.dumps({**core, "observationDigest": digest}))
+    verifier = tmp_path / "verifier"
+    verifier.write_text("verified")
+    commands: list[list[str]] = []
+
+    def trusted(path: Path, *, directory: bool, label: str) -> tuple[Path, os.stat_result]:
+        del directory, label
+        return path, path.stat()
+
+    def run(args: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        commands.append(args)
+        return subprocess.CompletedProcess(args, 0, "{}\n", "")
+
+    monkeypatch.setattr(github_sync, "trusted_external_path", trusted)
+    monkeypatch.setattr(github_sync, "run_command", run)
+
+    result = github_sync.validate_signed_repository_release_controls(
+        config=config, receipt_path=receipt, verifier_path=verifier
+    )
+
+    assert result["observationDigest"] == digest
+    assert len(commands) == 1
+    assert commands[0][0] == str(verifier)
 
 
 def test_direct_main_publication_surfaces_do_not_exist() -> None:

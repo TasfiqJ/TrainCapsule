@@ -337,7 +337,7 @@ def validate_repository_release_controls(
         timeout=60,
     )
     if result.returncode != 0:
-        raise GitHubSyncError("server-side main protection/rules are unavailable")
+        return validate_signed_repository_release_controls(config=config)
     try:
         raw: object = json.loads(result.stdout)
     except ValueError as exc:
@@ -469,6 +469,105 @@ def validate_repository_release_controls(
         "observedRuleTypes": sorted(rule_map),
         "configuredOnly": False,
         "rulesetId": exact["id"],
+        "requiredCheckAppIds": observed_checks,
+        "observationDigest": digest,
+        "signedObservationPath": str(receipt_path),
+    }
+
+
+def validate_signed_repository_release_controls(
+    *,
+    config: GitHubConfig,
+    receipt_path: Path = Path("/var/lib/traincapsule-verifier/ruleset/current.json"),
+    verifier_path: Path = Path("/usr/local/bin/traincapsule-verifier-verify-receipt"),
+) -> dict[str, object]:
+    """Verify the root-promoted ruleset observation without controller credentials."""
+
+    trusted_external_path(receipt_path, directory=False, label="ruleset observation receipt")
+    trusted_external_path(verifier_path, directory=False, label="ruleset receipt verifier")
+    try:
+        raw: object = json.loads(receipt_path.read_bytes())
+    except (OSError, ValueError) as exc:
+        raise GitHubSyncError("signed ruleset observation is unavailable") from exc
+    if not isinstance(raw, dict):
+        raise GitHubSyncError("signed ruleset observation has the wrong shape")
+    payload = cast(dict[str, object], raw)
+    raw_checks = payload.get("requiredCheckAppIds")
+    if not isinstance(raw_checks, dict):
+        raise GitHubSyncError("signed ruleset observation check roster is unavailable")
+    observed_checks = {
+        key: value
+        for key, value in cast(dict[object, object], raw_checks).items()
+        if isinstance(key, str) and type(value) is int
+    }
+    expected_checks = config.remote_ci.trusted_check_app_ids
+    if any(value is None for value in expected_checks.values()):
+        raise GitHubSyncError("every required check must bind a provisioned GitHub App ID")
+    expected_exact = cast(dict[str, int], expected_checks)
+    if observed_checks != expected_exact:
+        raise GitHubSyncError("signed ruleset required contexts/GitHub App IDs differ")
+    if (
+        payload.get("repository") != config.repository
+        or payload.get("baseBranch") != "main"
+        or payload.get("enforcement") != "active"
+        or type(payload.get("rulesetId")) is not int
+        or payload.get("bypassActorCount") != 0
+        or any(
+            payload.get(field) is not True
+            for field in (
+                "deletionForbidden",
+                "forcePushForbidden",
+                "pullRequestRequired",
+                "directBranchUpdatesForbidden",
+                "autoMergeEnabled",
+            )
+        )
+    ):
+        raise GitHubSyncError("signed ruleset observation does not enforce exact main")
+    observation_core = {
+        "repository": config.repository,
+        "baseBranch": "main",
+        "rulesetId": payload["rulesetId"],
+        "enforcement": "active",
+        "requiredCheckAppIds": observed_checks,
+        "bypassActorCount": 0,
+        "deletionForbidden": True,
+        "forcePushForbidden": True,
+        "pullRequestRequired": True,
+        "directBranchUpdatesForbidden": True,
+        "autoMergeEnabled": True,
+    }
+    digest = sha256_digest(
+        (json.dumps(observation_core, separators=(",", ":"), sort_keys=True) + "\n").encode()
+    )
+    if payload.get("observationDigest") != digest:
+        raise GitHubSyncError("signed ruleset observation digest mismatch")
+    verified = run_command(
+        [
+            str(verifier_path),
+            "verify-ruleset-observation",
+            "--receipt",
+            str(receipt_path),
+            "--repository",
+            config.repository,
+            "--observation-digest",
+            digest,
+        ],
+        cwd=verifier_path.parent,
+        check=False,
+        timeout=60,
+    )
+    if verified.returncode != 0:
+        raise GitHubSyncError("signed ruleset observation receipt is invalid or stale")
+    return {
+        "observedRuleTypes": [
+            "deletion",
+            "non_fast_forward",
+            "pull_request",
+            "required_status_checks",
+        ],
+        "configuredOnly": False,
+        "rulesetId": payload["rulesetId"],
         "requiredCheckAppIds": observed_checks,
         "observationDigest": digest,
         "signedObservationPath": str(receipt_path),

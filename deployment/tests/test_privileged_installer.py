@@ -1885,3 +1885,13 @@ def test_assembler_rejects_anchor_producer_generation_divergence(tmp_path: Path)
             oracles=oracles,
             repo_root=repo_root,
         )
+
+
+def test_refresh_service_can_create_first_generation_pointer() -> None:
+    service = (
+        Path(__file__).parents[2]
+        / "config/traincapsule-deployment-refresh.service"
+    ).read_text(encoding="utf-8")
+
+    assert "ReadWritePaths=/opt/traincapsule-runtime\n" in service
+    assert "ReadWritePaths=/opt/traincapsule-runtime/current\n" not in service

@@ -16,7 +16,12 @@ ReadOnlyPaths=/var/lib/traincapsule-verifier/deployment-refresh-claims
 ReadOnlyPaths=/var/lib/traincapsule-verifier/anchor-updates
 ReadOnlyPaths=/var/lib/traincapsule-runtime/git
 ReadWritePaths=/opt/traincapsule-runtime/generations
-ReadWritePaths=/opt/traincapsule-runtime/current
+# The broker atomically creates/replaces the `current` directory entry. A
+# bind-mount exception for the entry itself cannot work on a first install
+# because systemd resolves ReadWritePaths before ExecStart and the entry does
+# not exist yet. Grant the root-only broker its runtime parent instead; all
+# candidate bytes remain independently inventory-checked before the swap.
+ReadWritePaths=/opt/traincapsule-runtime
 ReadWritePaths=/var/lib/traincapsule-verifier/repository-boundary
 ReadWritePaths=/var/lib/traincapsule-verifier/deployment-refresh-journal
 ReadWritePaths=/etc/traincapsule-controller

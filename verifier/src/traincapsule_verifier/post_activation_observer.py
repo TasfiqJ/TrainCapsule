@@ -23,7 +23,7 @@ from .controller_start_broker import (
 )
 from .filesystem import open_trusted_root, read_bounded_file
 from .models import ActivationReceipt
-from .public_verifier import PublicVerifier
+from .public_verifier import PublicVerificationError, PublicVerifier
 
 ROOT = Path("/var/lib/traincapsule-verifier")
 CONFIG = Path("/etc/traincapsule-verifier")
@@ -519,7 +519,12 @@ def observe() -> Path:
         _atomic(target, canonical_json_bytes(observation))
         _retire_refresh_completion(policy, receipt, observation)
         return target
-    except (OSError, ValueError, subprocess.TimeoutExpired) as error:
+    except (
+        OSError,
+        ValueError,
+        subprocess.TimeoutExpired,
+        PublicVerificationError,
+    ) as error:
         _fail_closed(policy, receipt, str(error))
         raise
 
@@ -531,7 +536,7 @@ def main() -> int:
     try:
         observe()
         return 0
-    except (OSError, ValueError, subprocess.TimeoutExpired):
+    except (OSError, ValueError, subprocess.TimeoutExpired, PublicVerificationError):
         print("post-activation observation failed closed", file=sys.stderr)
         return 1
 

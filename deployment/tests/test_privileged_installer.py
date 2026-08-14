@@ -877,7 +877,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                 b"v3-controller --repo /var/lib/traincapsule-verifier/repository-boundary\n"
                 b"EnvironmentFile=/etc/traincapsule-controller/controller-runtime.env\n"
                 b"WorkingDirectory=/var/lib/traincapsule-verifier/repository-boundary\n"
-                b"NoNewPrivileges=yes\n"
+                b"NoNewPrivileges=no\n"
             )
         elif role == "controller-runtime-environment":
             data = (

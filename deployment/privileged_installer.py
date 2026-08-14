@@ -2240,7 +2240,7 @@ class PrivilegedInstaller:
             f"ExecStart={ROLE_TARGETS['python-runtime']} {arguments}",
             f"EnvironmentFile={ROLE_TARGETS['controller-runtime-environment']}",
             "WorkingDirectory=/var/lib/traincapsule-verifier/repository-boundary",
-            "NoNewPrivileges=yes",
+            "NoNewPrivileges=no",
         )
         lines = unit.splitlines()
         if (
@@ -2427,7 +2427,7 @@ class PrivilegedInstaller:
             f"User={principal}",
             f"Group={principal}",
             f"ExecStart={ROLE_TARGETS['activation-supervisor-launcher']}",
-            "NoNewPrivileges=yes",
+            "NoNewPrivileges=no",
         )
         if any(line not in unit.splitlines() for line in required):
             raise InstallFailure(

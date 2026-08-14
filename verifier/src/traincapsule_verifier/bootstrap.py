@@ -143,7 +143,10 @@ Group={controller_user}
 EnvironmentFile=/etc/traincapsule-controller/controller-runtime.env
 ExecStart=/usr/libexec/traincapsule-activation-supervisor
 WorkingDirectory=/var/lib/traincapsule-verifier/repository-boundary
-NoNewPrivileges=yes
+# The controller principal has exactly one sudoers allowlist entry for the
+# root-owned private-gate helper.  Setting NoNewPrivileges=yes here prevents
+# that fail-closed health probe from executing at all.
+NoNewPrivileges=no
 PrivateTmp=yes
 ProtectSystem=strict
 ProtectHome=read-only

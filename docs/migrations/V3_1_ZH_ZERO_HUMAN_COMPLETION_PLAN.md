@@ -652,6 +652,16 @@ FAIL: V3-MIG-016 is pending; run .venv/bin/python scripts/finalize_v3_1_zh_m0_ev
 
 The finalizer was not used to invent or self-author the missing independent authority.
 
+The available 20-canary suite's common `BLOCKED_PREREQUISITE` was traced to a concrete path bug,
+not to 20 independent mechanism failures. `run_mandatory_canaries` accepted a relative result root;
+the bundle command created valid bytes, but the clone command re-resolved that relative bundle path
+from inside the run directory and addressed a nonexistent nested path. The preserved 2.7 MB bundle
+was independently cloned successfully. The runner now resolves the result root before creating any
+run paths, and a regression executes all 20 passing mechanisms from a relative result root while
+asserting the disposable clone is present. The activation/canary module, Ruff, and strict Pyright
+pass. A fresh installed-runner 20-canary result is still required before this blocker can be marked
+closed.
+
 Remaining immediate blocker and next action: the installed runtime still contains the old observer
 bytes, and normal authority renewal does not yet exist. Implement and hostile-test pre-expiry
 machine-policy/activation renewal with a stop-before-expiry deadline, then publish only through the

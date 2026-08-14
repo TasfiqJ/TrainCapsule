@@ -989,6 +989,27 @@ def test_canary_publication_remote_is_explicit_and_exact(
         )
 
 
+def test_relative_canary_result_root_keeps_bundle_clone_addressable(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _repo(tmp_path)
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(canaries, "validate_active_source_generation", _active_for_path)
+
+    suite_path = run_mandatory_canaries(
+        repo_root=repo,
+        result_root=Path("relative-results"),
+        runner_factory=_passing_runner,
+        now=NOW,
+    )
+
+    assert suite_path.is_absolute()
+    assert verify_mandatory_canary_suite(
+        suite_path, repo_root=repo
+    ).status is CanaryStatus.PASS
+    assert (suite_path.parent / "isolated-repo/.git").is_dir()
+
+
 def test_canary_suite_reopens_every_exact_result_and_evidence_byte(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

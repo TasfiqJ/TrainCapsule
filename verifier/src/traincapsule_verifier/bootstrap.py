@@ -120,13 +120,10 @@ UnitKind = Literal[
 ]
 
 
-def systemd_unit_content(
-    *, unit: UnitKind, controller_user: str = CONTROLLER_USER
-) -> bytes:
+def systemd_unit_content(*, unit: UnitKind, controller_user: str = CONTROLLER_USER) -> bytes:
     """Render one exact production unit without mutating the host."""
     if not controller_user or any(
-        character not in "abcdefghijklmnopqrstuvwxyz0123456789_-"
-        for character in controller_user
+        character not in "abcdefghijklmnopqrstuvwxyz0123456789_-" for character in controller_user
     ):
         raise ValueError("controller service principal is invalid")
     if unit == "activation-supervisor":
@@ -204,7 +201,6 @@ ProtectSystem=strict
 ReadOnlyPaths=/etc/traincapsule-verifier /etc/traincapsule-controller
 ReadOnlyPaths=/var/lib/traincapsule-verifier/activation
 ReadOnlyPaths=/var/lib/traincapsule-verifier/controller-start-journal
-ReadOnlyPaths=/var/lib/traincapsule-runtime
 ReadWritePaths=/var/lib/traincapsule-verifier/post-activation-observations
 ReadWritePaths=/var/lib/traincapsule-verifier/activation-refresh-inbox
 ReadWritePaths=/var/lib/traincapsule-verifier/activation-refresh-retirement
@@ -644,18 +640,12 @@ def post_activation_policy_content() -> bytes:
             "repositoryRoot": "/var/lib/traincapsule-verifier/repository-boundary",
             "runtimeRoot": "/var/lib/traincapsule-runtime",
             "startJournalRoot": "/var/lib/traincapsule-verifier/controller-start-journal",
-            "observationRoot": (
-                "/var/lib/traincapsule-verifier/post-activation-observations"
-            ),
-            "refreshCompletionRoot": (
-                "/var/lib/traincapsule-verifier/activation-refresh-inbox"
-            ),
+            "observationRoot": ("/var/lib/traincapsule-verifier/post-activation-observations"),
+            "refreshCompletionRoot": ("/var/lib/traincapsule-verifier/activation-refresh-inbox"),
             "refreshRetirementRoot": (
                 "/var/lib/traincapsule-verifier/activation-refresh-retirement"
             ),
-            "runtimeManifestPath": (
-                "/etc/traincapsule-controller/runtime-manifest.json"
-            ),
+            "runtimeManifestPath": ("/etc/traincapsule-controller/runtime-manifest.json"),
             "maximumObservationSeconds": 3600,
         }
     )
@@ -704,12 +694,10 @@ def git_anchor_producer_policy_content() -> bytes:
                 "sha256:06b0e62f960bf4fe2e87d457d92bafda392e7369ee6a576d9ca36530b9f4263c"
             ),
             "privateKeyPath": (
-                "/var/lib/traincapsule-verifier/anchor-fetcher-private/"
-                "github-app-private-key.pem"
+                "/var/lib/traincapsule-verifier/anchor-fetcher-private/github-app-private-key.pem"
             ),
             "observerKeyPath": (
-                "/var/lib/traincapsule-verifier/anchor-fetcher-private/"
-                "observer-private-key.pem"
+                "/var/lib/traincapsule-verifier/anchor-fetcher-private/observer-private-key.pem"
             ),
             "rulesetReceiptPath": "/var/lib/traincapsule-verifier/ruleset/current.json",
             "rulesetPublicKeyPath": "/etc/traincapsule-verifier/ruleset-public-key.pem",
@@ -1124,9 +1112,7 @@ def production_install_manifest() -> InstallManifest:
         )
         for path, content, purpose in units
     ]
-    controller_policy = canonical_json_bytes(
-        {"schemaVersion": "3.1", "principal": CONTROLLER_USER}
-    )
+    controller_policy = canonical_json_bytes({"schemaVersion": "3.1", "principal": CONTROLLER_USER})
     files.append(
         InstallFile(
             path="/etc/traincapsule-verifier/controller-principal.json",

@@ -37,15 +37,9 @@ from .canaries import (
 from .installed_runtime import InstalledControllerRuntimeManifest
 from .runtime_paths import V3RuntimePaths, resolve_v3_runtime_paths
 
-CONTROLLER_PRINCIPAL_POLICY = Path(
-    "/etc/traincapsule-verifier/controller-principal.json"
-)
-CONTROLLER_START_OUTBOX = Path(
-    "/var/lib/traincapsule-verifier/controller-start-outbox"
-)
-REFRESH_COMPLETION_INBOX = Path(
-    "/var/lib/traincapsule-verifier/activation-refresh-inbox"
-)
+CONTROLLER_PRINCIPAL_POLICY = Path("/etc/traincapsule-verifier/controller-principal.json")
+CONTROLLER_START_OUTBOX = Path("/var/lib/traincapsule-verifier/controller-start-outbox")
+REFRESH_COMPLETION_INBOX = Path("/var/lib/traincapsule-verifier/activation-refresh-inbox")
 ACTIVATION_POLICY_RECEIPT = ACTIVATION_POLICY_RECEIPT_ROOT
 
 
@@ -102,13 +96,9 @@ class RefreshActivationState(V3Model):
     canary_suite_path: str | None = None
     canary_suite_digest: str | None = Field(default=None, pattern=DIGEST_PATTERN.pattern)
     activation_request_path: str | None = None
-    activation_request_digest: str | None = Field(
-        default=None, pattern=DIGEST_PATTERN.pattern
-    )
+    activation_request_digest: str | None = Field(default=None, pattern=DIGEST_PATTERN.pattern)
     activation_transaction_path: str | None = None
-    activation_transaction_digest: str | None = Field(
-        default=None, pattern=DIGEST_PATTERN.pattern
-    )
+    activation_transaction_digest: str | None = Field(default=None, pattern=DIGEST_PATTERN.pattern)
     updated_at: AwareDatetime
 
     @model_validator(mode="after")
@@ -126,13 +116,11 @@ class RefreshActivationState(V3Model):
         ):
             raise ValueError("refresh activation state is missing canary evidence")
         if phase_index >= 2 and (
-            self.activation_request_path is None
-            or self.activation_request_digest is None
+            self.activation_request_path is None or self.activation_request_digest is None
         ):
             raise ValueError("refresh activation state is missing request evidence")
         if phase_index >= 3 and (
-            self.activation_transaction_path is None
-            or self.activation_transaction_digest is None
+            self.activation_transaction_path is None or self.activation_transaction_digest is None
         ):
             raise ValueError("refresh activation state is missing transaction evidence")
         return self
@@ -163,9 +151,7 @@ def _load_refresh_completion(path: Path) -> tuple[RefreshCompletionV31, bytes]:
     completion = RefreshCompletionV31.model_validate_json(raw, strict=True)
     if raw != completion.canonical_json_bytes():
         raise RuntimeError("refresh completion claim is not canonical")
-    expected_name = (
-        f"{completion.required_main_sha}-{completion.transaction_id}.json"
-    )
+    expected_name = f"{completion.required_main_sha}-{completion.transaction_id}.json"
     if path.name != expected_name:
         raise RuntimeError("refresh completion claim filename is not exact")
     return completion, raw
@@ -226,8 +212,7 @@ def _validate_refresh_completion(
         manifest.effective_config.digest == completion.effective_config_digest,
         f"sha256:{sha256_file(Path(manifest.repository_snapshot_manifest.path))}"
         == completion.snapshot_manifest_digest,
-        manifest.repository_snapshot_manifest.digest
-        == completion.snapshot_manifest_digest,
+        manifest.repository_snapshot_manifest.digest == completion.snapshot_manifest_digest,
     )
     if not all(exact_bindings):
         raise RuntimeError("refresh completion does not bind the installed runtime")
@@ -248,9 +233,7 @@ def sha256_file_bytes(raw: bytes) -> str:
     return hashlib.sha256(raw).hexdigest()
 
 
-def _refresh_state_path(
-    paths: V3RuntimePaths, completion: RefreshCompletionV31
-) -> Path:
+def _refresh_state_path(paths: V3RuntimePaths, completion: RefreshCompletionV31) -> Path:
     return (
         paths.state_root
         / "refresh-activation"
@@ -318,15 +301,11 @@ def stage_controller_start_request(
     return target
 
 
-def _resume_or_stage_activated(
-    *, repo_root: Path, paths: V3RuntimePaths
-) -> str | None:
+def _resume_or_stage_activated(*, repo_root: Path, paths: V3RuntimePaths) -> str | None:
     transactions = sorted(paths.activation_transactions.glob("ACTIVATE-*.json"))
     if len(transactions) != 1:
         return None
-    observed = ActivationTransaction.model_validate_json(
-        transactions[0].read_bytes(), strict=True
-    )
+    observed = ActivationTransaction.model_validate_json(transactions[0].read_bytes(), strict=True)
     transaction = activate_v31(
         repo_root=repo_root,
         canary_suite_path=Path(observed.canary_suite_path),
@@ -426,9 +405,7 @@ def _process_refresh_activation(
     else:
         if state_path.exists():
             raise RuntimeError("refresh activation state path is indirect")
-        if paths.stop.exists() and (
-            paths.stop.is_symlink() or not paths.stop.is_file()
-        ):
+        if paths.stop.exists() and (paths.stop.is_symlink() or not paths.stop.is_file()):
             raise RuntimeError("STOP control is indirect")
         if not paths.stop.exists():
             stop_payload = (
@@ -488,8 +465,7 @@ def _process_refresh_activation(
                 observed.exact_main_sha == completion.required_main_sha
                 and observed.exact_tree_sha == completion.required_main_tree_sha
                 and observed.source_generation_id == completion.source_generation_id
-                and observed.source_generation_digest
-                == completion.source_generation_digest
+                and observed.source_generation_digest == completion.source_generation_digest
             ):
                 suite_path, suite = candidate, observed
                 break
@@ -500,9 +476,7 @@ def _process_refresh_activation(
                 runner_executable=runner_executable,
                 publication_remote=os.environ.get("TCF_CANARY_PUBLICATION_REMOTE"),
             )
-            suite = MandatoryCanarySuite.model_validate_json(
-                suite_path.read_bytes(), strict=True
-            )
+            suite = MandatoryCanarySuite.model_validate_json(suite_path.read_bytes(), strict=True)
         if suite is None or suite.status is not CanaryStatus.PASS:
             return "STOPPED_CANARY_PREREQUISITE"
         if (
@@ -525,9 +499,7 @@ def _process_refresh_activation(
         suite_path = _reopen_bound_file(
             state.canary_suite_path, cast(str, state.canary_suite_digest)
         )
-        suite = verify_mandatory_canary_suite(
-            suite_path, repo_root=repo_root, require_pass=True
-        )
+        suite = verify_mandatory_canary_suite(suite_path, repo_root=repo_root, require_pass=True)
         if (
             suite.exact_main_sha != completion.required_main_sha
             or suite.exact_tree_sha != completion.required_main_tree_sha
@@ -569,16 +541,12 @@ def _process_refresh_activation(
             )
         except (OSError, RuntimeError, ValueError):
             return "ACTIVATION_REQUEST_SUBMITTED"
-        transaction_path = (
-            paths.activation_transactions / f"{transaction.transaction_id}.json"
-        )
+        transaction_path = paths.activation_transactions / f"{transaction.transaction_id}.json"
         state = state.model_copy(
             update={
                 "phase": "ACTIVATED",
                 "activation_transaction_path": str(transaction_path),
-                "activation_transaction_digest": (
-                    f"sha256:{sha256_file(transaction_path)}"
-                ),
+                "activation_transaction_digest": (f"sha256:{sha256_file(transaction_path)}"),
                 "updated_at": datetime.now(UTC),
             }
         )
@@ -599,9 +567,7 @@ def _process_refresh_activation(
     ):
         raise RuntimeError("activation transaction does not bind fresh refresh evidence")
     stage_controller_start_request(transaction, transaction_path=transaction_path)
-    state = state.model_copy(
-        update={"phase": "START_REQUESTED", "updated_at": datetime.now(UTC)}
-    )
+    state = state.model_copy(update={"phase": "START_REQUESTED", "updated_at": datetime.now(UTC)})
     _write_refresh_state(state_path, state)
     return f"ACTIVATED_START_REQUESTED:{transaction.transaction_id}"
 
@@ -684,9 +650,7 @@ def _run_activation_supervisor_locked(
                 repo_root=repo_root,
                 canary_suite_path=existing_suite,
             )
-            transaction_path = (
-                paths.activation_transactions / f"{transaction.transaction_id}.json"
-            )
+            transaction_path = paths.activation_transactions / f"{transaction.transaction_id}.json"
             stage_controller_start_request(
                 transaction,
                 transaction_path=transaction_path,
@@ -695,12 +659,6 @@ def _run_activation_supervisor_locked(
         except (OSError, RuntimeError, ValueError):
             continue
     if suites:
-        request = coordinate_activation_request(
-            repo_root=repo_root,
-            machine_policy_receipt_path=selected_policy_receipt,
-        )
-        if request is not None:
-            return "ACTIVATION_REQUEST_SUBMITTED"
         for existing_suite in suites:
             try:
                 policy_request = coordinate_activation_policy_request(
@@ -712,6 +670,12 @@ def _run_activation_supervisor_locked(
                     return "ACTIVATION_POLICY_REQUEST_SUBMITTED"
             except (OSError, RuntimeError, ValueError):
                 continue
+        request = coordinate_activation_request(
+            repo_root=repo_root,
+            machine_policy_receipt_path=selected_policy_receipt,
+        )
+        if request is not None:
+            return "ACTIVATION_REQUEST_SUBMITTED"
     suite_path = run_mandatory_canaries(
         repo_root=repo_root,
         result_root=paths.canary_results,

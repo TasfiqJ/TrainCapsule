@@ -123,7 +123,7 @@ No future SHA, run ID, receipt, or PASS is invented here. Retain `factory/state/
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **644 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **645 paths**.
 
 This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing
 report must bind acceptance to an immutable candidate SHA and independent test/receipt
@@ -343,6 +343,7 @@ artifacts.
 | `A` | `packages/traincapsule-ingest-pytorch/src/traincapsule_ingest_pytorch/importer.py` |
 | `A` | `packages/traincapsule-qualify/pyproject.toml` |
 | `A` | `packages/traincapsule-qualify/src/traincapsule_qualify/__init__.py` |
+| `A` | `packages/traincapsule-qualify/src/traincapsule_qualify/experiment.py` |
 | `A` | `packages/traincapsule-qualify/src/traincapsule_qualify/models.py` |
 | `A` | `packages/traincapsule-qualify/src/traincapsule_qualify/qualify.py` |
 | `M` | `private-gates-reference/README.md` |

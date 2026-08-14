@@ -11,9 +11,10 @@ production readiness, customer adoption, superior performance, or an advantage o
 tooling. Native diagnostics are preserved and may be sufficient. Customer, GPU, market, and paid
 engagement evidence remains external and deferred until it actually exists.
 
-The implemented product scope ends at evidence import, identity, native-baseline capture,
-completeness, and eligibility preflight. It does not include a baseline/candidate runner,
-reduction engine, GPU qualification claim, or commercial pack release.
+The implemented product scope includes evidence import, identity, native-baseline capture,
+completeness, eligibility preflight, and a shell-free, budget-bounded customer-local
+baseline/candidate qualification runner. It does not yet include a faithful reduction engine,
+GPU qualification claim, or commercial pack release.
 
 ## Repository layout
 

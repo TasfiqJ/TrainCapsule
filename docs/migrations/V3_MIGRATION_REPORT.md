@@ -123,7 +123,7 @@ No future SHA, run ID, receipt, or PASS is invented here. Retain `factory/state/
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **641 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **643 paths**.
 
 This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing
 report must bind acceptance to an immutable candidate SHA and independent test/receipt
@@ -620,6 +620,7 @@ artifacts.
 | `A` | `tcfactory/v3/pilot.py` |
 | `A` | `tcfactory/v3/pipeline_services.py` |
 | `A` | `tcfactory/v3/planning.py` |
+| `A` | `tcfactory/v3/post_activation_events.py` |
 | `A` | `tcfactory/v3/private_gate.py` |
 | `A` | `tcfactory/v3/publication.py` |
 | `A` | `tcfactory/v3/queue.py` |
@@ -671,6 +672,7 @@ artifacts.
 | `A` | `tests/test_v31_native_value_gate.py` |
 | `A` | `tests/test_v31_output_integration_gate.py` |
 | `A` | `tests/test_v31_phase6_installation.py` |
+| `A` | `tests/test_v31_post_activation_events.py` |
 | `A` | `tests/test_v31_task_compiler.py` |
 | `A` | `tests/test_v3_backend_runtime_policy.py` |
 | `A` | `tests/test_v3_backends_and_checkpoints.py` |

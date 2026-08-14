@@ -63,6 +63,7 @@ from .v3.enums import Lane
 from .v3.external_evidence import TrustedEvidenceRecord
 from .v3.milestones import MilestoneRoadmap
 from .v3.pilot import create_pilot_metadata, list_pilot_metadata, load_pilot_metadata
+from .v3.post_activation_events import emit_post_activation_events
 from .v3.queue import V3Queue
 from .v3.runtime_paths import resolve_v3_runtime_paths
 from .v3.work_items import WorkItemCollection
@@ -936,6 +937,7 @@ def v3_controller(
     while True:
         result = asyncio.run(controller.run_cycle())
         console.print_json(data=result)
+        emit_post_activation_events(repo_root=root, paths=paths, cycle_result=result)
         if once:
             return
         time.sleep(5)

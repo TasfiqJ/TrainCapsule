@@ -16,7 +16,7 @@ from typing import Any, Literal, cast
 
 from pydantic import ConfigDict, Field, field_validator, model_validator
 
-from .gitops import current_sha
+from .gitops import current_sha, trusted_repository_git_command
 from .models import RiskTier, TaskPacket
 from .util import read_json, run_command, write_json
 from .v3.base import SHA_PATTERN, V3Model, sha256_digest
@@ -271,8 +271,8 @@ def validate_controller_activation(*, repo_root: Path, config: GitHubConfig) -> 
 
     validate_publication_installation(config)
     tracked = run_command(
-        [
-            "git",
+        trusted_repository_git_command(
+            repo_root,
             "diff",
             "--quiet",
             "HEAD",
@@ -280,12 +280,19 @@ def validate_controller_activation(*, repo_root: Path, config: GitHubConfig) -> 
             "tcfactory",
             "config/factory.yaml",
             "config/github.yaml",
-        ],
+        ),
         cwd=repo_root,
         check=False,
     )
     untracked = run_command(
-        ["git", "ls-files", "--others", "--exclude-standard", "--", "tcfactory"],
+        trusted_repository_git_command(
+            repo_root,
+            "ls-files",
+            "--others",
+            "--exclude-standard",
+            "--",
+            "tcfactory",
+        ),
         cwd=repo_root,
         check=False,
     )

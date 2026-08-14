@@ -9,6 +9,7 @@ import pytest
 import typer
 
 import tcfactory.cli as cli
+import tcfactory.gitops as gitops
 import tcfactory.v3.runtime_paths as runtime_paths
 from tcfactory.runtime_status import build_runtime_status
 from tcfactory.v3.configuration import FactoryV3Config
@@ -41,6 +42,32 @@ def test_runtime_git_commands_pin_the_exact_trusted_repository(
         str(repo),
         "rev-parse",
     ]
+
+
+def test_activation_git_commands_pin_the_exact_trusted_repository(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    captured: list[str] = []
+
+    def run(command: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
+        captured.extend(command)
+        return subprocess.CompletedProcess(command, 0, "1859f0e\n", "")
+
+    monkeypatch.setattr(gitops, "run_command", run)
+    repository = tmp_path / "root-owned-repository"
+    repository.mkdir()
+
+    assert gitops.current_sha(repository) == "1859f0e"
+    assert captured == [
+        "git",
+        "-c",
+        f"safe.directory={repository}",
+        "-c",
+        f"safe.directory={repository / '.git'}",
+        "rev-parse",
+        "HEAD",
+    ]
+    assert "safe.directory=*" not in captured
 
 
 def _item() -> WorkItem:

@@ -641,12 +641,17 @@ def test_activation_supervisor_requests_fresh_policy_before_reusing_consumed_req
 
     import tcfactory.v3.activation_supervisor as supervisor
 
-    monkeypatch.setattr(supervisor, "resolve_v3_runtime_paths", lambda _repo: paths)
-    monkeypatch.setattr(
-        supervisor,
-        "verify_mandatory_canary_suite",
-        lambda *_args, **_kwargs: None,
-    )
+    def resolved_paths(_repo: Path) -> V3RuntimePaths:
+        return paths
+
+    def accept_suite(
+        _suite: Path, *, repo_root: Path, require_pass: bool
+    ) -> None:
+        assert repo_root == repo.resolve()
+        assert require_pass
+
+    monkeypatch.setattr(supervisor, "resolve_v3_runtime_paths", resolved_paths)
+    monkeypatch.setattr(supervisor, "verify_mandatory_canary_suite", accept_suite)
 
     def no_unused_live_receipt(**_kwargs: object) -> Never:
         raise RuntimeError("the previous activation receipt was consumed")

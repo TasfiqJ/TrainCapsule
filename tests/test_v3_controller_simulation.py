@@ -1322,6 +1322,61 @@ def test_missing_recovery_worktree_is_transplanted_and_fully_revalidated(
     assert receipt["allStagesRequireRevalidation"] is True
 
 
+def test_stale_main_checkpoint_is_invalidated_and_restarted_from_current_main(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _simulation_repo(tmp_path)
+    _make_first_item_standard(repo)
+    monkeypatch.delenv("TCF_RUNTIME_ROOT", raising=False)
+    crashing = V3Controller(
+        repo_root=repo,
+        backend=_CrashAfterBoundFailureBackend(),
+        publisher=_AutomatedPRSimulationPublisher(repo, tmp_path / "gates"),
+    )
+    with pytest.raises(RuntimeError, match="crash after bound repair handoff"):
+        asyncio.run(crashing.run_cycle())
+    stale = crashing.checkpoints.load_v3("V3-SIM-001")
+    assert stale is not None
+
+    (repo / "main-advanced.txt").write_text("new protected main\n", encoding="utf-8")
+    _git(repo, "add", "main-advanced.txt")
+    _git(repo, "commit", "-m", "advance protected main")
+    advanced_main = _git(repo, "rev-parse", "HEAD")
+    _git(crashing.git_root, "fetch", str(repo), advanced_main)
+    _git(crashing.git_root, "update-ref", "refs/heads/main", advanced_main)
+    lease_path = crashing.queue.lease_root / "V3-SIM-001.json"
+    lease = json.loads(lease_path.read_text(encoding="utf-8"))
+    lease["ownerProcessIdentity"] = "linux-proc:999999999:0"
+    lease_path.write_text(json.dumps(lease), encoding="utf-8")
+    resumed = V3Controller(
+        repo_root=repo,
+        backend=_CommittingBackend(),
+        publisher=_AutomatedPRSimulationPublisher(repo, tmp_path / "gates"),
+    )
+
+    result = asyncio.run(resumed.run_cycle())
+
+    assert cast(list[dict[str, object]], result["results"])[0]["status"] == (
+        "PASSED_ENGINEERING"
+    )
+    checkpoint = resumed.checkpoints.load_v3("V3-SIM-001")
+    assert checkpoint is not None
+    assert (
+        subprocess.run(
+            [
+                "git",
+                "merge-base",
+                "--is-ancestor",
+                advanced_main,
+                checkpoint.candidate_sha,
+            ],
+            cwd=repo,
+            check=False,
+        ).returncode
+        == 0
+    )
+
+
 def test_controller_process_lock_covers_the_entire_async_worker_lifetime(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

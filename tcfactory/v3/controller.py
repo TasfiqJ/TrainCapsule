@@ -2611,8 +2611,20 @@ class V3Controller:
                 check=False,
             )
             if ancestor.returncode != 0:
-                raise RuntimeError("recovery checkpoint candidate is not based on current main")
-            worktree_base = recovered_checkpoint.candidate_sha
+                recovered_checkpoint.active = False
+                recovered_checkpoint.approval_state = "STALE_MAIN_CHECKPOINT_INVALIDATED"
+                recovered_checkpoint.circuit_breaker_reason = (
+                    "recovery checkpoint candidate is not based on current main; "
+                    "all prior stages require revalidation"
+                )
+                recovered_checkpoint.completed_roles = []
+                recovered_checkpoint.stage_artifact_digests = {}
+                recovered_checkpoint.stage_artifact_paths = {}
+                recovered_checkpoint.updated_at = datetime.now(UTC)
+                self.checkpoints.save_v3(recovered_checkpoint)
+                recovered_checkpoint = None
+            else:
+                worktree_base = recovered_checkpoint.candidate_sha
         if recovered_checkpoint is not None and recovered_checkpoint.publication_transaction_id:
             if (
                 not recovered_checkpoint.active

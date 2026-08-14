@@ -18,8 +18,8 @@ from .github_sync import (
     validate_publication_installation,
     validate_repository_release_controls,
 )
-from .gitops import current_sha
-from .util import read_json, resolve_within, sha256_file, write_json
+from .gitops import current_sha, trusted_repository_git_command
+from .util import read_json, run_command, sha256_file, write_json
 from .v3.base import SHA_PATTERN, V3Model, sha256_digest
 from .v3.configuration import (
     AutonomyV3Config,
@@ -32,6 +32,10 @@ from .v3.migrations import (
     load_installed_legacy_migration,
     verify_legacy_queue_archive_receipt,
 )
+from .v3.milestone_runtime import (
+    MilestoneCompletionReceipt,
+    load_milestone_state,
+)
 from .v3.milestones import MilestoneRoadmap
 from .v3.private_gate import (
     validate_private_gate_installation,
@@ -41,7 +45,6 @@ from .v3.queue import V3Queue
 from .v3.recovery import enforce_controller_restart_budget
 from .v3.runtime_paths import V3RuntimePaths, resolve_v3_runtime_paths
 from .v3.source_authority import validate_active_source_generation
-from .v3.work_items import WorkItemCollection
 from .yamlutil import load_yaml
 
 
@@ -54,7 +57,12 @@ class MigrationCompleteMarker(V3Model):
     milestone: Literal["M0_FACTORY_MIGRATED"] = "M0_FACTORY_MIGRATED"
     acceptance_work_items: dict[str, str]
     acceptance_evidence_digests: dict[str, str]
+    milestone_receipt_digest: str = Field(pattern=r"^sha256:[0-9a-f]{64}$")
     completed_at: datetime
+
+
+class MigrationMarkerCheckoutMismatch(RuntimeError):
+    """The validated M0 marker belongs to an older trusted ancestor snapshot."""
 
 
 class SupervisorState(V3Model):
@@ -128,9 +136,13 @@ def _verify_source_integrity(repo_root: Path) -> None:
 
 
 def _verify_migration_marker(
-    repo_root: Path, config: FactoryV3Config, marker_path: Path
+    repo_root: Path,
+    config: FactoryV3Config,
+    marker_path: Path,
+    *,
+    allow_ancestor_completion: bool = False,
 ) -> MigrationCompleteMarker:
-    if not marker_path.is_file():
+    if marker_path.is_symlink() or not marker_path.is_file():
         raise RuntimeError("V3 migration-complete marker is missing")
     marker = MigrationCompleteMarker.model_validate(read_json(marker_path, {}))
     active_source = validate_active_source_generation(repo_root)
@@ -141,35 +153,92 @@ def _verify_migration_marker(
         raise RuntimeError("migration marker active-generation digest is stale")
     head = current_sha(repo_root)
     if marker.completed_sha != head:
-        raise RuntimeError("migration marker must match the exact current checkout SHA")
-    roadmap = WorkItemCollection.model_validate(load_yaml(repo_root / config.roadmap.work_items))
-    milestones = MilestoneRoadmap.model_validate(load_yaml(repo_root / config.roadmap.milestones))
-    if milestones.milestone("M0_FACTORY_MIGRATED").status is not MilestoneStatus.COMPLETED:
-        raise RuntimeError("migration marker requires completed M0 milestone")
+        ancestor = run_command(
+            trusted_repository_git_command(
+                repo_root,
+                "merge-base",
+                "--is-ancestor",
+                marker.completed_sha,
+                head,
+            ),
+            cwd=repo_root,
+            check=False,
+        )
+        if not allow_ancestor_completion or ancestor.returncode != 0:
+            raise MigrationMarkerCheckoutMismatch(
+                "migration marker must match the exact current checkout SHA"
+            )
+    paths = resolve_v3_runtime_paths(repo_root, config)
+    receipt, receipt_digest = _load_m0_completion_receipt(paths, active_source.canonical_digest())
+    if marker.milestone_receipt_digest != receipt_digest:
+        raise RuntimeError("migration marker milestone receipt digest is stale")
     required = {f"V3-MIG-{number:03d}" for number in range(16, 21)}
     if set(marker.acceptance_work_items) != required:
         raise RuntimeError("migration marker acceptance work-item set is incomplete")
+    if set(marker.acceptance_evidence_digests) != required:
+        raise RuntimeError("migration marker acceptance evidence set is incomplete")
     for identifier in required:
-        item = roadmap.item(identifier)
-        if item.status is not WorkStatus.COMPLETED or not item.evidence_required:
-            raise RuntimeError(f"migration acceptance item is incomplete: {identifier}")
         if marker.acceptance_work_items[identifier] != WorkStatus.COMPLETED.value:
             raise RuntimeError(f"migration marker status is stale: {identifier}")
-        if identifier not in marker.acceptance_evidence_digests:
-            raise RuntimeError(f"migration marker evidence digest is missing: {identifier}")
-        referenced = [
-            resolve_within(repo_root, reference, require_exists=True)
-            for reference in item.evidence_required
-        ]
-        actual_digest = sha256_digest(
-            b"\n".join(
-                f"{path.relative_to(repo_root).as_posix()}:{sha256_file(path)}".encode()
-                for path in sorted(referenced)
-            )
-        )
-        if marker.acceptance_evidence_digests[identifier] != actual_digest:
+        if marker.acceptance_evidence_digests[identifier] != receipt.evidence_digests[identifier]:
             raise RuntimeError(f"migration marker evidence is stale: {identifier}")
     return marker
+
+
+def _load_m0_completion_receipt(
+    paths: V3RuntimePaths, source_authority_digest: str
+) -> tuple[MilestoneCompletionReceipt, str]:
+    receipt_path = paths.milestone_decisions / "M0_FACTORY_MIGRATED.json"
+    if receipt_path.is_symlink() or not receipt_path.is_file():
+        raise RuntimeError("M0 completion receipt is missing")
+    raw = read_json(receipt_path, {})
+    receipt = MilestoneCompletionReceipt.model_validate(raw.get("record"))
+    receipt_digest = sha256_digest(receipt.canonical_json_bytes())
+    if raw.get("contentDigest") != receipt_digest:
+        raise RuntimeError("M0 completion receipt digest mismatch")
+    if (
+        receipt.milestone_id != "M0_FACTORY_MIGRATED"
+        or receipt.decision is not MilestoneStatus.COMPLETED
+    ):
+        raise RuntimeError("M0 completion receipt does not authorize completion")
+    if receipt.source_authority_digest != source_authority_digest:
+        raise RuntimeError("M0 completion receipt source authority is stale")
+    required = {f"V3-MIG-{number:03d}" for number in range(16, 21)}
+    if not required.issubset(receipt.evidence_digests):
+        raise RuntimeError("M0 completion receipt lacks migration acceptance evidence")
+    state = load_milestone_state(paths.milestone_state)
+    if state is None:
+        raise RuntimeError("M0 completion receipt lacks milestone runtime state")
+    if (
+        state.statuses.get("M0_FACTORY_MIGRATED") is not MilestoneStatus.COMPLETED
+        or state.active_milestone == "M0_FACTORY_MIGRATED"
+        or state.last_completion_digest != receipt_digest
+    ):
+        raise RuntimeError("M0 completion receipt and runtime state disagree")
+    return receipt, receipt_digest
+
+
+def _verify_m0_observation_state(
+    repo_root: Path, config: FactoryV3Config, paths: V3RuntimePaths
+) -> None:
+    milestones = MilestoneRoadmap.model_validate(load_yaml(repo_root / config.roadmap.milestones))
+    if milestones.milestone("M0_FACTORY_MIGRATED").status is not MilestoneStatus.ACTIVE:
+        raise RuntimeError("missing migration marker is allowed only for active M0 observation")
+    state = load_milestone_state(paths.milestone_state)
+    if state is None:
+        return
+    active = [
+        identifier
+        for identifier, status in state.statuses.items()
+        if status is MilestoneStatus.ACTIVE
+    ]
+    if (
+        state.active_milestone != "M0_FACTORY_MIGRATED"
+        or active != ["M0_FACTORY_MIGRATED"]
+        or state.statuses.get("M0_FACTORY_MIGRATED") is not MilestoneStatus.ACTIVE
+        or state.last_completion_digest is not None
+    ):
+        raise RuntimeError("migration marker is mandatory after M0 observation")
 
 
 def run_startup_preflight(
@@ -214,7 +283,32 @@ def run_startup_preflight(
         "repositoryControls": release_controls,
         "activationReceiptDigest": activation_digest,
     }
-    marker = _verify_migration_marker(repo_root, config, paths.migration_marker)
+    marker: MigrationCompleteMarker | None = None
+    migration_state = "M0_OBSERVATION"
+    if paths.migration_marker.is_file():
+        try:
+            marker = _verify_migration_marker(repo_root, config, paths.migration_marker)
+        except MigrationMarkerCheckoutMismatch:
+            _verify_migration_marker(
+                repo_root,
+                config,
+                paths.migration_marker,
+                allow_ancestor_completion=True,
+            )
+            marker = create_migration_complete_marker(repo_root)
+        migration_state = "COMPLETE"
+    else:
+        v3_paths = resolve_v3_runtime_paths(repo_root, config)
+        milestone_state = load_milestone_state(v3_paths.milestone_state)
+        if (
+            milestone_state is not None
+            and milestone_state.statuses.get("M0_FACTORY_MIGRATED")
+            is MilestoneStatus.COMPLETED
+        ):
+            marker = create_migration_complete_marker(repo_root)
+            migration_state = "COMPLETE"
+        else:
+            _verify_m0_observation_state(repo_root, config, v3_paths)
     queue = V3Queue(paths.queue)
     queue.initialize()
     pending_claim_recovery = len(queue.items(WorkStatus.RUNNING))
@@ -228,7 +322,8 @@ def run_startup_preflight(
         "validatedConfigs": sorted(loaded),
         "sourceIntegrity": "PASS",
         "legacyMigrationRecords": len(legacy_migration.records),
-        "migrationCompletedSha": marker.completed_sha,
+        "migrationState": migration_state,
+        "migrationCompletedSha": marker.completed_sha if marker is not None else None,
         "credentialRoute": route.value,
         "credentials": route.value,
         "runtimeState": "RECOVERY_PENDING" if pending_claim_recovery else "CLEAN",
@@ -344,36 +439,25 @@ def create_migration_complete_marker(
     _verify_source_integrity(repo_root)
     config = _factory_config(repo_root)
     paths = runtime_paths(repo_root, config)
-    roadmap = WorkItemCollection.model_validate(load_yaml(repo_root / config.roadmap.work_items))
-    milestones = MilestoneRoadmap.model_validate(load_yaml(repo_root / config.roadmap.milestones))
-    if milestones.milestone("M0_FACTORY_MIGRATED").status is not MilestoneStatus.COMPLETED:
-        raise RuntimeError("cannot create migration marker before M0 is completed")
+    v3_paths = resolve_v3_runtime_paths(repo_root, config)
+    active_source = validate_active_source_generation(repo_root)
+    receipt, receipt_digest = _load_m0_completion_receipt(
+        v3_paths, active_source.canonical_digest()
+    )
     required = [f"V3-MIG-{number:03d}" for number in range(16, 21)]
-    evidence: dict[str, str] = {}
-    for identifier in required:
-        item = roadmap.item(identifier)
-        if item.status is not WorkStatus.COMPLETED or not item.evidence_required:
-            raise RuntimeError(f"cannot create marker before {identifier} evidence is complete")
-        referenced = [
-            resolve_within(repo_root, reference, require_exists=True)
-            for reference in item.evidence_required
-        ]
-        evidence[identifier] = sha256_digest(
-            b"\n".join(
-                f"{path.relative_to(repo_root).as_posix()}:{sha256_file(path)}".encode()
-                for path in sorted(referenced)
-            )
-        )
     marker = MigrationCompleteMarker(
         completed_sha=current_sha(repo_root),
-        source_manifest_sha256=validate_active_source_generation(repo_root).manifest_digest,
-        active_generation_sha256=validate_active_source_generation(repo_root).config_digest,
+        source_manifest_sha256=active_source.manifest_digest,
+        active_generation_sha256=active_source.config_digest,
         acceptance_work_items={identifier: "COMPLETED" for identifier in required},
-        acceptance_evidence_digests=evidence,
+        acceptance_evidence_digests={
+            identifier: receipt.evidence_digests[identifier] for identifier in required
+        },
+        milestone_receipt_digest=receipt_digest,
         completed_at=datetime.now(UTC),
     )
     write_json(paths.migration_marker, marker.model_dump(mode="json", by_alias=True))
-    return marker
+    return _verify_migration_marker(repo_root, config, paths.migration_marker)
 
 
 def _parser() -> argparse.ArgumentParser:

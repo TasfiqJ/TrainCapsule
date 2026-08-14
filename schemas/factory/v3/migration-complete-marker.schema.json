@@ -48,6 +48,11 @@
       "title": "Acceptanceevidencedigests",
       "type": "object"
     },
+    "milestoneReceiptDigest": {
+      "pattern": "^sha256:[0-9a-f]{64}$",
+      "title": "Milestonereceiptdigest",
+      "type": "string"
+    },
     "completedAt": {
       "format": "date-time",
       "title": "Completedat",
@@ -60,6 +65,7 @@
     "activeGenerationSha256",
     "acceptanceWorkItems",
     "acceptanceEvidenceDigests",
+    "milestoneReceiptDigest",
     "completedAt"
   ],
   "title": "MigrationCompleteMarker",

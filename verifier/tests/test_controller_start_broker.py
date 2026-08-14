@@ -91,6 +91,80 @@ def test_activation_binds_runtime_manifest_file_not_inner_self_digest() -> None:
     assert authority_digest != "sha256:" + "a" * 64
 
 
+def test_runtime_manifest_accepts_exact_production_authority_shape() -> None:
+    artifact = {"path": "/tmp/artifact", "digest": DIGEST, "executable": False}
+    payload: dict[str, object] = {
+        "schemaVersion": "3.1",
+        "manifestDigest": "sha256:" + "0" * 64,
+        "controllerPrincipal": "traincapsule-controller",
+        "serviceName": "traincapsule-controller.service",
+        "distributionRoot": "/opt/traincapsule-runtime",
+        "repositoryRoot": "/var/lib/traincapsule-verifier/repository-boundary",
+        "runtimeRoot": "/var/lib/traincapsule-runtime",
+        "pythonRuntime": {
+            "path": "/opt/traincapsule-runtime/python/bin/python3.12",
+            "digest": DIGEST,
+            "executable": True,
+        },
+        "packageManifest": artifact,
+        "dependencyLock": artifact,
+        "controllerUnit": {
+            "path": "/etc/systemd/system/traincapsule-controller.service",
+            "digest": DIGEST,
+            "executable": False,
+        },
+        "environmentFile": {
+            "path": "/etc/traincapsule-controller/controller-runtime.env",
+            "digest": DIGEST,
+            "executable": False,
+        },
+        "effectiveConfig": {
+            "path": "/etc/traincapsule-controller/effective-config.yaml",
+            "digest": DIGEST,
+            "executable": False,
+        },
+        "repositorySnapshotManifest": artifact,
+        "reductionOracle": {
+            "oracleId": "TRAINCAPSULE_REDUCTION_ORACLE_V1",
+            "executable": {
+                "path": "/usr/local/libexec/traincapsule-reduction-oracle",
+                "digest": DIGEST,
+                "executable": True,
+            },
+            "publicKey": {
+                "path": "/etc/traincapsule-verifier/keys/reduction-oracle.pub",
+                "digest": DIGEST,
+                "executable": False,
+            },
+            "receiptVerifier": {
+                "path": "/usr/local/bin/traincapsule-verifier-verify-receipt",
+                "digest": DIGEST,
+                "executable": True,
+            },
+            "publicReceiptRoot": "/var/lib/traincapsule-verifier/receipts",
+            "activationReceiptPath": (
+                "/var/lib/traincapsule-verifier/activation/current.json"
+            ),
+        },
+        "repositoryMainSha": "a" * 40,
+        "repositoryTreeSha": "b" * 40,
+        "mutableGitRoot": "/var/lib/traincapsule-runtime/git",
+        "mutableWorktreeRoot": "/var/lib/traincapsule-runtime/worktrees",
+        "artifactRoot": "/var/lib/traincapsule-runtime/artifacts/v3",
+        "entryArguments": (
+            "-m",
+            "tcfactory.cli",
+            "v3-controller",
+            "--repo",
+            "/var/lib/traincapsule-verifier/repository-boundary",
+        ),
+    }
+    payload["manifestDigest"] = sha256_digest(canonical_json_bytes(payload))
+    broker._RuntimeManifest.model_validate(  # pyright: ignore[reportPrivateUsage]
+        payload, strict=True
+    )
+
+
 def test_systemd_path_has_one_root_broker_and_no_direct_controller_start() -> None:
     service = systemd_unit_content(unit="controller-start-broker").decode()
     trigger = systemd_unit_content(unit="controller-start-path").decode()

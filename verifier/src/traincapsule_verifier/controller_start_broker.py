@@ -226,6 +226,11 @@ def _read_runtime_manifest(path: Path) -> tuple[_RuntimeManifest, bytes]:
     return manifest, raw
 
 
+def _runtime_manifest_authority_digest(raw: bytes) -> str:
+    """Return the exact installed-file identity bound by activation receipts."""
+    return sha256_digest(raw)
+
+
 def run_systemctl(*arguments: str, timeout: int = 30) -> subprocess.CompletedProcess[str]:
     return subprocess.run(
         ["/usr/bin/systemctl", *arguments],
@@ -268,7 +273,11 @@ def _attest_process(pid: int, manifest: _RuntimeManifest, controller_uid: int) -
 
 
 def _rollback(
-    *, policy: _Policy, request: _StartRequest, manifest: _RuntimeManifest, reason: str
+    *,
+    policy: _Policy,
+    request: _StartRequest,
+    runtime_manifest_digest: str,
+    reason: str,
 ) -> None:
     run_systemctl("stop", policy.service_name, timeout=60)
     restore_runtime_stop(Path(policy.runtime_root))
@@ -276,7 +285,7 @@ def _rollback(
         transaction_id=request.transaction_id,
         request_digest=sha256_digest(canonical_json_bytes(request)),
         phase="ROLLED_BACK",
-        runtime_manifest_digest=manifest.manifest_digest,
+        runtime_manifest_digest=runtime_manifest_digest,
         recorded_at=datetime.now(UTC).isoformat(),
         reason=reason[:1000],
     )
@@ -297,7 +306,10 @@ def process() -> int:
     runtime_root = Path(policy.runtime_root)
     if (runtime_root / "HARD_STUCK.json").exists() or (runtime_root / "STOP").exists():
         raise ValueError("controller start is forbidden by runtime control state")
-    manifest, _ = _read_runtime_manifest(Path(policy.runtime_manifest_path))
+    manifest, runtime_manifest_raw = _read_runtime_manifest(
+        Path(policy.runtime_manifest_path)
+    )
+    runtime_manifest_digest = _runtime_manifest_authority_digest(runtime_manifest_raw)
     journal_root = Path(policy.journal_root)
     with (
         open_trusted_root(
@@ -333,7 +345,7 @@ def process() -> int:
                 if (
                     request.activation_receipt_id != receipt.receipt_id
                     or request.activation_receipt_digest != model_digest(receipt)
-                    or receipt.controller_binary_digest != manifest.manifest_digest
+                    or receipt.controller_binary_digest != runtime_manifest_digest
                     or receipt.controller_config_digest != manifest.effective_config.digest
                 ):
                     continue
@@ -342,7 +354,7 @@ def process() -> int:
                     main_sha=request.exact_main_sha,
                     source_generation_id=receipt.source_generation_id,
                     source_generation_digest=receipt.source_generation_digest,
-                    controller_binary_digest=manifest.manifest_digest,
+                    controller_binary_digest=runtime_manifest_digest,
                     controller_config_digest=manifest.effective_config.digest,
                 )
                 journal_path = journal_root / f"{request.transaction_id}.json"
@@ -354,7 +366,7 @@ def process() -> int:
                 digest = sha256_digest(raw)
                 if existing is not None and (
                     existing.request_digest != digest
-                    or existing.runtime_manifest_digest != manifest.manifest_digest
+                    or existing.runtime_manifest_digest != runtime_manifest_digest
                 ):
                     raise ValueError("controller start journal identity mismatch")
                 if existing is not None and existing.phase == "ROLLED_BACK":
@@ -371,7 +383,7 @@ def process() -> int:
                         transaction_id=request.transaction_id,
                         request_digest=digest,
                         phase="PREPARED",
-                        runtime_manifest_digest=manifest.manifest_digest,
+                        runtime_manifest_digest=runtime_manifest_digest,
                         recorded_at=datetime.now(UTC).isoformat(),
                     )
                     _atomic_write(journal_path, canonical_json_bytes(prepared))
@@ -385,7 +397,12 @@ def process() -> int:
                         raise ValueError("controller service did not become active")
                     _attest_process(active_pid, manifest, controller.pw_uid)
                 except (OSError, ValueError, subprocess.TimeoutExpired) as error:
-                    _rollback(policy=policy, request=request, manifest=manifest, reason=str(error))
+                    _rollback(
+                        policy=policy,
+                        request=request,
+                        runtime_manifest_digest=runtime_manifest_digest,
+                        reason=str(error),
+                    )
                     raise ValueError(
                         "controller start/identity attestation failed; STOP restored"
                     ) from error
@@ -394,7 +411,7 @@ def process() -> int:
                     request_digest=digest,
                     phase="STARTED",
                     controller_pid=active_pid,
-                    runtime_manifest_digest=manifest.manifest_digest,
+                    runtime_manifest_digest=runtime_manifest_digest,
                     recorded_at=datetime.now(UTC).isoformat(),
                 )
                 _atomic_write(journal_path, canonical_json_bytes(terminal))

@@ -647,6 +647,7 @@ def post_activation_policy_content() -> bytes:
             ),
             "runtimeManifestPath": ("/etc/traincapsule-controller/runtime-manifest.json"),
             "maximumObservationSeconds": 3600,
+            "renewalSafetyWindowSeconds": 900,
         }
     )
 

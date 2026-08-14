@@ -615,6 +615,11 @@ Implemented source correction:
   previously skipped controller stop, STOP restoration, and the failure journal.
 - Added a regression test proving the command boundary reports a public authority rejection as a
   fail-closed failure.
+- Added a root-enforced 900-second pre-expiry safety window. The observer derives the earliest
+  deadline across the LIVE activation receipt, its linked machine-policy receipt, and the active
+  revocation authority. Entering the window invokes the same journaled controller stop and durable
+  STOP restoration before authority expires. This is source-level stop-before-expiry proof only;
+  successful independent renewal and reactivation remain unproven.
 
 Verification completed:
 
@@ -627,6 +632,12 @@ All checks passed!
 
 uv run python scripts/gates/v3_bundle_integrity.py
 PASS: authoritative V3 bundle covers and matches all 30 payload files
+
+uv run pytest verifier/tests/test_post_activation_observer.py verifier/tests/test_service_bootstrap.py -q
+26 passed
+
+uv run pyright verifier/src/traincapsule_verifier/post_activation_observer.py verifier/src/traincapsule_verifier/bootstrap.py verifier/tests/test_post_activation_observer.py
+0 errors, 0 warnings, 0 informations
 ```
 
 Remaining immediate blocker and next action: the installed runtime still contains the old observer

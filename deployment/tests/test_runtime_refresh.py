@@ -341,6 +341,13 @@ def test_systemd_units_separate_untrusted_claim_and_root_refresh_access() -> Non
     assert "ReadWritePaths=/var/lib/traincapsule-runtime" not in claim
     assert "ReadOnlyPaths=/var/lib/traincapsule-verifier/deployment-refresh-claims" in refresh
     assert "/deployment-update-handoffs" not in refresh
+    assert "ReadWritePaths=/var/lib/traincapsule-verifier\n" in refresh
+    assert (
+        "ReadWritePaths=/var/lib/traincapsule-verifier/repository-boundary"
+        not in refresh
+    )
+    assert "InaccessiblePaths=/var/lib/traincapsule-verifier/private" in refresh
+    assert "InaccessiblePaths=/var/lib/traincapsule-verifier/oracle" in refresh
     assert "systemctl" not in refresh
 
 

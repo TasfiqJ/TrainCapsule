@@ -843,6 +843,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                     "allowedSourcePrefixes": [
                         "tcfactory/",
                         "deployment/",
+                        "scripts/",
                         "verifier/src/traincapsule_verifier/",
                         "canary_runner/src/traincapsule_canary_runner/",
                         "packages/traincapsule-core/src/traincapsule_core/",
@@ -856,6 +857,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                     "requiredImports": [
                         "tcfactory",
                         "deployment",
+                        "scripts",
                         "traincapsule_verifier",
                         "traincapsule_canary_runner",
                         "traincapsule_core",

@@ -120,6 +120,7 @@ def _fixture(tmp_path: Path) -> tuple[RefreshPolicy, DeploymentUpdateHandoff, Pa
         "config/factory.yaml": b"schemaVersion: '3.1'\n",
         "tcfactory/__init__.py": b"VALUE = 1\n",
         "deployment/__init__.py": b"VALUE = 2\n",
+        "scripts/__init__.py": b"VALUE = 9\n",
         "verifier/src/traincapsule_verifier/__init__.py": b"VALUE = 3\n",
         "canary_runner/src/traincapsule_canary_runner/__init__.py": b"VALUE = 4\n",
         "packages/traincapsule-core/src/traincapsule_core/__init__.py": b"VALUE = 5\n",
@@ -179,6 +180,7 @@ def _fixture(tmp_path: Path) -> tuple[RefreshPolicy, DeploymentUpdateHandoff, Pa
         allowed_source_prefixes=(
             "tcfactory/",
             "deployment/",
+            "scripts/",
             "verifier/src/traincapsule_verifier/",
             "canary_runner/src/traincapsule_canary_runner/",
             "packages/traincapsule-core/src/traincapsule_core/",
@@ -189,6 +191,7 @@ def _fixture(tmp_path: Path) -> tuple[RefreshPolicy, DeploymentUpdateHandoff, Pa
         required_imports=(
             "tcfactory",
             "deployment",
+            "scripts",
             "traincapsule_verifier",
             "traincapsule_canary_runner",
             "traincapsule_core",

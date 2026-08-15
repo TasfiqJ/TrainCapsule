@@ -10,6 +10,10 @@ from typing import Any, cast
 
 import pytest
 
+from deployment.runtime_distribution import (
+    PROJECT_RUNTIME_IMPORTS,
+    PROJECT_SOURCE_MAPPINGS,
+)
 from scripts.gates.v3_1_zh_package_integrity import REPORT, ROOT, validate_package
 
 
@@ -18,6 +22,11 @@ def test_factory_wheel_includes_runtime_imported_scripts_package() -> None:
     packages = configuration["tool"]["hatch"]["build"]["targets"]["wheel"]["packages"]
     assert "scripts" in packages
     assert (ROOT / "scripts/__init__.py").is_file()
+
+
+def test_signed_runtime_includes_runtime_imported_scripts_package() -> None:
+    assert ("scripts/", "scripts/") in PROJECT_SOURCE_MAPPINGS
+    assert "scripts" in PROJECT_RUNTIME_IMPORTS
 
 
 def test_v31_package_gate_binds_all_43_split_payloads() -> None:

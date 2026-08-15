@@ -123,7 +123,7 @@ No future SHA, run ID, receipt, or PASS is invented here. Retain `factory/state/
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **649 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **650 paths**.
 
 This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing
 report must bind acceptance to an immutable candidate SHA and independent test/receipt
@@ -658,6 +658,7 @@ artifacts.
 | `M` | `tests/test_claude_features.py` |
 | `M` | `tests/test_claude_led_nodes.py` |
 | `M` | `tests/test_claude_only_policy.py` |
+| `M` | `tests/test_claude_runner.py` |
 | `M` | `tests/test_completion.py` |
 | `M` | `tests/test_context_manifest.py` |
 | `M` | `tests/test_control_scripts.py` |

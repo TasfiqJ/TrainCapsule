@@ -42,13 +42,23 @@ from .util import redact_sensitive, write_json
 MIN_CLAUDE_TASK_BUDGET_TOKENS = 20_000
 REPORT_CONTINUATION_MAX_TURNS = 4
 BACKEND_EVENT_RETENTION_DAYS = 30
-CLAUDE_SANDBOX_CONFIG_REPAIR = "claude-sandbox-config-dir-v1"
+CLAUDE_SANDBOX_CONFIG_REPAIR = "claude-sandbox-home-and-config-dir-v2"
 
 
 def subprocess_env_scrub_value(*, read_only: bool) -> str:
     """Strip controller credentials from every model-launched subprocess."""
     del read_only
     return "1"
+
+
+def claude_sandbox_state_environment() -> dict[str, str]:
+    """Pin a writable, internally consistent Claude home and config directory."""
+
+    config_dir = claude_config_dir().resolve()
+    return {
+        "HOME": str(config_dir.parent),
+        "CLAUDE_CONFIG_DIR": str(config_dir),
+    }
 
 
 def writable_uv_cache_dir(worktree: Path) -> Path:
@@ -403,11 +413,10 @@ async def run_agent_stage(
             # read-only reviews and broad sandboxed production roles, and the ignored
             # state directory cannot enter candidate diffs or commits.
             "UV_CACHE_DIR": str(writable_uv_cache_dir(worktree)),
-            # Pin Claude's writable state explicitly. With subprocess environment
-            # scrubbing enabled, relying on ``~/.claude`` can make the nested Linux
-            # sandbox resolve the account home to its read-only parent (for example,
-            # ``/var/lib/.claude``) even though the controller's HOME is correct.
-            "CLAUDE_CONFIG_DIR": str(claude_config_dir().resolve()),
+            # The nested Linux sandbox derives internal state from HOME even when
+            # CLAUDE_CONFIG_DIR is explicit, so both values must identify the same
+            # writable controller-owned home.
+            **claude_sandbox_state_environment(),
             "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1" if read_only else "0",
             "CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS": "1" if read_only else "0",
             "ENABLE_CLAUDEAI_MCP_SERVERS": "false",

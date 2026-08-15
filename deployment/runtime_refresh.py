@@ -267,7 +267,14 @@ def _canonical_model(
 
 def _run_git(repo: Path, *arguments: str) -> str:
     result = subprocess.run(
-        ["/usr/bin/git", "-C", str(repo), *arguments],
+        [
+            "/usr/bin/git",
+            "-c",
+            f"safe.directory={repo}",
+            "-C",
+            str(repo),
+            *arguments,
+        ],
         check=False,
         capture_output=True,
         text=True,

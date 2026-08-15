@@ -33,6 +33,12 @@ def test_refresh_verifies_observation_with_anchor_observer_key() -> None:
     assert "/etc/traincapsule-verifier/selector-public-key.pem" not in source
 
 
+def test_offline_git_uses_only_the_exact_repository_as_safe_directory() -> None:
+    source = (Path(__file__).resolve().parents[1] / "runtime_refresh.py").read_text()
+    assert 'f"safe.directory={repo}"' in source
+    assert "--global" not in source
+
+
 def _git(path: Path, *arguments: str) -> str:
     return subprocess.run(
         ["git", *arguments], cwd=path, check=True, capture_output=True, text=True

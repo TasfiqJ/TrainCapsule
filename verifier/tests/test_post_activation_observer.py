@@ -98,6 +98,20 @@ def test_public_verification_error_is_reported_as_fail_closed(
     assert observer.main() == 1
 
 
+def test_incomplete_observation_remains_pending_inside_bounded_window(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def pending() -> Path:
+        raise observer._ObservationPending(  # pyright: ignore[reportPrivateUsage]
+            "awaiting mandatory observed events"
+        )
+
+    monkeypatch.setattr(observer, "observe", pending)
+    monkeypatch.setattr(observer.sys, "argv", ["observer", "observe"])
+
+    assert observer.main() == 0
+
+
 def test_authority_renewal_margin_uses_earliest_expiry(tmp_path: Path) -> None:
     policy = _policy(tmp_path)
     now = datetime.now(UTC)
@@ -181,13 +195,29 @@ def test_seven_events_require_exact_receipt_tree_monotonicity_and_artifact_diges
     )
     complete_lines = list(lines)
     lines.pop()
-    with pytest.raises(ValueError, match="omits mandatory"):
+    with pytest.raises(ValueError, match="awaiting mandatory"):
         observer._event_evidence(  # pyright: ignore[reportPrivateUsage]
             policy,
             cast(observer.ActivationReceipt, receipt),
             main_sha="a" * 40,
             tree_sha="b" * 40,
         )
+
+    expired_receipt = SimpleNamespace(
+        receipt_id="ACT-TEST",
+        issued_at=issued_at - timedelta(hours=2),
+    )
+    with pytest.raises(ValueError, match="bounded observation window") as expired:
+        observer._event_evidence(  # pyright: ignore[reportPrivateUsage]
+            policy,
+            cast(observer.ActivationReceipt, expired_receipt),
+            main_sha="a" * 40,
+            tree_sha="b" * 40,
+        )
+    assert not isinstance(
+        expired.value,
+        observer._ObservationPending,  # pyright: ignore[reportPrivateUsage]
+    )
 
     lines[:] = complete_lines
     for index, sequence in ((0, 2), (1, 1)):

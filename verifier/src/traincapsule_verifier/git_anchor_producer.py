@@ -406,12 +406,16 @@ def produce(
             or job.source_generation_id != policy.source_generation_id
             or job.source_generation_digest != policy.source_generation_digest
             or job.publication_transaction_digest != sha256_digest(publication_raw)
-            or job.expires_at <= observed_now
-            or ruleset.repository != job.repository
+        ):
+            raise ValueError("anchor fetch job or authority binding is invalid")
+        if job.expires_at <= observed_now:
+            continue
+        if (
+            ruleset.repository != job.repository
             or ruleset.expires_at <= observed_now
             or ruleset.required_check_app_ids != policy.required_check_app_ids
         ):
-            raise ValueError("anchor fetch job or authority binding is invalid")
+            raise ValueError("anchor authority binding is invalid")
         transaction = _canonical_mapping(publication_raw)
         candidate_sha = transaction.get("candidateSha")
         pull_request_number = transaction.get("pullRequestNumber")
@@ -445,7 +449,7 @@ def produce(
             else None
         )
         if remote_sha != job.merged_main_sha:
-            raise ValueError("anchor fetcher observed a different main SHA")
+            continue
         checks = _verified_checks(
             _github_json(
                 f"/repos/{job.repository}/commits/{job.merged_main_sha}/check-runs",

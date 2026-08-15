@@ -42,6 +42,7 @@ exclude = [
 packages = [
   "tcfactory",
   "deployment",
+  "scripts",
 ]
 
 [tool.uv.workspace]

@@ -4,12 +4,20 @@ import json
 import shutil
 import stat
 import subprocess
+import tomllib
 from pathlib import Path
 from typing import Any, cast
 
 import pytest
 
 from scripts.gates.v3_1_zh_package_integrity import REPORT, ROOT, validate_package
+
+
+def test_factory_wheel_includes_runtime_imported_scripts_package() -> None:
+    configuration = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
+    packages = configuration["tool"]["hatch"]["build"]["targets"]["wheel"]["packages"]
+    assert "scripts" in packages
+    assert (ROOT / "scripts/__init__.py").is_file()
 
 
 def test_v31_package_gate_binds_all_43_split_payloads() -> None:

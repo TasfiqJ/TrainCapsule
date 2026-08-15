@@ -7,6 +7,7 @@ import pwd
 import stat
 import subprocess
 import sys
+import time
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import ClassVar, Literal
@@ -306,6 +307,36 @@ def _attest_process(pid: int, manifest: _RuntimeManifest, controller_uid: int) -
         raise ValueError("controller process arguments mismatch")
 
 
+def _attest_started_controller(
+    service: str,
+    manifest: _RuntimeManifest,
+    controller_uid: int,
+    *,
+    maximum_wait_seconds: float = 2.0,
+    retry_interval_seconds: float = 0.05,
+) -> int:
+    """Wait briefly for systemd's Type=simple process identity to settle."""
+
+    deadline = time.monotonic() + maximum_wait_seconds
+    last_error: OSError | ValueError = ValueError(
+        "controller service did not expose an attestable process"
+    )
+    while True:
+        pid = controller_active_pid(service)
+        if pid is None:
+            last_error = ValueError("controller service did not become active")
+        else:
+            try:
+                _attest_process(pid, manifest, controller_uid)
+            except (OSError, ValueError) as error:
+                last_error = error
+            else:
+                return pid
+        if time.monotonic() >= deadline:
+            raise ValueError("controller process identity did not settle") from last_error
+        time.sleep(retry_interval_seconds)
+
+
 def _rollback(
     *,
     policy: _Policy,
@@ -429,7 +460,11 @@ def process() -> int:
                         active_pid = controller_active_pid(policy.service_name)
                     if active_pid is None:
                         raise ValueError("controller service did not become active")
-                    _attest_process(active_pid, manifest, controller.pw_uid)
+                    active_pid = _attest_started_controller(
+                        policy.service_name,
+                        manifest,
+                        controller.pw_uid,
+                    )
                 except (OSError, ValueError, subprocess.TimeoutExpired) as error:
                     _rollback(
                         policy=policy,

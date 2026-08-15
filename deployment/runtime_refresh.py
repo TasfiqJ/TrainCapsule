@@ -302,7 +302,6 @@ def _find_evidence(root: Path, handoff: DeploymentUpdateHandoff) -> tuple[Path, 
         if (
             request.merged_main_sha == handoff.required_main_sha
             and request.merged_main_tree_sha == handoff.required_main_tree_sha
-            and request.base_sha == handoff.installed_main_sha
             and request.source_generation_id == handoff.source_generation_id
             and request.source_generation_digest == handoff.source_generation_digest
         ):
@@ -365,7 +364,6 @@ def _verify_evidence(
         request.repository != policy.repository
         or request.source_generation_id != policy.source_generation_id
         or request.source_generation_digest != policy.source_generation_digest
-        or request.base_sha != handoff.installed_main_sha
         or request.merged_main_sha != handoff.required_main_sha
         or request.merged_main_tree_sha != handoff.required_main_tree_sha
         or request.source_generation_id != handoff.source_generation_id
@@ -392,6 +390,47 @@ def _verify_evidence(
         or publication.get("mergedMainSha") != request.merged_main_sha
     ):
         raise RefreshFailure("refresh authority evidence is stale or inconsistently bound")
+    if request.base_sha != handoff.installed_main_sha:
+        with tempfile.TemporaryDirectory(prefix="traincapsule-refresh-ancestry-") as raw:
+            stage = Path(raw) / "candidate.git"
+            clone = subprocess.run(
+                ["/usr/bin/git", "clone", "--bare", "--no-local", str(bundle), str(stage)],
+                check=False,
+                capture_output=True,
+                timeout=120,
+                env={
+                    "PATH": "/usr/bin:/bin",
+                    "GIT_CONFIG_NOSYSTEM": "1",
+                    "GIT_CONFIG_GLOBAL": "/dev/null",
+                    "GIT_CONFIG_SYSTEM": "/dev/null",
+                },
+            )
+            if clone.returncode != 0:
+                raise RefreshFailure("refresh ancestry bundle cannot be materialized")
+            ancestor = subprocess.run(
+                [
+                    "/usr/bin/git",
+                    "-C",
+                    str(stage),
+                    "merge-base",
+                    "--is-ancestor",
+                    handoff.installed_main_sha,
+                    request.base_sha,
+                ],
+                check=False,
+                capture_output=True,
+                timeout=120,
+                env={
+                    "PATH": "/usr/bin:/bin",
+                    "GIT_CONFIG_NOSYSTEM": "1",
+                    "GIT_CONFIG_GLOBAL": "/dev/null",
+                    "GIT_CONFIG_SYSTEM": "/dev/null",
+                },
+            )
+            if ancestor.returncode != 0:
+                raise RefreshFailure(
+                    "installed main is not an ancestor of the signed PR base"
+                )
     return request
 
 

@@ -475,8 +475,8 @@ class V3Controller:
             try:
                 runtime = self.installed_runtime_loader()
                 runtime_attested = (
-                    runtime.repository_main_sha == installed_main == anchored_main
-                    and runtime.repository_tree_sha == installed_tree == anchored_tree
+                    runtime.repository_main_sha == installed_main
+                    and runtime.repository_tree_sha == installed_tree
                 )
             except RuntimeError:
                 runtime_attested = False

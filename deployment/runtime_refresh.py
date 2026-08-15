@@ -333,7 +333,7 @@ def _verify_evidence(
     publication_raw: bytes,
     bundle: Path,
     policy: AnchorUpdatePolicy,
-    selector_public_key: bytes,
+    observer_public_key: bytes,
     ruleset_public_key: bytes,
     now: datetime | None = None,
 ) -> AnchorUpdateRequest:
@@ -355,7 +355,7 @@ def _verify_evidence(
     ):
         raise RefreshFailure("refresh authority evidence is not canonical")
     try:
-        verify_model_signature(observed, load_public_key(selector_public_key))
+        verify_model_signature(observed, load_public_key(observer_public_key))
         verify_model_signature(ruleset, load_public_key(ruleset_public_key))
     except ValueError as exc:
         raise RefreshFailure("refresh authority signature is invalid") from exc
@@ -1296,8 +1296,8 @@ def refresh(
         publication_raw=publication_raw,
         bundle=bundle,
         policy=anchor_policy,
-        selector_public_key=_trusted(
-            _at(root, "/etc/traincapsule-verifier/selector-public-key.pem"),
+        observer_public_key=_trusted(
+            _at(root, "/etc/traincapsule-verifier/anchor-observer-public-key.pem"),
             uid=authority_uid,
             mode=0o444,
             maximum=8_192,

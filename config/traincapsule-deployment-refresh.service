@@ -22,7 +22,12 @@ ReadWritePaths=/opt/traincapsule-runtime/generations
 # not exist yet. Grant the root-only broker its runtime parent instead; all
 # candidate bytes remain independently inventory-checked before the swap.
 ReadWritePaths=/opt/traincapsule-runtime
-ReadWritePaths=/var/lib/traincapsule-verifier/repository-boundary
+# Repository replacement is a sibling-stage-and-rename transaction, so the
+# broker needs the boundary's parent directory writable. The independently
+# signed inputs remain read-only and private/oracle authority stays hidden.
+ReadWritePaths=/var/lib/traincapsule-verifier
+InaccessiblePaths=/var/lib/traincapsule-verifier/private
+InaccessiblePaths=/var/lib/traincapsule-verifier/oracle
 ReadWritePaths=/var/lib/traincapsule-verifier/deployment-refresh-journal
 ReadWritePaths=/etc/traincapsule-controller
 CapabilityBoundingSet=CAP_CHOWN CAP_DAC_OVERRIDE CAP_FOWNER

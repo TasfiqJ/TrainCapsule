@@ -230,7 +230,7 @@ class ClaudeBackend:
         repo_root = Path(request.controller_repo_root).resolve()
         worktree = Path(request.candidate_worktree).resolve()
         artifact_root = Path(request.artifact_root).resolve()
-        expire_redacted_event_summaries(repo_root / "factory/artifacts/v3")
+        expire_redacted_event_summaries(artifact_root)
         packet = validate_planning_packet(request)
         role = RoleName(request.role)
         stage = Stage(
@@ -284,6 +284,20 @@ class ClaudeBackend:
             ),
         )
         factory = load_factory_config(repo_root / "config/factory.yaml")
+        # The controller repository is a signed, read-only source snapshot.  Legacy
+        # Claude runner defaults put operational journals below ``factory/`` in the
+        # repository, so scope those mutable paths to this controller-owned artifact
+        # root before invoking the runner.  Absolute paths preserve the runner's
+        # existing resolution behavior while keeping candidate source and authority
+        # material immutable.
+        runtime_root = artifact_root / "backend-runtime"
+        factory = factory.model_copy(
+            update={
+                "peer_message_dir": str(runtime_root / "messages"),
+                "heartbeat_path": str(runtime_root / "heartbeat.json"),
+                "event_log_path": str(runtime_root / "events.jsonl"),
+            }
+        )
         self.require_execution_security(factory, compatibility_packet)
         roles = load_roles(repo_root / factory.roles_path)
         result_artifact = artifact_root / role.value

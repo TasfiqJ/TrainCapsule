@@ -491,6 +491,12 @@ def test_ruleset_consumers_do_not_receive_dac_override_capabilities() -> None:
         assert "AmbientCapabilities=" not in service
 
 
+def test_anchor_updater_can_lock_the_runtime_parent() -> None:
+    service = systemd_unit_content(unit="git-anchor-updater").decode()
+    assert "ReadWritePaths=/var/lib/traincapsule-runtime\n" in service
+    assert "ReadWritePaths=/var/lib/traincapsule-runtime/git\n" not in service
+
+
 def test_unit_separation_and_rollback_are_explicit(tmp_path: Path) -> None:
     paths = render_systemd_units(tmp_path / "stage")
     issuer = next(path for path in paths if path.name.endswith("issuer.service")).read_text()

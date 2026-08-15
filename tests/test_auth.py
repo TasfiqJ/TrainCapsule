@@ -193,6 +193,22 @@ def test_sanitized_agent_environment_loads_token_file_and_removes_api_routes(
     assert "TCF_ENV_FILE" not in environment
 
 
+def test_sanitized_agent_environment_keeps_explicit_claude_config_dir(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    token_file = tmp_path / "claude-oauth-token"
+    token_file.write_text("subscription-token\n", encoding="utf-8")
+    token_file.chmod(0o600)
+    config_dir = tmp_path / "controller-home" / ".claude"
+    monkeypatch.setenv("TCF_CLAUDE_OAUTH_TOKEN_FILE", str(token_file))
+
+    environment = auth.sanitized_agent_environment(
+        {"CLAUDE_CONFIG_DIR": str(config_dir.resolve())}
+    )
+
+    assert environment["CLAUDE_CONFIG_DIR"] == str(config_dir.resolve())
+
+
 def test_lights_out_rejects_world_readable_token_file(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

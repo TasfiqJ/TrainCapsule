@@ -66,6 +66,7 @@ PRODUCTION_RUNTIME_IMPORTS = (
 PROJECT_SOURCE_MAPPINGS = (
     ("tcfactory/", "tcfactory/"),
     ("deployment/", "deployment/"),
+    ("scripts/", "scripts/"),
     ("verifier/src/traincapsule_verifier/", "traincapsule_verifier/"),
     ("canary_runner/src/traincapsule_canary_runner/", "traincapsule_canary_runner/"),
     ("packages/traincapsule-core/src/traincapsule_core/", "traincapsule_core/"),

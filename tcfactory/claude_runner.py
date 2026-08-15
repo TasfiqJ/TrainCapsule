@@ -8,7 +8,7 @@ from typing import Any, cast
 
 from claude_agent_sdk import SandboxSettings, SettingSource
 
-from .auth import assert_max_oauth_only, sanitized_agent_environment
+from .auth import assert_max_oauth_only, claude_config_dir, sanitized_agent_environment
 from .backends.base import BashCommandRule, TranscriptRetention
 from .claude_features import (
     build_session_feature_plan,
@@ -402,6 +402,11 @@ async def run_agent_stage(
             # read-only reviews and broad sandboxed production roles, and the ignored
             # state directory cannot enter candidate diffs or commits.
             "UV_CACHE_DIR": str(writable_uv_cache_dir(worktree)),
+            # Pin Claude's writable state explicitly. With subprocess environment
+            # scrubbing enabled, relying on ``~/.claude`` can make the nested Linux
+            # sandbox resolve the account home to its read-only parent (for example,
+            # ``/var/lib/.claude``) even though the controller's HOME is correct.
+            "CLAUDE_CONFIG_DIR": str(claude_config_dir().resolve()),
             "CLAUDE_CODE_DISABLE_AUTO_MEMORY": "1" if read_only else "0",
             "CLAUDE_AGENT_SDK_DISABLE_BUILTIN_AGENTS": "1" if read_only else "0",
             "ENABLE_CLAUDEAI_MCP_SERVERS": "false",

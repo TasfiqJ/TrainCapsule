@@ -44,6 +44,7 @@ from tcfactory.handoffs import read_v3_handoff, write_v3_handoff
 from tcfactory.models import RoleName
 from tcfactory.prompts import compose_system_prompt
 from tcfactory.util import atomic_write_bytes, read_json, run_command, sha256_file, write_json
+from tcfactory.v3.backend_recovery import recover_repaired_claude_sandbox_blocks
 from tcfactory.v3.base import (
     DIGEST_PATTERN,
     SHA_PATTERN,
@@ -4602,6 +4603,16 @@ class V3Controller:
         state = self._load_state()
         self._require_installed_snapshot_alignment(state=state)
         collection = self._runtime_collection()
+        repaired_backend_blocks = recover_repaired_claude_sandbox_blocks(
+            collection=collection,
+            queue=self.queue,
+            checkpoints=self.checkpoints,
+            runtime_root=self.runtime_paths.state_root,
+            current_main_sha=current_sha(self.git_root, "main"),
+            now=now,
+        )
+        if repaired_backend_blocks:
+            collection = self._runtime_collection()
         self._promote_backend_pauses(collection, now)
         collection = self._runtime_collection()
         future_lane_milestones = self._future_lane_milestones(collection)

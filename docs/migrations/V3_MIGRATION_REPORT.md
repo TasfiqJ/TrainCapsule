@@ -123,7 +123,7 @@ No future SHA, run ID, receipt, or PASS is invented here. Retain `factory/state/
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **646 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **647 paths**.
 
 This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing
 report must bind acceptance to an immutable candidate SHA and independent test/receipt
@@ -649,6 +649,7 @@ artifacts.
 | `A` | `tests/product/test_install_to_preflight_journey.py` |
 | `A` | `tests/product/test_product_schemas.py` |
 | `A` | `tests/product/test_qualification.py` |
+| `M` | `tests/test_auth.py` |
 | `M` | `tests/test_autonomy_freedom_policy.py` |
 | `M` | `tests/test_autopilot_respec_evidence.py` |
 | `M` | `tests/test_calibration_evidence.py` |

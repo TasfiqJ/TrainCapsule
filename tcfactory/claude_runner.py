@@ -42,6 +42,7 @@ from .util import redact_sensitive, write_json
 MIN_CLAUDE_TASK_BUDGET_TOKENS = 20_000
 REPORT_CONTINUATION_MAX_TURNS = 4
 BACKEND_EVENT_RETENTION_DAYS = 30
+CLAUDE_SANDBOX_CONFIG_REPAIR = "claude-sandbox-config-dir-v1"
 
 
 def subprocess_env_scrub_value(*, read_only: bool) -> str:

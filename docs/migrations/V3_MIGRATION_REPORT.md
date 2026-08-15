@@ -123,7 +123,7 @@ No future SHA, run ID, receipt, or PASS is invented here. Retain `factory/state/
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **647 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **649 paths**.
 
 This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing
 report must bind acceptance to an immutable candidate SHA and independent test/receipt
@@ -590,6 +590,7 @@ artifacts.
 | `A` | `tcfactory/v3/__init__.py` |
 | `A` | `tcfactory/v3/activation.py` |
 | `A` | `tcfactory/v3/activation_supervisor.py` |
+| `A` | `tcfactory/v3/backend_recovery.py` |
 | `A` | `tcfactory/v3/base.py` |
 | `A` | `tcfactory/v3/canaries.py` |
 | `A` | `tcfactory/v3/candidate_freeze.py` |
@@ -667,6 +668,7 @@ artifacts.
 | `A` | `tests/test_sbom_generation.py` |
 | `A` | `tests/test_source_of_truth_integrity.py` |
 | `A` | `tests/test_v31_activation_and_canaries.py` |
+| `A` | `tests/test_v31_backend_recovery.py` |
 | `A` | `tests/test_v31_completion_policy.py` |
 | `A` | `tests/test_v31_contracts.py` |
 | `A` | `tests/test_v31_controlled_source_acquisition.py` |

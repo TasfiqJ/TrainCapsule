@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 from traincapsule_verifier.canonical import canonical_json_bytes, sha256_digest
 
+from deployment import runtime_refresh
 from deployment.privileged_installer import RepositorySnapshotManifest
 from deployment.runtime_refresh import (
     DeploymentUpdateHandoff,
@@ -43,6 +44,59 @@ def _git(path: Path, *arguments: str) -> str:
     return subprocess.run(
         ["git", *arguments], cwd=path, check=True, capture_output=True, text=True
     ).stdout.strip()
+
+
+def test_offline_git_attestation_does_not_rewrite_read_only_index(
+    tmp_path: Path,
+) -> None:
+    repository = tmp_path / "repository"
+    repository.mkdir()
+    _git(repository, "init")
+    _git(repository, "config", "user.name", "TrainCapsule Test")
+    _git(repository, "config", "user.email", "test@traincapsule.invalid")
+    (repository / "tracked.txt").write_text("tracked\n", encoding="utf-8")
+    _git(repository, "add", "tracked.txt")
+    _git(repository, "commit", "-m", "fixture")
+    index = repository / ".git/index"
+    index.chmod(0o444)
+
+    runtime_refresh.run_git(
+        repository, "status", "--porcelain=v1", "--untracked-files=all"
+    )
+
+    assert index.stat().st_mode & 0o777 == 0o444
+
+
+def test_restore_file_uses_target_filesystem_atomic_replace(tmp_path: Path) -> None:
+    backup_root = tmp_path / "backup-filesystem"
+    target_root = tmp_path / "target-filesystem"
+    backup_root.mkdir()
+    target_root.mkdir()
+    backup = backup_root / "runtime-manifest.json"
+    target = target_root / "runtime-manifest.json"
+    backup.write_bytes(b"old runtime\n")
+    backup.chmod(0o440)
+    target.write_bytes(b"new runtime\n")
+    observed_replaces: list[tuple[Path, Path]] = []
+    real_replace = os.replace
+
+    def same_filesystem_replace(
+        source: os.PathLike[str], destination: os.PathLike[str]
+    ) -> None:
+        source_path = Path(source)
+        destination_path = Path(destination)
+        observed_replaces.append((source_path, destination_path))
+        assert source_path.parent == destination_path.parent
+        real_replace(source_path, destination_path)
+
+    with pytest.MonkeyPatch.context() as monkeypatch:
+        monkeypatch.setattr(os, "replace", same_filesystem_replace)
+        runtime_refresh.restore_file(target, str(backup))
+
+    assert target.read_bytes() == b"old runtime\n"
+    assert target.stat().st_mode & 0o777 == 0o440
+    assert backup.read_bytes() == b"old runtime\n"
+    assert observed_replaces
 
 
 def _fixture(tmp_path: Path) -> tuple[RefreshPolicy, DeploymentUpdateHandoff, Path, Path]:

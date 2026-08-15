@@ -198,7 +198,7 @@ def test_read_only_producer_promoter_and_updater_material_are_exact(
                 "merged": True,
                 "merge_commit_sha": merged,
                 "head": {"sha": merged},
-                "base": {"ref": "main"},
+                "base": {"ref": "main", "sha": base},
             }
         return {
             "check_runs": [

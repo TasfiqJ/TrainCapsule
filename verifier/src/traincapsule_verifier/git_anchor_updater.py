@@ -314,8 +314,6 @@ def advance_anchor(
     try:
         fcntl.flock(lock, fcntl.LOCK_EX)
         current = _run_git(anchor, "rev-parse", "refs/heads/main")
-        if current not in {request.base_sha, request.merged_main_sha}:
-            raise ValueError("anchor main moved outside the signed transaction")
         prepared = AnchorUpdateJournal(
             request_id=request.request_id,
             request_digest=request_digest,
@@ -328,7 +326,7 @@ def advance_anchor(
         _write_journal(journal_path, prepared)
         if failpoint is not None:
             failpoint("PREPARED")
-        if current == request.base_sha:
+        if current != request.merged_main_sha:
             with tempfile.TemporaryDirectory(prefix="anchor-import-", dir=journals) as raw:
                 stage = Path(raw) / "stage.git"
                 clone = subprocess.run(
@@ -349,6 +347,19 @@ def advance_anchor(
                 _run_git(stage, "remote", "remove", "origin")
                 shutil.rmtree(stage / "hooks")
                 _validate_staging(stage, request, transaction)
+                if current != request.base_sha:
+                    try:
+                        _run_git(
+                            stage,
+                            "merge-base",
+                            "--is-ancestor",
+                            current,
+                            request.base_sha,
+                        )
+                    except ValueError:
+                        raise ValueError(
+                            "anchor main is not an ancestor of the signed PR base"
+                        ) from None
                 _run_git(anchor, "fetch", "--no-tags", str(stage), "refs/heads/main")
                 imported = prepared.model_copy(update={"phase": "OBJECTS_IMPORTED"})
                 _write_journal(journal_path, imported)
@@ -364,7 +375,7 @@ def advance_anchor(
                     "update-ref",
                     "refs/heads/main",
                     request.merged_main_sha,
-                    request.base_sha,
+                    current,
                 )
                 if failpoint is not None:
                     failpoint("REF_ADVANCED")

@@ -50,6 +50,10 @@ class ObservationId(StrEnum):
     NO_HUMAN_CLICK = "no_human_click"
 
 
+class _ObservationPending(ValueError):
+    """The valid observation window is still open and its roster is incomplete."""
+
+
 class _Policy(_Strict):
     schema_version: Literal["3.1"]
     service_name: Literal["traincapsule-controller.service"]
@@ -399,10 +403,20 @@ def _event_evidence(
             if prior is not None:
                 raise ValueError("post-activation journal contains duplicate events")
             events[event.event_id] = event
-    if set(events) != set(ObservationId):
-        raise ValueError("post-activation journal omits mandatory observed events")
-    ordered = list(ObservationId)
     observed_now = datetime.now(UTC)
+    if set(events) != set(ObservationId):
+        elapsed = (
+            observed_now - receipt.issued_at.astimezone(UTC)
+        ).total_seconds()
+        if elapsed < policy.maximum_observation_seconds:
+            raise _ObservationPending(
+                "post-activation journal is awaiting mandatory observed events"
+            )
+        raise ValueError(
+            "post-activation journal omits mandatory observed events after "
+            "the bounded observation window"
+        )
+    ordered = list(ObservationId)
     prior_time = receipt.issued_at
     for expected_sequence, event_id in enumerate(ordered, start=1):
         event = events[event_id]
@@ -550,6 +564,8 @@ def observe() -> Path:
         _atomic(target, canonical_json_bytes(observation))
         _retire_refresh_completion(policy, receipt, observation)
         return target
+    except _ObservationPending:
+        raise
     except (
         OSError,
         ValueError,
@@ -566,6 +582,9 @@ def main() -> int:
         return 2
     try:
         observe()
+        return 0
+    except _ObservationPending:
+        print("post-activation observation is pending", file=sys.stderr)
         return 0
     except (OSError, ValueError, subprocess.TimeoutExpired, PublicVerificationError):
         print("post-activation observation failed closed", file=sys.stderr)

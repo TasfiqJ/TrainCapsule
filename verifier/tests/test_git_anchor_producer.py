@@ -196,9 +196,11 @@ def test_read_only_producer_promoter_and_updater_material_are_exact(
     monkeypatch.setattr(producer, "_trusted_raw", trusted)
     monkeypatch.setattr(producer.os, "geteuid", lambda: identity.pw_uid)
 
+    remote_main = [merged]
+
     def github_json(path: str, _token: str) -> object:
         if path.endswith("/branches/main"):
-            return {"commit": {"sha": merged}}
+            return {"commit": {"sha": remote_main[0]}}
         if path.endswith("/pulls/41"):
             return {
                 "merged": True,
@@ -236,6 +238,22 @@ def test_read_only_producer_promoter_and_updater_material_are_exact(
         return original_git(rewritten, cwd=cwd, token=None)
 
     monkeypatch.setattr(producer, "_run_git", local_git)
+    assert producer.produce(
+        policy,
+        inbox=inbox,
+        outbox=outbox,
+        token_factory=lambda _policy, _key: "ghs_local_test_token",
+        now=NOW + timedelta(minutes=31),
+    ) == []
+    remote_main[0] = "f" * 40
+    assert producer.produce(
+        policy,
+        inbox=inbox,
+        outbox=outbox,
+        token_factory=lambda _policy, _key: "ghs_local_test_token",
+        now=NOW + timedelta(minutes=1),
+    ) == []
+    remote_main[0] = merged
     outputs = producer.produce(
         policy,
         inbox=inbox,

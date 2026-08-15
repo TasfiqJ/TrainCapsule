@@ -432,6 +432,7 @@ def produce(
             or cast(dict[str, object], pull_head).get("sha") != candidate_sha
             or not isinstance(pull_base, dict)
             or cast(dict[str, object], pull_base).get("ref") != "main"
+            or cast(dict[str, object], pull_base).get("sha") != job.base_sha
         ):
             raise ValueError("anchor fetcher PR merge binding is invalid")
         branch = _github_json(f"/repos/{job.repository}/branches/main", token)

@@ -55,7 +55,7 @@ def _public(key: Ed25519PrivateKey) -> bytes:
     )
 
 
-def _fixture(tmp_path: Path) -> dict[str, object]:
+def _fixture(tmp_path: Path, *, lagged: bool = False) -> dict[str, object]:
     source = tmp_path / "source"
     source.mkdir()
     _git(source, "init", "-b", "main")
@@ -64,10 +64,15 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
     (source / "value.txt").write_text("base\n", encoding="utf-8")
     _git(source, "add", ".")
     _git(source, "commit", "-m", "base")
-    base = _git(source, "rev-parse", "HEAD")
+    anchor_base = _git(source, "rev-parse", "HEAD")
     anchor = tmp_path / "anchor.git"
     _git(tmp_path, "clone", "--bare", str(source), str(anchor))
     _git(anchor, "remote", "remove", "origin")
+    if lagged:
+        (source / "intermediate.txt").write_text("protected predecessor\n", encoding="utf-8")
+        _git(source, "add", "intermediate.txt")
+        _git(source, "commit", "-m", "protected predecessor")
+    base = _git(source, "rev-parse", "HEAD")
     __import__("shutil").rmtree(anchor / "hooks")
     (source / "value.txt").write_text("merged\n", encoding="utf-8")
     _git(source, "commit", "-am", "merged")
@@ -170,6 +175,7 @@ def _fixture(tmp_path: Path) -> dict[str, object]:
     return {
         "source": source,
         "base": base,
+        "anchor_base": anchor_base,
         "anchor": anchor,
         "merged": merged,
         "bundle": bundle,
@@ -212,6 +218,34 @@ def test_anchor_update_is_exact_atomic_and_idempotent(tmp_path: Path) -> None:
     assert first.phase == second.phase == "COMMITTED"
     assert _git(values["anchor"], "rev-parse", "main") == values["merged"]  # type: ignore[arg-type]
     assert _git(values["anchor"], "remote") == ""  # type: ignore[arg-type]
+
+
+def test_anchor_update_catches_up_only_through_ancestral_protected_base(
+    tmp_path: Path,
+) -> None:
+    values = _fixture(tmp_path, lagged=True)
+    assert values["anchor_base"] != values["base"]
+    journal = _advance(values, tmp_path)
+    assert journal.phase == "COMMITTED"
+    assert _git(values["anchor"], "rev-parse", "main") == values["merged"]  # type: ignore[arg-type]
+
+
+def test_anchor_update_rejects_nonancestral_local_anchor(tmp_path: Path) -> None:
+    values = _fixture(tmp_path)
+    unrelated = tmp_path / "unrelated"
+    unrelated.mkdir()
+    _git(unrelated, "init", "-b", "main")
+    _git(unrelated, "config", "user.name", "Unrelated")
+    _git(unrelated, "config", "user.email", "unrelated@example.invalid")
+    (unrelated / "other.txt").write_text("unrelated\n", encoding="utf-8")
+    _git(unrelated, "add", ".")
+    _git(unrelated, "commit", "-m", "unrelated")
+    unrelated_sha = _git(unrelated, "rev-parse", "HEAD")
+    anchor = values["anchor"]
+    _git(anchor, "fetch", "--no-tags", str(unrelated), "refs/heads/main")  # type: ignore[arg-type]
+    _git(anchor, "update-ref", "refs/heads/main", unrelated_sha)  # type: ignore[arg-type]
+    with pytest.raises(ValueError, match="not an ancestor"):
+        _advance(values, tmp_path)
 
 
 @pytest.mark.parametrize("phase", ["PREPARED", "OBJECTS_IMPORTED", "REF_ADVANCED"])

@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import inspect
 import os
 import subprocess
 import sys
@@ -21,8 +22,15 @@ from deployment.runtime_refresh import (
     claim_pending,
     extract_tree_files,
     publish_activation_completions,
+    refresh,
     rollback_switch,
 )
+
+
+def test_refresh_verifies_observation_with_anchor_observer_key() -> None:
+    source = inspect.getsource(refresh)
+    assert "/etc/traincapsule-verifier/anchor-observer-public-key.pem" in source
+    assert "/etc/traincapsule-verifier/selector-public-key.pem" not in source
 
 
 def _git(path: Path, *arguments: str) -> str:

@@ -242,7 +242,7 @@ NoNewPrivileges=yes
 ProtectSystem=strict
 ReadOnlyPaths=/etc/traincapsule-verifier
 ReadOnlyPaths=/var/lib/traincapsule-verifier/anchor-updates
-ReadWritePaths=/var/lib/traincapsule-runtime/git
+ReadWritePaths=/var/lib/traincapsule-runtime
 ReadWritePaths=/var/lib/traincapsule-verifier/anchor-update-journal
 InaccessiblePaths=/var/lib/traincapsule-verifier/private /var/lib/traincapsule-verifier/oracle
 """

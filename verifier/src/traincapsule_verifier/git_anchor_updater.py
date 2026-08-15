@@ -87,7 +87,14 @@ def valid_main_parent_binding(
 
 def _run_git(path: Path, *arguments: str) -> str:
     result = subprocess.run(
-        ["/usr/bin/git", "-C", str(path), *arguments],
+        [
+            "/usr/bin/git",
+            "-c",
+            f"safe.directory={path}",
+            "-C",
+            str(path),
+            *arguments,
+        ],
         check=False,
         capture_output=True,
         text=True,

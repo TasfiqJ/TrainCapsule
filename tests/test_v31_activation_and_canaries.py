@@ -362,9 +362,30 @@ def test_activation_request_is_exact_idempotent_and_stopped(
     outbox = tmp_path / "activation-outbox"
     outbox.mkdir(mode=0o700)
     receipt = _activation_policy_receipt(repo, suite, tmp_path / "policy.json")
+    paths = _runtime_paths(runtime)
+    paths.activation_transactions.mkdir()
+    consumed = ActivationTransaction(
+        schema_version="3.1",
+        transaction_id="ACTIVATE-CONSUMED",
+        phase=ActivationPhase.ACTIVATED,
+        exact_main_sha="a" * 40,
+        exact_tree_sha="b" * 40,
+        activation_receipt_id="ACT:CONSUMED",
+        activation_receipt_digest=DIGEST,
+        canary_suite_path=str(suite),
+        canary_suite_digest=DIGEST,
+        preflight_digest=DIGEST,
+        stop_digest=DIGEST,
+        stop_archive_path=str(runtime / "old-stop"),
+        prepared_at=NOW,
+        activated_at=NOW,
+    )
+    (paths.activation_transactions / "ACTIVATE-CONSUMED.json").write_bytes(
+        consumed.canonical_json_bytes()
+    )
 
     def resolve_paths(_root: Path) -> V3RuntimePaths:
-        return _runtime_paths(runtime)
+        return paths
 
     monkeypatch.setattr(activation, "resolve_v3_runtime_paths", resolve_paths)
     _, runtime_loader = _runtime_loader()
@@ -384,6 +405,10 @@ def test_activation_request_is_exact_idempotent_and_stopped(
     )
     assert first == second
     assert (runtime / "STOP").is_file()
+    assert not list(paths.activation_transactions.iterdir())
+    archived = list((paths.control_archive / "activation-transactions").iterdir())
+    assert len(archived) == 1
+    assert archived[0].read_bytes() == consumed.canonical_json_bytes()
     assert len(list(outbox.glob("*.activation-request.json"))) == 1
     request = ActivationRequestV31.model_validate_json(first.read_bytes(), strict=True)
     controller_raw = (

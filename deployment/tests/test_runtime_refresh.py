@@ -77,6 +77,8 @@ def _fixture(tmp_path: Path) -> tuple[RefreshPolicy, DeploymentUpdateHandoff, Pa
             b"VALUE = 7\n"
         ),
         "packages/traincapsule-cli/src/traincapsule_cli/__init__.py": b"VALUE = 8\n",
+        "schemas/factory/v3/example.json": b"{}\n",
+        "schemas/factory/v3.1/example.json": b"{}\n",
         # A project hook is deliberately present.  The packager must treat it only as data.
         "setup.py": b"raise RuntimeError('PROJECT BUILD HOOK EXECUTED')\n",
         "uv.lock": b"offline-lock\n",

@@ -653,7 +653,10 @@ def _build_generation(
     if not effective_config.is_file():
         raise RefreshFailure("required main lacks the fixed effective configuration")
     snapshot_entries: list[SnapshotEntry] = []
-    for path in sorted(repository.rglob("*")):
+    for path in sorted(
+        repository.rglob("*"),
+        key=lambda candidate: candidate.relative_to(repository).as_posix(),
+    ):
         relative = path.relative_to(repository).as_posix()
         if relative == "SNAPSHOT_MANIFEST.json":
             continue

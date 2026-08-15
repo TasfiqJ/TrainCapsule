@@ -28,7 +28,7 @@ from tcfactory.claude_runner import (
     redacted_event_summary,
     resolve_sdk_tools,
 )
-from tcfactory.models import PauseKind, QuotaPauseRecord
+from tcfactory.models import FactoryConfig, PauseKind, QuotaPauseRecord
 from tcfactory.quota import QuotaLimitPause
 from tcfactory.v3.enums import Lane, RiskTier, WorkKind
 from tcfactory.v3.planning import V3TaskPacket
@@ -181,6 +181,11 @@ def test_claude_overall_timeout_writes_typed_durable_terminal_record(
     assert payload["redactedSummary"] == "backend overall wall-clock deadline exceeded"
     assert captured["strict_tool_allowlist"] is True
     assert captured["bash_allowlist"] == []
+    captured_config = captured["config"]
+    assert isinstance(captured_config, FactoryConfig)
+    assert captured_config.peer_message_dir == str(tmp_path / "backend-runtime/messages")
+    assert captured_config.heartbeat_path == str(tmp_path / "backend-runtime/heartbeat.json")
+    assert captured_config.event_log_path == str(tmp_path / "backend-runtime/events.jsonl")
     record = load_backend_terminal_record(
         terminal,
         expected_digest=result.terminal_record_digest,

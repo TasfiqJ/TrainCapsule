@@ -93,6 +93,58 @@ def test_activation_binds_runtime_manifest_file_not_inner_self_digest() -> None:
     assert authority_digest != "sha256:" + "a" * 64
 
 
+def test_started_controller_attestation_retries_transient_systemd_identity_race(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    attempts = 0
+
+    def attest(_pid: int, _manifest: object, _uid: int) -> None:
+        nonlocal attempts
+        attempts += 1
+        if attempts == 1:
+            raise ValueError("controller process principal mismatch")
+
+    def active(_service: str) -> int | None:
+        return 4321
+
+    def no_sleep(_seconds: float) -> None:
+        return None
+
+    monkeypatch.setattr(broker, "controller_active_pid", active)
+    monkeypatch.setattr(broker, "_attest_process", attest)
+    monkeypatch.setattr(broker.time, "sleep", no_sleep)
+
+    observed = broker._attest_started_controller(  # pyright: ignore[reportPrivateUsage]
+        "traincapsule-controller.service",
+        object(),  # type: ignore[arg-type]
+        994,
+    )
+
+    assert observed == 4321
+    assert attempts == 2
+
+
+def test_started_controller_attestation_keeps_fail_closed_timeout(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    def active(_service: str) -> int | None:
+        return 4321
+
+    def fail(_pid: int, _manifest: object, _uid: int) -> None:
+        raise ValueError("controller process executable mismatch")
+
+    monkeypatch.setattr(broker, "controller_active_pid", active)
+    monkeypatch.setattr(broker, "_attest_process", fail)
+
+    with pytest.raises(ValueError, match="identity did not settle"):
+        broker._attest_started_controller(  # pyright: ignore[reportPrivateUsage]
+            "traincapsule-controller.service",
+            object(),  # type: ignore[arg-type]
+            994,
+            maximum_wait_seconds=0,
+        )
+
+
 def test_runtime_manifest_accepts_exact_production_authority_shape() -> None:
     artifact = {"path": "/tmp/artifact", "digest": DIGEST, "executable": False}
     payload: dict[str, object] = {

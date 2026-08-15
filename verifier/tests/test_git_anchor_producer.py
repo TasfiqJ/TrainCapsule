@@ -132,6 +132,12 @@ def test_read_only_producer_promoter_and_updater_material_are_exact(
         inbox=inbox,
         now=NOW + timedelta(minutes=1),
     ) == []
+    assert producer.stage_jobs(
+        policy,
+        transaction_root=transaction_root,
+        inbox=inbox,
+        now=NOW + timedelta(minutes=31),
+    ) == []
 
     ruleset_key = Ed25519PrivateKey.generate()
     ruleset_core = {

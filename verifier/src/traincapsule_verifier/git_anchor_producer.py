@@ -203,8 +203,8 @@ def stage_jobs(
                 or transaction_target.read_bytes() != canonical_transaction
             ):
                 raise ValueError("anchor fetch job replay conflicts")
-            if job.expires_at <= current:
-                raise ValueError("anchor fetch job expired before independent acquisition")
+            continue
+        if job.expires_at <= current:
             continue
         _atomic(
             transaction_target,

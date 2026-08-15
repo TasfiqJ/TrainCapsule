@@ -284,6 +284,7 @@ def _run_git(repo: Path, *arguments: str) -> str:
             "GIT_CONFIG_NOSYSTEM": "1",
             "GIT_CONFIG_GLOBAL": "/dev/null",
             "GIT_CONFIG_SYSTEM": "/dev/null",
+            "GIT_OPTIONAL_LOCKS": "0",
         },
     )
     if result.returncode != 0:
@@ -1008,7 +1009,21 @@ def _restore_file(target: Path, backup: str | None) -> None:
         return
     source = Path(backup)
     if source.exists() or source.is_symlink():
-        os.replace(source, target)
+        target.parent.mkdir(parents=True, exist_ok=True)
+        descriptor, temporary_name = tempfile.mkstemp(
+            prefix=f".{target.name}.restore-", dir=target.parent
+        )
+        os.close(descriptor)
+        temporary = Path(temporary_name)
+        try:
+            if source.is_symlink():
+                temporary.unlink()
+                os.symlink(os.readlink(source), temporary)
+            else:
+                shutil.copy2(source, temporary, follow_symlinks=False)
+            os.replace(temporary, target)
+        finally:
+            temporary.unlink(missing_ok=True)
 
 
 def _rollback_switch(
@@ -1598,6 +1613,8 @@ attest_generation = _attest_generation
 attest_repository_boundary = _attest_repository_boundary
 rollback_switch = _rollback_switch
 extract_tree_files = _tree_files
+run_git = _run_git
+restore_file = _restore_file
 
 
 def main(argv: Sequence[str] | None = None) -> int:

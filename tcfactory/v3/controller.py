@@ -498,7 +498,7 @@ class V3Controller:
             "controllerRuntimeMayExecuteRequiredMain": False,
             "installedRuntimeAttested": runtime_attested,
             "installedRuntimeManifestDigest": (
-                runtime.manifest_digest if runtime is not None else None
+                runtime.canonical_digest() if runtime is not None else None
             ),
             "nextAction": "INSTALL_SIGNED_SNAPSHOT_RUNTIME_AT_REQUIRED_MAIN",
         }

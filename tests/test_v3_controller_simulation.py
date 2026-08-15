@@ -878,6 +878,13 @@ def test_advanced_anchor_requires_signed_deployment_update_before_next_claim(
         publisher=_AutomatedPRSimulationPublisher(repo, tmp_path / "gates"),
     )
     base = _git(controller.git_root, "rev-parse", "main")
+    installed_tree = _git(repo, "rev-parse", "HEAD^{tree}")
+    installed_runtime = InstalledControllerRuntimeManifest.model_construct(
+        manifest_digest="sha256:" + "0" * 64,
+        repository_main_sha=base,
+        repository_tree_sha=installed_tree,
+    )
+    controller.installed_runtime_loader = lambda: installed_runtime
     worktree = tmp_path / "verified-merged-main"
     _git(tmp_path, "clone", str(controller.git_root), str(worktree))
     _git(worktree, "config", "user.name", "Independent Updater")
@@ -899,6 +906,8 @@ def test_advanced_anchor_requires_signed_deployment_update_before_next_claim(
     assert payload["installedMainSha"] == base
     assert payload["requiredMainSha"] == merged
     assert payload["controllerRuntimeMayExecuteRequiredMain"] is False
+    assert payload["installedRuntimeManifestDigest"] == installed_runtime.canonical_digest()
+    assert payload["installedRuntimeManifestDigest"] != installed_runtime.manifest_digest
     assert backend.calls == 0
     assert all(item.status is not WorkStatus.RUNNING for item in controller.queue.items())
 
@@ -906,6 +915,7 @@ def test_advanced_anchor_requires_signed_deployment_update_before_next_claim(
         repo_root=repo,
         backend=backend,
         publisher=_AutomatedPRSimulationPublisher(repo, tmp_path / "gates-restart"),
+        installed_runtime_loader=lambda: installed_runtime,
     )
     with pytest.raises(RuntimeError, match="DEPLOYMENT_UPDATE_REQUIRED"):
         asyncio.run(restarted.run_cycle())

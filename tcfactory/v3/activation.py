@@ -103,6 +103,42 @@ def _activation_runtime_bundle(
     return manifest, raw, Path(manifest.effective_config.path).read_bytes()
 
 
+def _archive_consumed_activation_transaction(paths: V3RuntimePaths) -> None:
+    """Retire one completed activation journal before requesting fresh authority."""
+
+    if not paths.activation_transactions.exists():
+        return
+    entries = list(paths.activation_transactions.iterdir())
+    if not entries:
+        return
+    if len(entries) != 1:
+        raise RuntimeError("activation renewal found multiple live transactions")
+    source = entries[0]
+    if source.is_symlink() or not source.is_file():
+        raise RuntimeError("activation renewal transaction is indirect")
+    raw = source.read_bytes()
+    transaction = ActivationTransaction.model_validate_json(raw, strict=True)
+    if (
+        raw != transaction.canonical_json_bytes()
+        or transaction.phase is not ActivationPhase.ACTIVATED
+    ):
+        raise RuntimeError("activation renewal transaction is not completed and canonical")
+    archive = paths.control_archive / "activation-transactions"
+    if archive.exists() and (archive.is_symlink() or not archive.is_dir()):
+        raise RuntimeError("activation transaction archive is indirect")
+    archive.mkdir(parents=True, exist_ok=True, mode=0o700)
+    target = archive / f"{transaction.transaction_id}-{sha256_digest(raw)[7:19]}.json"
+    if target.exists():
+        raise RuntimeError("activation transaction archive identity already exists")
+    os.rename(source, target)
+    for directory in (paths.activation_transactions, archive):
+        descriptor = os.open(directory, os.O_RDONLY | os.O_DIRECTORY)
+        try:
+            os.fsync(descriptor)
+        finally:
+            os.close(descriptor)
+
+
 def stage_activation_request(
     *,
     repo_root: Path,
@@ -122,8 +158,6 @@ def stage_activation_request(
         raise RuntimeError("activation request requires the durable STOP control")
     if paths.pause.exists() or paths.hard_stuck.exists():
         raise RuntimeError("activation request is forbidden while PAUSE or HARD_STUCK exists")
-    if paths.activation_transactions.exists() and any(paths.activation_transactions.iterdir()):
-        raise RuntimeError("activation request is forbidden with existing activation transactions")
     suite_path = canary_suite_path.resolve(strict=True)
     suite_raw = suite_path.read_bytes()
     suite = verify_mandatory_canary_suite(suite_path, repo_root=repo_root, require_pass=True)
@@ -157,6 +191,10 @@ def stage_activation_request(
         raise RuntimeError("installed runtime manifest bytes are not canonical")
     if config_digest != installed_runtime.effective_config.digest:
         raise RuntimeError("installed runtime config digest mismatch")
+    # A prior ACTIVATED journal is immutable evidence, but it must not permanently
+    # block renewal after an independent observer restores STOP. Archive it only
+    # after the new suite, policy receipt, and installed runtime all match exactly.
+    _archive_consumed_activation_transaction(paths)
     identity = sha256_digest(
         b"\0".join(
             (

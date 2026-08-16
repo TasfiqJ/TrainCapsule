@@ -1,7 +1,9 @@
 from pathlib import Path
 from types import SimpleNamespace
+from typing import Any
 
 from tcfactory.claude_runner import (
+    claude_sandbox_state_environment,
     needs_report_continuation,
     provider_compatible_task_budget,
     report_continuation_overrides,
@@ -21,6 +23,20 @@ def test_provider_task_budget_uses_current_minimum() -> None:
 def test_only_read_only_roles_force_subprocess_environment_scrubbing() -> None:
     assert subprocess_env_scrub_value(read_only=True) == "1"
     assert subprocess_env_scrub_value(read_only=False) == "1"
+
+
+def test_nested_sandbox_home_owns_the_explicit_claude_config_dir(
+    tmp_path: Path, monkeypatch: Any,
+) -> None:
+    config_dir = tmp_path / "controller-home" / ".claude"
+    monkeypatch.setenv("CLAUDE_CONFIG_DIR", str(config_dir))
+
+    environment = claude_sandbox_state_environment()
+
+    assert environment == {
+        "HOME": str(config_dir.parent.resolve()),
+        "CLAUDE_CONFIG_DIR": str(config_dir.resolve()),
+    }
 
 
 def test_stages_get_a_sandbox_writable_uv_cache_inside_the_candidate_mount(

@@ -203,9 +203,13 @@ def test_sanitized_agent_environment_keeps_explicit_claude_config_dir(
     monkeypatch.setenv("TCF_CLAUDE_OAUTH_TOKEN_FILE", str(token_file))
 
     environment = auth.sanitized_agent_environment(
-        {"CLAUDE_CONFIG_DIR": str(config_dir.resolve())}
+        {
+            "HOME": str(config_dir.parent.resolve()),
+            "CLAUDE_CONFIG_DIR": str(config_dir.resolve()),
+        }
     )
 
+    assert environment["HOME"] == str(config_dir.parent.resolve())
     assert environment["CLAUDE_CONFIG_DIR"] == str(config_dir.resolve())
 
 

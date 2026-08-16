@@ -41,6 +41,7 @@ CONTROLLER_PRINCIPAL_POLICY = Path("/etc/traincapsule-verifier/controller-princi
 CONTROLLER_START_OUTBOX = Path("/var/lib/traincapsule-verifier/controller-start-outbox")
 REFRESH_COMPLETION_INBOX = Path("/var/lib/traincapsule-verifier/activation-refresh-inbox")
 ACTIVATION_POLICY_RECEIPT = ACTIVATION_POLICY_RECEIPT_ROOT
+CONTROLLER_START_ROLLBACK_STOP = b"controller start broker rollback\n"
 
 
 def _refresh_runtime_bundle(
@@ -434,16 +435,49 @@ def _process_refresh_activation(
 
     if state.phase == "START_REQUESTED":
         if paths.stop.exists():
-            return "STOPPED_POST_ACTIVATION"
-        transaction_path = _reopen_bound_file(
-            cast(str, state.activation_transaction_path),
-            cast(str, state.activation_transaction_digest),
-        )
-        transaction = ActivationTransaction.model_validate_json(
-            transaction_path.read_bytes(), strict=True
-        )
-        stage_controller_start_request(transaction, transaction_path=transaction_path)
-        return f"ACTIVATED_START_REQUESTED:{transaction.transaction_id}"
+            if (
+                paths.stop.is_symlink()
+                or not paths.stop.is_file()
+                or paths.stop.read_bytes() != CONTROLLER_START_ROLLBACK_STOP
+            ):
+                return "STOPPED_POST_ACTIVATION"
+            transaction_path = _reopen_bound_file(
+                cast(str, state.activation_transaction_path),
+                cast(str, state.activation_transaction_digest),
+            )
+            transaction = ActivationTransaction.model_validate_json(
+                transaction_path.read_bytes(), strict=True
+            )
+            if transaction.phase.value != "ACTIVATED":
+                raise RuntimeError("rolled-back refresh activation was not activated")
+            # The independent observer or start broker restored the authoritative
+            # STOP after activation.  Keep STOP in place, discard only the consumed
+            # request/transaction bindings, and obtain fresh canaries plus new
+            # independent authority.  This makes rollback recoverable without
+            # replaying the old LIVE receipt or starting the controller directly.
+            state = state.model_copy(
+                update={
+                    "phase": "RECEIVED",
+                    "canary_suite_path": None,
+                    "canary_suite_digest": None,
+                    "activation_request_path": None,
+                    "activation_request_digest": None,
+                    "activation_transaction_path": None,
+                    "activation_transaction_digest": None,
+                    "updated_at": datetime.now(UTC),
+                }
+            )
+            _write_refresh_state(state_path, state)
+        else:
+            transaction_path = _reopen_bound_file(
+                cast(str, state.activation_transaction_path),
+                cast(str, state.activation_transaction_digest),
+            )
+            transaction = ActivationTransaction.model_validate_json(
+                transaction_path.read_bytes(), strict=True
+            )
+            stage_controller_start_request(transaction, transaction_path=transaction_path)
+            return f"ACTIVATED_START_REQUESTED:{transaction.transaction_id}"
 
     if state.canary_suite_path is None:
         result_root = (
@@ -509,6 +543,15 @@ def _process_refresh_activation(
             raise RuntimeError("bound canary suite no longer matches refresh completion")
 
     if state.activation_request_path is None:
+        policy_request = coordinate_activation_policy_request(
+            repo_root=repo_root,
+            canary_suite_path=suite_path,
+            machine_policy_receipt_path=activation_policy_receipt_path,
+            installed_runtime_manifest_path=installed_runtime_manifest_path,
+            installed_runtime_loader=installed_runtime_loader,
+        )
+        if policy_request is not None:
+            return "ACTIVATION_POLICY_REQUEST_SUBMITTED"
         request_path = stage_activation_request(
             repo_root=repo_root,
             canary_suite_path=suite_path,

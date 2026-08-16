@@ -19,6 +19,7 @@ from pydantic import AwareDatetime, Field, model_validator
 from ..util import atomic_write_bytes, sha256_file
 from .activation import (
     ACTIVATION_POLICY_RECEIPT_ROOT,
+    ACTIVATION_POLICY_RENEWAL_MARGIN,
     ActivationTransaction,
     InstalledRuntimeLoader,
     activate_v31,
@@ -34,6 +35,7 @@ from .canaries import (
     run_mandatory_canaries,
     verify_mandatory_canary_suite,
 )
+from .contracts_v31 import ActivationRequestV31
 from .installed_runtime import InstalledControllerRuntimeManifest
 from .runtime_paths import V3RuntimePaths, resolve_v3_runtime_paths
 
@@ -433,6 +435,7 @@ def _process_refresh_activation(
         )
         _write_refresh_state(state_path, state)
 
+    force_fresh_canaries = False
     if state.phase == "START_REQUESTED":
         if paths.stop.exists():
             if (
@@ -468,6 +471,7 @@ def _process_refresh_activation(
                 }
             )
             _write_refresh_state(state_path, state)
+            force_fresh_canaries = True
         else:
             transaction_path = _reopen_bound_file(
                 cast(str, state.activation_transaction_path),
@@ -479,13 +483,50 @@ def _process_refresh_activation(
             stage_controller_start_request(transaction, transaction_path=transaction_path)
             return f"ACTIVATED_START_REQUESTED:{transaction.transaction_id}"
 
+    if (
+        state.phase == "REQUEST_SUBMITTED"
+        and state.activation_request_path is not None
+        and paths.stop.is_file()
+        and not paths.stop.is_symlink()
+        and paths.stop.read_bytes() == CONTROLLER_START_ROLLBACK_STOP
+    ):
+        request_path = _reopen_bound_file(
+            state.activation_request_path,
+            cast(str, state.activation_request_digest),
+        )
+        request_raw = request_path.read_bytes()
+        request = ActivationRequestV31.model_validate_json(request_raw, strict=True)
+        if request_raw != request.canonical_json_bytes():
+            raise RuntimeError("refresh activation request is not canonical")
+        if request.machine_policy_receipt.expires_at <= (
+            datetime.now(UTC) + ACTIVATION_POLICY_RENEWAL_MARGIN
+        ):
+            state = state.model_copy(
+                update={
+                    "phase": "RECEIVED",
+                    "canary_suite_path": None,
+                    "canary_suite_digest": None,
+                    "activation_request_path": None,
+                    "activation_request_digest": None,
+                    "activation_transaction_path": None,
+                    "activation_transaction_digest": None,
+                    "updated_at": datetime.now(UTC),
+                }
+            )
+            _write_refresh_state(state_path, state)
+            force_fresh_canaries = True
+
     if state.canary_suite_path is None:
         result_root = (
             paths.canary_results
             / "deployment-refresh"
             / f"{completion.required_main_sha}-{completion.transaction_id}"
         )
-        candidates = sorted(result_root.rglob("suite.json")) if result_root.exists() else []
+        candidates = (
+            []
+            if force_fresh_canaries
+            else sorted(result_root.rglob("suite.json")) if result_root.exists() else []
+        )
         suite_path: Path | None = None
         suite: MandatoryCanarySuite | None = None
         for candidate in reversed(candidates):

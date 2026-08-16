@@ -25,6 +25,7 @@ from tcfactory.v3.activation import (
     validate_activation_control_state,
 )
 from tcfactory.v3.activation_supervisor import (
+    RefreshActivationState,
     RefreshCompletionV31,
     run_activation_supervisor,
 )
@@ -893,6 +894,15 @@ def test_refresh_completion_forces_fresh_exact_canaries_and_never_reuses_history
 
     monkeypatch.setattr(supervisor, "stage_activation_request", stage)
 
+    def no_policy_request(**_kwargs: object) -> None:
+        return None
+
+    monkeypatch.setattr(
+        supervisor,
+        "coordinate_activation_policy_request",
+        no_policy_request,
+    )
+
     def receipt_pending(**_kwargs: object) -> Never:
         raise RuntimeError("receipt pending")
 
@@ -920,6 +930,167 @@ def test_refresh_completion_forces_fresh_exact_canaries_and_never_reuses_history
             installed_runtime_loader=runtime_loader,
             installed_runtime_manifest_path=tmp_path / "runtime-manifest.json",
         )
+
+
+def test_refresh_activation_recovers_broker_rollback_with_fresh_authority(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _repo(tmp_path)
+    main_sha = _git(repo, "rev-parse", "HEAD")
+    tree_sha = _git(repo, "rev-parse", "HEAD^{tree}")
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    paths = _runtime_paths(runtime)
+    paths.stop.write_bytes(b"controller start broker rollback\n")
+    paths.activation_transactions.mkdir()
+    completion = RefreshCompletionV31(
+        transaction_id=main_sha + "-" + "3" * 16,
+        handoff_digest=DIGEST,
+        previous_main_sha="c" * 40,
+        required_main_sha=main_sha,
+        required_main_tree_sha=tree_sha,
+        source_generation_id="traincapsule-v3.1-zh-2026-08-12",
+        source_generation_digest=DIGEST,
+        generation_manifest_digest=DIGEST,
+        runtime_manifest_digest=DIGEST,
+        environment_digest=DIGEST,
+        effective_config_digest=DIGEST,
+        snapshot_manifest_digest=DIGEST,
+        committed_at=NOW,
+    )
+    completion_root = tmp_path / "completion-inbox"
+    completion_root.mkdir()
+    completion_path = completion_root / f"{main_sha}-{completion.transaction_id}.json"
+    completion_raw = completion.canonical_json_bytes()
+    completion_path.write_bytes(completion_raw)
+    old_suite = tmp_path / "old-suite.json"
+    old_suite.write_bytes(b"old suite\n")
+    old_request = tmp_path / "old-request.json"
+    old_request.write_bytes(b"old request\n")
+    transaction = ActivationTransaction(
+        schema_version="3.1",
+        transaction_id="ACTIVATE-ACT-ROLLED-BACK",
+        phase=ActivationPhase.ACTIVATED,
+        exact_main_sha=main_sha,
+        exact_tree_sha=tree_sha,
+        activation_receipt_id="ACT-ROLLED-BACK",
+        activation_receipt_digest=DIGEST,
+        canary_suite_path=str(old_suite),
+        canary_suite_digest=sha256_digest(old_suite.read_bytes()),
+        preflight_digest=DIGEST,
+        stop_digest=DIGEST,
+        stop_archive_path=str(runtime / "old-stop"),
+        prepared_at=NOW,
+        activated_at=NOW,
+    )
+    transaction_path = paths.activation_transactions / f"{transaction.transaction_id}.json"
+    transaction_raw = transaction.canonical_json_bytes()
+    transaction_path.write_bytes(transaction_raw)
+    state = RefreshActivationState(
+        completion_path=str(completion_path),
+        completion_digest=sha256_digest(completion_raw),
+        completion=completion,
+        phase="START_REQUESTED",
+        canary_suite_path=str(old_suite),
+        canary_suite_digest=sha256_digest(old_suite.read_bytes()),
+        activation_request_path=str(old_request),
+        activation_request_digest=sha256_digest(old_request.read_bytes()),
+        activation_transaction_path=str(transaction_path),
+        activation_transaction_digest=sha256_digest(transaction_raw),
+        updated_at=NOW,
+    )
+    state_path = activation_supervisor._refresh_state_path(  # pyright: ignore[reportPrivateUsage]
+        paths, completion
+    )
+    state_path.parent.mkdir(parents=True)
+    state_path.write_bytes(state.canonical_json_bytes())
+    fresh_suite = tmp_path / "fresh-suite.json"
+    fresh_suite.write_bytes(b"fresh suite\n")
+    _runtime, runtime_loader = _runtime_loader()
+    calls: list[str] = []
+
+    def resolved_paths(_repo: Path) -> V3RuntimePaths:
+        return paths
+
+    monkeypatch.setattr(activation_supervisor, "resolve_v3_runtime_paths", resolved_paths)
+
+    def validate_completion(**_kwargs: object) -> str:
+        return sha256_digest(completion_raw)
+
+    monkeypatch.setattr(
+        activation_supervisor,
+        "_validate_refresh_completion",
+        validate_completion,
+    )
+
+    def run_canaries(**_kwargs: object) -> Path:
+        calls.append("fresh-canaries")
+        return fresh_suite
+
+    monkeypatch.setattr(activation_supervisor, "run_mandatory_canaries", run_canaries)
+    fresh = SimpleNamespace(
+        status=CanaryStatus.PASS,
+        exact_main_sha=main_sha,
+        exact_tree_sha=tree_sha,
+        source_generation_id=completion.source_generation_id,
+        source_generation_digest=completion.source_generation_digest,
+    )
+    def parse_fresh(_raw: bytes, *, strict: bool) -> SimpleNamespace:
+        assert strict
+        return fresh
+
+    monkeypatch.setattr(
+        activation_supervisor.MandatoryCanarySuite,
+        "model_validate_json",
+        parse_fresh,
+    )
+
+    def request_policy(**kwargs: object) -> Path:
+        assert kwargs["canary_suite_path"] == fresh_suite
+        calls.append("fresh-policy")
+        return tmp_path / "policy-request.json"
+
+    monkeypatch.setattr(
+        activation_supervisor,
+        "coordinate_activation_policy_request",
+        request_policy,
+    )
+    def reject_old_authority(**_kwargs: object) -> Never:
+        pytest.fail("old authority must not be reused")
+
+    def reject_direct_start(*_args: object, **_kwargs: object) -> Never:
+        pytest.fail("controller must remain stopped")
+
+    monkeypatch.setattr(
+        activation_supervisor,
+        "stage_activation_request",
+        reject_old_authority,
+    )
+    monkeypatch.setattr(
+        activation_supervisor,
+        "stage_controller_start_request",
+        reject_direct_start,
+    )
+
+    assert (
+        run_activation_supervisor(
+            repo_root=repo,
+            refresh_completion_root=completion_root,
+            refresh_completion_loader=lambda _path: (completion, completion_raw),
+            installed_runtime_loader=runtime_loader,
+            installed_runtime_manifest_path=tmp_path / "runtime-manifest.json",
+        )
+        == "ACTIVATION_POLICY_REQUEST_SUBMITTED"
+    )
+    assert calls == ["fresh-canaries", "fresh-policy"]
+    assert paths.stop.read_bytes() == b"controller start broker rollback\n"
+    recovered = RefreshActivationState.model_validate_json(
+        state_path.read_bytes(), strict=True
+    )
+    assert recovered.phase == "CANARIES_PASSED"
+    assert recovered.canary_suite_path == str(fresh_suite)
+    assert recovered.activation_request_path is None
+    assert recovered.activation_transaction_path is None
 
 
 def test_refresh_completion_substitution_and_ambiguity_fail_before_canaries(

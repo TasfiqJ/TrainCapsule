@@ -396,6 +396,7 @@ def test_activation_request_is_exact_idempotent_and_stopped(
         machine_policy_receipt_path=receipt,
         _outbox_root=outbox,
         installed_runtime_loader=runtime_loader,
+        now=NOW + timedelta(minutes=1),
     )
     second = stage_activation_request(
         repo_root=repo,
@@ -403,6 +404,7 @@ def test_activation_request_is_exact_idempotent_and_stopped(
         machine_policy_receipt_path=receipt,
         _outbox_root=outbox,
         installed_runtime_loader=runtime_loader,
+        now=NOW + timedelta(minutes=1),
     )
     assert first == second
     assert (runtime / "STOP").is_file()
@@ -432,6 +434,22 @@ def test_activation_request_is_exact_idempotent_and_stopped(
             machine_policy_receipt_path=mismatched_receipt,
             _outbox_root=outbox,
             installed_runtime_loader=runtime_loader,
+            now=NOW + timedelta(minutes=1),
+        )
+    expired_receipt = tmp_path / "expired-policy.json"
+    expired_receipt.write_bytes(
+        receipt_value.model_copy(
+            update={"expires_at": NOW + timedelta(minutes=10)}
+        ).canonical_json_bytes()
+    )
+    with pytest.raises(RuntimeError, match="does not authorize the exact activation evidence"):
+        stage_activation_request(
+            repo_root=repo,
+            canary_suite_path=suite,
+            machine_policy_receipt_path=expired_receipt,
+            _outbox_root=outbox,
+            installed_runtime_loader=runtime_loader,
+            now=NOW + timedelta(minutes=11),
         )
     manifest, _ = _runtime_loader()
 
@@ -447,6 +465,7 @@ def test_activation_request_is_exact_idempotent_and_stopped(
             machine_policy_receipt_path=receipt,
             _outbox_root=outbox,
             installed_runtime_loader=tampered_loader,
+            now=NOW + timedelta(minutes=1),
         )
 
 
@@ -508,6 +527,7 @@ def test_activation_request_retires_exact_prepared_receipt_replay(
         machine_policy_receipt_path=receipt,
         _outbox_root=outbox,
         installed_runtime_loader=runtime_loader,
+        now=NOW + timedelta(minutes=1),
     )
 
     assert request.is_file()

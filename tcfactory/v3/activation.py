@@ -188,6 +188,7 @@ def stage_activation_request(
     ),
     installed_runtime_loader: InstalledRuntimeLoader = _activation_runtime_bundle,
     _outbox_root: Path = Path("/var/lib/traincapsule-verifier/activation-controller-outbox"),
+    now: datetime | None = None,
 ) -> Path:
     """Create an unsigned, evidence-bound activation request; never authorize activation."""
 
@@ -206,9 +207,12 @@ def stage_activation_request(
         raise RuntimeError("activation canary suite does not bind the exact current main/tree")
     receipt_raw = machine_policy_receipt_path.resolve(strict=True).read_bytes()
     receipt = MachinePolicyReceiptV31.model_validate_json(receipt_raw, strict=True)
+    now = now or datetime.now(UTC)
     suite_digest = sha256_digest(suite_raw)
     if (
         receipt.decision is not PolicyDecision.PASS
+        or receipt.issued_at > now
+        or receipt.expires_at <= now
         or receipt.candidate_sha != main_sha
         or receipt.candidate_tree_sha != tree_sha
         or receipt.source_generation_id != suite.source_generation_id

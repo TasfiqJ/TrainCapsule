@@ -118,14 +118,53 @@ def _archive_consumed_activation_transaction(paths: V3RuntimePaths) -> None:
         raise RuntimeError("activation renewal transaction is indirect")
     raw = source.read_bytes()
     transaction = ActivationTransaction.model_validate_json(raw, strict=True)
-    if (
-        raw != transaction.canonical_json_bytes()
-        or transaction.phase is not ActivationPhase.ACTIVATED
-    ):
+    if raw != transaction.canonical_json_bytes():
         raise RuntimeError("activation renewal transaction is not completed and canonical")
     archive = paths.control_archive / "activation-transactions"
     if archive.exists() and (archive.is_symlink() or not archive.is_dir()):
         raise RuntimeError("activation transaction archive is indirect")
+    if transaction.phase is ActivationPhase.PREPARED:
+        # A consumed LIVE receipt can be replayed after an independent safe-stop.
+        # The old STOP archive then already exists, so the replay fails between
+        # PREPARED journal creation and STOP archival. Retire only that exact
+        # residue when an immutable, canonical ACTIVATED predecessor proves the
+        # same receipt, evidence, and STOP archive previously completed.
+        predecessors: list[ActivationTransaction] = []
+        if archive.is_dir():
+            for candidate in archive.glob(f"{transaction.transaction_id}-*.json"):
+                if candidate.is_symlink() or not candidate.is_file():
+                    continue
+                candidate_raw = candidate.read_bytes()
+                predecessor = ActivationTransaction.model_validate_json(
+                    candidate_raw, strict=True
+                )
+                if (
+                    candidate_raw == predecessor.canonical_json_bytes()
+                    and predecessor.phase is ActivationPhase.ACTIVATED
+                    and predecessor.transaction_id == transaction.transaction_id
+                    and predecessor.exact_main_sha == transaction.exact_main_sha
+                    and predecessor.exact_tree_sha == transaction.exact_tree_sha
+                    and predecessor.activation_receipt_id
+                    == transaction.activation_receipt_id
+                    and predecessor.activation_receipt_digest
+                    == transaction.activation_receipt_digest
+                    and predecessor.canary_suite_path == transaction.canary_suite_path
+                    and predecessor.canary_suite_digest == transaction.canary_suite_digest
+                    and predecessor.stop_digest == transaction.stop_digest
+                    and predecessor.stop_archive_path == transaction.stop_archive_path
+                ):
+                    predecessors.append(predecessor)
+        if len(predecessors) != 1:
+            raise RuntimeError(
+                "prepared activation renewal lacks one exact activated predecessor"
+            )
+        if not paths.stop.is_file() or paths.stop.is_symlink():
+            raise RuntimeError("prepared activation renewal is not safely stopped")
+        if sha256_digest(paths.stop.read_bytes()) != transaction.stop_digest:
+            raise RuntimeError("prepared activation renewal STOP digest changed")
+        _validate_archive(transaction)
+    elif transaction.phase is not ActivationPhase.ACTIVATED:
+        raise RuntimeError("activation renewal transaction is not completed and canonical")
     archive.mkdir(parents=True, exist_ok=True, mode=0o700)
     target = archive / f"{transaction.transaction_id}-{sha256_digest(raw)[7:19]}.json"
     if target.exists():

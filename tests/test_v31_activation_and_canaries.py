@@ -449,6 +449,69 @@ def test_activation_request_is_exact_idempotent_and_stopped(
         )
 
 
+def test_activation_request_retires_exact_prepared_receipt_replay(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _repo(tmp_path)
+    suite = _suite(repo, tmp_path, monkeypatch)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    stop = runtime / "STOP"
+    stop.write_text("stopped\n", encoding="utf-8")
+    outbox = tmp_path / "activation-outbox"
+    outbox.mkdir(mode=0o700)
+    receipt = _activation_policy_receipt(repo, suite, tmp_path / "policy.json")
+    paths = _runtime_paths(runtime)
+    paths.activation_transactions.mkdir()
+    stop_archive = paths.control_archive / "STOP.ACT:CONSUMED.aaaaaaaaaaaa"
+    stop_archive.parent.mkdir(parents=True)
+    stop_archive.write_bytes(stop.read_bytes())
+    common = {
+        "schema_version": "3.1",
+        "transaction_id": "ACTIVATE-ACT:CONSUMED",
+        "exact_main_sha": "a" * 40,
+        "exact_tree_sha": "b" * 40,
+        "activation_receipt_id": "ACT:CONSUMED",
+        "activation_receipt_digest": DIGEST,
+        "canary_suite_path": str(suite),
+        "canary_suite_digest": DIGEST,
+        "preflight_digest": DIGEST,
+        "stop_digest": sha256_digest(stop.read_bytes()),
+        "stop_archive_path": str(stop_archive),
+        "prepared_at": NOW,
+    }
+    activated = ActivationTransaction(
+        **common,
+        phase=ActivationPhase.ACTIVATED,
+        activated_at=NOW,
+    )
+    archive = paths.control_archive / "activation-transactions"
+    archive.mkdir()
+    (archive / "ACTIVATE-ACT:CONSUMED-terminal.json").write_bytes(
+        activated.canonical_json_bytes()
+    )
+    prepared = ActivationTransaction(**common, phase=ActivationPhase.PREPARED)
+    live = paths.activation_transactions / "ACTIVATE-ACT:CONSUMED.json"
+    live.write_bytes(prepared.canonical_json_bytes())
+
+    monkeypatch.setattr(activation, "resolve_v3_runtime_paths", lambda _root: paths)
+    _, runtime_loader = _runtime_loader()
+    request = stage_activation_request(
+        repo_root=repo,
+        canary_suite_path=suite,
+        machine_policy_receipt_path=receipt,
+        _outbox_root=outbox,
+        installed_runtime_loader=runtime_loader,
+    )
+
+    assert request.is_file()
+    assert stop.is_file()
+    assert not live.exists()
+    archived = list(archive.glob("ACTIVATE-ACT:CONSUMED-*.json"))
+    assert len(archived) == 2
+    assert any(path.read_bytes() == prepared.canonical_json_bytes() for path in archived)
+
+
 def test_activation_policy_request_uses_independent_verifier_bridge(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

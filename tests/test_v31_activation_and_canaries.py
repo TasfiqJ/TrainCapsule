@@ -466,35 +466,40 @@ def test_activation_request_retires_exact_prepared_receipt_replay(
     stop_archive = paths.control_archive / "STOP.ACT:CONSUMED.aaaaaaaaaaaa"
     stop_archive.parent.mkdir(parents=True)
     stop_archive.write_bytes(stop.read_bytes())
-    common = {
-        "schema_version": "3.1",
-        "transaction_id": "ACTIVATE-ACT:CONSUMED",
-        "exact_main_sha": "a" * 40,
-        "exact_tree_sha": "b" * 40,
-        "activation_receipt_id": "ACT:CONSUMED",
-        "activation_receipt_digest": DIGEST,
-        "canary_suite_path": str(suite),
-        "canary_suite_digest": DIGEST,
-        "preflight_digest": DIGEST,
-        "stop_digest": sha256_digest(stop.read_bytes()),
-        "stop_archive_path": str(stop_archive),
-        "prepared_at": NOW,
-    }
-    activated = ActivationTransaction(
-        **common,
-        phase=ActivationPhase.ACTIVATED,
-        activated_at=NOW,
-    )
+    def transaction(
+        phase: ActivationPhase, *, activated_at: datetime | None = None
+    ) -> ActivationTransaction:
+        return ActivationTransaction(
+            schema_version="3.1",
+            transaction_id="ACTIVATE-ACT:CONSUMED",
+            phase=phase,
+            exact_main_sha="a" * 40,
+            exact_tree_sha="b" * 40,
+            activation_receipt_id="ACT:CONSUMED",
+            activation_receipt_digest=DIGEST,
+            canary_suite_path=str(suite),
+            canary_suite_digest=DIGEST,
+            preflight_digest=DIGEST,
+            stop_digest=sha256_digest(stop.read_bytes()),
+            stop_archive_path=str(stop_archive),
+            prepared_at=NOW,
+            activated_at=activated_at,
+        )
+
+    activated = transaction(ActivationPhase.ACTIVATED, activated_at=NOW)
     archive = paths.control_archive / "activation-transactions"
     archive.mkdir()
     (archive / "ACTIVATE-ACT:CONSUMED-terminal.json").write_bytes(
         activated.canonical_json_bytes()
     )
-    prepared = ActivationTransaction(**common, phase=ActivationPhase.PREPARED)
+    prepared = transaction(ActivationPhase.PREPARED)
     live = paths.activation_transactions / "ACTIVATE-ACT:CONSUMED.json"
     live.write_bytes(prepared.canonical_json_bytes())
 
-    monkeypatch.setattr(activation, "resolve_v3_runtime_paths", lambda _root: paths)
+    def resolve_paths(_root: Path) -> V3RuntimePaths:
+        return paths
+
+    monkeypatch.setattr(activation, "resolve_v3_runtime_paths", resolve_paths)
     _, runtime_loader = _runtime_loader()
     request = stage_activation_request(
         repo_root=repo,

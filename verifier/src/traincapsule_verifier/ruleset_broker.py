@@ -157,10 +157,7 @@ def promote_ruleset_outbox_item(
     try:
         existing = read_bounded_file(target, name, maximum_bytes=1_000_000)
     except FileNotFoundError:
-        receipt = RulesetObservationReceipt.model_validate_json(raw, strict=True)
-        if canonical_json_bytes(receipt) != raw:
-            raise ValueError("ruleset observation is not canonical") from None
-        verify_model_signature(receipt, public_key)
+        receipt = _verified_current(raw, public_key)
         try:
             current = _verified_current(
                 read_bounded_file(target, "current.json"), public_key
@@ -169,6 +166,10 @@ def promote_ruleset_outbox_item(
             current = None
         if current is not None and current.observed_at >= receipt.observed_at:
             return
+        if not isinstance(receipt, RulesetObservationReceipt):
+            raise ValueError(
+                "legacy ruleset observation cannot advance the selector"
+            ) from None
         promote_ruleset_observation(raw, target=target, public_key=public_key)
         return
     if existing != raw:

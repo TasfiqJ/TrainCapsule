@@ -409,3 +409,29 @@ def test_ruleset_broker_verifies_then_skips_unpromoted_older_history(
     assert RulesetObservationReceipt.model_validate_json(
         (target_path / "current.json").read_bytes(), strict=True
     ).observation_id == current.observation_id
+
+
+def test_ruleset_broker_verifies_then_skips_legacy_backlog(
+    tmp_path: Path,
+) -> None:
+    target_path = tmp_path / "ruleset"
+    target_path.mkdir(mode=0o700)
+    key = Ed25519PrivateKey.generate()
+    current = _ruleset_receipt(key, datetime.now(UTC) - timedelta(minutes=1))
+    legacy = _legacy_ruleset_receipt(key, datetime.now(UTC) - timedelta(hours=1))
+    legacy_raw = canonical_json_bytes(legacy)
+
+    with open_trusted_root(target_path, expected_uid=os.getuid()) as target:
+        promote_ruleset_observation(
+            canonical_json_bytes(current), target=target, public_key=key.public_key()
+        )
+        promote_ruleset_outbox_item(
+            f"{legacy.observation_id}.json",
+            legacy_raw,
+            target=target,
+            public_key=key.public_key(),
+        )
+
+    assert RulesetObservationReceipt.model_validate_json(
+        (target_path / "current.json").read_bytes(), strict=True
+    ).observation_id == current.observation_id

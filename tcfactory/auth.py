@@ -4,6 +4,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any, Literal, cast
 
@@ -190,6 +191,11 @@ def sanitized_agent_environment(extra: dict[str, str] | None = None) -> dict[str
         environment.pop(name, None)
     # Never let a generic API key helper override subscription OAuth in child sessions.
     environment.pop("ANTHROPIC_CUSTOM_HEADERS", None)
+    runtime_bin = str(Path(sys.executable).resolve().parent)
+    current_path = environment.get("PATH", "")
+    environment["PATH"] = os.pathsep.join(
+        part for part in (runtime_bin, current_path) if part
+    )
     if extra:
         environment.update(extra)
     return environment

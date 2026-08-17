@@ -138,6 +138,7 @@ def build_production_runtime(
             dependency_root=dependencies,
             python_version="3.12.13",
             required_imports=COMPLETE_RUNTIME_IMPORTS,
+            extra_executables={"uv": uv},
         )
         installed = stage / "installed"
         parsed_manifest = RuntimeDistributionManifest.model_validate_json(

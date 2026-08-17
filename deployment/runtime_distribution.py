@@ -13,7 +13,7 @@ import os
 import stat
 import tempfile
 import zipfile
-from collections.abc import Iterable
+from collections.abc import Iterable, Mapping
 from pathlib import Path, PurePosixPath
 from typing import Literal
 
@@ -343,6 +343,7 @@ def build_runtime_distribution(
     dependency_root: Path,
     python_version: str,
     required_imports: Iterable[str],
+    extra_executables: Mapping[str, Path] | None = None,
 ) -> tuple[Path, Path]:
     """Build a deterministic archive from pre-provisioned runtime/dependency trees."""
 
@@ -364,6 +365,19 @@ def build_runtime_distribution(
     if executable.stat().st_nlink != 1:
         raise RuntimeDistributionError("runtime executable contains a hard link")
     identities.add(executable_identity)
+    for name, source in sorted((extra_executables or {}).items()):
+        if not name or name in {".", ".."} or "/" in name or "\\" in name:
+            raise RuntimeDistributionError(f"invalid extra executable name: {name!r}")
+        if source.is_symlink() or not source.is_file():
+            raise RuntimeDistributionError(f"extra executable is not a regular file: {source}")
+        source_stat = source.stat()
+        identity = (source_stat.st_dev, source_stat.st_ino)
+        if identity in identities or source_stat.st_nlink != 1:
+            raise RuntimeDistributionError("extra executable contains a hard link")
+        if source_stat.st_mode & 0o111 == 0:
+            raise RuntimeDistributionError(f"extra executable is not executable: {source}")
+        identities.add(identity)
+        files.append((f"bin/{name}", source, 0o555))
     for root, prefix in roots:
         for source in sorted(path for path in root.rglob("*") if path.is_file()):
             relative_source = source.relative_to(root)

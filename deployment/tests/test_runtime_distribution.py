@@ -103,6 +103,32 @@ def test_exact_distribution_extracts_without_running_build_hooks(tmp_path: Path)
     assert stat.S_IMODE((destination / "bin/python3.12").stat().st_mode) == 0o555
 
 
+def test_extra_executable_is_packaged_and_extracted_read_only(tmp_path: Path) -> None:
+    python_root, dependencies, _ = _inputs(tmp_path)
+    uv = tmp_path / "uv"
+    uv.write_bytes(b"\x7fELF\x02\x01fixture-uv")
+    uv.chmod(0o755)
+    archive, manifest_path = build_runtime_distribution(
+        tmp_path / "runtime.zip",
+        python_root=python_root,
+        dependency_root=dependencies,
+        python_version="3.12.13",
+        required_imports=("pydantic",),
+        extra_executables={"uv": uv},
+    )
+    manifest = RuntimeDistributionManifest.model_validate_json(
+        manifest_path.read_bytes(), strict=True
+    )
+    validate_runtime_distribution(archive, manifest)
+    destination = tmp_path / "installed"
+    extract_runtime_distribution(archive, manifest, destination)
+    validate_extracted_runtime_distribution(destination, manifest)
+
+    installed_uv = destination / "bin/uv"
+    assert installed_uv.read_bytes() == uv.read_bytes()
+    assert stat.S_IMODE(installed_uv.stat().st_mode) == 0o555
+
+
 def test_archive_tamper_extra_member_and_manifest_substitution_fail_closed(
     tmp_path: Path,
 ) -> None:

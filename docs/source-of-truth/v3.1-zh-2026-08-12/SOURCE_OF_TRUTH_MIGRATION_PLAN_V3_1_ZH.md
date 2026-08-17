@@ -82,7 +82,7 @@ Before implementation, Codex must verify the current `main` SHA. When it differs
 - Do not edit the old final bundle in place.
 - Do not force-push.
 - Do not merge directly to `main`.
-- Work on a dedicated branch and open a draft PR.
+- Use the frozen exact-SHA candidate and publish only by an ordinary non-force push to `main`.
 - Preserve a rollback branch/tag or exact base SHA.
 - Store a migration manifest containing old/new hashes.
 - No AI-created independent machine-policy authorization.
@@ -355,11 +355,11 @@ For each state file:
 
 - create migration branch;
 - push branch;
-- open draft PR;
+- push the receipt-authorized exact SHA directly to `main`;
 - run GitHub-hosted CPU checks;
 - run optional self-hosted checks;
 - require machine-policy evaluation for source authority and trust/release changes;
-- enable auto-merge only after required exact-SHA checks and independent machine-policy authorization;
+- push directly to `main` only after required exact-SHA gates and independent machine-policy authorization;
 - do not alter branch protection automatically unless explicitly authorized.
 
 ## 17. CI migration

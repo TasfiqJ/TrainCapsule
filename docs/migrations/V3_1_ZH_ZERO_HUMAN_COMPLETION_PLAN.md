@@ -252,20 +252,19 @@ authority.
 
 ## What remains: P1 complete the autonomous release and refresh loop
 
-### P1.1 Produce a genuinely machine-originated protected PR
+### P1.1 Produce a genuinely machine-originated exact-SHA main publication
 
-PR #25 proved required checks and protected merge behavior, but the user account marked it ready and
-merged it. The zero-human loop still needs a real transaction where the machine:
+The zero-human loop needs a real transaction where the machine:
 
 1. selects and completes a bounded work item;
 2. freezes the exact candidate SHA and tree;
-3. pushes a candidate branch with the scoped GitHub App credential;
-4. opens and marks the PR ready;
-5. waits for exact-head required checks;
-6. obtains the independent machine-policy check;
-7. requests auto-merge;
-8. lets GitHub perform the merge without the user account;
-9. verifies exact merged `main`;
+3. runs all required local and private gates on that exact SHA;
+4. obtains the independent machine-policy receipt;
+5. race-checks the observed `main` base;
+6. performs one ordinary non-force push of the exact candidate to `main`;
+7. waits for exact-SHA hosted post-push checks;
+8. automatically reverts by another ordinary push if a post-push invariant fails;
+9. verifies exact `main`;
 10. promotes the signed anchor bundle;
 11. refreshes the immutable source/runtime generation;
 12. obtains fresh activation authority; and
@@ -277,18 +276,17 @@ This is the concrete implementation of
 [SOURCE_OF_TRUTH_MIGRATION_PLAN.md, section 16](../../TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/SOURCE_OF_TRUTH_MIGRATION_PLAN.md)
 (lines 295–305).
 
-**Acceptance proof.** GitHub timeline actors, App IDs, check suites, auto-merge event, merge actor,
-exact SHAs, root-promoted bundle, refresh completion, fresh activation, seven-event observation, and
-next scheduler decision must all bind the same transaction. No event may be performed by `TasfiqJ`
-or another person.
+**Acceptance proof.** GitHub push actor, App ID, check suites, exact SHAs, main-base race check,
+root-promoted bundle, refresh completion, fresh activation, seven-event observation, and next
+scheduler decision must all bind the same transaction. No event may depend on a person or pull request.
 
 ### P1.2 Exercise crash recovery at every publication and deployment boundary
 
-For each durable phase—prepared, branch pushed, PR open, checks pending, policy pending, auto-merge
-requested, merged, exact-main verified, anchor promoted, refresh switching, refresh committed,
+For each durable phase—prepared, policy pending, base race-checked, main pushed, post-push checks
+pending, exact-main verified, anchor promoted, refresh switching, refresh committed,
 activation requested, activated, start requested—kill the responsible process before and after its
 journal write. Recovery must either continue idempotently or stop with immutable `HARD_STUCK`
-evidence; it must never duplicate a PR, merge, external action, receipt, or runtime switch.
+evidence; it must never duplicate a push, external action, receipt, or runtime switch.
 
 This implements candidate preservation and deterministic recovery from
 [FACTORY_LOOP_REDESIGN_SPEC.md, sections 13–14](../../TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md)
@@ -296,12 +294,12 @@ This implements candidate preservation and deterministic recovery from
 [SOURCE_OF_TRUTH_MIGRATION_PLAN.md, section 20](../../TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/SOURCE_OF_TRUTH_MIGRATION_PLAN.md)
 (lines 381–401).
 
-### P1.3 Prove automated post-merge invariant failure and revert PR
+### P1.3 Prove automatic post-push invariant failure and direct revert
 
-Deliberately introduce a candidate that passes pre-merge controls but fails a declared post-merge
-invariant. The machine must create a normal protected revert PR, run the same exact-SHA checks and
-machine authority, merge it without direct-main mutation, restore the verified anchor/runtime, and
-continue or enter a bounded stop.
+Deliberately introduce a candidate that passes pre-push controls but fails a declared post-push
+invariant. The machine must create a normal revert commit, publish it by an ordinary non-force push
+to `main`, run exact-SHA checks, restore the verified tree/anchor/runtime, and continue or enter a
+bounded stop. It must never force-push, rewrite history, create a branch, or open a pull request.
 
 This is required by the protected release and recovery architecture in
 [FACTORY_LOOP_REDESIGN_SPEC.md, sections 26–27](../../TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md)
@@ -425,8 +423,8 @@ authority:
 3. **Repair noninteractive credential and cold-boot continuity.** No browser or founder login.
 4. **Repair and pass all 20 canaries on the exact installed SHA.**
 5. **Complete V3-MIG-012 through V3-MIG-020 and close M0.**
-6. **Run a machine-originated protected PR, refresh, reactivation, and next-task cycle.**
-7. **Run publication/deployment crash matrices and the automated revert PR.**
+6. **Run a machine-originated exact-SHA direct-main publication, refresh, reactivation, and next-task cycle.**
+7. **Run publication/deployment crash matrices and the automatic ordinary-push revert.**
 8. **Regenerate the durable current-state documents and 158-row ledger.**
 9. **Complete the product runner, reduction, recovery, pack, and typed market/pilot artifacts.**
 10. **Collect real external/commercial evidence without blocking unrelated lanes.**
@@ -482,8 +480,8 @@ This is the installed security and supportability standard in
 - Expire and revoke machine-policy and activation receipts and prove renewal-or-stop.
 - Simulate Claude quota and authentication expiry and prove typed pause/resume without repair-budget
   consumption.
-- Submit a malicious or invalid candidate and prove rejection before branch publication.
-- Trigger post-merge invariant failure and prove an automated protected revert PR.
+- Submit a malicious or invalid candidate and prove rejection before main publication.
+- Trigger post-push invariant failure and prove an automatic ordinary-push revert on `main`.
 - Keep one lane in `WAITING_EXTERNAL` and prove eligible unrelated lanes continue.
 
 These tests directly instantiate the scheduler, retry, external-truth, release, context, and completion
@@ -502,12 +500,12 @@ scheduled controller event
 → bounded task selection
 → noninteractive backend execution
 → frozen candidate and independent gates
-→ App-authenticated branch and PR
-→ exact-head required checks
-→ independent machine-policy check
-→ machine-requested auto-merge
-→ GitHub protected merge
-→ exact merged-main verification
+→ exact-SHA local/private gates
+→ independent machine-policy receipt
+→ main-base race check
+→ App-authenticated ordinary non-force push to main
+→ exact-SHA hosted post-push checks
+→ exact-main verification or automatic ordinary-push revert
 → signed anchor promotion
 → atomic immutable runtime refresh
 → fresh machine-policy and LIVE activation
@@ -670,8 +668,8 @@ A subsequent real invocation of the installed root-owned runner on exact commit
 digest `sha256:4414e84c4ecb6bb5799c0c84aed64917b697990064c23f55c113d13f7eea1411`.
 Eighteen mechanisms passed. Two remained truthfully `BLOCKED_PREREQUISITE`:
 
-- `post_merge_invariant_failure_and_automated_revert_pr`: the external probe lacked a proven
-  isolated GitHub repository, App credential, ruleset, and revert-PR permission;
+- `post_push_invariant_failure_and_automatic_direct_revert`: the earlier external probe lacked a
+  proven isolated GitHub repository, App credential, and ordinary direct-main revert path;
 - `real_claude_mechanical_task`: the external probe lacked a proven real Claude executable,
   credential, and paid canary budget.
 

@@ -949,7 +949,7 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                 "networkAllowed": canary_id
                 in {
                     "real_claude_mechanical_task",
-                    "post_merge_invariant_failure_and_automated_revert_pr",
+                    "post_push_invariant_failure_and_automatic_direct_revert",
                 },
             }
             for canary_id in CANARY_IDS

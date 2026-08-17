@@ -83,7 +83,7 @@ groups:
     maxCharacters: 29000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3_1_ZH.md
-        sha256: f8e2e8ae98fefb43c21470961583b9a990f213aa0865d20ee993d3bae9ab2cd1
+        sha256: 426d8010043d236ab7c7ca7a24579f033021c9f42a50eecdbd2dbcb80045589e
         authorityClass: normative_roadmap
         authoritySections: ["§12.2 Milestone map", "§12.3 M0 — Factory and source-of-truth migration", "§12.4 M1 — Native preflight and problem access", "§12.12 Legacy 124-task ledger disposition", "§12.13 Operating cadence"]
         scope: Current milestone gates and work dispositions.
@@ -115,13 +115,13 @@ groups:
     maxCharacters: 53000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/FACTORY_LOOP_REDESIGN_SPEC_V3_1_ZH.md
-        sha256: eb2585a1a89a4d4c234081e98b7bb37cf37ba66478e8072665b27cd756c9db89
+        sha256: 3894c6e3c500d8cf56d58cebb189ba8ccd2acc10cd998a26253c91fbab247b42
         authorityClass: normative_factory
         authoritySections: ["§V3.1-ZH controlling amendment", "§7. Four-lane scheduler", "§10. Retry and recovery policy", "§13. Pipeline redesign", "§15. Machine-policy authorization state", "§17. Agent backend abstraction", "§25. Startup and restart redesign", "§26. Git and GitHub release redesign"]
         scope: Controller, scheduler, recovery, and release design.
         freshnessPolicy: manifest_locked
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3_1_ZH.md
-        sha256: 8a9e3736ae634923a4061b288390e9343e35dd5bb6eac9610601fa490e35e85d
+        sha256: 7cb549ce726a531740e7e1fd524234aad80fad40375bd1e50c79843b9bee52a0
         authorityClass: executor_policy
         authoritySections: ["§V3.1-ZH controlling amendment", "§Independent machine authority", "§Work-item protocol", "§Factory-specific implementation rules", "§Git rules", "§Stop conditions"]
         scope: Bounded executor contract and stop conditions.
@@ -199,7 +199,7 @@ groups:
         scope: Initial pack trust boundary.
         freshnessPolicy: manifest_locked
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3_1_ZH.md
-        sha256: f8e2e8ae98fefb43c21470961583b9a990f213aa0865d20ee993d3bae9ab2cd1
+        sha256: 426d8010043d236ab7c7ca7a24579f033021c9f42a50eecdbd2dbcb80045589e
         authorityClass: normative_roadmap
         authoritySections: ["§12.4 M1 — Native preflight and problem access", "§12.5 M2 — Controlled end-to-end qualification", "§12.10 Checkpoint pack roadmap"]
         scope: Initial pack gates and deferred scope.
@@ -231,13 +231,13 @@ groups:
     maxCharacters: 53000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/FACTORY_LOOP_REDESIGN_SPEC_V3_1_ZH.md
-        sha256: eb2585a1a89a4d4c234081e98b7bb37cf37ba66478e8072665b27cd756c9db89
+        sha256: 3894c6e3c500d8cf56d58cebb189ba8ccd2acc10cd998a26253c91fbab247b42
         authorityClass: normative_factory
         authoritySections: ["§7. Four-lane scheduler", "§8. Scheduler score", "§10. Retry and recovery policy", "§13. Pipeline redesign", "§17. Agent backend abstraction", "§25. Startup and restart redesign", "§26. Git and GitHub release redesign"]
         scope: Controller and recovery implementation.
         freshnessPolicy: manifest_locked
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3_1_ZH.md
-        sha256: 8a9e3736ae634923a4061b288390e9343e35dd5bb6eac9610601fa490e35e85d
+        sha256: 7cb549ce726a531740e7e1fd524234aad80fad40375bd1e50c79843b9bee52a0
         authorityClass: executor_policy
         authoritySections: ["§Work-item protocol", "§Factory-specific implementation rules", "§Git rules", "§Stop conditions"]
         scope: Executor protocol and stop conditions.

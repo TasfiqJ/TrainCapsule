@@ -106,7 +106,7 @@ M1-PRODUCT   M1-MARKET    M1-COMP       M1-TRUST
 - finite retry and restart budgets enforced;
 - machine-policy and external-evidence states implemented;
 - completion expansion is proposal-only;
-- release uses pull requests;
+- release uses exact-SHA ordinary non-force pushes to `main`;
 - factory and product CI separated;
 - current queue safely migrated;
 - one mechanical and one standard simulated work item complete;
@@ -128,7 +128,7 @@ M1-PRODUCT   M1-MARKET    M1-COMP       M1-TRUST
 | `V3-MIG-009` | MARKET | Generalize signed external-evidence receipts | 005 | invalid/synthetic/issuer tests |
 | `V3-MIG-010` | FACTORY | Convert completion audit to milestone proposal-only behavior | 005,007 | proposal artifact; no ledger mutation |
 | `V3-MIG-011` | FACTORY | Add backend-neutral executor interface and Claude adapter | 005 | protocol tests; current Claude flow preserved |
-| `V3-MIG-012` | FACTORY | Change release path from direct main to draft PR | 005 | PR dry run, exact-SHA checks |
+| `V3-MIG-012` | FACTORY | Enforce receipt-authorized exact-SHA direct-main publication | 005 | direct-main dry run, exact-SHA checks |
 | `V3-MIG-013` | FACTORY | Split factory, product, security, and source-integrity CI | 012 | workflows and local equivalents |
 | `V3-MIG-014` | FACTORY | Make Windows/WSL controls configurable; add restart budget | 007 | non-hardcoded config tests |
 | `V3-MIG-015` | FACTORY | Migrate legacy ledger/queue/checkpoints without resuming obsolete work | 005,006,007 | migration report and hashes |

@@ -14,7 +14,7 @@ ROOT = Path(__file__).resolve().parents[1]
 TARGET = ROOT / "policy/runner-policy.template.json"
 NETWORK = {
     MandatoryCanaryId.REAL_CLAUDE_MECHANICAL_TASK,
-    MandatoryCanaryId.POST_MERGE_INVARIANT_FAILURE_AND_AUTOMATED_REVERT_PR,
+    MandatoryCanaryId.POST_PUSH_INVARIANT_FAILURE_AND_AUTOMATIC_DIRECT_REVERT,
 }
 
 

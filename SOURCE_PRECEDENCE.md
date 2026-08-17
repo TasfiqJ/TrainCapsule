@@ -26,7 +26,7 @@ Apply active-generation sources in this order, highest first:
 
 All paths are relative to the active V3.1-ZH bundle. A verified external receipt controls only its exact external-evidence scope; it never rewrites normative product or factory policy.
 
-V3.1-ZH is an explicit owner-approved amendment, not a claim that immutable V3 required zero-human operation. It replaces V3's qualified-human runtime approvals with independent off-repository machine authority and replaces the temporary direct-main deviation with automated pull requests, required server-side checks, and machine-authorized auto-merge. The residual risk of removing qualified-human review is disclosed in every affected active document.
+V3.1-ZH is an explicit owner-approved amendment, not a claim that immutable V3 required zero-human operation. It replaces V3's qualified-human runtime approvals with independent off-repository machine authority and makes exact-SHA, receipt-authorized, ordinary non-force pushes to `main` the sole publication route. Required post-push checks and automatic ordinary-push revert preserve the fail-closed boundary. The residual risk of removing qualified-human review is disclosed in every affected active document.
 
 `config/owner_directives.yaml`, `config/human_approval.yaml`, `factory/policy/ZERO_HUMAN_OPERATION_OVERRIDE.json`, and their migration ADRs are historical migration evidence only. They cannot shadow, authorize, or modify active V3.1-ZH policy.
 
@@ -46,7 +46,7 @@ A source monitor may mark an affected assumption `STALE` or `RECHECK_REQUIRED` a
 - No runtime state waits for human approval.
 - No candidate-writing agent or agent-visible repository file may self-certify trust, release, or activation.
 - Independent off-repository machine authority issues signed, scoped, expiring, revocable receipts for the exact candidate SHA and evidence digests.
-- Candidate publication is automated pull request only. Protected `main` requires exact-SHA server checks and a valid machine receipt before auto-merge.
+- Candidate publication is exact-SHA direct-to-`main` only after deterministic gates and a valid independent machine receipt. Pull requests, candidate branches, force pushes, deletion, and bypass are forbidden.
 - Activation requires a signed external activation receipt bound to the exact merged SHA and verified runtime state.
 - Missing machine authority is `BLOCKED_POLICY`; missing external truth is `WAITING_EXTERNAL`; neither may be fabricated or silently promoted.
 

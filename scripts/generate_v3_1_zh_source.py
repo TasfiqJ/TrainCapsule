@@ -297,6 +297,9 @@ TARGET_REPLACEMENTS: dict[str, tuple[tuple[str, str], ...]] = {
         ("Install V3 documents", "Install V3.1-ZH documents"),
         ("Enable V3 controller", "Enable V3.1-ZH controller"),
         ("V3 scheduler still", "V3.1-ZH scheduler still"),
+        ("release uses pull requests;", "release uses exact-SHA ordinary non-force pushes to `main`;"),
+        ("Change release path from direct main to draft PR", "Enforce receipt-authorized exact-SHA direct-main publication"),
+        ("PR dry run, exact-SHA checks", "direct-main dry run, exact-SHA checks"),
     ),
     "FACTORY_LOOP_REDESIGN_SPEC_V3_1_ZH.md": (
         (
@@ -306,6 +309,9 @@ TARGET_REPLACEMENTS: dict[str, tuple[tuple[str, str], ...]] = {
         ("releaseMode: PULL_REQUEST", "releaseMode: DIRECT_MAIN_EXACT_SHA"),
         ("releaseMode: pull_request", "releaseMode: direct_main_exact_sha"),
         ("directMainPush: false", "directMainPush: true"),
+        ("Default to pull-request release.", "Use receipt-authorized exact-SHA direct-main release only."),
+        ("→ draft PR", "→ ordinary non-force push to `main`"),
+        ("integration/trust auto-merge only after all required checks and a valid independent machine-policy receipt", "integration/trust direct-main publication only after all required gates and a valid independent machine-policy receipt"),
         ("Install V3 authority", "Install V3.1-ZH authority"),
         ("gate-based V3 work items", "gate-based V3.1-ZH work items"),
     ),
@@ -339,6 +345,9 @@ TARGET_REPLACEMENTS: dict[str, tuple[tuple[str, str], ...]] = {
         ("reference the V3 context resolver", "reference the V3.1-ZH context resolver"),
         ("stop V3 controller", "stop V3.1-ZH controller"),
         ("preserve V3 artifacts/logs", "preserve V3.1-ZH artifacts/logs"),
+        ("Work on a dedicated branch and open a draft PR.", "Use the frozen exact-SHA candidate and publish only by an ordinary non-force push to `main`."),
+        ("open draft PR;", "push the receipt-authorized exact SHA directly to `main`;"),
+        ("enable auto-merge only after required exact-SHA checks and independent machine-policy authorization;", "push directly to `main` only after required exact-SHA gates and independent machine-policy authorization;"),
         ('"manifestVersion": 3', '"schemaVersion": 1'),
         ('"bundleVersion": "v3-2026-08-11"', f'"generationId": "{GENERATION_ID}"'),
         (
@@ -382,6 +391,9 @@ TARGET_REPLACEMENTS: dict[str, tuple[tuple[str, str], ...]] = {
     "generatorPath": "scripts/generate_v3_1_zh_source.py"
   }''',
         ),
+    ),
+    "14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3_1_ZH.md": (
+        ("release through draft PR under current policy;", "release only through a receipt-authorized exact-SHA ordinary push to `main`;"),
     ),
 }
 

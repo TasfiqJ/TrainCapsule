@@ -184,7 +184,7 @@ def _claude(args: argparse.Namespace) -> dict[str, object]:
     }
 
 
-def _github_revert(args: argparse.Namespace) -> dict[str, object]:
+def _github_direct_revert(args: argparse.Namespace) -> dict[str, object]:
     config = _load_policy().github
     gh = Path(config.executable)
     repository = config.repository
@@ -197,8 +197,6 @@ def _github_revert(args: argparse.Namespace) -> dict[str, object]:
         "LANG": "C.UTF-8",
         "PATH": "/usr/bin:/bin",
     }
-    branch = f"canary/post-merge-{args.run_id.lower()}"
-    revert_branch = f"canary/revert-{args.run_id.lower()}"
     probe = subprocess.run(
         [
             str(gh),
@@ -217,8 +215,42 @@ def _github_revert(args: argparse.Namespace) -> dict[str, object]:
     )
     if probe.returncode != 0:
         raise ValueError("GitHub App cannot observe the isolated canary repository")
-    # Mutation is delegated to a root-installed canary workflow; this client only dispatches
-    # the exact SHA/tree request and verifies the resulting revert PR independently.
+    base = subprocess.run(
+        [
+            str(gh),
+            "api",
+            f"repos/{repository}/git/ref/heads/main",
+            "--jq",
+            ".object.sha",
+        ],
+        env=env,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    base_sha = base.stdout.strip()
+    if base.returncode != 0 or len(base_sha) != 40:
+        raise ValueError("isolated canary main identity is unavailable")
+    base_tree_observation = subprocess.run(
+        [
+            str(gh),
+            "api",
+            f"repos/{repository}/git/commits/{base_sha}",
+            "--jq",
+            ".tree.sha",
+        ],
+        env=env,
+        check=False,
+        capture_output=True,
+        text=True,
+        timeout=60,
+    )
+    base_tree = base_tree_observation.stdout.strip()
+    if base_tree_observation.returncode != 0 or len(base_tree) != 40:
+        raise ValueError("isolated canary main tree is unavailable")
+    # Mutation is delegated to the isolated repository workflow. It performs two ordinary,
+    # non-force pushes to main: the intentional failure and its exact revert.
     dispatched = subprocess.run(
         [
             str(gh),
@@ -233,10 +265,6 @@ def _github_revert(args: argparse.Namespace) -> dict[str, object]:
             f"exact_main_sha={args.main_sha}",
             "-f",
             f"exact_tree_sha={args.tree_sha}",
-            "-f",
-            f"candidate_branch={branch}",
-            "-f",
-            f"revert_branch={revert_branch}",
         ],
         env=env,
         check=False,
@@ -247,22 +275,17 @@ def _github_revert(args: argparse.Namespace) -> dict[str, object]:
     if dispatched.returncode != 0:
         raise ValueError("isolated revert canary workflow dispatch was rejected")
     verified_stdout = ""
-    verified_returncode = 1
+    observed_head = ""
+    observed_tree = ""
     proven = False
     for attempt in range(30):
-        verified = subprocess.run(
+        head = subprocess.run(
             [
                 str(gh),
-                "pr",
-                "list",
-                "--repo",
-                repository,
-                "--head",
-                revert_branch,
-                "--state",
-                "all",
-                "--json",
-                "number,headRefName,baseRefName,body,statusCheckRollup",
+                "api",
+                f"repos/{repository}/git/ref/heads/main",
+                "--jq",
+                ".object.sha",
             ],
             env=env,
             check=False,
@@ -270,48 +293,15 @@ def _github_revert(args: argparse.Namespace) -> dict[str, object]:
             text=True,
             timeout=60,
         )
-        verified_returncode = verified.returncode
-        verified_stdout = verified.stdout
-        if verified_returncode == 0:
-            observed_rows: object = json.loads(verified_stdout)
-            rows = cast(list[object], observed_rows) if isinstance(observed_rows, list) else []
-            row = (
-                cast(dict[str, object], rows[0])
-                if len(rows) == 1 and isinstance(rows[0], dict)
-                else {}
-            )
-            checks_raw = row.get("statusCheckRollup")
-            checks = cast(list[object], checks_raw) if isinstance(checks_raw, list) else []
-            check_rows = [
-                cast(dict[str, object], item) for item in checks if isinstance(item, dict)
-            ]
-            conclusions = {item.get("conclusion") for item in check_rows}
-            check_names = {item.get("name") for item in check_rows}
-            body = row.get("body")
-            required_body = (
-                isinstance(body, str)
-                and "TrainCapsule-Automated-Revert: true" in body
-                and f"Exact-Main-SHA: {args.main_sha}" in body
-                and f"Exact-Tree-SHA: {args.tree_sha}" in body
-            )
-            base_sha = ""
-            if isinstance(body, str):
-                base_lines = [
-                    line.removeprefix("Canary-Base-SHA: ")
-                    for line in body.splitlines()
-                    if line.startswith("Canary-Base-SHA: ")
-                ]
-                if len(base_lines) == 1:
-                    base_sha = base_lines[0]
-            restored = subprocess.run(
+        observed_head = head.stdout.strip()
+        if head.returncode == 0 and observed_head != base_sha and len(observed_head) == 40:
+            tree = subprocess.run(
                 [
                     str(gh),
                     "api",
-                    f"repos/{repository}/git/ref/heads/main",
-                    "--method",
-                    "GET",
+                    f"repos/{repository}/git/commits/{observed_head}",
                     "--jq",
-                    ".object.sha",
+                    ".tree.sha",
                 ],
                 env=env,
                 check=False,
@@ -319,19 +309,55 @@ def _github_revert(args: argparse.Namespace) -> dict[str, object]:
                 text=True,
                 timeout=60,
             )
-            proven = (
-                row.get("headRefName") == revert_branch
-                and row.get("baseRefName") == "main"
-                and required_body
-                and len(base_sha) == 40
-                and bool(checks)
-                and conclusions == {"SUCCESS"}
-                and "TrainCapsule revert PR validation" in check_names
-                and restored.returncode == 0
-                and restored.stdout.strip() == base_sha
+            observed_tree = tree.stdout.strip()
+            checks = subprocess.run(
+                [
+                    str(gh),
+                    "api",
+                    "-H",
+                    "Accept: application/vnd.github+json",
+                    f"repos/{repository}/commits/{observed_head}/check-runs",
+                ],
+                env=env,
+                check=False,
+                capture_output=True,
+                text=True,
+                timeout=60,
             )
-            if proven:
-                break
+            verified_stdout = checks.stdout
+            if checks.returncode == 0:
+                payload: object = json.loads(verified_stdout)
+                typed_payload = (
+                    cast(dict[str, object], payload) if isinstance(payload, dict) else {}
+                )
+                rows_raw = typed_payload.get("check_runs")
+                rows = cast(list[object], rows_raw) if isinstance(rows_raw, list) else []
+                matches = [
+                    cast(dict[str, object], row)
+                    for row in rows
+                    if isinstance(row, dict)
+                    and cast(dict[str, object], row).get("name")
+                    == "TrainCapsule direct-main revert validation"
+                    and cast(dict[str, object], row).get("conclusion") == "success"
+                ]
+                output = matches[0].get("output") if len(matches) == 1 else None
+                summary = (
+                    cast(dict[str, object], output).get("summary")
+                    if isinstance(output, dict)
+                    else None
+                )
+                proven = (
+                    tree.returncode == 0
+                    and observed_tree == base_tree
+                    and isinstance(summary, str)
+                    and "TrainCapsule-Direct-Main-Revert: true" in summary
+                    and f"Exact-Main-SHA: {args.main_sha}" in summary
+                    and f"Exact-Tree-SHA: {args.tree_sha}" in summary
+                    and f"Canary-Base-SHA: {base_sha}" in summary
+                    and f"Canary-Base-Tree: {base_tree}" in summary
+                )
+                if proven:
+                    break
         if attempt < 29:
             time.sleep(10)
     return {
@@ -339,15 +365,17 @@ def _github_revert(args: argparse.Namespace) -> dict[str, object]:
         "repository": repository,
         "exactMainSha": args.main_sha,
         "exactTreeSha": args.tree_sha,
-        "candidateBranch": branch,
-        "revertBranch": revert_branch,
-        "revertPrObservationDigest": _digest(verified_stdout.encode()),
+        "canaryBaseSha": base_sha,
+        "canaryBaseTree": base_tree,
+        "directRevertSha": observed_head,
+        "restoredTree": observed_tree,
+        "directRevertObservationDigest": _digest(verified_stdout.encode()),
     }
 
 
 def run_probe(canary_id: str, args: argparse.Namespace) -> dict[str, object]:
     if canary_id == "real_claude_mechanical_task":
         return _claude(args)
-    if canary_id == "post_merge_invariant_failure_and_automated_revert_pr":
-        return _github_revert(args)
+    if canary_id == "post_push_invariant_failure_and_automatic_direct_revert":
+        return _github_direct_revert(args)
     raise ValueError("external canary identity is not recognized")

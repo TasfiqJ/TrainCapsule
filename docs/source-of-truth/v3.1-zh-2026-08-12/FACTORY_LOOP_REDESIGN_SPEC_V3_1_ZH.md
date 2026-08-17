@@ -1020,13 +1020,13 @@ The factory may push only the exact receipt-authorized candidate to `main` with 
 
 ### Replacement
 
-Default to pull-request release.
+Use receipt-authorized exact-SHA direct-main release only.
 
 ```text
 verified candidate
 → release branch
 → push
-→ draft PR
+→ ordinary non-force push to `main`
 → required CI
 → independent machine-policy authorization and automated merge policy
 ```
@@ -1223,7 +1223,7 @@ Write explicit migrations.
 
 - no direct main push;
 - PR created from verified candidate;
-- integration/trust auto-merge only after all required checks and a valid independent machine-policy receipt;
+- integration/trust direct-main publication only after all required gates and a valid independent machine-policy receipt;
 - CI identity bound to candidate SHA.
 
 ### Context

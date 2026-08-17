@@ -67,8 +67,8 @@
       "networkAllowed": false,
       "timeoutSeconds": 300
     },
-    "post_merge_invariant_failure_and_automated_revert_pr": {
-      "executable": "/usr/libexec/traincapsule-canary-post_merge_invariant_failure_and_automated_revert_pr",
+    "post_push_invariant_failure_and_automatic_direct_revert": {
+      "executable": "/usr/libexec/traincapsule-canary-post_push_invariant_failure_and_automatic_direct_revert",
       "executableDigest": "sha256:0000000000000000000000000000000000000000000000000000000000000000",
       "networkAllowed": true,
       "timeoutSeconds": 3600

@@ -2547,7 +2547,7 @@
       "sourcePath": "docs/source-of-truth/v3-2026-08-11/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3.md",
       "sourceSha256": "4a6c6c660581711ca44bbee7d43f37c2ce244c4f117c84ba1802c19385e5fb37",
       "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3_1_ZH.md",
-      "targetSha256": "f8e2e8ae98fefb43c21470961583b9a990f213aa0865d20ee993d3bae9ab2cd1"
+      "targetSha256": "426d8010043d236ab7c7ca7a24579f033021c9f42a50eecdbd2dbcb80045589e"
     },
     {
       "logicalId": "TC.V3_1_ZH.SOURCE_REGISTER",
@@ -3013,7 +3013,7 @@
           "targetSectionId": "14-claude-code-master-build-prompt-v3-1-zh-security-rules"
         },
         {
-          "disposition": "PRESERVED",
+          "disposition": "SUPERSEDED_POLICY",
           "sourceHeading": "Git rules",
           "sourceLine": 360,
           "targetHeading": "Git rules",
@@ -3057,7 +3057,7 @@
       "sourcePath": "docs/source-of-truth/v3-2026-08-11/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3.md",
       "sourceSha256": "d7377e6f1fe86a7a0a70d951ac11a47e717c6988ace97368567bcd343de6b0d5",
       "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3_1_ZH.md",
-      "targetSha256": "8a9e3736ae634923a4061b288390e9343e35dd5bb6eac9610601fa490e35e85d"
+      "targetSha256": "7cb549ce726a531740e7e1fd524234aad80fad40375bd1e50c79843b9bee52a0"
     },
     {
       "logicalId": "TC.V3_1_ZH.FACTORY_LOOP",
@@ -3916,7 +3916,7 @@
       "sourcePath": "docs/source-of-truth/v3-2026-08-11/FACTORY_LOOP_REDESIGN_SPEC.md",
       "sourceSha256": "69500bdc0b9a42cd8bba6190912f5be3e2615189f0c8a9bd2f7c0b700f42cdc6",
       "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/FACTORY_LOOP_REDESIGN_SPEC_V3_1_ZH.md",
-      "targetSha256": "eb2585a1a89a4d4c234081e98b7bb37cf37ba66478e8072665b27cd756c9db89"
+      "targetSha256": "3894c6e3c500d8cf56d58cebb189ba8ccd2acc10cd998a26253c91fbab247b42"
     },
     {
       "logicalId": "TC.V3_1_ZH.MIGRATION_PLAN",
@@ -4151,7 +4151,7 @@
       "sourcePath": "TrainCapsule_V3_Review_and_Migration_Bundle_2026-08-11/traincapsule_v3_review_2026-08-11/SOURCE_OF_TRUTH_MIGRATION_PLAN.md",
       "sourceSha256": "cd1366cb9f9c10153d404388bb03a019603a91c5d800f051aacbc0bedc8a5157",
       "targetPath": "docs/source-of-truth/v3.1-zh-2026-08-12/SOURCE_OF_TRUTH_MIGRATION_PLAN_V3_1_ZH.md",
-      "targetSha256": "42bfc7b7e990149afabc042129b17fadec1d6a9b90dfa9bb278847a8c6ee9bbc"
+      "targetSha256": "f38bef2a72491adee545598546fa3e538794920c4d88d012ba995d5652ef0d98"
     }
   ],
   "generatedAt": "2026-08-12T00:00:00Z",

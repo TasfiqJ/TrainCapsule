@@ -210,7 +210,7 @@ CANARY_IDS = (
     "machine_verifier_unavailable",
     "activation_receipt_wrong_sha",
     "runtime_root_outside_repo",
-    "post_merge_invariant_failure_and_automated_revert_pr",
+    "post_push_invariant_failure_and_automatic_direct_revert",
 )
 CANARY_DISTRIBUTION_FILES = (
     "__init__.py",

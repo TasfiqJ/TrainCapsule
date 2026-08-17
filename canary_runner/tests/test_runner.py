@@ -286,7 +286,7 @@ def test_live_probes_cannot_pass_without_root_policy(
         run_probe(MandatoryCanaryId.REAL_CLAUDE_MECHANICAL_TASK.value, args)
     with pytest.raises(OSError):
         run_probe(
-            MandatoryCanaryId.POST_MERGE_INVARIANT_FAILURE_AND_AUTOMATED_REVERT_PR.value,
+            MandatoryCanaryId.POST_PUSH_INVARIANT_FAILURE_AND_AUTOMATIC_DIRECT_REVERT.value,
             args,
         )
 
@@ -319,6 +319,10 @@ def test_github_live_probe_forces_read_only_method_before_dispatch(
         command: list[str], **_kwargs: object
     ) -> subprocess.CompletedProcess[str]:
         commands.append(command)
+        if "git/ref/heads/main" in " ".join(command):
+            return subprocess.CompletedProcess(command, 0, "c" * 40 + "\n", "")
+        if "git/commits/" in " ".join(command):
+            return subprocess.CompletedProcess(command, 0, "d" * 40 + "\n", "")
         return subprocess.CompletedProcess(
             command,
             1 if "workflow" in command else 0,
@@ -338,7 +342,7 @@ def test_github_live_probe_forces_read_only_method_before_dispatch(
         tree_sha=TREE,
     )
     with pytest.raises(ValueError, match="dispatch was rejected"):
-        external_probes._github_revert(args)  # pyright: ignore[reportPrivateUsage]
+        external_probes._github_direct_revert(args)  # pyright: ignore[reportPrivateUsage]
     assert commands[0][1:5] == [
         "api",
         "repos/TasfiqJ/TrainCapsule-Canary/actions/runs",
@@ -356,6 +360,8 @@ def test_github_live_probe_requires_exact_check_and_restored_baseline(
     token.write_text("test-token", encoding="utf-8")
     token.chmod(0o600)
     base_sha = "c" * 40
+    base_tree = "d" * 40
+    revert_sha = "e" * 40
     commands: list[list[str]] = []
 
     def policy() -> Any:
@@ -376,32 +382,33 @@ def test_github_live_probe_requires_exact_check_and_restored_baseline(
         command: list[str], **_kwargs: object
     ) -> subprocess.CompletedProcess[str]:
         commands.append(command)
-        if command[1:3] == ["pr", "list"]:
-            body = "\n".join(
+        if "git/ref/heads/main" in " ".join(command):
+            observed = base_sha if len(commands) <= 2 else revert_sha
+            return subprocess.CompletedProcess(command, 0, observed + "\n", "")
+        if f"git/commits/{base_sha}" in " ".join(command):
+            return subprocess.CompletedProcess(command, 0, base_tree + "\n", "")
+        if f"git/commits/{revert_sha}" in " ".join(command):
+            return subprocess.CompletedProcess(command, 0, base_tree + "\n", "")
+        if f"commits/{revert_sha}/check-runs" in " ".join(command):
+            summary = "\n".join(
                 (
-                    "TrainCapsule-Automated-Revert: true",
+                    "TrainCapsule-Direct-Main-Revert: true",
                     f"Exact-Main-SHA: {SHA}",
                     f"Exact-Tree-SHA: {TREE}",
                     f"Canary-Base-SHA: {base_sha}",
+                    f"Canary-Base-Tree: {base_tree}",
                 )
             )
-            payload = [
-                {
-                    "number": 1,
-                    "headRefName": f"canary/revert-{RUN.lower()}",
-                    "baseRefName": "main",
-                    "body": body,
-                    "statusCheckRollup": [
-                        {
-                            "name": "TrainCapsule revert PR validation",
-                            "conclusion": "SUCCESS",
-                        }
-                    ],
-                }
-            ]
+            payload = {
+                "check_runs": [
+                    {
+                        "name": "TrainCapsule direct-main revert validation",
+                        "conclusion": "success",
+                        "output": {"summary": summary},
+                    }
+                ]
+            }
             return subprocess.CompletedProcess(command, 0, json.dumps(payload), "")
-        if "git/ref/heads/main" in " ".join(command):
-            return subprocess.CompletedProcess(command, 0, base_sha + "\n", "")
         return subprocess.CompletedProcess(command, 0, "{}", "")
 
     monkeypatch.setattr(external_probes, "_load_policy", policy)
@@ -415,15 +422,12 @@ def test_github_live_probe_requires_exact_check_and_restored_baseline(
         main_sha=SHA,
         tree_sha=TREE,
     )
-    outcome = external_probes._github_revert(args)  # pyright: ignore[reportPrivateUsage]
+    outcome = external_probes._github_direct_revert(args)  # pyright: ignore[reportPrivateUsage]
     assert outcome["proven"] is True
-    assert "all" in commands[2]
-    assert commands[3][1:5] == [
-        "api",
-        "repos/TasfiqJ/TrainCapsule-Canary/git/ref/heads/main",
-        "--method",
-        "GET",
-    ]
+    dispatch = next(command for command in commands if command[1:3] == ["workflow", "run"])
+    assert not any("branch=" in item for item in dispatch)
+    assert outcome["directRevertSha"] == revert_sha
+    assert outcome["restoredTree"] == base_tree
 
 
 def test_claude_live_probe_uses_and_cleans_disposable_workspace_output(

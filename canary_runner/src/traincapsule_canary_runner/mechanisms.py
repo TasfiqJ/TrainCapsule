@@ -317,8 +317,8 @@ EXTERNAL = {
     MandatoryCanaryId.REAL_CLAUDE_MECHANICAL_TASK: (
         "real Claude executable, credential, and paid canary budget"
     ),
-    MandatoryCanaryId.POST_MERGE_INVARIANT_FAILURE_AND_AUTOMATED_REVERT_PR: (
-        "isolated GitHub repository, App credential, ruleset, and revert-PR permission"
+    MandatoryCanaryId.POST_PUSH_INVARIANT_FAILURE_AND_AUTOMATIC_DIRECT_REVERT: (
+        "isolated GitHub repository, App credential, and ordinary direct-main push permission"
     ),
 }
 

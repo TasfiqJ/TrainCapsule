@@ -56,6 +56,6 @@ Where relevant, test positive, negative, boundary, malformed-input, tamper, UNKN
 
 ## Release and handoff
 
-Do not force-push, rewrite unrelated history, or publish any Git ref from an agent session. Preserve the exact base and candidate SHAs. Only the controller may publish the candidate branch, open or update its automated pull request, verify exact-head-SHA server checks and an independent signed machine-policy receipt, and authorize auto-merge into protected `main`. Direct-main publication is forbidden. Post-merge invariant failure must open an automated revert pull request; it is never repaired by force or silent history rewrite.
+Do not force-push, rewrite unrelated history, or publish any Git ref from an agent session. Preserve the exact base and candidate SHAs. Only the controller may verify exact-SHA gates and an independent signed machine-policy receipt, race-check `main`, and publish the exact candidate through one ordinary non-force push to `main`. Pull requests and non-main branch publication are forbidden. A post-push invariant failure must be repaired by an ordinary revert commit pushed to `main`, never by force or silent history rewrite.
 
 Return the packet's structured handoff with work item, status, SHAs, outcome, changed files, acceptance and oracle evidence, gate results, native comparison, truth states, limitations, bounded findings, external evidence required, machine-policy state, rollback, and one next recommended action already within the authorized roadmap.

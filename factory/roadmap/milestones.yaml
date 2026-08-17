@@ -13,10 +13,10 @@ milestones:
       - finite retry and restart budgets enforced
       - machine-policy and external-evidence states implemented
       - completion expansion is proposal-only
-      - release uses an automated pull request, exact-head-SHA checks, an independent machine-policy receipt, and verified merged main
+      - release uses an exact-SHA ordinary push to main, an independent machine-policy receipt, post-push checks, and verified main
       - factory and product CI separated
       - current queue safely migrated
-      - one mechanical and one standard work item have candidate manifests, automated pull requests, required CI, and verified merged-main receipts
+      - one mechanical and one standard work item have candidate manifests, receipt-authorized direct-main publication, required CI, and verified-main receipts
       - rollback tested
       - machine-verifiable owner policy and source-migration receipt recorded
     requiredEvidence:

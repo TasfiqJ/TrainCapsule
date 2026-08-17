@@ -1,9 +1,6 @@
 name: TrainCapsule / Product unit
 
 on:
-  pull_request:
-    branches: [main]
-  merge_group:
   push:
     branches: [main]
   workflow_dispatch:

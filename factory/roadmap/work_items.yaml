@@ -392,12 +392,12 @@ workItems:
   updatedAt: null
 - version: 3
   workItemId: V3-MIG-012
-  title: Change release path from direct main to draft PR
+  title: Enforce receipt-authorized exact-SHA direct-main publication
   lane: FACTORY
   kind: MIGRATION
   milestone: M0_FACTORY_MIGRATED
-  decisionContribution: Change release path from direct main to draft PR
-  customerOutcome: Change release path from direct main to draft PR
+  decisionContribution: Enforce receipt-authorized exact-SHA direct-main publication
+  customerOutcome: Enforce receipt-authorized exact-SHA direct-main publication
   dependsOn:
   - V3-MIG-005
   softDependsOn: []
@@ -414,7 +414,7 @@ workItems:
   automatable: true
   packetPath: null
   evidenceRequired:
-  - PR dry run, exact-SHA checks
+  - direct-main dry run, exact-SHA checks
   externalReceiptRequired: false
   machinePolicyReceiptRequired: false
   retryPolicy:

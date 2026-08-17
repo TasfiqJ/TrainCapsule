@@ -415,7 +415,7 @@ Never use shell composition or unreviewed executable input in gates.
 - do not rewrite unrelated history;
 - commit only task changes;
 - preserve candidate SHA;
-- release through draft PR under current policy;
+- release only through a receipt-authorized exact-SHA ordinary push to `main`;
 - do not merge integration/trust changes yourself.
 
 ## Completion output

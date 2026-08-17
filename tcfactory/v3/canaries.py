@@ -54,8 +54,8 @@ class MandatoryCanaryId(StrEnum):
     MACHINE_VERIFIER_UNAVAILABLE = "machine_verifier_unavailable"
     ACTIVATION_RECEIPT_WRONG_SHA = "activation_receipt_wrong_sha"
     RUNTIME_ROOT_OUTSIDE_REPO = "runtime_root_outside_repo"
-    POST_MERGE_INVARIANT_FAILURE_AND_AUTOMATED_REVERT_PR = (
-        "post_merge_invariant_failure_and_automated_revert_pr"
+    POST_PUSH_INVARIANT_FAILURE_AND_AUTOMATIC_DIRECT_REVERT = (
+        "post_push_invariant_failure_and_automatic_direct_revert"
     )
 
 

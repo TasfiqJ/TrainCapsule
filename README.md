@@ -38,11 +38,10 @@ uv run python scripts/generate_product_schemas.py --check
 ```
 
 The complete factory and product quality path is local and deterministic. The V3.1-ZH target
-contract is fully unattended after bootstrap: candidate branch, automated pull request,
-exact-head-SHA server checks, independent signed machine-policy receipt, authorized auto-merge into
-protected `main`, and automated revert pull request on post-merge invariant failure. That publication
-capability is currently `PENDING_PHASE_4`; controller startup fails closed and this repository does
-not claim that automated PR publication, merge, or revert is operational yet.
+contract is fully unattended after bootstrap: frozen candidate, exact-SHA local/private gates,
+independent signed machine-policy receipt, race-checked ordinary non-force push to `main`, hosted
+post-push verification, and automatic ordinary-push revert on a post-push invariant failure. Pull
+requests, candidate branches, force pushes, and history rewriting are forbidden.
 
 ## Product preflight
 
@@ -67,7 +66,7 @@ automatically.
 
 Source precedence is defined in `SOURCE_PRECEDENCE.md`. External or customer-dependent claims must
 remain external/deferred unless backed by attributable, machine-verifiable external evidence. The
-zero-human/automated-PR amendment is explicit; the copied V2 and V3 bundles remain byte-identical.
+zero-human/direct-main amendment is explicit; the copied V2 and V3 bundles remain byte-identical.
 V3.1-ZH does not claim conformance with V3's qualified-human approval clauses. Independent
 off-repository verification and signed exact-SHA activation replace those runtime dependencies, with
 the residual risk disclosed rather than hidden.

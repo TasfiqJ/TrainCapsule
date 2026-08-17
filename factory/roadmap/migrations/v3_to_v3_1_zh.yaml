@@ -25,4 +25,4 @@ activeGeneration:
 truthBoundary: >-
   V3 local simulation and owner-directed main-publication evidence is retained as
   history, but cannot satisfy V3.1 independent signed authorization, automated
-  pull-request, required-CI, or verified merged-main acceptance.
+  exact-SHA direct-main, required-CI, or verified-main acceptance.

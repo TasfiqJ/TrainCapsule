@@ -1,6 +1,6 @@
 schemaVersion: '3.1'
-workItemsSha256: sha256:d84b36d83df2bbc349167b2e9ce41ad47493d5056aeebce7127970117ca023f4
-milestonesSha256: sha256:8a2e6b9d740839b494e0dbb7910defd52cf0948b6b26f4b8f218e1f25c794db6
+workItemsSha256: sha256:88ca16094fb561d4cdbc5cf94ec4b14ac6ef8d1324b6ea028ff3289a06a51ecf
+milestonesSha256: sha256:5b7425b8bed95499f5551813e0e28f6e05149ba3b619e8201a5262238ea024c8
 workItems:
 - workItemId: V3-MIG-001
   milestoneId: M0_FACTORY_MIGRATED
@@ -154,7 +154,7 @@ workItems:
   requiredPriorEvidence: {}
 - workItemId: V3-MIG-012
   milestoneId: M0_FACTORY_MIGRATED
-  roadmapEvidenceDigest: sha256:41697460f3bd3921d5c7e8cdb661ffc2b68cef13febeae116dc29e21e30f7c83
+  roadmapEvidenceDigest: sha256:1bf5e8ab315de9a3e20c6db49af9748fd41763ecd7ca94dad0c304847b3235de
   minimumGrade: CONTROLLED
   requiredAuthorities:
   - CONTROLLER
@@ -1636,7 +1636,7 @@ workItems:
   requiredPriorEvidence: {}
 milestones:
 - milestoneId: M0_FACTORY_MIGRATED
-  roadmapEvidenceDigest: sha256:b5c4c1ece3dcb387b480897cf57f3c6148e604dc312ed7faeac53331bbe82569
+  roadmapEvidenceDigest: sha256:a3549e843d3ad59a15d3152d9e7fbb11329cdd71981cd67cf86e64af15cec5cf
   requiredExternalEvidenceTypes: []
   requiredSemanticCounts:
     MACHINE_POLICY_DECISION: 1
@@ -1695,7 +1695,7 @@ milestones:
     machinePolicyRequired: false
     requiredCorrelationFields: []
   - criterionId: M0_FACTORY_MIGRATED-EXIT-07
-    criterionDigest: sha256:35dc0d4366e048d95799f3ff329897b3ea6110c367fca9ccafaf501f44338559
+    criterionDigest: sha256:f8b2e1fafd95bad58305861da3c3c1c5d55a02eeca0edfd3f21a3a470fbdaab1
     requiredWorkItemIds:
     - V3-MIG-008
     - V3-MIG-012
@@ -1721,7 +1721,7 @@ milestones:
     machinePolicyRequired: false
     requiredCorrelationFields: []
   - criterionId: M0_FACTORY_MIGRATED-EXIT-10
-    criterionDigest: sha256:25932ac5778c7d4e53127b0467d4f25b1870286b3b44f62bb904d5e36310c0d8
+    criterionDigest: sha256:f86309d1cddb36dfacd43885f996ae220036b4a6240d122523d3b206651c01fe
     requiredWorkItemIds:
     - V3-MIG-019
     requiredExternalEvidenceTypes: []

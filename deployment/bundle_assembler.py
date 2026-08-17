@@ -596,7 +596,7 @@ def _validate_canary_policy(policy_path: Path, sources: Mapping[str, Path]) -> N
         raise BundleAssemblyError("canary policy must pin exactly all 20 mechanisms")
     network_canaries = {
         "real_claude_mechanical_task",
-        "post_merge_invariant_failure_and_automated_revert_pr",
+        "post_push_invariant_failure_and_automatic_direct_revert",
     }
     for canary_id in CANARY_IDS:
         mechanism_raw = mechanisms[canary_id]

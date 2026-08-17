@@ -56,8 +56,8 @@ def test_required_workflows_are_bounded_portable_and_secret_free() -> None:
             assert "retention-days:" in text
             assert "include-hidden-files: true" in text
         assert "push:\n    branches: [main]" in text
-        assert "pull_request:\n    branches: [main]" in text
-        assert "merge_group:" in text
+        assert "pull_request:" not in text
+        assert "merge_group:" not in text
         assert "${{ secrets" not in text
         uses = [line for line in text.splitlines() if "uses:" in line]
         assert uses

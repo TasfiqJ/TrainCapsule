@@ -198,10 +198,23 @@ def create_and_submit_verification_request(
         raise VerifierSubmissionError("verification profile/gate evidence is incomplete")
     identity: dict[str, object] = {
         "workItemId": work_item_id,
+        "milestoneId": milestone_id,
+        "lane": lane,
+        "riskTier": profile["riskTier"],
         "candidateSha": candidate_sha,
         "candidateTreeSha": candidate_tree_sha,
+        "baseSha": base_sha,
+        "sourceGenerationId": source_generation_id,
+        "sourceGenerationDigest": source_generation_digest,
+        "contextManifestDigest": context_manifest_digest,
+        "taskPacketDigest": task_packet_digest,
         "candidateManifestDigest": candidate_manifest_digest,
         "checkpointDigest": checkpoint_digest,
+        # The profile binds claims, scope, dispositions, gate identity, and oracle
+        # runner digests.  Its exact canonical bytes must therefore participate in
+        # request identity so a legitimate policy/oracle rotation cannot collide
+        # with an already-staged request for the same candidate.
+        "profileDigest": _digest(profile_path.read_bytes()),
     }
     if renewal_parent_digest is not None:
         if _DIGEST.fullmatch(renewal_parent_digest) is None:

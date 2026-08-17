@@ -175,3 +175,29 @@ def test_controller_profile_builder_emits_strict_request_and_submits_atomically(
     evidence_raw = evidence_path.read_bytes()
     evidence = TrustedEvidenceManifest.model_validate_json(evidence_raw, strict=True)
     assert evidence_raw == canonical_json_bytes(evidence)
+
+    oracle_bindings = profile["oracles"]
+    assert isinstance(oracle_bindings, dict)
+    conformance_binding = oracle_bindings["ORACLE:CONFORMANCE:001"]
+    assert isinstance(conformance_binding, dict)
+    conformance_binding["runnerDigest"] = "sha256:" + "f" * 64
+    profile_path.write_bytes(canonical_json_bytes(profile))
+    rotated_request_path = create_and_submit_verification_request(
+        profile_path=profile_path,
+        work_item_id="V3-DEC-001",
+        milestone_id="M1_PRODUCT_WEDGE",
+        lane="PRODUCT",
+        candidate_sha="a" * 40,
+        candidate_tree_sha="b" * 40,
+        base_sha="a" * 40,
+        source_generation_id="traincapsule-v3.1-zh-2026-08-12",
+        source_generation_digest="sha256:" + "a" * 64,
+        context_manifest_digest="sha256:" + "b" * 64,
+        task_packet_digest="sha256:" + "c" * 64,
+        candidate_manifest_digest="sha256:" + "d" * 64,
+        checkpoint_digest="sha256:" + "e" * 64,
+        gate_evidence={"FACTORY-QUALITY": gate},
+        evidence_root=tmp_path / "rotated-evidence",
+        controller_outbox=outbox,
+    )
+    assert rotated_request_path.name != request_path.name

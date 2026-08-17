@@ -75,6 +75,29 @@ def verified_check_digests(
     return observed
 
 
+def validate_direct_main_ruleset(
+    ruleset: RulesetObservationReceipt,
+    *,
+    repository: str,
+    now: datetime,
+) -> None:
+    """Require the protected direct-main posture independently of post-push checks."""
+
+    if (
+        ruleset.repository != repository
+        or ruleset.observed_at > now
+        or ruleset.expires_at <= now
+        or ruleset.required_check_app_ids
+        or ruleset.bypass_actor_count != 0
+        or not ruleset.deletion_forbidden
+        or not ruleset.force_push_forbidden
+        or ruleset.pull_request_required
+        or ruleset.direct_branch_updates_forbidden
+        or ruleset.auto_merge_enabled
+    ):
+        raise ValueError("selector ruleset observation is invalid or stale")
+
+
 def _select(request_raw: bytes, *, selector_uid: int) -> None:
     with open_trusted_root(CONFIG, expected_uid=0) as config_root:
         policy_raw = read_bounded_file(config_root, SELECTOR_POLICY.name)
@@ -139,13 +162,7 @@ def _select(request_raw: bytes, *, selector_uid: int) -> None:
     ruleset = RulesetObservationReceipt.model_validate_json(ruleset_raw, strict=True)
     verify_model_signature(ruleset, load_public_key(ruleset_public_key_raw))
     now = datetime.now(UTC)
-    if (
-        ruleset.repository != repository
-        or ruleset.observed_at > now
-        or ruleset.expires_at <= now
-        or ruleset.required_check_app_ids != required_checks
-    ):
-        raise ValueError("selector ruleset observation is invalid or stale")
+    validate_direct_main_ruleset(ruleset, repository=repository, now=now)
     commit_detail: object = _github_json(
         f"/repos/{repository}/git/commits/{request.verified_main_sha}", token
     )

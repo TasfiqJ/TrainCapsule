@@ -16,7 +16,10 @@ from traincapsule_verifier.models import (
     RulesetObservationReceipt,
     ruleset_observation_identifier,
 )
-from traincapsule_verifier.observed_main_selector import verified_check_digests
+from traincapsule_verifier.observed_main_selector import (
+    validate_direct_main_ruleset,
+    verified_check_digests,
+)
 from traincapsule_verifier.ruleset_broker import (
     LegacyRulesetObservationReceipt,
     promote_ruleset_observation,
@@ -161,6 +164,31 @@ def test_selector_accepts_heterogeneous_trusted_app_mapping_only() -> None:
     ]
     with pytest.raises(ValueError, match="missing or spoofed"):
         verified_check_digests(forged, required)
+
+
+def test_selector_validates_direct_main_ruleset_separately_from_post_push_checks() -> None:
+    key = Ed25519PrivateKey.generate()
+    now = datetime(2026, 8, 17, 20, 0, tzinfo=UTC)
+    receipt = _ruleset_receipt(key, now - timedelta(minutes=1))
+    validate_direct_main_ruleset(
+        receipt,
+        repository="TasfiqJ/TrainCapsule",
+        now=now,
+    )
+    with pytest.raises(ValueError, match="invalid or stale"):
+        validate_direct_main_ruleset(
+            receipt.model_copy(update={"pull_request_required": True}),
+            repository="TasfiqJ/TrainCapsule",
+            now=now,
+        )
+    with pytest.raises(ValueError, match="invalid or stale"):
+        validate_direct_main_ruleset(
+            receipt.model_copy(
+                update={"required_check_app_ids": {"legacy pre-push check": 15368}}
+            ),
+            repository="TasfiqJ/TrainCapsule",
+            now=now,
+        )
 
 
 def test_observed_main_receipt_accepts_exact_github_check_names() -> None:

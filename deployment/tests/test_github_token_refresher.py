@@ -50,7 +50,6 @@ def _policy(tmp_path: Path) -> RefreshPolicy:
             "actions": "write",
             "checks": "read",
             "contents": "read",
-            "pull_requests": "read",
         },
         private_key_path=str(key_path),
         outbox_token_path=str(outbox / "token"),
@@ -83,7 +82,6 @@ def test_policy_loader_accepts_the_repository_canonical_json_line(tmp_path: Path
             "actions": "write",
             "checks": "read",
             "contents": "read",
-            "pull_requests": "read",
         },
         private_key_path="/var/lib/traincapsule-github-token/github-app-private-key.pem",
         outbox_token_path="/var/lib/traincapsule-github-token/outbox/token",
@@ -144,7 +142,6 @@ def test_scoped_refresh_rotation_and_promotion_never_log_token(
             "actions": "write",
             "checks": "read",
             "contents": "read",
-            "pull_requests": "read",
         },
         "repositories": ["isolated-canary"],
     }

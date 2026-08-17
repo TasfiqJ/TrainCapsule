@@ -83,7 +83,6 @@ class AnchorProducerPolicy(V31Model):
         if self.permissions != {
             "checks": "read",
             "contents": "read",
-            "pull_requests": "read",
         }:
             raise ValueError("anchor fetcher GitHub App permissions are not exact read-only scope")
         return self

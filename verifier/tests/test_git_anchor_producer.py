@@ -50,7 +50,7 @@ def _policy() -> AnchorProducerPolicy:
         repository="TasfiqJ/TrainCapsule",
         github_app_id=900001,
         installation_id=700001,
-        permissions={"checks": "read", "contents": "read", "pull_requests": "read"},
+        permissions={"checks": "read", "contents": "read"},
         required_check_app_ids={
             "TrainCapsule / Factory quality": 15368,
             "TrainCapsule / Machine policy": 900002,

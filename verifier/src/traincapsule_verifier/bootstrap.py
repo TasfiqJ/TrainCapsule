@@ -677,7 +677,6 @@ def git_anchor_producer_policy_content() -> bytes:
             "permissions": {
                 "checks": "read",
                 "contents": "read",
-                "pull_requests": "read",
             },
             "requiredCheckAppIds": {
                 "TrainCapsule / Factory quality": 15368,

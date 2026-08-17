@@ -74,7 +74,6 @@ class RefreshPolicy(_Strict):
             "actions": "write",
             "checks": "read",
             "contents": "read",
-            "pull_requests": "read",
         }:
             raise ValueError("GitHub App token permissions exceed the isolated canary scope")
         return self

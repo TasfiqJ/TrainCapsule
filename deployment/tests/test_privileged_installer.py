@@ -679,21 +679,26 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                 }
             )
         elif role in {"activation-selector-policy", "ruleset-observer-policy"}:
+            required_checks = (
+                {
+                    "TrainCapsule / Docs and schemas": 15368,
+                    "TrainCapsule / Factory quality": 15368,
+                    "TrainCapsule / Machine policy": 789,
+                    "TrainCapsule / Packaging install": 15368,
+                    "TrainCapsule / Product contract": 15368,
+                    "TrainCapsule / Product unit": 15368,
+                    "TrainCapsule / Security": 15368,
+                    "TrainCapsule / Source freshness": 15368,
+                    "TrainCapsule / Source-of-truth integrity": 15368,
+                }
+                if role == "activation-selector-policy"
+                else {}
+            )
             data = canonical_json_bytes(
                 {
                     "schemaVersion": "3.1",
                     "repository": "TasfiqJ/TrainCapsule",
-                    "requiredCheckAppIds": {
-                        "TrainCapsule / Docs and schemas": 15368,
-                        "TrainCapsule / Factory quality": 15368,
-                        "TrainCapsule / Machine policy": 789,
-                        "TrainCapsule / Packaging install": 15368,
-                        "TrainCapsule / Product contract": 15368,
-                        "TrainCapsule / Product unit": 15368,
-                        "TrainCapsule / Security": 15368,
-                        "TrainCapsule / Source freshness": 15368,
-                        "TrainCapsule / Source-of-truth integrity": 15368,
-                    },
+                    "requiredCheckAppIds": required_checks,
                     "githubAppId": 123,
                     "installationId": 456,
                     "privateKeyEnvironment": (
@@ -780,7 +785,6 @@ def _fixture(tmp_path: Path) -> tuple[Path, Path, PrivilegedInstallSpec, FakeAut
                         "actions": "write",
                         "checks": "read",
                         "contents": "read",
-                        "pull_requests": "read",
                     },
                     "privateKeyPath": ROLE_TARGETS["github-token-refresher-private-key"],
                     "outboxTokenPath": "/var/lib/traincapsule-github-token/outbox/token",

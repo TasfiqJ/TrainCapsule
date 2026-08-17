@@ -846,15 +846,24 @@ def _validate_read_only_observer_policies(sources: Mapping[str, Path]) -> None:
     ):
         raise BundleAssemblyError("read-only observer GitHub App binding is unavailable")
     environment_name = "TRAINCAPSULE_GITHUB_APP_PRIVATE_KEY_BASE64"
-    expected: dict[str, object] = {
+    common: dict[str, object] = {
         "schemaVersion": "3.1",
         "repository": "TasfiqJ/TrainCapsule",
-        "requiredCheckAppIds": cast(dict[str, object], required_checks),
         "githubAppId": app_id,
         "installationId": installation_id,
         "privateKeyEnvironment": environment_name,
     }
-    for role in ("activation-selector-policy", "ruleset-observer-policy"):
+    expected_by_role: dict[str, dict[str, object]] = {
+        "activation-selector-policy": {
+            **common,
+            "requiredCheckAppIds": cast(dict[str, object], required_checks),
+        },
+        "ruleset-observer-policy": {
+            **common,
+            "requiredCheckAppIds": cast(dict[str, object], {}),
+        },
+    }
+    for role, expected in expected_by_role.items():
         if _canonical_mapping(sources[role].read_bytes(), label=role) != expected:
             raise BundleAssemblyError(f"{role} is not exact or GitHub-App-bound")
     try:
@@ -962,7 +971,6 @@ def _validate_github_token_refresher(sources: Mapping[str, Path]) -> None:
             "actions": "write",
             "checks": "read",
             "contents": "read",
-            "pull_requests": "read",
         }
         or policy["privateKeyPath"] != ROLE_TARGETS["github-token-refresher-private-key"]
         or policy["outboxTokenPath"] != "/var/lib/traincapsule-github-token/outbox/token"
@@ -1032,7 +1040,7 @@ def _validate_anchor_producer(sources: Mapping[str, Path]) -> None:
         or type(policy["installationId"]) is not int
         or policy["installationId"] <= 0
         or policy["permissions"]
-        != {"checks": "read", "contents": "read", "pull_requests": "read"}
+        != {"checks": "read", "contents": "read"}
         or set(check_ids) != required_checks
         or any(type(value) is not int or value <= 0 for value in check_ids.values())
         or policy["privateKeyPath"] != ROLE_TARGETS["git-anchor-github-private-key"]

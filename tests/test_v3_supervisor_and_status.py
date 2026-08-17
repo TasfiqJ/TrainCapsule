@@ -28,6 +28,7 @@ from tcfactory.v3.milestone_runtime import (
 )
 from tcfactory.v3.milestones import MilestoneRoadmap
 from tcfactory.v3.private_gate import PrivateGateHealthCheck, PrivateGateVerificationError
+from tcfactory.v3.publication import PublicationCredentialUnavailable
 from tcfactory.v3.runtime_paths import resolve_v3_runtime_paths
 from tcfactory.v3.source_authority import validate_active_source_generation
 from tcfactory.yamlutil import load_yaml
@@ -194,6 +195,25 @@ def test_startup_preflight_requires_marker_credentials_and_clean_controls(
             "status": "PASS",
             "rulesDigest": "sha256:" + "c" * 64,
         },
+        "activationReceiptDigest": "sha256:" + "b" * 64,
+    }
+
+    def reject_missing_publication_identity(**_: object) -> dict[str, object]:
+        raise PublicationCredentialUnavailable("missing machine identity")
+
+    monkeypatch.setattr(
+        "tcfactory.supervisor.validate_repository_release_controls",
+        reject_missing_publication_identity,
+    )
+    with pytest.raises(PublicationCredentialUnavailable, match="missing machine identity"):
+        run_startup_preflight(repo_root)
+    degraded = run_startup_preflight(repo_root, allow_publication_degraded=True)
+    assert degraded["ready"] is True
+    assert degraded["publicationRecovery"] == {
+        "status": "CREDENTIAL_UNAVAILABLE",
+        "transactions": 0,
+        "phases": [],
+        "repositoryControls": {"status": "NOT_OBSERVED"},
         "activationReceiptDigest": "sha256:" + "b" * 64,
     }
 

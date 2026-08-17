@@ -41,6 +41,7 @@ from .v3.private_gate import (
     validate_private_gate_installation,
     validate_private_gate_runtime_health,
 )
+from .v3.publication import PublicationCredentialUnavailable
 from .v3.queue import V3Queue
 from .v3.recovery import enforce_controller_restart_budget
 from .v3.runtime_paths import V3RuntimePaths, resolve_v3_runtime_paths
@@ -242,7 +243,10 @@ def _verify_m0_observation_state(
 
 
 def run_startup_preflight(
-    repo_root: Path, *, allow_stop_for_activation: bool = False
+    repo_root: Path,
+    *,
+    allow_stop_for_activation: bool = False,
+    allow_publication_degraded: bool = False,
 ) -> dict[str, object]:
     """Fail closed before a controller process can start."""
 
@@ -274,15 +278,31 @@ def run_startup_preflight(
             exact_main_sha=current_sha(repo_root),
             activation_receipt_digest=activation_digest,
         )
-    release_controls = validate_repository_release_controls(repo_root=repo_root, config=github)
-    recovered = reconcile_publications(repo_root=repo_root, state_root=paths.state_root)
-    publication_recovery: dict[str, object] = {
-        "status": "RECONCILED",
-        "transactions": len(recovered),
-        "phases": [item.phase.value for item in recovered],
-        "repositoryControls": release_controls,
-        "activationReceiptDigest": activation_digest,
-    }
+    try:
+        release_controls = validate_repository_release_controls(
+            repo_root=repo_root, config=github
+        )
+        recovered = reconcile_publications(repo_root=repo_root, state_root=paths.state_root)
+        publication_recovery: dict[str, object] = {
+            "status": "RECONCILED",
+            "transactions": len(recovered),
+            "phases": [item.phase.value for item in recovered],
+            "repositoryControls": release_controls,
+            "activationReceiptDigest": activation_digest,
+        }
+    except PublicationCredentialUnavailable:
+        if not allow_publication_degraded:
+            raise
+        # Keep all GitHub mutation closed while allowing independent local
+        # product construction. Any later publication attempt raises the same
+        # typed error until a machine publication identity is provisioned.
+        publication_recovery = {
+            "status": "CREDENTIAL_UNAVAILABLE",
+            "transactions": 0,
+            "phases": [],
+            "repositoryControls": {"status": "NOT_OBSERVED"},
+            "activationReceiptDigest": activation_digest,
+        }
     marker: MigrationCompleteMarker | None = None
     migration_state = "M0_OBSERVATION"
     if paths.migration_marker.is_file():

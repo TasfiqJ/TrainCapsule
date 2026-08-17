@@ -1608,8 +1608,11 @@ def test_direct_controller_entry_runs_full_supervisor_preflight_first(
 ) -> None:
     calls: list[Path] = []
 
-    def reject(repo: Path) -> dict[str, object]:
+    def reject(
+        repo: Path, *, allow_publication_degraded: bool = False
+    ) -> dict[str, object]:
         calls.append(repo)
+        assert allow_publication_degraded is True
         raise RuntimeError("full preflight sentinel")
 
     monkeypatch.setattr(cli, "run_startup_preflight", reject)

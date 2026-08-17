@@ -64,6 +64,10 @@ class PublicationError(RuntimeError):
     """A publication invariant was not satisfied."""
 
 
+class PublicationCredentialUnavailable(PublicationError):
+    """The non-interactive publication identity is absent or no longer valid."""
+
+
 class PublicationPending(PublicationError):
     """A required external observation has not completed yet."""
 
@@ -491,7 +495,23 @@ class GhPublicationClient:
     def _run(self, args: list[str]) -> Any:
         result = run_command(args, cwd=self.repo_root, check=False, timeout=300)
         if result.returncode != 0:
-            raise PublicationError(redact_sensitive(str(result.stderr) or "GitHub command failed"))
+            error = redact_sensitive(str(result.stderr) or "GitHub command failed")
+            normalized = error.casefold()
+            credential_markers = (
+                "gh auth login",
+                "gh auth status",
+                "not logged into any github hosts",
+                "authentication required",
+                "http 401",
+                "bad credentials",
+            )
+            if args and args[0] == "gh" and any(
+                marker in normalized for marker in credential_markers
+            ):
+                raise PublicationCredentialUnavailable(
+                    "non-interactive GitHub publication credential is unavailable"
+                )
+            raise PublicationError(error)
         return result
 
     def _json(self, args: list[str]) -> object:

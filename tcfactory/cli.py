@@ -921,7 +921,7 @@ def v3_controller(
     # Keep the complete supervisor preflight here as well as in the scheduled
     # launcher so direct CLI invocation cannot bypass migration, private-gate,
     # publication-recovery, ruleset, checkpoint, or credential checks.
-    run_startup_preflight(root)
+    run_startup_preflight(root, allow_publication_degraded=True)
     paths = resolve_v3_runtime_paths(root)
     if paths.stop.exists() or paths.hard_stuck.exists():
         raise typer.BadParameter("durable STOP or HARD_STUCK prevents controller startup")

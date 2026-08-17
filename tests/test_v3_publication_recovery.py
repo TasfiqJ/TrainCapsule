@@ -14,6 +14,8 @@ from tcfactory.v3.publication import (
     AuthorizedReceipt,
     AutomatedPRPublisher,
     CheckObservation,
+    GhPublicationClient,
+    PublicationCredentialUnavailable,
     PublicationError,
     PublicationPhase,
     PublicationTransaction,
@@ -28,6 +30,33 @@ MERGED = "d" * 40
 MERGED_TREE = "e" * 40
 DIGEST = "sha256:" + "f" * 64
 NOW = datetime(2026, 8, 12, 12, 0, tzinfo=UTC)
+
+
+def test_gh_client_types_missing_noninteractive_credentials(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    monkeypatch.setattr(
+        "tcfactory.v3.publication.run_command",
+        lambda *_args, **_kwargs: SimpleNamespace(
+            returncode=1,
+            stdout="",
+            stderr="To get started with GitHub CLI, please run: gh auth login",
+        ),
+    )
+    client = GhPublicationClient(
+        tmp_path,
+        remote="origin",
+        repository="TasfiqJ/TrainCapsule",
+        branch_prefix="codex/",
+    )
+
+    with pytest.raises(
+        PublicationCredentialUnavailable,
+        match="non-interactive GitHub publication credential is unavailable",
+    ):
+        client._run(  # pyright: ignore[reportPrivateUsage]
+            ["gh", "api", "repos/TasfiqJ/TrainCapsule"]
+        )
 
 
 def _config() -> GitHubConfig:

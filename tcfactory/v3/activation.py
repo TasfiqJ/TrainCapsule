@@ -629,8 +629,13 @@ def _activate_v31_locked(
     if preflight is None:
         from ..supervisor import run_startup_preflight
 
-        preflight = run_startup_preflight
-    preflight_result = preflight(repo_root, allow_stop_for_activation=True)
+        preflight_result = run_startup_preflight(
+            repo_root,
+            allow_stop_for_activation=True,
+            allow_publication_degraded=True,
+        )
+    else:
+        preflight_result = preflight(repo_root, allow_stop_for_activation=True)
     preflight_digest = sha256_digest(
         (json.dumps(preflight_result, sort_keys=True, default=str) + "\n").encode("utf-8")
     )

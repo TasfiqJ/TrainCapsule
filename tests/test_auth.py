@@ -1,6 +1,8 @@
 from __future__ import annotations
 
 import json
+import os
+import sys
 from collections.abc import Callable
 from pathlib import Path
 from types import SimpleNamespace
@@ -303,3 +305,19 @@ def test_sanitized_agent_environment_strips_controller_ack(
     monkeypatch.setenv("TCF_USAGE_CREDITS_DISABLED_ACK", "1")
     environment = auth.sanitized_agent_environment()
     assert "TCF_USAGE_CREDITS_DISABLED_ACK" not in environment
+
+
+def test_sanitized_agent_environment_prepends_runtime_bin(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    token_file = tmp_path / "claude-oauth-token"
+    token_file.write_text("subscription-token\n", encoding="utf-8")
+    token_file.chmod(0o600)
+    monkeypatch.setenv("TCF_CLAUDE_OAUTH_TOKEN_FILE", str(token_file))
+    monkeypatch.setenv("PATH", os.pathsep.join(("/usr/bin", "/bin")))
+
+    environment = auth.sanitized_agent_environment()
+
+    assert environment["PATH"].split(os.pathsep)[0] == str(
+        Path(sys.executable).resolve().parent
+    )

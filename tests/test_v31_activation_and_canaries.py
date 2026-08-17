@@ -983,7 +983,14 @@ def test_refresh_activation_recovers_broker_rollback_with_fresh_authority(
     completion_path = completion_root / f"{main_sha}-{completion.transaction_id}.json"
     completion_raw = completion.canonical_json_bytes()
     completion_path.write_bytes(completion_raw)
-    old_suite = tmp_path / "old-suite.json"
+    old_suite = (
+        paths.canary_results
+        / "deployment-refresh"
+        / f"{completion.required_main_sha}-{completion.transaction_id}"
+        / "OLD"
+        / "suite.json"
+    )
+    old_suite.parent.mkdir(parents=True)
     old_suite.write_bytes(b"old suite\n")
     old_request = tmp_path / "old-request.json"
     old_request.write_bytes(b"old request\n")

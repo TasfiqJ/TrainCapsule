@@ -6,10 +6,12 @@ import fcntl
 import os
 import pwd
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from typing import Literal
 
 from cryptography.hazmat.primitives.asymmetric.ed25519 import Ed25519PublicKey
+from pydantic import AwareDatetime, Field, ValidationError, model_validator
 
 from .canonical import canonical_json_bytes
 from .filesystem import (
@@ -19,11 +21,74 @@ from .filesystem import (
     open_trusted_root,
     read_bounded_file,
 )
-from .models import RulesetObservationReceipt
+from .models import Digest, Identifier, RulesetObservationReceipt, V31Model
 from .public_crypto import SignatureError, load_public_key, verify_model_signature
 
 ROOT = Path("/var/lib/traincapsule-verifier")
 CONFIG = Path("/etc/traincapsule-verifier")
+
+
+class LegacyRulesetObservationReceipt(V31Model):
+    """Verified predecessor accepted only to advance the selector during migration."""
+
+    observation_id: Identifier
+    observation_digest: Digest
+    repository: str = Field(pattern=r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
+    base_branch: Literal["main"]
+    ruleset_id: int = Field(gt=0)
+    enforcement: Literal["active"]
+    required_check_app_ids: dict[str, int] = Field(min_length=1, max_length=64)
+    bypass_actor_count: Literal[0]
+    deletion_forbidden: Literal[True]
+    force_push_forbidden: Literal[True]
+    pull_request_required: Literal[True]
+    direct_branch_updates_forbidden: Literal[True]
+    auto_merge_enabled: Literal[True]
+    observed_at: AwareDatetime
+    expires_at: AwareDatetime
+    issuer_id: Identifier
+    issuer_key_id: Identifier
+    signature_algorithm: Literal["ed25519"]
+    signature: str = Field(min_length=80, max_length=128)
+
+    @model_validator(mode="after")
+    def validate_legacy_binding(self) -> LegacyRulesetObservationReceipt:
+        from .canonical import sha256_digest
+
+        lifetime = self.expires_at.astimezone(UTC) - self.observed_at.astimezone(UTC)
+        if lifetime <= timedelta(0) or lifetime > timedelta(minutes=30):
+            raise ValueError("legacy ruleset observation lifetime is invalid")
+        core = {
+            "repository": self.repository,
+            "baseBranch": self.base_branch,
+            "rulesetId": self.ruleset_id,
+            "enforcement": self.enforcement,
+            "requiredCheckAppIds": self.required_check_app_ids,
+            "bypassActorCount": self.bypass_actor_count,
+            "deletionForbidden": self.deletion_forbidden,
+            "forcePushForbidden": self.force_push_forbidden,
+            "pullRequestRequired": self.pull_request_required,
+            "directBranchUpdatesForbidden": self.direct_branch_updates_forbidden,
+            "autoMergeEnabled": self.auto_merge_enabled,
+        }
+        if self.observation_digest != sha256_digest(canonical_json_bytes(core)):
+            raise ValueError("legacy ruleset observation digest is invalid")
+        return self
+
+
+def _verified_current(
+    raw: bytes, public_key: Ed25519PublicKey
+) -> RulesetObservationReceipt | LegacyRulesetObservationReceipt:
+    try:
+        receipt: RulesetObservationReceipt | LegacyRulesetObservationReceipt = (
+            RulesetObservationReceipt.model_validate_json(raw, strict=True)
+        )
+    except ValidationError:
+        receipt = LegacyRulesetObservationReceipt.model_validate_json(raw, strict=True)
+    if canonical_json_bytes(receipt) != raw:
+        raise ValueError("current ruleset selector is not canonical")
+    verify_model_signature(receipt, public_key)
+    return receipt
 
 
 def promote_ruleset_observation(
@@ -51,11 +116,10 @@ def promote_ruleset_observation(
     except TrustedPathError:
         if read_bounded_file(target, version_name) != raw:
             raise ValueError("ruleset observation identity conflicts") from None
-    current: RulesetObservationReceipt | None = None
+    current: RulesetObservationReceipt | LegacyRulesetObservationReceipt | None = None
     try:
         current_raw = read_bounded_file(target, "current.json")
-        current = RulesetObservationReceipt.model_validate_json(current_raw, strict=True)
-        verify_model_signature(current, public_key)
+        current = _verified_current(current_raw, public_key)
     except FileNotFoundError:
         pass
     if current is not None:
@@ -98,15 +162,13 @@ def promote_ruleset_outbox_item(
             raise ValueError("ruleset observation is not canonical") from None
         verify_model_signature(receipt, public_key)
         try:
-            current = RulesetObservationReceipt.model_validate_json(
-                read_bounded_file(target, "current.json"), strict=True
+            current = _verified_current(
+                read_bounded_file(target, "current.json"), public_key
             )
         except FileNotFoundError:
             current = None
-        if current is not None:
-            verify_model_signature(current, public_key)
-            if current.observed_at >= receipt.observed_at:
-                return
+        if current is not None and current.observed_at >= receipt.observed_at:
+            return
         promote_ruleset_observation(raw, target=target, public_key=public_key)
         return
     if existing != raw:

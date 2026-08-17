@@ -18,6 +18,7 @@ from traincapsule_verifier.models import (
 )
 from traincapsule_verifier.observed_main_selector import verified_check_digests
 from traincapsule_verifier.ruleset_broker import (
+    LegacyRulesetObservationReceipt,
     promote_ruleset_observation,
     promote_ruleset_outbox_item,
 )
@@ -84,6 +85,49 @@ def _ruleset_receipt(
         pull_request_required=False,
         direct_branch_updates_forbidden=False,
         auto_merge_enabled=False,
+        observed_at=observed_at,
+        expires_at=observed_at + timedelta(minutes=15),
+        issuer_id="RULESET:OBSERVER",
+        issuer_key_id="KEY:RULESET:ACTIVE",
+        signature_algorithm="ed25519",
+        signature="A" * 88,
+    )
+    return provisional.model_copy(update={"signature": sign_model(provisional, key)})
+
+
+def _legacy_ruleset_receipt(
+    key: Ed25519PrivateKey, observed_at: datetime
+) -> LegacyRulesetObservationReceipt:
+    checks = {"TrainCapsule / Factory quality": 15368}
+    core: dict[str, object] = {
+        "repository": "TasfiqJ/TrainCapsule",
+        "baseBranch": "main",
+        "rulesetId": 20_794_549,
+        "enforcement": "active",
+        "requiredCheckAppIds": checks,
+        "bypassActorCount": 0,
+        "deletionForbidden": True,
+        "forcePushForbidden": True,
+        "pullRequestRequired": True,
+        "directBranchUpdatesForbidden": True,
+        "autoMergeEnabled": True,
+    }
+    digest = sha256_digest(canonical_json_bytes(core))
+    provisional = LegacyRulesetObservationReceipt(
+        schema_version="3.1",
+        observation_id=ruleset_observation_identifier(digest, observed_at),
+        observation_digest=digest,
+        repository="TasfiqJ/TrainCapsule",
+        base_branch="main",
+        ruleset_id=20_794_549,
+        enforcement="active",
+        required_check_app_ids=checks,
+        bypass_actor_count=0,
+        deletion_forbidden=True,
+        force_push_forbidden=True,
+        pull_request_required=True,
+        direct_branch_updates_forbidden=True,
+        auto_merge_enabled=True,
         observed_at=observed_at,
         expires_at=observed_at + timedelta(minutes=15),
         issuer_id="RULESET:OBSERVER",
@@ -269,6 +313,31 @@ def test_ruleset_broker_rotates_replays_and_recovers_after_preselector_crash(
     assert (target_path / "current.json").stat().st_mode & 0o777 == 0o444
     assert (target_path / f"{first.observation_id}.json").stat().st_mode & 0o777 == 0o644
     assert (target_path / f"{second.observation_id}.json").stat().st_mode & 0o777 == 0o644
+
+
+def test_ruleset_broker_replaces_verified_legacy_selector_with_direct_main(
+    tmp_path: Path,
+) -> None:
+    target_path = tmp_path / "ruleset"
+    target_path.mkdir(mode=0o700)
+    key = Ed25519PrivateKey.generate()
+    legacy = _legacy_ruleset_receipt(key, datetime.now(UTC) - timedelta(minutes=2))
+    direct = _ruleset_receipt(key, datetime.now(UTC) - timedelta(minutes=1))
+    (target_path / "current.json").write_bytes(canonical_json_bytes(legacy))
+
+    with open_trusted_root(target_path, expected_uid=os.getuid()) as target:
+        promote_ruleset_outbox_item(
+            f"{direct.observation_id}.json",
+            canonical_json_bytes(direct),
+            target=target,
+            public_key=key.public_key(),
+        )
+
+    promoted = RulesetObservationReceipt.model_validate_json(
+        (target_path / "current.json").read_bytes(), strict=True
+    )
+    assert promoted.observation_id == direct.observation_id
+    assert promoted.pull_request_required is False
 
 
 def test_ruleset_broker_rejects_mismatched_signature(tmp_path: Path) -> None:

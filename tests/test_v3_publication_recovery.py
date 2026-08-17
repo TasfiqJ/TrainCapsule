@@ -35,13 +35,16 @@ NOW = datetime(2026, 8, 12, 12, 0, tzinfo=UTC)
 def test_gh_client_types_missing_noninteractive_credentials(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
-    monkeypatch.setattr(
-        "tcfactory.v3.publication.run_command",
-        lambda *_args, **_kwargs: SimpleNamespace(
+    def failed_command(*_args: object, **_kwargs: object) -> SimpleNamespace:
+        return SimpleNamespace(
             returncode=1,
             stdout="",
             stderr="To get started with GitHub CLI, please run: gh auth login",
-        ),
+        )
+
+    monkeypatch.setattr(
+        "tcfactory.v3.publication.run_command",
+        failed_command,
     )
     client = GhPublicationClient(
         tmp_path,

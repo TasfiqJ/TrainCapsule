@@ -1,9 +1,4 @@
-"""V3.1 GitHub policy and automated pull-request publication entrypoints.
-
-There is intentionally no direct-main push helper in this module.  The only mutating
-transport is :class:`GhPublicationClient`, whose push method accepts a protected
-candidate-branch prefix and rejects ``main``.
-"""
+"""V3.1 GitHub policy and exact-SHA direct-main publication entrypoints."""
 
 from __future__ import annotations
 
@@ -23,7 +18,7 @@ from .v3.base import SHA_PATTERN, V3Model, sha256_digest
 from .v3.installed_runtime import load_installed_controller_runtime
 from .v3.publication import (
     MACHINE_POLICY_CHECK,
-    AutomatedPRPublisher,
+    DirectMainPublisher,
     ExternalReceiptAuthorizer,
     GhPublicationClient,
     PublicationError,
@@ -91,14 +86,10 @@ class GitHubConfig(V3Model):
     base_branch: Literal["main"] = "main"
     visibility: Literal["public"] = "public"
     repository: str = Field(min_length=3, pattern=r"^[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+$")
-    release_mode: Literal["AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"] = (
-        "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
+    release_mode: Literal["DIRECT_MAIN_EXACT_SHA_MACHINE_RECEIPT_POST_PUSH_VERIFY"] = (
+        "DIRECT_MAIN_EXACT_SHA_MACHINE_RECEIPT_POST_PUSH_VERIFY"
     )
-    direct_main_push: Literal[False] = False
-    candidate_branch_prefix: Literal["factory/"] = "factory/"
-    pull_request_metadata_path: Literal["factory/state/latest-pull-request.json"] = (
-        "factory/state/latest-pull-request.json"
-    )
+    direct_main_push: Literal[True] = True
     transaction_path: Literal["publication-transactions"] = "publication-transactions"
     quarantine_path: Literal["publication-quarantine"] = "publication-quarantine"
     independent_receipt_root: str = Field(min_length=1)
@@ -106,9 +97,9 @@ class GitHubConfig(V3Model):
     activation_receipt_path: str = Field(min_length=1)
     exact_head_sha_checks_required: Literal[True] = True
     independent_machine_policy_receipt_required: Literal[True] = True
-    merge_queue_or_auto_merge_required: Literal[True] = True
+    merge_queue_or_auto_merge_required: Literal[False] = False
     exact_merged_main_verification_required: Literal[True] = True
-    publisher_capability: Literal["AUTOMATED_PR_V31_READY"] = "AUTOMATED_PR_V31_READY"
+    publisher_capability: Literal["DIRECT_MAIN_V31_READY"] = "DIRECT_MAIN_V31_READY"
     retry_attempts: int = Field(default=5, ge=1, le=10)
     retry_backoff_seconds: int = Field(default=30, ge=1, le=3600)
     verify_remote_sha: Literal[True] = True
@@ -163,11 +154,9 @@ class RequiredWorkflowStatus(V3Model):
 
 class GitHubReleaseMetadata(V3Model):
     schema_version: Literal["3.1"] = "3.1"
-    release_mode: Literal["AUTOMATED_PULL_REQUEST"] = "AUTOMATED_PULL_REQUEST"
+    release_mode: Literal["DIRECT_MAIN"] = "DIRECT_MAIN"
     transaction_id: str
     candidate_sha: str = Field(pattern=SHA_PATTERN.pattern)
-    pull_request_number: int = Field(ge=1)
-    pull_request_url: str
     merged_main_sha: str | None = Field(default=None, pattern=SHA_PATTERN.pattern)
     status: Literal[
         "PENDING_REQUIRED_CHECKS",
@@ -196,20 +185,16 @@ GithubSyncError = GitHubSyncError
 
 
 def validate_release_rule_types(rule_types: set[str]) -> None:
-    required = {
-        "required_status_checks",
-        "pull_request",
-        "non_fast_forward",
-        "deletion",
-    }
+    required = {"non_fast_forward", "deletion"}
     missing = required - rule_types
     if missing:
         raise GitHubSyncError(
             f"main rules are missing required release controls: {sorted(missing)}"
         )
-    if "update" in rule_types:
+    forbidden = {"update", "pull_request", "required_status_checks"} & rule_types
+    if forbidden:
         raise GitHubSyncError(
-            "GitHub restrict-updates would block bypass-free automated PR merges"
+            f"main rules contain controls incompatible with direct publication: {sorted(forbidden)}"
         )
 
 
@@ -247,7 +232,7 @@ def validate_publication_installation(config: GitHubConfig) -> None:
     """Fail closed before runtime when external publication authority is unavailable."""
 
     if not config.enabled:
-        raise GitHubSyncError("automated pull-request publication is disabled")
+        raise GitHubSyncError("direct-main publication is disabled")
     if shutil.which("gh") is None:
         raise GitHubSyncError("GitHub CLI is unavailable")
     missing_ids = [
@@ -401,52 +386,19 @@ def validate_repository_release_controls(
             if isinstance(typed_rule.get("type"), str):
                 rule_map[cast(str, typed_rule["type"])] = typed_rule
     validate_release_rule_types(set(rule_map))
-    status_parameters = rule_map["required_status_checks"].get("parameters")
-    if not isinstance(status_parameters, dict):
-        raise GitHubSyncError("required status-check parameters are unavailable")
-    raw_checks = cast(dict[str, object], status_parameters).get("required_status_checks")
-    if not isinstance(raw_checks, list):
-        raise GitHubSyncError("required status-check contexts are unavailable")
     observed_checks: dict[str, int] = {}
-    for raw_check in cast(list[object], raw_checks):
-        if not isinstance(raw_check, dict):
-            continue
-        typed_check = cast(dict[str, object], raw_check)
-        context, integration_id = typed_check.get("context"), typed_check.get("integration_id")
-        if isinstance(context, str) and isinstance(integration_id, int):
-            observed_checks[context] = integration_id
-    expected_checks = config.remote_ci.trusted_check_app_ids
-    if any(value is None for value in expected_checks.values()):
-        raise GitHubSyncError("every required check must bind a provisioned GitHub App ID")
-    expected_exact = cast(dict[str, int], expected_checks)
-    if observed_checks != expected_exact:
-        raise GitHubSyncError("main ruleset required contexts/GitHub App IDs differ")
-    repository_result = run_command(
-        ["gh", "api", f"repos/{config.repository}"],
-        cwd=repo_root,
-        check=False,
-        timeout=60,
-    )
-    if repository_result.returncode != 0:
-        raise GitHubSyncError("repository merge policy is unavailable")
-    repository_payload: object = json.loads(repository_result.stdout)
-    if (
-        not isinstance(repository_payload, dict)
-        or cast(dict[str, object], repository_payload).get("allow_auto_merge") is not True
-    ):
-        raise GitHubSyncError("repository automatic merge is not enabled")
-    observation_core = {
+    observation_core: dict[str, object] = {
         "repository": config.repository,
         "baseBranch": "main",
         "rulesetId": exact["id"],
         "enforcement": exact["enforcement"],
-        "requiredCheckAppIds": observed_checks,
+        "requiredCheckAppIds": {},
         "bypassActorCount": 0,
         "deletionForbidden": True,
         "forcePushForbidden": True,
-        "pullRequestRequired": True,
-        "directBranchUpdatesForbidden": True,
-        "autoMergeEnabled": True,
+        "pullRequestRequired": False,
+        "directBranchUpdatesForbidden": False,
+        "autoMergeEnabled": False,
     }
     digest = sha256_digest(
         (json.dumps(observation_core, separators=(",", ":"), sort_keys=True) + "\n").encode()
@@ -507,28 +459,19 @@ def validate_signed_repository_release_controls(
         for key, value in cast(dict[object, object], raw_checks).items()
         if isinstance(key, str) and type(value) is int
     }
-    expected_checks = config.remote_ci.trusted_check_app_ids
-    if any(value is None for value in expected_checks.values()):
-        raise GitHubSyncError("every required check must bind a provisioned GitHub App ID")
-    expected_exact = cast(dict[str, int], expected_checks)
-    if observed_checks != expected_exact:
-        raise GitHubSyncError("signed ruleset required contexts/GitHub App IDs differ")
+    if observed_checks:
+        raise GitHubSyncError("direct-main ruleset must not contain required-check rules")
     if (
         payload.get("repository") != config.repository
         or payload.get("baseBranch") != "main"
         or payload.get("enforcement") != "active"
         or type(payload.get("rulesetId")) is not int
         or payload.get("bypassActorCount") != 0
-        or any(
-            payload.get(field) is not True
-            for field in (
-                "deletionForbidden",
-                "forcePushForbidden",
-                "pullRequestRequired",
-                "directBranchUpdatesForbidden",
-                "autoMergeEnabled",
-            )
-        )
+        or payload.get("deletionForbidden") is not True
+        or payload.get("forcePushForbidden") is not True
+        or payload.get("pullRequestRequired") is not False
+        or payload.get("directBranchUpdatesForbidden") is not False
+        or payload.get("autoMergeEnabled") is not False
     ):
         raise GitHubSyncError("signed ruleset observation does not enforce exact main")
     observation_core = {
@@ -540,9 +483,9 @@ def validate_signed_repository_release_controls(
         "bypassActorCount": 0,
         "deletionForbidden": True,
         "forcePushForbidden": True,
-        "pullRequestRequired": True,
-        "directBranchUpdatesForbidden": True,
-        "autoMergeEnabled": True,
+        "pullRequestRequired": False,
+        "directBranchUpdatesForbidden": False,
+        "autoMergeEnabled": False,
     }
     digest = sha256_digest(
         (json.dumps(observation_core, separators=(",", ":"), sort_keys=True) + "\n").encode()
@@ -567,12 +510,7 @@ def validate_signed_repository_release_controls(
     if verified.returncode != 0:
         raise GitHubSyncError("signed ruleset observation receipt is invalid or stale")
     return {
-        "observedRuleTypes": [
-            "deletion",
-            "non_fast_forward",
-            "pull_request",
-            "required_status_checks",
-        ],
+        "observedRuleTypes": ["deletion", "non_fast_forward"],
         "configuredOnly": False,
         "rulesetId": payload["rulesetId"],
         "requiredCheckAppIds": observed_checks,
@@ -581,9 +519,9 @@ def validate_signed_repository_release_controls(
     }
 
 
-def build_automated_pr_publisher(
+def build_direct_main_publisher(
     *, repo_root: Path, state_root: Path, config: GitHubConfig | None = None
-) -> AutomatedPRPublisher:
+) -> DirectMainPublisher:
     from .v3.runtime_paths import ensure_v3_mutable_runtime, resolve_v3_runtime_paths
 
     active = config or load_github_config(repo_root / "config/github.yaml")
@@ -601,9 +539,8 @@ def build_automated_pr_publisher(
         runtime_paths.git_root,
         remote=active.remote,
         repository=active.repository,
-        branch_prefix=active.candidate_branch_prefix,
     )
-    return AutomatedPRPublisher(
+    return DirectMainPublisher(
         repo_root=repo_root,
         config=active,
         transaction_root=state_root / active.transaction_path,
@@ -616,7 +553,7 @@ def build_automated_pr_publisher(
 
 
 def reconcile_publications(*, repo_root: Path, state_root: Path) -> list[PublicationTransaction]:
-    return build_automated_pr_publisher(
+    return build_direct_main_publisher(
         repo_root=repo_root, state_root=state_root
     ).reconcile_pending()
 
@@ -648,17 +585,15 @@ def sync_github(
     config = load_github_config(config_path)
     state = load_github_state(state_path)
     return {
-        "status": "v3.1-pr-publisher-only",
+        "status": "v3.1-direct-main-publisher",
         "pending": state.pending,
         "releaseMode": config.release_mode,
-        "directMainPush": False,
+        "directMainPush": True,
         "message": "publication is owned by the exact-candidate V3.1 controller",
     }
 
 
 def publication_metadata(transaction: PublicationTransaction) -> GitHubReleaseMetadata | None:
-    if transaction.pull_request_number is None or transaction.pull_request_url is None:
-        return None
     status = {
         "INVARIANTS_VERIFIED": "MERGED_MAIN_VERIFIED",
         "REVERTED": "REVERTED_MAIN_VERIFIED",
@@ -668,8 +603,6 @@ def publication_metadata(transaction: PublicationTransaction) -> GitHubReleaseMe
     return GitHubReleaseMetadata(
         transaction_id=transaction.transaction_id,
         candidate_sha=transaction.candidate_sha,
-        pull_request_number=transaction.pull_request_number,
-        pull_request_url=transaction.pull_request_url,
         merged_main_sha=transaction.merged_main_sha,
         status=cast(Any, status),
         machine_policy_receipt_digest=transaction.receipt_digest,

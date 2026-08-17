@@ -50,11 +50,11 @@ def test_checked_in_v3_configuration_is_finite_and_fail_closed() -> None:
     assert isinstance(executors, ExecutorConfig)
     assert factory.allow_paid_usage is False
     assert factory.schema_version == "3.1"
-    assert factory.repository.direct_main_push is False
+    assert factory.repository.direct_main_push is True
     assert (
-        factory.repository.release_mode == "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
+        factory.repository.release_mode == "DIRECT_MAIN_EXACT_SHA_MACHINE_RECEIPT_POST_PUSH_VERIFY"
     )
-    assert factory.release.publisher_capability == "AUTOMATED_PR_V31_READY"
+    assert factory.release.publisher_capability == "DIRECT_MAIN_V31_READY"
     assert factory.execution.work_until_done is False
     assert all(
         value > 0

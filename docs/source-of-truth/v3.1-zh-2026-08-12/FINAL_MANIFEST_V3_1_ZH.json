@@ -6,12 +6,12 @@
     "humanApprovalRuntimeState": false,
     "machineAuthorityIndependentOffRepository": true,
     "operatingDoctrine": "ZERO_FOUNDER_INTERVENTION_AFTER_BOOTSTRAP",
-    "releaseFlow": "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
+    "releaseFlow": "DIRECT_MAIN_EXACT_SHA_MACHINE_RECEIPT_POST_PUSH_VERIFY"
   },
   "coverageEvidence": {
     "mappedHeadingCount": 504,
     "path": "docs/source-of-truth/v3.1-zh-2026-08-12/SECTION_COVERAGE_V3_TO_V3_1_ZH.json",
-    "sha256": "69748b10c1192cc7c99efd34e8a08068f1afd876e444205309e2e302be6eb043",
+    "sha256": "63a7f1e829f84608f587d873521e1e201af13579f5795f88d2dfa20f27bef301",
     "sourceHeadingCount": 504
   },
   "documents": [
@@ -34,7 +34,7 @@
           "sectionId": "traincapsule-v3-1-zh-source-generation-v3-1-zh-controlling-amendment"
         }
       ],
-      "sha256": "801633926515a037506add0f661b19e20cc6afccc2fcef5818be398b21a25b6f"
+      "sha256": "1c05233be77689640da2e5ab0add366b6bbeacfcac8d00fe2bdec52977602d1f"
     },
     {
       "authorityClass": "root_policy",
@@ -220,7 +220,7 @@
           "sectionId": "00-executive-build-decision-v3-1-zh-00-18-final-authorization"
         }
       ],
-      "sha256": "3ba7bba9f99692634eafadc41b6fef3a45d77523fc4fb4cae07ebe8a832fbfa1"
+      "sha256": "53df032fa62d0840c3f4bcd47fafc2abb99675b8be350055e59a89e8f590a6b9"
     },
     {
       "authorityClass": "normative_product",
@@ -541,7 +541,7 @@
           "sectionId": "03-product-strategy-and-requirements-v3-1-zh-03-20-definition-of-product-success"
         }
       ],
-      "sha256": "efc721763e42b9e8c664ffc67d64526c56f1365f29ce15b95e5362249580f912"
+      "sha256": "f7183182fe2c13f7fabebf5d93bab724a3572344b10f621e20df50b70ff05a79"
     },
     {
       "authorityClass": "normative_architecture",
@@ -812,7 +812,7 @@
           "sectionId": "04-technical-architecture-v3-1-zh-04-27-v1-completion-definition"
         }
       ],
-      "sha256": "d66e62e4ef190a96f14108a5fcfb1817f2120095196b6882f6237728dbfb2cd8"
+      "sha256": "ee39972e3b838b3d9c052ae2bc529bf8046f1488debcd142b242d860ab933c95"
     },
     {
       "authorityClass": "normative_trust",
@@ -1128,7 +1128,7 @@
           "sectionId": "05-trust-replay-reduction-recovery-and-capsule-specification-v3-1-zh-05-30-trust-stop-conditions"
         }
       ],
-      "sha256": "1e308439213ed94d6190db975b5a2cd61c2b5784fc39942e4e48a8cb16ae72a5"
+      "sha256": "52659f419107bb0acc77a92866ada9d4970a07924cb452b2c277c62fc860cc7a"
     },
     {
       "authorityClass": "normative_commercial",
@@ -1459,7 +1459,7 @@
           "sectionId": "06-commercial-model-go-to-market-and-validation-plan-v3-1-zh-06-29-success-definition"
         }
       ],
-      "sha256": "485c38a199b6317f9720bc1bb4eb43bf189e44b89f276c287d841da1b27a51a6"
+      "sha256": "6c9a4d5d610f53500d44afb72e42b563b9c4f9521463523be6a0af766cbaa1fc"
     },
     {
       "authorityClass": "normative_roadmap",
@@ -1670,7 +1670,7 @@
           "sectionId": "12-gate-based-roadmap-and-backlog-v3-1-zh-12-14-roadmap-success-criteria"
         }
       ],
-      "sha256": "cc4b73358c85d80249999ffbf96c0fe723e6318e42d89e8a211e989eaef2729d"
+      "sha256": "f8e2e8ae98fefb43c21470961583b9a990f213aa0865d20ee993d3bae9ab2cd1"
     },
     {
       "authorityClass": "current_fact_register",
@@ -1836,7 +1836,7 @@
           "sectionId": "13-current-source-and-competitive-register-v3-1-zh-13-9-claim-rules"
         }
       ],
-      "sha256": "0fa8699ad2070cfd2093899e4b3eec17ed543a15c99f081bc5363c9a2e79280c"
+      "sha256": "cf24b992523dfb636e4113a4c3a35c5245d66c752e99f14fb8dda0c141c0e10f"
     },
     {
       "authorityClass": "normative_build",
@@ -2007,7 +2007,7 @@
           "sectionId": "14-claude-code-master-build-prompt-v3-1-zh-final-operating-principle"
         }
       ],
-      "sha256": "ea2df9cc6e41c0e679c208ed8c2615c938f644711c25cea35052ee2cd865606d"
+      "sha256": "8a9e3736ae634923a4061b288390e9343e35dd5bb6eac9610601fa490e35e85d"
     },
     {
       "authorityClass": "normative_factory",
@@ -2553,7 +2553,7 @@
           "sectionId": "traincapsule-autonomous-factory-and-business-loop-redesign-specification-v3-1-zh-34-factory-success-metric"
         }
       ],
-      "sha256": "7654d080165084aa7111712d8c655264458235202af2142ca0e7d495f3688bae"
+      "sha256": "eb2585a1a89a4d4c234081e98b7bb37cf37ba66478e8072665b27cd756c9db89"
     },
     {
       "authorityClass": "normative_migration",
@@ -2709,7 +2709,7 @@
           "sectionId": "source-of-truth-migration-plan-v3-1-zh-21-final-migration-acceptance"
         }
       ],
-      "sha256": "f07bc12885e1fdcca6251c17a4badc2439a921cbcdc23b39784ce17d5eb5266a"
+      "sha256": "42bfc7b7e990149afabc042129b17fadec1d6a9b90dfa9bb278847a8c6ee9bbc"
     }
   ],
   "generatedAt": "2026-08-12T00:00:00Z",

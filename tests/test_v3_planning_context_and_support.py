@@ -405,7 +405,7 @@ def test_v3_operator_cli_is_read_only_and_explains_provenance(
         ["config", "explain", "factory.repository.releaseMode", "--repo", str(ROOT)],
     )
     assert explain.exit_code == 0
-    assert "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE" in explain.stdout
+    assert "DIRECT_MAIN_EXACT_SHA_MACHINE_RECEIPT_POST_PUSH_VERIFY" in explain.stdout
     assert runner.invoke(app, ["migrate", "--repo", str(ROOT)]).exit_code == 2
     dry = runner.invoke(app, ["migrate", "--dry-run", "--repo", str(ROOT)])
     assert dry.exit_code == 0

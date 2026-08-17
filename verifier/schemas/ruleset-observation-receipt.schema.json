@@ -14,7 +14,7 @@
   "additionalProperties": false,
   "properties": {
     "autoMergeEnabled": {
-      "const": true,
+      "const": false,
       "title": "Automergeenabled",
       "type": "boolean"
     },
@@ -34,7 +34,7 @@
       "type": "boolean"
     },
     "directBranchUpdatesForbidden": {
-      "const": true,
+      "const": false,
       "title": "Directbranchupdatesforbidden",
       "type": "boolean"
     },
@@ -71,7 +71,7 @@
       "type": "string"
     },
     "pullRequestRequired": {
-      "const": true,
+      "const": false,
       "title": "Pullrequestrequired",
       "type": "boolean"
     },
@@ -85,7 +85,6 @@
         "type": "integer"
       },
       "maxProperties": 64,
-      "minProperties": 1,
       "title": "Requiredcheckappids",
       "type": "object"
     },

@@ -509,13 +509,13 @@ class RulesetObservationReceipt(V31Model):
     base_branch: Literal["main"]
     ruleset_id: int = Field(gt=0)
     enforcement: Literal["active"]
-    required_check_app_ids: dict[str, int] = Field(min_length=1, max_length=64)
+    required_check_app_ids: dict[str, int] = Field(max_length=64)
     bypass_actor_count: Literal[0]
     deletion_forbidden: Literal[True]
     force_push_forbidden: Literal[True]
-    pull_request_required: Literal[True]
-    direct_branch_updates_forbidden: Literal[True]
-    auto_merge_enabled: Literal[True]
+    pull_request_required: Literal[False]
+    direct_branch_updates_forbidden: Literal[False]
+    auto_merge_enabled: Literal[False]
     observed_at: AwareDatetime
     expires_at: AwareDatetime
     issuer_id: Identifier

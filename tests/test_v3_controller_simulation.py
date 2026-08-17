@@ -748,7 +748,7 @@ class _PendingThenVerifiedPublisher(_AutomatedPRSimulationPublisher):
         if self.calls == 1:
             return {
                 "status": "PENDING_REQUIRED_CHECKS",
-                "transactionId": f"PRPUB-V3_SIM_001-{candidate_sha[:12].upper()}",
+                "transactionId": f"MAINPUB-V3_SIM_001-{candidate_sha[:12].upper()}",
                 "candidateSha": candidate_sha,
                 "pullRequestNumber": 1,
                 "pullRequestUrl": "https://github.com/TasfiqJ/TrainCapsule/pull/1",
@@ -760,7 +760,7 @@ class _PendingThenVerifiedPublisher(_AutomatedPRSimulationPublisher):
             lease_guard()
             return dict(self._verified_result)
         result = super().publish(**arguments)
-        result["transactionId"] = f"PRPUB-V3_SIM_001-{candidate_sha[:12].upper()}"
+        result["transactionId"] = f"MAINPUB-V3_SIM_001-{candidate_sha[:12].upper()}"
         self._verified_result = dict(result)
         return result
 

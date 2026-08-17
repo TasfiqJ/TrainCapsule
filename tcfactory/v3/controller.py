@@ -2394,25 +2394,19 @@ class V3Controller:
     @staticmethod
     def _validated_publication_success(
         release: Mapping[str, object],
-    ) -> tuple[str, str, int, str]:
+    ) -> tuple[str, str]:
         merged_main_sha = release.get("mergedMainSha")
         receipt_digest = release.get("machinePolicyReceiptDigest")
-        pull_request_number = release.get("pullRequestNumber")
-        pull_request_url = release.get("pullRequestUrl")
         if (
             not isinstance(merged_main_sha, str)
             or SHA_PATTERN.fullmatch(merged_main_sha) is None
             or not isinstance(receipt_digest, str)
             or DIGEST_PATTERN.fullmatch(receipt_digest) is None
-            or not isinstance(pull_request_number, int)
-            or pull_request_number < 1
-            or not isinstance(pull_request_url, str)
-            or not pull_request_url.startswith("https://github.com/")
         ):
             raise RuntimeError(
-                "publisher claimed success without exact merged-main, PR, and policy bindings"
+                "publisher claimed success without exact main and policy bindings"
             )
-        return merged_main_sha, receipt_digest, pull_request_number, pull_request_url
+        return merged_main_sha, receipt_digest
 
     @staticmethod
     def _value_failure_reasons(
@@ -2734,7 +2728,7 @@ class V3Controller:
                     "workItemId": item.work_item_id,
                     "release": release,
                 }
-            _, receipt_digest, _, _ = self._validated_publication_success(release)
+            _, receipt_digest = self._validated_publication_success(release)
             recovered_checkpoint.active = False
             recovered_checkpoint.backend_wait_state = None
             recovered_checkpoint.backend_resume_at = None
@@ -4070,7 +4064,7 @@ class V3Controller:
             findings=finding_bindings,
             external_evidence=external_bindings,
             checkpoint_digest=checkpoint_digest,
-            release_decision=ReleaseDecision.APPROVED_FOR_AUTOMATED_PULL_REQUEST,
+            release_decision=ReleaseDecision.APPROVED_FOR_DIRECT_MAIN,
             created_at=datetime.now(UTC),
         )
         manifest.verify_artifacts(bound_artifacts)
@@ -4416,7 +4410,7 @@ class V3Controller:
             attempts_remaining=checkpoint.budget.repair_cycles_remaining,
             base_sha=base_sha,
             candidate_sha=candidate_sha,
-            next_action="OPEN_AUTOMATED_PULL_REQUEST",
+            next_action="PUSH_EXACT_CANDIDATE_TO_MAIN",
             findings=handoff_findings,
             artifacts=native_value_handoff_artifacts,
             source_digest=packet.source_digest,
@@ -4425,7 +4419,7 @@ class V3Controller:
             backend_session_ref=backend_session_ref,
         )
         checkpoint.publication_transaction_id = (
-            f"PRPUB-{item.work_item_id.replace('-', '_')}-{candidate_sha[:12].upper()}"
+            f"MAINPUB-{item.work_item_id.replace('-', '_')}-{candidate_sha[:12].upper()}"
         )
         checkpoint.publication_manifest_path = str(manifest_path.resolve())
         checkpoint.publication_manifest_digest = _digest_file(manifest_path)
@@ -4534,7 +4528,7 @@ class V3Controller:
                 "workItemId": item.work_item_id,
                 "release": release,
             }
-        merged_main_sha, receipt_digest, _, _ = self._validated_publication_success(release)
+        merged_main_sha, receipt_digest = self._validated_publication_success(release)
         if current_sha(self.git_root, "refs/heads/main") != merged_main_sha:
             raise RuntimeError(
                 "verified publication is not present in the independent mutable Git anchor"

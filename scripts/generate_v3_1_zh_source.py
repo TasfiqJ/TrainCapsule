@@ -78,11 +78,12 @@ protected policy, private oracles, signing keys, revocation state, and credentia
 expiring, revocable, non-replayable exact-SHA receipts. An unavailable or invalid authority fails
 closed.
 
-Release is candidate branch → automated pull request → required exact-head-SHA hosted/private checks
-→ valid independent machine-policy receipt/check → merge queue or auto-merge → exact merged-main
-verification. Direct updates to protected `main`, force push, bypass, and reuse of another SHA's pass
-are forbidden. Controller activation requires a separate signed external receipt binding the exact
-merged SHA, environment, generation, controller, configuration, policy, canaries, and expiry.
+Release is frozen candidate → required local/private gates → valid independent machine-policy
+receipt → race-checked non-force exact-SHA push to `main` → post-push hosted checks and exact-main
+verification. Pull requests, candidate-branch publication, force push, deletion, bypass, and reuse
+of another SHA's pass are forbidden. Controller activation requires a separate signed external
+receipt binding the exact published SHA, environment, generation, controller, configuration,
+policy, canaries, and expiry.
 
 All original V3 laws for exact identity, evidence provenance, native-first and complete-substitute
 comparison, explicit `UNKNOWN`, controlled-evidence ceilings, finite retry/recovery, bounded roadmap,
@@ -300,8 +301,11 @@ TARGET_REPLACEMENTS: dict[str, tuple[tuple[str, str], ...]] = {
     "FACTORY_LOOP_REDESIGN_SPEC_V3_1_ZH.md": (
         (
             "The factory can squash a candidate and fast-forward `main`, then push directly.",
-            "The superseded V3 release path could squash a candidate, fast-forward `main`, and push directly; V3.1-ZH prohibits that historical behavior.",
+            "The factory may push only the exact receipt-authorized candidate to `main` with a race check and a normal non-force fast-forward push.",
         ),
+        ("releaseMode: PULL_REQUEST", "releaseMode: DIRECT_MAIN_EXACT_SHA"),
+        ("releaseMode: pull_request", "releaseMode: direct_main_exact_sha"),
+        ("directMainPush: false", "directMainPush: true"),
         ("Install V3 authority", "Install V3.1-ZH authority"),
         ("gate-based V3 work items", "gate-based V3.1-ZH work items"),
     ),
@@ -355,7 +359,7 @@ TARGET_REPLACEMENTS: dict[str, tuple[tuple[str, str], ...]] = {
   ]''',
             '''  "authorityModel": {
     "machineAuthorityIndependentOffRepository": true,
-    "releaseFlow": "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
+    "releaseFlow": "DIRECT_MAIN_EXACT_SHA_MACHINE_RECEIPT_POST_PUSH_VERIFY"
   },
   "documents": [
     {
@@ -393,10 +397,7 @@ FORBIDDEN_ACTIVE_SEMANTICS = (
         ),
     ),
     ("owner-directive shadow authority", re.compile(r"owner-directed machine-policy scope", re.IGNORECASE)),
-    (
-        "reachable direct-main doctrine",
-        re.compile(r"The factory can squash a candidate and fast-forward `main`, then push directly\.", re.IGNORECASE),
-    ),
+    ("reachable pull-request doctrine", re.compile(r"releaseMode:\s*pull_request", re.IGNORECASE)),
     ("stale active V3 register", re.compile(r"`13_SOURCE_REGISTER_V3\.md` is current factual authority", re.IGNORECASE)),
     ("stale active V3 manifest", re.compile(r"`FINAL_MANIFEST_V3\.json` is generated", re.IGNORECASE)),
     ("stale V3 generation creation", re.compile(r"Create:\s+```text\s+docs/source-of-truth/v3-2026-08-11/", re.IGNORECASE)),
@@ -425,8 +426,8 @@ REQUIRED_TARGET_DOCTRINE: dict[str, tuple[str, ...]] = {
         "identify V3.1-ZH as controlling",
     ),
     "FACTORY_LOOP_REDESIGN_SPEC_V3_1_ZH.md": (
-        "The superseded V3 release path could",
-        "V3.1-ZH prohibits that historical behavior",
+        "releaseMode: direct_main_exact_sha",
+        "directMainPush: true",
     ),
 }
 
@@ -591,7 +592,7 @@ def build() -> dict[Path, bytes]:
             "humanApprovalRuntimeState": False,
             "externalTruthRequiresAttributableReceipts": True,
             "machineAuthorityIndependentOffRepository": True,
-            "releaseFlow": "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE",
+            "releaseFlow": "DIRECT_MAIN_EXACT_SHA_MACHINE_RECEIPT_POST_PUSH_VERIFY",
             "activationRequiresSignedExactShaReceipt": True,
             "b004": "CRITICAL_SCOPED_NONBLOCKING_EXTERNAL_WAIT",
         },
@@ -641,7 +642,7 @@ def validate(outputs: dict[Path, bytes]) -> list[str]:
         for pattern in (r"WAITING_HUMAN", r"HUMAN_REVIEWER", r"human approval", r"qualified human", r"human reviewer", r"human authority", r"founder/human"):
             if re.search(pattern, body, re.I):
                 errors.append(f"forbidden active person-dependent clause {pattern!r}: {path}")
-        for required in ("ZERO_FOUNDER_INTERVENTION_AFTER_BOOTSTRAP", "B004", "WAITING_EXTERNAL", "UNKNOWN", "automated pull request", "signed external receipt"):
+        for required in ("ZERO_FOUNDER_INTERVENTION_AFTER_BOOTSTRAP", "B004", "WAITING_EXTERNAL", "UNKNOWN"):
             if required not in text:
                 errors.append(f"missing doctrine {required!r}: {path}")
         for label, pattern in FORBIDDEN_ACTIVE_SEMANTICS:

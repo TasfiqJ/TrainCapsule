@@ -318,7 +318,7 @@
           "then": {
             "properties": {
               "evidenceType": {
-                "const": "AUTOMATED_PR_REQUIRED_CI_MERGED_MAIN_ACCEPTANCE"
+                "const": "DIRECT_MAIN_POST_PUSH_CI_ACCEPTANCE"
               },
               "executions": {
                 "maxItems": 1,

@@ -55,18 +55,18 @@ def test_ruleset_observer_accepts_github_null_as_no_bypass_and_uses_graphql_auto
 def _ruleset_receipt(
     key: Ed25519PrivateKey, observed_at: datetime
 ) -> RulesetObservationReceipt:
-    core = {
+    core: dict[str, object] = {
         "repository": "TasfiqJ/TrainCapsule",
         "baseBranch": "main",
         "rulesetId": 20_794_549,
         "enforcement": "active",
-        "requiredCheckAppIds": {"Factory quality": 15368},
+        "requiredCheckAppIds": {},
         "bypassActorCount": 0,
         "deletionForbidden": True,
         "forcePushForbidden": True,
-        "pullRequestRequired": True,
-        "directBranchUpdatesForbidden": True,
-        "autoMergeEnabled": True,
+        "pullRequestRequired": False,
+        "directBranchUpdatesForbidden": False,
+        "autoMergeEnabled": False,
     }
     digest = sha256_digest(canonical_json_bytes(core))
     provisional = RulesetObservationReceipt(
@@ -77,13 +77,13 @@ def _ruleset_receipt(
         base_branch="main",
         ruleset_id=20_794_549,
         enforcement="active",
-        required_check_app_ids={"Factory quality": 15368},
+        required_check_app_ids={},
         bypass_actor_count=0,
         deletion_forbidden=True,
         force_push_forbidden=True,
-        pull_request_required=True,
-        direct_branch_updates_forbidden=True,
-        auto_merge_enabled=True,
+        pull_request_required=False,
+        direct_branch_updates_forbidden=False,
+        auto_merge_enabled=False,
         observed_at=observed_at,
         expires_at=observed_at + timedelta(minutes=15),
         issuer_id="RULESET:OBSERVER",

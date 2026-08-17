@@ -1620,7 +1620,7 @@ def test_direct_controller_entry_runs_full_supervisor_preflight_first(
     def publisher_must_not_run(**_: object) -> Never:
         pytest.fail("publisher constructed before full preflight")
 
-    monkeypatch.setattr(cli, "build_automated_pr_publisher", publisher_must_not_run)
+    monkeypatch.setattr(cli, "build_direct_main_publisher", publisher_must_not_run)
     with pytest.raises(RuntimeError, match="full preflight sentinel"):
         cli.v3_controller(repo=tmp_path, once=True)
     assert calls == [tmp_path.resolve()]

@@ -72,19 +72,18 @@ def test_release_controls_use_verified_root_observation_without_gh_credentials(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     config = load_github_config(Path("config/github.yaml"))
-    expected = config.remote_ci.trusted_check_app_ids
-    core = {
+    core: dict[str, object] = {
         "repository": config.repository,
         "baseBranch": "main",
         "rulesetId": 20794549,
         "enforcement": "active",
-        "requiredCheckAppIds": expected,
+        "requiredCheckAppIds": {},
         "bypassActorCount": 0,
         "deletionForbidden": True,
         "forcePushForbidden": True,
-        "pullRequestRequired": True,
-        "directBranchUpdatesForbidden": True,
-        "autoMergeEnabled": True,
+        "pullRequestRequired": False,
+        "directBranchUpdatesForbidden": False,
+        "autoMergeEnabled": False,
     }
     digest = sha256_digest(
         (json.dumps(core, separators=(",", ":"), sort_keys=True) + "\n").encode()
@@ -115,22 +114,24 @@ def test_release_controls_use_verified_root_observation_without_gh_credentials(
     assert commands[0][0] == str(verifier)
 
 
-def test_direct_main_publication_surfaces_do_not_exist() -> None:
-    assert not hasattr(github_sync, "push_main_with_retry")
-    assert not hasattr(github_sync, "MainOnlyPublisher")
-    assert not hasattr(github_sync, "MainPublicationTransaction")
+def test_direct_main_publication_is_the_only_active_builder() -> None:
+    assert hasattr(github_sync, "build_direct_main_publisher")
+    assert not hasattr(github_sync, "build_automated_pr_publisher")
     source = Path(github_sync.__file__).read_text(encoding="utf-8")
-    assert "fast_forward_main" not in source
-    assert ":refs/heads/main" not in source
+    assert "build_direct_main_publisher" in source
 
 
-def test_candidate_push_rejects_main_force_tags_and_symbolic_sources(
+def test_direct_main_push_is_exact_non_force_and_race_checked(
     monkeypatch: pytest.MonkeyPatch, tmp_path: Path
 ) -> None:
     observed: list[list[str]] = []
 
     def fake_run(args: list[str], **_: object) -> subprocess.CompletedProcess[str]:
         observed.append(args)
+        if args[:2] == ["git", "ls-remote"]:
+            already_pushed = any("refs/heads/main" in part for part in args) and len(observed) > 2
+            sha = CANDIDATE if already_pushed else "a" * 40
+            return subprocess.CompletedProcess(args, 0, f"{sha}\trefs/heads/main\n", "")
         return subprocess.CompletedProcess(args, 0, "ok", "")
 
     monkeypatch.setattr(publication, "run_command", fake_run)
@@ -138,32 +139,22 @@ def test_candidate_push_rejects_main_force_tags_and_symbolic_sources(
         tmp_path,
         remote="origin",
         repository="TasfiqJ/TrainCapsule",
-        branch_prefix="factory/",
     )
-    for branch in ("main", "refs/tags/release", "factory/../main", "other/candidate"):
-        with pytest.raises(PublicationError):
-            client.push_candidate_branch(sha=CANDIDATE, branch=branch)
-    with pytest.raises(PublicationError, match="exact commit SHA"):
-        client.push_candidate_branch(sha="HEAD", branch="factory/v3-rel-001/candidate")
-    client.push_candidate_branch(sha=CANDIDATE, branch="factory/v3-rel-001/candidate")
-    assert observed == [
-        [
-            "git",
-            "push",
-            "--porcelain",
-            "origin",
-            f"{CANDIDATE}:refs/heads/factory/v3-rel-001/candidate",
-        ]
-    ]
+    with pytest.raises(PublicationError, match="exact commit SHAs"):
+        client.push_main(sha="HEAD", expected_base_sha="a" * 40)
+    client.push_main(sha=CANDIDATE, expected_base_sha="a" * 40)
+    push = next(args for args in observed if args[:2] == ["git", "push"])
+    assert push == ["git", "push", "--porcelain", "origin", f"{CANDIDATE}:refs/heads/main"]
+    assert all("--force" not in part for part in push)
 
 
 @pytest.mark.parametrize(
     ("field", "value"),
     [
-        ("directMainPush", True),
-        ("releaseMode", "owner_directed_main_only"),
+        ("directMainPush", False),
+        ("releaseMode", "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"),
         ("publisherCapability", "PENDING_PHASE_4"),
-        ("candidateBranchPrefix", "main"),
+        ("mergeQueueOrAutoMergeRequired", True),
     ],
 )
 def test_v31_config_rejects_legacy_or_unproven_release_modes(field: str, value: object) -> None:
@@ -185,13 +176,13 @@ def test_required_check_roster_cannot_omit_independent_policy() -> None:
         GitHubConfig.model_validate(payload)
 
 
-def test_release_rules_require_pr_controls_without_merge_deadlocking_update() -> None:
-    valid = {"required_status_checks", "pull_request", "non_fast_forward", "deletion"}
+def test_release_rules_allow_only_non_destructive_direct_main_controls() -> None:
+    valid = {"non_fast_forward", "deletion"}
     github_sync.validate_release_rule_types(valid)
-    with pytest.raises(github_sync.GitHubSyncError, match="would block.*PR merges"):
-        github_sync.validate_release_rule_types(valid | {"update"})
+    with pytest.raises(github_sync.GitHubSyncError, match="incompatible with direct publication"):
+        github_sync.validate_release_rule_types(valid | {"pull_request"})
     with pytest.raises(github_sync.GitHubSyncError, match="missing required release controls"):
-        github_sync.validate_release_rule_types({"non_fast_forward", "deletion"})
+        github_sync.validate_release_rule_types({"non_fast_forward"})
 
 
 def test_pull_request_observation_cannot_launder_a_non_main_base() -> None:

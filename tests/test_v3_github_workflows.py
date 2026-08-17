@@ -30,9 +30,9 @@ def test_required_workflow_files_and_config_names_match() -> None:
         *EXPECTED_FILES.values(),
         MACHINE_POLICY_CHECK,
     ]
-    assert config.release_mode == "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"
-    assert config.direct_main_push is False
-    assert config.publisher_capability == "AUTOMATED_PR_V31_READY"
+    assert config.release_mode == "DIRECT_MAIN_EXACT_SHA_MACHINE_RECEIPT_POST_PUSH_VERIFY"
+    assert config.direct_main_push is True
+    assert config.publisher_capability == "DIRECT_MAIN_V31_READY"
     assert (
         config.remote_ci.trusted_check_app_ids[MACHINE_POLICY_CHECK]
         == MACHINE_POLICY_APP_ID

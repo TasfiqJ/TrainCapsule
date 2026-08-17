@@ -124,28 +124,16 @@
       "type": "string"
     },
     "releaseMode": {
-      "const": "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE",
-      "default": "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE",
+      "const": "DIRECT_MAIN_EXACT_SHA_MACHINE_RECEIPT_POST_PUSH_VERIFY",
+      "default": "DIRECT_MAIN_EXACT_SHA_MACHINE_RECEIPT_POST_PUSH_VERIFY",
       "title": "Releasemode",
       "type": "string"
     },
     "directMainPush": {
-      "const": false,
-      "default": false,
+      "const": true,
+      "default": true,
       "title": "Directmainpush",
       "type": "boolean"
-    },
-    "candidateBranchPrefix": {
-      "const": "factory/",
-      "default": "factory/",
-      "title": "Candidatebranchprefix",
-      "type": "string"
-    },
-    "pullRequestMetadataPath": {
-      "const": "factory/state/latest-pull-request.json",
-      "default": "factory/state/latest-pull-request.json",
-      "title": "Pullrequestmetadatapath",
-      "type": "string"
     },
     "transactionPath": {
       "const": "publication-transactions",
@@ -187,8 +175,8 @@
       "type": "boolean"
     },
     "mergeQueueOrAutoMergeRequired": {
-      "const": true,
-      "default": true,
+      "const": false,
+      "default": false,
       "title": "Mergequeueorautomergerequired",
       "type": "boolean"
     },
@@ -199,8 +187,8 @@
       "type": "boolean"
     },
     "publisherCapability": {
-      "const": "AUTOMATED_PR_V31_READY",
-      "default": "AUTOMATED_PR_V31_READY",
+      "const": "DIRECT_MAIN_V31_READY",
+      "default": "DIRECT_MAIN_V31_READY",
       "title": "Publishercapability",
       "type": "string"
     },

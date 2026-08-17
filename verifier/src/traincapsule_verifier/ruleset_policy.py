@@ -4,19 +4,14 @@ from __future__ import annotations
 
 from collections.abc import Set
 
-REQUIRED_RELEASE_RULE_TYPES = frozenset(
-    {
-        "required_status_checks",
-        "pull_request",
-        "non_fast_forward",
-        "deletion",
-    }
+REQUIRED_RELEASE_RULE_TYPES = frozenset({"non_fast_forward", "deletion"})
+FORBIDDEN_RELEASE_RULE_TYPES = frozenset(
+    {"update", "pull_request", "required_status_checks"}
 )
-FORBIDDEN_RELEASE_RULE_TYPES = frozenset({"update"})
 
 
 def validate_release_rule_types(rule_types: Set[str]) -> None:
-    """Require PR-only controls without GitHub's merge-deadlocking update rule."""
+    """Require main-only fast-forward controls without PR dependencies."""
 
     missing = REQUIRED_RELEASE_RULE_TYPES - rule_types
     if missing:
@@ -24,6 +19,5 @@ def validate_release_rule_types(rule_types: Set[str]) -> None:
     forbidden = FORBIDDEN_RELEASE_RULE_TYPES & rule_types
     if forbidden:
         raise ValueError(
-            "GitHub restrict-updates is incompatible with a bypass-free automated PR ruleset "
-            "and would block PR merges"
+            "ruleset controls are incompatible with direct fast-forward main publication"
         )

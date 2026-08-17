@@ -121,9 +121,9 @@ def _source_integrity(repo_root: Path) -> str:
 def _configuration(repo_root: Path) -> str:
     loaded = validate_v3_configuration(repo_root)
     github = load_github_config(repo_root / "config/github.yaml")
-    if github.direct_main_push or github.publisher_capability != "AUTOMATED_PR_V31_READY":
-        raise RuntimeError("V3.1 automated PR publisher is not the active release mode")
-    return f"validated {len(loaded)} V3.1 configurations and PR-only publication policy"
+    if not github.direct_main_push or github.publisher_capability != "DIRECT_MAIN_V31_READY":
+        raise RuntimeError("V3.1 direct-main publisher is not the active release mode")
+    return f"validated {len(loaded)} V3.1 configurations and direct-main publication policy"
 
 
 def _root_entry_point(repo_root: Path) -> str:

@@ -21,9 +21,8 @@ from tcfactory.yamlutil import load_yaml
 
 class RepositoryPolicy(V3Model):
     base_branch: Literal["main"]
-    release_mode: Literal["AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE"]
-    direct_main_push: Literal[False]
-    candidate_branch_prefix: Literal["factory/"]
+    release_mode: Literal["DIRECT_MAIN_EXACT_SHA_MACHINE_RECEIPT_POST_PUSH_VERIFY"]
+    direct_main_push: Literal[True]
     require_clean_base: bool
     candidate_manifest_required: Literal[True]
 
@@ -67,13 +66,13 @@ class RuntimePolicy(V3Model):
 
 
 class ReleasePolicy(V3Model):
-    direct_main_push_forbidden: Literal[True]
-    automated_pull_request_required: Literal[True]
+    direct_main_push_forbidden: Literal[False]
+    automated_pull_request_required: Literal[False]
     exact_head_sha_checks_required: Literal[True]
     independent_machine_policy_receipt_required: Literal[True]
-    merge_queue_or_auto_merge_required: Literal[True]
+    merge_queue_or_auto_merge_required: Literal[False]
     exact_merged_main_verification_required: Literal[True]
-    publisher_capability: Literal["AUTOMATED_PR_V31_READY"]
+    publisher_capability: Literal["DIRECT_MAIN_V31_READY"]
 
 
 class OperatorPolicy(V3Model):

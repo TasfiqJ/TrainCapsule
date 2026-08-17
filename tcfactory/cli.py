@@ -29,7 +29,7 @@ from .completion import audit_and_expand_or_complete
 from .config import load_autonomy_config, load_factory_config, load_roles, load_task
 from .feature_ledger import load_feature_ledger
 from .github_sync import (
-    build_automated_pr_publisher,
+    build_direct_main_publisher,
     load_github_config,
     load_github_state,
     sync_github,
@@ -928,7 +928,7 @@ def v3_controller(
     github = load_github_config(root / "config/github.yaml")
     try:
         validate_controller_activation(repo_root=root, config=github)
-        publisher = build_automated_pr_publisher(
+        publisher = build_direct_main_publisher(
             repo_root=root, state_root=paths.state_root, config=github
         )
     except (OSError, ValueError, RuntimeError) as exc:

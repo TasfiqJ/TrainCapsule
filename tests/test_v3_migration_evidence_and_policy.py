@@ -43,13 +43,13 @@ def test_historical_v3_final_receipt_cannot_satisfy_v31(tmp_path: Path) -> None:
     "residue",
     [
         "WAITING_HUMAN",
-        "directMainPush: true",
-        "owner_directed_main_only",
-        "publish directly-to-main",
-        "main-only publication",
+        "AUTOMATED_PR_REQUIRED",
+        "OPEN_AUTOMATED_PULL_REQUEST",
+        "candidateBranchPrefix: factory/",
+        "pullRequestMetadataPath: state/pr.json",
     ],
 )
-def test_active_policy_rejects_human_or_direct_main_residue(
+def test_active_policy_rejects_human_or_pull_request_residue(
     tmp_path: Path, residue: str
 ) -> None:
     shutil.copytree(

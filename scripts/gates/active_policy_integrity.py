@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Reject human intervention and direct-main publication in active V3.1 policy."""
+"""Reject human intervention and pull-request publication in active V3.1 policy."""
 
 from __future__ import annotations
 
@@ -57,18 +57,12 @@ FORBIDDEN = (
     ("human milestone enum", re.compile(r"\bMilestoneStatus\.WAITING_HUMAN\b")),
     ("human finding owner", re.compile(r"ownerClass[^\n]{0,80}\bHUMAN\b", re.IGNORECASE)),
     (
-        "enabled direct-main release",
+        "enabled pull-request release",
         re.compile(
-            r"owner_directed_main_only|directMainPush\s*:\s*true|"
-            r"direct_main_push\s*:\s*Literal\[True\]|PUBLISH_MAIN_ONLY|"
-            r"\bmain[- ]only\b|\bdirect(?:ly)?[- ]to[- ]main\b|"
-            r"pull requests? (?:are|is) forbidden|PR[- ]forbidden",
+            r"AUTOMATED_PR_REQUIRED|automated_pull_request_required\s*:\s*Literal\[True\]|"
+            r"OPEN_AUTOMATED_PULL_REQUEST|candidateBranchPrefix|pullRequestMetadataPath",
             re.IGNORECASE,
         ),
-    ),
-    (
-        "pull-request bypass",
-        re.compile(r"\b(?:no|without)[-_ ](?:pull[-_ ]request|PR)\b", re.IGNORECASE),
     ),
     (
         "required human approval",

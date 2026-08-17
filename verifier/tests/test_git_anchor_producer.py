@@ -90,12 +90,11 @@ def test_read_only_producer_promoter_and_updater_material_are_exact(
     transaction_root.mkdir(mode=0o700)
     transaction = {
         "schemaVersion": "3.1",
-        "transactionId": "PRPUB-V3_PRODUCT_001-" + merged[:12].upper(),
+        "transactionId": "MAINPUB-V3_PRODUCT_001-" + merged[:12].upper(),
         "phase": "MERGED",
         "baseSha": base,
         "candidateSha": merged,
         "mergedMainSha": merged,
-        "pullRequestNumber": 41,
         "updatedAt": NOW.isoformat().replace("+00:00", "Z"),
     }
     transaction_path = transaction_root / f"{merged}.json"
@@ -140,18 +139,18 @@ def test_read_only_producer_promoter_and_updater_material_are_exact(
     ) == []
 
     ruleset_key = Ed25519PrivateKey.generate()
-    ruleset_core = {
+    ruleset_core: dict[str, object] = {
         "repository": policy.repository,
         "baseBranch": "main",
         "rulesetId": 1,
         "enforcement": "active",
-        "requiredCheckAppIds": policy.required_check_app_ids,
+        "requiredCheckAppIds": {},
         "bypassActorCount": 0,
         "deletionForbidden": True,
         "forcePushForbidden": True,
-        "pullRequestRequired": True,
-        "directBranchUpdatesForbidden": True,
-        "autoMergeEnabled": True,
+        "pullRequestRequired": False,
+        "directBranchUpdatesForbidden": False,
+        "autoMergeEnabled": False,
     }
     ruleset_digest = sha256_digest(canonical_json_bytes(ruleset_core))
     ruleset_provisional = RulesetObservationReceipt(
@@ -162,13 +161,13 @@ def test_read_only_producer_promoter_and_updater_material_are_exact(
         base_branch="main",
         ruleset_id=1,
         enforcement="active",
-        required_check_app_ids=policy.required_check_app_ids,
+        required_check_app_ids={},
         bypass_actor_count=0,
         deletion_forbidden=True,
         force_push_forbidden=True,
-        pull_request_required=True,
-        direct_branch_updates_forbidden=True,
-        auto_merge_enabled=True,
+        pull_request_required=False,
+        direct_branch_updates_forbidden=False,
+        auto_merge_enabled=False,
         observed_at=NOW,
         expires_at=NOW + timedelta(minutes=15),
         issuer_id="RULESET:OBSERVER",

@@ -1,4 +1,4 @@
-"""Crash-safe V3.1 automated pull-request publication.
+"""Crash-safe V3.1 exact-SHA direct-main publication.
 
 This module deliberately knows only the independent verifier's public receipt and
 check-authorization wire formats.  It cannot import or execute private oracle logic.
@@ -168,7 +168,7 @@ class PublicActivationAuthorization(V3Model):
 
 class PublicationTransaction(V3Model):
     schema_version: Literal["3.1"] = "3.1"
-    transaction_id: str = Field(pattern=r"^PRPUB-[A-Z0-9_-]+$")
+    transaction_id: str = Field(pattern=r"^MAINPUB-[A-Z0-9_-]+$")
     work_item_id: str = Field(pattern=_WORK_ITEM.pattern)
     base_sha: str = Field(pattern=SHA_PATTERN.pattern)
     candidate_sha: str = Field(pattern=SHA_PATTERN.pattern)
@@ -207,15 +207,32 @@ class PublicationTransaction(V3Model):
     def coherent(self) -> PublicationTransaction:
         if self.updated_at < self.created_at or self.attempt > self.maximum_attempts:
             raise ValueError("publication timestamps or retry budget are inconsistent")
-        if self.pull_request_number is None and self.pull_request_url is not None:
-            raise ValueError("pull-request URL requires a number")
-        if self.phase not in {
+        direct_phases = {
             PublicationPhase.PREPARED,
-            PublicationPhase.BRANCH_PUSHED,
+            PublicationPhase.MERGED,
+            PublicationPhase.MAIN_VERIFIED,
+            PublicationPhase.INVARIANTS_VERIFIED,
+            PublicationPhase.REVERT_REQUIRED,
+            PublicationPhase.REVERTED,
             PublicationPhase.FAILED,
             PublicationPhase.HARD_STUCK,
-        } and (self.pull_request_number is None or self.pull_request_url is None):
-            raise ValueError("opened publication phase requires a pull request")
+        }
+        if self.phase not in direct_phases:
+            raise ValueError("pull-request publication phases are forbidden")
+        if any(
+            value is not None
+            for value in (
+                self.pull_request_number,
+                self.pull_request_url,
+                self.revert_pull_request_number,
+                self.revert_pull_request_url,
+            )
+        ):
+            raise ValueError("pull-request identity is forbidden")
+        if self.candidate_branch != "main":
+            raise ValueError("direct publication target must be main")
+        if self.revert_branch not in {None, "main"}:
+            raise ValueError("direct revert target must be main")
         if (self.receipt_id is None) != (self.receipt_digest is None):
             raise ValueError("receipt identity and digest must be recorded together")
         if (self.expected_machine_policy_receipt_id is None) != (
@@ -266,6 +283,8 @@ class ReceiptAuthorizer(Protocol):
 
 class PublicationClient(Protocol):
     def remote_branch_sha(self, branch: str) -> str | None: ...
+
+    def push_main(self, *, sha: str, expected_base_sha: str) -> None: ...
 
     def push_candidate_branch(self, *, sha: str, branch: str) -> None: ...
 
@@ -482,15 +501,15 @@ class ExternalReceiptAuthorizer:
 
 
 class GhPublicationClient:
-    """Minimal GitHub transport; every mutating operation is PR-branch scoped."""
+    """Minimal GitHub transport for race-checked, non-force direct-main pushes."""
 
     def __init__(
-        self, repo_root: Path, *, remote: str, repository: str, branch_prefix: str
+        self, repo_root: Path, *, remote: str, repository: str
     ) -> None:
         self.repo_root = repo_root.resolve()
         self.remote = remote
         self.repository = repository
-        self.branch_prefix = branch_prefix
+        self.branch_prefix = "factory/"
 
     def _run(self, args: list[str]) -> Any:
         result = run_command(args, cwd=self.repo_root, check=False, timeout=300)
@@ -532,6 +551,19 @@ class GhPublicationClient:
             raise PublicationError("publication source must be an exact commit SHA")
         _safe_branch(branch, prefix=self.branch_prefix)
         self._run(["git", "push", "--porcelain", self.remote, f"{sha}:refs/heads/{branch}"])
+
+    def push_main(self, *, sha: str, expected_base_sha: str) -> None:
+        if not re.fullmatch(SHA_PATTERN, sha) or not re.fullmatch(
+            SHA_PATTERN, expected_base_sha
+        ):
+            raise PublicationError("direct publication requires exact commit SHAs")
+        if self.remote_branch_sha("main") != expected_base_sha:
+            raise PublicationError("main moved before direct publication")
+        # Deliberately omit every force option. A race after the observation is
+        # rejected by GitHub as a non-fast-forward rather than overwriting main.
+        self._run(["git", "push", "--porcelain", self.remote, f"{sha}:refs/heads/main"])
+        if self.remote_branch_sha("main") != sha:
+            raise PublicationError("direct publication did not advance main to the exact SHA")
 
     @staticmethod
     def _pr(raw: Mapping[str, object]) -> PullRequestObservation:
@@ -767,8 +799,8 @@ class GhPublicationClient:
         return sha
 
 
-class AutomatedPRPublisher:
-    """Automated exact-SHA PR publication with durable reconciliation and revert PRs."""
+class DirectMainPublisher:
+    """Automated exact-SHA direct-main publication with durable reconciliation."""
 
     def __init__(
         self,
@@ -803,10 +835,10 @@ class AutomatedPRPublisher:
         self.anchor_main_observer = anchor_main_observer or (
             lambda: current_sha(self.git_root, "refs/heads/main")
         )
-        if getattr(config, "publisher_capability", None) != "AUTOMATED_PR_V31_READY":
-            raise PublicationError("automated PR publisher capability is not active")
-        if getattr(config, "direct_main_push", True) is not False:
-            raise PublicationError("direct main publication is forbidden")
+        if getattr(config, "publisher_capability", None) != "DIRECT_MAIN_V31_READY":
+            raise PublicationError("direct-main publisher capability is not active")
+        if getattr(config, "direct_main_push", False) is not True:
+            raise PublicationError("direct main publication is not enabled")
         names = set(getattr(config.remote_ci, "required_workflows", []))
         if MACHINE_POLICY_CHECK not in names:
             raise PublicationError("independent machine-policy check is not required")
@@ -1068,51 +1100,49 @@ class AutomatedPRPublisher:
             raise PublicationError("publication transaction is HARD_STUCK")
         if tx.terminal:
             return tx
-        before_merge = {
-            PublicationPhase.PREPARED,
-            PublicationPhase.BRANCH_PUSHED,
-            PublicationPhase.PR_OPEN,
-            PublicationPhase.CHECKS_PENDING,
-            PublicationPhase.POLICY_PENDING,
-            PublicationPhase.READY_TO_MERGE,
-        }
-        if tx.phase in before_merge and self.client.remote_branch_sha("main") != tx.base_sha:
-            return self._premerge_fail(tx, "main moved from the receipt-bound base SHA")
         if tx.phase is PublicationPhase.PREPARED:
-            if tx.expected_machine_policy_receipt_id is not None:
-                try:
-                    preauthorized = self._authorize(
-                        tx,
-                        sha=tx.candidate_sha,
-                        manifest_digest=tx.candidate_manifest_digest,
-                    )
-                except (FileNotFoundError, PublicationPending):
-                    return tx
-                except PublicationError as exc:
-                    return self._premerge_fail(tx, str(exc))
-                if (
-                    preauthorized.authorization.receipt_id
-                    != tx.expected_machine_policy_receipt_id
-                    or preauthorized.authorization.receipt_digest
-                    != tx.expected_machine_policy_receipt_digest
-                ):
-                    return self._premerge_fail(
-                        tx,
-                        "publication receipt differs from the pre-authorized Phase 11 receipt",
-                    )
+            observed_main = self.client.remote_branch_sha("main")
+            if observed_main == tx.candidate_sha:
                 tx = self._save(
                     tx,
-                    receipt_id=preauthorized.authorization.receipt_id,
-                    receipt_digest=preauthorized.authorization.receipt_digest,
+                    PublicationPhase.MERGED,
+                    merged_main_sha=tx.candidate_sha,
                 )
-                self._assert_transaction_candidate_frozen(tx)
-            remote = self.client.remote_branch_sha(tx.candidate_branch)
-            if remote is None:
-                self._assert_transaction_candidate_frozen(tx)
-                self.client.push_candidate_branch(sha=tx.candidate_sha, branch=tx.candidate_branch)
-            elif remote != tx.candidate_sha:
-                return self._hard(tx, "candidate branch already points to another SHA")
-            tx = self._save(tx, PublicationPhase.BRANCH_PUSHED)
+            elif observed_main != tx.base_sha:
+                return self._premerge_fail(tx, "main moved from the receipt-bound base SHA")
+        if tx.phase is PublicationPhase.PREPARED:
+            try:
+                preauthorized = self._authorize(
+                    tx,
+                    sha=tx.candidate_sha,
+                    manifest_digest=tx.candidate_manifest_digest,
+                )
+            except (FileNotFoundError, PublicationPending):
+                return tx
+            except PublicationError as exc:
+                return self._premerge_fail(tx, str(exc))
+            if tx.expected_machine_policy_receipt_id is not None and (
+                preauthorized.authorization.receipt_id
+                != tx.expected_machine_policy_receipt_id
+                or preauthorized.authorization.receipt_digest
+                != tx.expected_machine_policy_receipt_digest
+            ):
+                return self._premerge_fail(
+                    tx,
+                    "publication receipt differs from the pre-authorized Phase 11 receipt",
+                )
+            tx = self._save(
+                tx,
+                receipt_id=preauthorized.authorization.receipt_id,
+                receipt_digest=preauthorized.authorization.receipt_digest,
+            )
+            self._assert_transaction_candidate_frozen(tx)
+            self.client.push_main(sha=tx.candidate_sha, expected_base_sha=tx.base_sha)
+            tx = self._save(
+                tx,
+                PublicationPhase.MERGED,
+                merged_main_sha=tx.candidate_sha,
+            )
         if tx.phase is PublicationPhase.BRANCH_PUSHED:
             marker = f"<!-- {tx.transaction_id} -->"
             pr = self.client.find_pull_request(
@@ -1195,7 +1225,7 @@ class AutomatedPRPublisher:
             assert tx.merged_main_sha is not None
             remote = self.client.remote_branch_sha("main")
             if remote != tx.merged_main_sha:
-                return self._hard(tx, "remote main does not equal the exact merged PR SHA")
+                return self._hard(tx, "remote main does not equal the exact published SHA")
             # The controller's Git anchor has no remote or credentials.  A separate root-owned,
             # observed-main updater must import the verified commit and atomically advance main.
             # Until that happens this remains a durable active transaction and no completion or
@@ -1232,10 +1262,7 @@ class AutomatedPRPublisher:
                     base_sha=tx.base_sha,
                     message=f"revert: quarantine {tx.work_item_id} {tx.candidate_sha[:12]}",
                 )
-                branch = (
-                    f"{self.config.candidate_branch_prefix}revert/"
-                    f"{tx.work_item_id.lower()}/{revert_sha[:12]}"
-                )
+                branch = "main"
                 tx = self._save(
                     tx,
                     PublicationPhase.REVERT_REQUIRED,
@@ -1245,17 +1272,16 @@ class AutomatedPRPublisher:
             else:
                 revert_sha = tx.revert_sha
                 branch = tx.revert_branch
-            remote = self.client.remote_branch_sha(branch)
-            if remote is None:
-                self.client.push_candidate_branch(sha=revert_sha, branch=branch)
-            elif remote != revert_sha:
-                return self._hard(tx, "revert branch already points to another SHA")
-            tx = self._save(
-                tx,
-                PublicationPhase.REVERT_BRANCH_PUSHED,
-                revert_sha=revert_sha,
-                revert_branch=branch,
+            assert tx.merged_main_sha is not None
+            self.client.push_main(
+                sha=revert_sha,
+                expected_base_sha=tx.merged_main_sha,
             )
+            if self.client.commit_tree_sha(revert_sha) != self.client.commit_tree_sha(
+                tx.base_sha
+            ):
+                return self._hard(tx, "direct revert tree does not restore the exact base tree")
+            return self._save(tx, PublicationPhase.REVERTED, reverted_main_sha=revert_sha)
         if tx.phase is PublicationPhase.REVERT_BRANCH_PUSHED:
             assert tx.revert_branch is not None and tx.revert_sha is not None
             marker = f"<!-- {tx.transaction_id}-REVERT -->"
@@ -1408,14 +1434,11 @@ class AutomatedPRPublisher:
             if self._prepared.pop(candidate_sha, None) is None:
                 raise PublicationError("candidate lacks exact-SHA pre-promotion gate evidence")
             work_item_id = str(item.work_item_id)
-            branch = (
-                f"{self.config.candidate_branch_prefix}{work_item_id.lower()}/{candidate_sha[:12]}"
-            )
-            _safe_branch(branch, prefix=self.config.candidate_branch_prefix)
+            branch = "main"
             now = self.clock()
             tx = PublicationTransaction(
                 transaction_id=(
-                    f"PRPUB-{work_item_id.replace('-', '_')}-{candidate_sha[:12].upper()}"
+                    f"MAINPUB-{work_item_id.replace('-', '_')}-{candidate_sha[:12].upper()}"
                 ),
                 work_item_id=work_item_id,
                 base_sha=manifest.base_sha,
@@ -1454,8 +1477,6 @@ class AutomatedPRPublisher:
             "status": status,
             "transactionId": tx.transaction_id,
             "candidateSha": tx.candidate_sha,
-            "pullRequestNumber": tx.pull_request_number,
-            "pullRequestUrl": tx.pull_request_url,
             "machinePolicyReceiptDigest": tx.receipt_digest,
             "mergedMainSha": tx.merged_main_sha,
             "phase": tx.phase.value,

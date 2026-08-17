@@ -168,24 +168,7 @@ def _observe(uid: int) -> None:
         if isinstance(raw, dict) and isinstance(cast(dict[str, object], raw).get("type"), str)
     }
     validate_release_rule_types(set(rule_map))
-    parameters = rule_map["required_status_checks"].get("parameters")
-    if not isinstance(parameters, dict):
-        raise ValueError("ruleset status-check parameters are unavailable")
-    raw_checks = cast(dict[str, object], parameters).get("required_status_checks")
-    if not isinstance(raw_checks, list):
-        raise ValueError("ruleset status-check roster is unavailable")
     observed: dict[str, int] = {}
-    for raw in cast(list[object], raw_checks):
-        if isinstance(raw, dict):
-            check = cast(dict[str, object], raw)
-            if isinstance(check.get("context"), str) and isinstance(
-                check.get("integration_id"), int
-            ):
-                observed[cast(str, check["context"])] = cast(int, check["integration_id"])
-    if observed != expected:
-        raise ValueError("ruleset exact check/App mapping differs from policy")
-    if not repository_auto_merge_enabled(repository, token):
-        raise ValueError("repository auto-merge is disabled")
     now = datetime.now(UTC)
     core = {
         "repository": repository,
@@ -196,9 +179,9 @@ def _observe(uid: int) -> None:
         "bypassActorCount": 0,
         "deletionForbidden": True,
         "forcePushForbidden": True,
-        "pullRequestRequired": True,
-        "directBranchUpdatesForbidden": True,
-        "autoMergeEnabled": True,
+        "pullRequestRequired": False,
+        "directBranchUpdatesForbidden": False,
+        "autoMergeEnabled": False,
     }
     observation_digest = sha256_digest(canonical_json_bytes(core))
     provisional = RulesetObservationReceipt(
@@ -213,9 +196,9 @@ def _observe(uid: int) -> None:
         bypass_actor_count=0,
         deletion_forbidden=True,
         force_push_forbidden=True,
-        pull_request_required=True,
-        direct_branch_updates_forbidden=True,
-        auto_merge_enabled=True,
+        pull_request_required=False,
+        direct_branch_updates_forbidden=False,
+        auto_merge_enabled=False,
         observed_at=now,
         expires_at=now + timedelta(minutes=15),
         issuer_id="RULESET:OBSERVER",

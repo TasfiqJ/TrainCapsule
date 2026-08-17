@@ -126,12 +126,12 @@
       "additionalProperties": false,
       "properties": {
         "directMainPushForbidden": {
-          "const": true,
+          "const": false,
           "title": "Directmainpushforbidden",
           "type": "boolean"
         },
         "automatedPullRequestRequired": {
-          "const": true,
+          "const": false,
           "title": "Automatedpullrequestrequired",
           "type": "boolean"
         },
@@ -146,7 +146,7 @@
           "type": "boolean"
         },
         "mergeQueueOrAutoMergeRequired": {
-          "const": true,
+          "const": false,
           "title": "Mergequeueorautomergerequired",
           "type": "boolean"
         },
@@ -156,7 +156,7 @@
           "type": "boolean"
         },
         "publisherCapability": {
-          "const": "AUTOMATED_PR_V31_READY",
+          "const": "DIRECT_MAIN_V31_READY",
           "title": "Publishercapability",
           "type": "string"
         }
@@ -182,19 +182,14 @@
           "type": "string"
         },
         "releaseMode": {
-          "const": "AUTOMATED_PR_REQUIRED_CHECKS_MACHINE_RECEIPT_AUTO_MERGE",
+          "const": "DIRECT_MAIN_EXACT_SHA_MACHINE_RECEIPT_POST_PUSH_VERIFY",
           "title": "Releasemode",
           "type": "string"
         },
         "directMainPush": {
-          "const": false,
+          "const": true,
           "title": "Directmainpush",
           "type": "boolean"
-        },
-        "candidateBranchPrefix": {
-          "const": "factory/",
-          "title": "Candidatebranchprefix",
-          "type": "string"
         },
         "requireCleanBase": {
           "title": "Requirecleanbase",
@@ -210,7 +205,6 @@
         "baseBranch",
         "releaseMode",
         "directMainPush",
-        "candidateBranchPrefix",
         "requireCleanBase",
         "candidateManifestRequired"
       ],

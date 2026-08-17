@@ -413,32 +413,16 @@ def produce(
         if (
             ruleset.repository != job.repository
             or ruleset.expires_at <= observed_now
-            or ruleset.required_check_app_ids != policy.required_check_app_ids
         ):
             raise ValueError("anchor authority binding is invalid")
         transaction = _canonical_mapping(publication_raw)
         candidate_sha = transaction.get("candidateSha")
-        pull_request_number = transaction.get("pullRequestNumber")
-        if not isinstance(candidate_sha, str) or not isinstance(pull_request_number, int):
-            raise ValueError("anchor fetcher publication lacks exact PR/candidate identity")
-        pull = _github_json(
-            f"/repos/{job.repository}/pulls/{pull_request_number}", token
-        )
-        if not isinstance(pull, dict):
-            raise ValueError("anchor fetcher pull-request response is invalid")
-        typed_pull = cast(dict[str, object], pull)
-        pull_head = typed_pull.get("head")
-        pull_base = typed_pull.get("base")
         if (
-            typed_pull.get("merged") is not True
-            or typed_pull.get("merge_commit_sha") != job.merged_main_sha
-            or not isinstance(pull_head, dict)
-            or cast(dict[str, object], pull_head).get("sha") != candidate_sha
-            or not isinstance(pull_base, dict)
-            or cast(dict[str, object], pull_base).get("ref") != "main"
-            or cast(dict[str, object], pull_base).get("sha") != job.base_sha
+            not isinstance(candidate_sha, str)
+            or candidate_sha != job.merged_main_sha
+            or transaction.get("baseSha") != job.base_sha
         ):
-            raise ValueError("anchor fetcher PR merge binding is invalid")
+            raise ValueError("anchor fetcher direct-main publication binding is invalid")
         branch = _github_json(f"/repos/{job.repository}/branches/main", token)
         if not isinstance(branch, dict):
             raise ValueError("anchor fetcher main response is invalid")

@@ -31,11 +31,12 @@ protected policy, private oracles, signing keys, revocation state, and credentia
 expiring, revocable, non-replayable exact-SHA receipts. An unavailable or invalid authority fails
 closed.
 
-Release is candidate branch → automated pull request → required exact-head-SHA hosted/private checks
-→ valid independent machine-policy receipt/check → merge queue or auto-merge → exact merged-main
-verification. Direct updates to protected `main`, force push, bypass, and reuse of another SHA's pass
-are forbidden. Controller activation requires a separate signed external receipt binding the exact
-merged SHA, environment, generation, controller, configuration, policy, canaries, and expiry.
+Release is frozen candidate → required local/private gates → valid independent machine-policy
+receipt → race-checked non-force exact-SHA push to `main` → post-push hosted checks and exact-main
+verification. Pull requests, candidate-branch publication, force push, deletion, bypass, and reuse
+of another SHA's pass are forbidden. Controller activation requires a separate signed external
+receipt binding the exact published SHA, environment, generation, controller, configuration,
+policy, canaries, and expiry.
 
 All original V3 laws for exact identity, evidence provenance, native-first and complete-substitute
 comparison, explicit `UNKNOWN`, controlled-evidence ceilings, finite retry/recovery, bounded roadmap,

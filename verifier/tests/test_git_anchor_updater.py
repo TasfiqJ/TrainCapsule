@@ -82,18 +82,18 @@ def _fixture(tmp_path: Path, *, lagged: bool = False) -> dict[str, object]:
     _git(source, "bundle", "create", str(bundle), "main")
     selector = Ed25519PrivateKey.generate()
     ruleset_key = Ed25519PrivateKey.generate()
-    core = {
+    core: dict[str, object] = {
         "repository": "TasfiqJ/TrainCapsule",
         "baseBranch": "main",
         "rulesetId": 1,
         "enforcement": "active",
-        "requiredCheckAppIds": {"Factory quality": 15368},
+        "requiredCheckAppIds": {},
         "bypassActorCount": 0,
         "deletionForbidden": True,
         "forcePushForbidden": True,
-        "pullRequestRequired": True,
-        "directBranchUpdatesForbidden": True,
-        "autoMergeEnabled": True,
+        "pullRequestRequired": False,
+        "directBranchUpdatesForbidden": False,
+        "autoMergeEnabled": False,
     }
     ruleset_digest = sha256_digest(canonical_json_bytes(core))
     ruleset_provisional = RulesetObservationReceipt(
@@ -104,13 +104,13 @@ def _fixture(tmp_path: Path, *, lagged: bool = False) -> dict[str, object]:
         base_branch="main",
         ruleset_id=1,
         enforcement="active",
-        required_check_app_ids={"Factory quality": 15368},
+        required_check_app_ids={},
         bypass_actor_count=0,
         deletion_forbidden=True,
         force_push_forbidden=True,
-        pull_request_required=True,
-        direct_branch_updates_forbidden=True,
-        auto_merge_enabled=True,
+        pull_request_required=False,
+        direct_branch_updates_forbidden=False,
+        auto_merge_enabled=False,
         observed_at=NOW,
         expires_at=NOW + timedelta(minutes=15),
         issuer_id="RULESET:OBSERVER",

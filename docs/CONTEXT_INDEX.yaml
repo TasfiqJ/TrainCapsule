@@ -13,13 +13,13 @@ groups:
     maxCharacters: 44000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/00_EXECUTIVE_BUILD_DECISION_V3_1_ZH.md
-        sha256: 3ba7bba9f99692634eafadc41b6fef3a45d77523fc4fb4cae07ebe8a832fbfa1
+        sha256: 53df032fa62d0840c3f4bcd47fafc2abb99675b8be350055e59a89e8f590a6b9
         authorityClass: normative_executive
         authoritySections: ["§V3.1-ZH controlling amendment", "§00.2 The product being built", "§00.5 Product boundary", "§00.9 Maturity model", "§00.10 Independent machine authority"]
         scope: Company boundary, maturity, and independent machine authority.
         freshnessPolicy: manifest_locked
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3_1_ZH.md
-        sha256: efc721763e42b9e8c664ffc67d64526c56f1365f29ce15b95e5362249580f912
+        sha256: f7183182fe2c13f7fabebf5d93bab724a3572344b10f621e20df50b70ff05a79
         authorityClass: normative_product
         authoritySections: ["§03.1 Product definition", "§03.6 Product workflow", "§03.7 Product outputs", "§03.14 Required nonfunctional properties", "§03.19 Claims policy"]
         scope: Product workflow, outputs, nonfunctional properties, and claim limits.
@@ -35,7 +35,7 @@ groups:
     maxCharacters: 36000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/04_TECHNICAL_ARCHITECTURE_V3_1_ZH.md
-        sha256: d66e62e4ef190a96f14108a5fcfb1817f2120095196b6882f6237728dbfb2cd8
+        sha256: ee39972e3b838b3d9c052ae2bc529bf8046f1488debcd142b242d860ab933c95
         authorityClass: normative_architecture
         authoritySections: ["§V3.1-ZH controlling amendment", "§04.4 Repository layout", "§04.6 Core domain objects", "§04.16 Independent machine authorization boundary", "§04.17 Security architecture", "§04.21 Testing architecture", "§04.23 Packaging and deployment"]
         scope: Architecture and implementation constraints.
@@ -51,7 +51,7 @@ groups:
     maxCharacters: 32000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3_1_ZH.md
-        sha256: 1e308439213ed94d6190db975b5a2cd61c2b5784fc39942e4e48a8cb16ae72a5
+        sha256: 52659f419107bb0acc77a92866ada9d4970a07924cb452b2c277c62fc860cc7a
         authorityClass: normative_trust
         authoritySections: ["§V3.1-ZH controlling amendment", "§05.3 Evidence provenance", "§05.4 Evidence completeness", "§05.5 Identity law", "§05.6 Native baseline law", "§05.20 Independent machine authority", "§05.21 AI role boundaries", "§05.29 Minimum external verifier"]
         scope: Trust invariants and decision boundaries.
@@ -67,7 +67,7 @@ groups:
     maxCharacters: 30000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/06_COMMERCIAL_MODEL_AND_GTM_V3_1_ZH.md
-        sha256: 485c38a199b6317f9720bc1bb4eb43bf189e44b89f276c287d841da1b27a51a6
+        sha256: 6c9a4d5d610f53500d44afb72e42b563b9c4f9521463523be6a0af766cbaa1fc
         authorityClass: normative_commercial
         authoritySections: ["§06.4 Ideal customer profile", "§06.6 Offer ladder", "§06.10 Complete-substitute benchmark", "§06.16 Validation gates", "§06.17 Stop and pivot rules"]
         scope: Commercial hypotheses and gated validation.
@@ -83,7 +83,7 @@ groups:
     maxCharacters: 29000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3_1_ZH.md
-        sha256: cc4b73358c85d80249999ffbf96c0fe723e6318e42d89e8a211e989eaef2729d
+        sha256: f8e2e8ae98fefb43c21470961583b9a990f213aa0865d20ee993d3bae9ab2cd1
         authorityClass: normative_roadmap
         authoritySections: ["§12.2 Milestone map", "§12.3 M0 — Factory and source-of-truth migration", "§12.4 M1 — Native preflight and problem access", "§12.12 Legacy 124-task ledger disposition", "§12.13 Operating cadence"]
         scope: Current milestone gates and work dispositions.
@@ -99,7 +99,7 @@ groups:
     maxCharacters: 20000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/13_SOURCE_REGISTER_V3_1_ZH.md
-        sha256: 0fa8699ad2070cfd2093899e4b3eec17ed543a15c99f081bc5363c9a2e79280c
+        sha256: cf24b992523dfb636e4113a4c3a35c5245d66c752e99f14fb8dda0c141c0e10f
         authorityClass: current_fact
         authoritySections: ["§13.2 Current native and platform baselines", "§13.3 Direct and adjacent commercial competitors", "§13.6 Capability matrix", "§13.8 Monthly update procedure", "§13.9 Claim rules"]
         scope: Dated native, competitor, and factory facts requiring freshness evidence.
@@ -115,13 +115,13 @@ groups:
     maxCharacters: 53000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/FACTORY_LOOP_REDESIGN_SPEC_V3_1_ZH.md
-        sha256: 7654d080165084aa7111712d8c655264458235202af2142ca0e7d495f3688bae
+        sha256: eb2585a1a89a4d4c234081e98b7bb37cf37ba66478e8072665b27cd756c9db89
         authorityClass: normative_factory
         authoritySections: ["§V3.1-ZH controlling amendment", "§7. Four-lane scheduler", "§10. Retry and recovery policy", "§13. Pipeline redesign", "§15. Machine-policy authorization state", "§17. Agent backend abstraction", "§25. Startup and restart redesign", "§26. Git and GitHub release redesign"]
         scope: Controller, scheduler, recovery, and release design.
         freshnessPolicy: manifest_locked
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3_1_ZH.md
-        sha256: ea2df9cc6e41c0e679c208ed8c2615c938f644711c25cea35052ee2cd865606d
+        sha256: 8a9e3736ae634923a4061b288390e9343e35dd5bb6eac9610601fa490e35e85d
         authorityClass: executor_policy
         authoritySections: ["§V3.1-ZH controlling amendment", "§Independent machine authority", "§Work-item protocol", "§Factory-specific implementation rules", "§Git rules", "§Stop conditions"]
         scope: Bounded executor contract and stop conditions.
@@ -137,13 +137,13 @@ groups:
     maxCharacters: 48000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/06_COMMERCIAL_MODEL_AND_GTM_V3_1_ZH.md
-        sha256: 485c38a199b6317f9720bc1bb4eb43bf189e44b89f276c287d841da1b27a51a6
+        sha256: 6c9a4d5d610f53500d44afb72e42b563b9c4f9521463523be6a0af766cbaa1fc
         authorityClass: normative_commercial
         authoritySections: ["§06.4 Ideal customer profile", "§06.10 Complete-substitute benchmark", "§06.16 Validation gates", "§06.17 Stop and pivot rules"]
         scope: Wedge hypothesis and kill gates.
         freshnessPolicy: manifest_locked
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/13_SOURCE_REGISTER_V3_1_ZH.md
-        sha256: 0fa8699ad2070cfd2093899e4b3eec17ed543a15c99f081bc5363c9a2e79280c
+        sha256: cf24b992523dfb636e4113a4c3a35c5245d66c752e99f14fb8dda0c141c0e10f
         authorityClass: current_fact
         authoritySections: ["§13.2 Current native and platform baselines", "§13.3 Direct and adjacent commercial competitors", "§13.6 Capability matrix"]
         scope: Dated substitute evidence.
@@ -159,19 +159,19 @@ groups:
     maxCharacters: 84000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/04_TECHNICAL_ARCHITECTURE_V3_1_ZH.md
-        sha256: d66e62e4ef190a96f14108a5fcfb1817f2120095196b6882f6237728dbfb2cd8
+        sha256: ee39972e3b838b3d9c052ae2bc529bf8046f1488debcd142b242d860ab933c95
         authorityClass: normative_architecture
         authoritySections: ["§04.6 Core domain objects", "§04.8 Initial native integration", "§04.9 Eligibility engine", "§04.17 Security architecture"]
         scope: Native integration architecture.
         freshnessPolicy: manifest_locked
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3_1_ZH.md
-        sha256: 1e308439213ed94d6190db975b5a2cd61c2b5784fc39942e4e48a8cb16ae72a5
+        sha256: 52659f419107bb0acc77a92866ada9d4970a07924cb452b2c277c62fc860cc7a
         authorityClass: normative_trust
         authoritySections: ["§05.3 Evidence provenance", "§05.4 Evidence completeness", "§05.5 Identity law", "§05.6 Native baseline law"]
         scope: Native trust law.
         freshnessPolicy: manifest_locked
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/13_SOURCE_REGISTER_V3_1_ZH.md
-        sha256: 0fa8699ad2070cfd2093899e4b3eec17ed543a15c99f081bc5363c9a2e79280c
+        sha256: cf24b992523dfb636e4113a4c3a35c5245d66c752e99f14fb8dda0c141c0e10f
         authorityClass: current_fact
         authoritySections: ["§13.2 Current native and platform baselines"]
         scope: Current native format and capability facts.
@@ -187,19 +187,19 @@ groups:
     maxCharacters: 81000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/03_PRODUCT_STRATEGY_AND_REQUIREMENTS_V3_1_ZH.md
-        sha256: efc721763e42b9e8c664ffc67d64526c56f1365f29ce15b95e5362249580f912
+        sha256: f7183182fe2c13f7fabebf5d93bab724a3572344b10f621e20df50b70ff05a79
         authorityClass: normative_product
         authoritySections: ["§03.8 Initial incident pack", "§03.9 Checkpoint pack policy"]
         scope: Initial pack product boundary.
         freshnessPolicy: manifest_locked
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/05_TRUST_REPLAY_REDUCTION_AND_CAPSULE_SPEC_V3_1_ZH.md
-        sha256: 1e308439213ed94d6190db975b5a2cd61c2b5784fc39942e4e48a8cb16ae72a5
+        sha256: 52659f419107bb0acc77a92866ada9d4970a07924cb452b2c277c62fc860cc7a
         authorityClass: normative_trust
         authoritySections: ["§05.26 Initial pack: pre-collective lifecycle", "§05.27 Checkpoint/resume reference pack policy"]
         scope: Initial pack trust boundary.
         freshnessPolicy: manifest_locked
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/12_GATE_BASED_ROADMAP_AND_BACKLOG_V3_1_ZH.md
-        sha256: cc4b73358c85d80249999ffbf96c0fe723e6318e42d89e8a211e989eaef2729d
+        sha256: f8e2e8ae98fefb43c21470961583b9a990f213aa0865d20ee993d3bae9ab2cd1
         authorityClass: normative_roadmap
         authoritySections: ["§12.4 M1 — Native preflight and problem access", "§12.5 M2 — Controlled end-to-end qualification", "§12.10 Checkpoint pack roadmap"]
         scope: Initial pack gates and deferred scope.
@@ -215,7 +215,7 @@ groups:
     maxCharacters: 20000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/13_SOURCE_REGISTER_V3_1_ZH.md
-        sha256: 0fa8699ad2070cfd2093899e4b3eec17ed543a15c99f081bc5363c9a2e79280c
+        sha256: cf24b992523dfb636e4113a4c3a35c5245d66c752e99f14fb8dda0c141c0e10f
         authorityClass: current_fact
         authoritySections: ["§13.2 Current native and platform baselines", "§13.3 Direct and adjacent commercial competitors", "§13.6 Capability matrix", "§13.8 Monthly update procedure"]
         scope: Dated market evidence requiring refresh.
@@ -231,13 +231,13 @@ groups:
     maxCharacters: 53000
     entries:
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/FACTORY_LOOP_REDESIGN_SPEC_V3_1_ZH.md
-        sha256: 7654d080165084aa7111712d8c655264458235202af2142ca0e7d495f3688bae
+        sha256: eb2585a1a89a4d4c234081e98b7bb37cf37ba66478e8072665b27cd756c9db89
         authorityClass: normative_factory
         authoritySections: ["§7. Four-lane scheduler", "§8. Scheduler score", "§10. Retry and recovery policy", "§13. Pipeline redesign", "§17. Agent backend abstraction", "§25. Startup and restart redesign", "§26. Git and GitHub release redesign"]
         scope: Controller and recovery implementation.
         freshnessPolicy: manifest_locked
       - path: docs/source-of-truth/v3.1-zh-2026-08-12/14_CLAUDE_CODE_MASTER_BUILD_PROMPT_V3_1_ZH.md
-        sha256: ea2df9cc6e41c0e679c208ed8c2615c938f644711c25cea35052ee2cd865606d
+        sha256: 8a9e3736ae634923a4061b288390e9343e35dd5bb6eac9610601fa490e35e85d
         authorityClass: executor_policy
         authoritySections: ["§Work-item protocol", "§Factory-specific implementation rules", "§Git rules", "§Stop conditions"]
         scope: Executor protocol and stop conditions.

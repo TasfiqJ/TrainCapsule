@@ -58,8 +58,10 @@ PYTHONPATH="$ROOT/verifier/src${PYTHONPATH:+:$PYTHONPATH}" \
 "$UV_BIN" run --active --no-sync python scripts/update_v3_migration_inventory.py --check
 "$UV_BIN" run --active --no-sync python scripts/update_v31_findings_candidate.py --check
 "$UV_BIN" run --active --no-sync python scripts/gates/no_paid_usage.py
-"$UV_BIN" run --active --no-sync tcfactory config validate
-"$UV_BIN" run --active --no-sync tcfactory migrate-roadmap --from-v2 --dry-run
+PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" \
+  "$UV_BIN" run --active --no-sync tcfactory config validate
+PYTHONPATH="$ROOT${PYTHONPATH:+:$PYTHONPATH}" \
+  "$UV_BIN" run --active --no-sync tcfactory migrate-roadmap --from-v2 --dry-run
 "$UV_BIN" build --offline --wheel
 "$UV_BIN" build --offline --wheel --project verifier --out-dir dist/verifier
 

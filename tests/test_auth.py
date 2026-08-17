@@ -193,6 +193,58 @@ def test_sanitized_agent_environment_loads_token_file_and_removes_api_routes(
     assert "TCF_ENV_FILE" not in environment
 
 
+def test_project_sandbox_credential_boundary_accepts_strict_policy(tmp_path: Path) -> None:
+    settings_dir = tmp_path / ".claude"
+    settings_dir.mkdir()
+    (settings_dir / "settings.json").write_text(
+        json.dumps(
+            {
+                "sandbox": {
+                    "enabled": True,
+                    "failIfUnavailable": True,
+                    "allowUnsandboxedCommands": False,
+                    "credentials": {
+                        "envVars": [{"name": "CLAUDE_CODE_OAUTH_TOKEN", "mode": "deny"}],
+                        "files": [
+                            {
+                                "path": "~/.config/traincapsule/claude-oauth-token",
+                                "mode": "deny",
+                            },
+                            {"path": "~/.claude/.credentials.json", "mode": "deny"},
+                        ],
+                    },
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    auth.assert_project_sandbox_credential_boundary(tmp_path)
+
+
+def test_project_sandbox_credential_boundary_rejects_missing_oauth_deny(
+    tmp_path: Path,
+) -> None:
+    settings_dir = tmp_path / ".claude"
+    settings_dir.mkdir()
+    (settings_dir / "settings.json").write_text(
+        json.dumps(
+            {
+                "sandbox": {
+                    "enabled": True,
+                    "failIfUnavailable": True,
+                    "allowUnsandboxedCommands": False,
+                    "credentials": {"envVars": [], "files": []},
+                }
+            }
+        ),
+        encoding="utf-8",
+    )
+
+    with pytest.raises(RuntimeError, match="must deny OAuth"):
+        auth.assert_project_sandbox_credential_boundary(tmp_path)
+
+
 def test_sanitized_agent_environment_keeps_explicit_claude_config_dir(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

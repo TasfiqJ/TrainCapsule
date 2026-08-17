@@ -20,9 +20,9 @@ def test_provider_task_budget_uses_current_minimum() -> None:
     assert provider_compatible_task_budget(36_000) == 36_000
 
 
-def test_only_read_only_roles_force_subprocess_environment_scrubbing() -> None:
-    assert subprocess_env_scrub_value(read_only=True) == "1"
-    assert subprocess_env_scrub_value(read_only=False) == "1"
+def test_native_sandbox_credential_boundary_replaces_broken_extra_scrubber() -> None:
+    assert subprocess_env_scrub_value(read_only=True) == "0"
+    assert subprocess_env_scrub_value(read_only=False) == "0"
 
 
 def test_nested_sandbox_home_owns_the_explicit_claude_config_dir(

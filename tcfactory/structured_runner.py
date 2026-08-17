@@ -9,7 +9,12 @@ from typing import Any, TypeVar, cast
 from claude_agent_sdk import EffortLevel, SandboxSettings
 from pydantic import BaseModel
 
-from .auth import sanitized_agent_environment
+from .auth import (
+    assert_project_sandbox_credential_boundary,
+    claude_sandbox_state_environment,
+    sanitized_agent_environment,
+    subprocess_env_scrub_value,
+)
 from .backends.base import (
     AgentTaskRequest,
     BackendRouteState,
@@ -179,6 +184,7 @@ async def run_structured_read_only_review[T: BaseModel](
     artifact_dir.mkdir(parents=True, exist_ok=True)
     transcript = artifact_dir / "transcript-summary.json"
     stderr_path = artifact_dir / "claude-stderr.log"
+    assert_project_sandbox_credential_boundary(cwd)
     environment = sanitized_agent_environment(
         {
             "TCF_TASK_ID": task_id,
@@ -192,7 +198,8 @@ async def run_structured_read_only_review[T: BaseModel](
             "CLAUDE_CODE_MAX_RETRIES": "4",
             "API_TIMEOUT_MS": "300000",
             "CLAUDE_ASYNC_AGENT_STALL_TIMEOUT_MS": "180000",
-            "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": "1",
+            **claude_sandbox_state_environment(),
+            "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": subprocess_env_scrub_value(read_only=True),
         }
     )
 

@@ -123,7 +123,7 @@ No future SHA, run ID, receipt, or PASS is invented here. Retain `factory/state/
 <!-- BEGIN GENERATED FILE INVENTORY -->
 ## Complete tracked file inventory
 
-Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **650 paths**.
+Compared with `6b480232fa92b069103da44c475bd17bcb3e6bd1`: **651 paths**.
 
 This is a deterministic tracked-tree inventory, not acceptance evidence. The enclosing
 report must bind acceptance to an immutable candidate SHA and independent test/receipt
@@ -553,6 +553,7 @@ artifacts.
 | `A` | `scripts/windows_activation_entrypoint.sh` |
 | `M` | `scripts/windows_task_entrypoint.sh` |
 | `M` | `scripts/windows_wsl_prepare.sh` |
+| `M` | `tcfactory/auth.py` |
 | `M` | `tcfactory/autopilot.py` |
 | `A` | `tcfactory/backends/__init__.py` |
 | `A` | `tcfactory/backends/base.py` |

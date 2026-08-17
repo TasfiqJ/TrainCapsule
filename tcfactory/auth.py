@@ -28,6 +28,23 @@ def claude_config_dir() -> Path:
     return Path(override).expanduser() if override else Path.home() / ".claude"
 
 
+def claude_sandbox_state_environment() -> dict[str, str]:
+    """Pin a writable, internally consistent Claude home and config directory."""
+
+    config_dir = claude_config_dir().resolve()
+    return {
+        "HOME": str(config_dir.parent),
+        "CLAUDE_CONFIG_DIR": str(config_dir),
+    }
+
+
+def subprocess_env_scrub_value(*, read_only: bool) -> str:
+    """Use the native sandbox credential policy instead of the broken extra scrubber."""
+
+    del read_only
+    return "0"
+
+
 def subscription_credentials_path() -> Path:
     return claude_config_dir() / ".credentials.json"
 
@@ -176,6 +193,64 @@ def sanitized_agent_environment(extra: dict[str, str] | None = None) -> dict[str
     if extra:
         environment.update(extra)
     return environment
+
+
+def assert_project_sandbox_credential_boundary(project_root: Path) -> None:
+    """Fail closed unless Bash keeps the controller OAuth credential unreachable.
+
+    Claude Code's optional subprocess environment scrubber currently fails to build its
+    bubblewrap mount tree for service accounts.  The native sandbox can provide the same
+    credential boundary, but only when the project policy is present and strict.  Check
+    that policy before a session is allowed to opt out of the broken extra scrubber.
+    """
+
+    settings_path = project_root.resolve() / ".claude" / "settings.json"
+    try:
+        parsed = json.loads(settings_path.read_text(encoding="utf-8"))
+    except (OSError, json.JSONDecodeError) as exc:
+        raise RuntimeError(
+            f"Claude sandbox credential policy is missing or invalid: {settings_path}"
+        ) from exc
+    if not isinstance(parsed, dict):
+        raise RuntimeError(f"Claude sandbox credential policy is invalid: {settings_path}")
+    settings = cast(dict[str, object], parsed)
+    sandbox_value = settings.get("sandbox")
+    if not isinstance(sandbox_value, dict):
+        raise RuntimeError(f"Claude sandbox credential policy is invalid: {settings_path}")
+    sandbox = cast(dict[str, object], sandbox_value)
+    credential_value = sandbox.get("credentials")
+    if not isinstance(credential_value, dict):
+        raise RuntimeError(f"Claude sandbox credential policy is invalid: {settings_path}")
+    credential_policy = cast(dict[str, object], credential_value)
+
+    def denied_values(value: object, *, key: str) -> set[str]:
+        if not isinstance(value, list):
+            return set()
+        denied: set[str] = set()
+        for entry in cast(list[object], value):
+            if not isinstance(entry, dict):
+                continue
+            item = cast(dict[str, object], entry)
+            candidate = item.get(key)
+            if item.get("mode") == "deny" and isinstance(candidate, str):
+                denied.add(candidate)
+        return denied
+
+    denied_environment = denied_values(credential_policy.get("envVars"), key="name")
+    denied_files = denied_values(credential_policy.get("files"), key="path")
+    boundary_is_strict = (
+        sandbox.get("enabled") is True
+        and sandbox.get("failIfUnavailable") is True
+        and sandbox.get("allowUnsandboxedCommands") is False
+        and "CLAUDE_CODE_OAUTH_TOKEN" in denied_environment
+        and "~/.config/traincapsule/claude-oauth-token" in denied_files
+        and "~/.claude/.credentials.json" in denied_files
+    )
+    if not boundary_is_strict:
+        raise RuntimeError(
+            "Claude sandbox credential policy must deny OAuth environment and files, "
+            "fail when unavailable, and forbid unsandboxed commands"
+        )
 
 
 def active_subscription_auth_source() -> AuthSource | None:

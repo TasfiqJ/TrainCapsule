@@ -8,7 +8,13 @@ from typing import Any, cast
 
 from claude_agent_sdk import SandboxSettings, SettingSource
 
-from .auth import assert_max_oauth_only, claude_config_dir, sanitized_agent_environment
+from .auth import (
+    assert_max_oauth_only,
+    assert_project_sandbox_credential_boundary,
+    claude_sandbox_state_environment,
+    sanitized_agent_environment,
+    subprocess_env_scrub_value,
+)
 from .backends.base import BashCommandRule, TranscriptRetention
 from .claude_features import (
     build_session_feature_plan,
@@ -42,23 +48,7 @@ from .util import redact_sensitive, write_json
 MIN_CLAUDE_TASK_BUDGET_TOKENS = 20_000
 REPORT_CONTINUATION_MAX_TURNS = 4
 BACKEND_EVENT_RETENTION_DAYS = 30
-CLAUDE_SANDBOX_CONFIG_REPAIR = "claude-sandbox-home-and-config-dir-v2"
-
-
-def subprocess_env_scrub_value(*, read_only: bool) -> str:
-    """Strip controller credentials from every model-launched subprocess."""
-    del read_only
-    return "1"
-
-
-def claude_sandbox_state_environment() -> dict[str, str]:
-    """Pin a writable, internally consistent Claude home and config directory."""
-
-    config_dir = claude_config_dir().resolve()
-    return {
-        "HOME": str(config_dir.parent),
-        "CLAUDE_CONFIG_DIR": str(config_dir),
-    }
+CLAUDE_SANDBOX_CONFIG_REPAIR = "claude-native-credential-boundary-v3"
 
 
 def writable_uv_cache_dir(worktree: Path) -> Path:
@@ -231,6 +221,7 @@ async def run_agent_stage(
     transcript_retention: TranscriptRetention = TranscriptRetention.REDACTED_SUMMARY,
     strict_tool_allowlist: bool = False,
 ) -> StageResult:
+    assert_project_sandbox_credential_boundary(worktree)
     if config.auth_mode == "max_oauth_only":
         try:
             assert_max_oauth_only(
@@ -423,9 +414,10 @@ async def run_agent_stage(
             "API_TIMEOUT_MS": "300000",
             "CLAUDE_CODE_MAX_RETRIES": "4",
             "CLAUDE_ASYNC_AGENT_STALL_TIMEOUT_MS": "180000",
-            # The environment has already been stripped of credentials and paid API routes.
-            # SDK subprocess hardening removes controller credentials without reducing the
-            # repository write authority granted by the task and OS sandbox.
+            # The parent environment is sanitized and the mandatory project sandbox policy
+            # denies the retained OAuth token and credential files. Claude Code's separate
+            # subprocess scrubber is disabled because it creates its bubblewrap state above
+            # service-account HOME and prevents every Bash command from starting.
             "CLAUDE_CODE_SUBPROCESS_ENV_SCRUB": subprocess_env_scrub_value(read_only=read_only),
         }
     )

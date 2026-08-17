@@ -117,7 +117,7 @@ def test_fixed_sandbox_failure_is_archived_and_reopened_once(tmp_path: Path) -> 
     assert queue.load("V3-MIG-015").status is WorkStatus.READY
     assert checkpoints.load_v3("V3-MIG-015") is None
     recovery = checkpoints.root / "recovery-archive" / (
-        "222222222222-claude-sandbox-home-and-config-dir-v2"
+        "222222222222-claude-native-credential-boundary-v3"
     )
     assert (recovery / "V3-MIG-015.json").is_file()
     journal = json.loads((recovery / "V3-MIG-015.journal.json").read_bytes())

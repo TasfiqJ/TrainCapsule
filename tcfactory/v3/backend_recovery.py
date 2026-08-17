@@ -116,7 +116,7 @@ def recover_repaired_claude_sandbox_blocks(
 ) -> list[str]:
     """Reopen only failures conclusively caused by the repaired sandbox home defect."""
 
-    if CLAUDE_SANDBOX_CONFIG_REPAIR != "claude-sandbox-home-and-config-dir-v2":
+    if CLAUDE_SANDBOX_CONFIG_REPAIR != "claude-native-credential-boundary-v3":
         raise RuntimeError("Claude sandbox repair marker is unavailable")
     recovered: list[str] = []
     recovery_root = checkpoints.root / "recovery-archive" / (

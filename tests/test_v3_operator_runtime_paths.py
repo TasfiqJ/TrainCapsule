@@ -149,6 +149,7 @@ def test_alternate_v2_config_cannot_reach_legacy_v2_control_state(
 
     cli.autonomy_pause(repo=ROOT, config_path=alternate)
     assert (runtime_root / "PAUSE").read_bytes() == b"pause requested\n"
+    assert (runtime_root / "PAUSE").stat().st_mode & 0o777 == 0o600
     assert {path: path.read_bytes() if path.exists() else None for path in before} == before
 
     cli.autonomy_resume(repo=ROOT, config_path=alternate)
@@ -156,6 +157,7 @@ def test_alternate_v2_config_cannot_reach_legacy_v2_control_state(
 
     cli.autonomy_stop(repo=ROOT, config_path=alternate)
     assert (runtime_root / "STOP").read_bytes() == b"stop requested\n"
+    assert (runtime_root / "STOP").stat().st_mode & 0o777 == 0o600
     with pytest.raises(typer.Exit):
         cli.autonomy_resume(repo=ROOT, config_path=alternate)
     assert {path: path.read_bytes() if path.exists() else None for path in before} == before

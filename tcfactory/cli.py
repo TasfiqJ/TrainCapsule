@@ -1254,8 +1254,7 @@ def autonomy_pause(
     else:
         factory = load_factory_config(repo_root / config_path)
         path = _control_file(repo_root, factory, "pause")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("pause requested\n", encoding="utf-8")
+    atomic_write_text(path, "pause requested\n")
     console.print(f"[yellow]Autopilot pause requested.[/yellow] {path}")
 
 
@@ -1322,8 +1321,7 @@ def autonomy_stop(
     else:
         factory = load_factory_config(repo_root / config_path)
         path = _control_file(repo_root, factory, "stop")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("stop requested\n", encoding="utf-8")
+    atomic_write_text(path, "stop requested\n")
     console.print(f"[red]Autopilot stop requested.[/red] {path}")
 
 

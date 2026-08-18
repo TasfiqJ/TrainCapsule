@@ -230,38 +230,41 @@ class SourceMigrationAuthorization(IndependentReceiptAuthority):
 
 class RequiredCheckReceipt(V3Model):
     name: Literal[
-        "Factory quality",
-        "Packaging install",
-        "Product CI",
-        "Security",
-        "Docs and schemas",
-        "Source-of-truth integrity",
-        "Source freshness",
+        "TrainCapsule / Factory quality",
+        "TrainCapsule / Packaging install",
+        "TrainCapsule / Product contract",
+        "TrainCapsule / Product unit",
+        "TrainCapsule / Security",
+        "TrainCapsule / Docs and schemas",
+        "TrainCapsule / Source-of-truth integrity",
+        "TrainCapsule / Source freshness",
     ]
     conclusion: Literal["success"]
     observed_sha: str = Field(pattern=SHA_PATTERN.pattern)
 
 
-class PullRequestAcceptanceReceipt(IndependentReceiptAuthority):
-    receipt_type: Literal["V3_1_PR_PUBLICATION"]
+class DirectMainAcceptanceReceipt(IndependentReceiptAuthority):
+    receipt_type: Literal["V3_1_DIRECT_MAIN_PUBLICATION"]
     task_class: Literal["MECHANICAL", "STANDARD"]
     candidate_sha: str = Field(pattern=SHA_PATTERN.pattern)
-    pull_request_url: str = Field(pattern=r"^https://github\.com/.+/pull/[0-9]+$")
-    pull_request_head_sha: str = Field(pattern=SHA_PATTERN.pattern)
-    merged_main_sha: str = Field(pattern=SHA_PATTERN.pattern)
+    base_sha: str = Field(pattern=SHA_PATTERN.pattern)
+    observed_main_sha: str = Field(pattern=SHA_PATTERN.pattern)
+    fast_forward: Literal[True]
     active_generation_digest: str = Field(pattern=DIGEST_HEX_PATTERN)
     source_manifest_digest: str = Field(pattern=DIGEST_HEX_PATTERN)
-    required_checks: list[RequiredCheckReceipt] = Field(min_length=7, max_length=7)
+    required_checks: list[RequiredCheckReceipt] = Field(min_length=8, max_length=8)
 
     @model_validator(mode="after")
-    def validate_exact_sha_and_checks(self) -> PullRequestAcceptanceReceipt:
-        if not (self.pull_request_head_sha == self.candidate_sha == self.merged_main_sha):
-            raise ValueError("PR receipt must bind one exact candidate/head/merged-main SHA")
+    def validate_exact_sha_and_checks(self) -> DirectMainAcceptanceReceipt:
+        if self.base_sha == self.candidate_sha or self.observed_main_sha != self.candidate_sha:
+            raise ValueError(
+                "direct-main receipt must bind a distinct base and exact observed main"
+            )
         names = [check.name for check in self.required_checks]
         if len(names) != len(set(names)):
-            raise ValueError("PR receipt required checks must be unique")
+            raise ValueError("direct-main receipt required checks must be unique")
         if any(check.observed_sha != self.candidate_sha for check in self.required_checks):
-            raise ValueError("PR receipt check result is not bound to the candidate SHA")
+            raise ValueError("direct-main receipt check result is not bound to the candidate SHA")
         return self
 
 
@@ -291,7 +294,7 @@ class FinalMigrationEvidence(V3Model):
     evidence_inputs: dict[str, str] = Field(default_factory=dict[str, str], max_length=8)
     truth_boundary: str = Field(min_length=12)
     source_migration_authorization: SourceMigrationAuthorization | None
-    pr_acceptance_receipts: list[PullRequestAcceptanceReceipt]
+    direct_main_acceptance_receipts: list[DirectMainAcceptanceReceipt]
     recovery_rehearsal_receipt: RecoveryRehearsalReceipt | None
 
     @model_validator(mode="after")
@@ -322,26 +325,29 @@ class FinalMigrationEvidence(V3Model):
         if self.work_item_id == "V3-MIG-016":
             if self.source_migration_authorization is None:
                 raise ValueError("V3-MIG-016 requires an independent signed authorization")
-            if self.pr_acceptance_receipts or self.recovery_rehearsal_receipt is not None:
+            if self.direct_main_acceptance_receipts or self.recovery_rehearsal_receipt is not None:
                 raise ValueError("V3-MIG-016 may contain only source-migration authorization")
         elif self.work_item_id == "V3-MIG-019":
             if self.source_migration_authorization is not None:
                 raise ValueError("V3-MIG-019 cannot contain source-migration authorization")
             if self.recovery_rehearsal_receipt is not None:
                 raise ValueError("V3-MIG-019 cannot contain a recovery rehearsal")
-            if {receipt.task_class for receipt in self.pr_acceptance_receipts} != {
+            if {receipt.task_class for receipt in self.direct_main_acceptance_receipts} != {
                 "MECHANICAL",
                 "STANDARD",
             }:
-                raise ValueError("V3-MIG-019 requires mechanical and standard PR receipts")
+                raise ValueError("V3-MIG-019 requires mechanical and standard direct-main receipts")
         elif self.work_item_id == "V3-MIG-017":
             if self.recovery_rehearsal_receipt is None:
                 raise ValueError("V3-MIG-017 requires an independent recovery rehearsal receipt")
-            if self.source_migration_authorization is not None or self.pr_acceptance_receipts:
+            if (
+                self.source_migration_authorization is not None
+                or self.direct_main_acceptance_receipts
+            ):
                 raise ValueError("V3-MIG-017 may contain only its rehearsal receipt")
         elif (
             self.source_migration_authorization is not None
-            or self.pr_acceptance_receipts
+            or self.direct_main_acceptance_receipts
             or self.recovery_rehearsal_receipt is not None
         ):
             raise ValueError("this evidence type cannot contain independent receipt artifacts")

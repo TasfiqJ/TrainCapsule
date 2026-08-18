@@ -49,9 +49,7 @@ def test_historical_v3_final_receipt_cannot_satisfy_v31(tmp_path: Path) -> None:
         "pullRequestMetadataPath: state/pr.json",
     ],
 )
-def test_active_policy_rejects_human_or_pull_request_residue(
-    tmp_path: Path, residue: str
-) -> None:
+def test_active_policy_rejects_human_or_pull_request_residue(tmp_path: Path, residue: str) -> None:
     shutil.copytree(
         ROOT,
         tmp_path / "repo",
@@ -73,7 +71,7 @@ def test_pending_receipt_rejects_unknown_self_assertion(tmp_path: Path) -> None:
                 "workItemId": "V3-MIG-019",
                 "status": "PENDING_FINALIZATION",
                 "finalizationCommand": ["python", "finalize.py"],
-                "reason": "real PR receipts are absent",
+                "reason": "real direct-main receipts are absent",
                 "selfAttestedPass": True,
             }
         ),
@@ -87,6 +85,14 @@ def test_final_evidence_schema_requires_independent_receipt_artifacts() -> None:
     schema = FinalMigrationEvidence.model_json_schema(by_alias=True)
     assert {
         "sourceMigrationAuthorization",
-        "prAcceptanceReceipts",
+        "directMainAcceptanceReceipts",
         "recoveryRehearsalReceipt",
     } <= set(schema["required"])
+    encoded = json.dumps(schema, sort_keys=True)
+    assert "V3_1_DIRECT_MAIN_PUBLICATION" in encoded
+    assert "baseSha" in encoded
+    assert "observedMainSha" in encoded
+    assert "fastForward" in encoded
+    assert "V3_1_PR_PUBLICATION" not in encoded
+    assert "pullRequestUrl" not in encoded
+    assert "pullRequestHeadSha" not in encoded

@@ -28,6 +28,110 @@
       "title": "AuthorityDigests",
       "type": "object"
     },
+    "DirectMainAcceptanceReceipt": {
+      "additionalProperties": false,
+      "properties": {
+        "issuer": {
+          "const": "INDEPENDENT_MACHINE_VERIFIER",
+          "title": "Issuer",
+          "type": "string"
+        },
+        "issuedAt": {
+          "format": "date-time",
+          "title": "Issuedat",
+          "type": "string"
+        },
+        "expiresAt": {
+          "format": "date-time",
+          "title": "Expiresat",
+          "type": "string"
+        },
+        "nonce": {
+          "minLength": 16,
+          "title": "Nonce",
+          "type": "string"
+        },
+        "revocationEpoch": {
+          "minimum": 0,
+          "title": "Revocationepoch",
+          "type": "integer"
+        },
+        "signature": {
+          "$ref": "#/$defs/IndependentReceiptSignature"
+        },
+        "receiptType": {
+          "const": "V3_1_DIRECT_MAIN_PUBLICATION",
+          "title": "Receipttype",
+          "type": "string"
+        },
+        "taskClass": {
+          "enum": [
+            "MECHANICAL",
+            "STANDARD"
+          ],
+          "title": "Taskclass",
+          "type": "string"
+        },
+        "candidateSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Candidatesha",
+          "type": "string"
+        },
+        "baseSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Basesha",
+          "type": "string"
+        },
+        "observedMainSha": {
+          "pattern": "^[0-9a-f]{40}$",
+          "title": "Observedmainsha",
+          "type": "string"
+        },
+        "fastForward": {
+          "const": true,
+          "title": "Fastforward",
+          "type": "boolean"
+        },
+        "activeGenerationDigest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Activegenerationdigest",
+          "type": "string"
+        },
+        "sourceManifestDigest": {
+          "pattern": "^[0-9a-f]{64}$",
+          "title": "Sourcemanifestdigest",
+          "type": "string"
+        },
+        "requiredChecks": {
+          "items": {
+            "$ref": "#/$defs/RequiredCheckReceipt"
+          },
+          "maxItems": 8,
+          "minItems": 8,
+          "title": "Requiredchecks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "issuer",
+        "issuedAt",
+        "expiresAt",
+        "nonce",
+        "revocationEpoch",
+        "signature",
+        "receiptType",
+        "taskClass",
+        "candidateSha",
+        "baseSha",
+        "observedMainSha",
+        "fastForward",
+        "activeGenerationDigest",
+        "sourceManifestDigest",
+        "requiredChecks"
+      ],
+      "title": "DirectMainAcceptanceReceipt",
+      "type": "object"
+    },
     "EvidenceBinding": {
       "additionalProperties": false,
       "description": "Bind evidence without recursively hashing the evidence files themselves.",
@@ -454,11 +558,11 @@
             }
           ]
         },
-        "prAcceptanceReceipts": {
+        "directMainAcceptanceReceipts": {
           "items": {
-            "$ref": "#/$defs/PullRequestAcceptanceReceipt"
+            "$ref": "#/$defs/DirectMainAcceptanceReceipt"
           },
-          "title": "Pracceptancereceipts",
+          "title": "Directmainacceptancereceipts",
           "type": "array"
         },
         "recoveryRehearsalReceipt": {
@@ -482,7 +586,7 @@
         "executions",
         "truthBoundary",
         "sourceMigrationAuthorization",
-        "prAcceptanceReceipts",
+        "directMainAcceptanceReceipts",
         "recoveryRehearsalReceipt"
       ],
       "title": "FinalMigrationEvidence",
@@ -558,110 +662,6 @@
       "title": "PendingMigrationEvidence",
       "type": "object"
     },
-    "PullRequestAcceptanceReceipt": {
-      "additionalProperties": false,
-      "properties": {
-        "issuer": {
-          "const": "INDEPENDENT_MACHINE_VERIFIER",
-          "title": "Issuer",
-          "type": "string"
-        },
-        "issuedAt": {
-          "format": "date-time",
-          "title": "Issuedat",
-          "type": "string"
-        },
-        "expiresAt": {
-          "format": "date-time",
-          "title": "Expiresat",
-          "type": "string"
-        },
-        "nonce": {
-          "minLength": 16,
-          "title": "Nonce",
-          "type": "string"
-        },
-        "revocationEpoch": {
-          "minimum": 0,
-          "title": "Revocationepoch",
-          "type": "integer"
-        },
-        "signature": {
-          "$ref": "#/$defs/IndependentReceiptSignature"
-        },
-        "receiptType": {
-          "const": "V3_1_PR_PUBLICATION",
-          "title": "Receipttype",
-          "type": "string"
-        },
-        "taskClass": {
-          "enum": [
-            "MECHANICAL",
-            "STANDARD"
-          ],
-          "title": "Taskclass",
-          "type": "string"
-        },
-        "candidateSha": {
-          "pattern": "^[0-9a-f]{40}$",
-          "title": "Candidatesha",
-          "type": "string"
-        },
-        "pullRequestUrl": {
-          "pattern": "^https://github\\.com/.+/pull/[0-9]+$",
-          "title": "Pullrequesturl",
-          "type": "string"
-        },
-        "pullRequestHeadSha": {
-          "pattern": "^[0-9a-f]{40}$",
-          "title": "Pullrequestheadsha",
-          "type": "string"
-        },
-        "mergedMainSha": {
-          "pattern": "^[0-9a-f]{40}$",
-          "title": "Mergedmainsha",
-          "type": "string"
-        },
-        "activeGenerationDigest": {
-          "pattern": "^[0-9a-f]{64}$",
-          "title": "Activegenerationdigest",
-          "type": "string"
-        },
-        "sourceManifestDigest": {
-          "pattern": "^[0-9a-f]{64}$",
-          "title": "Sourcemanifestdigest",
-          "type": "string"
-        },
-        "requiredChecks": {
-          "items": {
-            "$ref": "#/$defs/RequiredCheckReceipt"
-          },
-          "maxItems": 7,
-          "minItems": 7,
-          "title": "Requiredchecks",
-          "type": "array"
-        }
-      },
-      "required": [
-        "issuer",
-        "issuedAt",
-        "expiresAt",
-        "nonce",
-        "revocationEpoch",
-        "signature",
-        "receiptType",
-        "taskClass",
-        "candidateSha",
-        "pullRequestUrl",
-        "pullRequestHeadSha",
-        "mergedMainSha",
-        "activeGenerationDigest",
-        "sourceManifestDigest",
-        "requiredChecks"
-      ],
-      "title": "PullRequestAcceptanceReceipt",
-      "type": "object"
-    },
     "RecoveryRehearsalReceipt": {
       "additionalProperties": false,
       "properties": {
@@ -734,13 +734,14 @@
       "properties": {
         "name": {
           "enum": [
-            "Factory quality",
-            "Packaging install",
-            "Product CI",
-            "Security",
-            "Docs and schemas",
-            "Source-of-truth integrity",
-            "Source freshness"
+            "TrainCapsule / Factory quality",
+            "TrainCapsule / Packaging install",
+            "TrainCapsule / Product contract",
+            "TrainCapsule / Product unit",
+            "TrainCapsule / Security",
+            "TrainCapsule / Docs and schemas",
+            "TrainCapsule / Source-of-truth integrity",
+            "TrainCapsule / Source freshness"
           ],
           "title": "Name",
           "type": "string"

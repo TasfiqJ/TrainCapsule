@@ -19,13 +19,14 @@ from tcfactory.v3.external_evidence import (
 ROOT = Path(__file__).resolve().parents[1]
 REQUIRED_CHECKS = frozenset(
     {
-        "Factory quality",
-        "Packaging install",
-        "Product CI",
-        "Security",
-        "Docs and schemas",
-        "Source-of-truth integrity",
-        "Source freshness",
+        "TrainCapsule / Factory quality",
+        "TrainCapsule / Packaging install",
+        "TrainCapsule / Product contract",
+        "TrainCapsule / Product unit",
+        "TrainCapsule / Security",
+        "TrainCapsule / Docs and schemas",
+        "TrainCapsule / Source-of-truth integrity",
+        "TrainCapsule / Source freshness",
     }
 )
 
@@ -85,16 +86,13 @@ def _common(receipt: dict[str, Any], *, kind: str, now: datetime) -> None:
 
 
 def _publication(receipt: dict[str, Any], *, now: datetime) -> None:
-    _common(receipt, kind="V3_1_PR_PUBLICATION", now=now)
-    pull_request_url = receipt.get("pullRequestUrl")
-    if not isinstance(pull_request_url, str) or not pull_request_url.startswith(
-        "https://github.com/"
-    ):
-        raise ValueError("publication receipt lacks a GitHub pull request URL")
-    if receipt.get("pullRequestHeadSha") != receipt["candidateSha"]:
-        raise ValueError("publication receipt PR head is not the candidate SHA")
-    if receipt.get("mergedMainSha") != receipt["candidateSha"]:
-        raise ValueError("publication receipt merge is not exact-SHA")
+    _common(receipt, kind="V3_1_DIRECT_MAIN_PUBLICATION", now=now)
+    base = receipt.get("baseSha")
+    observed_main = receipt.get("observedMainSha")
+    if not isinstance(base, str) or len(base) != 40 or base == receipt["candidateSha"]:
+        raise ValueError("publication receipt lacks a distinct main base")
+    if observed_main != receipt["candidateSha"] or receipt.get("fastForward") is not True:
+        raise ValueError("publication receipt is not an exact fast-forward main observation")
     raw_checks = receipt.get("requiredChecks")
     if not isinstance(raw_checks, dict):
         raise ValueError("publication receipt required-check set is incomplete")

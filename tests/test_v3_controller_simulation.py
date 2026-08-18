@@ -961,6 +961,38 @@ def test_advanced_anchor_requires_signed_deployment_update_before_next_claim(
     assert stale_payload["installedRuntimeAttested"] is False
 
 
+def test_signed_installed_successor_may_recover_a_lagging_anchor(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _simulation_repo(tmp_path)
+    monkeypatch.delenv("TCF_RUNTIME_ROOT", raising=False)
+    controller = V3Controller(
+        repo_root=repo,
+        backend=_BackendMustNotRun(),
+        publisher=_AutomatedPRSimulationPublisher(repo, tmp_path / "gates"),
+    )
+    anchored_main = _git(controller.git_root, "rev-parse", "main")
+    (repo / "signed-install.txt").write_text("newer signed install\n", encoding="utf-8")
+    _git(repo, "add", "signed-install.txt")
+    _git(repo, "commit", "-m", "newer signed install")
+    installed_main = _git(repo, "rev-parse", "main")
+    installed_tree = _git(repo, "rev-parse", "HEAD^{tree}")
+    assert installed_main != anchored_main
+    installed_runtime = InstalledControllerRuntimeManifest.model_construct(
+        manifest_digest="sha256:" + "0" * 64,
+        repository_main_sha=installed_main,
+        repository_tree_sha=installed_tree,
+    )
+    controller.installed_runtime_loader = lambda: installed_runtime
+
+    state = controller._load_state()  # pyright: ignore[reportPrivateUsage]
+    controller._require_installed_snapshot_alignment(  # pyright: ignore[reportPrivateUsage]
+        state=state
+    )
+
+    assert controller._load_state().deployment_update_handoff is None  # pyright: ignore[reportPrivateUsage]
+
+
 def test_backend_wait_exhaustion_is_finite_without_product_repair_spend(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

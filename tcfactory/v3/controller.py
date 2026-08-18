@@ -39,7 +39,7 @@ from tcfactory.context import (
     build_v3_context_manifest,
 )
 from tcfactory.github_sync import load_github_config
-from tcfactory.gitops import Worktree, create_worktree, current_sha
+from tcfactory.gitops import Worktree, create_worktree, current_sha, is_ancestor
 from tcfactory.handoffs import read_v3_handoff, write_v3_handoff
 from tcfactory.models import RoleName
 from tcfactory.prompts import compose_system_prompt
@@ -481,7 +481,13 @@ class V3Controller:
                 )
             except RuntimeError:
                 runtime_attested = False
-        if (installed_main, installed_tree) == (anchored_main, anchored_tree) and runtime_attested:
+        installed_is_safe_successor = False
+        if runtime_attested:
+            installed_is_safe_successor = (
+                (installed_main, installed_tree) == (anchored_main, anchored_tree)
+                or is_ancestor(self.repo_root, anchored_main, installed_main)
+            )
+        if installed_is_safe_successor:
             if state.deployment_update_handoff is not None:
                 state.deployment_update_handoff = None
                 state.deployment_update_digest = None
@@ -498,6 +504,7 @@ class V3Controller:
             "sourceGenerationDigest": self.active_source.source_digest,
             "controllerRuntimeMayExecuteRequiredMain": False,
             "installedRuntimeAttested": runtime_attested,
+            "installedIsDescendantOfAnchor": installed_is_safe_successor,
             "installedRuntimeManifestDigest": (
                 runtime.canonical_digest() if runtime is not None else None
             ),
@@ -518,8 +525,8 @@ class V3Controller:
         state.deployment_update_digest = digest
         self._save_state(state)
         raise RuntimeError(
-            "DEPLOYMENT_UPDATE_REQUIRED: mutable main is newer than the installed "
-            "signed snapshot/runtime; no new work may be claimed"
+            "DEPLOYMENT_UPDATE_REQUIRED: installed signed snapshot/runtime does not "
+            "safely contain mutable main; no new work may be claimed"
         )
 
     def _roadmap(self) -> WorkItemCollection:

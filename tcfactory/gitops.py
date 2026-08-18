@@ -68,6 +68,19 @@ def current_sha(repo_root: Path, ref: str = "HEAD") -> str:
     ).stdout.strip()
 
 
+def is_ancestor(repo_root: Path, ancestor_sha: str, descendant_sha: str) -> bool:
+    """Return whether both exact commits have the required ancestry relationship."""
+
+    result = run_command(
+        trusted_repository_git_command(
+            repo_root, "merge-base", "--is-ancestor", ancestor_sha, descendant_sha
+        ),
+        cwd=repo_root,
+        check=False,
+    )
+    return result.returncode == 0
+
+
 def current_branch(repo_root: Path) -> str:
     return run_command(["git", "branch", "--show-current"], cwd=repo_root).stdout.strip()
 

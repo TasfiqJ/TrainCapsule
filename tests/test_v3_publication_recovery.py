@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+import json
 from datetime import UTC, datetime
 from pathlib import Path
 from types import SimpleNamespace
@@ -209,6 +210,51 @@ def test_crash_after_push_reconciles_without_duplicate_push(tmp_path: Path) -> N
     tx = publisher.reconcile_transaction(_transaction())
     assert tx.phase is PublicationPhase.MERGED
     assert client.pushes == [(BASE, CANDIDATE)]
+
+
+def test_reconcile_archives_terminal_legacy_pr_state_without_replay(tmp_path: Path) -> None:
+    publisher, client, _ = _publisher(tmp_path)
+    publisher.transaction_root.mkdir(parents=True)
+    legacy = publisher.transaction_root / f"{CANDIDATE}.json"
+    legacy.write_text(
+        json.dumps(
+            {
+                "candidateSha": CANDIDATE,
+                "phase": "INVARIANTS_VERIFIED",
+                "transactionId": "PRPUB-LEGACY-TERMINAL",
+            }
+        ),
+        encoding="utf-8",
+    )
+    assert publisher.reconcile_pending() == []
+    assert client.pushes == []
+    assert not legacy.exists()
+    assert (
+        publisher.quarantine_root
+        / "legacy-pr-publication-audit"
+        / legacy.name
+    ).is_file()
+
+
+def test_reconcile_preserves_and_rejects_nonterminal_legacy_pr_state(
+    tmp_path: Path,
+) -> None:
+    publisher, _, _ = _publisher(tmp_path)
+    publisher.transaction_root.mkdir(parents=True)
+    legacy = publisher.transaction_root / f"{CANDIDATE}.json"
+    legacy.write_text(
+        json.dumps(
+            {
+                "candidateSha": CANDIDATE,
+                "phase": "PR_OPEN",
+                "transactionId": "PRPUB-LEGACY-PENDING",
+            }
+        ),
+        encoding="utf-8",
+    )
+    with pytest.raises(PublicationError, match="requires review"):
+        publisher.reconcile_pending()
+    assert legacy.is_file()
 
 
 def test_failed_post_push_checks_trigger_exact_direct_revert(tmp_path: Path) -> None:

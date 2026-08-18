@@ -1364,9 +1364,50 @@ class DirectMainPublisher:
         if not self.transaction_root.is_dir():
             return results
         for path in sorted(self.transaction_root.glob("*.json")):
-            tx = PublicationTransaction.model_validate(read_json(path, {}))
+            raw = read_json(path, {})
+            if self._archive_terminal_legacy_pr_transaction(path, raw):
+                continue
+            tx = PublicationTransaction.model_validate(raw)
             results.append(self.reconcile_transaction(tx))
         return results
+
+    def _archive_terminal_legacy_pr_transaction(
+        self, path: Path, raw: object
+    ) -> bool:
+        """Move superseded PR-era terminal records out of the active direct-main queue."""
+
+        if not isinstance(raw, dict):
+            return False
+        payload = cast(dict[str, object], raw)
+        transaction_id = payload.get("transactionId")
+        if not isinstance(transaction_id, str) or not transaction_id.startswith("PRPUB-"):
+            return False
+        candidate_sha = payload.get("candidateSha")
+        phase = payload.get("phase")
+        if (
+            path.is_symlink()
+            or not path.is_file()
+            or candidate_sha != path.stem
+            or not isinstance(candidate_sha, str)
+            or re.fullmatch(SHA_PATTERN, candidate_sha) is None
+            or phase
+            not in {
+                PublicationPhase.MAIN_VERIFIED.value,
+                PublicationPhase.INVARIANTS_VERIFIED.value,
+                PublicationPhase.REVERTED.value,
+                PublicationPhase.FAILED.value,
+            }
+        ):
+            raise PublicationError(
+                "non-terminal or malformed legacy PR publication state requires review"
+            )
+        archive = self.quarantine_root / "legacy-pr-publication-audit"
+        archive.mkdir(parents=True, exist_ok=True, mode=0o700)
+        destination = archive / path.name
+        if destination.exists() or destination.is_symlink():
+            raise PublicationError("legacy PR publication archive identity conflicts")
+        os.replace(path, destination)
+        return True
 
     def publish(
         self,

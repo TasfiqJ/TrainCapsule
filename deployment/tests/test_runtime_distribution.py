@@ -36,7 +36,11 @@ def test_production_runtime_exports_and_wraps_locked_agent_tools(tmp_path: Path)
     assert arguments[:6] == [str(uv), "export", "--frozen", "--extra", "dev", "--no-dev"]
     assert set(wrappers) == set(OFFLINE_AGENT_TOOLS)
     for tool, wrapper in wrappers.items():
-        assert f'python3.12" -m {tool}' in wrapper.read_text(encoding="utf-8")
+        rendered = wrapper.read_text(encoding="utf-8")
+        if tool == "ruff":
+            assert "site-packages/bin/ruff" in rendered
+        else:
+            assert f'python3.12" -m {tool}' in rendered
         assert stat.S_IMODE(wrapper.stat().st_mode) == 0o755
 
 

@@ -56,8 +56,13 @@ def create_offline_tool_wrappers(root: Path) -> dict[str, Path]:
     wrappers: dict[str, Path] = {}
     for tool in OFFLINE_AGENT_TOOLS:
         wrapper = root / f"agent-tool-{tool}"
+        command = (
+            'exec "$(dirname "$0")/../lib/python3.12/site-packages/bin/ruff" "$@"'
+            if tool == "ruff"
+            else f'exec "$(dirname "$0")/python3.12" -m {tool} "$@"'
+        )
         wrapper.write_text(
-            f'#!/bin/sh\nexec "$(dirname "$0")/python3.12" -m {tool} "$@"\n',
+            f"#!/bin/sh\n{command}\n",
             encoding="utf-8",
             newline="\n",
         )

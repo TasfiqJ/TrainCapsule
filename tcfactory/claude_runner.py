@@ -48,7 +48,7 @@ from .util import redact_sensitive, write_json
 MIN_CLAUDE_TASK_BUDGET_TOKENS = 20_000
 REPORT_CONTINUATION_MAX_TURNS = 4
 BACKEND_EVENT_RETENTION_DAYS = 30
-CLAUDE_SANDBOX_CONFIG_REPAIR = "claude-runtime-bin-path-v4"
+CLAUDE_SANDBOX_CONFIG_REPAIR = "claude-offline-validation-toolchain-v5"
 
 
 def writable_uv_cache_dir(worktree: Path) -> Path:

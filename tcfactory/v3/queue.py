@@ -181,6 +181,32 @@ class V3Queue:
             self._atomic_write(source, updated)
             return source
 
+    def refresh_blocked_from_authority(
+        self,
+        canonical_item: WorkItem,
+        *,
+        updated_at: datetime,
+    ) -> Path:
+        """Replace stale task prose from source authority while preserving runtime state."""
+
+        with self._claim_lock(canonical_item.work_item_id):
+            source = self.locate(canonical_item.work_item_id)
+            current = WorkItem.model_validate(load_yaml(source))
+            if current.status is not WorkStatus.BLOCKED_TECHNICAL:
+                raise ValueError("queue item is no longer blocked technical")
+            payload = canonical_item.model_dump(mode="python", by_alias=False)
+            payload.update(
+                {
+                    "status": current.status,
+                    "external_evidence_refs": current.external_evidence_refs,
+                    "created_at": current.created_at or canonical_item.created_at,
+                    "updated_at": updated_at,
+                }
+            )
+            refreshed = WorkItem.model_validate(payload)
+            self._atomic_write(source, refreshed)
+            return source
+
     def _transition_owned(
         self,
         work_item_id: str,

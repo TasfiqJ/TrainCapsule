@@ -26,6 +26,45 @@ from deployment.runtime_distribution import (
     extract_runtime_distribution,
 )
 
+OFFLINE_AGENT_TOOLS = ("pytest", "ruff", "pyright")
+
+
+def locked_dependency_export_arguments(uv: Path, requirements: Path) -> list[str]:
+    """Return the frozen export boundary, including local agent validation tools."""
+
+    return [
+        str(uv),
+        "export",
+        "--frozen",
+        "--extra",
+        "dev",
+        "--no-dev",
+        "--no-hashes",
+        "--no-emit-project",
+        "--no-emit-workspace",
+        "--no-emit-local",
+        "--format",
+        "requirements-txt",
+        "--output-file",
+        str(requirements),
+    ]
+
+
+def create_offline_tool_wrappers(root: Path) -> dict[str, Path]:
+    """Create relocatable entry points that always use the packaged interpreter."""
+
+    wrappers: dict[str, Path] = {}
+    for tool in OFFLINE_AGENT_TOOLS:
+        wrapper = root / f"agent-tool-{tool}"
+        wrapper.write_text(
+            f'#!/bin/sh\nexec "$(dirname "$0")/python3.12" -m {tool} "$@"\n',
+            encoding="utf-8",
+            newline="\n",
+        )
+        wrapper.chmod(0o755)
+        wrappers[tool] = wrapper
+    return wrappers
+
 
 def _run(arguments: list[str], *, cwd: Path) -> None:
     result = subprocess.run(
@@ -81,23 +120,7 @@ def build_production_runtime(
         requirements = stage / "requirements.txt"
         dependencies = stage / "site-packages"
         dependencies.mkdir()
-        _run(
-            [
-                str(uv),
-                "export",
-                "--frozen",
-                "--no-dev",
-                "--no-hashes",
-                "--no-emit-project",
-                "--no-emit-workspace",
-                "--no-emit-local",
-                "--format",
-                "requirements-txt",
-                "--output-file",
-                str(requirements),
-            ],
-            cwd=exact_repo,
-        )
+        _run(locked_dependency_export_arguments(uv, requirements), cwd=exact_repo)
         _run(
             [
                 str(uv),
@@ -132,13 +155,14 @@ def build_production_runtime(
                 target.parent.mkdir(parents=True, exist_ok=True)
                 target.write_bytes(source.read_bytes())
                 target.chmod(0o644)
+        wrappers = create_offline_tool_wrappers(stage)
         archive, manifest = build_runtime_distribution(
             output,
             python_root=python_root,
             dependency_root=dependencies,
             python_version="3.12.13",
             required_imports=COMPLETE_RUNTIME_IMPORTS,
-            extra_executables={"uv": uv},
+            extra_executables={"uv": uv, **wrappers},
         )
         installed = stage / "installed"
         parsed_manifest = RuntimeDistributionManifest.model_validate_json(
@@ -173,8 +197,8 @@ def build_production_runtime(
                     smoke,
                     str(len(import_paths)),
                     *import_paths,
-                *PRODUCTION_RUNTIME_IMPORTS,
-                *PROJECT_RUNTIME_IMPORTS,
+                    *PRODUCTION_RUNTIME_IMPORTS,
+                    *PROJECT_RUNTIME_IMPORTS,
                 ],
                 cwd=exact_repo,
             )
@@ -186,13 +210,12 @@ def build_production_runtime(
                 [str(installed / "bin/python3.12"), "-c", service_smoke],
                 cwd=stage,
             )
-            claude = (
-                installed
-                / "lib/python3.12/site-packages/claude_agent_sdk/_bundled/claude"
-            )
+            claude = installed / "lib/python3.12/site-packages/claude_agent_sdk/_bundled/claude"
             if not claude.is_file() or not claude.stat().st_mode & 0o111:
                 raise RuntimeError("Claude SDK bundled executable is absent or non-executable")
             _run([str(claude), "--version"], cwd=exact_repo)
+            for tool in OFFLINE_AGENT_TOOLS:
+                _run([str(installed / "bin" / tool), "--version"], cwd=exact_repo)
         finally:
             for directory in [
                 installed,

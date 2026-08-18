@@ -18,16 +18,33 @@ from deployment.runtime_distribution import (
     validate_extracted_runtime_distribution,
     validate_runtime_distribution,
 )
-from scripts.build_production_runtime import project_runtime_source_files
+from scripts.build_production_runtime import (
+    OFFLINE_AGENT_TOOLS,
+    create_offline_tool_wrappers,
+    locked_dependency_export_arguments,
+    project_runtime_source_files,
+)
+
+
+def test_production_runtime_exports_and_wraps_locked_agent_tools(tmp_path: Path) -> None:
+    uv = tmp_path / "uv"
+    requirements = tmp_path / "requirements.txt"
+
+    arguments = locked_dependency_export_arguments(uv, requirements)
+    wrappers = create_offline_tool_wrappers(tmp_path)
+
+    assert arguments[:6] == [str(uv), "export", "--frozen", "--extra", "dev", "--no-dev"]
+    assert set(wrappers) == set(OFFLINE_AGENT_TOOLS)
+    for tool, wrapper in wrappers.items():
+        assert f'python3.12" -m {tool}' in wrapper.read_text(encoding="utf-8")
+        assert stat.S_IMODE(wrapper.stat().st_mode) == 0o755
 
 
 def test_production_runtime_excludes_package_local_tests(tmp_path: Path) -> None:
     source = tmp_path / "application"
     (source / "tests").mkdir(parents=True)
     (source / "runtime.py").write_text("VALUE = 1\n", encoding="utf-8")
-    (source / "tests/test_runtime.py").write_text(
-        "raise AssertionError\n", encoding="utf-8"
-    )
+    (source / "tests/test_runtime.py").write_text("raise AssertionError\n", encoding="utf-8")
 
     selected = project_runtime_source_files(source)
 
@@ -164,8 +181,7 @@ def test_archive_links_and_input_hardlinks_are_rejected(tmp_path: Path) -> None:
     zeroed = substituted.model_copy(update={"manifest_digest": "sha256:" + "0" * 64})
     substituted = substituted.model_copy(
         update={
-            "manifest_digest": "sha256:"
-            + hashlib.sha256(canonical_json_bytes(zeroed)).hexdigest()
+            "manifest_digest": "sha256:" + hashlib.sha256(canonical_json_bytes(zeroed)).hexdigest()
         }
     )
     with pytest.raises(RuntimeDistributionError, match="unsafe member"):

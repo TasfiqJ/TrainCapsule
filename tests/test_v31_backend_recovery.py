@@ -94,6 +94,7 @@ def _checkpoint(artifact_root: Path) -> V3Checkpoint:
     [
         "bwrap: Can't mkdir /var/lib/.claude: Read-only file system",
         "/bin/bash: line 1: uv: command not found",
+        "Failed to download pytest from https://files.pythonhosted.org/package.whl",
     ],
 )
 def test_fixed_claude_runtime_failure_is_archived_and_reopened_once(
@@ -110,8 +111,14 @@ def test_fixed_claude_runtime_failure_is_archived_and_reopened_once(
     result.parent.mkdir(parents=True)
     result.write_text(json.dumps({"error": failure}), encoding="utf-8")
     checkpoints.save_v3(_checkpoint(artifact_root))
+    authoritative = item.model_copy(
+        update={
+            "title": "Current direct-main migration",
+            "evidence_required": ["direct-main validation receipt"],
+        }
+    )
     collection = WorkItemCollection(
-        active_milestone="M0_FACTORY_MIGRATED", work_items=[item]
+        active_milestone="M0_FACTORY_MIGRATED", work_items=[authoritative]
     )
 
     assert recover_repaired_claude_sandbox_blocks(
@@ -123,43 +130,44 @@ def test_fixed_claude_runtime_failure_is_archived_and_reopened_once(
         now=datetime.now(UTC),
     ) == ["V3-MIG-015"]
     assert queue.load("V3-MIG-015").status is WorkStatus.READY
+    assert queue.load("V3-MIG-015").title == "Current direct-main migration"
+    assert queue.load("V3-MIG-015").evidence_required == ["direct-main validation receipt"]
     assert checkpoints.load_v3("V3-MIG-015") is None
-    recovery = checkpoints.root / "recovery-archive" / (
-        "222222222222-claude-runtime-bin-path-v4"
+    recovery = (
+        checkpoints.root
+        / "recovery-archive"
+        / ("222222222222-claude-offline-validation-toolchain-v5")
     )
     assert (recovery / "V3-MIG-015.json").is_file()
     journal = json.loads((recovery / "V3-MIG-015.journal.json").read_bytes())
     assert journal["phase"] == "COMMITTED"
 
-    current = queue.load("V3-MIG-015")
+    current = authoritative
     journal["phase"] = "ARCHIVED"
-    (recovery / "V3-MIG-015.journal.json").write_text(
-        json.dumps(journal), encoding="utf-8"
-    )
+    (recovery / "V3-MIG-015.journal.json").write_text(json.dumps(journal), encoding="utf-8")
     assert recover_repaired_claude_sandbox_blocks(
-        collection=WorkItemCollection(
-            active_milestone="M0_FACTORY_MIGRATED", work_items=[current]
-        ),
+        collection=WorkItemCollection(active_milestone="M0_FACTORY_MIGRATED", work_items=[current]),
         queue=queue,
         checkpoints=checkpoints,
         runtime_root=runtime,
         current_main_sha=NEW_SHA,
         now=datetime.now(UTC),
     ) == ["V3-MIG-015"]
-    assert json.loads((recovery / "V3-MIG-015.journal.json").read_bytes())[
-        "phase"
-    ] == "COMMITTED"
+    assert json.loads((recovery / "V3-MIG-015.journal.json").read_bytes())["phase"] == "COMMITTED"
 
-    assert recover_repaired_claude_sandbox_blocks(
-        collection=WorkItemCollection(
-            active_milestone="M0_FACTORY_MIGRATED", work_items=[current]
-        ),
-        queue=queue,
-        checkpoints=checkpoints,
-        runtime_root=runtime,
-        current_main_sha=NEW_SHA,
-        now=datetime.now(UTC),
-    ) == []
+    assert (
+        recover_repaired_claude_sandbox_blocks(
+            collection=WorkItemCollection(
+                active_milestone="M0_FACTORY_MIGRATED", work_items=[current]
+            ),
+            queue=queue,
+            checkpoints=checkpoints,
+            runtime_root=runtime,
+            current_main_sha=NEW_SHA,
+            now=datetime.now(UTC),
+        )
+        == []
+    )
 
 
 def test_unrelated_terminal_failure_remains_blocked(tmp_path: Path) -> None:
@@ -175,15 +183,18 @@ def test_unrelated_terminal_failure_remains_blocked(tmp_path: Path) -> None:
     result.write_text('{"error":"ordinary test failure"}', encoding="utf-8")
     checkpoints.save_v3(_checkpoint(artifact_root))
 
-    assert recover_repaired_claude_sandbox_blocks(
-        collection=WorkItemCollection(
-            active_milestone="M0_FACTORY_MIGRATED", work_items=[item]
-        ),
-        queue=queue,
-        checkpoints=checkpoints,
-        runtime_root=runtime,
-        current_main_sha=NEW_SHA,
-        now=datetime.now(UTC),
-    ) == []
+    assert (
+        recover_repaired_claude_sandbox_blocks(
+            collection=WorkItemCollection(
+                active_milestone="M0_FACTORY_MIGRATED", work_items=[item]
+            ),
+            queue=queue,
+            checkpoints=checkpoints,
+            runtime_root=runtime,
+            current_main_sha=NEW_SHA,
+            now=datetime.now(UTC),
+        )
+        == []
+    )
     assert queue.load("V3-MIG-015").status is WorkStatus.BLOCKED_TECHNICAL
     assert checkpoints.load_v3("V3-MIG-015") is not None

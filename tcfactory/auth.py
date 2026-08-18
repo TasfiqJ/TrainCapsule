@@ -198,6 +198,10 @@ def sanitized_agent_environment(extra: dict[str, str] | None = None) -> dict[str
     )
     if extra:
         environment.update(extra)
+    # The installed runtime contains the locked validation toolchain. Agent tasks must
+    # never turn a local quality gate into an unreviewed network package installation.
+    environment["UV_OFFLINE"] = "1"
+    environment["UV_NO_SYNC"] = "1"
     return environment
 
 

@@ -321,3 +321,21 @@ def test_sanitized_agent_environment_prepends_runtime_bin(
     assert environment["PATH"].split(os.pathsep)[0] == str(
         Path(sys.executable).resolve().parent
     )
+    assert environment["UV_OFFLINE"] == "1"
+    assert environment["UV_NO_SYNC"] == "1"
+
+
+def test_sanitized_agent_environment_cannot_override_offline_boundary(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    token_file = tmp_path / "claude-oauth-token"
+    token_file.write_text("subscription-token\n", encoding="utf-8")
+    token_file.chmod(0o600)
+    monkeypatch.setenv("TCF_CLAUDE_OAUTH_TOKEN_FILE", str(token_file))
+
+    environment = auth.sanitized_agent_environment(
+        {"UV_OFFLINE": "0", "UV_NO_SYNC": "0"}
+    )
+
+    assert environment["UV_OFFLINE"] == "1"
+    assert environment["UV_NO_SYNC"] == "1"

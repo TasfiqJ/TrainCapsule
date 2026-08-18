@@ -13,10 +13,12 @@ from tcfactory.util import atomic_write_bytes
 from tcfactory.v3.base import sha256_digest
 from tcfactory.v3.enums import WorkStatus
 from tcfactory.v3.queue import V3Queue
-from tcfactory.v3.work_items import WorkItemCollection
+from tcfactory.v3.work_items import WorkItem, WorkItemCollection
 
 _LEGACY_SANDBOX_FAILURE = b"bwrap: Can't mkdir /var/lib/.claude: Read-only file system"
 _LEGACY_UV_PATH_FAILURE = b"uv: command not found"
+_OFFLINE_DEPENDENCY_FAILURE = b"Failed to download"
+_PACKAGE_INDEX_HOSTS = (b"pypi.org", b"files.pythonhosted.org")
 _MAX_BACKEND_RESULT_BYTES = 2_000_000
 
 
@@ -49,8 +51,13 @@ def _bound_backend_result(
     ):
         return None
     raw = result.read_bytes()
-    repaired_failures = (_LEGACY_SANDBOX_FAILURE, _LEGACY_UV_PATH_FAILURE)
-    return (result, raw) if any(failure in raw for failure in repaired_failures) else None
+    repaired_legacy = any(
+        failure in raw for failure in (_LEGACY_SANDBOX_FAILURE, _LEGACY_UV_PATH_FAILURE)
+    )
+    repaired_offline = _OFFLINE_DEPENDENCY_FAILURE in raw and any(
+        host in raw for host in _PACKAGE_INDEX_HOSTS
+    )
+    return (result, raw) if repaired_legacy or repaired_offline else None
 
 
 def _eligible(
@@ -80,6 +87,7 @@ def _finish_recovery(
     queue: V3Queue,
     checkpoints: CheckpointStore,
     work_item_id: str,
+    canonical_item: WorkItem,
     now: datetime,
     journal_path: Path,
     journal: dict[str, object],
@@ -99,6 +107,7 @@ def _finish_recovery(
             source.unlink()
     item = queue.load(work_item_id)
     if item.status is WorkStatus.BLOCKED_TECHNICAL:
+        queue.refresh_blocked_from_authority(canonical_item, updated_at=now)
         queue.transition(work_item_id, WorkStatus.READY, updated_at=now)
     elif item.status is not WorkStatus.READY:
         raise RuntimeError("backend recovery queue state changed unexpectedly")
@@ -118,11 +127,13 @@ def recover_repaired_claude_sandbox_blocks(
 ) -> list[str]:
     """Reopen only failures conclusively caused by repaired Claude runtime boundaries."""
 
-    if CLAUDE_SANDBOX_CONFIG_REPAIR != "claude-runtime-bin-path-v4":
+    if CLAUDE_SANDBOX_CONFIG_REPAIR != "claude-offline-validation-toolchain-v5":
         raise RuntimeError("Claude sandbox repair marker is unavailable")
     recovered: list[str] = []
-    recovery_root = checkpoints.root / "recovery-archive" / (
-        f"{current_main_sha[:12]}-{CLAUDE_SANDBOX_CONFIG_REPAIR}"
+    recovery_root = (
+        checkpoints.root
+        / "recovery-archive"
+        / (f"{current_main_sha[:12]}-{CLAUDE_SANDBOX_CONFIG_REPAIR}")
     )
     recovery_root.mkdir(parents=True, exist_ok=True, mode=0o700)
     os.chmod(recovery_root, 0o700)
@@ -134,6 +145,7 @@ def recover_repaired_claude_sandbox_blocks(
                 journal.get("repairMarker") != CLAUDE_SANDBOX_CONFIG_REPAIR
                 or journal.get("workItemId") != item.work_item_id
                 or journal.get("recoveryMainSha") != current_main_sha
+                or journal.get("authorityItemDigest") != item.canonical_digest()
             ):
                 raise RuntimeError("backend recovery journal identity changed")
             if journal.get("phase") == "COMMITTED":
@@ -142,6 +154,7 @@ def recover_repaired_claude_sandbox_blocks(
                 queue=queue,
                 checkpoints=checkpoints,
                 work_item_id=item.work_item_id,
+                canonical_item=item,
                 now=now,
                 journal_path=journal_path,
                 journal=journal,
@@ -169,6 +182,7 @@ def recover_repaired_claude_sandbox_blocks(
             "workItemId": item.work_item_id,
             "repairMarker": CLAUDE_SANDBOX_CONFIG_REPAIR,
             "recoveryMainSha": current_main_sha,
+            "authorityItemDigest": item.canonical_digest(),
             "failedCandidateSha": checkpoint.candidate_sha,
             "checkpointDigest": sha256_digest(checkpoint_raw),
             "previousDigest": sha256_digest(previous_raw) if previous_raw is not None else None,
@@ -186,6 +200,7 @@ def recover_repaired_claude_sandbox_blocks(
             queue=queue,
             checkpoints=checkpoints,
             work_item_id=item.work_item_id,
+            canonical_item=item,
             now=now,
             journal_path=journal_path,
             journal=journal,

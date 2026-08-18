@@ -1542,6 +1542,7 @@ class PrivilegedInstaller:
         if self._state.get("status") == "COMMITTED":
             return self.attest(require_paths=True)
         try:
+            self._quiesce_managed_units_before_replacement()
             self._ensure_accounts()
             self._ensure_directories()
             self._ensure_stop_marker()
@@ -2179,10 +2180,29 @@ class PrivilegedInstaller:
                 "an active controller cannot be adopted by the receipt-gated installation"
             )
 
-    def _reload_and_leave_controller_stopped(self) -> None:
+    def _quiesce_managed_units_before_replacement(self) -> None:
+        """Prevent installed path units from racing executable replacement.
+
+        Existing path/timer units can otherwise observe inbox files while their
+        service executable or pinned interpreter is between atomic replacements.
+        Preserve every captured baseline for rollback, but stop the managed graph
+        until the complete installed tree has been attested and reloaded.
+        """
+
         self._state["systemEffectsStarted"] = True
         self._save_state()
-        self._record("SYSTEM_EFFECTS_BEGIN", {})
+        self._record("SYSTEM_EFFECTS_BEGIN", {"reason": "quiesce-before-replacement"})
+        for unit in reversed(self._managed_units()):
+            if unit == self.spec.controller_unit or not self.system.unit_active(unit):
+                continue
+            self._unit_transition("INSTALL_QUIESCE", unit, self.system.stop_unit)
+        self._state["managedUnitsQuiesced"] = True
+        self._save_state()
+        self._record("MANAGED_UNITS_QUIESCED", {})
+
+    def _reload_and_leave_controller_stopped(self) -> None:
+        if self._state.get("managedUnitsQuiesced") is not True:
+            raise InstallFailure("managed units were not quiesced before replacement")
         self.system.daemon_reload()
         self._record("DAEMON_RELOADED_AFTER_ATTESTATION", {})
         self._state["daemonReloadComplete"] = True

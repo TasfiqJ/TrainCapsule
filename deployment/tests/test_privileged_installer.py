@@ -1379,6 +1379,32 @@ def test_default_is_read_only_and_apply_attests_exact_tree(tmp_path: Path) -> No
     assert authority.owner(stop) == (controller_uid, controller_uid)
 
 
+def test_apply_quiesces_existing_triggers_before_replacing_executables(
+    tmp_path: Path,
+) -> None:
+    root, bundle, spec, authority, system = _fixture(tmp_path)
+    preexisting = {
+        "traincapsule-deployment-refresh.path",
+        "traincapsule-verifier-git-anchor-producer.path",
+    }
+    system.enabled.update(preexisting)
+    system.active.update(preexisting)
+    installer = _installer(root, bundle, spec, authority, system)
+
+    result = installer.apply(APPLY_CONFIRMATION)
+
+    assert isinstance(result, DeploymentAttestation)
+    for unit in preexisting:
+        stop = ("stop", unit)
+        start = ("start", unit)
+        assert stop in system.calls
+        assert start in system.calls
+        assert system.calls.index(stop) < system.calls.index(start)
+    events = (installer.txn / "events.jsonl").read_text(encoding="utf-8")
+    assert '"event":"MANAGED_UNITS_QUIESCED"' in events
+    assert '"event":"DAEMON_RELOADED_AFTER_ATTESTATION"' in events
+
+
 def test_production_apply_rejects_missing_systemd_before_mutation(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:
@@ -1524,10 +1550,11 @@ def test_rollback_does_not_restart_memory_only_unit_without_unit_file(
     installer = _installer(root, bundle, spec, authority, system)
 
     installer.apply(APPLY_CONFIRMATION)
+    calls_before_rollback = len(system.calls)
     installer.rollback()
 
     assert memory_only not in system.active
-    assert ("start", memory_only) not in system.calls
+    assert ("start", memory_only) not in system.calls[calls_before_rollback:]
     events = (installer.txn / "events.jsonl").read_text(encoding="utf-8")
     assert '"event":"ROLLBACK_ACTIVE_STATE_UNAVAILABLE"' in events
 

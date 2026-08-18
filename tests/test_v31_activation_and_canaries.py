@@ -888,7 +888,9 @@ def test_activation_supervisor_consumes_delayed_live_receipt_and_stages_start(
 
 
 def test_activation_supervisor_requests_fresh_policy_before_reusing_consumed_request(
-    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
 ) -> None:
     repo = _repo(tmp_path)
     runtime = tmp_path / "runtime"
@@ -929,6 +931,13 @@ def test_activation_supervisor_requests_fresh_policy_before_reusing_consumed_req
     monkeypatch.setattr(supervisor, "coordinate_activation_request", stale_activation_request)
     assert run_activation_supervisor(repo_root=repo) == ("ACTIVATION_POLICY_REQUEST_SUBMITTED")
     assert calls == ["policy"]
+    assert any(
+        message.startswith(
+            "ACTIVATION_LIVE_RECEIPT_REJECTED:RuntimeError:"
+            "the previous activation receipt was consumed"
+        )
+        for message in caplog.messages
+    )
 
 
 def test_refresh_completion_forces_fresh_exact_canaries_and_never_reuses_history(

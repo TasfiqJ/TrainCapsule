@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import fcntl
 import json
+import logging
 import os
 import pwd
 import stat
@@ -44,6 +45,12 @@ CONTROLLER_START_OUTBOX = Path("/var/lib/traincapsule-verifier/controller-start-
 REFRESH_COMPLETION_INBOX = Path("/var/lib/traincapsule-verifier/activation-refresh-inbox")
 ACTIVATION_POLICY_RECEIPT = ACTIVATION_POLICY_RECEIPT_ROOT
 CONTROLLER_START_ROLLBACK_STOP = b"controller start broker rollback\n"
+LOGGER = logging.getLogger(__name__)
+
+
+def _bounded_failure(error: Exception) -> str:
+    detail = " ".join(str(error).split())[:240]
+    return f"{type(error).__name__}:{detail or 'no detail'}"
 
 
 def _refresh_runtime_bundle(
@@ -525,7 +532,9 @@ def _process_refresh_activation(
         candidates = (
             []
             if force_fresh_canaries
-            else sorted(result_root.rglob("suite.json")) if result_root.exists() else []
+            else sorted(result_root.rglob("suite.json"))
+            if result_root.exists()
+            else []
         )
         suite_path: Path | None = None
         suite: MandatoryCanarySuite | None = None
@@ -740,7 +749,8 @@ def _run_activation_supervisor_locked(
                 transaction_path=transaction_path,
             )
             return f"ACTIVATED_START_REQUESTED:{transaction.transaction_id}"
-        except (OSError, RuntimeError, ValueError):
+        except (OSError, RuntimeError, ValueError) as error:
+            LOGGER.warning("ACTIVATION_LIVE_RECEIPT_REJECTED:%s", _bounded_failure(error))
             continue
     if suites:
         for existing_suite in suites:
@@ -752,7 +762,8 @@ def _run_activation_supervisor_locked(
                 )
                 if policy_request is not None:
                     return "ACTIVATION_POLICY_REQUEST_SUBMITTED"
-            except (OSError, RuntimeError, ValueError):
+            except (OSError, RuntimeError, ValueError) as error:
+                LOGGER.warning("ACTIVATION_POLICY_REQUEST_REJECTED:%s", _bounded_failure(error))
                 continue
         request = coordinate_activation_request(
             repo_root=repo_root,

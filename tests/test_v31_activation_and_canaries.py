@@ -486,6 +486,7 @@ def test_activation_request_retires_exact_prepared_receipt_replay(
     stop_archive = paths.control_archive / "STOP.ACT:CONSUMED.aaaaaaaaaaaa"
     stop_archive.parent.mkdir(parents=True)
     stop_archive.write_bytes(stop.read_bytes())
+
     def transaction(
         phase: ActivationPhase, *, activated_at: datetime | None = None
     ) -> ActivationTransaction:
@@ -509,9 +510,7 @@ def test_activation_request_retires_exact_prepared_receipt_replay(
     activated = transaction(ActivationPhase.ACTIVATED, activated_at=NOW)
     archive = paths.control_archive / "activation-transactions"
     archive.mkdir()
-    (archive / "ACTIVATE-ACT:CONSUMED-terminal.json").write_bytes(
-        activated.canonical_json_bytes()
-    )
+    (archive / "ACTIVATE-ACT:CONSUMED-terminal.json").write_bytes(activated.canonical_json_bytes())
     prepared = transaction(ActivationPhase.PREPARED)
     live = paths.activation_transactions / "ACTIVATE-ACT:CONSUMED.json"
     live.write_bytes(prepared.canonical_json_bytes())
@@ -598,9 +597,7 @@ def test_activation_request_retires_ancestor_replay_after_new_operator_stop(
     )
     archive = paths.control_archive / "activation-transactions"
     archive.mkdir()
-    (archive / "ACTIVATE-ACT:CONSUMED-terminal.json").write_bytes(
-        activated.canonical_json_bytes()
-    )
+    (archive / "ACTIVATE-ACT:CONSUMED-terminal.json").write_bytes(activated.canonical_json_bytes())
     prepared = transaction(
         ActivationPhase.PREPARED,
         stop_digest=sha256_digest(stop.read_bytes()),
@@ -754,6 +751,22 @@ def test_activation_policy_request_uses_independent_verifier_bridge(
         )
         is None
     )
+    renewed_suite = run_mandatory_canaries(
+        repo_root=repo,
+        result_root=tmp_path / "renewed-canary-results",
+        runner_factory=_passing_runner,
+        now=observed_now,
+    )
+    replacement = activation.coordinate_activation_policy_request(
+        repo_root=repo,
+        canary_suite_path=renewed_suite,
+        profile_path=profile,
+        machine_policy_receipt_path=receipt,
+        installed_runtime_loader=runtime_loader,
+        controller_outbox=outbox,
+    )
+    assert replacement is not None
+    assert replacement != renewal
 
 
 def test_stopped_activation_supervisor_runs_canaries_then_coordinates_without_controller(
@@ -892,9 +905,7 @@ def test_activation_supervisor_requests_fresh_policy_before_reusing_consumed_req
     def resolved_paths(_repo: Path) -> V3RuntimePaths:
         return paths
 
-    def accept_suite(
-        _suite: Path, *, repo_root: Path, require_pass: bool
-    ) -> None:
+    def accept_suite(_suite: Path, *, repo_root: Path, require_pass: bool) -> None:
         assert repo_root == repo.resolve()
         assert require_pass
 
@@ -1154,6 +1165,7 @@ def test_refresh_activation_recovers_broker_rollback_with_fresh_authority(
         source_generation_id=completion.source_generation_id,
         source_generation_digest=completion.source_generation_digest,
     )
+
     def parse_fresh(_raw: bytes, *, strict: bool) -> SimpleNamespace:
         assert strict
         return fresh
@@ -1174,6 +1186,7 @@ def test_refresh_activation_recovers_broker_rollback_with_fresh_authority(
         "coordinate_activation_policy_request",
         request_policy,
     )
+
     def reject_old_authority(**_kwargs: object) -> Never:
         pytest.fail("old authority must not be reused")
 
@@ -1203,9 +1216,7 @@ def test_refresh_activation_recovers_broker_rollback_with_fresh_authority(
     )
     assert calls == ["fresh-canaries", "fresh-policy"]
     assert paths.stop.read_bytes() == b"controller start broker rollback\n"
-    recovered = RefreshActivationState.model_validate_json(
-        state_path.read_bytes(), strict=True
-    )
+    recovered = RefreshActivationState.model_validate_json(state_path.read_bytes(), strict=True)
     assert recovered.phase == "CANARIES_PASSED"
     assert recovered.canary_suite_path == str(fresh_suite)
     assert recovered.activation_request_path is None
@@ -1429,9 +1440,7 @@ def test_relative_canary_result_root_keeps_bundle_clone_addressable(
     )
 
     assert suite_path.is_absolute()
-    assert verify_mandatory_canary_suite(
-        suite_path, repo_root=repo
-    ).status is CanaryStatus.PASS
+    assert verify_mandatory_canary_suite(suite_path, repo_root=repo).status is CanaryStatus.PASS
     assert (suite_path.parent / "isolated-repo/.git").is_dir()
 
 
@@ -1700,9 +1709,7 @@ def test_direct_controller_entry_runs_full_supervisor_preflight_first(
 ) -> None:
     calls: list[Path] = []
 
-    def reject(
-        repo: Path, *, allow_publication_degraded: bool = False
-    ) -> dict[str, object]:
+    def reject(repo: Path, *, allow_publication_degraded: bool = False) -> dict[str, object]:
         calls.append(repo)
         assert allow_publication_degraded is True
         raise RuntimeError("full preflight sentinel")

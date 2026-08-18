@@ -91,9 +91,7 @@ class ActivationTransaction(V3Model):
         return self
 
 
-InstalledRuntimeLoader = Callable[
-    [Path], tuple[InstalledControllerRuntimeManifest, bytes, bytes]
-]
+InstalledRuntimeLoader = Callable[[Path], tuple[InstalledControllerRuntimeManifest, bytes, bytes]]
 
 
 def _activation_runtime_bundle(
@@ -138,17 +136,14 @@ def _archive_consumed_activation_transaction(
                 if candidate.is_symlink() or not candidate.is_file():
                     continue
                 candidate_raw = candidate.read_bytes()
-                predecessor = ActivationTransaction.model_validate_json(
-                    candidate_raw, strict=True
-                )
+                predecessor = ActivationTransaction.model_validate_json(candidate_raw, strict=True)
                 identity_matches = (
                     candidate_raw == predecessor.canonical_json_bytes()
                     and predecessor.phase is ActivationPhase.ACTIVATED
                     and predecessor.transaction_id == transaction.transaction_id
                     and predecessor.exact_main_sha == transaction.exact_main_sha
                     and predecessor.exact_tree_sha == transaction.exact_tree_sha
-                    and predecessor.activation_receipt_id
-                    == transaction.activation_receipt_id
+                    and predecessor.activation_receipt_id == transaction.activation_receipt_id
                     and predecessor.activation_receipt_digest
                     == transaction.activation_receipt_digest
                     and predecessor.canary_suite_path == transaction.canary_suite_path
@@ -166,9 +161,7 @@ def _archive_consumed_activation_transaction(
             and is_ancestor(repo_root, transaction.exact_main_sha, current_main_sha)
         )
         if len(predecessors) != 1 and not changed_stop_recovery:
-            raise RuntimeError(
-                "prepared activation renewal lacks one exact activated predecessor"
-            )
+            raise RuntimeError("prepared activation renewal lacks one exact activated predecessor")
         if not paths.stop.is_file() or paths.stop.is_symlink():
             raise RuntimeError("prepared activation renewal is not safely stopped")
         if sha256_digest(paths.stop.read_bytes()) != transaction.stop_digest:
@@ -251,9 +244,7 @@ def stage_activation_request(
     # A prior ACTIVATED journal is immutable evidence, but it must not permanently
     # block renewal after an independent observer restores STOP. Archive it only
     # after the new suite, policy receipt, and installed runtime all match exactly.
-    _archive_consumed_activation_transaction(
-        paths, repo_root=repo_root, current_main_sha=main_sha
-    )
+    _archive_consumed_activation_transaction(paths, repo_root=repo_root, current_main_sha=main_sha)
     identity = sha256_digest(
         b"\0".join(
             (
@@ -396,9 +387,7 @@ def coordinate_activation_policy_request(
         "/etc/traincapsule-controller/runtime-manifest.json"
     ),
     installed_runtime_loader: InstalledRuntimeLoader = _activation_runtime_bundle,
-    controller_outbox: Path = Path(
-        "/var/lib/traincapsule-verifier/controller-outbox"
-    ),
+    controller_outbox: Path = Path("/var/lib/traincapsule-verifier/controller-outbox"),
 ) -> Path | None:
     """Submit exact stopped-state evidence for independent activation policy review."""
 
@@ -413,30 +402,31 @@ def coordinate_activation_policy_request(
         return None
     suite_path = canary_suite_path.resolve(strict=True)
     suite_raw = suite_path.read_bytes()
-    suite = verify_mandatory_canary_suite(
-        suite_path, repo_root=repo_root, require_pass=True
-    )
+    suite = verify_mandatory_canary_suite(suite_path, repo_root=repo_root, require_pass=True)
     main_sha = current_sha(repo_root)
     tree_sha = _exact_tree(repo_root, main_sha)
     if suite.exact_main_sha != main_sha or suite.exact_tree_sha != tree_sha:
         return None
-    receipt_path = resolve_activation_policy_receipt_path(
-        repo_root, machine_policy_receipt_path
-    )
+    suite_digest = sha256_digest(suite_raw)
+    receipt_path = resolve_activation_policy_receipt_path(repo_root, machine_policy_receipt_path)
     renewal_parent_digest: str | None = None
     if receipt_path.is_file() and not receipt_path.is_symlink():
         receipt_raw = receipt_path.read_bytes()
         renewal_parent_digest = sha256_digest(receipt_raw)
         try:
-            receipt = MachinePolicyReceiptV31.model_validate_json(
-                receipt_raw, strict=True
-            )
+            receipt = MachinePolicyReceiptV31.model_validate_json(receipt_raw, strict=True)
             now = datetime.now(UTC)
             if (
                 receipt.canonical_json_bytes() == receipt_raw
                 and receipt.work_item_id == ACTIVATION_POLICY_WORK_ITEM
                 and receipt.candidate_sha == main_sha
                 and receipt.candidate_tree_sha == tree_sha
+                and receipt.source_generation_id == suite.source_generation_id
+                and receipt.source_generation_digest == suite.source_generation_digest
+                and receipt.context_manifest_digest == suite_digest
+                and receipt.task_packet_digest == suite.controller_digest
+                and receipt.candidate_manifest_digest == suite.factory_config_digest
+                and "ACTIVATION" in receipt.allowed_claims
                 and receipt.decision is PolicyDecision.PASS
                 and receipt.issued_at <= now
                 and receipt.expires_at > now + ACTIVATION_POLICY_RENEWAL_MARGIN
@@ -453,7 +443,6 @@ def coordinate_activation_policy_request(
     installed_runtime, runtime_raw, config_raw = installed_runtime_loader(
         installed_runtime_manifest_path
     )
-    suite_digest = sha256_digest(suite_raw)
     runtime_digest = sha256_digest(runtime_raw)
     config_digest = sha256_digest(config_raw)
     evidence_identity = sha256_digest(
@@ -468,9 +457,7 @@ def coordinate_activation_policy_request(
         )
     )
     evidence_root = (
-        paths.state_root
-        / "activation-policy-evidence"
-        / evidence_identity.removeprefix("sha256:")
+        paths.state_root / "activation-policy-evidence" / evidence_identity.removeprefix("sha256:")
     )
     suite_root = suite_path.parent.resolve(strict=True)
     result_evidence: dict[str, Path] = {}
@@ -623,14 +610,11 @@ def _activate_v31_locked(
         suite_path, repo_root=repo_root, require_pass=True
     )
     receipt_path, receipt_before, receipt = _load_live_receipt(repo_root)
-    runtime_value, runtime_raw, _ = installed_runtime_loader(
-        installed_runtime_manifest_path
-    )
+    runtime_value, runtime_raw, _ = installed_runtime_loader(installed_runtime_manifest_path)
     installed_runtime = runtime_value
     if (
         receipt.controller_binary_digest != sha256_digest(runtime_raw)
-        or receipt.controller_config_digest
-        != installed_runtime.effective_config.digest
+        or receipt.controller_config_digest != installed_runtime.effective_config.digest
     ):
         raise RuntimeError("LIVE receipt does not bind the exact installed controller runtime")
     receipt_stat = receipt_path.lstat()
@@ -659,17 +643,16 @@ def _activate_v31_locked(
     if preflight_result.get("activationReceiptDigest") != expected_receipt_digest:
         raise RuntimeError("startup preflight did not verify the exact activation receipt")
     suite_after = suite_path.lstat()
-    if (
-        (suite_after.st_dev, suite_after.st_ino) != (suite_stat.st_dev, suite_stat.st_ino)
-        or suite_path.read_bytes() != suite_before
-    ):
+    if (suite_after.st_dev, suite_after.st_ino) != (
+        suite_stat.st_dev,
+        suite_stat.st_ino,
+    ) or suite_path.read_bytes() != suite_before:
         raise RuntimeError("mandatory canary suite changed during activation preflight")
     receipt_after = receipt_path.lstat()
-    if (
-        (receipt_after.st_dev, receipt_after.st_ino)
-        != (receipt_stat.st_dev, receipt_stat.st_ino)
-        or receipt_path.read_bytes() != receipt_before
-    ):
+    if (receipt_after.st_dev, receipt_after.st_ino) != (
+        receipt_stat.st_dev,
+        receipt_stat.st_ino,
+    ) or receipt_path.read_bytes() != receipt_before:
         raise RuntimeError("activation receipt changed during activation preflight")
 
     transaction_id = f"ACTIVATE-{receipt.receipt_id}"

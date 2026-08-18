@@ -469,6 +469,43 @@ def test_activation_request_is_exact_idempotent_and_stopped(
         )
 
 
+def test_activation_request_reports_bounded_staging_rejection(
+    tmp_path: Path,
+    monkeypatch: pytest.MonkeyPatch,
+    caplog: pytest.LogCaptureFixture,
+) -> None:
+    repo = _repo(tmp_path)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    (runtime / "STOP").write_text("stopped\n", encoding="utf-8")
+    paths = _runtime_paths(runtime)
+    suite = paths.canary_results / "RUN" / "suite.json"
+    suite.parent.mkdir(parents=True)
+    suite.write_bytes(b"{}")
+    receipt = tmp_path / "activation-policy.json"
+    receipt.write_bytes(b"{}")
+
+    def resolved_paths(_repo: Path) -> V3RuntimePaths:
+        return paths
+
+    monkeypatch.setattr(activation, "resolve_v3_runtime_paths", resolved_paths)
+
+    def reject_staging(**_kwargs: object) -> Path:
+        raise RuntimeError("request identity conflict\nwith stale evidence")
+
+    monkeypatch.setattr(activation, "stage_activation_request", reject_staging)
+    assert (
+        activation.coordinate_activation_request(
+            repo_root=repo,
+            machine_policy_receipt_path=receipt,
+        )
+        is None
+    )
+    assert (
+        "ACTIVATION_REQUEST_REJECTED:RuntimeError:request identity conflict with stale evidence"
+    ) in caplog.messages
+
+
 def test_activation_request_retires_exact_prepared_receipt_replay(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

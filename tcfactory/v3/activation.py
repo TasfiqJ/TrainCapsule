@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import logging
 import os
 import shutil
 import stat
@@ -45,6 +46,12 @@ ACTIVATION_POLICY_RECEIPT_ROOT = Path(
 )
 ACTIVATION_POLICY_RENEWAL_MARGIN = timedelta(minutes=15)
 ACTIVATION_POLICY_MAX_RENEWAL_EVIDENCE_AGE = timedelta(minutes=15)
+LOGGER = logging.getLogger(__name__)
+
+
+def _bounded_failure(error: Exception) -> str:
+    detail = " ".join(str(error).split())[:240]
+    return f"{type(error).__name__}:{detail or 'no detail'}"
 
 
 def resolve_activation_policy_receipt_path(
@@ -372,7 +379,8 @@ def coordinate_activation_request(
                 canary_suite_path=suite_path,
                 machine_policy_receipt_path=machine_policy_receipt_path,
             )
-        except (OSError, RuntimeError, ValueError):
+        except (OSError, RuntimeError, ValueError) as error:
+            LOGGER.warning("ACTIVATION_REQUEST_REJECTED:%s", _bounded_failure(error))
             continue
     return None
 

@@ -11,6 +11,7 @@ backends:
       - repository_read
       - bounded_repository_write
       - deterministic_gate_execution
+      - web_research_when_policy_allows
     durableStateOwnedByFactory: true
 weeklyAllocationPercent:
   planning: 10

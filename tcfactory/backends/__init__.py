@@ -16,7 +16,6 @@ from tcfactory.backends.base import (
 )
 from tcfactory.backends.claude import ClaudeBackend, ClaudeCredentialProvider
 from tcfactory.backends.fake import FakeBackend
-from tcfactory.backends.registry import resolve_executor_backend
 
 __all__ = [
     "AgentCapabilityReport",
@@ -34,5 +33,4 @@ __all__ = [
     "Handoff",
     "SessionState",
     "UsageState",
-    "resolve_executor_backend",
 ]

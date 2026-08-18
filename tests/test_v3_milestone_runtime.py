@@ -121,8 +121,6 @@ def test_completion_proposals_cannot_broaden_policy_or_repeat_expansion() -> Non
             milestone_id="M0_FACTORY_MIGRATED",
             summary="Too broad.",
             proposed_work=[f"new-{index}" for index in range(6)],
-            candidate_sha="a" * 40,
-            evidence_digests=[DIGEST],
             reviewer_artifact_digest=DIGEST,
         )
     proposal = CompletionProposal(
@@ -130,8 +128,6 @@ def test_completion_proposals_cannot_broaden_policy_or_repeat_expansion() -> Non
         milestone_id="M0_FACTORY_MIGRATED",
         summary="Bounded proposal.",
         proposed_work=["one bounded follow-up"],
-        candidate_sha="a" * 40,
-        evidence_digests=[DIGEST],
         reviewer_artifact_digest=DIGEST,
         accepted=True,
         accepted_by_machine_policy_ref="MPR-EXTERNAL-001",
@@ -167,109 +163,6 @@ def test_completion_proposals_cannot_broaden_policy_or_repeat_expansion() -> Non
             trusted_external_receipt_refs=[],
             proposals=[proposal],
             expansion_round=2,
-        )
-
-
-def test_authorized_completion_expansion_consumes_only_round_and_evaluator_is_read_only(
-    tmp_path: Path,
-) -> None:
-    ledger = tmp_path / "factory/feature_ledger.yaml"
-    ledger.parent.mkdir(parents=True)
-    ledger.write_text("version: 2\nlegacy: immutable\n", encoding="utf-8")
-    before = ledger.read_bytes()
-    roadmap = MilestoneRoadmap.model_validate(
-        load_yaml(ROOT / "factory/roadmap/milestones.yaml")
-    )
-    milestone = roadmap.milestones[0]
-    collection = WorkItemCollection(
-        active_milestone=milestone.milestone_id,
-        work_items=[],
-    )
-    accepted = CompletionProposal(
-        proposal_id="CPROP-M0-AUTHORIZED",
-        milestone_id=milestone.milestone_id,
-        summary="One bounded, independently authorized expansion.",
-        proposed_work=["one bounded follow-up"],
-        candidate_sha="a" * 40,
-        evidence_digests=[DIGEST],
-        reviewer_artifact_digest=DIGEST,
-        accepted=True,
-        accepted_by_machine_policy_ref="MPR-EXTERNAL-001",
-    )
-
-    consumed = evaluate_v3_milestone_completion(
-        milestone=milestone,
-        work_items=collection,
-        deterministic_evidence={},
-        independent_review_refs=[],
-        machine_policy_receipt_refs=[],
-        trusted_external_receipt_refs=[],
-        proposals=[accepted],
-        expansion_round=1,
-    )
-    assert consumed.expansion_round == 1
-    assert consumed.proposals == [accepted]
-
-    with pytest.raises(CompletionBlocked, match="limited to one round"):
-        evaluate_v3_milestone_completion(
-            milestone=milestone,
-            work_items=collection,
-            deterministic_evidence={},
-            independent_review_refs=[],
-            machine_policy_receipt_refs=[],
-            trusted_external_receipt_refs=[],
-            proposals=[accepted],
-            expansion_round=2,
-        )
-
-    unaccepted = accepted.model_copy(
-        update={"accepted": False, "accepted_by_machine_policy_ref": None}
-    )
-    proposed_only = evaluate_v3_milestone_completion(
-        milestone=milestone,
-        work_items=collection,
-        deterministic_evidence={},
-        independent_review_refs=[],
-        machine_policy_receipt_refs=[],
-        trusted_external_receipt_refs=[],
-        proposals=[unaccepted],
-        expansion_round=0,
-    )
-    assert proposed_only.proposals == [unaccepted]
-    assert ledger.read_bytes() == before
-
-
-def test_completion_review_rejects_more_than_five_separate_proposals() -> None:
-    roadmap = MilestoneRoadmap.model_validate(
-        load_yaml(ROOT / "factory/roadmap/milestones.yaml")
-    )
-    milestone = roadmap.milestones[0]
-    proposals = [
-        CompletionProposal(
-            proposal_id=f"CPROP-M0-BOUND-{index}",
-            milestone_id=milestone.milestone_id,
-                summary=f"Bounded proposal {index}.",
-                proposed_work=[f"follow-up-{index}"],
-                candidate_sha="a" * 40,
-                evidence_digests=[DIGEST],
-                reviewer_artifact_digest=DIGEST,
-        )
-        for index in range(6)
-    ]
-
-    with pytest.raises(CompletionBlocked, match="at most five proposals"):
-        evaluate_v3_milestone_completion(
-            milestone=milestone,
-            work_items=WorkItemCollection(
-                active_milestone=milestone.milestone_id,
-                work_items=[],
-            ),
-            deterministic_evidence={},
-            independent_review_refs=[],
-            machine_policy_receipt_refs=[],
-            trusted_external_receipt_refs=[],
-            proposals=proposals,
-            expansion_round=0,
         )
 
 

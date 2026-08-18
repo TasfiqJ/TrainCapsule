@@ -222,11 +222,24 @@ def test_completion_audit_wiring_keeps_reviews_blind_until_adjudication(
     def fake_deterministic_check(*_: object) -> list[str]:
         return []
 
+    def fake_append_missing_items(**_: object) -> list[str]:
+        return ["AUTO003"]
+
+    def no_op(*_: object) -> None:
+        return None
+
     monkeypatch.setattr(completion_module, "load_definition", fake_load_definition)
     monkeypatch.setattr(
         completion_module, "deterministic_completion_check", fake_deterministic_check
     )
     monkeypatch.setattr(completion_module, "_one_review", fake_review)
+    monkeypatch.setattr(
+        completion_module,
+        "_append_missing_items",
+        fake_append_missing_items,
+    )
+    monkeypatch.setattr(completion_module, "save_feature_ledger", no_op)
+    monkeypatch.setattr(completion_module, "commit_all", no_op)
     def fixed_sha(_repo_root: Path, _ref: str = "HEAD") -> str:
         return "a" * 40
 
@@ -244,7 +257,7 @@ def test_completion_audit_wiring_keeps_reviews_blind_until_adjudication(
         ],
     )
 
-    outcome, proposal_refs, audited_sha = asyncio.run(
+    outcome, added, audited_sha = asyncio.run(
         completion_module.audit_and_expand_or_complete(
             repo_root=tmp_path,
             config=FactoryConfig(auth_mode="unrestricted"),
@@ -253,9 +266,8 @@ def test_completion_audit_wiring_keeps_reviews_blind_until_adjudication(
         )
     )
 
-    assert outcome == "proposed"
-    assert len(proposal_refs) == 1
-    assert proposal_refs[0].endswith("MILESTONE_COMPLETION_PROPOSAL.json")
+    assert outcome == "expanded"
+    assert added == ["AUTO003"]
     assert audited_sha == "a" * 40
     assert captured["primary-audit"] == []
     assert captured["adversarial-audit"] == []

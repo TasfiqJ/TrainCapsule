@@ -27,20 +27,6 @@
           "title": "Proposedwork",
           "type": "array"
         },
-        "candidateSha": {
-          "pattern": "^[0-9a-f]{40}$",
-          "title": "Candidatesha",
-          "type": "string"
-        },
-        "evidenceDigests": {
-          "items": {
-            "type": "string"
-          },
-          "maxItems": 256,
-          "minItems": 1,
-          "title": "Evidencedigests",
-          "type": "array"
-        },
         "reviewerArtifactDigest": {
           "pattern": "^sha256:[0-9a-f]{64}$",
           "title": "Reviewerartifactdigest",
@@ -69,8 +55,6 @@
         "milestoneId",
         "summary",
         "proposedWork",
-        "candidateSha",
-        "evidenceDigests",
         "reviewerArtifactDigest"
       ],
       "title": "CompletionProposal",

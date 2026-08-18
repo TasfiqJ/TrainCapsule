@@ -118,19 +118,10 @@ def load_backend_terminal_record(
 
 
 class ClaudeBackend:
-    def __init__(
-        self,
-        credentials: ClaudeCredentialProvider | None = None,
-        *,
-        max_concurrent_sessions: int = 2,
-    ) -> None:
-        if max_concurrent_sessions < 1:
-            raise ValueError("max_concurrent_sessions must be positive")
+    def __init__(self, credentials: ClaudeCredentialProvider | None = None) -> None:
         self.credentials = credentials or ClaudeCredentialProvider()
         self._sessions: dict[str, AgentSession] = {}
         self._requests: dict[str, AgentTaskRequest] = {}
-        self._active_sessions: set[str] = set()
-        self._max_concurrent_sessions = max_concurrent_sessions
         self._counter = 0
 
     def capabilities(self) -> AgentCapabilityReport:
@@ -155,8 +146,6 @@ class ClaudeBackend:
         if unsupported_tools:
             names = ", ".join(sorted(unsupported_tools))
             raise ValueError(f"Claude V3 execution rejects unsupported tools: {names}")
-        if len(self._active_sessions) >= self._max_concurrent_sessions:
-            raise RuntimeError("Claude executor concurrent-session limit reached")
         self._counter += 1
         session = AgentSession(
             session_ref=f"ASESS-CLAUDE-{self._counter:04d}",
@@ -167,18 +156,14 @@ class ClaudeBackend:
         )
         self._sessions[session.session_ref] = session
         self._requests[session.session_ref] = request
-        self._active_sessions.add(session.session_ref)
         return session
-
-    def _release_session(self, session_ref: str) -> None:
-        self._active_sessions.discard(session_ref)
 
     def resume(self, session: AgentSession, handoff: Handoff) -> AgentRunResult:
         """Refuse implicit SDK execution; ``run_stage`` is the async legacy adapter."""
 
         if session.session_ref not in self._sessions:
             raise ValueError("unknown Claude backend session")
-        result = AgentRunResult(
+        return AgentRunResult(
             session=session,
             state=SessionState.FAILED,
             verdict="blocked",
@@ -189,8 +174,6 @@ class ClaudeBackend:
             terminal_disposition=BackendTerminalDisposition.ROUTE_REFUSED,
             error_state=BackendRouteState.ROUTE_REFUSED,
         )
-        self._release_session(session.session_ref)
-        return result
 
     @staticmethod
     def require_execution_security(config: FactoryConfig, task: TaskPacket) -> None:
@@ -222,7 +205,6 @@ class ClaudeBackend:
         self._sessions[session.session_ref] = current.model_copy(
             update={"state": SessionState.CANCELLED}
         )
-        self._release_session(session.session_ref)
 
     def usage_state(self) -> UsageState:
         route = self.credentials.state()
@@ -242,19 +224,9 @@ class ClaudeBackend:
         )
 
     async def execute(self, request: AgentTaskRequest) -> AgentRunResult:
-        """Execute and release the configured concurrency slot on every exit path."""
-
-        session = self.start(request)
-        try:
-            return await self._execute_started(request, session)
-        finally:
-            self._release_session(session.session_ref)
-
-    async def _execute_started(
-        self, request: AgentTaskRequest, session: AgentSession
-    ) -> AgentRunResult:
         """Execute a V3 request through the existing SDK adapter behind this boundary."""
 
+        session = self.start(request)
         repo_root = Path(request.controller_repo_root).resolve()
         worktree = Path(request.candidate_worktree).resolve()
         artifact_root = Path(request.artifact_root).resolve()

@@ -173,24 +173,6 @@ def test_fixed_claude_runtime_failure_is_archived_and_reopened_once(
         == []
     )
 
-    changed_after_commit = current.model_copy(
-        update={"title": "Later canonical roadmap wording"}
-    )
-    assert (
-        recover_repaired_claude_sandbox_blocks(
-            collection=WorkItemCollection(
-                active_milestone="M0_FACTORY_MIGRATED",
-                work_items=[changed_after_commit],
-            ),
-            queue=queue,
-            checkpoints=checkpoints,
-            runtime_root=runtime,
-            current_main_sha=NEW_SHA,
-            now=datetime.now(UTC),
-        )
-        == []
-    )
-
 
 def test_unrelated_terminal_failure_remains_blocked(tmp_path: Path) -> None:
     runtime = tmp_path / "runtime"

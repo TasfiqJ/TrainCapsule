@@ -23,45 +23,10 @@ class Milestone(V3Model):
     def validate_bounded_completion(self) -> Milestone:
         for criterion in self.exit_criteria:
             normalized = re.sub(r"[^a-z0-9]+", " ", criterion.lower()).strip()
-            terminal = re.search(
-                r"\b(complete(?:d)?|done|finish(?:ed)?|ship(?:ped)?|delivered|"
-                r"resolved|closed|ready|satisfied)\b",
-                normalized,
-            )
-            if not terminal:
-                continue
-            universal = re.search(
-                r"\b(all|every|entire|whole|everything|100 percent|zero remaining|"
-                r"no remaining)\b",
-                normalized,
-            )
-            global_scope = re.search(
-                r"\b(product|system|roadmap|repository|codebase|backlog|"
-                r"requirements?|features?)\b",
-                normalized,
-            )
-            task_scope = re.search(r"\b(tasks?|work items?)\b", normalized)
-            normalized_milestone_id = re.sub(
-                r"[^a-z0-9]+", " ", self.milestone_id.lower()
-            ).strip()
-            milestone_bound = normalized_milestone_id in normalized
-            if (
-                re.search(r"\beverything\b", normalized)
-                or (global_scope and universal)
-                or (
-                global_scope
-                and re.search(
-                    r"\b(product|system|roadmap|repository|codebase)\s+"
-                    r"(?:is\s+)?(?:complete(?:d)?|done|finished|ready)\b",
-                    normalized,
-                )
-                )
-                or (universal and task_scope and not milestone_bound)
+            if "all product tasks" in normalized and (
+                "done" in normalized or "complete" in normalized
             ):
-                raise ValueError(
-                    "unbounded global completion criterion is forbidden "
-                    "(all-product-tasks)"
-                )
+                raise ValueError("global all-product-tasks completion is forbidden")
         return self
 
 

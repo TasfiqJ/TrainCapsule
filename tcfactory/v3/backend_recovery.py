@@ -147,14 +147,11 @@ def recover_repaired_claude_sandbox_blocks(
                 journal.get("repairMarker") != CLAUDE_SANDBOX_CONFIG_REPAIR
                 or journal.get("workItemId") != item.work_item_id
                 or journal.get("recoveryMainSha") != current_main_sha
+                or journal.get("authorityItemDigest") != item.canonical_digest()
             ):
                 raise RuntimeError("backend recovery journal identity changed")
             if journal.get("phase") == "COMMITTED":
-                if not isinstance(journal.get("committedAt"), str):
-                    raise RuntimeError("backend recovery committed journal is incomplete")
                 continue
-            if journal.get("authorityItemDigest") != item.canonical_digest():
-                raise RuntimeError("backend recovery journal identity changed")
             if _finish_recovery(
                 queue=queue,
                 checkpoints=checkpoints,

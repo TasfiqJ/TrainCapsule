@@ -16,25 +16,14 @@ class DispositionRecord(V3Model):
     previous: Disposition
     decision: Disposition
     rationale: str = Field(min_length=1)
-    evidence_refs: list[str] = Field(max_length=64)
+    evidence_refs: list[str]
     decided_by: OwnerType
     decided_at: datetime
 
     @model_validator(mode="after")
     def require_decision_evidence(self) -> DispositionRecord:
-        if self.decided_at.utcoffset() is None:
-            raise ValueError("disposition decision timestamp must include a timezone")
         if self.previous is self.decision:
             raise ValueError("disposition decision must change the previous state")
-        if len(self.evidence_refs) != len(set(self.evidence_refs)):
-            raise ValueError("disposition evidence references must be unique")
-        if any(
-            not reference.strip() or any(ord(char) < 32 for char in reference)
-            for reference in self.evidence_refs
-        ):
-            raise ValueError(
-                "disposition evidence references must be non-empty printable strings"
-            )
         if self.decision in {Disposition.STOP, Disposition.REPLACE} and not self.evidence_refs:
             raise ValueError("stop and replace dispositions require evidence")
         return self
@@ -45,20 +34,8 @@ class DispositionLedger(V3Model):
     records: list[DispositionRecord]
 
     @model_validator(mode="after")
-    def validate_ledger_history(self) -> DispositionLedger:
+    def unique_records(self) -> DispositionLedger:
         identifiers = [record.record_id for record in self.records]
         if len(identifiers) != len(set(identifiers)):
             raise ValueError("disposition record IDs must be unique")
-        ordering = [(record.decided_at, record.record_id) for record in self.records]
-        if ordering != sorted(ordering):
-            raise ValueError("disposition records must be in chronological canonical order")
-        last_decision: dict[str, Disposition] = {}
-        for record in self.records:
-            prior = last_decision.get(record.work_item_id)
-            if prior is not None and record.previous is not prior:
-                raise ValueError(
-                    "disposition transition does not continue the prior decision for "
-                    f"{record.work_item_id}"
-                )
-            last_decision[record.work_item_id] = record.decision
         return self

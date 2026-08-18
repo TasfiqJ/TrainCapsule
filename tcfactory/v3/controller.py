@@ -1607,10 +1607,6 @@ class V3Controller:
                     milestone_id=collection.active_milestone,
                     summary="Bounded milestone completion gaps require separate work proposals.",
                     proposed_work=completion_failures[:5],
-                    candidate_sha=current_sha(self.git_root, "main"),
-                    evidence_digests=[
-                        next(iter(evidence_digests.values()), active_source.canonical_digest())
-                    ],
                     reviewer_artifact_digest=(
                         next(iter(evidence_digests.values()), active_source.canonical_digest())
                     ),

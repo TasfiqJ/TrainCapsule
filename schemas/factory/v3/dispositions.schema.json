@@ -42,7 +42,6 @@
           "items": {
             "type": "string"
           },
-          "maxItems": 64,
           "title": "Evidencerefs",
           "type": "array"
         },

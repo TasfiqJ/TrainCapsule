@@ -16,7 +16,7 @@ from typing import Literal
 from pydantic import AwareDatetime, Field, model_validator
 
 from ..github_sync import load_github_config
-from ..gitops import current_sha
+from ..gitops import current_sha, is_ancestor
 from ..util import atomic_write_bytes, sha256_file
 from .base import DIGEST_PATTERN, SHA_PATTERN, V3Model, sha256_digest
 from .canaries import MandatoryCanarySuite, verify_mandatory_canary_suite
@@ -103,7 +103,9 @@ def _activation_runtime_bundle(
     return manifest, raw, Path(manifest.effective_config.path).read_bytes()
 
 
-def _archive_consumed_activation_transaction(paths: V3RuntimePaths) -> None:
+def _archive_consumed_activation_transaction(
+    paths: V3RuntimePaths, *, repo_root: Path, current_main_sha: str
+) -> None:
     """Retire one completed activation journal before requesting fresh authority."""
 
     if not paths.activation_transactions.exists():
@@ -130,6 +132,7 @@ def _archive_consumed_activation_transaction(paths: V3RuntimePaths) -> None:
         # residue when an immutable, canonical ACTIVATED predecessor proves the
         # same receipt, evidence, and STOP archive previously completed.
         predecessors: list[ActivationTransaction] = []
+        changed_stop_predecessors: list[ActivationTransaction] = []
         if archive.is_dir():
             for candidate in archive.glob(f"{transaction.transaction_id}-*.json"):
                 if candidate.is_symlink() or not candidate.is_file():
@@ -138,7 +141,7 @@ def _archive_consumed_activation_transaction(paths: V3RuntimePaths) -> None:
                 predecessor = ActivationTransaction.model_validate_json(
                     candidate_raw, strict=True
                 )
-                if (
+                identity_matches = (
                     candidate_raw == predecessor.canonical_json_bytes()
                     and predecessor.phase is ActivationPhase.ACTIVATED
                     and predecessor.transaction_id == transaction.transaction_id
@@ -150,11 +153,19 @@ def _archive_consumed_activation_transaction(paths: V3RuntimePaths) -> None:
                     == transaction.activation_receipt_digest
                     and predecessor.canary_suite_path == transaction.canary_suite_path
                     and predecessor.canary_suite_digest == transaction.canary_suite_digest
-                    and predecessor.stop_digest == transaction.stop_digest
                     and predecessor.stop_archive_path == transaction.stop_archive_path
-                ):
+                )
+                if identity_matches and predecessor.stop_digest == transaction.stop_digest:
                     predecessors.append(predecessor)
-        if len(predecessors) != 1:
+                elif identity_matches:
+                    changed_stop_predecessors.append(predecessor)
+        changed_stop_recovery = (
+            not predecessors
+            and len(changed_stop_predecessors) == 1
+            and transaction.exact_main_sha != current_main_sha
+            and is_ancestor(repo_root, transaction.exact_main_sha, current_main_sha)
+        )
+        if len(predecessors) != 1 and not changed_stop_recovery:
             raise RuntimeError(
                 "prepared activation renewal lacks one exact activated predecessor"
             )
@@ -162,7 +173,10 @@ def _archive_consumed_activation_transaction(paths: V3RuntimePaths) -> None:
             raise RuntimeError("prepared activation renewal is not safely stopped")
         if sha256_digest(paths.stop.read_bytes()) != transaction.stop_digest:
             raise RuntimeError("prepared activation renewal STOP digest changed")
-        _validate_archive(transaction)
+        if changed_stop_recovery:
+            _validate_archive(changed_stop_predecessors[0])
+        else:
+            _validate_archive(transaction)
     elif transaction.phase is not ActivationPhase.ACTIVATED:
         raise RuntimeError("activation renewal transaction is not completed and canonical")
     archive.mkdir(parents=True, exist_ok=True, mode=0o700)
@@ -237,7 +251,9 @@ def stage_activation_request(
     # A prior ACTIVATED journal is immutable evidence, but it must not permanently
     # block renewal after an independent observer restores STOP. Archive it only
     # after the new suite, policy receipt, and installed runtime all match exactly.
-    _archive_consumed_activation_transaction(paths)
+    _archive_consumed_activation_transaction(
+        paths, repo_root=repo_root, current_main_sha=main_sha
+    )
     identity = sha256_digest(
         b"\0".join(
             (

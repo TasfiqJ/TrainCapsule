@@ -538,6 +538,98 @@ def test_activation_request_retires_exact_prepared_receipt_replay(
     assert any(path.read_bytes() == prepared.canonical_json_bytes() for path in archived)
 
 
+def test_activation_request_retires_ancestor_replay_after_new_operator_stop(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    repo = _repo(tmp_path)
+    old_sha = _git(repo, "rev-parse", "HEAD")
+    old_tree = _git(repo, "rev-parse", "HEAD^{tree}")
+    (repo / "successor.txt").write_text("successor\n", encoding="utf-8")
+    _git(repo, "add", "successor.txt")
+    _git(
+        repo,
+        "-c",
+        "user.name=Canary Test",
+        "-c",
+        "user.email=canary@example.invalid",
+        "commit",
+        "-m",
+        "successor",
+    )
+    suite = _suite(repo, tmp_path, monkeypatch)
+    runtime = tmp_path / "runtime"
+    runtime.mkdir()
+    stop = runtime / "STOP"
+    stop.write_text("new operator stop\n", encoding="utf-8")
+    outbox = tmp_path / "activation-outbox"
+    outbox.mkdir(mode=0o700)
+    receipt = _activation_policy_receipt(repo, suite, tmp_path / "policy.json")
+    paths = _runtime_paths(runtime)
+    paths.activation_transactions.mkdir()
+    old_stop = b"old activation stop\n"
+    stop_archive = paths.control_archive / f"STOP.ACT:CONSUMED.{old_sha[:12]}"
+    stop_archive.parent.mkdir(parents=True)
+    stop_archive.write_bytes(old_stop)
+
+    def transaction(
+        phase: ActivationPhase, *, stop_digest: str, activated_at: datetime | None = None
+    ) -> ActivationTransaction:
+        return ActivationTransaction(
+            schema_version="3.1",
+            transaction_id="ACTIVATE-ACT:CONSUMED",
+            phase=phase,
+            exact_main_sha=old_sha,
+            exact_tree_sha=old_tree,
+            activation_receipt_id="ACT:CONSUMED",
+            activation_receipt_digest=DIGEST,
+            canary_suite_path=str(suite),
+            canary_suite_digest=DIGEST,
+            preflight_digest=DIGEST,
+            stop_digest=stop_digest,
+            stop_archive_path=str(stop_archive),
+            prepared_at=NOW,
+            activated_at=activated_at,
+        )
+
+    activated = transaction(
+        ActivationPhase.ACTIVATED,
+        stop_digest=sha256_digest(old_stop),
+        activated_at=NOW,
+    )
+    archive = paths.control_archive / "activation-transactions"
+    archive.mkdir()
+    (archive / "ACTIVATE-ACT:CONSUMED-terminal.json").write_bytes(
+        activated.canonical_json_bytes()
+    )
+    prepared = transaction(
+        ActivationPhase.PREPARED,
+        stop_digest=sha256_digest(stop.read_bytes()),
+    )
+    live = paths.activation_transactions / "ACTIVATE-ACT:CONSUMED.json"
+    live.write_bytes(prepared.canonical_json_bytes())
+
+    def resolve_paths(_root: Path) -> V3RuntimePaths:
+        return paths
+
+    monkeypatch.setattr(activation, "resolve_v3_runtime_paths", resolve_paths)
+    _, runtime_loader = _runtime_loader()
+    request = stage_activation_request(
+        repo_root=repo,
+        canary_suite_path=suite,
+        machine_policy_receipt_path=receipt,
+        _outbox_root=outbox,
+        installed_runtime_loader=runtime_loader,
+        now=NOW + timedelta(minutes=1),
+    )
+
+    assert request.is_file()
+    assert stop.is_file()
+    assert not live.exists()
+    archived = list(archive.glob("ACTIVATE-ACT:CONSUMED-*.json"))
+    assert len(archived) == 2
+    assert any(path.read_bytes() == prepared.canonical_json_bytes() for path in archived)
+
+
 def test_activation_policy_request_uses_independent_verifier_bridge(
     tmp_path: Path, monkeypatch: pytest.MonkeyPatch
 ) -> None:

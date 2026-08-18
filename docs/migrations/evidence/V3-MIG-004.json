@@ -1,0 +1,51 @@
+{
+  "bindings": [
+    {
+      "path": "config/source_precedence.yaml",
+      "sha256": "3c9adcca6b4a5424f4ebf9b030c3cb4545c0bb9bf6e3d1f07f46f796df6a9aaf"
+    },
+    {
+      "path": "SOURCE_PRECEDENCE.md",
+      "sha256": "43c7b8f1d42a2d2f366b8e9e628e780002a9ceed4580e0ffe55f9cdd6939e534"
+    },
+    {
+      "path": "scripts/gates/source_of_truth_integrity.py",
+      "sha256": "15aa1ca0dfdcf1be6b7dfb19c00f33389c4d71c59da16546356e14fb05133f36"
+    },
+    {
+      "path": "tests/test_v3_mig_004_source_precedence.py",
+      "sha256": "fc65a36aed1bb6ed52709fbb7261c2f3b71fa0b1379b469ad4a8a70abcbd8dc1"
+    }
+  ],
+  "claim": "Source precedence and context authority are executable and fail closed.",
+  "independentAuthorityReceipt": null,
+  "independentAuthorityState": "MISSING_NOT_REQUIRED_FOR_LOCAL_ENGINEERING_EVIDENCE",
+  "limitations": [
+    "This artifact is deterministic repository evidence, not an independent review.",
+    "It does not authorize publication, activation, or a completion-ledger transition."
+  ],
+  "localVerificationState": "VERIFIED",
+  "schemaVersion": 1,
+  "taskId": "V3-MIG-004",
+  "verification": {
+    "command": [
+      ".venv/bin/python",
+      "-m",
+      "pytest",
+      "-q",
+      "tests/test_v3_mig_004_source_precedence.py",
+      "tests/test_source_of_truth_integrity.py"
+    ],
+    "negativeCases": [
+      "precedence mutation with recomputed self-digest",
+      "missing precedence source",
+      "duplicate precedence source",
+      "missing manifest source",
+      "normative source in current-fact group",
+      "current fact in normative group",
+      "role/group authority mismatch",
+      "stale current fact",
+      "duplicate context entry"
+    ]
+  }
+}

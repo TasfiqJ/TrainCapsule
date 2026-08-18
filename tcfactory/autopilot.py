@@ -66,7 +66,9 @@ def _finite_ceiling_reached(current: int, ceiling: int) -> bool:
     return current >= ceiling
 
 
-def _finite_ceiling_exceeded(current: int, ceiling: int) -> bool:
+def _finite_ceiling_exceeded(  # pyright: ignore[reportUnusedFunction]
+    current: int, ceiling: int
+) -> bool:
     """Return whether a configured finite inclusive ceiling was exceeded."""
 
     if ceiling <= 0:
@@ -1288,38 +1290,18 @@ async def _run_autopilot_inner(
                 _notify(autonomy, state.last_event)
                 return
 
-            if outcome == "expanded":
-                expansion_count = len(
-                    list(
-                        factory.resolve(repo_root, factory.completion_dir).glob(
-                            "*/ROADMAP_EXPANDED.json"
-                        )
-                    )
-                )
-                if not autonomy.auto_expand_roadmap or _finite_ceiling_exceeded(
-                    expansion_count, autonomy.max_completion_expansions
-                ):
-                    state.status = "blocked"
-                    state.blocked_tasks = ["PRODUCT_COMPLETION"]
-                    state.last_event = (
-                        "Completion audit found additional work, but automatic roadmap "
-                        f"expansion is disabled or exceeded its ceiling ({expansion_count}/"
-                        f"{_ceiling_label(autonomy.max_completion_expansions)})."
-                    )
-                    save_state(repo_root, factory, state)
-                    _notify(autonomy, state.last_event)
-                    return
-                state.status = "running"
-                state.active_task_id = None
-                state.current_action = None
+            if outcome == "proposed":
+                state.status = "blocked"
+                state.blocked_tasks = ["PRODUCT_COMPLETION"]
+                state.current_action = "await machine-policy-authorized proposal acceptance"
                 state.last_event = (
-                    "Independent completion audit expanded the roadmap: "
+                    "Independent completion audit emitted proposal-only missing work; "
+                    "the feature ledger and Git candidate were not mutated: "
                     + ", ".join(completion_evidence)
                 )
                 save_state(repo_root, factory, state)
-                if once:
-                    return
-                continue
+                _notify(autonomy, state.last_event)
+                return
 
             observed_main = current_sha(repo_root, "main")
             if observed_main != audited_sha:

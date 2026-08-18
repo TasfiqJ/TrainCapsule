@@ -1,0 +1,92 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/evidence/V3-MIG-009.schema.json",
+  "title": "V3-MIG-009 deterministic engineering evidence",
+  "type": "object",
+  "additionalProperties": false,
+  "required": [
+    "schemaVersion",
+    "workItemId",
+    "verificationKind",
+    "authorityClaim",
+    "implementation",
+    "verification",
+    "limitations",
+    "evidenceDigest"
+  ],
+  "properties": {
+    "schemaVersion": {
+      "const": "traincapsule.v3-migration-verification/v1"
+    },
+    "workItemId": {
+      "const": "V3-MIG-009"
+    },
+    "verificationKind": {
+      "const": "DETERMINISTIC_CRYPTOGRAPHIC_INTEGRATION_TEST"
+    },
+    "authorityClaim": {
+      "const": "NONE"
+    },
+    "implementation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["productionModule", "directAcceptanceTest", "signedArtifacts"],
+      "properties": {
+        "productionModule": {
+          "const": "tcfactory/v3/external_evidence.py"
+        },
+        "directAcceptanceTest": {
+          "const": "tests/test_v3_mig_009_external_evidence.py"
+        },
+        "signedArtifacts": {
+          "const": [
+            "external-evidence-receipt",
+            "external-evidence-revocation-list",
+            "external-evidence-authority-anchor"
+          ]
+        }
+      }
+    },
+    "verification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["cryptoBoundary", "pytestCases", "coveredOutcomes", "result"],
+      "properties": {
+        "cryptoBoundary": {
+          "const": "REAL_ED25519_EXACT_BYTES"
+        },
+        "pytestCases": {
+          "const": 8
+        },
+        "coveredOutcomes": {
+          "const": [
+            "valid-receipt-revocation-anchor-snapshot",
+            "tampered-receipt",
+            "tampered-detached-signature",
+            "wrong-verification-key",
+            "revoked-nonce",
+            "subject-mismatch",
+            "non-ed25519-declaration",
+            "schema-and-digest-validation"
+          ]
+        },
+        "result": {
+          "const": "PASS"
+        }
+      }
+    },
+    "limitations": {
+      "type": "array",
+      "minItems": 2,
+      "uniqueItems": true,
+      "items": {
+        "type": "string",
+        "minLength": 1
+      }
+    },
+    "evidenceDigest": {
+      "type": "string",
+      "pattern": "^sha256:[0-9a-f]{64}$"
+    }
+  }
+}

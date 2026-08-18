@@ -18,7 +18,7 @@ from tcfactory.v3.source_authority import SourceAuthorityError
 ROOT = Path(__file__).resolve().parents[1]
 
 
-def _repository_fixture(tmp_path: Path) -> Path:
+def repository_fixture(tmp_path: Path) -> Path:
     shutil.copytree(
         ROOT / "docs/source-of-truth",
         tmp_path / "docs/source-of-truth",
@@ -36,6 +36,8 @@ def _repository_fixture(tmp_path: Path) -> Path:
         tmp_path / "scripts/generate_v3_1_zh_source.py",
     )
     shutil.copy2(ROOT / "config/active_generation.yaml", tmp_path / "config/active_generation.yaml")
+    shutil.copy2(ROOT / "config/context.yaml", tmp_path / "config/context.yaml")
+    shutil.copy2(ROOT / "config/source_precedence.yaml", tmp_path / "config/source_precedence.yaml")
     shutil.copy2(ROOT / "config/human_approval.yaml", tmp_path / "config/human_approval.yaml")
     shutil.copy2(ROOT / "config/owner_directives.yaml", tmp_path / "config/owner_directives.yaml")
     (tmp_path / "docs/migrations").mkdir(parents=True)
@@ -78,7 +80,7 @@ def test_repository_v3_source_authority_is_integral() -> None:
 
 
 def test_integrity_rejects_missing_active_file(tmp_path: Path) -> None:
-    repo = _repository_fixture(tmp_path)
+    repo = repository_fixture(tmp_path)
     target = repo / (
         "docs/source-of-truth/v3.1-zh-2026-08-12/"
         "00_EXECUTIVE_BUILD_DECISION_V3_1_ZH.md"
@@ -89,7 +91,7 @@ def test_integrity_rejects_missing_active_file(tmp_path: Path) -> None:
 
 
 def test_integrity_rejects_changed_hash(tmp_path: Path) -> None:
-    repo = _repository_fixture(tmp_path)
+    repo = repository_fixture(tmp_path)
     path = repo / "docs/source-of-truth/v3.1-zh-2026-08-12/00_EXECUTIVE_BUILD_DECISION_V3_1_ZH.md"
     path.write_text(path.read_text(encoding="utf-8") + "changed\n", encoding="utf-8")
     with pytest.raises(SourceAuthorityError, match="deterministic historical derivation"):
@@ -97,7 +99,7 @@ def test_integrity_rejects_changed_hash(tmp_path: Path) -> None:
 
 
 def test_integrity_rejects_duplicate_logical_id(tmp_path: Path) -> None:
-    repo = _repository_fixture(tmp_path)
+    repo = repository_fixture(tmp_path)
     path, payload = _manifest(repo)
     files = cast(list[dict[str, object]], payload["documents"])
     assert isinstance(files[0], dict) and isinstance(files[1], dict)
@@ -109,7 +111,7 @@ def test_integrity_rejects_duplicate_logical_id(tmp_path: Path) -> None:
 
 
 def test_integrity_rejects_manifest_self_hash(tmp_path: Path) -> None:
-    repo = _repository_fixture(tmp_path)
+    repo = repository_fixture(tmp_path)
     path, payload = _manifest(repo)
     files = cast(list[dict[str, object]], payload["documents"])
     files.append(
@@ -132,7 +134,7 @@ def test_integrity_rejects_manifest_self_hash(tmp_path: Path) -> None:
 
 
 def test_integrity_rejects_active_parenthesized_duplicate(tmp_path: Path) -> None:
-    repo = _repository_fixture(tmp_path)
+    repo = repository_fixture(tmp_path)
     duplicate = repo / (
         "docs/source-of-truth/v3.1-zh-2026-08-12/"
         "00_EXECUTIVE_BUILD_DECISION_V3_1_ZH(1).md"
@@ -143,7 +145,7 @@ def test_integrity_rejects_active_parenthesized_duplicate(tmp_path: Path) -> Non
 
 
 def test_integrity_rejects_old_bundle_as_active(tmp_path: Path) -> None:
-    repo = _repository_fixture(tmp_path)
+    repo = repository_fixture(tmp_path)
     path = repo / "config/active_generation.yaml"
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     payload["sourceRoot"] = "docs/source-of-truth/v3-2026-08-11"
@@ -153,7 +155,7 @@ def test_integrity_rejects_old_bundle_as_active(tmp_path: Path) -> None:
 
 
 def test_integrity_rejects_unresolved_context_path(tmp_path: Path) -> None:
-    repo = _repository_fixture(tmp_path)
+    repo = repository_fixture(tmp_path)
     path = repo / "docs/CONTEXT_INDEX.yaml"
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     payload["groups"]["product_normative"]["entries"][0]["path"] = "docs/missing.md"
@@ -163,7 +165,7 @@ def test_integrity_rejects_unresolved_context_path(tmp_path: Path) -> None:
 
 
 def test_integrity_rejects_mixed_normative_and_current_fact_context(tmp_path: Path) -> None:
-    repo = _repository_fixture(tmp_path)
+    repo = repository_fixture(tmp_path)
     path = repo / "docs/CONTEXT_INDEX.yaml"
     payload = yaml.safe_load(path.read_text(encoding="utf-8"))
     payload["groups"]["current_facts"]["entries"][0]["authorityClass"] = "normative_product"
@@ -173,7 +175,7 @@ def test_integrity_rejects_mixed_normative_and_current_fact_context(tmp_path: Pa
 
 
 def test_integrity_rejects_synthetic_commercial_completion(tmp_path: Path) -> None:
-    repo = _repository_fixture(tmp_path)
+    repo = repository_fixture(tmp_path)
     path = repo / "factory/roadmap/milestones.yaml"
     path.parent.mkdir(parents=True)
     path.write_text(

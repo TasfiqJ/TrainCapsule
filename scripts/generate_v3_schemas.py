@@ -68,7 +68,9 @@ from tcfactory.v3.external_evidence_authority import (
     ExternalEvidenceAuthorityLedger,
     ExternalEvidenceAuthorityState,
 )
+from tcfactory.v3.maturity import MaturityState, MaturityTarget
 from tcfactory.v3.migration_evidence import MigrationEvidenceDocument
+from tcfactory.v3.migration_installation_evidence import MigrationInstallationEvidence
 from tcfactory.v3.migrations import LegacyMigrationMap
 from tcfactory.v3.milestone_runtime import (
     MilestoneAdvanceTransaction,
@@ -135,6 +137,9 @@ SCHEMAS: Final[dict[str, type[BaseModel]]] = {
     "milestones.schema.json": MilestoneRoadmap,
     "migration-complete-marker.schema.json": MigrationCompleteMarker,
     "migration-evidence.schema.json": MigrationEvidenceDocument,
+    "migration-installation-evidence.schema.json": MigrationInstallationEvidence,
+    "maturity-state.schema.json": MaturityState,
+    "maturity-target.schema.json": MaturityTarget,
     "milestone-completion.schema.json": MilestoneCompletionDecision,
     "milestone-evidence-contract.schema.json": MilestoneEvidenceContract,
     "milestone-completion-receipt.schema.json": MilestoneCompletionReceipt,

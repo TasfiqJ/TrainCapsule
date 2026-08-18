@@ -1,0 +1,77 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "authorityBoundary": {
+      "additionalProperties": false,
+      "properties": {
+        "authoritativeCompletionReceipt": {"const": false},
+        "historicalFactsReverifiedFromTrackedArtifacts": {"const": true},
+        "independentAuthorityPresent": {"const": false},
+        "limitation": {"minLength": 1, "type": "string"}
+      },
+      "required": [
+        "authoritativeCompletionReceipt",
+        "historicalFactsReverifiedFromTrackedArtifacts",
+        "independentAuthorityPresent",
+        "limitation"
+      ],
+      "type": "object"
+    },
+    "claims": {
+      "additionalProperties": false,
+      "properties": {
+        "checkpointInventory": {"items": {"minLength": 1, "type": "string"}, "type": "array"},
+        "cleanStatusBasis": {
+          "additionalProperties": false,
+          "properties": {
+            "ahead": {"const": 0},
+            "behind": {"const": 0},
+            "diverged": {"const": false},
+            "startingLocalHeadEqualsOriginMain": {"const": true},
+            "trackedDirtyPaths": {"maxItems": 0, "type": "array"}
+          },
+          "required": ["ahead", "behind", "diverged", "startingLocalHeadEqualsOriginMain", "trackedDirtyPaths"],
+          "type": "object"
+        },
+        "cleanTrackedStatus": {"const": true},
+        "migrationBaselineSha": {"pattern": "^[0-9a-f]{40}$", "type": "string"},
+        "phase0StartingSha": {"pattern": "^[0-9a-f]{40}$", "type": "string"},
+        "queueInventory": {
+          "additionalProperties": false,
+          "properties": {
+            "phase0Paths": {"items": {"minLength": 1, "type": "string"}, "minItems": 1, "type": "array"},
+            "snapshotFiles": {"items": {"type": "object"}, "minItems": 1, "type": "array"},
+            "snapshotSummary": {"type": "object"}
+          },
+          "required": ["phase0Paths", "snapshotFiles", "snapshotSummary"],
+          "type": "object"
+        }
+      },
+      "required": ["checkpointInventory", "cleanStatusBasis", "cleanTrackedStatus", "migrationBaselineSha", "phase0StartingSha", "queueInventory"],
+      "type": "object"
+    },
+    "componentBindings": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {"minimum": 1, "type": "integer"},
+          "path": {"minLength": 1, "type": "string"},
+          "role": {"enum": ["BASELINE_REPORT", "PHASE_0_BASELINE", "RUNTIME_SNAPSHOT"]},
+          "sha256": {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"}
+        },
+        "required": ["bytes", "path", "role", "sha256"],
+        "type": "object"
+      },
+      "maxItems": 3,
+      "minItems": 3,
+      "type": "array"
+    },
+    "evidenceDigest": {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"},
+    "evidenceType": {"const": "TRACKED_HISTORICAL_REVERIFICATION"},
+    "schemaVersion": {"const": 1},
+    "workItemId": {"const": "V3-MIG-001"}
+  },
+  "required": ["authorityBoundary", "claims", "componentBindings", "evidenceDigest", "evidenceType", "schemaVersion", "workItemId"],
+  "type": "object"
+}

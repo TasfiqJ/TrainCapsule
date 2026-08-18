@@ -1,0 +1,26 @@
+{
+  "workItemId": "V3-MIG-011",
+  "evidenceType": "LOCAL_REVERIFICATION",
+  "claim": "The configured Claude executor resolves through an allowlisted backend-neutral registry, preserves DENY-network capability parity, and enforces the configured two-session ceiling with terminal-path slot release.",
+  "implementationFiles": [
+    "tcfactory/backends/registry.py",
+    "tcfactory/backends/claude.py",
+    "tcfactory/cli.py",
+    "config/executors.yaml"
+  ],
+  "verification": {
+    "testFile": "tests/test_v3_executor_registry.py",
+    "status": "PASSED_LOCAL_TESTS",
+    "testsPassed": 34,
+    "command": ".venv/bin/python -m pytest -q tests/test_v3_executor_registry.py tests/test_v3_backends_and_checkpoints.py tests/test_v3_backend_runtime_policy.py",
+    "staticChecks": [
+      "pyright: 0 errors",
+      "ruff: all checks passed"
+    ]
+  },
+  "authority": "UNSIGNED_LOCAL_ENGINEERING_EVIDENCE",
+  "limitations": [
+    "This artifact is not a machine-policy receipt and grants no publication authority.",
+    "Live Claude authentication and provider execution are outside this deterministic local verification."
+  ]
+}

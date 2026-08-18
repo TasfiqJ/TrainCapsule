@@ -16,6 +16,7 @@ from tcfactory.v3.queue import V3Queue
 from tcfactory.v3.work_items import WorkItemCollection
 
 _LEGACY_SANDBOX_FAILURE = b"bwrap: Can't mkdir /var/lib/.claude: Read-only file system"
+_LEGACY_UV_PATH_FAILURE = b"uv: command not found"
 _MAX_BACKEND_RESULT_BYTES = 2_000_000
 
 
@@ -48,7 +49,8 @@ def _bound_backend_result(
     ):
         return None
     raw = result.read_bytes()
-    return (result, raw) if _LEGACY_SANDBOX_FAILURE in raw else None
+    repaired_failures = (_LEGACY_SANDBOX_FAILURE, _LEGACY_UV_PATH_FAILURE)
+    return (result, raw) if any(failure in raw for failure in repaired_failures) else None
 
 
 def _eligible(
@@ -114,9 +116,9 @@ def recover_repaired_claude_sandbox_blocks(
     current_main_sha: str,
     now: datetime,
 ) -> list[str]:
-    """Reopen only failures conclusively caused by the repaired sandbox home defect."""
+    """Reopen only failures conclusively caused by repaired Claude runtime boundaries."""
 
-    if CLAUDE_SANDBOX_CONFIG_REPAIR != "claude-native-credential-boundary-v3":
+    if CLAUDE_SANDBOX_CONFIG_REPAIR != "claude-runtime-bin-path-v4":
         raise RuntimeError("Claude sandbox repair marker is unavailable")
     recovered: list[str] = []
     recovery_root = checkpoints.root / "recovery-archive" / (

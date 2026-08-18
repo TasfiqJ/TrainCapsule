@@ -4,6 +4,8 @@ import json
 from datetime import UTC, datetime
 from pathlib import Path
 
+import pytest
+
 from tcfactory.backends.base import AgentSession, SessionState
 from tcfactory.checkpoints import CheckpointBudget, CheckpointStore, V3Checkpoint
 from tcfactory.v3.backend_recovery import recover_repaired_claude_sandbox_blocks
@@ -87,7 +89,16 @@ def _checkpoint(artifact_root: Path) -> V3Checkpoint:
     )
 
 
-def test_fixed_sandbox_failure_is_archived_and_reopened_once(tmp_path: Path) -> None:
+@pytest.mark.parametrize(
+    "failure",
+    [
+        "bwrap: Can't mkdir /var/lib/.claude: Read-only file system",
+        "/bin/bash: line 1: uv: command not found",
+    ],
+)
+def test_fixed_claude_runtime_failure_is_archived_and_reopened_once(
+    tmp_path: Path, failure: str
+) -> None:
     runtime = tmp_path / "runtime"
     queue = V3Queue(runtime / "v3-queue")
     queue.initialize()
@@ -97,10 +108,7 @@ def test_fixed_sandbox_failure_is_archived_and_reopened_once(tmp_path: Path) -> 
     artifact_root = runtime / "artifacts/v3/V3-MIG-015/run-1"
     result = artifact_root / "factory_repair/backend-result.json"
     result.parent.mkdir(parents=True)
-    result.write_text(
-        json.dumps({"error": "bwrap: Can't mkdir /var/lib/.claude: Read-only file system"}),
-        encoding="utf-8",
-    )
+    result.write_text(json.dumps({"error": failure}), encoding="utf-8")
     checkpoints.save_v3(_checkpoint(artifact_root))
     collection = WorkItemCollection(
         active_milestone="M0_FACTORY_MIGRATED", work_items=[item]
@@ -117,7 +125,7 @@ def test_fixed_sandbox_failure_is_archived_and_reopened_once(tmp_path: Path) -> 
     assert queue.load("V3-MIG-015").status is WorkStatus.READY
     assert checkpoints.load_v3("V3-MIG-015") is None
     recovery = checkpoints.root / "recovery-archive" / (
-        "222222222222-claude-native-credential-boundary-v3"
+        "222222222222-claude-runtime-bin-path-v4"
     )
     assert (recovery / "V3-MIG-015.json").is_file()
     journal = json.loads((recovery / "V3-MIG-015.journal.json").read_bytes())

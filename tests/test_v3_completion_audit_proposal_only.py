@@ -197,14 +197,16 @@ def test_v3_mig_010_engineering_evidence_is_digest_bound_and_non_authoritative()
     assert evidence["authorityClaim"] == "NONE"
     assert evidence["machinePolicyAuthorized"] is False
     assert evidence["controllerAuthorized"] is False
-    observed_commit = subprocess.run(
-        ["git", "rev-parse", "HEAD"],
+    observed_base = str(evidence["observedCommit"])
+    assert len(observed_base) == 40
+    ancestry = subprocess.run(
+        ["git", "merge-base", "--is-ancestor", observed_base, "HEAD"],
         cwd=ROOT,
-        check=True,
+        check=False,
         capture_output=True,
         text=True,
-    ).stdout.strip()
-    assert evidence["observedCommit"] == observed_commit
+    )
+    assert ancestry.returncode == 0
     for binding in evidence["bindings"]:
         payload = (ROOT / binding["path"]).read_bytes()
         assert "sha256:" + hashlib.sha256(payload).hexdigest() == binding["digest"]

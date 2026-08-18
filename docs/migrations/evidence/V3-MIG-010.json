@@ -27,7 +27,7 @@
     {
       "path": "tests/test_v3_completion_audit_proposal_only.py",
       "role": "ledger-byte, Git-SHA, mutator-tripwire, and evidence-binding verification",
-      "digest": "sha256:9a23332a68c623ea38ee6bb0106bad45f367579a08695431ef8085a3929f9eb7"
+      "digest": "sha256:8461a26fcca18fbd61c28075d48e0f3b5f8e72fc1748120c8df3acae8fbb4701"
     },
     {
       "path": "tests/test_completion.py",

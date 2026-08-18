@@ -95,6 +95,10 @@ def _checkpoint(artifact_root: Path) -> V3Checkpoint:
         "bwrap: Can't mkdir /var/lib/.claude: Read-only file system",
         "/bin/bash: line 1: uv: command not found",
         "Failed to download pytest from https://files.pythonhosted.org/package.whl",
+        (
+            "environment build failure fetching cryptography with denied "
+            "pypi.org and files.pythonhosted.org access"
+        ),
     ],
 )
 def test_fixed_claude_runtime_failure_is_archived_and_reopened_once(

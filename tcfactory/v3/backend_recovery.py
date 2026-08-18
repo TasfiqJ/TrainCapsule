@@ -18,6 +18,7 @@ from tcfactory.v3.work_items import WorkItem, WorkItemCollection
 _LEGACY_SANDBOX_FAILURE = b"bwrap: Can't mkdir /var/lib/.claude: Read-only file system"
 _LEGACY_UV_PATH_FAILURE = b"uv: command not found"
 _OFFLINE_DEPENDENCY_FAILURE = b"Failed to download"
+_OFFLINE_ENVIRONMENT_FAILURE = b"environment build failure fetching"
 _PACKAGE_INDEX_HOSTS = (b"pypi.org", b"files.pythonhosted.org")
 _MAX_BACKEND_RESULT_BYTES = 2_000_000
 
@@ -54,8 +55,9 @@ def _bound_backend_result(
     repaired_legacy = any(
         failure in raw for failure in (_LEGACY_SANDBOX_FAILURE, _LEGACY_UV_PATH_FAILURE)
     )
-    repaired_offline = _OFFLINE_DEPENDENCY_FAILURE in raw and any(
-        host in raw for host in _PACKAGE_INDEX_HOSTS
+    repaired_offline = any(host in raw for host in _PACKAGE_INDEX_HOSTS) and any(
+        marker in raw
+        for marker in (_OFFLINE_DEPENDENCY_FAILURE, _OFFLINE_ENVIRONMENT_FAILURE)
     )
     return (result, raw) if repaired_legacy or repaired_offline else None
 

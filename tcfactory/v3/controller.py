@@ -4609,7 +4609,12 @@ class V3Controller:
             queue=self.queue,
             checkpoints=self.checkpoints,
             runtime_root=self.runtime_paths.state_root,
-            current_main_sha=current_sha(self.git_root, "main"),
+            # Recovery is authorized by the installed, independently verified
+            # successor snapshot.  The mutable deployment anchor intentionally
+            # trails that snapshot until the signed refresh handoff completes;
+            # using it here makes a runtime-only repair look identical to the
+            # failed candidate and permanently suppresses the recovery.
+            current_main_sha=current_sha(self.repo_root, "main"),
             now=now,
         )
         if repaired_backend_blocks:

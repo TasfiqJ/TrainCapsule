@@ -23,6 +23,45 @@ class MaturityState(V3Model):
     engineering_evidence: list[str] = Field(default_factory=list[str])
     external_evidence_refs: list[str] = Field(default_factory=list[str])
 
+    @model_validator(mode="after")
+    def require_evidence_for_elevated_maturity(self) -> MaturityState:
+        """Reject maturity labels that are not backed by auditable references."""
+
+        for label, references in (
+            ("engineering evidence", self.engineering_evidence),
+            ("external evidence", self.external_evidence_refs),
+        ):
+            if len(references) != len(set(references)):
+                raise ValueError(f"{label} references must be unique")
+            if any(
+                not reference.strip() or any(ord(char) < 32 for char in reference)
+                for reference in references
+            ):
+                raise ValueError(f"{label} references must be non-empty printable strings")
+
+        if self.engineering in {
+            EngineeringMaturity.IMPLEMENTED_EXPERIMENTAL,
+            EngineeringMaturity.CONTROLLED_VALIDATED,
+            EngineeringMaturity.EXTERNAL_VALIDATED,
+        } and not self.engineering_evidence:
+            raise ValueError("elevated engineering maturity requires engineering evidence")
+        if (
+            self.engineering is EngineeringMaturity.EXTERNAL_VALIDATED
+            and not self.external_evidence_refs
+        ):
+            raise ValueError("external engineering validation requires external evidence")
+        if (
+            self.commercial
+            in {
+                CommercialMaturity.NATIVE_ADVANTAGE_DEMONSTRATED,
+                CommercialMaturity.EXTERNAL_VALUE_DEMONSTRATED,
+                CommercialMaturity.COMMERCIALLY_SUPPORTED,
+            }
+            and not self.external_evidence_refs
+        ):
+            raise ValueError("elevated commercial maturity requires external evidence")
+        return self
+
 
 def _authorization_digest(
     lineage: str,

@@ -1,0 +1,24 @@
+{
+  "schemaVersion": 1,
+  "workItemId": "V3-MIG-002",
+  "command": [
+    ".venv/bin/python",
+    "scripts/gates/v3_mig_002_rollback_rehearsal.py"
+  ],
+  "exitCode": 0,
+  "result": "PASS",
+  "observations": {
+    "annotatedTagObject": "2c613785595950c15cdf63c5b26ffd387f41cc88",
+    "peeledCommit": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
+    "attestedBranchStart": "1ae79ba02c2b0cbec9b21ad3d2fc08d0afdbface",
+    "observedBranchTip": "c02d91dc4d186ce44eb9438b17dbc94a8592b8f4",
+    "repositoryFingerprintBefore": "a72bc45037e148bee836c1f6bc503d884a73e0a719fda6320a1c50edfad836ed",
+    "repositoryFingerprintAfter": "a72bc45037e148bee836c1f6bc503d884a73e0a719fda6320a1c50edfad836ed",
+    "trackedInputsVerified": 5,
+    "repositoryMutation": false,
+    "runtimeAccess": false,
+    "runtimeMutation": false,
+    "isolation": "DISPOSABLE_GIT_ARCHIVE"
+  },
+  "truthBoundary": "The task-bound rehearsal verifies the V3.1 Phase-0 annotated tag object, peeled commit, branch starting SHA, baseline inputs, disposable archive isolation, and unchanged repository fingerprint. It does not access or mutate runtime."
+}

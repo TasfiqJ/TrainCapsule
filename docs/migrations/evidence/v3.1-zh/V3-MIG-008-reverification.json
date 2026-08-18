@@ -1,0 +1,84 @@
+{
+  "authorityBoundary": {
+    "admissibleCompletionEvidencePresent": false,
+    "completionEligible": false,
+    "controllerAttestationPresent": false,
+    "engineeringOnlyProbeUsesSimulatedControllerEnum": true,
+    "failClosedReasons": [
+      "V3-MIG-008 lacks INDEPENDENT_MACHINE_POLICY authority",
+      "V3-MIG-008 lacks INDEPENDENT_REVIEWER authority",
+      "V3-MIG-008 lacks 1 INDEPENDENT_REVIEW evidence",
+      "V3-MIG-008 lacks 1 MACHINE_POLICY_DECISION evidence"
+    ],
+    "independentMachinePolicyReceiptPresent": false,
+    "independentReviewerAttestationPresent": false,
+    "limitation": "Engineering behavior is re-verified, but no controller-derived completion observation, independently signed machine-policy receipt, or independent reviewer attestation is asserted by this repository-authored artifact.",
+    "simulationIsNotAnAttestation": true
+  },
+  "completionContract": {
+    "minimumGrade": "CONTROLLED",
+    "requiredAuthorities": [
+      "CONTROLLER",
+      "INDEPENDENT_MACHINE_POLICY",
+      "INDEPENDENT_REVIEWER"
+    ],
+    "requiredSemantics": [
+      "DETERMINISTIC_ARTIFACT",
+      "INDEPENDENT_REVIEW",
+      "MACHINE_POLICY_DECISION"
+    ]
+  },
+  "componentBindings": [
+    {
+      "bytes": 73912,
+      "path": "config/completion_evidence_policy.yaml",
+      "role": "COMPLETION_POLICY",
+      "sha256": "sha256:ebca9338e7118966370091cf094d317dad554870c39fda407ad7638425d8749a"
+    },
+    {
+      "bytes": 16750,
+      "path": "tcfactory/v3/completion_policy.py",
+      "role": "COMPLETION_POLICY_EVALUATOR",
+      "sha256": "sha256:d4bc127933300401b509e64e03590d2b79eaf069a42030a5445ea9552b1ce010"
+    },
+    {
+      "bytes": 8132,
+      "path": "tcfactory/v3/pipeline_services.py",
+      "role": "MACHINE_POLICY_IMPLEMENTATION",
+      "sha256": "sha256:0804ca5f8ca4e5ba318368d2aa1a224b4faa19dca013b1e9a9f69d6c04bad318"
+    },
+    {
+      "bytes": 3137,
+      "path": "tests/test_v3_machine_policy.py",
+      "role": "MACHINE_POLICY_REGRESSION",
+      "sha256": "sha256:2fba25e5668629f6641480c48e1f7e7df1807305c680d240bed8665fd89b9972"
+    },
+    {
+      "bytes": 5764,
+      "path": "tests/test_v3_mig_008_reverification.py",
+      "role": "TASK_REVERIFICATION_REGRESSION",
+      "sha256": "sha256:ebb45dbbdb6dfe55125ce13d56f6243a199b4d14a329d2b0ada0ff7877306492"
+    }
+  ],
+  "engineeringVerification": {
+    "claims": [
+      "positive independently-verified record acceptance",
+      "negative invalid trust-state rejection",
+      "expired and not-yet-valid receipt rejection",
+      "candidate SHA mismatch rejection",
+      "artifact and authority-manifest digest binding"
+    ],
+    "status": "VERIFIED",
+    "testSelectors": [
+      "tests/test_v3_machine_policy.py::test_machine_policy_gate_requires_independently_verified_record",
+      "tests/test_v3_machine_policy.py::test_machine_policy_gate_binds_scope_candidate_artifacts_and_authority",
+      "tests/test_v3_mig_008_reverification.py::test_machine_policy_gate_rejects_expired_and_future_receipts",
+      "tests/test_v3_mig_008_reverification.py::test_completed_roadmap_item_without_admissible_authority_fails_closed"
+    ]
+  },
+  "evidenceDigest": "sha256:2696138c8e7bd612254620fa5a02b53887848840eaaea8db977450d517a69c67",
+  "evidenceType": "ENGINEERING_REVERIFICATION_WITH_AUTHORIZATION_GAP",
+  "roadmapStatus": "COMPLETED",
+  "schemaVersion": 1,
+  "workItemId": "V3-MIG-008"
+}

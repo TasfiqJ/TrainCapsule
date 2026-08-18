@@ -75,6 +75,7 @@ def test_checked_in_v3_configuration_is_finite_and_fail_closed() -> None:
     assert autonomy.external.ai_may_complete_external_evidence is False
     assert autonomy.completion.roadmap_expansion_requires_machine_policy_receipt is True
     assert autonomy.external.machine_policy_receipts_required is True
+    assert autonomy.completion.max_expansion_rounds_per_milestone == 1
     assert "human" not in autonomy.model_dump_json(by_alias=True).lower()
     assert external.allow_repository_fallback is False
     assert external.agent_writable is False
@@ -83,6 +84,14 @@ def test_checked_in_v3_configuration_is_finite_and_fail_closed() -> None:
     assert milestones.source_migration_machine_policy_receipt_required is True
     assert scheduler.active_milestone == milestones.active_milestone
     assert executors.allow_paid_usage is False
+
+
+def test_completion_expansion_budget_cannot_be_widened_to_two_rounds() -> None:
+    payload = load_yaml(ROOT / "config/autonomy.yaml")
+    payload["completion"]["maxExpansionRoundsPerMilestone"] = 2
+
+    with pytest.raises(ValidationError, match="maxExpansionRoundsPerMilestone"):
+        AutonomyV3Config.model_validate(payload)
 
 
 def test_v3_factory_payload_is_not_silently_accepted_as_v31(tmp_path: Path) -> None:
@@ -172,7 +181,10 @@ def test_m0_through_m6_are_bounded_and_external_milestones_remain_waiting() -> N
 
 
 def test_every_generated_schema_rejects_unknown_top_level_fields() -> None:
-    assert len(SCHEMAS) == len(set(SCHEMAS)) == 63
+    checked_in = {
+        path.name for path in (ROOT / "schemas/factory/v3").glob("*.schema.json")
+    }
+    assert set(SCHEMAS) == checked_in
     assert {
         "private-gate-receipt.schema.json",
         "milestone-runtime-state.schema.json",

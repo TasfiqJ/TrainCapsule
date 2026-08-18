@@ -946,13 +946,14 @@ def v3_controller(
 def _construct_live_v3_controller(*, root: Path, publisher: object) -> Any:
     """One production construction seam, kept testable without starting the loop."""
 
-    from .backends.claude import ClaudeBackend, ClaudeCredentialProvider
+    from .backends.registry import resolve_executor_backend
+    from .v3.configuration import load_executors_v3
     from .v3.controller import V3Controller
     from .v3.phase6_installation import build_phase6_runtime
 
     return V3Controller(
         repo_root=root,
-        backend=ClaudeBackend(ClaudeCredentialProvider(require_long_lived_token=True)),
+        backend=resolve_executor_backend(load_executors_v3(root / "config/executors.yaml")),
         publisher=publisher,  # pyright: ignore[reportArgumentType]
         phase6_runtime=build_phase6_runtime(repo_root=root),
     )
@@ -1330,7 +1331,7 @@ def completion_audit(
     repo: Annotated[Path, typer.Option("--repo")] = Path("."),
     config_path: Annotated[Path, typer.Option("--config")] = Path("config/factory.yaml"),
 ) -> None:
-    """Run the independent product-completion audit or expand the roadmap."""
+    """Run the read-only product-completion audit and emit bounded proposals."""
     repo_root = _resolve_repo(repo)
     _reject_legacy_v2_surface(repo_root, config_path, "completion-audit")
     factory = load_factory_config(repo_root / config_path)

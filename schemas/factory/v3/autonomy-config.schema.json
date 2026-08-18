@@ -40,8 +40,7 @@
       "additionalProperties": false,
       "properties": {
         "maxExpansionRoundsPerMilestone": {
-          "maximum": 2,
-          "minimum": 1,
+          "const": 1,
           "title": "Maxexpansionroundspermilestone",
           "type": "integer"
         },

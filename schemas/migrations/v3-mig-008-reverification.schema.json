@@ -1,0 +1,93 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "additionalProperties": false,
+  "properties": {
+    "authorityBoundary": {
+      "additionalProperties": false,
+      "properties": {
+        "admissibleCompletionEvidencePresent": {"const": false},
+        "completionEligible": {"const": false},
+        "controllerAttestationPresent": {"const": false},
+        "engineeringOnlyProbeUsesSimulatedControllerEnum": {"const": true},
+        "failClosedReasons": {
+          "items": {"minLength": 1, "type": "string"},
+          "minItems": 1,
+          "type": "array",
+          "uniqueItems": true
+        },
+        "independentMachinePolicyReceiptPresent": {"const": false},
+        "independentReviewerAttestationPresent": {"const": false},
+        "limitation": {"minLength": 1, "type": "string"},
+        "simulationIsNotAnAttestation": {"const": true}
+      },
+      "required": [
+        "admissibleCompletionEvidencePresent",
+        "completionEligible",
+        "controllerAttestationPresent",
+        "independentMachinePolicyReceiptPresent",
+        "independentReviewerAttestationPresent",
+        "engineeringOnlyProbeUsesSimulatedControllerEnum",
+        "simulationIsNotAnAttestation",
+        "failClosedReasons",
+        "limitation"
+      ],
+      "type": "object"
+    },
+    "completionContract": {
+      "additionalProperties": false,
+      "properties": {
+        "minimumGrade": {"const": "CONTROLLED"},
+        "requiredAuthorities": {
+          "const": ["CONTROLLER", "INDEPENDENT_MACHINE_POLICY", "INDEPENDENT_REVIEWER"]
+        },
+        "requiredSemantics": {
+          "const": ["DETERMINISTIC_ARTIFACT", "INDEPENDENT_REVIEW", "MACHINE_POLICY_DECISION"]
+        }
+      },
+      "required": ["minimumGrade", "requiredAuthorities", "requiredSemantics"],
+      "type": "object"
+    },
+    "componentBindings": {
+      "items": {
+        "additionalProperties": false,
+        "properties": {
+          "bytes": {"minimum": 1, "type": "integer"},
+          "path": {"minLength": 1, "type": "string"},
+          "role": {"minLength": 1, "type": "string"},
+          "sha256": {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"}
+        },
+        "required": ["bytes", "path", "role", "sha256"],
+        "type": "object"
+      },
+      "minItems": 5,
+      "type": "array"
+    },
+    "engineeringVerification": {
+      "additionalProperties": false,
+      "properties": {
+        "claims": {"items": {"minLength": 1, "type": "string"}, "minItems": 5, "type": "array"},
+        "status": {"const": "VERIFIED"},
+        "testSelectors": {"items": {"minLength": 1, "type": "string"}, "minItems": 4, "type": "array"}
+      },
+      "required": ["status", "claims", "testSelectors"],
+      "type": "object"
+    },
+    "evidenceDigest": {"pattern": "^sha256:[0-9a-f]{64}$", "type": "string"},
+    "evidenceType": {"const": "ENGINEERING_REVERIFICATION_WITH_AUTHORIZATION_GAP"},
+    "roadmapStatus": {"const": "COMPLETED"},
+    "schemaVersion": {"const": 1},
+    "workItemId": {"const": "V3-MIG-008"}
+  },
+  "required": [
+    "schemaVersion",
+    "evidenceType",
+    "workItemId",
+    "roadmapStatus",
+    "componentBindings",
+    "engineeringVerification",
+    "completionContract",
+    "authorityBoundary",
+    "evidenceDigest"
+  ],
+  "type": "object"
+}

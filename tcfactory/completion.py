@@ -8,9 +8,9 @@ from typing import Any, cast
 import yaml
 from pydantic import Field, model_validator
 
-from .feature_ledger import FeatureItem, FeatureLedger, save_feature_ledger
+from .feature_ledger import FeatureLedger
 from .gates import PrivateGateError, run_private_gate
-from .gitops import changed_files, cleanup_worktree, commit_all, create_worktree, current_sha
+from .gitops import changed_files, cleanup_worktree, create_worktree, current_sha
 from .models import (
     COMPLETION_AUDIT_JSON_SCHEMA,
     CompletionAuditReport,
@@ -21,7 +21,7 @@ from .models import (
 )
 from .structured_runner import run_structured_read_only_review
 from .util import run_command, utc_stamp, write_json
-from .v3.base import DIGEST_PATTERN, V3Model
+from .v3.base import DIGEST_PATTERN, SHA_PATTERN, V3Model, sha256_digest
 from .v3.enums import MilestoneStatus, MilestoneType, RiskTier, WorkKind, WorkStatus
 from .v3.milestones import Milestone
 from .v3.work_items import WorkItemCollection
@@ -37,12 +37,18 @@ class CompletionProposal(V3Model):
     milestone_id: str = Field(pattern=r"^M[0-9]+_[A-Z0-9_]+$")
     summary: str = Field(min_length=1)
     proposed_work: list[str] = Field(min_length=1, max_length=5)
+    candidate_sha: str = Field(pattern=SHA_PATTERN.pattern)
+    evidence_digests: list[str] = Field(min_length=1, max_length=256)
     reviewer_artifact_digest: str = Field(pattern=DIGEST_PATTERN.pattern)
     accepted: bool = False
     accepted_by_machine_policy_ref: str | None = None
 
     @model_validator(mode="after")
     def require_acceptance_authority(self) -> CompletionProposal:
+        if len(self.evidence_digests) != len(set(self.evidence_digests)):
+            raise ValueError("completion proposal evidence digests must be unique")
+        if any(DIGEST_PATTERN.fullmatch(value) is None for value in self.evidence_digests):
+            raise ValueError("completion proposal evidence digest is invalid")
         if self.accepted and not self.accepted_by_machine_policy_ref:
             raise ValueError(
                 "accepted completion proposal requires an explicit machine-policy reference"
@@ -423,43 +429,6 @@ def _validate_new_items(ledger: FeatureLedger, items: list[CompletionWorkItem]) 
             )
 
 
-def _append_missing_items(
-    *,
-    ledger: FeatureLedger,
-    items: list[CompletionWorkItem],
-    audit_artifact: str,
-) -> list[str]:
-    _validate_new_items(ledger, items)
-    added: list[str] = []
-    for draft in items:
-        ready = set(draft.depends_on).issubset(ledger.passed_ids())
-        ledger.tasks.append(
-            FeatureItem(
-                task_id=draft.task_id,
-                outcome=draft.outcome,
-                lead_role=draft.lead_role,
-                phase=draft.phase,
-                depends_on=draft.depends_on,
-                status="ready" if ready else "blocked",
-                packet_path=None,
-                trust_core=draft.trust_core,
-                auto_enqueue_allowed=True,
-                automatable=True,
-                completion_kind="build",
-                evidence_required=draft.evidence_required,
-                evidence=[],
-                notes=[
-                    "Added by independent product-completion audit.",
-                    f"Audit artifact: {audit_artifact}",
-                    *[f"Required evidence: {value}" for value in draft.evidence_required],
-                ],
-            )
-        )
-        added.append(draft.task_id)
-    ledger.refresh_readiness()
-    return added
-
-
 async def _one_review(
     *,
     repo_root: Path,
@@ -595,7 +564,7 @@ async def audit_and_expand_or_complete(
     ledger: FeatureLedger,
     audits_required: int = 2,
 ) -> tuple[str, list[str], str]:
-    """Independently challenge product completion, then complete or expand the roadmap."""
+    """Audit completion and emit evidence-bound proposals without mutating the roadmap."""
 
     if not ledger.build_complete():
         raise CompletionBlocked("Completion audit may run only after current build tasks pass")
@@ -732,19 +701,29 @@ async def audit_and_expand_or_complete(
             f"provided: {details}"
         )
 
-    added = _append_missing_items(
-        ledger=ledger,
-        items=missing,
-        audit_artifact=str(root.relative_to(repo_root)),
+    _validate_new_items(ledger, missing)
+    audit_set_path = root / "audit-set.json"
+    audit_digest = sha256_digest(audit_set_path.read_bytes())
+    bounded = missing[:5]
+    proposal = CompletionProposal(
+        proposal_id=f"CPROP-M0-{audited_sha[:12].upper()}",
+        milestone_id="M0_FACTORY_MIGRATED",
+        summary="Independent completion audit found bounded missing product work.",
+        proposed_work=[item.outcome for item in bounded],
+        candidate_sha=audited_sha,
+        evidence_digests=[audit_digest],
+        reviewer_artifact_digest=audit_digest,
+        accepted=False,
     )
-    ledger_path = config.resolve(repo_root, config.feature_ledger_path)
-    save_feature_ledger(ledger_path, ledger)
-    commit_all(repo_root, "expand roadmap")
+    proposal_path = root / "MILESTONE_COMPLETION_PROPOSAL.json"
     write_json(
-        root / "ROADMAP_EXPANDED.json",
+        proposal_path,
         {
-            "added_task_ids": added,
-            "missing_items": [item.model_dump(mode="json") for item in missing],
+            "record": proposal.model_dump(mode="json", by_alias=True),
+            "contentDigest": proposal.canonical_digest(),
+            "proposedWorkItems": [
+                item.model_dump(mode="json", by_alias=True) for item in bounded
+            ],
         },
     )
-    return "expanded", added, audited_sha
+    return "proposed", [str(proposal_path.relative_to(repo_root))], audited_sha

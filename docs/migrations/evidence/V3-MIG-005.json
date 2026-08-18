@@ -1,0 +1,34 @@
+{
+  "schemaVersion": "traincapsule.v3-migration-verification/v1",
+  "workItemId": "V3-MIG-005",
+  "verificationKind": "DETERMINISTIC_REPOSITORY_TEST",
+  "authorityClaim": "NONE",
+  "implementation": {
+    "models": [
+      "tcfactory/v3/maturity.py",
+      "tcfactory/v3/dispositions.py",
+      "tcfactory/v3/milestones.py"
+    ],
+    "standaloneSchemas": [
+      "schemas/factory/v3/maturity-state.schema.json",
+      "schemas/factory/v3/maturity-target.schema.json"
+    ],
+    "directAcceptanceTest": "tests/test_v3_mig_005_models.py"
+  },
+  "verification": {
+    "testFiles": [
+      "tests/test_v3_mig_005_models.py",
+      "tests/test_v3_domain_models.py",
+      "tests/test_v3_config_and_roadmap.py",
+      "tests/test_v3_planning_context_and_support.py"
+    ],
+    "testsPassed": 50,
+    "schemaModelsChecked": 66,
+    "ruffResult": "PASS",
+    "result": "PASS"
+  },
+  "limitations": [
+    "This repository artifact records deterministic engineering verification only.",
+    "It is not an external-evidence receipt or an independent machine-policy authorization."
+  ]
+}

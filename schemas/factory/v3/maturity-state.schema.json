@@ -1,0 +1,56 @@
+{
+  "$defs": {
+    "CommercialMaturity": {
+      "enum": [
+        "NOT_EVALUATED",
+        "NATIVE_ADVANTAGE_UNPROVEN",
+        "NATIVE_ADVANTAGE_DEMONSTRATED",
+        "EXTERNAL_VALUE_DEMONSTRATED",
+        "COMMERCIALLY_SUPPORTED",
+        "WITHDRAWN"
+      ],
+      "title": "CommercialMaturity",
+      "type": "string"
+    },
+    "EngineeringMaturity": {
+      "enum": [
+        "DESIGN_ONLY",
+        "IMPLEMENTED_EXPERIMENTAL",
+        "CONTROLLED_VALIDATED",
+        "EXTERNAL_VALIDATED",
+        "DEPRECATED"
+      ],
+      "title": "EngineeringMaturity",
+      "type": "string"
+    }
+  },
+  "additionalProperties": false,
+  "properties": {
+    "engineering": {
+      "$ref": "#/$defs/EngineeringMaturity",
+      "default": "DESIGN_ONLY"
+    },
+    "commercial": {
+      "$ref": "#/$defs/CommercialMaturity",
+      "default": "NOT_EVALUATED"
+    },
+    "engineeringEvidence": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Engineeringevidence",
+      "type": "array"
+    },
+    "externalEvidenceRefs": {
+      "items": {
+        "type": "string"
+      },
+      "title": "Externalevidencerefs",
+      "type": "array"
+    }
+  },
+  "title": "MaturityState",
+  "type": "object",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://traincapsule.local/schemas/factory/v3/maturity-state.schema.json"
+}

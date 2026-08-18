@@ -163,7 +163,10 @@ class ValueAutonomy(V3Model):
 
 
 class CompletionAutonomy(V3Model):
-    max_expansion_rounds_per_milestone: int = Field(ge=1, le=2)
+    # The protected V3/V3.1-ZH contract permits exactly one bounded expansion
+    # round.  Keeping this as a Literal prevents a locally supplied value of
+    # two from widening policy beyond the completion evaluator's hard stop.
+    max_expansion_rounds_per_milestone: Literal[1]
     max_expansion_items: int = Field(ge=1, le=5)
     roadmap_expansion_requires_machine_policy_receipt: Literal[True]
     reviewers_may_mutate_roadmap: Literal[False]
